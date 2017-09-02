@@ -1,3 +1,10 @@
+Makefile
+/libtool
+.deps
+src/config.h
+src/poke
+src/poke-poke.o
+stamp-h1
 /ABOUT-NLS
 /build-aux
 *~
