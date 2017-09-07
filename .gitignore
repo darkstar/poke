@@ -26,3 +26,7 @@ config.h.in
 /build-aux/install-sh
 /build-aux/missing
 /autom4te.cache/
+/doc/poke.info
+/doc/stamp-vti
+/doc/version.texi
+/gnulib

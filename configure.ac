@@ -55,6 +55,7 @@ dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile
                 src/Makefile
+                doc/Makefile
                 po/Makefile.in)
 AC_OUTPUT
 

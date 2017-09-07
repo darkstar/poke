@@ -1,5 +1,3 @@
-# GNU poke
-
 # Copyright (C) 2017 Jose E. Marchesi
 
 # This program is free software: you can redistribute it and/or modify
@@ -15,12 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-bin_PROGRAMS = poke
-poke_SOURCES = poke.c poke.h poke-cmd-tab.y poke-cmd-lex.l
 
-poke_CPPFLAGS = -I$(top_srcdir)/lib
-poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS)
-poke_LDADD = $(top_builddir)/lib/libpoke.la \
-             $(LTLIBREADLINE)
+info_TEXINFOS = poke.texi
+poke_TEXINFOS = fdl.texi
 
-# End of Makefile.am

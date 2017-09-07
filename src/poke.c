@@ -24,6 +24,19 @@
 #include <stdio.h>
 #include <gettext.h>
 #define _(str) gettext (str)
+#include <unistd.h>
+#include <string.h>
+#include "readline.h"
+#if defined HAVE_READLINE_HISTORY_H
+# include <readline/history.h>
+#endif
+
+#include "poke.h"
+
+/* poke can be run either interactively (from a tty) or in batch mode.
+   The following predicate records this.  */
+
+int poke_interactive_p;
 
 /* Command line options management.  */
 
@@ -88,8 +101,14 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
 static void
 print_version ()
 {
-  printf ("poke %s\n", VERSION);
-  /* xgettext: no-wrap */
+  /* TRANSLATORS: ascii-art in here.  */
+  fprintf (stdout, "     _____\n");
+  fprintf (stdout, " ---'   __\\_______\n");
+  fprintf (stdout, "            ______)  GNU poke %s\n", VERSION);
+  fprintf (stdout, "            __)\n");
+  fprintf (stdout, "           __)\n");
+  fprintf (stdout, " ---._______)\n");
+  /* xgettesxt: no-wrap */
   puts ("");
 
   /* It is important to separate the year from the rest of the message,
@@ -138,6 +157,34 @@ parse_args (int argc, char *argv[])
           exit (EXIT_FAILURE);
         }
     }
+
+  /* XXX: open IO file.  */
+}
+
+static int
+repl ()
+{
+  print_version ();
+  puts ("");
+  
+  while (1)
+    {
+      char *line = readline ("poke> ");
+      
+      if (line == NULL
+          || strcmp (line, "exit") == 0)
+        {
+          free (line);
+          break;
+        }
+          
+#if defined HAVE_READLINE_HISTORY_H
+      if (line && *line)
+        add_history (line);
+#endif      
+      
+      free (line);
+    }
 }
 
 int
@@ -146,5 +193,12 @@ main (int argc, char *argv[])
   set_program_name (xstrdup ("poke"));
   parse_args (argc, argv);
 
+  /* Determine whether the tool has been invoked interactively.  */
+  poke_interactive_p = isatty (fileno (stdin));
+
+  /* Enter the REPL.  */
+  if (poke_interactive_p)
+    return repl ();
+  
   return 0;
 }
