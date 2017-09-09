@@ -16,7 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 bin_PROGRAMS = poke
-poke_SOURCES = poke.c poke.h pcl-lex.l pcl-tab.y
+poke_SOURCES = poke.c poke.h pcl-tab.y pcl-lex.l
+
+BUILT_SOURCES = pcl-tab.h
+AM_YFLAGS = -d
+AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib
 poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS)

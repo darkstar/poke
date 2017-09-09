@@ -26,7 +26,7 @@
 
 struct pcl_type
 {
-  int signed;	/* 0 => unsigned, 1 => signed.  */
+  int sign;	/* 0 => unsigned, 1 => signed.  */
   int size;	/* Size in bits.  */
 };
 
@@ -39,7 +39,7 @@ enum pcl_ast_node_type
   PCL_AST_TYPE,
   PCL_AST_TYPEDEF,
   PCL_AST_INT,
-  PCL_AST_STRING,
+  PCL_AST_STR,
   PCL_AST_ID
 };
 
@@ -53,9 +53,11 @@ struct pcl_ast_node
     char *id;
   } val;
 
-  struct pcl_ast_node *children;
-  size_t num_children;
+  struct pcl_ast_node **children;
+  size_t nchildren;
 };
+
+
 
 /*
  * The PCL stack machine.
@@ -101,6 +103,7 @@ enum pcl_sm_op
 
 
 
+#if 0
 /* The struct construction (scons) machine gets a sequence of
    bytecodes, an IO space and an address in the space as input
    arguments.  The result of executing the program is a `pcl_struct'
@@ -108,5 +111,6 @@ enum pcl_sm_op
 
 struct pcl_struct *scons (char *ops, struct poke_io *io,
                           poke_io_addr_t addr);
+#endif
 
 #endif /* ! PCL_H */

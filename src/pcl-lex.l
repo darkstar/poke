@@ -1,4 +1,5 @@
-/* pcl-lex.l - Lexer for the Poke Command Language.  */ /* -*- mode: C -*- */
+/* -*- mode: C -*- */
+/* pcl-lex.l - Lexer for the Poke Command Language.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -18,7 +19,7 @@
 
 /* Automake needs this.  */
 %option outfile="lex.yy.c"
-%option prefix="pcl"
+%option prefix="pcl_tab_"
 %option pointer
 %option noyywrap
 %option reentrant
@@ -34,8 +35,31 @@
 }
 
 %{
+#include <string.h>
+#include <xalloc.h>
 #include <pcl.h>
 #include <pcl-tab.h>
+
+int
+pcl_atoi (const char *str, int *number)
+{
+  int res;
+  long int li;
+  char *end;
+  int base = 0;
+
+  res = 0;
+
+  li = strtol (str, &end, base);
+  if ((*str != '\0') && (*end == '\0'))
+    {
+      /* The entire string is valid.  */
+      res = 0;
+      *number = (int) li;
+    }
+
+  return res;
+}
 
 %}
 
@@ -54,7 +78,7 @@ STRING             \"([^"]|\\(.|\n))*\"
   /*  Create an integer node.  */
   int integer_value;
 
-  yylval->node = pcl_ast_node_new ();
+  yylval->node = xmalloc (sizeof (struct pcl_ast_node *));
   pcl_atoi (yytext, &integer_value);
   yylval->node->type = PCL_AST_INT;
   yylval->node->val.integer = integer_value;
@@ -68,12 +92,16 @@ STRING             \"([^"]|\\(.|\n))*\"
   /* Strip the quoting characters */
   yytext[strlen(yytext) - 1] = 0;
 
-  yylval->node = pcl_ast_node_new ();
+  yylval->node = xmalloc (sizeof (struct pcl_ast_node *));
   yylval->node->type = PCL_AST_STR;
   yylval->node->val.str = yytext + 1;
 
   return PCL_TOK_STR;
 }
+
+enum    { return PCL_TOK_ENUM; }
+struct  { return PCL_TOK_STRUCT; }
+typedef { return PCL_TOK_TYPEDEF; }
 
 . { return PCL_TOK_ERR; }
 
