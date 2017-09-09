@@ -30,3 +30,4 @@ config.h.in
 /doc/stamp-vti
 /doc/version.texi
 /gnulib
+/src/pcl-lex.h

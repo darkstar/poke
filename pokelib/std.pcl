@@ -1,6 +1,6 @@
-/* poke.h - Interactive editor for binary files.  */
+/* std.pcl - Standard PCL definitions.  */ /* -*- mode: c -*- */
 
-/* Copyright (C) 2017 Jose E. Marchesi */
+/* Copyright (C) 2017 Jose E. Marchesi.  */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef POKE_H
-#define POKE_H
+typedef u:4 nibble;
+typedef s:4 snibble;
 
-extern int poke_interactive_p;
-extern int poke_io_file;
+typedef u:8 byte;
+typedef s:8 sbyte;
 
-#endif /* !POKE_H */
+typedef u:16 half;
+typedef s:16 shalf;
+
+typedef u:32 word;
+typedef s:32 sword;
+
+typedef u:64 xword;
+typedef s:64 sxword;

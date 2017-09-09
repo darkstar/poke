@@ -341,6 +341,34 @@ enum elf_xword elf_sh_flags
   SHF_MASKPROC = 0xf000_0000 	<<Processor-specific flags>>
 };
 
+enum elf_word elf_p_type
+{
+  PT_NULL = 0		<<Array element is unused>>,
+  PT_LOAD = 1		<<Loadable segment>>,
+  PT_DYNAMIC = 2	<<Dynamic linking information>>,
+  PT_INTERP = 3		<<Location and size of a null-terminated>>
+			<<path name to invoke as an interpreter>>,
+  PT_NOTE = 4		<<Location and size of auxiliary>>
+			<<information>>,
+  PT_SHLIB = 5		<<Reserved.  Unspecified semantics>>,
+  PT_PHDR = 6		<<Location and size of the program header>>
+                        <<table itself>>,
+  PT_TLS = 7		<<Thread-Local storage template>>,
+  PT_LOOS = 0x60000000	<<Operating system-specific>>,
+  PT_HIOS = 0x6fffffff	<<Operating system-specific>>,
+  PT_LOPROC = 0x70000000 <<Processor-specific>>,
+  PT_HIPROC = 0x7fffffff <<Processor-specific>>
+};
+
+enum elf_word elf_p_flags
+{
+  PF_X = 0x1		<<Execute>>,
+  PF_W = 0x2		<<Write>>,
+  PF_R = 0x4		<<Read>>,
+  PF_MASKOS = 0xff00000	<<Unspecified>>,
+  PF_MASKPROC = 0xf000_0000 <<Unspecified>>
+};
+
 enum elf_word elf_ch_type
 {
   ELFCOMPRESS_ZLIB = 1		<<ZLIB algorithm>>,
@@ -348,6 +376,53 @@ enum elf_word elf_ch_type
   ELFCOMPRESS_HIOS = 0x6fffffff	<<Operating system-specific>>,
   ELFCOMPRESS_LOPROC = 0x70000000 <<Processor-specific>>,
   ELFCOMPRESS_HIPROC = 0x7fffffff <<Processor-specific>>
+};
+
+/*
+	#define ELF32_R_SYM(i)	((i) >> 8)
+	#define ELF32_R_TYPE(i)   ((unsigned char)(i))
+	#define ELF32_R_INFO(s,t) (((s) << 8)+(unsigned char)(t))
+   
+               sym     |type
+        |----|----|----|----|
+
+	#define ELF64_R_SYM(i)    ((i) >> 32)
+	#define ELF64_R_TYPE(i)   ((i) & 0xffffffffL)
+	#define ELF64_R_INFO(s,t) (((s) << 32)+((t) & 0xffffffffL))
+
+                sym         |        type 
+        |----|----|----|----|----|----|----|----|
+
+ */
+
+struct elf_rel <<ELF relocation>>
+{
+  elf_addr r_offset	<<Relocation location>>;
+
+  info_start = .;
+  elf_xword r_info	<<Relocation info: symbol + type>>;
+
+  . -= info_start;
+  elf_r_sym r_sym;	<<Relocation symbol>>
+  elf_r_type r_type;	<<Relocation type>>
+};
+
+struct elf_rela <<ELF relocation with addend>>
+{
+  elf_addr r_offset	<<Relocation location>>;
+
+  info_start = .;
+  elf_xword r_info	<<Relocation info: symbol + type>>;
+
+  . = info_start;
+  elf_r_sym r_sym;	<<Relocation symbol>>
+  elf_r_type r_type;	<<Relocation type>>
+
+  assert (sizeof (elf_r_sym) + sizeof (elf_r_type) == sizeof (elf_xword));
+
+  elf_sxword r_addend	<<Constant addend used to compute>>
+                        <<the value to be stored into the>>
+                        <<relocatable field>>;
 };
 
 struct elf_ident <<ELF identification>>
@@ -382,7 +457,7 @@ struct elf_ehdr <<ELF header>>
   elf_xword e_shoff <<Section header table's file offset in bytes.  If>>
                     <<the file has no section header table, this holds zero.>>;
 
-  elf_word  e_flags;    /* XXX */
+  elf_word  e_flags;    /* This is machine-specific.  */
   elf_half  e_ehsize    <<ELF header size in bytes>>;
 
   elf_half  e_phentsize <<Size in bytes of one entry in the file's>>
@@ -401,13 +476,25 @@ struct elf_ehdr <<ELF header>>
                         <<with the section name string table, or SHN_UNDEF>>;
 };
 
+struct elf_phdr <<ELF segment>>
+{
+  enum elf_p_type p_type	<<Segment type>>;
+  enum elf_p_flags p_flags	<<Section flags>>;
+  elf_off p_offset;
+  elf_addr p_vaddr;
+  elf_addr p_paddr;
+  elf_xword p_filesz;
+  elf_xword p_memsz;
+  elf_xword p_align;
+};
+
 struct elf_shdr <<ELF section header>>
 {
    elf_word  sh_name <<Index of the section's name into the section>>
                      <<header string table section>>;
 
    enum elf_sh_type  sh_type  <<Section type>>;
-   enum elf_sh_flags sh_flags <<Section flags>>;
+   elf_xword sh_flags <<Section flags>>;
 
    elf_addr sh_addr	<<If the section will appear in the memory image>>
                     	<<of a process, this member gives the address at which>>
@@ -439,8 +526,8 @@ struct elf_chdr <<ELF compressed section header.  >>
                 <<Used in sections with SHF_COMPRESSED>>
 {
   enum elf_ch_type ch_type	<<Compression algorithm>>;
-  elf_word ch_size		<<Size in bytes of the uncompressed data>>;
-  elf_word ch_addralign		<<Required alignment of the uncompressed data>>;
+  elf_xword ch_size		<<Size in bytes of the uncompressed data>>;
+  elf_xword ch_addralign	<<Required alignment of the uncompressed data>>;
 };
 
 /* Finally, the ELF object file itself.  */
@@ -479,8 +566,8 @@ struct elf <<ELF object file>>
 
   for (i = 0; i < ehdr.e_phnum; i++)
     {
-      . = phdr[i].ph_offset;
-      byte segment<i>[pdhr[i].ph_size] <<ELF segment>>;
+      . = phdr[i].p_offset;
+      byte segment<i>[pdhr[i].p_size] <<ELF segment>>;
     }
 };
 
@@ -492,6 +579,8 @@ struct elf <<ELF object file>>
        ehdr.e_type == ET_REL (relocatable objects).
      - ET_REL requires a section header table.
      - ET_EXEC requires a program header table.
+     - Only one PT_INTERP segment in a file.
+     - Only one PT_PHDR segment in a file.
 
    Integrity for elf_ident:
 
@@ -502,4 +591,5 @@ struct elf <<ELF object file>>
 
      - sizeof (e_ident) == e_ident.ei_nident
        && sizeof (struct elf_header) == e_ehsize);
+
 */

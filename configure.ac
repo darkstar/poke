@@ -35,6 +35,15 @@ LT_INIT
 AC_PROG_CC_C99
 AM_PROG_CC_C_O
 
+: ${LEX='flex'}
+: ${LEXLIB='-lfl'}
+: ${LEX_OUTPUT_ROOT='lex.yy'}
+AC_ARG_VAR([LEX], [The flex implementation to use.])
+AC_ARG_VAR([LEXLIB], [Options for linking with the flex runtime library.])
+AC_ARG_VAR([LEX_OUTPUT_ROOT], [Base of the file name that the lexer generates.])
+
+gl_BISON
+
 dnl System
 AC_CANONICAL_HOST
 canonical=$host

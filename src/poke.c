@@ -1,4 +1,4 @@
-/* poke.c -- Interactive editor for binary files.  */
+/* poke.c - Interactive editor for binary files.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -169,7 +169,7 @@ repl ()
   
   while (1)
     {
-      char *line = readline ("poke> ");
+      char *line = readline ("(poke) ");
       
       if (line == NULL
           || strcmp (line, "exit") == 0)
