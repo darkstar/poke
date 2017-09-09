@@ -34,7 +34,7 @@ struct pcl_type
  * The PCL AST.
  */
 
-enum pcl_ast_node_type
+enum pcl_ast_type
 {
   PCL_AST_TYPE,
   PCL_AST_TYPEDEF,
@@ -43,9 +43,9 @@ enum pcl_ast_node_type
   PCL_AST_ID
 };
 
-struct pcl_ast_node
+struct pcl_ast
 {
-  enum pcl_ast_node_type type;
+  enum pcl_ast_type type;
   union
   {
     int64_t integer;
@@ -53,7 +53,7 @@ struct pcl_ast_node
     char *id;
   } val;
 
-  struct pcl_ast_node **children;
+  struct pcl_ast **children;
   size_t nchildren;
 };
 

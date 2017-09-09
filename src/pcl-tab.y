@@ -30,48 +30,46 @@
 #include <pcl.h>
 #include "pcl-tab.h"
 
-  /* #define scanner (pcl_parser_scanner (pcl_parser)) */
+/* #define scanner (pcl_parser_scanner (pcl_parser)) */
 
 #define PCL_AST_CHILDREN_STEP 12
   
 static inline void
-pcl_ast_add_child (struct pcl_ast_node *node,
-                   struct pcl_ast_node *child)
+pcl_ast_add_child (struct pcl_ast *ast,
+                   struct pcl_ast *child)
 {
-  if (node->nchildren % PCL_AST_CHILDREN_STEP == 0)
-    node->children = xrealloc (node->children,
-                               (node->nchildren + PCL_AST_CHILDREN_STEP)
-                               * sizeof (node));
+  if (ast->nchildren % PCL_AST_CHILDREN_STEP == 0)
+    ast->children = xrealloc (ast->children,
+                               (ast->nchildren + PCL_AST_CHILDREN_STEP)
+                               * sizeof (ast));
 
-  node->children[node->nchildren++] = child;
+  ast->children[ast->nchildren++] = child;
 }
 
-static inline struct pcl_ast_node *
-pcl_ast_node (enum pcl_ast_node_type type,
-              int nchildren,
-              ...)
+static inline struct pcl_ast *
+pcl_ast_new (enum pcl_ast_type type, int nchildren, ...)
 {
   va_list valist;
-  struct pcl_ast_node *node;
+  struct pcl_ast *ast;
 
-  node = xmalloc (sizeof (struct pcl_ast_node));
-  node->nchildren = 0;
-  node->children = NULL;
+  ast = xmalloc (sizeof (struct pcl_ast));
+  ast->nchildren = 0;
+  ast->children = NULL;
 
-  if (node)
+  if (ast)
     {
       int i;
       
-      node->type = type;
+      ast->type = type;
 
       va_start (valist, nchildren);
       for (i = 0; i < nchildren; i++)
-        pcl_ast_add_child (node,
-                           va_arg (valist, struct pcl_ast_node *));
+        pcl_ast_add_child (ast,
+                           va_arg (valist, struct pcl_ast *));
       va_end (valist);
     }
 
-  return node;
+  return ast;
 };
 
 void
@@ -82,39 +80,38 @@ pcl_tab_error (const char *err)
  
 %}
 
-%token <node> PCL_TOK_INT
-%token <node> PCL_TOK_STR
-%token <node> PCL_TOK_ID
+%token <ast> PCL_TOK_INT
+%token <ast> PCL_TOK_STR
+%token <ast> PCL_TOK_ID
 
-%token <node> PCL_TOK_ENUM
-%token <node> PCL_TOK_STRUCT
-%token <node> PCL_TOK_TYPEDEF
+%token <ast> PCL_TOK_ENUM
+%token <ast> PCL_TOK_STRUCT
+%token <ast> PCL_TOK_TYPEDEF
 
-%token <node> PCL_TOK_ERR
+%token <ast> PCL_TOK_ERR
 
-%type <node> typedef
-%type <node> type
+%type <ast> typedef
+%type <ast> type
 
 %union {
-  struct pcl_ast_node *node;
-  int keyword;
+  struct pcl_ast *ast;
 }
 
 %% /* The grammar follows.  */
 
 typedef: PCL_TOK_TYPEDEF type PCL_TOK_ID ';'
        {
-         $$ = pcl_ast_node (PCL_AST_TYPEDEF, 2, $2, $3);
+         $$ = pcl_ast_new (PCL_AST_TYPEDEF, 2, $2, $3);
        }
        | PCL_TOK_TYPEDEF PCL_TOK_ID PCL_TOK_ID ';'
        {
-         $$ = pcl_ast_node (PCL_AST_TYPEDEF, 2, $2, $3);
+         $$ = pcl_ast_new (PCL_AST_TYPEDEF, 2, $2, $3);
        }
        ;
 
 type: PCL_TOK_INT ':' PCL_TOK_ID
     {
-      $$ = pcl_ast_node (PCL_AST_TYPE, 2, $1, $3);
+      $$ = pcl_ast_new (PCL_AST_TYPE, 2, $1, $3);
     }
     ;
 

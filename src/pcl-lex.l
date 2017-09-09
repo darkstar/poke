@@ -75,26 +75,23 @@ STRING             \"([^"]|\\(.|\n))*\"
 {BLANK}  { /* Ignore whitespace */ }
 
 "-"?((0x[0-9a-fA-F]+)|{DIGIT}+) {
-  /*  Create an integer node.  */
   int integer_value;
 
-  yylval->node = xmalloc (sizeof (struct pcl_ast_node *));
+  yylval->ast = xmalloc (sizeof (struct pcl_ast *));
   pcl_atoi (yytext, &integer_value);
-  yylval->node->type = PCL_AST_INT;
-  yylval->node->val.integer = integer_value;
+  yylval->ast->type = PCL_AST_INT;
+  yylval->ast->val.integer = integer_value;
 
   return PCL_TOK_INT;    
 }
 
 {STRING} {
-  /* Create a string node.  */
-  
   /* Strip the quoting characters */
   yytext[strlen(yytext) - 1] = 0;
 
-  yylval->node = xmalloc (sizeof (struct pcl_ast_node *));
-  yylval->node->type = PCL_AST_STR;
-  yylval->node->val.str = yytext + 1;
+  yylval->ast = xmalloc (sizeof (struct pcl_ast *));
+  yylval->ast->type = PCL_AST_STR;
+  yylval->ast->val.str = yytext + 1;
 
   return PCL_TOK_STR;
 }
