@@ -24,6 +24,17 @@
 #include "xalloc.h"
 #include "pcl-ast.h"
 
+/* Return the endianness of the running system.  */
+
+enum pcl_ast_endian
+pcl_ast_default_endian (void)
+{
+  char buffer[4] = { 0x0, 0x0, 0x0, 0x1 };
+  uint32_t canary = *((uint32_t *) buffer);
+
+  return canary == 0x1 ? PCL_AST_MSB : PCL_AST_LSB;
+}
+
 /* Allocate and return a new AST node, with the given CODE.  The rest
    of the node is initialized to zero.  */
   
@@ -68,7 +79,7 @@ static pcl_ast ids_hash_table[HASH_TABLE_SIZE];
 
 /* Return a PCL_AST_IDENTIFIER node whose name is the NULL-terminated
    string STR.  If an identifier with that name has previously been
-   referred to, the ame node is returned this time.  */
+   referred to, the name node is returned this time.  */
 
 pcl_ast 
 pcl_ast_get_identifier (const char *str)
@@ -88,6 +99,7 @@ pcl_ast_get_identifier (const char *str)
 #define HASHBITS 30  
   hash &= (1 << HASHBITS) - 1;
   hash %= HASH_TABLE_SIZE;
+#undef HASHBITS
 
   /* Search the hash table for the identifier.  */
   for (id = ids_hash_table[hash]; id != NULL; id = PCL_AST_CHAIN (id))
@@ -105,6 +117,76 @@ pcl_ast_get_identifier (const char *str)
   ids_hash_table[hash] = id;
 
   return id;
+}
+
+/* Named types are stored in a hash table, and are referred from AST
+   nodes.  */
+
+static pcl_ast types_hash_table[HASH_TABLE_SIZE];
+
+static int
+type_hash (const char *name)
+{
+  size_t len;
+  int hash;
+  int i;
+
+  len = strlen (name);
+  hash = len;
+  for (i = 0; i < len; i++)
+    hash = ((hash * 613) + (unsigned)(name[i]));
+
+#define HASHBITS 30
+  hash &= (1 << HASHBITS) - 1;
+  hash %= HASH_TABLE_SIZE;
+#undef HASHBITS
+
+  return hash;
+}
+
+/* Register a named type, storing it in the types hash table, and
+   return a pointer to it.  If a type with the given name has been
+   already registered, return NULL.  */
+
+pcl_ast
+pcl_ast_register_type (const char *name, pcl_ast type)
+{
+  int hash;
+  pcl_ast t;
+
+  hash = type_hash (name);
+
+  /* Search the hash table for the type.  */
+  for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
+    if (PCL_AST_TYPE_NAME (t)
+        && !strcmp (PCL_AST_TYPE_NAME (t), name))
+      return NULL;
+
+  /* Put the passed type in the hash table.  */
+  PCL_AST_CHAIN (type) = types_hash_table[hash];
+  types_hash_table[hash] = type;
+
+  return type;
+}
+
+/* Return the type associated with the given NAME.  If the type name
+   has not been registered, return NULL.  */
+
+pcl_ast
+pcl_ast_get_type (const char *name)
+{
+  int hash;
+  pcl_ast t;
+  
+  hash = type_hash (name);
+
+  /* Search the hash table for the type.  */
+  for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
+    if (PCL_AST_TYPE_NAME (t)
+        && !strcmp (PCL_AST_TYPE_NAME (t), name))
+      return t;
+
+  return NULL;
 }
 
 /* Build and return an AST node for an integer constant.  */
@@ -238,4 +320,85 @@ pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier)
   PCL_AST_STRUCT_REF_IDENTIFIER (sref) = identifier;
 
   return sref;
+}
+
+/* Build and return an AST node for a type.  */
+
+pcl_ast
+pcl_ast_make_type (int signed_p, pcl_ast width,
+                   pcl_ast enumeration, pcl_ast strct)
+{
+  pcl_ast type = pcl_ast_make_node (PCL_AST_TYPE);
+
+  assert (!!width + !!enumeration + !!strct == 1);
+
+  PCL_AST_TYPE_SIGNED_P (type) = signed_p;
+  PCL_AST_TYPE_WIDTH (type) = width;
+  PCL_AST_TYPE_ENUMERATION (type) = enumeration;
+  PCL_AST_TYPE_STRUCT (type) = strct;
+
+  return type;
+}
+
+/* Build and return an AST node for a struct.  */
+
+pcl_ast
+pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
+                     enum pcl_ast_endian endian)
+{
+  pcl_ast strct = pcl_ast_make_node (PCL_AST_STRUCT);
+
+  assert (tag && fields);
+
+  PCL_AST_STRUCT_TAG (strct) = tag;
+  PCL_AST_STRUCT_FIELDS (strct) = fields;
+  PCL_AST_STRUCT_DOCSTR (strct) = docstr;
+  PCL_AST_STRUCT_ENDIAN (strct) = endian;
+
+  return strct;
+}
+
+/* Build and return an AST node for an enum.  */
+
+pcl_ast
+pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr)
+{
+  pcl_ast enumeration = pcl_ast_make_node (PCL_AST_ENUM);
+
+  assert (tag && values);
+
+  PCL_AST_ENUM_TAG (enumeration) = tag;
+  PCL_AST_ENUM_VALUES (enumeration) = values;
+  PCL_AST_ENUM_DOCSTR (enumeration) = docstr;
+
+  return enumeration;
+}
+
+/* Build and return an AST node for a struct field.  */
+
+pcl_ast
+pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
+                    enum pcl_ast_endian endian, pcl_ast size_exp)
+{
+  pcl_ast field = pcl_ast_make_node (PCL_AST_FIELD);
+
+  assert (name);
+
+  PCL_AST_FIELD_NAME (field) = name;
+  PCL_AST_FIELD_TYPE (field) = type;
+  PCL_AST_FIELD_DOCSTR (field) = docstr;
+  PCL_AST_FIELD_ENDIAN (field) = endian;
+  PCL_AST_FIELD_SIZE_EXP (field) = size_exp;
+
+  return field;
+}
+
+/* Build and return an AST node for a PCL program.  */
+
+pcl_ast
+pcl_ast_make_program (void)
+{
+  pcl_ast program = pcl_ast_make_node (PCL_AST_PROGRAM);
+
+  return program;
 }

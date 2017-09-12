@@ -88,6 +88,9 @@ D [0-9]
 "if"		{ return PCL_TOK_IF; }
 "sizeof"	{ return PCL_TOK_SIZEOF; }
 
+"lsb"		{ return PCL_TOK_LSB; }
+"msb"		{ return PCL_TOK_MSB; }
+
 "*="		{ return PCL_TOK_MULA; }
 "/="		{ return PCL_TOK_DIVA; }
 "%="		{ return PCL_TOK_MODA; }
@@ -110,12 +113,19 @@ D [0-9]
 "++"		{ return PCL_TOK_INC; }
 "--"		{ return PCL_TOK_DEC; }
 
-{L}({L}|{D})* { 
-   /* XXX: this should return type name for type names.  The table of
-      types should be constructed and inspected on the fly.  */
+{L}({L}|{D})* {
+   pcl_ast type;
 
-  yylval->ast = pcl_ast_get_identifier (yytext);
-  return PCL_TOK_ID;
+   if ((type = pcl_ast_get_type (yytext)) != NULL)
+     {
+       yylval->ast = type;
+       return PCL_TOK_TYPENAME;
+     }
+   else
+     {
+       yylval->ast = pcl_ast_get_identifier (yytext);
+       return PCL_TOK_ID;
+     }
 }
 
 "-"?((0x[0-9a-fA-F]+)|{DIGIT}+) {

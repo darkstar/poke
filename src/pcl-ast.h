@@ -32,7 +32,9 @@
 
 enum pcl_ast_code
 {
+  PCL_AST_PROGRAM,
   PCL_AST_ENUMERATOR,
+  PCL_AST_ENUM,
   PCL_AST_EXP,
   PCL_AST_COND_EXP,
   PCL_AST_INTEGER,
@@ -45,7 +47,8 @@ enum pcl_ast_code
   PCL_AST_LOOP,
   PCL_AST_IDENTIFIER,
   PCL_AST_ARRAY_REF,
-  PCL_AST_STRUCT_REF
+  PCL_AST_STRUCT_REF,
+  PCL_AST_TYPE
 };
 
 enum pcl_ast_op
@@ -92,6 +95,12 @@ enum pcl_ast_op
   PCL_AST_OP_IORA
 };
 
+enum pcl_ast_endian
+{
+  PCL_AST_MSB, /* Big-endian.  */
+  PCL_AST_LSB  /* Little-endian.  */
+};
+
 /* The following structs define the several supported types of nodes
    in the abstract syntax tree, which are discriminated using the
    codes defined in the `pcl_ast_code' enumeration above.
@@ -112,6 +121,14 @@ struct pcl_ast_common
   enum pcl_ast_code code : 8;
 
   unsigned literal_p : 1;
+};
+
+#define PCL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->declarations)
+
+struct pcl_ast_program
+{
+  struct pcl_ast_common common;
+  union pcl_ast_s *declarations;
 };
 
 #define PCL_AST_IDENTIFIER_LENGTH(AST) ((AST)->identifier.length)
@@ -178,28 +195,46 @@ struct pcl_ast_enumerator
   union pcl_ast_s *docstr;
 };
 
+#define PCL_AST_ENUM_TAG(AST) ((AST)->enumeration.tag)
+#define PCL_AST_ENUM_VALUES(AST) ((AST)->enumeration.values)
+#define PCL_AST_ENUM_DOCSTR(AST) ((AST)->enumeration.docstr)
+
+struct pcl_ast_enum
+{
+  struct pcl_ast_common common;
+  union pcl_ast_s *tag;
+  union pcl_ast_s *values;
+  union pcl_ast_s *docstr;
+};
+
 #define PCL_AST_STRUCT_TAG(AST) ((AST)->strct.tag)
 #define PCL_AST_STRUCT_FIELDS(AST) ((AST)->strct.fields)
 #define PCL_AST_STRUCT_DOCSTR(AST) ((AST)->strct.docstr)
+#define PCL_AST_STRUCT_ENDIAN(AST) ((AST)->strct.endian)
 
 struct pcl_ast_struct
 {
   struct pcl_ast_common common;
+  enum pcl_ast_endian endian;
   union pcl_ast_s *tag;
   union pcl_ast_s *fields;
   union pcl_ast_s *docstr;
 };
 
 #define PCL_AST_FIELD_NAME(AST) ((AST)->field.name)
+#define PCL_AST_FIELD_ENDIAN(AST) ((AST)->field.endian)
 #define PCL_AST_FIELD_TYPE(AST) ((AST)->field.type)
-#define PCL_AST_fIELD_DOCSTR(AST) ((AST)->field.docstr)
+#define PCL_AST_FIELD_DOCSTR(AST) ((AST)->field.docstr)
+#define PCL_AST_FIELD_SIZE_EXP(AST) ((AST)->field.size_exp)
 
 struct pcl_ast_field
 {
   struct pcl_ast_common common;
+  enum pcl_ast_endian endian;
   union pcl_ast_s *name;
   union pcl_ast_s *type;
   union pcl_ast_s *docstr;
+  union pcl_ast_s *size_exp;
 };
 
 #define PCL_AST_STMT_FILENAME(AST) ((AST)->stmt.filename)
@@ -260,6 +295,24 @@ struct pcl_ast_struct_ref
   union pcl_ast_s *identifier;
 };
 
+
+#define PCL_AST_TYPE_NAME(AST) ((AST)->type.name)
+#define PCL_AST_TYPE_SIGNED_P(AST) ((AST)->type.signed_p)
+#define PCL_AST_TYPE_WIDTH(AST) ((AST)->type.width)
+#define PCL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
+#define PCL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
+
+struct pcl_ast_type
+{
+  struct pcl_ast_common common;
+  char *name;
+  int signed_p;
+  union pcl_ast_s *width;
+  union pcl_ast_s *enumeration;
+  union pcl_ast_s *strt;
+};
+  
+
 /* Finally, the `pcl_ast' type, which represents both an AST tree and
    a node.  */
 
@@ -279,6 +332,8 @@ union pcl_ast_s
   struct pcl_ast_array_ref aref;
   struct pcl_ast_struct_ref sref;
   struct pcl_ast_enumerator enumerator;
+  struct pcl_ast_enum enumeration;
+  struct pcl_ast_type type;
 };
 
 typedef union pcl_ast_s *pcl_ast;
@@ -288,7 +343,13 @@ typedef union pcl_ast_s *pcl_ast;
 
 pcl_ast pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2);
 
+enum pcl_ast_endian pcl_ast_default_endian (void);
+
 pcl_ast pcl_ast_get_identifier (const char *str);
+
+pcl_ast pcl_ast_register_type (const char *name, pcl_ast type);
+pcl_ast pcl_ast_get_type (const char *str);
+
 pcl_ast pcl_ast_make_integer (uint64_t value);
 pcl_ast pcl_ast_make_string (const char *str);
 pcl_ast pcl_ast_make_enumerator (pcl_ast identifier, pcl_ast value,
@@ -300,5 +361,15 @@ pcl_ast pcl_ast_make_binary_exp (enum pcl_ast_op code, pcl_ast op1,
 pcl_ast pcl_ast_make_unary_exp (enum pcl_ast_op code, pcl_ast op);
 pcl_ast pcl_ast_make_array_ref (pcl_ast base, pcl_ast index);
 pcl_ast pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier);
+pcl_ast pcl_ast_make_type (int signed_p, pcl_ast width,
+                           pcl_ast enumeration, pcl_ast strct);
+pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
+                             enum pcl_ast_endian endian);
+
+pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
+                            enum pcl_ast_endian endian, pcl_ast size_exp);
+pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
+pcl_ast pcl_ast_make_program (void);
+
 
 #endif /* ! PCL_AST_H */
