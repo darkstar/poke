@@ -319,13 +319,6 @@ type_specifier:
         | 'u' ':' constant_expression
         	{ $$ = pcl_ast_make_type (0, $3, NULL, NULL); }
         | PCL_TOK_TYPENAME
-	        {
-                  /* Note the lexer will only return PCL_TOK_TYPENAME
-                     if the string actually identifies a registered
-                     type, so we can rely on the call below to always
-                     return a type ast node.  */
-                  $$ = pcl_ast_get_type ($1);
-                }
 	| PCL_TOK_STRUCT PCL_TOK_ID
         	{
                   pcl_ast type
