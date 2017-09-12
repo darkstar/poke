@@ -16,7 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 bin_PROGRAMS = poke
-poke_SOURCES = poke.c poke.h pcl-tab.y pcl-lex.l
+poke_SOURCES = poke.c poke.h \
+               pcl-ast.h pcl-ast.c \
+               pcl-tab.y pcl-lex.l
 
 BUILT_SOURCES = pcl-tab.h
 AM_YFLAGS = -d

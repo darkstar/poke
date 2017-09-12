@@ -50,11 +50,54 @@ This manual documents version @value{VERSION} of GNU poke.
 @menu
 The Basics
 
+Internals
+* Poke Architecture::		Overall architecture.
+
 * GNU Free Documentation License:: Distribution terms for this document.
 
 Indexes
 * Concept Index::
 @end menu
+
+@node Poke Architecture
+@chapter Poke Architecture
+
+PCL stands for ``Poke Control Language'', and also for ``Poke C-like
+Language''.  It is pronounced ``pickle''.
+
+@verbatim
+
+      +----------+
+      | compiler |
+      +----------+
+           |
+           v
+      +----------+      +-------+
+      |   PVM    | <--->|       |
+      +----------+      |       |
+           ^            |       |
+           |            | data  |
+           v            |       |
+      +----------+      |       |
+      | command  | <--->|       |
+      +----------+      +-------+
+
+@end verbatim
+
+Files:
+
+@table @file
+@item pcl.h
+PCL compiler header file.
+@item pcl-ast.h pcl-ast.c
+PCL abstract syntax tree.
+@item pcl-gen.c
+PCL code generator.
+@item pcl-lex.l pcl-lex.y
+PCL parser and lexer.
+@item pvm.h pvm.c
+Poke virtual machine.
+@end table
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
