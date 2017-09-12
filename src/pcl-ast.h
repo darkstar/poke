@@ -65,6 +65,10 @@ enum pcl_ast_op
   PCL_AST_OP_MUL,
   PCL_AST_OP_DIV,
   PCL_AST_OP_MOD,
+  PCL_AST_OP_LT,
+  PCL_AST_OP_GT,
+  PCL_AST_OP_LE,
+  PCL_AST_OP_GE,
   /* Unary operators.  */
   PCL_AST_OP_INC,
   PCL_AST_OP_DEC,
@@ -73,7 +77,19 @@ enum pcl_ast_op
   PCL_AST_OP_POS,
   PCL_AST_OP_NEG,
   PCL_AST_OP_BNOT,
-  PCL_AST_OP_NOT
+  PCL_AST_OP_NOT,
+  /* Assign operators.  */
+  PCL_AST_OP_ASSIGN,
+  PCL_AST_OP_MULA,
+  PCL_AST_OP_DIVA,
+  PCL_AST_OP_MODA,
+  PCL_AST_OP_ADDA,
+  PCL_AST_OP_SUBA,
+  PCL_AST_OP_SLA,
+  PCL_AST_OP_SRA,
+  PCL_AST_OP_BANDA,
+  PCL_AST_OP_XORA,
+  PCL_AST_OP_IORA
 };
 
 /* The following structs define the several supported types of nodes
@@ -88,11 +104,11 @@ enum pcl_ast_op
 
 #define PCL_AST_CHAIN(AST) ((AST)->common.chain)
 #define PCL_AST_CODE(AST) ((AST)->common.code)
-#define PCL_AST_LITERAL_P(AST) ((AST)->common.literal)
+#define PCL_AST_LITERAL_P(AST) ((AST)->common.literal_p)
 
 struct pcl_ast_common
 {
-  union pcl_ast *chain;
+  union pcl_ast_s *chain;
   enum pcl_ast_code code : 8;
 
   unsigned literal_p : 1;
@@ -135,7 +151,7 @@ struct pcl_ast_exp
   struct pcl_ast_common common;
   enum pcl_ast_op code;
   uint8_t numops : 8;
-  union pcl_ast *operands[2];
+  union pcl_ast_s *operands[2];
 };
 
 #define PCL_AST_COND_EXP_COND(AST) ((AST)->cond_exp.cond)
@@ -145,10 +161,10 @@ struct pcl_ast_exp
 struct pcl_ast_cond_exp
 {
   struct pcl_ast_common common;
-  union pcl_ast *cond;
-  union pcl_ast *thenexp;
-  union pcl_ast *elseexp;
-}
+  union pcl_ast_s *cond;
+  union pcl_ast_s *thenexp;
+  union pcl_ast_s *elseexp;
+};
 
 #define PCL_AST_ENUMERATOR_IDENTIFIER(AST) ((AST)->enumerator.identifier)
 #define PCL_AST_ENUMERATOR_VALUE(AST) ((AST)->enumerator.value)
@@ -157,9 +173,9 @@ struct pcl_ast_cond_exp
 struct pcl_ast_enumerator
 {
   struct pcl_ast_common common;
-  union pcl_ast *identifier;
-  union pcl_ast *value;
-  union pcl_ast *docstr;
+  union pcl_ast_s *identifier;
+  union pcl_ast_s *value;
+  union pcl_ast_s *docstr;
 };
 
 #define PCL_AST_STRUCT_TAG(AST) ((AST)->strct.tag)
@@ -169,9 +185,9 @@ struct pcl_ast_enumerator
 struct pcl_ast_struct
 {
   struct pcl_ast_common common;
-  union pcl_ast *tag;
-  union pcl_ast *fields;
-  union pcl_ast *docstr;
+  union pcl_ast_s *tag;
+  union pcl_ast_s *fields;
+  union pcl_ast_s *docstr;
 };
 
 #define PCL_AST_FIELD_NAME(AST) ((AST)->field.name)
@@ -181,9 +197,9 @@ struct pcl_ast_struct
 struct pcl_ast_field
 {
   struct pcl_ast_common common;
-  union pcl_ast *name;
-  union pcl_ast *type;
-  union pcl_ast *docstr;
+  union pcl_ast_s *name;
+  union pcl_ast_s *type;
+  union pcl_ast_s *docstr;
 };
 
 #define PCL_AST_STMT_FILENAME(AST) ((AST)->stmt.filename)
@@ -195,53 +211,53 @@ struct pcl_ast_stmt
   struct pcl_ast_common common;
   char *filename;
   size_t linenum;
-  union pcl_ast *body;
+  union pcl_ast_s *body;
 };
 
-#define PCL_AST_IF_STMT_COND(AST) ((AST).if_stmt.cond)
-#define PCL_AST_IF_STMT_THENPART(AST) ((AST).if_stmt.thenpart)
-#define PCL_AST_IF_STMT_ELSEPART(AST) ((AST).if_stmt.elsepart)
+#define PCL_AST_IF_STMT_COND(AST) ((AST)->if_stmt.cond)
+#define PCL_AST_IF_STMT_THENPART(AST) ((AST)->if_stmt.thenpart)
+#define PCL_AST_IF_STMT_ELSEPART(AST) ((AST)->if_stmt.elsepart)
 
 struct pcl_ast_if_stmt
 {
   struct pcl_ast_common common;
-  union pcl_ast *cond;
-  union pcl_ast *thenpart;
-  union pcl_ast *elsepart;
+  union pcl_ast_s *cond;
+  union pcl_ast_s *thenpart;
+  union pcl_ast_s *elsepart;
 };
 
-#define PCL_AST_LOOP_PRE(AST) ((AST).loop.pre)
-#define PCL_AST_LOOP_COND(AST) ((AST).loop.cond)
-#define PCL_AST_LOOP_POST(AST) ((AST).loop.post)
-#define PCL_AST_LOOP_BODY(AST) ((AST).loop.body)
+#define PCL_AST_LOOP_PRE(AST) ((AST)->loop.pre)
+#define PCL_AST_LOOP_COND(AST) ((AST)->loop.cond)
+#define PCL_AST_LOOP_POST(AST) ((AST)->loop.post)
+#define PCL_AST_LOOP_BODY(AST) ((AST)->loop.body)
 
 struct pcl_ast_loop
 {
   struct pcl_ast_common common;
-  union pcl_ast *pre;
-  union pcl_ast *cond;
-  union pcl_ast *post;
-  union pcl_ast *body;
+  union pcl_ast_s *pre;
+  union pcl_ast_s *cond;
+  union pcl_ast_s *post;
+  union pcl_ast_s *body;
 };
 
-#define PCL_AST_ARRAY_REF_BASE(AST) ((AST).aref.base)
-#define PCL_AST_ARRAY_REF_INDEX(AST) ((AST).aref.index)
+#define PCL_AST_ARRAY_REF_BASE(AST) ((AST)->aref.base)
+#define PCL_AST_ARRAY_REF_INDEX(AST) ((AST)->aref.index)
 
 struct pcl_ast_array_ref
 {
   struct pcl_ast_common common;
-  union pcl_ast *base;
-  union pcl_ast *index;
+  union pcl_ast_s *base;
+  union pcl_ast_s *index;
 };
 
-#define PCL_AST_STRUCT_REF_BASE(AST) ((AST).sref.base)
-#define PCL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST).sref.identifier)
+#define PCL_AST_STRUCT_REF_BASE(AST) ((AST)->sref.base)
+#define PCL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST)->sref.identifier)
 
 struct pcl_ast_struct_ref
 {
   struct pcl_ast_common common;
-  union pcl_ast *base;
-  union pcl_ast *identifier;
+  union pcl_ast_s *base;
+  union pcl_ast_s *identifier;
 };
 
 /* Finally, the `pcl_ast' type, which represents both an AST tree and
@@ -249,6 +265,7 @@ struct pcl_ast_struct_ref
 
 union pcl_ast_s
 {
+  struct pcl_ast_common common; /* This field _must_ appear first.  */
   struct pcl_ast_struct strct;
   struct pcl_ast_field field;
   struct pcl_ast_stmt stmt;
@@ -261,6 +278,7 @@ union pcl_ast_s
   struct pcl_ast_cond_exp cond_exp;
   struct pcl_ast_array_ref aref;
   struct pcl_ast_struct_ref sref;
+  struct pcl_ast_enumerator enumerator;
 };
 
 typedef union pcl_ast_s *pcl_ast;
@@ -268,7 +286,6 @@ typedef union pcl_ast_s *pcl_ast;
 /*  Prototypes for the non-static functions implemented in pcl-ast.c.
     See the .c file for information on how to use them functions.  */
 
-pcl_ast pcl_ast_make_node (enum pcl_ast_code code);
 pcl_ast pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2);
 
 pcl_ast pcl_ast_get_identifier (const char *str);

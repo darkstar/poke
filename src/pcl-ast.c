@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "xalloc.h"
 #include "pcl-ast.h"
 
@@ -31,7 +32,7 @@ pcl_ast_make_node (enum pcl_ast_code code)
 {
   pcl_ast ast;
 
-  ast = xmalloc (sizeof (union pcl_ast));
+  ast = xmalloc (sizeof (union pcl_ast_s));
   memset (ast, 0, sizeof (ast));
   PCL_AST_CODE (ast) = code;
 
@@ -86,10 +87,10 @@ pcl_ast_get_identifier (const char *str)
 
 #define HASHBITS 30  
   hash &= (1 << HASHBITS) - 1;
-  hash %= MAX_HASH_TABLE;
+  hash %= HASH_TABLE_SIZE;
 
   /* Search the hash table for the identifier.  */
-  for (id = ids_hash_table[hash]; id != NULL; idp = PCL_AST_CHAIN (id))
+  for (id = ids_hash_table[hash]; id != NULL; id = PCL_AST_CHAIN (id))
     if (PCL_AST_IDENTIFIER_LENGTH (id) == len
         && !strcmp (PCL_AST_IDENTIFIER_POINTER (id), str))
       return id;
@@ -125,7 +126,7 @@ pcl_ast_make_string (const char *str)
 {
   pcl_ast new = pcl_ast_make_node (PCL_AST_STRING);
 
-  PCL_AST_STRING_POINTER (new) = str;
+  PCL_AST_STRING_POINTER (new) = strdup (str);
   PCL_AST_STRING_LENGTH (new) = strlen (str);
   return new;
 }
@@ -157,7 +158,7 @@ pcl_ast_make_cond_exp (pcl_ast cond,
 {
   pcl_ast cond_exp = pcl_ast_make_node (PCL_AST_COND_EXP);
 
-  assert (condition && thenexp && elseexp);
+  assert (cond && thenexp && elseexp);
 
   PCL_AST_COND_EXP_COND (cond_exp) = cond;
   PCL_AST_COND_EXP_THENEXP (thenexp) = thenexp;
@@ -182,8 +183,8 @@ pcl_ast_make_binary_exp (enum pcl_ast_op code,
 
   PCL_AST_EXP_CODE (exp) = code;
   PCL_AST_EXP_NUMOPS (exp) = 2;
-  PCL_AST_EXP_OPERAND (exp)[0] = op1;
-  PCL_AST_EXP_OPERAND (exp)[1] = op2;
+  PCL_AST_EXP_OPERAND (exp, 0) = op1;
+  PCL_AST_EXP_OPERAND (exp, 1) = op2;
 
   PCL_AST_LITERAL_P (exp)
     = PCL_AST_LITERAL_P (op1) && PCL_AST_LITERAL_P (op2);
@@ -199,19 +200,10 @@ pcl_ast_make_unary_exp (enum pcl_ast_op code,
 {
   pcl_ast exp = pcl_ast_make_node (PCL_AST_EXP);
 
-  assert (op == PCL_AST_OP_INC
-          || op == PCL_AST_OP_DEC
-          || op == PCL_AST_OP_SIZEOF
-          || op == PCL_AST_OP_ADDRESS
-          || op == PCL_AST_OP_POS
-          || op == PCL_AST_OP_NEG
-          || op == PCL_AST_OP_BNOT
-          || op == PCL_AST_OP_NOT);
-
   PCL_AST_EXP_CODE (exp) = code;
-  PCL_ST_EXP_NUMOPS (exp) = 1;
-  PCL_AST_EXP_OPERAND (exp)[0] = op;
-  PCL_AST_LITERAL_P (exp) = PCL_AST_LITERAL_p (op);
+  PCL_AST_EXP_NUMOPS (exp) = 1;
+  PCL_AST_EXP_OPERAND (exp, 0) = op;
+  PCL_AST_LITERAL_P (exp) = PCL_AST_LITERAL_P (op);
   
   return exp;
 }
@@ -244,7 +236,6 @@ pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier)
 
   PCL_AST_STRUCT_REF_BASE (sref) = base;
   PCL_AST_STRUCT_REF_IDENTIFIER (sref) = identifier;
-  PCL_AST_LITERAL_P (sref) = 0;
 
   return sref;
 }

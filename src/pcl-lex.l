@@ -104,15 +104,16 @@ D [0-9]
 "=="		{ return PCL_TOK_EQ; }
 "!="		{ return PCL_TOK_NE; }
 "<="		{ return PCL_TOK_LE; }
-">='		{ return PCL_TOK_GE; }
+">="		{ return PCL_TOK_GE; }
 "<<"		{ return PCL_TOK_SL; }
 ">>"		{ return PCL_TOK_SR; }
 "++"		{ return PCL_TOK_INC; }
 "--"		{ return PCL_TOK_DEC; }
 
-/* XXX: this should return type name for type names.  The table of
-types should be constructed and inspected on the fly.  */
 {L}({L}|{D})* { 
+   /* XXX: this should return type name for type names.  The table of
+      types should be constructed and inspected on the fly.  */
+
   yylval->ast = pcl_ast_get_identifier (yytext);
   return PCL_TOK_ID;
 }
@@ -123,8 +124,6 @@ types should be constructed and inspected on the fly.  */
   pcl_atoi (yytext, &integer_value);
 
   yylval->ast = pcl_ast_make_integer (integer_value);
-  yylval->ast->integer->value = integer_value;
-
   return PCL_TOK_INT;    
 }
 

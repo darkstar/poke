@@ -120,7 +120,12 @@ enumerator:
 
 constant_expression:
 	  conditional_expression
-		{ PCL_AST_EXPR_CONST_P ($1) = 1; $$ = $1; }
+          	{
+                  if (PCL_AST_LITERAL_P ($1) == 1)
+                    pcl_tab_error ("expected constant expression");
+
+                  $$ = $1;
+                }
         ;
 
 expression:
@@ -136,24 +141,23 @@ assignment_expression:
         ;
 
 assignment_operator:
-	  '='
-		{ $$ = PCL_AST_OP_ASSIGN; }
-        | PCL_TOK_MULA
-        | PCL_TOK_DIVA
-        | PCL_TOK_MODA
-        | PCL_TOK_ADDA
-        | PCL_TOK_SUBA
-        | PCL_TOK_SLA
-        | PCL_TOK_SRA
-        | PCL_TOK_BANDA
-        | PCL_TOK_XORA
-        | PCL_TOK_IORA
+	'='		{ $$ = PCL_AST_OP_ASSIGN; }
+	| PCL_TOK_MULA	{ $$ = PCL_AST_OP_MULA; }
+	| PCL_TOK_DIVA	{ $$ = PCL_AST_OP_DIVA; }
+	| PCL_TOK_MODA	{ $$ = PCL_AST_OP_MODA; }
+	| PCL_TOK_ADDA	{ $$ = PCL_AST_OP_ADDA; }
+	| PCL_TOK_SUBA	{ $$ = PCL_AST_OP_SUBA; }
+	| PCL_TOK_SLA	{ $$ = PCL_AST_OP_SLA; }
+	| PCL_TOK_SRA	{ $$ = PCL_AST_OP_SRA; }
+	| PCL_TOK_BANDA	{ $$ = PCL_AST_OP_BANDA; }
+	| PCL_TOK_XORA	{ $$ = PCL_AST_OP_XORA; }
+	| PCL_TOK_IORA	{ $$ = PCL_AST_OP_IORA; }
         ;
 
 conditional_expression:
 	  logical_or_expression
 	| logical_or_expression '?' expression ':' conditional_expression
-          	{ $$ = pcl_ast_make_cond_expr ($1, $3, $5); }
+          	{ $$ = pcl_ast_make_cond_exp ($1, $3, $5); }
 	;
 
 logical_or_expression:
@@ -242,7 +246,7 @@ unary_expression:
 		{ $$ = pcl_ast_make_unary_exp ($1, $2); }
         | PCL_TOK_SIZEOF unary_expression
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $2); }
-        | PCL_TOK_SIZEOF '(' type_name ')'
+        | PCL_TOK_SIZEOF '(' PCL_TOK_TYPENAME ')'
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $3); }
         ;
 
@@ -277,7 +281,7 @@ primary_expression:
         | PCL_TOK_INT
         | PCL_TOK_STR
         | '(' expression ')'
-		{ $$ = $1; }
+		{ $$ = $2; }
 	;
 
 %%
