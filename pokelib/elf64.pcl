@@ -46,4 +46,4 @@ struct elf_sym
   elf_xword st_size	<<<Size of the associated symbol>>>;
 };
 
-include elf.pcl;
+#include "elf.pcl"

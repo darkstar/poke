@@ -44,4 +44,4 @@ struct elf_sym
   elf_half st_shndx;
 };
 
-include elf.pcl;
+#include "elf.pcl"

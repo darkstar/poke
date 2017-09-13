@@ -40,6 +40,8 @@
 #include <pcl-ast.h>
 #include <pcl-tab.h>
 
+/* Convert the printed representation of a number to an integer.  */
+  
 static int
 pcl_atoi (const char *str, int *number)
 {
@@ -61,6 +63,41 @@ pcl_atoi (const char *str, int *number)
   return res;
 }
 
+/* Get a docstring literal, remove delimiters, format it according to
+   the rules documented below, and return it on a freshly allocated
+   string.  */
+
+static char *
+make_docstring (const char *str)
+{
+  /* Ok, these are the rules for docstrings:
+
+   - Docstrings are delimited by <<< and >>> sequences.
+   - Docstrings can't be nested.
+   - Newlines can be part of docstrings.
+   - Blank lines immediately following <<< are removed.
+   - Black lines immediately preceding >>> are removed.
+   - Any indentation in the first line of the docstring is removed.
+   - An uniform amount of indentation from the second and further
+     lines of a docstring, equal to the minimum indentation of all
+     non-blank lines after the first line, is removed.
+   - Relative indentation of the second and later lines in the
+     docstring is retained.
+   
+     Note STR is guaranteed to be a properly formatted docstring.
+   */
+
+
+  size_t len = strlen (str) - 6 + 1;
+  char *dstring = xmalloc (len);
+  
+  strncmp (dstring, str + 3, len - 1);
+  dstring [len] = '\0';
+
+  return dstring;
+}
+
+ 
 %}
 
 NEWLINE            \n
@@ -92,7 +129,13 @@ D [0-9]
 "lsb"		{ return PCL_TOK_LSB; }
 "msb"		{ return PCL_TOK_MSB; }
 
-{DOCSTR}	{ return PCL_TOK_DOCSTR; }
+{DOCSTR} {
+   char *dstring = make_docstring (yytext);
+
+   yylval->ast = pcl_ast_make_string (dstring);
+   free (dstring);
+   return PCL_TOK_DOCSTR;
+}
 
 "*="		{ return PCL_TOK_MULA; }
 "/="		{ return PCL_TOK_DIVA; }
@@ -151,25 +194,3 @@ D [0-9]
 . { return PCL_TOK_ERR; }
 
 %%
-
-/* Handling of docstrings.  These are the rules:
-
-   - Docstrings are delimited by <<< and >>> sequences.
-
-   - Docstrings can't be nested.
-
-   - Newlines can be part of docstrings.
-
-   - Blank lines immediately following <<< are removed.
-
-   - Black lines immediately preceding >>> are removed.
- 
-   - Any indentation in the first line of the docstring is removed.
-
-   - An uniform amount of indentation from the second and further
-     lines of a docstring, equal to the minimum indentation of all
-     non-blank lines after the first line, is removed.
-
-   - Relative indentation of the second and later lines in the
-     docstring is retained.
- */
