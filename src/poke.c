@@ -182,10 +182,47 @@ repl ()
       if (line && *line)
         add_history (line);
 #endif      
-      
+
       free (line);
     }
 }
+
+/*
+ * yyscan_t scanner;
+ *
+ * yylex_init ( &scanner ); | yylex_init_extra ( YY_EXTRA_TYPE, &scanner );
+ * yyset_extra ( YY_EXTRA_TYPE, & scanner );
+ * YY_EXTRA_TYPE yyget_extra ( & scanner );
+ * yylex ( scanner );
+ *  0 => success
+ *  ENOMEM
+ *  EINVAL
+ * yylex_destroy ( &scanner );
+ *
+ * yyextra stores user-specific data.
+ *
+ * Parser:
+ *
+ *  int yyparse (void); (or pcl_tab_parse)
+ *
+ *    0 -> parsing susccessful.
+ *    1 -> syntax error, or YYABORT.
+ *    2 -> memory exhaustion.
+ *
+ * YYACCEPT - return immediately returning 0
+ * YYABORT - return immediately returning 1
+ *
+ * %parse-param: make arguments available in yyparse, and thus
+ *  in grammar actions.
+ *
+ *  yypush_parse () -> returns YYPUSH_MORE if more input is required
+ *  to finish parsing the grammar.
+ *  yypull_parse () -> parse the rest of the input stream.
+ */
+
+#include "pcl-ast.h"
+#include "pcl-tab.h"
+#include "pcl-lex.h"
 
 int
 main (int argc, char *argv[])
@@ -197,8 +234,22 @@ main (int argc, char *argv[])
   poke_interactive_p = isatty (fileno (stdin));
 
   /* Enter the REPL.  */
-  if (poke_interactive_p)
-    return repl ();
+  //  if (poke_interactive_p)
+  //    return repl ();
+
+  void *pcl_scanner;
+  void *pcl_parser;
+
+  pcl_tab_lex_init (&pcl_scanner);
+  /*  pcl_tab_set_extra (pcl_parser, pcl_scanner); */
+  pcl_tab_set_in (stdin, pcl_scanner);
+  int ret = pcl_tab_parse (pcl_scanner);
+  if (ret == 1)
+    printf ("SYNTAX ERROR\n");
+  else if (ret == 2)
+    printf ("MEMORY EXHAUSTION\n");
+
+  pcl_tab_lex_destroy (pcl_scanner);
   
   return 0;
 }

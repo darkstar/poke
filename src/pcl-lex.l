@@ -20,15 +20,15 @@
 /* Automake needs this.  */
 %option outfile="lex.yy.c"
 %option prefix="pcl_tab_"
+%option warn nodefault
 %option pointer
 %option noyywrap
 %option reentrant
 %option bison-bridge
-%option extra-type="void *"
-
+   /*%option extra-type="void *"*/
 %option header-file="pcl-lex.h"
-%option nounput
-%option noinput
+%option bison-locations
+
 %top {
    /* This code goes at the "top" of the generated file.  */
    #include <config.h>
@@ -158,6 +158,34 @@ D [0-9]
 ">>"		{ return PCL_TOK_SR; }
 "++"		{ return PCL_TOK_INC; }
 "--"		{ return PCL_TOK_DEC; }
+
+"["		{ return '['; }
+"]"		{ return ']'; }
+"("		{ return '('; }
+")"		{ return ')'; }
+"{"		{ return '{'; }
+"}"		{ return '}'; }
+","		{ return ','; }
+"="		{ return '='; }
+"?"		{ return '?'; }
+":"		{ return ':'; }
+";"		{ return ';'; }
+"|"		{ return '|'; }
+"^"		{ return '^'; }
+"&"		{ return '&'; }
+"<"		{ return '<'; }
+">"		{ return '>'; }
+"+"		{ return '+'; }
+"-"		{ return '-'; }
+"*"		{ return '*'; }
+"/"		{ return '/'; }
+"%"		{ return '%'; }
+"!"		{ return '!'; }
+"~"		{ return '~'; }
+"."		{ return '.'; }
+
+"s"		{ return 's'; }
+"u"		{ return 'u'; }
 
 {L}({L}|{D})* {
    pcl_ast type;
