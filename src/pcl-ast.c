@@ -198,6 +198,7 @@ pcl_ast_make_integer (uint64_t value)
 
   PCL_AST_INTEGER_VALUE (new) = value;
   PCL_AST_LITERAL_P (new) = 1;
+
   return new;
 }
 
@@ -208,9 +209,28 @@ pcl_ast_make_string (const char *str)
 {
   pcl_ast new = pcl_ast_make_node (PCL_AST_STRING);
 
+  assert (str);
+  
   PCL_AST_STRING_POINTER (new) = strdup (str);
   PCL_AST_STRING_LENGTH (new) = strlen (str);
+
   return new;
+}
+
+/* Build and return an AST node for a doc string.  */
+
+pcl_ast
+pcl_ast_make_doc_string (const char *str, pcl_ast entity)
+{
+  pcl_ast doc_string = pcl_ast_make_node (PCL_AST_DOC_STRING);
+
+  assert (str);
+
+  PCL_AST_DOC_STRING_POINTER (doc_string) = strdup (str);
+  PCL_AST_DOC_STRING_LENGTH (doc_string) = strlen (str);
+  PCL_AST_DOC_STRING_ENTITY (doc_string) = entity;
+
+  return doc_string;
 }
 
 /* Build and return an AST node for an enumerator.  */

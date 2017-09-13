@@ -132,7 +132,7 @@ D [0-9]
 {DOCSTR} {
    char *dstring = make_docstring (yytext);
 
-   yylval->ast = pcl_ast_make_string (dstring);
+   yylval->ast = pcl_ast_make_doc_string (dstring, NULL);
    free (dstring);
    return PCL_TOK_DOCSTR;
 }

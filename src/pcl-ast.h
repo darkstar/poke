@@ -39,6 +39,7 @@ enum pcl_ast_code
   PCL_AST_COND_EXP,
   PCL_AST_INTEGER,
   PCL_AST_STRING,
+  PCL_AST_DOC_STRING,
   PCL_AST_STRUCT,
   PCL_AST_FIELD,
   PCL_AST_COMPOUND,
@@ -157,6 +158,18 @@ struct pcl_ast_string
   struct pcl_ast_common common;
   size_t length;
   char *pointer;
+};
+
+#define PCL_AST_DOC_STRING_LENGTH(AST) ((AST)->doc_string.length)
+#define PCL_AST_DOC_STRING_POINTER(AST) ((AST)->doc_string.pointer)
+#define PCL_AST_DOC_STRING_ENTITY(AST) ((AST)->doc_string.entity)
+
+struct pcl_ast_doc_string
+{
+  struct pcl_ast_common common;
+  size_t length;
+  char *pointer;
+  union pcl_ast_s *entity;
 };
 
 #define PCL_AST_EXP_CODE(AST) ((AST)->exp.code)
@@ -327,6 +340,7 @@ union pcl_ast_s
   struct pcl_ast_identifier identifier;
   struct pcl_ast_integer integer;
   struct pcl_ast_string string;
+  struct pcl_ast_doc_string doc_string;
   struct pcl_ast_exp exp;
   struct pcl_ast_cond_exp cond_exp;
   struct pcl_ast_array_ref aref;
@@ -352,6 +366,7 @@ pcl_ast pcl_ast_get_type (const char *str);
 
 pcl_ast pcl_ast_make_integer (uint64_t value);
 pcl_ast pcl_ast_make_string (const char *str);
+pcl_ast pcl_ast_make_doc_string (const char *str, pcl_ast entity);
 pcl_ast pcl_ast_make_enumerator (pcl_ast identifier, pcl_ast value,
                                  pcl_ast docstr);
 pcl_ast pcl_ast_make_cond_exp (pcl_ast cond, pcl_ast thenexp,

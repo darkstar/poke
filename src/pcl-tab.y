@@ -356,6 +356,7 @@ enum_specifier:
 	| PCL_TOK_ENUM PCL_TOK_ID PCL_TOK_DOCSTR '{' enumerator_list '}'
 		{
                   $$ = pcl_ast_make_enum ($2, $5, $3);
+                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -363,6 +364,7 @@ enum_specifier:
         | PCL_TOK_ENUM PCL_TOK_DOCSTR PCL_TOK_ID '{' enumerator_list '}'
 		{
                   $$ = pcl_ast_make_enum ($3, $5, $2);
+                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -370,6 +372,7 @@ enum_specifier:
         | PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}' PCL_TOK_DOCSTR
 		{
                   $$ = pcl_ast_make_enum ($2, $4, $6);
+                  PCL_AST_DOC_STRING_ENTITY ($6) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -377,6 +380,7 @@ enum_specifier:
         | PCL_TOK_DOCSTR PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}'
 		{
                   $$ = pcl_ast_make_enum ($3, $5, $1);
+                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -393,15 +397,27 @@ enumerator:
 	  PCL_TOK_ID
                 { $$ = pcl_ast_make_enumerator ($1, NULL, NULL); }
 	| PCL_TOK_ID PCL_TOK_DOCSTR
-                { $$ = pcl_ast_make_enumerator ($1, NULL, $2); }
+                {
+                  $$ = pcl_ast_make_enumerator ($1, NULL, $2);
+                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
+                }
         | PCL_TOK_ID '=' constant_expression
                 { $$ = pcl_ast_make_enumerator ($1, $3, NULL); }
         | PCL_TOK_ID '=' PCL_TOK_DOCSTR constant_expression
-        	{ $$ = pcl_ast_make_enumerator ($1, $4, $3); }
+        	{
+                  $$ = pcl_ast_make_enumerator ($1, $4, $3);
+                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
+                }
         | PCL_TOK_ID '=' constant_expression PCL_TOK_DOCSTR
-	        { $$ = pcl_ast_make_enumerator ($1, $3, $4); }
+	        {
+                  $$ = pcl_ast_make_enumerator ($1, $3, $4);
+                  PCL_AST_DOC_STRING_ENTITY ($4) = $$;
+                }
         | PCL_TOK_DOCSTR PCL_TOK_ID '=' constant_expression
-        	{ $$ = pcl_ast_make_enumerator ($2, $4, $1); }
+        	{
+                  $$ = pcl_ast_make_enumerator ($2, $4, $1);
+                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
+                }
 	;
 
 /*
@@ -420,6 +436,7 @@ struct_specifier:
 	| PCL_TOK_STRUCT PCL_TOK_ID PCL_TOK_DOCSTR '{' struct_declaration_list '}'
           	{
                   $$ = pcl_ast_make_struct ($2, $5, $3, pcl_ast_default_endian ());
+                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -427,6 +444,7 @@ struct_specifier:
         | PCL_TOK_STRUCT PCL_TOK_DOCSTR PCL_TOK_ID '{' struct_declaration_list '}'
           	{
                   $$ = pcl_ast_make_struct ($3, $5, $2, pcl_ast_default_endian ());
+                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -434,6 +452,7 @@ struct_specifier:
         | PCL_TOK_STRUCT PCL_TOK_ID '{' struct_declaration_list '}' PCL_TOK_DOCSTR
           	{
                   $$ = pcl_ast_make_struct ($2, $4, $6, pcl_ast_default_endian ());
+                  PCL_AST_DOC_STRING_ENTITY ($6) = $$;
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
@@ -467,18 +486,21 @@ struct_declaration:
                   PCL_AST_FIELD_TYPE ($2) = $1;
                   PCL_AST_FIELD_DOCSTR ($2) = $3;
                   $$ = $2;
+                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                 }
         | type_specifier PCL_TOK_DOCSTR struct_field ';'
         	{
                   PCL_AST_FIELD_TYPE ($3) = $1;
                   PCL_AST_FIELD_DOCSTR ($3) = $2;
                   $$ = $3;
+                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                 }
         | PCL_TOK_DOCSTR type_specifier struct_field ';'
         	{
                   PCL_AST_FIELD_TYPE ($3) = $2;
                   PCL_AST_FIELD_DOCSTR ($3) = $1;
                   $$ = $3;
+                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
                 }
         ;
 
