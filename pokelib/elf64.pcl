@@ -16,33 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-typedef unsigned xword elf_addr <<Unsigned program address>>; /* XXX: alignment? */
-typedef unsigned xword elf_off  <<Unsigned file offset>>;
-typedef unsigned half elf_half <<Unsigned medium integer>>;
-typedef unsigned word elf_word <<Unsigned integer>>;
-typedef unsigned xword elf_xword <<Unsigned long integer>>;
-typedef word elf_sword         <<Signed integer>>;
-typedef sword elf_sxword <<Signed long integer>>;
+typedef unsigned xword elf_addr <<<Unsigned program address>>>;
+typedef unsigned xword elf_off  <<<Unsigned file offset>>>;
+typedef unsigned half elf_half <<<Unsigned medium integer>>>;
+typedef unsigned word elf_word <<<Unsigned integer>>>;
+typedef unsigned xword elf_xword <<<Unsigned long integer>>>;
+typedef word elf_sword         <<<Signed integer>>>;
+typedef sword elf_sxword <<<Signed long integer>>>;
 
 typedef word elf_r_sym;
 typedef word elf_r_type;
 
 struct elf_sym
 {
-  elf_word st_name	<<String table index for the symbol>>
-                        <<name, or 0 if the symbol has no name>>;
+  <<< String table index for the symbol name, or 0 if the
+      symbol has no name >>>
+  elf_word st_name;
 
   info_start = .;
-  ubyte st_info;	<<Symbol's type and binding attributes>>
+  ubyte st_info;	<<<Symbol's type and binding attributes>>>
 
   . = info_start;
-  nibble st_bind	<<Symbol's binding>>;
-  nibble st_type	<<Symbol's type>>;
+  nibble st_bind	<<<Symbol's binding>>>;
+  nibble st_type	<<<Symbol's type>>>;
 
   ubyte st_other;
   elf_half st_shndx;
-  elf_addr st_value	<<Value of the associated symbol>>;
-  elf_xword st_size	<<Size of the associated symbol>>;
+  elf_addr st_value	<<<Value of the associated symbol>>>;
+  elf_xword st_size	<<<Size of the associated symbol>>>;
 };
 
 include elf.pcl;

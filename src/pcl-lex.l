@@ -69,6 +69,7 @@ DIGIT              [0-9]
 LETTER             [a-zA-Z]
 FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
 STRING             \"([^"]|\\(.|\n))*\"
+DOCSTR		   <<<.*>>>
 
 L [a-zA-Z_]
 D [0-9]
@@ -90,6 +91,8 @@ D [0-9]
 
 "lsb"		{ return PCL_TOK_LSB; }
 "msb"		{ return PCL_TOK_MSB; }
+
+{DOCSTR}	{ return PCL_TOK_DOCSTR; }
 
 "*="		{ return PCL_TOK_MULA; }
 "/="		{ return PCL_TOK_DIVA; }
@@ -149,3 +152,24 @@ D [0-9]
 
 %%
 
+/* Handling of docstrings.  These are the rules:
+
+   - Docstrings are delimited by <<< and >>> sequences.
+
+   - Docstrings can't be nested.
+
+   - Newlines can be part of docstrings.
+
+   - Blank lines immediately following <<< are removed.
+
+   - Black lines immediately preceding >>> are removed.
+ 
+   - Any indentation in the first line of the docstring is removed.
+
+   - An uniform amount of indentation from the second and further
+     lines of a docstring, equal to the minimum indentation of all
+     non-blank lines after the first line, is removed.
+
+   - Relative indentation of the second and later lines in the
+     docstring is retained.
+ */

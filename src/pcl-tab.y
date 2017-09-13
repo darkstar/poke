@@ -374,6 +374,13 @@ enum_specifier:
                                              $$) == NULL)
                     pcl_tab_error ("Duplicated type.");
                 }
+        | PCL_TOK_DOCSTR PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}'
+		{
+                  $$ = pcl_ast_make_enum ($3, $5, $1);
+                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
+                                             $$) == NULL)
+                    pcl_tab_error ("Duplicated type.");
+                }        
         ;
 
 enumerator_list:
@@ -393,6 +400,8 @@ enumerator:
         	{ $$ = pcl_ast_make_enumerator ($1, $4, $3); }
         | PCL_TOK_ID '=' constant_expression PCL_TOK_DOCSTR
 	        { $$ = pcl_ast_make_enumerator ($1, $3, $4); }
+        | PCL_TOK_DOCSTR PCL_TOK_ID '=' constant_expression
+        	{ $$ = pcl_ast_make_enumerator ($2, $4, $1); }
 	;
 
 /*
@@ -463,6 +472,12 @@ struct_declaration:
         	{
                   PCL_AST_FIELD_TYPE ($3) = $1;
                   PCL_AST_FIELD_DOCSTR ($3) = $2;
+                  $$ = $3;
+                }
+        | PCL_TOK_DOCSTR type_specifier struct_field ';'
+        	{
+                  PCL_AST_FIELD_TYPE ($3) = $2;
+                  PCL_AST_FIELD_DOCSTR ($3) = $1;
                   $$ = $3;
                 }
         ;
