@@ -18,6 +18,10 @@
 
 #include <config.h>
 
+#ifdef PCL_DEBUG
+# include <stdio.h>
+#endif
+
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -198,6 +202,7 @@ pcl_ast_make_integer (uint64_t value)
 
   PCL_AST_INTEGER_VALUE (new) = value;
   PCL_AST_LITERAL_P (new) = 1;
+  
 
   return new;
 }
@@ -213,6 +218,7 @@ pcl_ast_make_string (const char *str)
   
   PCL_AST_STRING_POINTER (new) = strdup (str);
   PCL_AST_STRING_LENGTH (new) = strlen (str);
+  PCL_AST_LITERAL_P (new) = 1;
 
   return new;
 }
@@ -423,3 +429,142 @@ pcl_ast_make_program (void)
   return program;
 }
 
+#ifdef PCL_DEBUG
+
+void
+pcl_ast_print_declaration (pcl_ast decl, int indent)
+{
+
+  printf ("DECLARATION:: ");
+}
+
+void
+pcl_ast_print (pcl_ast ast, int indent)
+{
+  pcl_ast child;
+  int i;
+
+#define IPRINTF(...)                            \
+  do                                            \
+    {                                           \
+      int i;                                    \
+      for (i = 0; i < indent; i++)              \
+        printf (" ");                           \
+      printf (__VA_ARGS__);                     \
+    } while (0)
+
+  if (ast == NULL)
+    {
+      IPRINTF ("NULL::\n");
+      return;
+    }
+  
+  switch (PCL_AST_CODE (ast))
+    {
+    case PCL_AST_PROGRAM:
+      IPRINTF ("PROGRAM::\n");
+      for (child = PCL_AST_PROGRAM_DECLARATIONS (ast);
+           child;
+           child = PCL_AST_CHAIN (child))
+        pcl_ast_print (child, indent + 2);
+      break;
+
+    case PCL_AST_IDENTIFIER:
+      IPRINTF ("IDENTIFIER:: length=%d pointer=0x%lx",
+               PCL_AST_IDENTIFIER_LENGTH (ast),
+               PCL_AST_IDENTIFIER_POINTER (ast));
+      if (PCL_AST_IDENTIFIER_POINTER (ast))
+        printf (" value='%s'",
+                PCL_AST_IDENTIFIER_POINTER (ast));
+      printf ("\n");
+      break;
+
+    case PCL_AST_INTEGER:
+      IPRINTF ("INTEGER:: value=%d\n",
+              PCL_AST_INTEGER_VALUE (ast));
+      break;
+
+    case PCL_AST_STRING:
+      IPRINTF ("STRING:: length=%d pointer=0x%lx",
+               PCL_AST_STRING_LENGTH (ast),
+               PCL_AST_STRING_POINTER (ast));
+      if (PCL_AST_STRING_POINTER (ast))
+        printf (" value='%s'",
+                PCL_AST_STRING_POINTER (ast));
+      printf ("\n");
+      break;
+
+    case PCL_AST_DOC_STRING:
+      IPRINTF ("DOCSTR:: length=%d pointer=0x%lx entity=0x%lx",
+               PCL_AST_DOC_STRING_LENGTH (ast),
+               PCL_AST_DOC_STRING_POINTER (ast),
+               PCL_AST_DOC_STRING_ENTITY (ast));
+      if (PCL_AST_DOC_STRING_POINTER (ast))
+        printf (" value='%s'",
+                PCL_AST_DOC_STRING_POINTER (ast));
+      printf ("\n");
+      break;
+
+    case PCL_AST_EXP:
+      {
+        /* XXX: replace this with an #include hack.  */
+        static char *opcodes[] =
+          { "OR", "IOR", "XOR", "AND", "BAND", "EQ", "NE",
+            "SL", "SR", "ADD", "SUB", "MUL", "DIV", "MOD",
+            "LT", "GT", "LE", "GE", "INC", "DEC", "SIZEOF",
+            "ADDRESS", "POS", "NEG", "BNOT", "NOT", "ASSIGN",
+            "MULA", "DIVA", "MODA", "ADDA", "SUBA", "SLA",
+            "SRA", "BANDA", "XORA", "IORA"
+          };
+
+        IPRINTF ("EXPRESSION:: %s numops=%d\n",
+                 PCL_AST_EXP_CODE (ast) <= PCL_MAX_OPERATOR
+                 ? opcodes[PCL_AST_EXP_CODE (ast)] : "unknown",
+                 PCL_AST_EXP_NUMOPS (ast));
+        for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); i++)
+          pcl_ast_print (PCL_AST_EXP_OPERAND (ast, i),
+                         indent + 2);
+        break;
+      }
+
+    case PCL_AST_COND_EXP:
+      IPRINTF ("COND_EXPRESSION::\n");
+      IPRINTF ("condition:\n");
+      pcl_ast_print (PCL_AST_COND_EXP_COND (ast), indent + 2);
+      IPRINTF ("thenexp:\n");
+      pcl_ast_print (PCL_AST_COND_EXP_THENEXP (ast), indent + 2);
+      IPRINTF ("elseexp:\n");
+      pcl_ast_print (PCL_AST_COND_EXP_ELSEEXP (ast), indent + 2);
+      break;
+
+    case PCL_AST_ENUMERATOR:
+      IPRINTF ("ENUMERATOR::\n");
+      IPRINTF ("identifier:\n");
+      pcl_ast_print (PCL_AST_ENUMERATOR_IDENTIFIER (ast), indent + 2);
+      IPRINTF ("value:\n");
+      pcl_ast_print (PCL_AST_ENUMERATOR_VALUE (ast), indent + 2);
+      IPRINTF ("docstr:\n");
+      pcl_ast_print (PCL_AST_ENUMERATOR_DOCSTR (ast), indent + 2);
+      break;
+
+    case PCL_AST_ENUM:
+      IPRINTF ("ENUM::\n");
+      IPRINTF ("tag:\n");
+      pcl_ast_print (PCL_AST_ENUM_TAG (ast), indent + 2);
+      IPRINTF ("values:\n");
+      for (child = PCL_AST_ENUM_VALUES (ast);
+           child;
+           child = PCL_AST_CHAIN (child))
+        pcl_ast_print (child, indent + 2);
+      IPRINTF ("docstr:\n");
+      pcl_ast_print (PCL_AST_ENUM_DOCSTR (ast), indent + 2);
+      break;
+
+
+    default:
+      IPRINTF ("UNKNOWN:: code=%d\n", PCL_AST_CODE (ast));
+      break;
+    }
+}
+
+#endif /* PCL_DEBUG */

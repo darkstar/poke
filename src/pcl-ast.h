@@ -93,7 +93,8 @@ enum pcl_ast_op
   PCL_AST_OP_SRA,
   PCL_AST_OP_BANDA,
   PCL_AST_OP_XORA,
-  PCL_AST_OP_IORA
+  PCL_AST_OP_IORA,
+  PCL_MAX_OPERATOR = PCL_AST_OP_IORA
 };
 
 enum pcl_ast_endian
@@ -387,5 +388,10 @@ pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
 pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
 pcl_ast pcl_ast_make_program (void);
 
+#ifdef PCL_DEBUG
+
+void pcl_ast_print (pcl_ast ast, int indent);
+
+#endif /* PCL_DEBUG */
 
 #endif /* ! PCL_AST_H */

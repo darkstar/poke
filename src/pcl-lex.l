@@ -25,9 +25,9 @@
 %option noyywrap
 %option reentrant
 %option bison-bridge
-   /*%option extra-type="void *"*/
 %option header-file="pcl-lex.h"
 %option bison-locations
+%option yylineno   
 
 %top {
    /* This code goes at the "top" of the generated file.  */
@@ -39,6 +39,8 @@
 #include <xalloc.h>
 #include <pcl-ast.h>
 #include <pcl-tab.h>
+
+#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;
 
 /* Convert the printed representation of a number to an integer.  */
   
@@ -91,7 +93,7 @@ make_docstring (const char *str)
   size_t len = strlen (str) - 6 + 1;
   char *dstring = xmalloc (len);
   
-  strncmp (dstring, str + 3, len - 1);
+  strncpy (dstring, str + 3, len - 1);
   dstring [len] = '\0';
 
   return dstring;

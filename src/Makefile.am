@@ -24,7 +24,7 @@ BUILT_SOURCES = pcl-tab.h pcl-lex.c
 AM_YFLAGS = -d
 AM_LFLAGS = -d
 
-poke_CPPFLAGS = -I$(top_srcdir)/lib
+poke_CPPFLAGS = -I$(top_srcdir)/lib -DPCL_DEBUG
 poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE)

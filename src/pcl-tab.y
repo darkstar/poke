@@ -63,7 +63,7 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
 {
   /* yynerrs is a local variable of yyparse that contains the number of
      syntax errors reported so far.  */
-  fprintf (stderr, "%d: %s\n", llocp->first_line, err);
+  fprintf (stderr, "stdin: %d: %s\n", llocp->first_line, err);
 }
  
 %}
@@ -129,26 +129,30 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
 %type <ast> type_specifier declaration declaration_specifiers
 %type <ast> typedef_specifier struct_specifier enum_specifier
 %type <ast> struct_declaration_list struct_declaration_with_endian
-%type <ast> struct_declaration struct_field program
+%type <ast> struct_declaration struct_field declaration_list program
 
 %start program
 
 %% /* The grammar follows.  */
 
-program:
-	  declaration
+program: declaration_list
           	{
                   $$ = pcl_ast_make_program ();
                   PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
-                }
-        | program declaration
-        	{
-                  PCL_AST_PROGRAM_DECLARATIONS ($1)
-                    = pcl_ast_chainon (PCL_AST_PROGRAM_DECLARATIONS ($1),
-                                       $2);
-                  $$ = $1;
+
+#ifdef PCL_DEBUG
+                  pcl_ast_print ($$, 0);
+#endif                  
                 }
         ;
+
+declaration_list:
+	  declaration
+        | declaration_list declaration
+		{
+                  $$ = pcl_ast_chainon ($1, $2);
+                }
+	;
 
 /*
  * Expressions.
@@ -157,7 +161,7 @@ program:
 constant_expression:
 	  conditional_expression
           	{
-                  if (PCL_AST_LITERAL_P ($1) == 1)
+                  if (!PCL_AST_LITERAL_P ($1))
                     {
                       pcl_tab_error (&@1, NULL, "expected constant expression");
                       YYERROR;
