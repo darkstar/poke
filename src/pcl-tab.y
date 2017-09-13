@@ -108,8 +108,18 @@ pcl_tab_error (const char *err)
 %% /* The grammar follows.  */
 
 program:
-	  declaration		{ $$ = pcl_ast_make_program (); }
-        | program declaration	{ $$ = pcl_ast_chainon ($1, $2); }
+	  declaration
+          	{
+                  $$ = pcl_ast_make_program ();
+                  PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
+                }
+        | program declaration
+        	{
+                  PCL_AST_PROGRAM_DECLARATIONS ($1)
+                    = pcl_ast_chainon (PCL_AST_PROGRAM_DECLARATIONS ($1),
+                                       $2);
+                  $$ = $1;
+                }
         ;
 
 /*

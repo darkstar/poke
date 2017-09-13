@@ -124,7 +124,7 @@ struct pcl_ast_common
   unsigned literal_p : 1;
 };
 
-#define PCL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->declarations)
+#define PCL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->program.declarations)
 
 struct pcl_ast_program
 {
@@ -332,6 +332,7 @@ struct pcl_ast_type
 union pcl_ast_s
 {
   struct pcl_ast_common common; /* This field _must_ appear first.  */
+  struct pcl_ast_program program;
   struct pcl_ast_struct strct;
   struct pcl_ast_field field;
   struct pcl_ast_stmt stmt;
