@@ -539,7 +539,10 @@ pcl_ast_make_program (void)
     {                                           \
       int i;                                    \
       for (i = 0; i < indent; i++)              \
-        printf (" ");                           \
+        if (indent >= 2 && i % 2 == 0)          \
+          printf ("|");                         \
+        else                                    \
+          printf (" ");                         \
       printf (__VA_ARGS__);                     \
     } while (0)
 
