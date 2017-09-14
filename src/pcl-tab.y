@@ -65,6 +65,52 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
      syntax errors reported so far.  */
   fprintf (stderr, "stdin: %d: %s\n", llocp->first_line, err);
 }
+
+/* The following functions are used in the actions in several grammar
+   rules below.  This is to avoid replicating code in situations where
+   the difference between rules are just a different permutation of
+   its elements.
+
+   All these functions return 1 if the action is executed
+   successfully, or 0 if a syntax error should be raised at the
+   grammar rule invoking the function.  */
+
+static int
+enum_specifier_action (pcl_ast *enumeration,
+                       pcl_ast type, YYLTYPE *loc_type,
+                       pcl_ast tag, YYLTYPE *loc_tag,
+                       pcl_ast enumerators, YYLTYPE *loc_enumerators,
+                       pcl_ast docstr, YYLTYPE *loc_docstr)
+{
+  *enumeration = pcl_ast_make_enum (type, tag, enumerators, docstr);
+  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER (tag),
+                             *enumeration) == NULL)
+    {
+      pcl_tab_error (loc_tag, NULL, "enum already defined");
+      return 0;
+    }
+
+  return 1;
+}
+
+static int
+struct_specifier_action (pcl_ast *strct,
+                         pcl_ast tag, YYLTYPE *loc_tag,
+                         pcl_ast fields, YYLTYPE *loc_fields,
+                         pcl_ast docstr, YYLTYPE *loc_docstr)
+{
+  *strct = pcl_ast_make_struct (tag, fields, docstr,
+                                pcl_ast_default_endian ());
+
+  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER (tag),
+                             *strct) == NULL)
+    {
+      pcl_tab_error (loc_tag, NULL, "type already defined");
+      return 0;
+    }
+
+  return 1;
+}
  
 %}
 
@@ -73,47 +119,47 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
   enum pcl_ast_op opcode;
 }
 
-%token <ast> PCL_TOK_INT
-%token <ast> PCL_TOK_STR
-%token <ast> PCL_TOK_ID
-%token <ast> PCL_TOK_TYPENAME
-%token <ast> PCL_TOK_DOCSTR
+%token <ast> INT
+%token <ast> STR
+%token <ast> IDENTIFIER
+%token <ast> TYPENAME
+%token <ast> DOCSTR
 
-%token PCL_TOK_ENUM
-%token PCL_TOK_STRUCT
-%token PCL_TOK_TYPEDEF
-%token PCL_TOK_BREAK
-%token PCL_TOK_CONST
-%token PCL_TOK_CONTINUE
-%token PCL_TOK_ELSE
-%token PCL_TOK_FOR
-%token PCL_TOK_IF
-%token PCL_TOK_SIZEOF
-%token PCL_TOK_ERR
+%token ENUM
+%token STRUCT
+%token TYPEDEF
+%token BREAK
+%token CONST
+%token CONTINUE
+%token ELSE
+%token FOR
+%token IF
+%token SIZEOF
+%token ERR
 
-%token PCL_TOK_AND
-%token PCL_TOK_OR
-%token PCL_TOK_LE
-%token PCL_TOK_GE
-%token PCL_TOK_INC
-%token PCL_TOK_DEC
-%token PCL_TOK_SL
-%token PCL_TOK_SR
-%token PCL_TOK_EQ
-%token PCL_TOK_NE
+%token AND
+%token OR
+%token LE
+%token GE
+%token INC
+%token DEC
+%token SL
+%token SR
+%token EQ
+%token NE
 
-%token <opcode> PCL_TOK_MULA
-%token <opcode> PCL_TOK_DIVA
-%token <opcode> PCL_TOK_MODA
-%token <opcode> PCL_TOK_ADDA
-%token <opcode> PCL_TOK_SUBA
-%token <opcode> PCL_TOK_SLA
-%token <opcode> PCL_TOK_SRA
-%token <opcode> PCL_TOK_BANDA
-%token <opcode> PCL_TOK_XORA
-%token <opcode> PCL_TOK_IORA
+%token <opcode> MULA
+%token <opcode> DIVA
+%token <opcode> MODA
+%token <opcode> ADDA
+%token <opcode> SUBA
+%token <opcode> SLA
+%token <opcode> SRA
+%token <opcode> BANDA
+%token <opcode> XORA
+%token <opcode> IORA
 
-%token PCL_TOK_MSB PCL_TOK_LSB
+%token MSB LSB
 
 %type <opcode> unary_operator assignment_operator
 
@@ -125,7 +171,7 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
 %type <ast> shift_expression additive_expression
 %type <ast> multiplicative_expression unary_expression
 %type <ast> postfix_expression primary_expression
-%type <ast> expression assignment_expression
+%type <ast> expression assignment_expression simple_type_specifier
 %type <ast> type_specifier declaration declaration_specifiers
 %type <ast> typedef_specifier struct_specifier enum_specifier
 %type <ast> struct_declaration_list struct_declaration_with_endian
@@ -149,9 +195,7 @@ program: declaration_list
 declaration_list:
 	  declaration
         | declaration_list declaration
-		{
-                  $$ = pcl_ast_chainon ($1, $2);
-                }
+        	{ $$ = pcl_ast_chainon ($1, $2); }
 	;
 
 /*
@@ -185,16 +229,16 @@ assignment_expression:
 
 assignment_operator:
 	'='		{ $$ = PCL_AST_OP_ASSIGN; }
-	| PCL_TOK_MULA	{ $$ = PCL_AST_OP_MULA; }
-	| PCL_TOK_DIVA	{ $$ = PCL_AST_OP_DIVA; }
-	| PCL_TOK_MODA	{ $$ = PCL_AST_OP_MODA; }
-	| PCL_TOK_ADDA	{ $$ = PCL_AST_OP_ADDA; }
-	| PCL_TOK_SUBA	{ $$ = PCL_AST_OP_SUBA; }
-	| PCL_TOK_SLA	{ $$ = PCL_AST_OP_SLA; }
-	| PCL_TOK_SRA	{ $$ = PCL_AST_OP_SRA; }
-	| PCL_TOK_BANDA	{ $$ = PCL_AST_OP_BANDA; }
-	| PCL_TOK_XORA	{ $$ = PCL_AST_OP_XORA; }
-	| PCL_TOK_IORA	{ $$ = PCL_AST_OP_IORA; }
+	| MULA	{ $$ = PCL_AST_OP_MULA; }
+	| DIVA	{ $$ = PCL_AST_OP_DIVA; }
+	| MODA	{ $$ = PCL_AST_OP_MODA; }
+	| ADDA	{ $$ = PCL_AST_OP_ADDA; }
+	| SUBA	{ $$ = PCL_AST_OP_SUBA; }
+	| SLA	{ $$ = PCL_AST_OP_SLA; }
+	| SRA	{ $$ = PCL_AST_OP_SRA; }
+	| BANDA	{ $$ = PCL_AST_OP_BANDA; }
+	| XORA	{ $$ = PCL_AST_OP_XORA; }
+	| IORA	{ $$ = PCL_AST_OP_IORA; }
         ;
 
 conditional_expression:
@@ -205,13 +249,13 @@ conditional_expression:
 
 logical_or_expression:
 	  logical_and_expression
-        | logical_or_expression PCL_TOK_OR logical_and_expression
+        | logical_or_expression OR logical_and_expression
           	{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_OR, $1, $3); }
         ;
 
 logical_and_expression:
 	  inclusive_or_expression
-	| logical_and_expression PCL_TOK_AND inclusive_or_expression
+	| logical_and_expression AND inclusive_or_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_AND, $1, $3); }
 	;
 
@@ -235,9 +279,9 @@ and_expression:
 
 equality_expression:
           relational_expression
-	| equality_expression PCL_TOK_EQ relational_expression
+	| equality_expression EQ relational_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_EQ, $1, $3); }
-	| equality_expression PCL_TOK_NE relational_expression
+	| equality_expression NE relational_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_NE, $1, $3); }
 	;
 
@@ -247,17 +291,17 @@ relational_expression:
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_LT, $1, $3); }
         | relational_expression '>' shift_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_GT, $1, $3); }
-        | relational_expression PCL_TOK_LE shift_expression
+        | relational_expression LE shift_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_LE, $1, $3); }
-        | relational_expression PCL_TOK_GE shift_expression
+        | relational_expression GE shift_expression
         	{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_GE, $1, $3); }
         ;
 
 shift_expression:
 	  additive_expression
-        | shift_expression PCL_TOK_SL additive_expression
+        | shift_expression SL additive_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_SL, $1, $3); }
-        | shift_expression PCL_TOK_SR additive_expression
+        | shift_expression SR additive_expression
 		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_SR, $1, $3); }
         ;
 
@@ -281,15 +325,15 @@ multiplicative_expression:
 
 unary_expression:
 	  postfix_expression
-        | PCL_TOK_INC unary_expression
+        | INC unary_expression
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_INC, $2); }
-        | PCL_TOK_DEC unary_expression
+        | DEC unary_expression
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_DEC, $2); }
         | unary_operator multiplicative_expression
 		{ $$ = pcl_ast_make_unary_exp ($1, $2); }
-        | PCL_TOK_SIZEOF unary_expression
+        | SIZEOF unary_expression
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $2); }
-        | PCL_TOK_SIZEOF '(' PCL_TOK_TYPENAME ')'
+        | SIZEOF '(' TYPENAME ')'
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $3); }
         ;
 
@@ -305,11 +349,11 @@ postfix_expression:
 	  primary_expression
         | postfix_expression '[' expression ']'
 		{ $$ = pcl_ast_make_array_ref ($1, $3); }
-        | postfix_expression '.' PCL_TOK_ID
+        | postfix_expression '.' IDENTIFIER
 		{ $$ = pcl_ast_make_struct_ref ($1, $3); }
-        | postfix_expression PCL_TOK_INC
+        | postfix_expression INC
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_INC, $1); }
-	| postfix_expression PCL_TOK_DEC
+	| postfix_expression DEC
 		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_DEC, $1); }
 /*
         | '(' type_name ')' '{' initializer_list '}'
@@ -320,9 +364,9 @@ postfix_expression:
 	;
 
 primary_expression:
-	  PCL_TOK_ID
-        | PCL_TOK_INT
-        | PCL_TOK_STR
+	  IDENTIFIER
+        | INT
+        | STR
         | '(' expression ')'
 		{ $$ = $2; }
 	;
@@ -338,9 +382,9 @@ declaration:
 declaration_specifiers:
           typedef_specifier
 	| struct_specifier
-        | PCL_TOK_MSB struct_specifier
+        | MSB struct_specifier
           	{ PCL_AST_STRUCT_ENDIAN ($2) = PCL_AST_MSB; $$ = $2; }
-        | PCL_TOK_LSB struct_specifier
+        | LSB struct_specifier
         	{ PCL_AST_STRUCT_ENDIAN ($2) = PCL_AST_LSB; $$ = $2; }
         | enum_specifier
         ;
@@ -350,24 +394,30 @@ declaration_specifiers:
  */
 
 typedef_specifier:
-	  PCL_TOK_TYPEDEF type_specifier PCL_TOK_ID
+	  TYPEDEF type_specifier IDENTIFIER
           	{
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER($3),
-                                             $2) == NULL)
+                  const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
+                  pcl_ast type = pcl_ast_make_type (PCL_AST_TYPE_SIGNED_P ($2),
+                                                    PCL_AST_TYPE_WIDTH ($2),
+                                                    PCL_AST_TYPE_ENUMERATION ($2),
+                                                    PCL_AST_TYPE_STRUCT ($2));
+
+                  if (pcl_ast_register_type (id, type) == NULL)
                     {
-                      pcl_tab_error (&@2, "type already defined", NULL);
+                      pcl_tab_error (&@2, NULL, "type already defined");
                       YYERROR;
                     }
+                  /* XXX:
+                     pcl_ast_free ($1);
+                     pcl_ast_free ($3);
+                  */
+                  $$ = NULL;
                 }
         ;
 
 type_specifier:
-	  's' ':' constant_expression
-          	{ $$ = pcl_ast_make_type (1, $3, NULL, NULL); }
-        | 'u' ':' constant_expression
-        	{ $$ = pcl_ast_make_type (0, $3, NULL, NULL); }
-        | PCL_TOK_TYPENAME
-	| PCL_TOK_STRUCT PCL_TOK_ID
+	  simple_type_specifier
+	| STRUCT IDENTIFIER
         	{
                   pcl_ast strct
                     = pcl_ast_get_type (PCL_AST_IDENTIFIER_POINTER ($2));
@@ -381,14 +431,14 @@ type_specifier:
                   else
                     $$ = pcl_ast_make_type (0, NULL, NULL, strct);
                 }
-        | PCL_TOK_ENUM PCL_TOK_ID
+        | ENUM IDENTIFIER
         	{
                   pcl_ast enumeration
                     = pcl_ast_get_enum (PCL_AST_IDENTIFIER_POINTER ($2));
                   
                   if (!enumeration)
                     {
-                      pcl_tab_error (&@2, "expected enumeration", NULL);
+                      pcl_tab_error (&@2, NULL, "expected enumeration");
                       YYERROR;
                     }
                   else
@@ -396,65 +446,65 @@ type_specifier:
                 }
         ;
 
+simple_type_specifier:
+          TYPENAME
+        |
+	  's' ':' constant_expression
+          	{ $$ = pcl_ast_make_type (1, $3, NULL, NULL); }
+        | 'u' ':' constant_expression
+        	{ $$ = pcl_ast_make_type (0, $3, NULL, NULL); }
+	;
+
 /*
  * Enumerations.
  */
 
 enum_specifier:
-	  PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}'
-		{
-                  $$ = pcl_ast_make_enum ($2, $4, NULL);
-                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
+	  ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+          	{
+                  if (! enum_specifier_action (&$$,
+                                               $simple_type_specifier, &@simple_type_specifier,
+                                               $IDENTIFIER, &@IDENTIFIER,
+                                               $enumerator_list, &@enumerator_list,
+                                               NULL, NULL))
+                    YYERROR;
                 }
-	| PCL_TOK_ENUM PCL_TOK_ID PCL_TOK_DOCSTR '{' enumerator_list '}'
-		{
-                  $$ = pcl_ast_make_enum ($2, $5, $3);
-                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
-                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
+	| ENUM simple_type_specifier IDENTIFIER DOCSTR '{' enumerator_list '}'
+          	{
+                  if (! enum_specifier_action (&$$,
+                                               $simple_type_specifier, &@simple_type_specifier,
+                                               $IDENTIFIER, &@IDENTIFIER,
+                                               $enumerator_list, &@enumerator_list,
+                                               $DOCSTR, &@DOCSTR))
+                    YYERROR;
                 }
-        | PCL_TOK_ENUM PCL_TOK_DOCSTR PCL_TOK_ID '{' enumerator_list '}'
-		{
-                  $$ = pcl_ast_make_enum ($3, $5, $2);
-                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
-                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($3),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@3, "type already defined", NULL);
-                      YYERROR;
-                    }
+        | ENUM DOCSTR simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+          	{
+                  if (! enum_specifier_action (&$$,
+                                               $simple_type_specifier, &@simple_type_specifier,
+                                               $IDENTIFIER, &@IDENTIFIER,
+                                               $enumerator_list, &@enumerator_list,
+                                               $DOCSTR, &@DOCSTR))
+                    YYERROR;
                 }
-        | PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}' PCL_TOK_DOCSTR
-		{
-                  $$ = pcl_ast_make_enum ($2, $4, $6);
-                  PCL_AST_DOC_STRING_ENTITY ($6) = $$;
-                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
+        | ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}' DOCSTR
+          	{
+                  if (! enum_specifier_action (&$$,
+                                               $simple_type_specifier, &@simple_type_specifier,
+                                               $IDENTIFIER, &@IDENTIFIER,
+                                               $enumerator_list, &@enumerator_list,
+                                               $DOCSTR, &@DOCSTR))
+                    YYERROR;
                 }
-        | PCL_TOK_DOCSTR PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}'
-		{
-                  $$ = pcl_ast_make_enum ($3, $5, $1);
-                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
-                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($3),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@3, "type already defined", NULL);
-                      YYERROR;
-                    }
-                }        
+        | DOCSTR ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+          	{
+                  if (! enum_specifier_action (&$$,
+                                               $simple_type_specifier, &@simple_type_specifier,
+                                               $IDENTIFIER, &@IDENTIFIER,
+                                               $enumerator_list, &@enumerator_list,
+                                               $DOCSTR, &@DOCSTR))
+                    YYERROR;
+                }
         ;
 
 enumerator_list:
@@ -464,26 +514,26 @@ enumerator_list:
 	;
 
 enumerator:
-	  PCL_TOK_ID
+	  IDENTIFIER
                 { $$ = pcl_ast_make_enumerator ($1, NULL, NULL); }
-	| PCL_TOK_ID PCL_TOK_DOCSTR
+	| IDENTIFIER DOCSTR
                 {
                   $$ = pcl_ast_make_enumerator ($1, NULL, $2);
                   PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                 }
-        | PCL_TOK_ID '=' constant_expression
+        | IDENTIFIER '=' constant_expression
                 { $$ = pcl_ast_make_enumerator ($1, $3, NULL); }
-        | PCL_TOK_ID '=' PCL_TOK_DOCSTR constant_expression
+        | IDENTIFIER '=' DOCSTR constant_expression
         	{
                   $$ = pcl_ast_make_enumerator ($1, $4, $3);
                   PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                 }
-        | PCL_TOK_ID '=' constant_expression PCL_TOK_DOCSTR
+        | IDENTIFIER '=' constant_expression DOCSTR
 	        {
                   $$ = pcl_ast_make_enumerator ($1, $3, $4);
                   PCL_AST_DOC_STRING_ENTITY ($4) = $$;
                 }
-        | PCL_TOK_DOCSTR PCL_TOK_ID '=' constant_expression
+        | DOCSTR IDENTIFIER '=' constant_expression
         	{
                   $$ = pcl_ast_make_enumerator ($2, $4, $1);
                   PCL_AST_DOC_STRING_ENTITY ($1) = $$;
@@ -495,50 +545,41 @@ enumerator:
  */
 
 struct_specifier:
-	  PCL_TOK_STRUCT PCL_TOK_ID '{' struct_declaration_list '}'
-		{
-                  $$ = pcl_ast_make_struct ($2, $4, /* docstr */ NULL,
-                                            pcl_ast_default_endian ());
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
-                }
-	| PCL_TOK_STRUCT PCL_TOK_ID PCL_TOK_DOCSTR '{' struct_declaration_list '}'
+	  STRUCT IDENTIFIER '{' struct_declaration_list '}'
           	{
-                  $$ = pcl_ast_make_struct ($2, $5, $3, pcl_ast_default_endian ());
-                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
-                        
+                  if (! struct_specifier_action (&$$,
+                                                 $IDENTIFIER, &@IDENTIFIER,
+                                                 $struct_declaration_list,
+                                                 &@struct_declaration_list,
+                                                 NULL, NULL))
+                    YYERROR;
                 }
-        | PCL_TOK_STRUCT PCL_TOK_DOCSTR PCL_TOK_ID '{' struct_declaration_list '}'
+	| STRUCT IDENTIFIER DOCSTR '{' struct_declaration_list '}'
           	{
-                  $$ = pcl_ast_make_struct ($3, $5, $2, pcl_ast_default_endian ());
-                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@3, "type already defined", NULL);
-                      YYERROR;
-                    }
+                  if (! struct_specifier_action (&$$,
+                                                 $IDENTIFIER, &@IDENTIFIER,
+                                                 $struct_declaration_list,
+                                                 &@struct_declaration_list,
+                                                 $DOCSTR, &@DOCSTR))
+                    YYERROR;
                 }
-        | PCL_TOK_STRUCT PCL_TOK_ID '{' struct_declaration_list '}' PCL_TOK_DOCSTR
-          	{
-                  $$ = pcl_ast_make_struct ($2, $4, $6, pcl_ast_default_endian ());
-                  PCL_AST_DOC_STRING_ENTITY ($6) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
-                                             $$) == NULL)
-                    {
-                      pcl_tab_error (&@2, "type already defined", NULL);
-                      YYERROR;
-                    }
+        | STRUCT DOCSTR IDENTIFIER '{' struct_declaration_list '}'
+        	{
+                  if (! struct_specifier_action (&$$,
+                                                 $IDENTIFIER, &@IDENTIFIER,
+                                                 $struct_declaration_list,
+                                                 &@struct_declaration_list,
+                                                 $DOCSTR, &@DOCSTR))
+                    YYERROR;
+                }
+        | STRUCT IDENTIFIER '{' struct_declaration_list '}' DOCSTR
+        	{
+                  if (! struct_specifier_action (&$$,
+                                                 $IDENTIFIER, &@IDENTIFIER,
+                                                 $struct_declaration_list,
+                                                 &@struct_declaration_list,
+                                                 $DOCSTR, &@DOCSTR))
+                    YYERROR;
                 }
         ;
 
@@ -553,12 +594,12 @@ struct_declaration_list:
 
 struct_declaration_with_endian:
 	  struct_declaration
-        | PCL_TOK_MSB struct_declaration
+        | MSB struct_declaration
 		{
                   PCL_AST_FIELD_ENDIAN ($2) = PCL_AST_MSB;
                   $$ = $2;
                 }
-        | PCL_TOK_LSB struct_declaration
+        | LSB struct_declaration
         	{
                   PCL_AST_FIELD_ENDIAN ($2) = PCL_AST_LSB;
                   $$ = $2;
@@ -572,21 +613,21 @@ struct_declaration:
                   $$ = $2;
                 }
 
-	 | type_specifier struct_field PCL_TOK_DOCSTR ';'
+	 | type_specifier struct_field DOCSTR ';'
           	{
                   PCL_AST_FIELD_TYPE ($2) = $1;
                   PCL_AST_FIELD_DOCSTR ($2) = $3;
                   $$ = $2;
                   PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                 }
-        | type_specifier PCL_TOK_DOCSTR struct_field ';'
+        | type_specifier DOCSTR struct_field ';'
         	{
                   PCL_AST_FIELD_TYPE ($3) = $1;
                   PCL_AST_FIELD_DOCSTR ($3) = $2;
                   $$ = $3;
                   PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                 }
-        | PCL_TOK_DOCSTR type_specifier struct_field ';'
+        | DOCSTR type_specifier struct_field ';'
         	{
                   PCL_AST_FIELD_TYPE ($3) = $2;
                   PCL_AST_FIELD_DOCSTR ($3) = $1;
@@ -596,7 +637,7 @@ struct_declaration:
         ;
 
 struct_field:
-	  PCL_TOK_ID
+	  IDENTIFIER
           	{
                   $$ = pcl_ast_make_field ($1,
                                            /* type */ NULL,
@@ -604,7 +645,7 @@ struct_field:
                                            pcl_ast_default_endian (),
                                            /* size_exp */ NULL);
                 }
-        | PCL_TOK_ID '[' assignment_expression ']'
+        | IDENTIFIER '[' assignment_expression ']'
         	{
                   $$ = pcl_ast_make_field ($1,
                                            /* type */ NULL,

@@ -217,6 +217,7 @@ struct pcl_ast_enumerator
   union pcl_ast_s *docstr;
 };
 
+#define PCL_AST_ENUM_TYPE(AST) ((AST)->enumeration.type)
 #define PCL_AST_ENUM_TAG(AST) ((AST)->enumeration.tag)
 #define PCL_AST_ENUM_VALUES(AST) ((AST)->enumeration.values)
 #define PCL_AST_ENUM_DOCSTR(AST) ((AST)->enumeration.docstr)
@@ -224,6 +225,7 @@ struct pcl_ast_enumerator
 struct pcl_ast_enum
 {
   struct pcl_ast_common common;
+  union pcl_ast_s *type;
   union pcl_ast_s *tag;
   union pcl_ast_s *values;
   union pcl_ast_s *docstr;
@@ -399,7 +401,8 @@ pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
 
 pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
                             enum pcl_ast_endian endian, pcl_ast num_ents);
-pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
+pcl_ast pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
+                           pcl_ast docstr);
 pcl_ast pcl_ast_make_program (void);
 
 #ifdef PCL_DEBUG

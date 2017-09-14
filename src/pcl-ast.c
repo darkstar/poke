@@ -159,6 +159,7 @@ pcl_ast_register_type (const char *name, pcl_ast type)
       return NULL;
 
   /* Put the passed type in the hash table.  */
+  PCL_AST_TYPE_NAME (type) = xstrdup (name);
   PCL_AST_CHAIN (type) = types_hash_table[hash];
   types_hash_table[hash] = type;
 
@@ -260,7 +261,7 @@ pcl_ast_make_string (const char *str)
 
   assert (str);
   
-  PCL_AST_STRING_POINTER (new) = strdup (str);
+  PCL_AST_STRING_POINTER (new) = xstrdup (str);
   PCL_AST_STRING_LENGTH (new) = strlen (str);
   PCL_AST_LITERAL_P (new) = 1;
 
@@ -276,7 +277,7 @@ pcl_ast_make_doc_string (const char *str, pcl_ast entity)
 
   assert (str);
 
-  PCL_AST_DOC_STRING_POINTER (doc_string) = strdup (str);
+  PCL_AST_DOC_STRING_POINTER (doc_string) = xstrdup (str);
   PCL_AST_DOC_STRING_LENGTH (doc_string) = strlen (str);
   PCL_AST_DOC_STRING_ENTITY (doc_string) = entity;
 
@@ -431,12 +432,14 @@ pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
 /* Build and return an AST node for an enum.  */
 
 pcl_ast
-pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr)
+pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
+                   pcl_ast docstr)
 {
   pcl_ast enumeration = pcl_ast_make_node (PCL_AST_ENUM);
 
-  assert (tag && values);
+  assert (type && tag && values);
 
+  PCL_AST_ENUM_TYPE (enumeration) = type;
   PCL_AST_ENUM_TAG (enumeration) = tag;
   PCL_AST_ENUM_VALUES (enumeration) = values;
   PCL_AST_ENUM_DOCSTR (enumeration) = docstr;
@@ -621,6 +624,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
     case PCL_AST_ENUM:
       IPRINTF ("ENUM::\n");
 
+      PRINT_AST_SUBAST (type, ENUM_TYPE);
       PRINT_AST_SUBAST (tag, ENUM_TAG);
       PRINT_AST_OPT_SUBAST (docstr, ENUM_DOCSTR);
       IPRINTF ("values:\n");
@@ -647,7 +651,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
                PCL_AST_FIELD_ENDIAN (ast) == PCL_AST_MSB
                ? "msb" : "lsb");
       PRINT_AST_SUBAST (name, FIELD_NAME);
-      PRINT_AST_SUBAST (name, FIELD_TYPE);
+      PRINT_AST_SUBAST (type, FIELD_TYPE);
       PRINT_AST_OPT_SUBAST (num_ents, FIELD_NUM_ENTS);
       PRINT_AST_OPT_SUBAST (docstr, FIELD_DOCSTR);
       

@@ -117,51 +117,51 @@ D [0-9]
 
 {BLANK}		{ /* Ignore whitespace.  */ }
 
-"enum"		{ return PCL_TOK_ENUM; }
-"struct"	{ return PCL_TOK_STRUCT; }
-"typedef"	{ return PCL_TOK_TYPEDEF; }
-"break"		{ return PCL_TOK_BREAK; }
-"const"		{ return PCL_TOK_CONST; }
-"continue"	{ return PCL_TOK_CONTINUE; }
-"else"		{ return PCL_TOK_ELSE; }
-"for"		{ return PCL_TOK_FOR; }
-"if"		{ return PCL_TOK_IF; }
-"sizeof"	{ return PCL_TOK_SIZEOF; }
+"enum"		{ return ENUM; }
+"struct"	{ return STRUCT; }
+"typedef"	{ return TYPEDEF; }
+"break"		{ return BREAK; }
+"const"		{ return CONST; }
+"continue"	{ return CONTINUE; }
+"else"		{ return ELSE; }
+"for"		{ return FOR; }
+"if"		{ return IF; }
+"sizeof"	{ return SIZEOF; }
 
-"lsb"		{ return PCL_TOK_LSB; }
-"msb"		{ return PCL_TOK_MSB; }
+"lsb"		{ return LSB; }
+"msb"		{ return MSB; }
 
 {DOCSTR} {
    char *dstring = make_docstring (yytext);
 
    yylval->ast = pcl_ast_make_doc_string (dstring, NULL);
    free (dstring);
-   return PCL_TOK_DOCSTR;
+   return DOCSTR;
 }
 
-"<<<"		{ return PCL_TOK_ERR; /* XXX Error: unterminated docstring.  */ }
+"<<<"		{ return ERR; /* XXX Error: unterminated docstring.  */ }
 
-"*="		{ return PCL_TOK_MULA; }
-"/="		{ return PCL_TOK_DIVA; }
-"%="		{ return PCL_TOK_MODA; }
-"+="		{ return PCL_TOK_ADDA; }
-"-="		{ return PCL_TOK_SUBA; }
-"<<="		{ return PCL_TOK_SLA; }
-">>="		{ return PCL_TOK_SRA; }
-"&="		{ return PCL_TOK_BANDA; }
-"|="		{ return PCL_TOK_IORA; }
-"^="		{ return PCL_TOK_XORA; }
+"*="		{ return MULA; }
+"/="		{ return DIVA; }
+"%="		{ return MODA; }
+"+="		{ return ADDA; }
+"-="		{ return SUBA; }
+"<<="		{ return SLA; }
+">>="		{ return SRA; }
+"&="		{ return BANDA; }
+"|="		{ return IORA; }
+"^="		{ return XORA; }
 
-"||"		{ return PCL_TOK_OR; }
-"&&"		{ return PCL_TOK_AND; }
-"=="		{ return PCL_TOK_EQ; }
-"!="		{ return PCL_TOK_NE; }
-"<="		{ return PCL_TOK_LE; }
-">="		{ return PCL_TOK_GE; }
-"<<"		{ return PCL_TOK_SL; }
-">>"		{ return PCL_TOK_SR; }
-"++"		{ return PCL_TOK_INC; }
-"--"		{ return PCL_TOK_DEC; }
+"||"		{ return OR; }
+"&&"		{ return AND; }
+"=="		{ return EQ; }
+"!="		{ return NE; }
+"<="		{ return LE; }
+">="		{ return GE; }
+"<<"		{ return SL; }
+">>"		{ return SR; }
+"++"		{ return INC; }
+"--"		{ return DEC; }
 
 "["		{ return '['; }
 "]"		{ return ']'; }
@@ -197,12 +197,12 @@ D [0-9]
    if ((type = pcl_ast_get_type (yytext)) != NULL)
      {
        yylval->ast = type;
-       return PCL_TOK_TYPENAME;
+       return TYPENAME;
      }
    else
      {
        yylval->ast = pcl_ast_get_identifier (yytext);
-       return PCL_TOK_ID;
+       return IDENTIFIER;
      }
 }
 
@@ -212,7 +212,7 @@ D [0-9]
   pcl_atoi (yytext, &integer_value);
 
   yylval->ast = pcl_ast_make_integer (integer_value);
-  return PCL_TOK_INT;    
+  return INT;    
 }
 
 {STRING} {
@@ -220,9 +220,9 @@ D [0-9]
   yytext[strlen(yytext) - 1] = 0;
 
   yylval->ast = pcl_ast_make_string (yytext + 1);
-  return PCL_TOK_STR;
+  return STR;
 }
 
-. { return PCL_TOK_ERR; }
+. { return ERR; }
 
 %%
