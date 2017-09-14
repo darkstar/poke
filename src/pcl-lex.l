@@ -139,6 +139,8 @@ D [0-9]
    return PCL_TOK_DOCSTR;
 }
 
+"<<<"		{ return PCL_TOK_ERR; /* XXX Error: unterminated docstring.  */ }
+
 "*="		{ return PCL_TOK_MULA; }
 "/="		{ return PCL_TOK_DIVA; }
 "%="		{ return PCL_TOK_MODA; }

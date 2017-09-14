@@ -21,6 +21,10 @@
 
 #include <config.h>
 
+#ifdef PCL_DEBUG
+# include <stdio.h>
+#endif
+
 #include <stdint.h>
 #include "pcl-ast.h"
 
@@ -51,6 +55,10 @@ enum pcl_ast_code
   PCL_AST_STRUCT_REF,
   PCL_AST_TYPE
 };
+
+/* Pleae update the static `opcodes' array in pcl-ast.c:pcl_ast_print
+   if you augment, diminish or change the ordering of opcodes in the
+   following enumeration.  */
 
 enum pcl_ast_op
 {
@@ -239,7 +247,7 @@ struct pcl_ast_struct
 #define PCL_AST_FIELD_ENDIAN(AST) ((AST)->field.endian)
 #define PCL_AST_FIELD_TYPE(AST) ((AST)->field.type)
 #define PCL_AST_FIELD_DOCSTR(AST) ((AST)->field.docstr)
-#define PCL_AST_FIELD_SIZE_EXP(AST) ((AST)->field.size_exp)
+#define PCL_AST_FIELD_NUM_ENTS(AST) ((AST)->field.num_ents)
 
 struct pcl_ast_field
 {
@@ -248,7 +256,7 @@ struct pcl_ast_field
   union pcl_ast_s *name;
   union pcl_ast_s *type;
   union pcl_ast_s *docstr;
-  union pcl_ast_s *size_exp;
+  union pcl_ast_s *num_ents;
 };
 
 #define PCL_AST_STMT_FILENAME(AST) ((AST)->stmt.filename)
@@ -366,6 +374,12 @@ pcl_ast pcl_ast_get_identifier (const char *str);
 pcl_ast pcl_ast_register_type (const char *name, pcl_ast type);
 pcl_ast pcl_ast_get_type (const char *str);
 
+pcl_ast pcl_ast_register_enum (const char *tag, pcl_ast enumeration);
+pcl_ast pcl_ast_get_enum (const char *tag);
+
+pcl_ast pcL_ast_register_struct (const char *tag, pcl_ast strct);
+pcl_ast pcl_ast_get_struct (const char *tag);
+
 pcl_ast pcl_ast_make_integer (uint64_t value);
 pcl_ast pcl_ast_make_string (const char *str);
 pcl_ast pcl_ast_make_doc_string (const char *str, pcl_ast entity);
@@ -384,13 +398,13 @@ pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
                              enum pcl_ast_endian endian);
 
 pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
-                            enum pcl_ast_endian endian, pcl_ast size_exp);
+                            enum pcl_ast_endian endian, pcl_ast num_ents);
 pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
 pcl_ast pcl_ast_make_program (void);
 
 #ifdef PCL_DEBUG
 
-void pcl_ast_print (pcl_ast ast, int indent);
+void pcl_ast_print (FILE *fd, pcl_ast ast);
 
 #endif /* PCL_DEBUG */
 

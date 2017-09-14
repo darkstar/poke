@@ -81,6 +81,26 @@ pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2)
 #define HASH_TABLE_SIZE 1008
 static pcl_ast ids_hash_table[HASH_TABLE_SIZE];
 
+static int
+hash_string (const char *name)
+{
+  size_t len;
+  int hash;
+  int i;
+
+  len = strlen (name);
+  hash = len;
+  for (i = 0; i < len; i++)
+    hash = ((hash * 613) + (unsigned)(name[i]));
+
+#define HASHBITS 30
+  hash &= (1 << HASHBITS) - 1;
+  hash %= HASH_TABLE_SIZE;
+#undef HASHBITS
+
+  return hash;
+}
+
 /* Return a PCL_AST_IDENTIFIER node whose name is the NULL-terminated
    string STR.  If an identifier with that name has previously been
    referred to, the name node is returned this time.  */
@@ -90,20 +110,12 @@ pcl_ast_get_identifier (const char *str)
 {
   pcl_ast id;
   int hash;
-  int i;
   size_t len;
 
   /* Compute the hash code for the identifier string.  */
   len = strlen (str);
 
-  hash = len;
-  for (i = 0; i < len; i++)
-    hash = ((hash * 613) + (unsigned)(str[i]));
-
-#define HASHBITS 30  
-  hash &= (1 << HASHBITS) - 1;
-  hash %= HASH_TABLE_SIZE;
-#undef HASHBITS
+  hash = hash_string (str);
 
   /* Search the hash table for the identifier.  */
   for (id = ids_hash_table[hash]; id != NULL; id = PCL_AST_CHAIN (id))
@@ -128,26 +140,6 @@ pcl_ast_get_identifier (const char *str)
 
 static pcl_ast types_hash_table[HASH_TABLE_SIZE];
 
-static int
-type_hash (const char *name)
-{
-  size_t len;
-  int hash;
-  int i;
-
-  len = strlen (name);
-  hash = len;
-  for (i = 0; i < len; i++)
-    hash = ((hash * 613) + (unsigned)(name[i]));
-
-#define HASHBITS 30
-  hash &= (1 << HASHBITS) - 1;
-  hash %= HASH_TABLE_SIZE;
-#undef HASHBITS
-
-  return hash;
-}
-
 /* Register a named type, storing it in the types hash table, and
    return a pointer to it.  If a type with the given name has been
    already registered, return NULL.  */
@@ -158,7 +150,7 @@ pcl_ast_register_type (const char *name, pcl_ast type)
   int hash;
   pcl_ast t;
 
-  hash = type_hash (name);
+  hash = hash_string (name);
 
   /* Search the hash table for the type.  */
   for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
@@ -182,13 +174,65 @@ pcl_ast_get_type (const char *name)
   int hash;
   pcl_ast t;
   
-  hash = type_hash (name);
+  hash = hash_string (name);
 
   /* Search the hash table for the type.  */
   for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
     if (PCL_AST_TYPE_NAME (t)
         && !strcmp (PCL_AST_TYPE_NAME (t), name))
       return t;
+
+  return NULL;
+}
+
+/* Enumerations are stored in a hash table, and are referred from AST
+   nodes.  */
+
+static pcl_ast enums_hash_table[HASH_TABLE_SIZE];
+
+/* Register an enumeration, storing it in the enums hash table, and
+   return a pointer to it.  If an enumeration with the given tag has
+   been already registered, return NULL.  */
+
+pcl_ast
+pcl_ast_register_enum (const char *tag, pcl_ast enumeration)
+{
+  int hash;
+  pcl_ast e;
+
+  hash = hash_string (tag);
+
+  /* Search the hash table for the enumeration.  */
+  for (e = enums_hash_table[hash]; e != NULL; e = PCL_AST_CHAIN (e))
+    if (PCL_AST_ENUM_TAG (e)
+        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e))
+        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e)), tag))
+      return NULL;
+
+  /* Put the passed enumeration in the hash table.  */
+  PCL_AST_CHAIN (enumeration) = enums_hash_table[hash];
+  enums_hash_table[hash] = enumeration;
+
+  return enumeration;
+}
+
+/* Return the enumeration associated with the given TAG.  If the
+   enumeration tag has not been registered, return NULL.  */
+
+pcl_ast
+pcl_ast_get_enum (const char *tag)
+{
+  int hash;
+  pcl_ast e;
+
+  hash = hash_string (tag);
+
+  /* Search the hash table for the enumeration.  */
+  for (e = enums_hash_table[hash]; e != NULL; e = PCL_AST_CHAIN (e))
+    if (PCL_AST_ENUM_TAG (e)
+        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e))
+        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e)), tag))
+      return e;
 
   return NULL;
 }
@@ -374,7 +418,7 @@ pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
 {
   pcl_ast strct = pcl_ast_make_node (PCL_AST_STRUCT);
 
-  assert (tag && fields);
+  assert (tag);
 
   PCL_AST_STRUCT_TAG (strct) = tag;
   PCL_AST_STRUCT_FIELDS (strct) = fields;
@@ -404,7 +448,7 @@ pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr)
 
 pcl_ast
 pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
-                    enum pcl_ast_endian endian, pcl_ast size_exp)
+                    enum pcl_ast_endian endian, pcl_ast num_ents)
 {
   pcl_ast field = pcl_ast_make_node (PCL_AST_FIELD);
 
@@ -414,7 +458,7 @@ pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
   PCL_AST_FIELD_TYPE (field) = type;
   PCL_AST_FIELD_DOCSTR (field) = docstr;
   PCL_AST_FIELD_ENDIAN (field) = endian;
-  PCL_AST_FIELD_SIZE_EXP (field) = size_exp;
+  PCL_AST_FIELD_NUM_ENTS (field) = num_ents;
 
   return field;
 }
@@ -431,18 +475,9 @@ pcl_ast_make_program (void)
 
 #ifdef PCL_DEBUG
 
-void
-pcl_ast_print_declaration (pcl_ast decl, int indent)
-{
-
-  printf ("DECLARATION:: ");
-}
-
-void
-pcl_ast_print (pcl_ast ast, int indent)
-{
-  pcl_ast child;
-  int i;
+/* The following macros are commodities to be used to keep the
+   `pcl_ast_print' function as readable and easy to update as
+   possible.  Do not use them anywhere else.  */
 
 #define IPRINTF(...)                            \
   do                                            \
@@ -453,6 +488,50 @@ pcl_ast_print (pcl_ast ast, int indent)
       printf (__VA_ARGS__);                     \
     } while (0)
 
+#define PRINT_AST_IMM(NAME,MACRO,FMT)                    \
+  do                                                     \
+    {                                                    \
+      IPRINTF (#NAME ":\n");                             \
+      IPRINTF ("  " FMT "\n", PCL_AST_##MACRO (ast));    \
+    }                                                    \
+  while (0)
+
+#define PRINT_AST_SUBAST(NAME,MACRO)                            \
+  do                                                            \
+    {                                                           \
+      IPRINTF (#NAME ":\n");                                    \
+      pcl_ast_print_1 (fd, PCL_AST_##MACRO (ast), indent + 2);  \
+    }                                                           \
+  while (0)
+
+#define PRINT_AST_OPT_IMM(NAME,MACRO,FMT)       \
+  if (PCL_AST_##MACRO (ast))                    \
+    {                                           \
+      PRINT_AST_IMM (NAME, MACRO, FMT);         \
+    }
+
+#define PRINT_AST_OPT_SUBAST(NAME,MACRO)        \
+  if (PCL_AST_##MACRO (ast))                    \
+    {                                           \
+      PRINT_AST_SUBAST (NAME, MACRO);           \
+    }
+
+#define PRINT_AST_SUBAST_CHAIN(MACRO)           \
+  for (child = PCL_AST_##MACRO (ast);           \
+       child;                                   \
+       child = PCL_AST_CHAIN (child))           \
+    {                                           \
+      pcl_ast_print_1 (fd, child, indent + 2);  \
+    }
+
+/* Auxiliary function used by `pcl_ast_print', defined below.  */
+
+static void
+pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
+{
+  pcl_ast child;
+  int i;
+ 
   if (ast == NULL)
     {
       IPRINTF ("NULL::\n");
@@ -463,51 +542,45 @@ pcl_ast_print (pcl_ast ast, int indent)
     {
     case PCL_AST_PROGRAM:
       IPRINTF ("PROGRAM::\n");
-      for (child = PCL_AST_PROGRAM_DECLARATIONS (ast);
-           child;
-           child = PCL_AST_CHAIN (child))
-        pcl_ast_print (child, indent + 2);
+
+      PRINT_AST_SUBAST_CHAIN (PROGRAM_DECLARATIONS);
       break;
 
     case PCL_AST_IDENTIFIER:
-      IPRINTF ("IDENTIFIER:: length=%d pointer=0x%lx",
-               PCL_AST_IDENTIFIER_LENGTH (ast),
-               PCL_AST_IDENTIFIER_POINTER (ast));
-      if (PCL_AST_IDENTIFIER_POINTER (ast))
-        printf (" value='%s'",
-                PCL_AST_IDENTIFIER_POINTER (ast));
-      printf ("\n");
+      IPRINTF ("IDENTIFIER::\n");
+
+      PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%d");
+      PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "0x%lx");
+      PRINT_AST_OPT_IMM (*pointer, IDENTIFIER_POINTER, "'%s'");
       break;
 
     case PCL_AST_INTEGER:
-      IPRINTF ("INTEGER:: value=%d\n",
-              PCL_AST_INTEGER_VALUE (ast));
+      IPRINTF ("INTEGER::\n");
+
+      PRINT_AST_IMM (value, INTEGER_VALUE, "%lu");
       break;
 
     case PCL_AST_STRING:
-      IPRINTF ("STRING:: length=%d pointer=0x%lx",
-               PCL_AST_STRING_LENGTH (ast),
-               PCL_AST_STRING_POINTER (ast));
-      if (PCL_AST_STRING_POINTER (ast))
-        printf (" value='%s'",
-                PCL_AST_STRING_POINTER (ast));
-      printf ("\n");
+      IPRINTF ("STRING::\n");
+
+      PRINT_AST_IMM (length, STRING_LENGTH, "%lu");
+      PRINT_AST_IMM (pointer, STRING_POINTER, "0x%lx");
+      PRINT_AST_OPT_IMM (*pointer, STRING_POINTER, "'%s'");
       break;
 
     case PCL_AST_DOC_STRING:
-      IPRINTF ("DOCSTR:: length=%d pointer=0x%lx entity=0x%lx",
-               PCL_AST_DOC_STRING_LENGTH (ast),
-               PCL_AST_DOC_STRING_POINTER (ast),
-               PCL_AST_DOC_STRING_ENTITY (ast));
-      if (PCL_AST_DOC_STRING_POINTER (ast))
-        printf (" value='%s'",
-                PCL_AST_DOC_STRING_POINTER (ast));
-      printf ("\n");
+      IPRINTF ("DOCSTR::\n");
+
+      PRINT_AST_IMM (length, DOC_STRING_LENGTH, "%lu");
+      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "0x%lx");
+      PRINT_AST_OPT_IMM (*pointer, DOC_STRING_POINTER, "'%s'");
       break;
 
     case PCL_AST_EXP:
       {
         /* XXX: replace this with an #include hack.  */
+        /* Please keep the following array in sync with the enum
+           pcl_ast_op in pcl-ast.h.  */
         static char *opcodes[] =
           { "OR", "IOR", "XOR", "AND", "BAND", "EQ", "NE",
             "SL", "SR", "ADD", "SUB", "MUL", "DIV", "MOD",
@@ -522,49 +595,100 @@ pcl_ast_print (pcl_ast ast, int indent)
                  ? opcodes[PCL_AST_EXP_CODE (ast)] : "unknown",
                  PCL_AST_EXP_NUMOPS (ast));
         for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); i++)
-          pcl_ast_print (PCL_AST_EXP_OPERAND (ast, i),
+          pcl_ast_print_1 (fd, PCL_AST_EXP_OPERAND (ast, i),
                          indent + 2);
         break;
       }
 
     case PCL_AST_COND_EXP:
       IPRINTF ("COND_EXPRESSION::\n");
-      IPRINTF ("condition:\n");
-      pcl_ast_print (PCL_AST_COND_EXP_COND (ast), indent + 2);
-      IPRINTF ("thenexp:\n");
-      pcl_ast_print (PCL_AST_COND_EXP_THENEXP (ast), indent + 2);
-      IPRINTF ("elseexp:\n");
-      pcl_ast_print (PCL_AST_COND_EXP_ELSEEXP (ast), indent + 2);
+
+      PRINT_AST_SUBAST (condition, COND_EXP_COND);
+      PRINT_AST_OPT_SUBAST (thenexp, COND_EXP_THENEXP);
+      PRINT_AST_OPT_SUBAST (elseexp, COND_EXP_ELSEEXP);
       break;
 
     case PCL_AST_ENUMERATOR:
       IPRINTF ("ENUMERATOR::\n");
-      IPRINTF ("identifier:\n");
-      pcl_ast_print (PCL_AST_ENUMERATOR_IDENTIFIER (ast), indent + 2);
-      IPRINTF ("value:\n");
-      pcl_ast_print (PCL_AST_ENUMERATOR_VALUE (ast), indent + 2);
-      IPRINTF ("docstr:\n");
-      pcl_ast_print (PCL_AST_ENUMERATOR_DOCSTR (ast), indent + 2);
+
+      PRINT_AST_SUBAST (identifier, ENUMERATOR_IDENTIFIER);
+      PRINT_AST_SUBAST (value, ENUMERATOR_VALUE);
+      PRINT_AST_OPT_SUBAST (docstr, ENUMERATOR_DOCSTR);
       break;
 
     case PCL_AST_ENUM:
       IPRINTF ("ENUM::\n");
-      IPRINTF ("tag:\n");
-      pcl_ast_print (PCL_AST_ENUM_TAG (ast), indent + 2);
+
+      PRINT_AST_SUBAST (tag, ENUM_TAG);
+      PRINT_AST_OPT_SUBAST (docstr, ENUM_DOCSTR);
       IPRINTF ("values:\n");
-      for (child = PCL_AST_ENUM_VALUES (ast);
-           child;
-           child = PCL_AST_CHAIN (child))
-        pcl_ast_print (child, indent + 2);
-      IPRINTF ("docstr:\n");
-      pcl_ast_print (PCL_AST_ENUM_DOCSTR (ast), indent + 2);
+      PRINT_AST_SUBAST_CHAIN (ENUM_VALUES);
       break;
 
+    case PCL_AST_STRUCT:
+      IPRINTF ("STRUCT::\n");
+
+      IPRINTF ("STRUCT:: endian=%s\n",
+               PCL_AST_STRUCT_ENDIAN (ast)
+               == PCL_AST_MSB ? "msb" : "lsb");
+      PRINT_AST_SUBAST (tag, STRUCT_TAG);
+      PRINT_AST_OPT_SUBAST (docstr, STRUCT_DOCSTR);
+      IPRINTF ("fields:\n");
+      PRINT_AST_SUBAST_CHAIN (STRUCT_FIELDS);
+      break;
+
+    case PCL_AST_FIELD:
+      IPRINTF ("FIELD::\n");
+
+      IPRINTF ("endian:\n");
+      IPRINTF ("  %s\n",
+               PCL_AST_FIELD_ENDIAN (ast) == PCL_AST_MSB
+               ? "msb" : "lsb");
+      PRINT_AST_SUBAST (name, FIELD_NAME);
+      PRINT_AST_SUBAST (name, FIELD_TYPE);
+      PRINT_AST_OPT_SUBAST (num_ents, FIELD_NUM_ENTS);
+      PRINT_AST_OPT_SUBAST (docstr, FIELD_DOCSTR);
+      
+      break;
+
+    case PCL_AST_TYPE:
+      IPRINTF ("TYPE::\n");
+
+      PRINT_AST_IMM (signed, TYPE_SIGNED_P, "%d");
+      PRINT_AST_OPT_SUBAST (width, TYPE_WIDTH);
+
+      if (PCL_AST_TYPE_ENUMERATION (ast))
+        {
+          IPRINTF ("enumeration:\n");
+          IPRINTF ("  '%s'\n",
+                   PCL_AST_ENUM_TAG (PCL_AST_TYPE_ENUMERATION (ast)));
+        }
+
+      if (PCL_AST_TYPE_STRUCT (ast))
+        IPRINTF ("struct: tag '%s'\n",
+                 PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+      break;
 
     default:
       IPRINTF ("UNKNOWN:: code=%d\n", PCL_AST_CODE (ast));
       break;
     }
 }
+
+/* Dump a printable representation of AST to the file descriptor FD.
+   This function is intended to be useful to debug the PCL
+   compiler.  */
+
+void
+pcl_ast_print (FILE *fd, pcl_ast ast)
+{
+  pcl_ast_print_1 (fd, ast, 0);
+}
+
+#undef IPRINTF
+#undef PRINT_AST_IMM
+#undef PRINT_AST_SUBAST
+#undef PRINT_AST_OPT_FIELD
+#undef PRINT_AST_OPT_SUBAST
 
 #endif /* PCL_DEBUG */

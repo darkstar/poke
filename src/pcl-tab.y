@@ -141,7 +141,7 @@ program: declaration_list
                   PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
 
 #ifdef PCL_DEBUG
-                  pcl_ast_print ($$, 0);
+                  pcl_ast_print (stdout, $$);
 #endif                  
                 }
         ;
@@ -355,7 +355,7 @@ typedef_specifier:
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER($3),
                                              $2) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -369,29 +369,30 @@ type_specifier:
         | PCL_TOK_TYPENAME
 	| PCL_TOK_STRUCT PCL_TOK_ID
         	{
-                  pcl_ast type
+                  pcl_ast strct
                     = pcl_ast_get_type (PCL_AST_IDENTIFIER_POINTER ($2));
 
-                  if (!type)
+                  if (!strct)
                     {
-                      pcl_tab_error (&@2, NULL, "Undefined struct.");
+                      pcl_tab_error (&@2, NULL,
+                                     "expected struct");
                       YYERROR;
                     }
-                  
-                  $$ = type;
+                  else
+                    $$ = pcl_ast_make_type (0, NULL, NULL, strct);
                 }
         | PCL_TOK_ENUM PCL_TOK_ID
         	{
-                  pcl_ast type
-                    = pcl_ast_get_type (PCL_AST_IDENTIFIER_POINTER ($2));
+                  pcl_ast enumeration
+                    = pcl_ast_get_enum (PCL_AST_IDENTIFIER_POINTER ($2));
                   
-                  if (!type)
+                  if (!enumeration)
                     {
-                      pcl_tab_error (&@2, "Undefined enum.", NULL);
+                      pcl_tab_error (&@2, "expected enumeration", NULL);
                       YYERROR;
                     }
-                  
-                  $$ = type;
+                  else
+                    $$ = pcl_ast_make_type (0, NULL, enumeration, NULL);
                 }
         ;
 
@@ -403,10 +404,10 @@ enum_specifier:
 	  PCL_TOK_ENUM PCL_TOK_ID '{' enumerator_list '}'
 		{
                   $$ = pcl_ast_make_enum ($2, $4, NULL);
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
+                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -414,10 +415,10 @@ enum_specifier:
 		{
                   $$ = pcl_ast_make_enum ($2, $5, $3);
                   PCL_AST_DOC_STRING_ENTITY ($3) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
+                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -425,10 +426,10 @@ enum_specifier:
 		{
                   $$ = pcl_ast_make_enum ($3, $5, $2);
                   PCL_AST_DOC_STRING_ENTITY ($2) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
+                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@3, "Duplicated type.", NULL);
+                      pcl_tab_error (&@3, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -436,10 +437,10 @@ enum_specifier:
 		{
                   $$ = pcl_ast_make_enum ($2, $4, $6);
                   PCL_AST_DOC_STRING_ENTITY ($6) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
+                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -447,10 +448,10 @@ enum_specifier:
 		{
                   $$ = pcl_ast_make_enum ($3, $5, $1);
                   PCL_AST_DOC_STRING_ENTITY ($1) = $$;
-                  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
+                  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@3, "Duplicated type.", NULL);
+                      pcl_tab_error (&@3, "type already defined", NULL);
                       YYERROR;
                     }
                 }        
@@ -501,7 +502,7 @@ struct_specifier:
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -512,7 +513,7 @@ struct_specifier:
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                         
@@ -524,7 +525,7 @@ struct_specifier:
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($3),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@3, "Duplicated type.", NULL);
+                      pcl_tab_error (&@3, "type already defined", NULL);
                       YYERROR;
                     }
                 }
@@ -535,16 +536,18 @@ struct_specifier:
                   if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER ($2),
                                              $$) == NULL)
                     {
-                      pcl_tab_error (&@2, "Duplicated type.", NULL);
+                      pcl_tab_error (&@2, "type already defined", NULL);
                       YYERROR;
                     }
                 }
         ;
 
 struct_declaration_list:
-	  struct_declaration_with_endian
+          %empty
+		{ $$ = NULL; }
+	| struct_declaration_with_endian
         | struct_declaration_list struct_declaration_with_endian
-		{ $$ = pcl_ast_chainon ($1, $2); }
+        	{ $$ = pcl_ast_chainon ($1, $2); }
 /* XXX: add conditionals and loops.  */
 	;
 
@@ -563,7 +566,13 @@ struct_declaration_with_endian:
         ;
 
 struct_declaration:
-	  type_specifier struct_field PCL_TOK_DOCSTR ';'
+	   type_specifier struct_field ';'
+          	{
+                  PCL_AST_FIELD_TYPE ($2) = $1;
+                  $$ = $2;
+                }
+
+	 | type_specifier struct_field PCL_TOK_DOCSTR ';'
           	{
                   PCL_AST_FIELD_TYPE ($2) = $1;
                   PCL_AST_FIELD_DOCSTR ($2) = $3;
