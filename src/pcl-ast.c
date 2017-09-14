@@ -590,10 +590,12 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
             "SRA", "BANDA", "XORA", "IORA"
           };
 
-        IPRINTF ("EXPRESSION:: %s numops=%d\n",
+        IPRINTF ("EXPRESSION::\n");
+        IPRINTF ("opcode: %s\n",
                  PCL_AST_EXP_CODE (ast) <= PCL_MAX_OPERATOR
-                 ? opcodes[PCL_AST_EXP_CODE (ast)] : "unknown",
-                 PCL_AST_EXP_NUMOPS (ast));
+                 ? opcodes[PCL_AST_EXP_CODE (ast)] : "unknown");
+        PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
+        IPRINTF ("operands:\n");
         for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); i++)
           pcl_ast_print_1 (fd, PCL_AST_EXP_OPERAND (ast, i),
                          indent + 2);
