@@ -425,7 +425,7 @@ type_specifier:
                   if (!strct)
                     {
                       pcl_tab_error (&@2, NULL,
-                                     "expected struct");
+                                     "expected struct tag");
                       YYERROR;
                     }
                   else
@@ -438,7 +438,7 @@ type_specifier:
 
                   if (!enumeration)
                     {
-                      pcl_tab_error (&@2, NULL, "expected enumeration");
+                      pcl_tab_error (&@2, NULL, "expected enumeration tag");
                       YYERROR;
                     }
                   else
