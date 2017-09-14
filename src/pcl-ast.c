@@ -238,6 +238,58 @@ pcl_ast_get_enum (const char *tag)
   return NULL;
 }
 
+/* Structs are stored in a hash table, and are referred from AST
+   nodes.  */
+
+static pcl_ast structs_hash_table[HASH_TABLE_SIZE];
+
+/* Register a struct, storing it in the structs hash table, and return
+   a pointer to it.  If a struct with the given tag has been already
+   registered, return NULL.  */
+
+pcl_ast
+pcl_ast_register_struct (const char *tag, pcl_ast strct)
+{
+  int hash;
+  pcl_ast s;
+
+  hash = hash_string (tag);
+
+  /* Search the hash table for the struct.  */
+  for (s = structs_hash_table[hash]; s != NULL; s = PCL_AST_CHAIN (s))
+    if (PCL_AST_STRUCT_TAG (s)
+        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s))
+        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s)), tag))
+      return NULL;
+
+  /* Put the passed struct in the hash table.  */
+  PCL_AST_CHAIN (strct) = structs_hash_table[hash];
+  structs_hash_table[hash] = strct;
+
+  return strct;
+}
+
+/* Return the struct associated with the given TAG.  If the struct tag
+   has not been registered, return NULL.  */
+
+pcl_ast
+pcl_ast_get_struct (const char *tag)
+{
+  int hash;
+  pcl_ast s;
+
+  hash = hash_string (tag);
+
+  /* Search the hash table for the struct.  */
+  for (s = structs_hash_table[hash]; s != NULL; s = PCL_AST_CHAIN (s))
+    if (PCL_AST_STRUCT_TAG (s)
+        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s))
+        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s)), tag))
+      return s;
+
+  return NULL;
+}
+
 /* Build and return an AST node for an integer constant.  */
 
 pcl_ast 
@@ -634,7 +686,8 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
     case PCL_AST_STRUCT:
       IPRINTF ("STRUCT::\n");
 
-      IPRINTF ("STRUCT:: endian=%s\n",
+      IPRINTF ("endian:\n");
+      IPRINTF ("  %s\n",
                PCL_AST_STRUCT_ENDIAN (ast)
                == PCL_AST_MSB ? "msb" : "lsb");
       PRINT_AST_SUBAST (tag, STRUCT_TAG);
@@ -665,9 +718,12 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
 
       if (PCL_AST_TYPE_ENUMERATION (ast))
         {
+          pcl_ast enumeration = PCL_AST_TYPE_ENUMERATION (ast);
+          const char *tag
+            = PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (enumeration));
+
           IPRINTF ("enumeration:\n");
-          IPRINTF ("  '%s'\n",
-                   PCL_AST_ENUM_TAG (PCL_AST_TYPE_ENUMERATION (ast)));
+          IPRINTF ("  'enum %s'\n", tag);
         }
 
       if (PCL_AST_TYPE_STRUCT (ast))

@@ -379,7 +379,7 @@ pcl_ast pcl_ast_get_type (const char *str);
 pcl_ast pcl_ast_register_enum (const char *tag, pcl_ast enumeration);
 pcl_ast pcl_ast_get_enum (const char *tag);
 
-pcl_ast pcL_ast_register_struct (const char *tag, pcl_ast strct);
+pcl_ast pcl_ast_register_struct (const char *tag, pcl_ast strct);
 pcl_ast pcl_ast_get_struct (const char *tag);
 
 pcl_ast pcl_ast_make_integer (uint64_t value);

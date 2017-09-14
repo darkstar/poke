@@ -102,10 +102,10 @@ struct_specifier_action (pcl_ast *strct,
   *strct = pcl_ast_make_struct (tag, fields, docstr,
                                 pcl_ast_default_endian ());
 
-  if (pcl_ast_register_type (PCL_AST_IDENTIFIER_POINTER (tag),
-                             *strct) == NULL)
+  if (pcl_ast_register_struct (PCL_AST_IDENTIFIER_POINTER (tag),
+                               *strct) == NULL)
     {
-      pcl_tab_error (loc_tag, NULL, "type already defined");
+      pcl_tab_error (loc_tag, NULL, "struct already defined");
       return 0;
     }
 
@@ -420,7 +420,7 @@ type_specifier:
 	| STRUCT IDENTIFIER
         	{
                   pcl_ast strct
-                    = pcl_ast_get_type (PCL_AST_IDENTIFIER_POINTER ($2));
+                    = pcl_ast_get_struct (PCL_AST_IDENTIFIER_POINTER ($2));
 
                   if (!strct)
                     {
@@ -435,7 +435,7 @@ type_specifier:
         	{
                   pcl_ast enumeration
                     = pcl_ast_get_enum (PCL_AST_IDENTIFIER_POINTER ($2));
-                  
+
                   if (!enumeration)
                     {
                       pcl_tab_error (&@2, NULL, "expected enumeration");
