@@ -37,23 +37,28 @@
 enum pcl_ast_code
 {
   PCL_AST_PROGRAM,
-  PCL_AST_ENUMERATOR,
-  PCL_AST_ENUM,
+  /* Expressions.  */
   PCL_AST_EXP,
   PCL_AST_COND_EXP,
+  /* Enumerations.  */
+  PCL_AST_ENUM,
+  PCL_AST_ENUMERATOR,
+  /* Structs and their components.  */
+  PCL_AST_STRUCT,
+  /* Memory layouts.  */
+  PCL_AST_MEM,
+  PCL_AST_FIELD,
+  PCL_AST_COND,
+  PCL_AST_LOOP,
+  /* Types.  */
+  PCL_AST_TYPE,
+  PCL_AST_ARRAY_REF, /*XXX*/
+  PCL_AST_STRUCT_REF,
+  /* Leafs.  */
   PCL_AST_INTEGER,
   PCL_AST_STRING,
-  PCL_AST_DOC_STRING,
-  PCL_AST_STRUCT,
-  PCL_AST_FIELD,
-  PCL_AST_COMPOUND,
-  PCL_AST_STMT,
-  PCL_AST_IF_STMT,
-  PCL_AST_LOOP,
   PCL_AST_IDENTIFIER,
-  PCL_AST_ARRAY_REF,
-  PCL_AST_STRUCT_REF,
-  PCL_AST_TYPE
+  PCL_AST_DOC_STRING,
 };
 
 /* Pleae update the static `opcodes' array in pcl-ast.c:pcl_ast_print
@@ -231,18 +236,26 @@ struct pcl_ast_enum
   union pcl_ast_s *docstr;
 };
 
+#define PCL_AST_MEM_ENDIAN(AST) ((AST)->mem.endian)
+#define PCL_AST_MEM_COMPONENTS(AST) ((AST)->mem.components)
+
+struct pcl_ast_mem
+{
+  struct pcl_ast_common common;
+  enum pcl_ast_endian endian;
+  union pcl_ast_s *components;
+};
+
 #define PCL_AST_STRUCT_TAG(AST) ((AST)->strct.tag)
-#define PCL_AST_STRUCT_FIELDS(AST) ((AST)->strct.fields)
 #define PCL_AST_STRUCT_DOCSTR(AST) ((AST)->strct.docstr)
-#define PCL_AST_STRUCT_ENDIAN(AST) ((AST)->strct.endian)
+#define PCL_AST_STRUCT_MEM(AST) ((AST)->strct.mem)
 
 struct pcl_ast_struct
 {
   struct pcl_ast_common common;
-  enum pcl_ast_endian endian;
   union pcl_ast_s *tag;
-  union pcl_ast_s *fields;
   union pcl_ast_s *docstr;
+  union pcl_ast_s *mem;
 };
 
 #define PCL_AST_FIELD_NAME(AST) ((AST)->field.name)
@@ -261,26 +274,14 @@ struct pcl_ast_field
   union pcl_ast_s *num_ents;
 };
 
-#define PCL_AST_STMT_FILENAME(AST) ((AST)->stmt.filename)
-#define PCL_AST_STMT_LINENUM(AST) ((AST)->stmt.linenum)
-#define PCL_AST_STMT_BODY(AST) ((AST)->stmt.body)
+#define PCL_AST_COND_EXP(AST) ((AST)->cond.exp)
+#define PCL_AST_COND_THENPART(AST) ((AST)->cond.thenpart)
+#define PCL_AST_COND_ELSEPART(AST) ((AST)->cond.elsepart)
 
-struct pcl_ast_stmt
+struct pcl_ast_cond
 {
   struct pcl_ast_common common;
-  char *filename;
-  size_t linenum;
-  union pcl_ast_s *body;
-};
-
-#define PCL_AST_IF_STMT_COND(AST) ((AST)->if_stmt.cond)
-#define PCL_AST_IF_STMT_THENPART(AST) ((AST)->if_stmt.thenpart)
-#define PCL_AST_IF_STMT_ELSEPART(AST) ((AST)->if_stmt.elsepart)
-
-struct pcl_ast_if_stmt
-{
-  struct pcl_ast_common common;
-  union pcl_ast_s *cond;
+  union pcl_ast_s *exp;
   union pcl_ast_s *thenpart;
   union pcl_ast_s *elsepart;
 };
@@ -345,9 +346,9 @@ union pcl_ast_s
   struct pcl_ast_common common; /* This field _must_ appear first.  */
   struct pcl_ast_program program;
   struct pcl_ast_struct strct;
+  struct pcl_ast_mem mem;
   struct pcl_ast_field field;
-  struct pcl_ast_stmt stmt;
-  struct pcl_ast_if_stmt if_stmt;
+  struct pcl_ast_cond cond;
   struct pcl_ast_loop loop;
   struct pcl_ast_identifier identifier;
   struct pcl_ast_integer integer;
@@ -396,13 +397,16 @@ pcl_ast pcl_ast_make_array_ref (pcl_ast base, pcl_ast index);
 pcl_ast pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier);
 pcl_ast pcl_ast_make_type (int signed_p, pcl_ast width,
                            pcl_ast enumeration, pcl_ast strct);
-pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
-                             enum pcl_ast_endian endian);
+pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast docstr,
+                             pcl_ast mem);
+pcl_ast pcl_ast_make_mem (enum pcl_ast_endian endian,
+                          pcl_ast components);
 
 pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
                             enum pcl_ast_endian endian, pcl_ast num_ents);
 pcl_ast pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
                            pcl_ast docstr);
+pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);
 pcl_ast pcl_ast_make_program (void);
 
 #ifdef PCL_DEBUG

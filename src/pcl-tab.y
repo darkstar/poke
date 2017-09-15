@@ -96,11 +96,10 @@ enum_specifier_action (pcl_ast *enumeration,
 static int
 struct_specifier_action (pcl_ast *strct,
                          pcl_ast tag, YYLTYPE *loc_tag,
-                         pcl_ast fields, YYLTYPE *loc_fields,
-                         pcl_ast docstr, YYLTYPE *loc_docstr)
+                         pcl_ast docstr, YYLTYPE *loc_docstr,
+                         pcl_ast mem, YYLTYPE *loc_mem)
 {
-  *strct = pcl_ast_make_struct (tag, fields, docstr,
-                                pcl_ast_default_endian ());
+  *strct = pcl_ast_make_struct (tag, docstr, mem);
 
   if (pcl_ast_register_struct (PCL_AST_IDENTIFIER_POINTER (tag),
                                *strct) == NULL)
@@ -117,6 +116,7 @@ struct_specifier_action (pcl_ast *strct,
 %union {
   pcl_ast ast;
   enum pcl_ast_op opcode;
+  int integer;
 }
 
 %token <ast> INT
@@ -163,6 +163,8 @@ struct_specifier_action (pcl_ast *strct,
 
 %type <opcode> unary_operator assignment_operator
 
+%type <integer> mem_endianness
+
 %type <ast> enumerator_list enumerator constant_expression
 %type <ast> conditional_expression logical_or_expression
 %type <ast> logical_and_expression inclusive_or_expression
@@ -173,9 +175,11 @@ struct_specifier_action (pcl_ast *strct,
 %type <ast> postfix_expression primary_expression
 %type <ast> expression assignment_expression simple_type_specifier
 %type <ast> type_specifier declaration declaration_specifiers
-%type <ast> typedef_specifier struct_specifier enum_specifier
-%type <ast> struct_declaration_list struct_declaration_with_endian
-%type <ast> struct_declaration struct_field declaration_list program
+%type <ast> typedef_specifier enum_specifier struct_specifier 
+%type <ast> declaration_list program
+%type <ast> mem_layout mem_declarator_list
+%type <ast> mem_declarator mem_field_with_docstr mem_field_with_endian
+%type <ast> mem_field mem_cond
 
 %start program
 
@@ -376,16 +380,12 @@ primary_expression:
  */
 
 declaration:
-	  declaration_specifiers ';'
+	  declaration_specifiers
         ;
 
 declaration_specifiers:
           typedef_specifier
 	| struct_specifier
-        | MSB struct_specifier
-          	{ PCL_AST_STRUCT_ENDIAN ($2) = PCL_AST_MSB; $$ = $2; }
-        | LSB struct_specifier
-        	{ PCL_AST_STRUCT_ENDIAN ($2) = PCL_AST_LSB; $$ = $2; }
         | enum_specifier
         ;
 
@@ -545,114 +545,107 @@ enumerator:
  */
 
 struct_specifier:
-	  STRUCT IDENTIFIER '{' struct_declaration_list '}'
-          	{
-                  if (! struct_specifier_action (&$$,
-                                                 $IDENTIFIER, &@IDENTIFIER,
-                                                 $struct_declaration_list,
-                                                 &@struct_declaration_list,
-                                                 NULL, NULL))
-                    YYERROR;
-                }
-	| STRUCT IDENTIFIER DOCSTR '{' struct_declaration_list '}'
-          	{
-                  if (! struct_specifier_action (&$$,
-                                                 $IDENTIFIER, &@IDENTIFIER,
-                                                 $struct_declaration_list,
-                                                 &@struct_declaration_list,
-                                                 $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        | STRUCT DOCSTR IDENTIFIER '{' struct_declaration_list '}'
-        	{
-                  if (! struct_specifier_action (&$$,
-                                                 $IDENTIFIER, &@IDENTIFIER,
-                                                 $struct_declaration_list,
-                                                 &@struct_declaration_list,
-                                                 $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        | STRUCT IDENTIFIER '{' struct_declaration_list '}' DOCSTR
-        	{
-                  if (! struct_specifier_action (&$$,
-                                                 $IDENTIFIER, &@IDENTIFIER,
-                                                 $struct_declaration_list,
-                                                 &@struct_declaration_list,
-                                                 $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        ;
-
-struct_declaration_list:
-          %empty
-		{ $$ = NULL; }
-	| struct_declaration_with_endian
-        | struct_declaration_list struct_declaration_with_endian
-        	{ $$ = pcl_ast_chainon ($1, $2); }
-/* XXX: add conditionals and loops.  */
+	  STRUCT IDENTIFIER mem_layout
+			{
+                          if (!struct_specifier_action (&$$,
+                                                        $IDENTIFIER, &@IDENTIFIER,
+                                                        NULL, NULL,
+                                                        $mem_layout, &@mem_layout))
+                            YYERROR;
+                        }
+	| DOCSTR STRUCT IDENTIFIER mem_layout
+			{
+                          if (!struct_specifier_action (&$$,
+                                                        $IDENTIFIER, &@IDENTIFIER,
+                                                        $DOCSTR, &@DOCSTR,
+                                                        $mem_layout, &@mem_layout))
+                            YYERROR;
+                        }
+        | STRUCT IDENTIFIER mem_layout DOCSTR
+        		{
+                          if (!struct_specifier_action (&$$,
+                                                        $IDENTIFIER, &@IDENTIFIER,
+                                                        $DOCSTR, &@DOCSTR,
+                                                        $mem_layout, &@mem_layout))
+                            YYERROR;
+                        }
 	;
 
-struct_declaration_with_endian:
-	  struct_declaration
-        | MSB struct_declaration
-		{
-                  PCL_AST_FIELD_ENDIAN ($2) = PCL_AST_MSB;
-                  $$ = $2;
-                }
-        | LSB struct_declaration
-        	{
-                  PCL_AST_FIELD_ENDIAN ($2) = PCL_AST_LSB;
-                  $$ = $2;
-                }
+/*
+ * Memory layouts.
+ */
+
+mem_layout:
+	  mem_endianness '{' mem_declarator_list '}'
+          			{ $$ = pcl_ast_make_mem ($1, $3); }
+	| '{' mem_declarator_list '}'
+        			{ $$ = pcl_ast_make_mem (pcl_ast_default_endian (),
+                                                         $2); }
         ;
 
-struct_declaration:
-	   type_specifier struct_field ';'
-          	{
-                  PCL_AST_FIELD_TYPE ($2) = $1;
-                  $$ = $2;
-                }
+mem_endianness:
+	  MSB		{ $$ = PCL_AST_MSB; }
+	| LSB		{ $$ = PCL_AST_LSB; }
+	;
 
-	 | type_specifier struct_field DOCSTR ';'
-          	{
-                  PCL_AST_FIELD_TYPE ($2) = $1;
-                  PCL_AST_FIELD_DOCSTR ($2) = $3;
-                  $$ = $2;
-                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
-                }
-        | type_specifier DOCSTR struct_field ';'
-        	{
-                  PCL_AST_FIELD_TYPE ($3) = $1;
-                  PCL_AST_FIELD_DOCSTR ($3) = $2;
-                  $$ = $3;
-                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
-                }
-        | DOCSTR type_specifier struct_field ';'
-        	{
-                  PCL_AST_FIELD_TYPE ($3) = $2;
-                  PCL_AST_FIELD_DOCSTR ($3) = $1;
-                  $$ = $3;
-                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
-                }
+mem_declarator_list:
+	  %empty
+			{ $$ = NULL; }
+	| mem_declarator ';'
+        | mem_declarator_list  mem_declarator ';'
+		        { $$ = pcl_ast_chainon ($1, $2); }
+	;
+
+mem_declarator:
+	  mem_layout
+        | mem_field_with_docstr
+        | mem_cond
         ;
 
-struct_field:
-	  IDENTIFIER
-          	{
-                  $$ = pcl_ast_make_field ($1,
-                                           /* type */ NULL,
-                                           /* docstr */ NULL,
-                                           pcl_ast_default_endian (),
-                                           /* size_exp */ NULL);
-                }
-        | IDENTIFIER '[' assignment_expression ']'
-        	{
-                  $$ = pcl_ast_make_field ($1,
-                                           /* type */ NULL,
-                                           /* docstr */ NULL,
-                                           pcl_ast_default_endian (),
-                                           $3);
-                }
+mem_field_with_docstr:
+	  mem_field_with_endian
+	| DOCSTR mem_field_with_endian
+          		{
+                          PCL_AST_FIELD_DOCSTR ($2) = $1;
+                          $$ = $2;
+                        }
+        | mem_field_with_endian DOCSTR
+		        {
+                          PCL_AST_FIELD_DOCSTR ($1) = $2;
+                          $$ = $1;
+                        }
         ;
+
+mem_field_with_endian:
+	  mem_endianness mem_field
+          		{
+                          PCL_AST_FIELD_ENDIAN ($2) = $1;
+                          $$ = $2;
+                        }
+        | mem_field
+	;
+
+mem_field:
+	  type_specifier IDENTIFIER
+          		{
+                          pcl_ast one = pcl_ast_make_integer (1);
+                          $$ = pcl_ast_make_field ($2, $1, NULL,
+                                                   pcl_ast_default_endian (),
+                                                   one);
+                        }
+        | type_specifier IDENTIFIER '[' assignment_expression ']'
+		        {
+                          $$ = pcl_ast_make_field ($2, $1, NULL,
+                                                   pcl_ast_default_endian (),
+                                                   $4);
+                        }
+	;
+
+mem_cond:
+	  IF '(' expression ')' mem_layout
+          		{ $$ = pcl_ast_make_cond ($3, $5, NULL); }
+        | IF '(' expression ')' mem_layout ELSE mem_layout
+        		{ $$ = pcl_ast_make_cond ($3, $5, $7); }
+        ;        
 
 %%

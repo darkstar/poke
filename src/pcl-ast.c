@@ -466,19 +466,32 @@ pcl_ast_make_type (int signed_p, pcl_ast width,
 /* Build and return an AST node for a struct.  */
 
 pcl_ast
-pcl_ast_make_struct (pcl_ast tag, pcl_ast fields, pcl_ast docstr,
-                     enum pcl_ast_endian endian)
+pcl_ast_make_struct (pcl_ast tag, pcl_ast docstr,
+                     pcl_ast mem)
 {
   pcl_ast strct = pcl_ast_make_node (PCL_AST_STRUCT);
 
   assert (tag);
 
   PCL_AST_STRUCT_TAG (strct) = tag;
-  PCL_AST_STRUCT_FIELDS (strct) = fields;
   PCL_AST_STRUCT_DOCSTR (strct) = docstr;
-  PCL_AST_STRUCT_ENDIAN (strct) = endian;
+  PCL_AST_STRUCT_MEM (strct) = mem;
 
   return strct;
+}
+
+/* Build and return an AST node for a memory layout.  */
+
+pcl_ast
+pcl_ast_make_mem (enum pcl_ast_endian endian,
+                  pcl_ast components)
+{
+  pcl_ast mem = pcl_ast_make_node (PCL_AST_MEM);
+
+  PCL_AST_MEM_ENDIAN (mem) = endian;
+  PCL_AST_MEM_COMPONENTS (mem) = components;
+
+  return mem;
 }
 
 /* Build and return an AST node for an enum.  */
@@ -516,6 +529,22 @@ pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
   PCL_AST_FIELD_NUM_ENTS (field) = num_ents;
 
   return field;
+}
+
+/* Build and return an AST node for a struct conditional.  */
+
+pcl_ast
+pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart)
+{
+  pcl_ast cond = pcl_ast_make_node (PCL_AST_COND);
+
+  assert (exp);
+
+  PCL_AST_COND_EXP (cond) = exp;
+  PCL_AST_COND_THENPART (cond) = thenpart;
+  PCL_AST_COND_ELSEPART (cond) = elsepart;
+
+  return cond;
 }
 
 /* Build and return an AST node for a PCL program.  */
@@ -689,16 +718,24 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
     case PCL_AST_STRUCT:
       IPRINTF ("STRUCT::\n");
 
-      IPRINTF ("endian:\n");
-      IPRINTF ("  %s\n",
-               PCL_AST_STRUCT_ENDIAN (ast)
-               == PCL_AST_MSB ? "msb" : "lsb");
       PRINT_AST_SUBAST (tag, STRUCT_TAG);
       PRINT_AST_OPT_SUBAST (docstr, STRUCT_DOCSTR);
-      IPRINTF ("fields:\n");
-      PRINT_AST_SUBAST_CHAIN (STRUCT_FIELDS);
+      PRINT_AST_SUBAST (mem, STRUCT_MEM);
+
       break;
 
+    case PCL_AST_MEM:
+      IPRINTF ("MEM::\n");
+      
+      IPRINTF ("endian:\n");
+      IPRINTF ("  %s\n",
+               PCL_AST_MEM_ENDIAN (ast)
+               == PCL_AST_MSB ? "msb" : "lsb");
+      IPRINTF ("components:\n");
+      PRINT_AST_SUBAST_CHAIN (MEM_COMPONENTS);
+
+      break;
+      
     case PCL_AST_FIELD:
       IPRINTF ("FIELD::\n");
 
@@ -711,6 +748,15 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
       PRINT_AST_OPT_SUBAST (num_ents, FIELD_NUM_ENTS);
       PRINT_AST_OPT_SUBAST (docstr, FIELD_DOCSTR);
       
+      break;
+
+    case PCL_AST_COND:
+      IPRINTF ("COND::\n");
+
+      PRINT_AST_SUBAST (exp, COND_EXP);
+      PRINT_AST_SUBAST (thenpart, COND_THENPART);
+      PRINT_AST_SUBAST (elsepart, COND_ELSEPART);
+
       break;
 
     case PCL_AST_TYPE:
