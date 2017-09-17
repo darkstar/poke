@@ -31,9 +31,9 @@
 
 enum elf_ei_class
 {
-  ELFCLASSNONE 0x0	<<<Invalid class>>>,
-  ELFCLASS32 0x1	<<<32-bit objects>>>,
-  ELFCLASS64 0x2	<<<64-bit objects>>>
+  ELFCLASSNONE = 0x0	<<<Invalid class>>>,
+  ELFCLASS32 = 0x1	<<<32-bit objects>>>,
+  ELFCLASS64 = 0x2	<<<64-bit objects>>>
 };
 
 enum elf_e_type
@@ -66,7 +66,7 @@ enum elf_e_machine
   EM_PARISC = 15	<<<Hewlett-Packard PA-RISC>>>,
   /* 16 is reserved.  */
   EM_VPP500 = 17     	<<<Fujitsu VPP500>>>,
-  EM_SPARC32PLUS = 18	<<<32-bit on V9 SPARC>>>
+  EM_SPARC32PLUS = 18	<<<32-bit on V9 SPARC>>>,
   EM_960 = 19        	<<<Intel 80960>>>,
   EM_PPC = 20        	<<<PowerPC>>>,
   EM_PPC64 = 21      	<<<64-bit PowerPC>>>,
@@ -431,8 +431,8 @@ struct elf_rel <<<ELF relocation>>>
   elf_xword r_info	<<<Relocation info: symbol + type>>>;
 
   . -= info_start;
-  elf_r_sym r_sym;	<<<Relocation symbol>>>
-  elf_r_type r_type;	<<<Relocation type>>>
+  elf_r_sym r_sym : elf_r_sym_size; 	<<<Relocation symbol>>>
+  elf_r_type r_type : elf_r_type_size;	<<<Relocation type>>>
 };
 
 struct elf_rela <<<ELF relocation with addend>>>

@@ -99,6 +99,7 @@ make_docstring (const char *str)
   return dstring;
 }
 
+static pcl_ast cur_docstr;
  
 %}
 
@@ -108,12 +109,11 @@ DIGIT              [0-9]
 LETTER             [a-zA-Z]
 FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
 STRING             \"([^"]|\\(.|\n))*\"
-DOCSTR		   <<<.*>>>
 
 L [a-zA-Z_]
 D [0-9]
 
-%x C_COMMENT
+%x C_COMMENT C_DOCSTR
 
 %%
 
@@ -123,6 +123,16 @@ D [0-9]
 <C_COMMENT>"*/" { BEGIN(INITIAL); } 
 <C_COMMENT>. { }                    
 <C_COMMENT>\n { }                   
+
+"<<<" { BEGIN(C_DOCSTR); }
+<C_DOCSTR>">>>" {
+     BEGIN(INITIAL);
+     yylval->ast = cur_docstr;
+     return DOCSTR;
+}
+<C_DOCSTR>([^>]|>[^>]|>>[^>])* {
+     cur_docstr = pcl_ast_make_doc_string (yytext, NULL);
+}      
 
 "enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }
@@ -145,16 +155,6 @@ D [0-9]
 
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
-
-{DOCSTR} {
-   char *dstring = make_docstring (yytext);
-
-   yylval->ast = pcl_ast_make_doc_string (dstring, NULL);
-   free (dstring);
-   return DOCSTR;
-}
-
-"<<<"		{ return ERR; /* XXX Error: unterminated docstring.  */ }
 
 "*="		{ return MULA; }
 "/="		{ return DIVA; }

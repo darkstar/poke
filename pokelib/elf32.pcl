@@ -18,21 +18,27 @@
 
 include std;
 
-typedef word elf_addr <<<Unsigned program address>>>; /* XXX: alignment? */
-typedef word elf_off  <<<Unsigned file offset>>>;
-typedef half elf_half <<<Unsigned medium integer>>>;
-typedef word elf_word <<<Unsigned integer>>>;
-typedef sword elf_sword <<<Signed integer>>>;
+typedef unsigned int elf_addr;
+typedef unsigned int elf_off;
+typedef unsigned short elf_half;
+typedef unsigned int elf_word;
+typedef int elf_sword;
 
 /* Note that the gABI doesn't define Elf32_XWord and Elf32_Sxword
    types, but we nevertheless define elf_xword and elf_sxword so we
    can use a single copy of elf.pcl.  */
 
-typedef elf_word elf_xword   <<<Unsigned integer>>>;
-typedef elf_sword elf_sxword <<<Signed integer>>>;
+typedef elf_word elf_xword;
+typedef elf_sword elf_sxword;
 
-typedef u:24 elf_r_sym;
-typedef byte elf_r_type;
+typedef unsigned int elf_r_sym;
+typedef unsigned char elf_r_type;
+
+enum elf_constants
+{
+  elf_r_sym_size = 24,
+  elf_r_type_size = 8
+};
 
 struct elf_sym
 {
