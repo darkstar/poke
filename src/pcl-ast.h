@@ -50,6 +50,7 @@ enum pcl_ast_code
   PCL_AST_FIELD,
   PCL_AST_COND,
   PCL_AST_LOOP,
+  PCL_AST_ASSERTION,
   /* Types.  */
   PCL_AST_TYPE,
   PCL_AST_ARRAY_REF, /*XXX*/
@@ -346,6 +347,14 @@ struct pcl_ast_type
   union pcl_ast_s *enumeration;
   union pcl_ast_s *strt;
 };
+
+#define PCL_AST_ASSERTION_EXP(AST) ((AST)->assertion.exp)
+
+struct pcl_ast_assertion
+{
+  struct pcl_ast_common common;
+  union pcl_ast_s *exp;
+};
   
 
 /* Finally, the `pcl_ast' type, which represents both an AST tree and
@@ -371,6 +380,7 @@ union pcl_ast_s
   struct pcl_ast_enumerator enumerator;
   struct pcl_ast_enum enumeration;
   struct pcl_ast_type type;
+  struct pcl_ast_assertion assertion;
 };
 
 typedef union pcl_ast_s *pcl_ast;
@@ -417,6 +427,8 @@ pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
                             pcl_ast size);
 pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
 pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);
+pcl_ast pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post, pcl_ast body);
+pcl_ast pcl_ast_make_assertion (pcl_ast exp);
 pcl_ast pcl_ast_make_program (void);
 
 #ifdef PCL_DEBUG

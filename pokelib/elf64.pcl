@@ -37,7 +37,7 @@ struct elf_sym
   elf_word st_name;
 
   /*  info_start = .; */
-  unsigned char st_info; <<<Symbol's type and binding attributes>>>
+  unsigned char st_info <<<Symbol's type and binding attributes>>>;
 
   /* . = info_start; */
   int st_bind : 4	<<<Symbol's binding>>>;

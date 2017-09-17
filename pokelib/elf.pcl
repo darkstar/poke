@@ -186,9 +186,9 @@ enum elf_e_machine
   EM_TRIMEDIA = 163	<<<NXP Semiconductors TriMedia architecture family>>>,
   EM_QDSP6 = 164	<<<QUALCOMM DSP6 Processor>>>,
   EM_8051 = 165		<<<Intel 8051 and variants>>>,
-  EM_STXP7X = 166	<<<STMicroelectronics STxP7x family of configurable and>>>
-                     	<<<extensible RISC processors>>>,
-  EM_NDS32 = 167	<<<Andes Technology compact code size embedded RISC>>>
+  EM_STXP7X = 166	<<<STMicroelectronics STxP7x family of configurable and
+                     	   extensible RISC processors>>>,
+  EM_NDS32 = 167	<<<Andes Technology compact code size embedded RISC
                      	<<<processor family>>>,
   EM_ECOG1 = 168	<<<Cyan Technology eCOG1X family>>>,
   EM_ECOG1X = 168	<<<Cyan Technology eCOG1X family>>>,
@@ -200,8 +200,8 @@ enum elf_e_machine
   EM_METAG = 174	<<<Imagination Technologies META processor architecture>>>,
   EM_MCST_ELBRUS = 175	<<<MCST Elbrus general purpose hardware architecture>>>,
   EM_ECOG16 = 176	<<<Cyan Technology eCOG16 family>>>,
-  EM_CR16 = 177		<<<National Semiconductor CompactRISC CR16 16-bit>>>
-                     	<<<microprocessor>>>,
+  EM_CR16 = 177		<<<National Semiconductor CompactRISC CR16 16-bit
+                     	   microprocessor>>>,
   EM_ETPU = 178		<<<Freescale Extended Time Processing Unit>>>,
   EM_SLE9X = 179	<<<Infineon Technologies SLE9X core>>>,
   EM_L10M = 180		<<<Intel L10M>>>,
@@ -365,8 +365,8 @@ enum elf_sh_flags
   SHF_GROUP = 0x200		<<<This section is a member of a section group>>>,
   SHF_TLS = 0x400		<<<This section holds thread-local storage>>>,
   SHF_COMPRESSED = 0x800     	<<<This section holds compressed data>>>,
-  SHF_MASKOS = 0x0ff0_0000   	<<<Operating system-specific flags>>>,
-  SHF_MASKPROC = 0xf000_0000 	<<<Processor-specific flags>>>
+  SHF_MASKOS = 0x0ff00000   	<<<Operating system-specific flags>>>,
+  SHF_MASKPROC = 0xf0000000 	<<<Processor-specific flags>>>
 };
 
 enum elf_p_type
@@ -374,13 +374,13 @@ enum elf_p_type
   PT_NULL = 0		<<<Array element is unused>>>,
   PT_LOAD = 1		<<<Loadable segment>>>,
   PT_DYNAMIC = 2	<<<Dynamic linking information>>>,
-  PT_INTERP = 3		<<<Location and size of a null-terminated>>>
-			<<<path name to invoke as an interpreter>>>,
-  PT_NOTE = 4		<<<Location and size of auxiliary>>>
+  PT_INTERP = 3		<<<Location and size of a null-terminated
+			   path name to invoke as an interpreter>>>,
+  PT_NOTE = 4		<<<Location and size of auxiliary
 			<<<information>>>,
   PT_SHLIB = 5		<<<Reserved.  Unspecified semantics>>>,
-  PT_PHDR = 6		<<<Location and size of the program header>>>
-                        <<<table itself>>>,
+  PT_PHDR = 6		<<<Location and size of the program header
+                           table itself>>>,
   PT_TLS = 7		<<<Thread-Local storage template>>>,
   PT_LOOS = 0x60000000	<<<Operating system-specific>>>,
   PT_HIOS = 0x6fffffff	<<<Operating system-specific>>>,
@@ -394,7 +394,7 @@ enum elf_p_flags
   PF_W = 0x2		<<<Write>>>,
   PF_R = 0x4		<<<Read>>>,
   PF_MASKOS = 0xff00000	<<<Unspecified>>>,
-  PF_MASKPROC = 0xf000_0000 <<<Unspecified>>>
+  PF_MASKPROC = 0xf0000000 <<<Unspecified>>>
 };
 
 enum elf_ch_type
@@ -427,26 +427,26 @@ struct elf_rel <<<ELF relocation>>>
 {
   elf_addr r_offset	<<<Relocation location>>>;
 
-  info_start = .;
+  /* info_start = .; */
   elf_xword r_info	<<<Relocation info: symbol + type>>>;
 
-  . -= info_start;
-  elf_r_sym r_sym : elf_r_sym_size; 	<<<Relocation symbol>>>
-  elf_r_type r_type : elf_r_type_size;	<<<Relocation type>>>
+  /* . -= info_start; */
+  unsigned int r_sym : elf_r_sym_size 	<<<Relocation symbol>>>;
+  unsigned int r_type : elf_r_type_size	<<<Relocation type>>>;
 };
 
 struct elf_rela <<<ELF relocation with addend>>>
 {
   elf_addr r_offset	<<<Relocation location>>>;
 
-  info_start = .;
+  /* info_start = .; */
   elf_xword r_info	<<<Relocation info: symbol + type>>>;
 
-  . = info_start;
-  elf_r_sym r_sym;	<<<Relocation symbol>>>
-  elf_r_type r_type;	<<<Relocation type>>>
+  /* . = info_start; */
+  unsigned int r_sym : elf_r_sym_size;	<<<Relocation symbol>>>
+  unsigned int r_type : elf_r_type_size;<<<Relocation type>>>
 
-  assert (sizeof (elf_r_sym) + sizeof (elf_r_type) == sizeof (elf_xword));
+  /* assert (sizeof (elf_r_sym) + sizeof (elf_r_type) == sizeof (elf_xword)); */
 
   elf_sxword r_addend	<<<
                            Constant addend used to compute

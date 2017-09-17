@@ -545,6 +545,33 @@ pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart)
   return cond;
 }
 
+/* Build and return an AST node for a struct loop.  */
+
+pcl_ast
+pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post,
+                   pcl_ast body)
+{
+  pcl_ast loop = pcl_ast_make_node (PCL_AST_LOOP);
+
+  PCL_AST_LOOP_PRE (loop) = pre;
+  PCL_AST_LOOP_COND (loop) = cond;
+  PCL_AST_LOOP_POST (loop) = post;
+  PCL_AST_LOOP_BODY (loop) = body;
+
+  return loop;
+}
+
+/* Build and return an AST node for an assert.  */
+
+pcl_ast
+pcl_ast_make_assertion (pcl_ast exp)
+{
+  pcl_ast assertion = pcl_ast_make_node (PCL_AST_ASSERTION);
+
+  PCL_AST_ASSERTION_EXP (assertion) = exp;
+  return assertion;
+}
+
 /* Build and return an AST node for a PCL program.  */
 
 pcl_ast
@@ -757,6 +784,16 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
 
       break;
 
+    case PCL_AST_LOOP:
+      IPRINTF ("LOOP::\n");
+
+      PRINT_AST_SUBAST (pre, LOOP_PRE);
+      PRINT_AST_SUBAST (cond, LOOP_COND);
+      PRINT_AST_SUBAST (post, LOOP_POST);
+      PRINT_AST_SUBAST (body, LOOP_BODY);
+
+      break;
+
     case PCL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
@@ -785,6 +822,12 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
       if (PCL_AST_TYPE_STRUCT (ast))
         IPRINTF ("struct: tag '%s'\n",
                  PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+      break;
+
+    case PCL_AST_ASSERTION:
+      IPRINTF ("ASSERTION::\n");
+
+      PRINT_AST_SUBAST (exp, ASSERTION_EXP);
       break;
 
     default:

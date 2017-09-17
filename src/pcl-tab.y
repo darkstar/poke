@@ -132,8 +132,10 @@ struct_specifier_action (pcl_ast *strct,
 %token CONTINUE
 %token ELSE
 %token FOR
+%token WHILE
 %token IF
 %token SIZEOF
+%token ASSERT
 %token ERR
 
 %token AND
@@ -179,7 +181,8 @@ struct_specifier_action (pcl_ast *strct,
 %type <ast> declaration_list program
 %type <ast> mem_layout mem_declarator_list
 %type <ast> mem_declarator mem_field_with_docstr mem_field_with_endian
-%type <ast> mem_field_with_size mem_field mem_cond
+%type <ast> mem_field_with_size mem_field mem_cond mem_loop
+%type <ast> assert
 
 %start program
 
@@ -615,6 +618,8 @@ mem_declarator:
 	  mem_layout
         | mem_field_with_docstr
         | mem_cond
+        | mem_loop
+        | assert
         ;
 
 mem_field_with_docstr:
@@ -670,6 +675,18 @@ mem_cond:
           		{ $$ = pcl_ast_make_cond ($3, $5, NULL); }
         | IF '(' expression ')' mem_layout ELSE mem_layout
         		{ $$ = pcl_ast_make_cond ($3, $5, $7); }
-        ;        
+        ;
+
+mem_loop:
+	  FOR '(' expression ';' expression ';' expression ')' mem_layout
+          		{ $$ = pcl_ast_make_loop ($3, $5, $7, $9); }
+        | WHILE '(' expression ')' mem_layout
+        		{ $$ = pcl_ast_make_loop (NULL, $3, NULL, $5); }
+	;
+
+assert:
+	  ASSERT expression
+          		{ $$ = pcl_ast_make_assertion ($2); }
+	;
 
 %%

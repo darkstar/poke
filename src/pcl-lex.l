@@ -113,7 +113,7 @@ STRING             \"([^"]|\\(.|\n))*\"
 L [a-zA-Z_]
 D [0-9]
 
-%x C_COMMENT C_DOCSTR
+%x C_COMMENT C_DOCSTR C_INCLUDE
 
 %%
 
@@ -142,8 +142,10 @@ D [0-9]
 "continue"	{ return CONTINUE; }
 "else"		{ return ELSE; }
 "for"		{ return FOR; }
+"while"		{ return WHILE; }
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
+"assert"	{ return ASSERT; }
 
 "unsigned"	{ yylval->integer = 0; return UNSIGNED; }
 "signed"	{ yylval->integer = 1; return SIGNED; }
