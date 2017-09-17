@@ -290,6 +290,14 @@ pcl_ast_get_struct (const char *tag)
   return NULL;
 }
 
+/* Build and return an AST node for the location counter.  */
+
+pcl_ast
+pcl_ast_make_loc (void)
+{
+  return pcl_ast_make_node (PCL_AST_LOC);
+}
+
 /* Build and return an AST node for an integer constant.  */
 
 pcl_ast 
@@ -780,7 +788,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
 
       PRINT_AST_SUBAST (exp, COND_EXP);
       PRINT_AST_SUBAST (thenpart, COND_THENPART);
-      PRINT_AST_SUBAST (elsepart, COND_ELSEPART);
+      PRINT_AST_OPT_SUBAST (elsepart, COND_ELSEPART);
 
       break;
 
@@ -828,6 +836,24 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
       IPRINTF ("ASSERTION::\n");
 
       PRINT_AST_SUBAST (exp, ASSERTION_EXP);
+      break;
+
+    case PCL_AST_LOC:
+      IPRINTF ("LOC::\n");
+      break;
+
+    case PCL_AST_STRUCT_REF:
+      IPRINTF ("STRUCT_REF::\n");
+
+      PRINT_AST_SUBAST (base, STRUCT_REF_BASE);
+      PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
+      break;
+
+    case PCL_AST_ARRAY_REF:
+      IPRINTF ("ARRAY_REF::\n");
+
+      PRINT_AST_SUBAST (base, ARRAY_REF_BASE);
+      PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
       break;
 
     default:

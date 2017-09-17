@@ -60,6 +60,7 @@ enum pcl_ast_code
   PCL_AST_STRING,
   PCL_AST_IDENTIFIER,
   PCL_AST_DOC_STRING,
+  PCL_AST_LOC
 };
 
 /* Pleae update the static `opcodes' array in pcl-ast.c:pcl_ast_print
@@ -430,6 +431,7 @@ pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);
 pcl_ast pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post, pcl_ast body);
 pcl_ast pcl_ast_make_assertion (pcl_ast exp);
 pcl_ast pcl_ast_make_program (void);
+pcl_ast pcl_ast_make_loc (void);
 
 #ifdef PCL_DEBUG
 

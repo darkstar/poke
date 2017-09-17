@@ -374,6 +374,8 @@ primary_expression:
 	  IDENTIFIER
         | INTEGER
         | STR
+        | '.'
+          	{ $$ = pcl_ast_make_loc (); }
         | '(' expression ')'
 		{ $$ = $2; }
 	;
@@ -619,6 +621,7 @@ mem_declarator:
         | mem_field_with_docstr
         | mem_cond
         | mem_loop
+        | assignment_expression
         | assert
         ;
 

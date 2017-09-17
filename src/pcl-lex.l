@@ -113,7 +113,7 @@ STRING             \"([^"]|\\(.|\n))*\"
 L [a-zA-Z_]
 D [0-9]
 
-%x C_COMMENT C_DOCSTR C_INCLUDE
+%x C_COMMENT C_DOCSTR
 
 %%
 
@@ -124,7 +124,7 @@ D [0-9]
 <C_COMMENT>. { }                    
 <C_COMMENT>\n { }                   
 
-"<<<" { BEGIN(C_DOCSTR); }
+"<<<" 		{ BEGIN(C_DOCSTR); }
 <C_DOCSTR>">>>" {
      BEGIN(INITIAL);
      yylval->ast = cur_docstr;
