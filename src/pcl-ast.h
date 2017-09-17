@@ -263,6 +263,7 @@ struct pcl_ast_struct
 #define PCL_AST_FIELD_TYPE(AST) ((AST)->field.type)
 #define PCL_AST_FIELD_DOCSTR(AST) ((AST)->field.docstr)
 #define PCL_AST_FIELD_NUM_ENTS(AST) ((AST)->field.num_ents)
+#define PCL_AST_FIELD_SIZE(AST) ((AST)->field.size)
 
 struct pcl_ast_field
 {
@@ -272,6 +273,7 @@ struct pcl_ast_field
   union pcl_ast_s *type;
   union pcl_ast_s *docstr;
   union pcl_ast_s *num_ents;
+  union pcl_ast_s *size;
 };
 
 #define PCL_AST_COND_EXP(AST) ((AST)->cond.exp)
@@ -403,7 +405,8 @@ pcl_ast pcl_ast_make_mem (enum pcl_ast_endian endian,
                           pcl_ast components);
 
 pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
-                            enum pcl_ast_endian endian, pcl_ast num_ents);
+                            enum pcl_ast_endian endian, pcl_ast num_ents,
+                            pcl_ast size);
 pcl_ast pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
                            pcl_ast docstr);
 pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);

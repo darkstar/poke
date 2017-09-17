@@ -179,7 +179,7 @@ struct_specifier_action (pcl_ast *strct,
 %type <ast> declaration_list program
 %type <ast> mem_layout mem_declarator_list
 %type <ast> mem_declarator mem_field_with_docstr mem_field_with_endian
-%type <ast> mem_field mem_cond
+%type <ast> mem_field_with_size mem_field mem_cond
 
 %start program
 
@@ -380,7 +380,7 @@ primary_expression:
  */
 
 declaration:
-	  declaration_specifiers
+	  declaration_specifiers ';'
         ;
 
 declaration_specifiers:
@@ -561,6 +561,14 @@ struct_specifier:
                                                         $mem_layout, &@mem_layout))
                             YYERROR;
                         }
+        | STRUCT IDENTIFIER DOCSTR mem_layout
+        	{
+                  if (!struct_specifier_action (&$$,
+                                                $IDENTIFIER, &@IDENTIFIER,
+                                                $DOCSTR, &@DOCSTR,
+                                                $mem_layout, &@mem_layout))
+                    YYERROR;
+                }
         | STRUCT IDENTIFIER mem_layout DOCSTR
         		{
                           if (!struct_specifier_action (&$$,
@@ -617,13 +625,22 @@ mem_field_with_docstr:
         ;
 
 mem_field_with_endian:
-	  mem_endianness mem_field
+	  mem_endianness mem_field_with_size
           		{
                           PCL_AST_FIELD_ENDIAN ($2) = $1;
                           $$ = $2;
                         }
-        | mem_field
+        | mem_field_with_size
 	;
+
+mem_field_with_size:
+	  mem_field
+        | mem_field ':' expression
+          		{
+                          PCL_AST_FIELD_SIZE ($1) = $3;
+                          $$ = $1;
+                        }
+        ;
 
 mem_field:
 	  type_specifier IDENTIFIER
@@ -631,13 +648,13 @@ mem_field:
                           pcl_ast one = pcl_ast_make_integer (1);
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),
-                                                   one);
+                                                   one, NULL);
                         }
         | type_specifier IDENTIFIER '[' assignment_expression ']'
 		        {
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),
-                                                   $4);
+                                                   $4, NULL);
                         }
 	;
 

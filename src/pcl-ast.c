@@ -516,7 +516,8 @@ pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
 
 pcl_ast
 pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
-                    enum pcl_ast_endian endian, pcl_ast num_ents)
+                    enum pcl_ast_endian endian, pcl_ast num_ents,
+                    pcl_ast size)
 {
   pcl_ast field = pcl_ast_make_node (PCL_AST_FIELD);
 
@@ -527,6 +528,7 @@ pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
   PCL_AST_FIELD_DOCSTR (field) = docstr;
   PCL_AST_FIELD_ENDIAN (field) = endian;
   PCL_AST_FIELD_NUM_ENTS (field) = num_ents;
+  PCL_AST_FIELD_SIZE (field) = size;
 
   return field;
 }
@@ -746,6 +748,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
       PRINT_AST_SUBAST (name, FIELD_NAME);
       PRINT_AST_SUBAST (type, FIELD_TYPE);
       PRINT_AST_OPT_SUBAST (num_ents, FIELD_NUM_ENTS);
+      PRINT_AST_OPT_SUBAST (size, FIELD_SIZE);
       PRINT_AST_OPT_SUBAST (docstr, FIELD_DOCSTR);
       
       break;
