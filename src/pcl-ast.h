@@ -116,6 +116,16 @@ enum pcl_ast_endian
   PCL_AST_LSB  /* Little-endian.  */
 };
 
+enum pcl_ast_type_code
+{
+  PCL_TYPE_CHAR,
+  PCL_TYPE_SHORT,
+  PCL_TYPE_INT,
+  PCL_TYPE_LONG,
+  PCL_TYPE_ENUM,
+  PCL_TYPE_STRUCT
+};
+
 /* The following structs define the several supported types of nodes
    in the abstract syntax tree, which are discriminated using the
    codes defined in the `pcl_ast_code' enumeration above.
@@ -222,7 +232,6 @@ struct pcl_ast_enumerator
   union pcl_ast_s *docstr;
 };
 
-#define PCL_AST_ENUM_TYPE(AST) ((AST)->enumeration.type)
 #define PCL_AST_ENUM_TAG(AST) ((AST)->enumeration.tag)
 #define PCL_AST_ENUM_VALUES(AST) ((AST)->enumeration.values)
 #define PCL_AST_ENUM_DOCSTR(AST) ((AST)->enumeration.docstr)
@@ -230,7 +239,6 @@ struct pcl_ast_enumerator
 struct pcl_ast_enum
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *type;
   union pcl_ast_s *tag;
   union pcl_ast_s *values;
   union pcl_ast_s *docstr;
@@ -322,10 +330,9 @@ struct pcl_ast_struct_ref
   union pcl_ast_s *identifier;
 };
 
-
 #define PCL_AST_TYPE_NAME(AST) ((AST)->type.name)
-#define PCL_AST_TYPE_SIGNED_P(AST) ((AST)->type.signed_p)
-#define PCL_AST_TYPE_WIDTH(AST) ((AST)->type.width)
+#define PCL_AST_TYPE_CODE(AST) ((AST)->type.code)
+#define PCL_AST_TYPE_SIGNED(AST) ((AST)->type.signed_p)
 #define PCL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
 #define PCL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
 
@@ -333,8 +340,9 @@ struct pcl_ast_type
 {
   struct pcl_ast_common common;
   char *name;
+
+  enum pcl_ast_type_code code;
   int signed_p;
-  union pcl_ast_s *width;
   union pcl_ast_s *enumeration;
   union pcl_ast_s *strt;
 };
@@ -397,7 +405,7 @@ pcl_ast pcl_ast_make_binary_exp (enum pcl_ast_op code, pcl_ast op1,
 pcl_ast pcl_ast_make_unary_exp (enum pcl_ast_op code, pcl_ast op);
 pcl_ast pcl_ast_make_array_ref (pcl_ast base, pcl_ast index);
 pcl_ast pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier);
-pcl_ast pcl_ast_make_type (int signed_p, pcl_ast width,
+pcl_ast pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p, 
                            pcl_ast enumeration, pcl_ast strct);
 pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast docstr,
                              pcl_ast mem);
@@ -407,8 +415,7 @@ pcl_ast pcl_ast_make_mem (enum pcl_ast_endian endian,
 pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
                             enum pcl_ast_endian endian, pcl_ast num_ents,
                             pcl_ast size);
-pcl_ast pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
-                           pcl_ast docstr);
+pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
 pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);
 pcl_ast pcl_ast_make_program (void);
 

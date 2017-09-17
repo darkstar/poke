@@ -77,12 +77,11 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
 
 static int
 enum_specifier_action (pcl_ast *enumeration,
-                       pcl_ast type, YYLTYPE *loc_type,
                        pcl_ast tag, YYLTYPE *loc_tag,
                        pcl_ast enumerators, YYLTYPE *loc_enumerators,
                        pcl_ast docstr, YYLTYPE *loc_docstr)
 {
-  *enumeration = pcl_ast_make_enum (type, tag, enumerators, docstr);
+  *enumeration = pcl_ast_make_enum (tag, enumerators, docstr);
   if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER (tag),
                              *enumeration) == NULL)
     {
@@ -119,7 +118,7 @@ struct_specifier_action (pcl_ast *strct,
   int integer;
 }
 
-%token <ast> INT
+%token <ast> INTEGER
 %token <ast> STR
 %token <ast> IDENTIFIER
 %token <ast> TYPENAME
@@ -159,11 +158,12 @@ struct_specifier_action (pcl_ast *strct,
 %token <opcode> XORA
 %token <opcode> IORA
 
-%token MSB LSB
+%token MSB LSB CHAR SHORT INT LONG
+%token SIGNED UNSIGNED
 
 %type <opcode> unary_operator assignment_operator
 
-%type <integer> mem_endianness
+%type <integer> mem_endianness sign_qualifier
 
 %type <ast> enumerator_list enumerator constant_expression
 %type <ast> conditional_expression logical_or_expression
@@ -173,7 +173,7 @@ struct_specifier_action (pcl_ast *strct,
 %type <ast> shift_expression additive_expression
 %type <ast> multiplicative_expression unary_expression
 %type <ast> postfix_expression primary_expression
-%type <ast> expression assignment_expression simple_type_specifier
+%type <ast> expression assignment_expression
 %type <ast> type_specifier declaration declaration_specifiers
 %type <ast> typedef_specifier enum_specifier struct_specifier 
 %type <ast> declaration_list program
@@ -369,7 +369,7 @@ postfix_expression:
 
 primary_expression:
 	  IDENTIFIER
-        | INT
+        | INTEGER
         | STR
         | '(' expression ')'
 		{ $$ = $2; }
@@ -397,8 +397,8 @@ typedef_specifier:
 	  TYPEDEF type_specifier IDENTIFIER
           	{
                   const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
-                  pcl_ast type = pcl_ast_make_type (PCL_AST_TYPE_SIGNED_P ($2),
-                                                    PCL_AST_TYPE_WIDTH ($2),
+                  pcl_ast type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
+                                                    PCL_AST_TYPE_SIGNED ($2),
                                                     PCL_AST_TYPE_ENUMERATION ($2),
                                                     PCL_AST_TYPE_STRUCT ($2));
 
@@ -416,7 +416,23 @@ typedef_specifier:
         ;
 
 type_specifier:
-	  simple_type_specifier
+	  CHAR
+          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, 1, NULL, NULL); }
+	| sign_qualifier CHAR
+          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, $1, NULL, NULL); }
+        | SHORT
+                { $$ = pcl_ast_make_type (PCL_TYPE_SHORT, 1, NULL, NULL); }
+        | sign_qualifier SHORT
+                { $$ = pcl_ast_make_type (PCL_TYPE_SHORT, $1, NULL, NULL); }
+        | INT
+                { $$ = pcl_ast_make_type (PCL_TYPE_INT, 1, NULL, NULL); }
+        | sign_qualifier INT
+                { $$ = pcl_ast_make_type (PCL_TYPE_INT, $1, NULL, NULL); }
+        | LONG
+                { $$ = pcl_ast_make_type (PCL_TYPE_LONG, 1, NULL, NULL); }
+        | sign_qualifier LONG
+                { $$ = pcl_ast_make_type (PCL_TYPE_LONG, $1, NULL, NULL); }
+	| TYPENAME
 	| STRUCT IDENTIFIER
         	{
                   pcl_ast strct
@@ -429,7 +445,7 @@ type_specifier:
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (0, NULL, NULL, strct);
+                    $$ = pcl_ast_make_type (PCL_TYPE_STRUCT, 0, NULL, strct);
                 }
         | ENUM IDENTIFIER
         	{
@@ -442,64 +458,55 @@ type_specifier:
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (0, NULL, enumeration, NULL);
+                    $$ = pcl_ast_make_type (PCL_TYPE_ENUM, 0, enumeration, NULL);
                 }
         ;
 
-simple_type_specifier:
-          TYPENAME
-        |
-	  's' ':' constant_expression
-          	{ $$ = pcl_ast_make_type (1, $3, NULL, NULL); }
-        | 'u' ':' constant_expression
-        	{ $$ = pcl_ast_make_type (0, $3, NULL, NULL); }
-	;
+sign_qualifier:
+	  SIGNED		{ $$ = 1;  }
+	| UNSIGNED		{ $$ = 0; }
+        ;
 
 /*
  * Enumerations.
  */
 
 enum_specifier:
-	  ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+	  ENUM IDENTIFIER '{' enumerator_list '}'
           	{
                   if (! enum_specifier_action (&$$,
-                                               $simple_type_specifier, &@simple_type_specifier,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                NULL, NULL))
                     YYERROR;
                 }
-	| ENUM simple_type_specifier IDENTIFIER DOCSTR '{' enumerator_list '}'
+	| ENUM IDENTIFIER DOCSTR '{' enumerator_list '}'
           	{
                   if (! enum_specifier_action (&$$,
-                                               $simple_type_specifier, &@simple_type_specifier,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
                     YYERROR;
                 }
-        | ENUM DOCSTR simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+        | ENUM DOCSTR IDENTIFIER '{' enumerator_list '}'
           	{
                   if (! enum_specifier_action (&$$,
-                                               $simple_type_specifier, &@simple_type_specifier,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
                     YYERROR;
                 }
-        | ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}' DOCSTR
+        | ENUM IDENTIFIER '{' enumerator_list '}' DOCSTR
           	{
                   if (! enum_specifier_action (&$$,
-                                               $simple_type_specifier, &@simple_type_specifier,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
                     YYERROR;
                 }
-        | DOCSTR ENUM simple_type_specifier IDENTIFIER '{' enumerator_list '}'
+        | DOCSTR ENUM IDENTIFIER '{' enumerator_list '}'
           	{
                   if (! enum_specifier_action (&$$,
-                                               $simple_type_specifier, &@simple_type_specifier,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))

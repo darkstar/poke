@@ -128,6 +128,14 @@ D [0-9]
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
 
+"unsigned"	{ yylval->integer = 0; return UNSIGNED; }
+"signed"	{ yylval->integer = 1; return SIGNED; }
+
+"char"		{ return CHAR; }
+"short"		{ return SHORT; }
+"int"		{ return INT; }
+"long"		{ return LONG; }
+
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
 
@@ -188,9 +196,6 @@ D [0-9]
 "~"		{ return '~'; }
 "."		{ return '.'; }
 
-"s"		{ return 's'; }
-"u"		{ return 'u'; }
-
 {L}({L}|{D})* {
    pcl_ast type;
 
@@ -212,7 +217,7 @@ D [0-9]
   pcl_atoi (yytext, &integer_value);
 
   yylval->ast = pcl_ast_make_integer (integer_value);
-  return INT;    
+  return INTEGER;    
 }
 
 {STRING} {

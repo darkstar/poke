@@ -448,15 +448,13 @@ pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier)
 /* Build and return an AST node for a type.  */
 
 pcl_ast
-pcl_ast_make_type (int signed_p, pcl_ast width,
+pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p,
                    pcl_ast enumeration, pcl_ast strct)
 {
   pcl_ast type = pcl_ast_make_node (PCL_AST_TYPE);
 
-  assert (!!width + !!enumeration + !!strct == 1);
-
-  PCL_AST_TYPE_SIGNED_P (type) = signed_p;
-  PCL_AST_TYPE_WIDTH (type) = width;
+  PCL_AST_TYPE_CODE (type) = code;
+  PCL_AST_TYPE_SIGNED (type) = signed_p;
   PCL_AST_TYPE_ENUMERATION (type) = enumeration;
   PCL_AST_TYPE_STRUCT (type) = strct;
 
@@ -497,14 +495,12 @@ pcl_ast_make_mem (enum pcl_ast_endian endian,
 /* Build and return an AST node for an enum.  */
 
 pcl_ast
-pcl_ast_make_enum (pcl_ast type, pcl_ast tag, pcl_ast values,
-                   pcl_ast docstr)
+pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr)
 {
   pcl_ast enumeration = pcl_ast_make_node (PCL_AST_ENUM);
 
-  assert (type && tag && values);
+  assert (tag && values);
 
-  PCL_AST_ENUM_TYPE (enumeration) = type;
   PCL_AST_ENUM_TAG (enumeration) = tag;
   PCL_AST_ENUM_VALUES (enumeration) = values;
   PCL_AST_ENUM_DOCSTR (enumeration) = docstr;
@@ -710,7 +706,6 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
     case PCL_AST_ENUM:
       IPRINTF ("ENUM::\n");
 
-      PRINT_AST_SUBAST (type, ENUM_TYPE);
       PRINT_AST_SUBAST (tag, ENUM_TAG);
       PRINT_AST_OPT_SUBAST (docstr, ENUM_DOCSTR);
       IPRINTF ("values:\n");
@@ -765,8 +760,17 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
     case PCL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
-      PRINT_AST_IMM (signed, TYPE_SIGNED_P, "%d");
-      PRINT_AST_OPT_SUBAST (width, TYPE_WIDTH);
+      IPRINTF ("code:\n");
+      switch (PCL_AST_TYPE_CODE (ast))
+        {
+        case PCL_TYPE_CHAR: IPRINTF ("  char\n"); break;
+        case PCL_TYPE_SHORT: IPRINTF ("  short\n"); break;
+        case PCL_TYPE_INT: IPRINTF ("  int\n"); break;
+        case PCL_TYPE_LONG: IPRINTF ("  long\n"); break;
+        case PCL_TYPE_ENUM: IPRINTF (" enum\n"); break;
+        case PCL_TYPE_STRUCT: printf ("  struct"); break;
+        };
+      PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
 
       if (PCL_AST_TYPE_ENUMERATION (ast))
         {
