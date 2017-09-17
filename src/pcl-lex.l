@@ -113,9 +113,16 @@ DOCSTR		   <<<.*>>>
 L [a-zA-Z_]
 D [0-9]
 
+%x C_COMMENT
+
 %%
 
 {BLANK}		{ /* Ignore whitespace.  */ }
+
+"/*" { BEGIN(C_COMMENT); }          
+<C_COMMENT>"*/" { BEGIN(INITIAL); } 
+<C_COMMENT>. { }                    
+<C_COMMENT>\n { }                   
 
 "enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }

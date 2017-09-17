@@ -29,14 +29,14 @@
  * with these names.
  */
 
-enum byte elf_ei_class
+enum elf_ei_class
 {
   ELFCLASSNONE 0x0	<<<Invalid class>>>,
   ELFCLASS32 0x1	<<<32-bit objects>>>,
   ELFCLASS64 0x2	<<<64-bit objects>>>
 };
 
-enum elf_half elf_e_type
+enum elf_e_type
 {
   ET_NONE = 0x0000	<<<No file type>>>,
   ET_REL  = 0x0001	<<<Relocatable file>>>,
@@ -49,7 +49,7 @@ enum elf_half elf_e_type
   ET_HIPROC = 0xFFFF	<<<Processor-specific>>>
 };
 
-enum elf_half elf_e_machine
+enum elf_e_machine
 {
   EM_NONE  = 0		<<<No machine>>>,
   EM_M32   = 1		<<<AT&T WE 32100>>>,
@@ -256,13 +256,13 @@ enum elf_half elf_e_machine
   EM_RISCV = 243	<<<RISC-V>>>
 };
 
-enum word elf_e_version
+enum elf_e_version
 {
   EV_NONE = 0		<<<Invalid version>>>,
   EV_CURRENT = 1	<<<Current version>>>
 };
 
-enum word elf_sh_type
+enum elf_sh_type
 {
   SHT_NULL = 0		<<<Inactive section>>>,
 
@@ -323,7 +323,7 @@ enum word elf_sh_type
   SHT_HIUSER = 0xffffffff <<<Reserved for application programs>>>
 };
 
-enum elf_xword elf_sh_flags
+enum elf_sh_flags
 {
   <<< Section contains data that should be writable during
       process execution.  >>>
@@ -369,7 +369,7 @@ enum elf_xword elf_sh_flags
   SHF_MASKPROC = 0xf000_0000 	<<<Processor-specific flags>>>
 };
 
-enum elf_word elf_p_type
+enum elf_p_type
 {
   PT_NULL = 0		<<<Array element is unused>>>,
   PT_LOAD = 1		<<<Loadable segment>>>,
@@ -388,7 +388,7 @@ enum elf_word elf_p_type
   PT_HIPROC = 0x7fffffff <<<Processor-specific>>>
 };
 
-enum elf_word elf_p_flags
+enum elf_p_flags
 {
   PF_X = 0x1		<<<Execute>>>,
   PF_W = 0x2		<<<Write>>>,
@@ -397,7 +397,7 @@ enum elf_word elf_p_flags
   PF_MASKPROC = 0xf000_0000 <<<Unspecified>>>
 };
 
-enum elf_word elf_ch_type
+enum elf_ch_type
 {
   ELFCOMPRESS_ZLIB = 1		<<<ZLIB algorithm>>>,
   ELFCOMPRESS_LOOS = 0x60000000	<<<Operating system-specific>>>,
@@ -459,7 +459,7 @@ struct elf_ident <<<ELF identification>>>
 {
   byte ei_mag[4];
 
-  enum elf_ei_class ei_class <<<File class>>>;
+  enum elf_ei_class ei_class : 8 <<<File class>>>;
   byte ei_data            <<<Data encoding>>>;
   byte ei_version         <<<File version>>>;
   byte ei_osabi           <<<Operating system/ABI identification>>>;
@@ -476,9 +476,9 @@ struct elf_ehdr <<<ELF header>>>
 
   struct elf_ident e_ident;
 
-  enum elf_e_type e_type	<<<File type>>>;
-  enum elf_e_machine e_machine	<<<Required architecture>>>;
-  enum elf_e_version e_version	<<<Object file version>>>;
+  enum elf_e_type e_type : 16	    <<<File type>>>;
+  enum elf_e_machine e_machine : 16 <<<Required architecture>>>;
+  enum elf_e_version e_version : 32 <<<Object file version>>>;
 
   <<< Virtual address of entry point.  If the file has no
       associated entry point, holds zero.  >>>
@@ -526,8 +526,8 @@ struct elf_ehdr <<<ELF header>>>
 
 struct elf_phdr <<<ELF segment>>>
 {
-  enum elf_p_type p_type	<<<Segment type>>>;
-  enum elf_p_flags p_flags	<<<Section flags>>>;
+  enum elf_p_type p_type : 32	<<<Segment type>>>;
+  enum elf_p_flags p_flags : 32	<<<Section flags>>>;
   elf_off p_offset;
   elf_addr p_vaddr;
   elf_addr p_paddr;
@@ -543,8 +543,9 @@ struct elf_shdr <<<ELF section header>>>
 
    elf_word  sh_name;
     
-   enum elf_sh_type  sh_type  <<<Section type>>>;
-   elf_xword sh_flags         <<<Section flags>>>;
+   enum elf_sh_type  sh_type : 32 <<<Section type>>>;
+   enum elf_sh_flags sh_flags : sizeof (elf_xword) * 8
+     				  <<<Section flags>>>;
 
    <<< If the section will appear in the memory image of a process,
        this member gives the address at which the section's first
@@ -584,7 +585,7 @@ struct elf_chdr
    Used in sections with SHF_COMPRESSED
 >>>
 {
-  enum elf_ch_type ch_type	<<< Compression algorithm. >>>;
+  enum elf_ch_type ch_type : 32	<<< Compression algorithm. >>>;
   elf_xword ch_size		<<< Size in bytes of the uncompressed data. >>>;
   elf_xword ch_addralign	<<< Required alignment of the uncompressed data. >>>;
 };
