@@ -1,4 +1,4 @@
-/* pcl.h - Poke Command Language definitions.  */
+./* pcl.h - Poke Command Language definitions.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -23,11 +23,5 @@
 
 #include <config.h>
 #include <stdlib.h>
-
-struct pcl_type
-{
-  int sign;	/* 0 => unsigned, 1 => signed.  */
-  int size;	/* Size in bits.  */
-};
 
 #endif /* ! PCL_H */

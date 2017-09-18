@@ -200,7 +200,9 @@ program: declaration_list
         ;
 
 declaration_list:
-	  declaration
+          %empty
+		{ $$ = NULL; }
+	| declaration
         | declaration_list declaration
         	{ $$ = pcl_ast_chainon ($1, $2); }
 	;
