@@ -61,8 +61,9 @@
 void
 pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
 {
-  /* yynerrs is a local variable of yyparse that contains the number of
-     syntax errors reported so far.  */
+  // XXX
+  //  if (YYRECOVERING ())
+  //    return;
   fprintf (stderr, "stdin: %d: %s\n", llocp->first_line, err);
 }
 
@@ -117,6 +118,8 @@ struct_specifier_action (pcl_ast *strct,
   enum pcl_ast_op opcode;
   int integer;
 }
+
+%destructor { /* pcl_ast_free ($$);*/ } <ast>
 
 %token <ast> INTEGER
 %token <ast> STR
@@ -190,6 +193,9 @@ struct_specifier_action (pcl_ast *strct,
 
 program: declaration_list
           	{
+                  if (yynerrs > 0)
+                    YYERROR;
+                  
                   $$ = pcl_ast_make_program ();
                   PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
 
@@ -205,6 +211,8 @@ declaration_list:
 	| declaration
         | declaration_list declaration
         	{ $$ = pcl_ast_chainon ($1, $2); }
+        | error declaration
+	        { $$ = $2; }
 	;
 
 /*
@@ -380,6 +388,8 @@ primary_expression:
           	{ $$ = pcl_ast_make_loc (); }
         | '(' expression ')'
 		{ $$ = $2; }
+        | '(' error ')'
+        	{ $$ = NULL; }
 	;
 
 /*
@@ -625,6 +635,8 @@ mem_declarator:
         | mem_loop
         | assignment_expression
         | assert
+        | error
+          	{ $$ = NULL; }
         ;
 
 mem_field_with_docstr:
