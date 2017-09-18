@@ -194,7 +194,10 @@ struct_specifier_action (pcl_ast *strct,
 program: declaration_list
           	{
                   if (yynerrs > 0)
-                    YYERROR;
+                    {
+                      /* XXX pcl_ast_free ($1);  */
+                      YYERROR;
+                    }
                   
                   $$ = pcl_ast_make_program ();
                   PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
