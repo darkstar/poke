@@ -626,6 +626,10 @@ mem_declarator_list:
 	| mem_declarator ';'
         | mem_declarator_list  mem_declarator ';'
 		        { $$ = pcl_ast_chainon ($1, $2); }
+        | error ';'
+        		{ $$ = NULL; }
+        | mem_declarator_list error
+        		{ $$ = $1; }
 	;
 
 mem_declarator:
@@ -635,8 +639,6 @@ mem_declarator:
         | mem_loop
         | assignment_expression
         | assert
-        | error
-          	{ $$ = NULL; }
         ;
 
 mem_field_with_docstr:
