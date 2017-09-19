@@ -234,11 +234,17 @@ main (int argc, char *argv[])
   //  if (poke_interactive_p)
   //    return repl ();
 
-  int ret = pcl_parse_file (stdin);
+  pcl_ast ast;
+  int ret = pcl_parse_file (&ast, stdin);
   if (ret == 1)
     printf ("SYNTAX ERROR\n");
   else if (ret == 2)
     printf ("MEMORY EXHAUSTION\n");
+
+#ifdef PCL_DEBUG
+  pcl_ast_print (stdout, ast->ast);
+#endif
+  pcl_ast_free (ast);
 
   return 0;
 }

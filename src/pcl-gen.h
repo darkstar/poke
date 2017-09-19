@@ -22,6 +22,6 @@
 #include <config.h>
 #include <pcl-ast.h>
 
-int pcl_gen (pcl_ast ast);
+int pcl_gen (pcl_ast_node ast);
 
 #endif /* !PCL_GEN_H  */

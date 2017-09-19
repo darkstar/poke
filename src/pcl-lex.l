@@ -101,7 +101,7 @@ make_docstring (const char *str)
   return dstring;
 }
 
-static pcl_ast cur_docstr;
+static pcl_ast_node cur_docstr;
  
 %}
 
@@ -203,17 +203,17 @@ D [0-9]
 "."		{ return '.'; }
 
 {L}({L}|{D})* {
-   pcl_ast type;
+   pcl_ast_node type;
 
-   if ((type = pcl_parser_get_registered (yyextra, 
-                                          yytext, PCL_AST_TYPE)) != NULL)
+   if ((type = pcl_ast_get_registered (yyextra->ast, 
+                                       yytext, PCL_AST_TYPE)) != NULL)
      {
        yylval->ast = type;
        return TYPENAME;
      }
    else
      {
-       yylval->ast = pcl_parser_get_identifier (yyextra, yytext);
+       yylval->ast = pcl_ast_get_identifier (yyextra->ast, yytext);
        return IDENTIFIER;
      }
 }

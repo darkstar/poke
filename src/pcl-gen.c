@@ -28,9 +28,9 @@
 */
 
 int
-pcl_gen (pcl_ast ast)
+pcl_gen (pcl_ast_node ast)
 {
-  pcl_ast tmp;
+  pcl_ast_node tmp;
   size_t i;
   
   if (ast == NULL)

@@ -78,15 +78,15 @@ pcl_tab_error (YYLTYPE *llocp,
 
 static int
 enum_specifier_action (struct pcl_parser *pcl_parser,
-                       pcl_ast *enumeration,
-                       pcl_ast tag, YYLTYPE *loc_tag,
-                       pcl_ast enumerators, YYLTYPE *loc_enumerators,
-                       pcl_ast docstr, YYLTYPE *loc_docstr)
+                       pcl_ast_node *enumeration,
+                       pcl_ast_node tag, YYLTYPE *loc_tag,
+                       pcl_ast_node enumerators, YYLTYPE *loc_enumerators,
+                       pcl_ast_node docstr, YYLTYPE *loc_docstr)
 {
   *enumeration = pcl_ast_make_enum (tag, enumerators, docstr);
-  if (pcl_parser_register (pcl_parser,
-                           PCL_AST_IDENTIFIER_POINTER (tag),
-                           *enumeration) == NULL)
+  if (pcl_ast_register (pcl_parser->ast,
+                        PCL_AST_IDENTIFIER_POINTER (tag),
+                        *enumeration) == NULL)
     {
       pcl_tab_error (loc_tag, pcl_parser, "enum already defined");
       return 0;
@@ -97,16 +97,16 @@ enum_specifier_action (struct pcl_parser *pcl_parser,
 
 static int
 struct_specifier_action (struct pcl_parser *pcl_parser,
-                         pcl_ast *strct,
-                         pcl_ast tag, YYLTYPE *loc_tag,
-                         pcl_ast docstr, YYLTYPE *loc_docstr,
-                         pcl_ast mem, YYLTYPE *loc_mem)
+                         pcl_ast_node *strct,
+                         pcl_ast_node tag, YYLTYPE *loc_tag,
+                         pcl_ast_node docstr, YYLTYPE *loc_docstr,
+                         pcl_ast_node mem, YYLTYPE *loc_mem)
 {
   *strct = pcl_ast_make_struct (tag, docstr, mem);
 
-  if (pcl_parser_register (pcl_parser,
-                           PCL_AST_IDENTIFIER_POINTER (tag),
-                           *strct) == NULL)
+  if (pcl_ast_register (pcl_parser->ast,
+                        PCL_AST_IDENTIFIER_POINTER (tag),
+                        *strct) == NULL)
     {
       pcl_tab_error (loc_tag, pcl_parser, "struct already defined");
       return 0;
@@ -118,7 +118,7 @@ struct_specifier_action (struct pcl_parser *pcl_parser,
 %}
 
 %union {
-  pcl_ast ast;
+  pcl_ast_node ast;
   enum pcl_ast_op opcode;
   int integer;
 }
@@ -203,10 +203,8 @@ program: declaration_list
                       YYERROR;
                     }
                   
-                  $$ = pcl_ast_make_program ();
-                  PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
-
-                  pcl_parser->ast = $$;
+                  $$ = pcl_ast_make_program ($1);
+                  pcl_parser->ast->ast = $$;
                 }
         ;
 
@@ -419,13 +417,13 @@ typedef_specifier:
 	  TYPEDEF type_specifier IDENTIFIER
           	{
                   const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
-                  pcl_ast type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
+                  pcl_ast_node type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
                                                     PCL_AST_TYPE_SIGNED ($2),
                                                     PCL_AST_TYPE_SIZE ($2),
                                                     PCL_AST_TYPE_ENUMERATION ($2),
                                                     PCL_AST_TYPE_STRUCT ($2));
 
-                  if (pcl_parser_register (pcl_parser, id, type) == NULL)
+                  if (pcl_ast_register (pcl_parser->ast, id, type) == NULL)
                     {
                       pcl_tab_error (&@2, pcl_parser, "type already defined");
                       YYERROR;
@@ -444,10 +442,10 @@ type_specifier:
 	| TYPENAME
 	| STRUCT IDENTIFIER
         	{
-                  pcl_ast strct
-                    = pcl_parser_get_registered (pcl_parser,
-                                                 PCL_AST_IDENTIFIER_POINTER ($2),
-                                                 PCL_AST_STRUCT);
+                  pcl_ast_node strct
+                    = pcl_ast_get_registered (pcl_parser->ast,
+                                              PCL_AST_IDENTIFIER_POINTER ($2),
+                                              PCL_AST_STRUCT);
 
                   if (!strct)
                     {
@@ -460,10 +458,10 @@ type_specifier:
                 }
         | ENUM IDENTIFIER
         	{
-                  pcl_ast enumeration
-                    = pcl_parser_get_registered (pcl_parser,
-                                                 PCL_AST_IDENTIFIER_POINTER ($2),
-                                                 PCL_AST_ENUM);
+                  pcl_ast_node enumeration
+                    = pcl_ast_get_registered (pcl_parser->ast,
+                                              PCL_AST_IDENTIFIER_POINTER ($2),
+                                              PCL_AST_ENUM);
 
                   if (!enumeration)
                     {
@@ -690,8 +688,8 @@ mem_field_with_size:
 mem_field:
 	  type_specifier IDENTIFIER
           		{
-                          pcl_ast one = pcl_ast_make_integer (1);
-                          pcl_ast size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+                          pcl_ast_node one = pcl_ast_make_integer (1);
+                          pcl_ast_node size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
 
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),
@@ -699,7 +697,7 @@ mem_field:
                         }
         | type_specifier IDENTIFIER '[' assignment_expression ']'
 		        {
-                          pcl_ast size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+                          pcl_ast_node size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
 
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),

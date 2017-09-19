@@ -28,42 +28,38 @@
 #include <stdint.h>
 #include "pcl-ast.h"
 
-/*
- * The PCL abstract syntax tree is heavily influenced by the `tree'
- * abstraction used in the GCC front-end, and it is implemented in a
- * very similar way.
- */
+/* The following enumeration defines the codes characterizing the
+   several types of nodes supported in the PCL abstract syntax
+   trees.  */
 
 enum pcl_ast_code
 {
   PCL_AST_PROGRAM,
-  /* Expressions.  */
   PCL_AST_EXP,
   PCL_AST_COND_EXP,
-  /* Enumerations.  */
   PCL_AST_ENUM,
   PCL_AST_ENUMERATOR,
-  /* Structs and their components.  */
   PCL_AST_STRUCT,
-  /* Memory layouts.  */
   PCL_AST_MEM,
   PCL_AST_FIELD,
   PCL_AST_COND,
   PCL_AST_LOOP,
   PCL_AST_ASSERTION,
-  /* Types.  */
   PCL_AST_TYPE,
-  /* References.  */
   PCL_AST_ARRAY_REF,
   PCL_AST_STRUCT_REF,
-  /* PCL_AST_SYMBOL_REF, for symbols */
-  /* Leafs.  */
   PCL_AST_INTEGER,
   PCL_AST_STRING,
   PCL_AST_IDENTIFIER,
   PCL_AST_DOC_STRING,
   PCL_AST_LOC
 };
+
+/* The AST nodes representing expressions are characterized by
+   operators (see below in this file for more details on this.)  The
+   following enumeration defines the operator codes.
+
+   The definitions of the operators are in pdl-ops.def.  */
 
 #define PCL_DEF_OP(SYM, STRING) SYM,
 enum pcl_ast_op
@@ -72,14 +68,36 @@ enum pcl_ast_op
 };
 #undef PCL_DEF_OP
 
+/* Certain AST nodes can be characterized of featuring a byte
+   endianness.  The following values are supported:
+
+   MSB means that the most significative bytes come first.  This is
+   what is popularly known as big-endian.
+
+   LSB means that the least significative bytes come first.  This is
+   what is known as little-endian.
+
+   In both endiannesses the bits inside the bytes are ordered from
+   most significative to least significative.
+
+   The function `pcl_ast-default_endian' returns the endianness used
+   in the system running poke.  */
+
 enum pcl_ast_endian
 {
   PCL_AST_MSB, /* Big-endian.  */
   PCL_AST_LSB  /* Little-endian.  */
 };
 
-#define PCL_DEF_TYPE(CODE,ID,SIZE) CODE,
+enum pcl_ast_endian pcl_ast_default_endian (void);
 
+/* The AST nodes representing types are characterized by type codes
+   (see below in this file for more details on this.)  The following
+   enumeration defines the type codes.
+
+   The definitions of the supported types are in pdl-types.def.  */
+
+#define PCL_DEF_TYPE(CODE,ID,SIZE) CODE,
 enum pcl_ast_type_code
 {
   PCL_TYPE_NOTYPE,
@@ -87,18 +105,44 @@ enum pcl_ast_type_code
   PCL_TYPE_ENUM,
   PCL_TYPE_STRUCT
 };
-
 #undef PCL_DEF_TYPE
 
-/* The following structs define the several supported types of nodes
-   in the abstract syntax tree, which are discriminated using the
-   codes defined in the `pcl_ast_code' enumeration above.
+/* Next we define the several supported types of nodes in the abstract
+   syntax tree, which are discriminated using the codes defined in the
+   `pcl_ast_code' enumeration above.
 
-   Accessor macros are defined, and should be used as both l-values
-   and r-values.
+   Accessor macros are defined to access the attributes of the
+   different nodes, and should be used as both l-values and r-values
+   to inspect and modify nodes, respectively.
 
-   Note that the `pcl_ast_common' struct defines fields which are
-   common to every node in the AST, regardless of their type.  */
+   Declarations for constructor functions are also provided, that can
+   be used to create new instances of nodes.  */
+
+typedef union pcl_ast_node *pcl_ast_node;
+
+/* The `pcl_ast_common' struct defines fields which are common to
+   every node in the AST, regardless of their type.
+
+   CHAIN is used to chain AST nodes together.  This serves several
+   purposes in the compiler, like composing chains of related nodes
+   (such as the different enumerators in an enumeration) and
+   implementing hash bucket lists.  The `pcl_ast_chainon' utility
+   function is provided in order to confortably add elements to a list
+   of nodes chained by CHAIN.
+
+   CODE identifies the type of node.
+
+   The LITERAL_P flag is used in expression nodes, and tells whether
+   the expression is constant, i.e. whether the value of the
+   expression can be calculated at compile time.  This is used to
+   implement some optimizations.
+
+   The REGISTERED_P flag can be used in any kind of node.  It tells
+   whether the memory storage of the node is handled externally.
+   "Registered" nodes (and their subnodes) will not be disposed when
+   the abstract syntax tree gets disposed.
+
+   There is no constructor defined for common nodes.  */
 
 #define PCL_AST_CHAIN(AST) ((AST)->common.chain)
 #define PCL_AST_CODE(AST) ((AST)->common.code)
@@ -107,20 +151,36 @@ enum pcl_ast_type_code
 
 struct pcl_ast_common
 {
-  union pcl_ast_s *chain;
+  union pcl_ast_node *chain;
   enum pcl_ast_code code : 8;
 
   unsigned literal_p : 1;
   unsigned registered_p :1;
 };
 
+pcl_ast_node pcl_ast_chainon (pcl_ast_node ast1,
+                              pcl_ast_node ast2);
+
+/* PCL_AST_PROGRAM nodes represent PCL programs.
+
+   DECLARATIONS points to a possibly empty list of struct definitions
+   and enumerations, i.e. to nodes of types PCL_AST_STRUCT and
+   PCL_AST_ENUM respectively.  */
+
 #define PCL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->program.declarations)
 
 struct pcl_ast_program
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *declarations;
+  union pcl_ast_node *declarations;
 };
+
+pcl_ast_node pcl_ast_make_program (pcl_ast_node declarations);
+
+/* PCL_AST_IDENTIFIER nodes represent identifiers in PCL programs.
+   
+   POINTER must point to a NULL-terminated string.
+   LENGTH contains the size in bytes of the identifier.  */
 
 #define PCL_AST_IDENTIFIER_LENGTH(AST) ((AST)->identifier.length)
 #define PCL_AST_IDENTIFIER_POINTER(AST) ((AST)->identifier.pointer)
@@ -132,6 +192,13 @@ struct pcl_ast_identifier
   char *pointer;
 };
 
+pcl_ast_node pcl_ast_make_identifier (const char *str);
+
+/* PCL_AST_INTEGER nodes represent integer numeric literals in PCL
+   programs.
+
+   VALUE contains a 64-bit unsigned integer.  */
+
 #define PCL_AST_INTEGER_VALUE(AST) ((AST)->integer.value)
 
 struct pcl_ast_integer
@@ -139,6 +206,13 @@ struct pcl_ast_integer
   struct pcl_ast_common common;
   uint64_t value;
 };
+
+pcl_ast_node pcl_ast_make_integer (uint64_t value);
+
+/* PCL_AST_STRING nodes represent string literals in PCL programs.
+
+   POINTER must point to a NULL-terminated string.
+   LENGTH contains the size in bytes of the string.  */
 
 #define PCL_AST_STRING_LENGTH(AST) ((AST)->string.length)
 #define PCL_AST_STRING_POINTER(AST) ((AST)->string.pointer)
@@ -150,6 +224,17 @@ struct pcl_ast_string
   char *pointer;
 };
 
+pcl_ast_node pcl_ast_make_string (const char *str);
+
+/* PCL_AST_DOC_STRING nodes represent text that explains the meaning
+   or the contents of other nodes/entities.
+
+   POINTER must point to a NULL-terminated string.
+   LENGTH contains the size in bytes of the doc string.
+
+   ENTITY must point to the node whose meaning/contents are documented
+   by this docstring.  */
+
 #define PCL_AST_DOC_STRING_LENGTH(AST) ((AST)->doc_string.length)
 #define PCL_AST_DOC_STRING_POINTER(AST) ((AST)->doc_string.pointer)
 #define PCL_AST_DOC_STRING_ENTITY(AST) ((AST)->doc_string.entity)
@@ -159,8 +244,19 @@ struct pcl_ast_doc_string
   struct pcl_ast_common common;
   size_t length;
   char *pointer;
-  union pcl_ast_s *entity;
+  union pcl_ast_node *entity;
 };
+
+pcl_ast_node pcl_ast_make_doc_string (const char *str,
+                                      pcl_ast_node entity);
+
+/* PCL_AST_EXP nodes represent unary and binary expressions,
+   consisting on an operator and one or two operators, respectively.
+
+   The supported operators are specified in pcl-ops.def.
+
+   We defined two constructors for this node type: one for unary
+   expressions and another for binary expressions.  */
 
 #define PCL_AST_EXP_CODE(AST) ((AST)->exp.code)
 #define PCL_AST_EXP_NUMOPS(AST) ((AST)->exp.numops)
@@ -171,8 +267,25 @@ struct pcl_ast_exp
   struct pcl_ast_common common;
   enum pcl_ast_op code;
   uint8_t numops : 8;
-  union pcl_ast_s *operands[2];
+  union pcl_ast_node *operands[2];
 };
+
+pcl_ast_node pcl_ast_make_unary_exp (enum pcl_ast_op code,
+                                     pcl_ast_node op);
+pcl_ast_node pcl_ast_make_binary_exp (enum pcl_ast_op code,
+                                      pcl_ast_node op1,
+                                      pcl_ast_node op2);
+
+/* PCL_AST_COND_EXP nodes represent conditional expressions, having
+   exactly the same semantics than the C tertiary operator:
+
+                   exp1 ? exp2 : exp3
+
+   where exp1 is evaluated and then, depending on its value, either
+   exp2 (if exp1 is not 0) or exp3 (if exp1 is 0) are executed.
+
+   COND, THENEXP and ELSEEXP must point to expressions, i.e. to nodes
+   node of type  PCL_AST_EXP or type PCL_AST_COND_EXP.  */
 
 #define PCL_AST_COND_EXP_COND(AST) ((AST)->cond_exp.cond)
 #define PCL_AST_COND_EXP_THENEXP(AST) ((AST)->cond_exp.thenexp)
@@ -181,10 +294,26 @@ struct pcl_ast_exp
 struct pcl_ast_cond_exp
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *cond;
-  union pcl_ast_s *thenexp;
-  union pcl_ast_s *elseexp;
+  union pcl_ast_node *cond;
+  union pcl_ast_node *thenexp;
+  union pcl_ast_node *elseexp;
 };
+
+pcl_ast_node pcl_ast_make_cond_exp (pcl_ast_node cond,
+                                    pcl_ast_node thenexp,
+                                    pcl_ast_node elseexp);
+
+/* PCL_AST_ENUMERATOR nodes represent the definition of a constant
+   into an enumeration.
+
+   Each constant is characterized with an IDENTIFIER that identifies
+   it globally (meaning enumerator identifiers must be unique), an
+   optional VALUE, which must be a constant expression, and an
+   optional doc-string.
+
+   If the value is not explicitly provided, it must be calculated
+   considering the rest of the enumerators in the enumeration, exactly
+   like in C enums.  */
 
 #define PCL_AST_ENUMERATOR_IDENTIFIER(AST) ((AST)->enumerator.identifier)
 #define PCL_AST_ENUMERATOR_VALUE(AST) ((AST)->enumerator.value)
@@ -193,10 +322,28 @@ struct pcl_ast_cond_exp
 struct pcl_ast_enumerator
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *identifier;
-  union pcl_ast_s *value;
-  union pcl_ast_s *docstr;
+  union pcl_ast_node *identifier;
+  union pcl_ast_node *value;
+  union pcl_ast_node *docstr;
 };
+
+pcl_ast_node pcl_ast_make_enumerator (pcl_ast_node identifier,
+                                      pcl_ast_node value,
+                                      pcl_ast_node docstr);
+
+/* PCL_AST_ENUM nodes represent enumerations, having semantics much
+   like the C enums.
+
+   TAG is mandatory and must point to a PCL_AST_IDENTIFIER.  This
+   identifier characterizes the enumeration globally in the enums
+   namespace.
+
+   VALUES must point to a chain of PCL_AST_ENUMERATOR nodes containing
+   at least one node.  This means empty enumerations are not allowed.
+
+   DOCSTR optionally points to a PCL_AST_DOCSTR.  If it exists, it
+   contains text explaining the meaning of the collection of constants
+   defined in the enumeration.  */
 
 #define PCL_AST_ENUM_TAG(AST) ((AST)->enumeration.tag)
 #define PCL_AST_ENUM_VALUES(AST) ((AST)->enumeration.values)
@@ -205,20 +352,32 @@ struct pcl_ast_enumerator
 struct pcl_ast_enum
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *tag;
-  union pcl_ast_s *values;
-  union pcl_ast_s *docstr;
+  union pcl_ast_node *tag;
+  union pcl_ast_node *values;
+  union pcl_ast_node *docstr;
 };
 
-#define PCL_AST_MEM_ENDIAN(AST) ((AST)->mem.endian)
-#define PCL_AST_MEM_COMPONENTS(AST) ((AST)->mem.components)
+pcl_ast_node pcl_ast_make_enum (pcl_ast_node tag,
+                                pcl_ast_node values,
+                                pcl_ast_node docstr);
 
-struct pcl_ast_mem
-{
-  struct pcl_ast_common common;
-  enum pcl_ast_endian endian;
-  union pcl_ast_s *components;
-};
+
+/* PCL_AST_STRUCT nodes represent PCL structs, which are similar to C
+   structs... but not quite the same thing!
+
+   In PCL a struct is basically the declaration of a named memory
+   layout (see below for more info on memory layouts.)  Structs can
+   only be declared at the top-level.
+   
+   TAG must point to a node of type PCL_AST_IDENTIFIER, and globally
+   identifies the struct in the strucs namespace.
+
+   MEM must point to a node of type PCL_AST_MEM, that contains the
+   memory layout named in this struct.
+
+   DOCSTR optionally points to a docstring that documents the
+   meaning/contents of the struct.  */
+
 
 #define PCL_AST_STRUCT_TAG(AST) ((AST)->strct.tag)
 #define PCL_AST_STRUCT_DOCSTR(AST) ((AST)->strct.docstr)
@@ -227,10 +386,38 @@ struct pcl_ast_mem
 struct pcl_ast_struct
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *tag;
-  union pcl_ast_s *docstr;
-  union pcl_ast_s *mem;
+  union pcl_ast_node *tag;
+  union pcl_ast_node *docstr;
+  union pcl_ast_node *mem;
 };
+
+pcl_ast_node pcl_ast_make_struct (pcl_ast_node tag, pcl_ast_node docstr,
+                             pcl_ast_node mem);
+
+/* PCL_AST_MEM nodes represent memory layouts.  The layouts are
+   described by a program that, once executed, describes a collection
+   of subareas over a possibly non-contiguous memory area.
+
+   ENDIAN is the endianness used by the components (filds) of the
+   memory layout.
+
+   COMPONENTS points to a possibly empty list of other layouts,
+   fields, conditionals, loops and assertions, i.e. of nodes of types
+   PCL_AST_MEM, PCL_AST_FIELD, PCL_AST_COND, PCL_AST_LOOP and
+   PCL_AST_ASSERTION respectively.  */
+
+#define PCL_AST_MEM_ENDIAN(AST) ((AST)->mem.endian)
+#define PCL_AST_MEM_COMPONENTS(AST) ((AST)->mem.components)
+
+struct pcl_ast_mem
+{
+  struct pcl_ast_common common;
+  enum pcl_ast_endian endian;
+  union pcl_ast_node *components;
+};
+
+pcl_ast_node pcl_ast_make_mem (enum pcl_ast_endian endian,
+                          pcl_ast_node components);
 
 #define PCL_AST_FIELD_NAME(AST) ((AST)->field.name)
 #define PCL_AST_FIELD_ENDIAN(AST) ((AST)->field.endian)
@@ -243,12 +430,16 @@ struct pcl_ast_field
 {
   struct pcl_ast_common common;
   enum pcl_ast_endian endian;
-  union pcl_ast_s *name;
-  union pcl_ast_s *type;
-  union pcl_ast_s *docstr;
-  union pcl_ast_s *num_ents;
-  union pcl_ast_s *size;
+  union pcl_ast_node *name;
+  union pcl_ast_node *type;
+  union pcl_ast_node *docstr;
+  union pcl_ast_node *num_ents;
+  union pcl_ast_node *size;
 };
+
+pcl_ast_node pcl_ast_make_field (pcl_ast_node name, pcl_ast_node type, pcl_ast_node docstr,
+                            enum pcl_ast_endian endian, pcl_ast_node num_ents,
+                            pcl_ast_node size);
 
 #define PCL_AST_COND_EXP(AST) ((AST)->cond.exp)
 #define PCL_AST_COND_THENPART(AST) ((AST)->cond.thenpart)
@@ -257,10 +448,13 @@ struct pcl_ast_field
 struct pcl_ast_cond
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *exp;
-  union pcl_ast_s *thenpart;
-  union pcl_ast_s *elsepart;
+  union pcl_ast_node *exp;
+  union pcl_ast_node *thenpart;
+  union pcl_ast_node *elsepart;
 };
+
+pcl_ast_node pcl_ast_make_cond (pcl_ast_node exp, pcl_ast_node thenpart,
+                           pcl_ast_node elsepart);
 
 #define PCL_AST_LOOP_PRE(AST) ((AST)->loop.pre)
 #define PCL_AST_LOOP_COND(AST) ((AST)->loop.cond)
@@ -270,11 +464,14 @@ struct pcl_ast_cond
 struct pcl_ast_loop
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *pre;
-  union pcl_ast_s *cond;
-  union pcl_ast_s *post;
-  union pcl_ast_s *body;
+  union pcl_ast_node *pre;
+  union pcl_ast_node *cond;
+  union pcl_ast_node *post;
+  union pcl_ast_node *body;
 };
+
+pcl_ast_node pcl_ast_make_loop (pcl_ast_node pre, pcl_ast_node cond,
+                           pcl_ast_node post, pcl_ast_node body);
 
 #define PCL_AST_ARRAY_REF_BASE(AST) ((AST)->aref.base)
 #define PCL_AST_ARRAY_REF_INDEX(AST) ((AST)->aref.index)
@@ -282,9 +479,11 @@ struct pcl_ast_loop
 struct pcl_ast_array_ref
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *base;
-  union pcl_ast_s *index;
+  union pcl_ast_node *base;
+  union pcl_ast_node *index;
 };
+
+pcl_ast_node pcl_ast_make_array_ref (pcl_ast_node base, pcl_ast_node index);
 
 #define PCL_AST_STRUCT_REF_BASE(AST) ((AST)->sref.base)
 #define PCL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST)->sref.identifier)
@@ -292,9 +491,11 @@ struct pcl_ast_array_ref
 struct pcl_ast_struct_ref
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *base;
-  union pcl_ast_s *identifier;
+  union pcl_ast_node *base;
+  union pcl_ast_node *identifier;
 };
+
+pcl_ast_node pcl_ast_make_struct_ref (pcl_ast_node base, pcl_ast_node identifier);
 
 #define PCL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PCL_AST_TYPE_CODE(AST) ((AST)->type.code)
@@ -311,23 +512,34 @@ struct pcl_ast_type
   enum pcl_ast_type_code code;
   int signed_p;
   size_t size;
-  union pcl_ast_s *enumeration;
-  union pcl_ast_s *strt;
+  union pcl_ast_node *enumeration;
+  union pcl_ast_node *strt;
 };
+
+pcl_ast_node pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p, 
+                           size_t size, pcl_ast_node enumeration, pcl_ast_node strct);
+
+struct pcl_ast_loc
+{
+  struct pcl_ast_common common;
+};
+
+pcl_ast_node pcl_ast_make_loc (void);
+
 
 #define PCL_AST_ASSERTION_EXP(AST) ((AST)->assertion.exp)
 
 struct pcl_ast_assertion
 {
   struct pcl_ast_common common;
-  union pcl_ast_s *exp;
+  union pcl_ast_node *exp;
 };
-  
 
-/* Finally, the `pcl_ast' type, which represents both an AST tree and
-   a node.  */
+pcl_ast_node pcl_ast_make_assertion (pcl_ast_node exp);
 
-union pcl_ast_s
+/* Finally, the `pcl_ast_node' type, which represents an AST node.  */
+
+union pcl_ast_node
 {
   struct pcl_ast_common common; /* This field _must_ appear first.  */
   struct pcl_ast_program program;
@@ -348,52 +560,63 @@ union pcl_ast_s
   struct pcl_ast_enum enumeration;
   struct pcl_ast_type type;
   struct pcl_ast_assertion assertion;
+  struct pcl_ast_loc loc;
 };
 
-typedef union pcl_ast_s *pcl_ast;
+/* The `pcl_ast' struct defined below contains a PCL abstract syntax tree.
 
-/*  Prototypes for the non-static functions implemented in pcl-ast.c.
-    See the .c file for information on how to use them functions.  */
+   AST contains the tree of linked nodes, starting with a
+   PCL_AST_PROGRAM node.
 
-pcl_ast pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2);
+   Some of the tree nodes can be stored in the several hash tables,
+   which are created during parsing.
 
-enum pcl_ast_endian pcl_ast_default_endian (void);
+   `pcl_ast_init' allocates and initializes a new AST and returns a
+   pointer to it.
 
-pcl_ast pcl_ast_make_integer (uint64_t value);
-pcl_ast pcl_ast_make_string (const char *str);
-pcl_ast pcl_ast_make_doc_string (const char *str, pcl_ast entity);
-pcl_ast pcl_ast_make_enumerator (pcl_ast identifier, pcl_ast value,
-                                 pcl_ast docstr);
-pcl_ast pcl_ast_make_identifier (const char *str);
-pcl_ast pcl_ast_make_cond_exp (pcl_ast cond, pcl_ast thenexp,
-                               pcl_ast elseexp);
-pcl_ast pcl_ast_make_binary_exp (enum pcl_ast_op code, pcl_ast op1,
-                                 pcl_ast op2);
-pcl_ast pcl_ast_make_unary_exp (enum pcl_ast_op code, pcl_ast op);
-pcl_ast pcl_ast_make_array_ref (pcl_ast base, pcl_ast index);
-pcl_ast pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier);
-pcl_ast pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p, 
-                           size_t size, pcl_ast enumeration, pcl_ast strct);
-pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast docstr,
-                             pcl_ast mem);
-pcl_ast pcl_ast_make_mem (enum pcl_ast_endian endian,
-                          pcl_ast components);
+   `pcl_ast_free' frees all the memory allocated to store the AST
+   nodes and also the hash tables.  */
 
-pcl_ast pcl_ast_make_field (pcl_ast name, pcl_ast type, pcl_ast docstr,
-                            enum pcl_ast_endian endian, pcl_ast num_ents,
-                            pcl_ast size);
-pcl_ast pcl_ast_make_enum (pcl_ast tag, pcl_ast values, pcl_ast docstr);
-pcl_ast pcl_ast_make_cond (pcl_ast exp, pcl_ast thenpart, pcl_ast elsepart);
-pcl_ast pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post, pcl_ast body);
-pcl_ast pcl_ast_make_assertion (pcl_ast exp);
-pcl_ast pcl_ast_make_program (void);
-pcl_ast pcl_ast_make_loc (void);
+#define HASH_TABLE_SIZE 1008
+typedef pcl_ast_node pcl_hash[HASH_TABLE_SIZE];
+
+struct pcl_ast
+{
+  pcl_ast_node ast;
+
+  pcl_hash ids_hash_table;
+  pcl_hash types_hash_table;
+  pcl_hash enums_hash_table;
+  pcl_hash structs_hash_table;
+};
+
+typedef struct pcl_ast *pcl_ast;
+
+pcl_ast pcl_ast_init (void);
 void pcl_ast_free (pcl_ast ast);
+
+/* The following three functions are used by the lexer and the parser
+   in order to populate/inquiry the hash tables in the AST.  */
+
+pcl_ast_node pcl_ast_get_identifier (pcl_ast ast,
+                                     const char *str);
+
+pcl_ast_node pcl_ast_get_registered (pcl_ast ast,
+                                     const char *name,
+                                     enum pcl_ast_code code);
+
+pcl_ast_node pcl_ast_register (pcl_ast ast,
+                               const char *name,
+                               pcl_ast_node ast_node);
 
 #ifdef PCL_DEBUG
 
-void pcl_ast_print (FILE *fd, pcl_ast ast);
+/* The following function dumps a human-readable description of the
+   tree headed by the node AST.  It is used for debugging
+   purposes.  */
 
-#endif /* PCL_DEBUG */
+void pcl_ast_print (FILE *fd, pcl_ast_node ast);
+
+#endif
 
 #endif /* ! PCL_AST_H */
