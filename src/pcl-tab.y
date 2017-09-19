@@ -227,7 +227,8 @@ constant_expression:
           	{
                   if (!PCL_AST_LITERAL_P ($1))
                     {
-                      pcl_tab_error (&@1, pcl_parser, "expected constant expression");
+                      pcl_tab_error (&@1, pcl_parser,
+                                     "expected constant expression");
                       YYERROR;
                     }
 
