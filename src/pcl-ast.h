@@ -391,8 +391,9 @@ struct pcl_ast_struct
   union pcl_ast_node *mem;
 };
 
-pcl_ast_node pcl_ast_make_struct (pcl_ast_node tag, pcl_ast_node docstr,
-                             pcl_ast_node mem);
+pcl_ast_node pcl_ast_make_struct (pcl_ast_node tag,
+                                  pcl_ast_node docstr,
+                                  pcl_ast_node mem);
 
 /* PCL_AST_MEM nodes represent memory layouts.  The layouts are
    described by a program that, once executed, describes a collection
@@ -417,7 +418,26 @@ struct pcl_ast_mem
 };
 
 pcl_ast_node pcl_ast_make_mem (enum pcl_ast_endian endian,
-                          pcl_ast_node components);
+                               pcl_ast_node components);
+
+/* PCL_AST_FIELD nodes represent fields in memory layouts.
+
+   ENDIAN is the endianness in which the data in the field is stored.
+
+   NAME must point to an identifier which should be unique within the
+   containing struct (i.e. within the containing top-level memory
+   layout.)
+   
+   TYPE must point to a PCL_AST_TYPE node that describes the value
+   stored in the field.
+
+   NUM_ENTS must point to an expression specifiying how many entities
+   of size SIZE are stored in the field.
+
+   SIZE is the size in bits of each element stored in the field.
+
+   DOCSTR optionally points to a PCL_AST_DOC_STRING node that
+   documents the purpose/meaning of the field contents.  */
 
 #define PCL_AST_FIELD_NAME(AST) ((AST)->field.name)
 #define PCL_AST_FIELD_ENDIAN(AST) ((AST)->field.endian)
@@ -437,9 +457,28 @@ struct pcl_ast_field
   union pcl_ast_node *size;
 };
 
-pcl_ast_node pcl_ast_make_field (pcl_ast_node name, pcl_ast_node type, pcl_ast_node docstr,
-                            enum pcl_ast_endian endian, pcl_ast_node num_ents,
-                            pcl_ast_node size);
+pcl_ast_node pcl_ast_make_field (pcl_ast_node name,
+                                 pcl_ast_node type,
+                                 pcl_ast_node docstr,
+                                 enum pcl_ast_endian endian,
+                                 pcl_ast_node num_ents,
+                                 pcl_ast_node size);
+
+/* PCL_AST_COND nodes represent conditionals.
+
+   A conditional allows to conditionally define memory layouts, in a
+   very similar way the if-then-else statements determine the control
+   flow in conventional programming languages.
+
+   EXP must point to an expression whose result is interpreted as a
+   boolean in a C-style, 0 meaning false and any other value meaning
+   true.
+
+   THENPART must point to a PCL_AST_MEM node, which is the memory
+   layout that gets defined should EXP evaluate to true.
+
+   ELSEPART optionally points to a PCL_AST_MEM node, which is the
+   memory layout that gets defined should EXP evaluate to false.  */
 
 #define PCL_AST_COND_EXP(AST) ((AST)->cond.exp)
 #define PCL_AST_COND_THENPART(AST) ((AST)->cond.thenpart)
@@ -453,8 +492,29 @@ struct pcl_ast_cond
   union pcl_ast_node *elsepart;
 };
 
-pcl_ast_node pcl_ast_make_cond (pcl_ast_node exp, pcl_ast_node thenpart,
-                           pcl_ast_node elsepart);
+pcl_ast_node pcl_ast_make_cond (pcl_ast_node exp,
+                                pcl_ast_node thenpart,
+                                pcl_ast_node elsepart);
+
+/* PCL_AST_LOOP nodes represent loops.
+
+   A loop allows to define multiple memory layouts, in a very similar
+   way iterative statements work in conventional programming
+   languages.
+
+   PRE optionally points to an expression which is evaluated before
+   entering the loop.
+
+   COND optionally points to a condition that determines whether the
+   loop is entered initially, and afer each iteration.
+
+   BODY must point to a PCL_AST_MEM node, which is the memory layout
+   that is defined in each loop iteration.
+   
+   POST optionally points to an expression which is evaluated after
+   defining the memory layout in each iteration.
+
+   Note that if COND is not defined, the effect is an infinite loop.  */
 
 #define PCL_AST_LOOP_PRE(AST) ((AST)->loop.pre)
 #define PCL_AST_LOOP_COND(AST) ((AST)->loop.cond)
@@ -470,8 +530,19 @@ struct pcl_ast_loop
   union pcl_ast_node *body;
 };
 
-pcl_ast_node pcl_ast_make_loop (pcl_ast_node pre, pcl_ast_node cond,
-                           pcl_ast_node post, pcl_ast_node body);
+pcl_ast_node pcl_ast_make_loop (pcl_ast_node pre,
+                                pcl_ast_node cond,
+                                pcl_ast_node post,
+                                pcl_ast_node body);
+
+/* PCL_AST_ARRAY_REF nodes represent references to elements stored in
+   fields.
+
+   BASE must point to a PCL_AST_IDENTIFIER node, which in turn should
+   identify a field.
+
+   INDEX must point to an expression whose evaluation is the offset of
+   the element into the field, in units of the field's SIZE.  */
 
 #define PCL_AST_ARRAY_REF_BASE(AST) ((AST)->aref.base)
 #define PCL_AST_ARRAY_REF_INDEX(AST) ((AST)->aref.index)
@@ -483,7 +554,18 @@ struct pcl_ast_array_ref
   union pcl_ast_node *index;
 };
 
-pcl_ast_node pcl_ast_make_array_ref (pcl_ast_node base, pcl_ast_node index);
+pcl_ast_node pcl_ast_make_array_ref (pcl_ast_node base,
+                                     pcl_ast_node index);
+
+/* PCL_AST_STRUCT_REF nodes represent references to fields within a
+   struct.
+
+   BASE must point to a PCL_AST_IDENTIFIER node, which in turn should
+   identify a field whose type is a struct.
+
+   IDENTIFIER must point to a PCL_AST_IDENTIFIER node, which in turn
+   should identify a field defined in the struct characterized by
+   BASE.  */
 
 #define PCL_AST_STRUCT_REF_BASE(AST) ((AST)->sref.base)
 #define PCL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST)->sref.identifier)
@@ -495,7 +577,23 @@ struct pcl_ast_struct_ref
   union pcl_ast_node *identifier;
 };
 
-pcl_ast_node pcl_ast_make_struct_ref (pcl_ast_node base, pcl_ast_node identifier);
+pcl_ast_node pcl_ast_make_struct_ref (pcl_ast_node base,
+                                      pcl_ast_node identifier);
+
+/* PCL_AST_TYPE nodes represent field types.
+   
+   CODE contains the kind of type, as defined in the pcl_ast_type_code
+   enumeration above.
+
+   SIGNED is 1 if the type denotes a signed numeric type.
+
+   SIZE is the witdh in bits of type.
+
+   ENUMERATION must point to a PCL_AST_ENUM node if the type code is
+   PCL_TYPE_ENUM.
+
+   STRUCT must point to a PCL_AST_STRUCT node if the type code is
+   PCL_TYPE_STRUCT.  */
 
 #define PCL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PCL_AST_TYPE_CODE(AST) ((AST)->type.code)
@@ -516,8 +614,16 @@ struct pcl_ast_type
   union pcl_ast_node *strt;
 };
 
-pcl_ast_node pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p, 
-                           size_t size, pcl_ast_node enumeration, pcl_ast_node strct);
+pcl_ast_node pcl_ast_make_type (enum pcl_ast_type_code code,
+                                int signed_p, size_t size,
+                                pcl_ast_node enumeration,
+                                pcl_ast_node strct);
+
+/* PCL_AST_LOC nodes represent the current struct's location
+   counter.
+
+   This node can occur anywhere in an expression, inluding both sides
+   of assignment operators.  */
 
 struct pcl_ast_loc
 {
@@ -526,6 +632,11 @@ struct pcl_ast_loc
 
 pcl_ast_node pcl_ast_make_loc (void);
 
+/* PCL_AST_ASSERTION nodes represent checks that can occur anywhere
+   within a memory layout.
+
+   EXP must point to an expression.  If the expression evaluates to 1
+   a fatal error is raised at execution time.  */
 
 #define PCL_AST_ASSERTION_EXP(AST) ((AST)->assertion.exp)
 
@@ -537,7 +648,8 @@ struct pcl_ast_assertion
 
 pcl_ast_node pcl_ast_make_assertion (pcl_ast_node exp);
 
-/* Finally, the `pcl_ast_node' type, which represents an AST node.  */
+/* Finally, the `pcl_ast_node' type, which represents an AST node of
+   any type.  */
 
 union pcl_ast_node
 {
