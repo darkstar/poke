@@ -182,19 +182,32 @@ pcl_gen (pcl_ast ast)
       break;
 
     case PCL_AST_FIELD:
+      {
+        if (PCL_AST_FIELD_TYPE (ast) == PCL_TYPE_STRUCT)
+          {
+            /* if the field type is a STYPE, do a CALL to the referred
+               struct passing LOC in the stack, and getting the new
+               LOC in the stack.  */
+          }
+        
+        if (!pcl_gen (PCL_AST_FIELD_SIZE (ast)))
+          goto error;
+        if (!pcl_gen (PCL_AST_FIELD_NUM_ENTS (ast)))
+          goto error;
+        if (!pcl_gen (PCL_AST_FIELD_DOCSTR (ast)))
+          goto error;
+        if (!pcl_gen (PCL_AST_FIELD_TYPE (ast)))
+          goto error;
+        fprintf (stdout, "PUSH %d\n", PCL_AST_FIELD_ENDIAN (ast));
+        if (!pcl_gen (PCL_AST_FIELD_NAME (ast)))
+          goto error;
+        fprintf (stdout, "DFIELD\n");
 
-      if (!pcl_gen (PCL_AST_FIELD_SIZE (ast)))
-        goto error;
-      if (!pcl_gen (PCL_AST_FIELD_NUM_ENTS (ast)))
-        goto error;
-      if (!pcl_gen (PCL_AST_FIELD_DOCSTR (ast)))
-        goto error;
-      if (!pcl_gen (PCL_AST_FIELD_TYPE (ast)))
-        goto error;
-      fprintf (stdout, "PUSH %d\n", PCL_AST_FIELD_ENDIAN (ast));
-      if (!pcl_gen (PCL_AST_FIELD_NAME (ast)))
-        goto error;
-      fprintf (stdout, "DFIELD\n");
+        /* Update LOC.  */
+        fprintf (stdout, "LOC\n");
+        fprintf (stdout, "ADD\n");
+        fprintf (stdout, "SETLOC\n");
+      }
       
       break;
 

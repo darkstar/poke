@@ -78,15 +78,14 @@ enum pcl_ast_endian
   PCL_AST_LSB  /* Little-endian.  */
 };
 
+#define PCL_DEF_TYPE(CODE,SIZE) CODE,
+
 enum pcl_ast_type_code
 {
-  PCL_TYPE_CHAR,
-  PCL_TYPE_SHORT,
-  PCL_TYPE_INT,
-  PCL_TYPE_LONG,
-  PCL_TYPE_ENUM,
-  PCL_TYPE_STRUCT
+#include "pcl-types.def"
 };
+
+#undef PCL_DEF_TYPE
 
 /* The following structs define the several supported types of nodes
    in the abstract syntax tree, which are discriminated using the
@@ -295,6 +294,7 @@ struct pcl_ast_struct_ref
 #define PCL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PCL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PCL_AST_TYPE_SIGNED(AST) ((AST)->type.signed_p)
+#define PCL_AST_TYPE_SIZE(AST) ((AST)->type.size)
 #define PCL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
 #define PCL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
 
@@ -305,6 +305,7 @@ struct pcl_ast_type
 
   enum pcl_ast_type_code code;
   int signed_p;
+  size_t size;
   union pcl_ast_s *enumeration;
   union pcl_ast_s *strt;
 };
@@ -377,7 +378,7 @@ pcl_ast pcl_ast_make_unary_exp (enum pcl_ast_op code, pcl_ast op);
 pcl_ast pcl_ast_make_array_ref (pcl_ast base, pcl_ast index);
 pcl_ast pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier);
 pcl_ast pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p, 
-                           pcl_ast enumeration, pcl_ast strct);
+                           size_t size, pcl_ast enumeration, pcl_ast strct);
 pcl_ast pcl_ast_make_struct (pcl_ast tag, pcl_ast docstr,
                              pcl_ast mem);
 pcl_ast pcl_ast_make_mem (enum pcl_ast_endian endian,
@@ -392,6 +393,8 @@ pcl_ast pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post, pcl_ast body
 pcl_ast pcl_ast_make_assertion (pcl_ast exp);
 pcl_ast pcl_ast_make_program (void);
 pcl_ast pcl_ast_make_loc (void);
+
+size_t pcl_ast_type_size (pcl_ast type);
 
 #ifdef PCL_DEBUG
 

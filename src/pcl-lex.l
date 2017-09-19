@@ -150,10 +150,10 @@ D [0-9]
 "unsigned"	{ yylval->integer = 0; return UNSIGNED; }
 "signed"	{ yylval->integer = 1; return SIGNED; }
 
-"char"		{ return CHAR; }
-"short"		{ return SHORT; }
-"int"		{ return INT; }
-"long"		{ return LONG; }
+"char"		{ return CHAR; /* XXX: handle with types.def  */ }
+"short"		{ return SHORT; /* XXX: handle with types.def  */ }
+"int"		{ return INT; /* XXX: handle with types.def  */ }
+"long"		{ return LONG; /* XXX: handle with types.def  */ }
 
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }

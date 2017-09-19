@@ -457,12 +457,13 @@ pcl_ast_make_struct_ref (pcl_ast base, pcl_ast identifier)
 
 pcl_ast
 pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p,
-                   pcl_ast enumeration, pcl_ast strct)
+                   size_t size, pcl_ast enumeration, pcl_ast strct)
 {
   pcl_ast type = pcl_ast_make_node (PCL_AST_TYPE);
 
   PCL_AST_TYPE_CODE (type) = code;
   PCL_AST_TYPE_SIGNED (type) = signed_p;
+  PCL_AST_TYPE_SIZE (type) = size;
   PCL_AST_TYPE_ENUMERATION (type) = enumeration;
   PCL_AST_TYPE_STRUCT (type) = strct;
 
@@ -588,6 +589,22 @@ pcl_ast_make_program (void)
   pcl_ast program = pcl_ast_make_node (PCL_AST_PROGRAM);
 
   return program;
+}
+
+/* Return the size in bits of TYPE.  */
+
+#define PCL_DEF_TYPE(CODE,SIZE) SIZE,
+static enum pcl_ast_type_code pcl_type_size[] =
+{
+# include "pcl-types.def"
+};
+#undef PCL_DEF_TYPE
+
+size_t
+pcl_ast_type_size (pcl_ast type)
+{
+  assert (PCL_AST_CODE (type) == PCL_AST_TYPE);
+  return pcl_type_size[PCL_AST_TYPE_CODE (type)];
 }
 
 #ifdef PCL_DEBUG
@@ -811,6 +828,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
         case PCL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
         };
       PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
+      PRINT_AST_IMM (size, TYPE_SIZE, "%lu");
 
       if (PCL_AST_TYPE_ENUMERATION (ast))
         {

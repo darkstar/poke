@@ -426,6 +426,7 @@ typedef_specifier:
                   const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
                   pcl_ast type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
                                                     PCL_AST_TYPE_SIGNED ($2),
+                                                    PCL_AST_TYPE_SIZE ($2),
                                                     PCL_AST_TYPE_ENUMERATION ($2),
                                                     PCL_AST_TYPE_STRUCT ($2));
 
@@ -444,21 +445,21 @@ typedef_specifier:
 
 type_specifier:
 	  CHAR
-          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, 1, NULL, NULL); }
+          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, 1, 8, NULL, NULL); }
 	| sign_qualifier CHAR
-          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, $1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, $1, 8, NULL, NULL); }
         | SHORT
-                { $$ = pcl_ast_make_type (PCL_TYPE_SHORT, 1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_SHORT, 1, 16, NULL, NULL); }
         | sign_qualifier SHORT
-                { $$ = pcl_ast_make_type (PCL_TYPE_SHORT, $1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_SHORT, $1, 16, NULL, NULL); }
         | INT
-                { $$ = pcl_ast_make_type (PCL_TYPE_INT, 1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_INT, 1, 32, NULL, NULL); }
         | sign_qualifier INT
-                { $$ = pcl_ast_make_type (PCL_TYPE_INT, $1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_INT, $1, 32, NULL, NULL); }
         | LONG
-                { $$ = pcl_ast_make_type (PCL_TYPE_LONG, 1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_LONG, 1, 64, NULL, NULL); }
         | sign_qualifier LONG
-                { $$ = pcl_ast_make_type (PCL_TYPE_LONG, $1, NULL, NULL); }
+        	{ $$ = pcl_ast_make_type (PCL_TYPE_LONG, $1, 64, NULL, NULL); }
 	| TYPENAME
 	| STRUCT IDENTIFIER
         	{
@@ -472,7 +473,7 @@ type_specifier:
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (PCL_TYPE_STRUCT, 0, NULL, strct);
+                    $$ = pcl_ast_make_type (PCL_TYPE_STRUCT, 0, 0, NULL, strct);
                 }
         | ENUM IDENTIFIER
         	{
@@ -485,7 +486,7 @@ type_specifier:
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (PCL_TYPE_ENUM, 0, enumeration, NULL);
+                    $$ = pcl_ast_make_type (PCL_TYPE_ENUM, 0, 32, enumeration, NULL);
                 }
         ;
 
@@ -678,6 +679,15 @@ mem_field_with_size:
 	  mem_field
         | mem_field ':' expression
           		{
+                          if (PCL_AST_TYPE_CODE (PCL_AST_FIELD_TYPE ($1))
+                              == PCL_TYPE_STRUCT)
+                            {
+                              pcl_tab_error (&@1, NULL,
+                                             "fields of type struct can't have an\
+ explicit size");
+                              YYERROR;
+                            }
+                          
                           PCL_AST_FIELD_SIZE ($1) = $3;
                           $$ = $1;
                         }
@@ -687,15 +697,19 @@ mem_field:
 	  type_specifier IDENTIFIER
           		{
                           pcl_ast one = pcl_ast_make_integer (1);
+                          pcl_ast size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),
-                                                   one, NULL);
+                                                   one, size);
                         }
         | type_specifier IDENTIFIER '[' assignment_expression ']'
 		        {
+                          pcl_ast size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+
                           $$ = pcl_ast_make_field ($2, $1, NULL,
                                                    pcl_ast_default_endian (),
-                                                   $4, NULL);
+                                                   $4, size);
                         }
 	;
 
