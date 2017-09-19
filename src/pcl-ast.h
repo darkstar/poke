@@ -53,8 +53,10 @@ enum pcl_ast_code
   PCL_AST_ASSERTION,
   /* Types.  */
   PCL_AST_TYPE,
-  PCL_AST_ARRAY_REF, /*XXX*/
+  /* References.  */
+  PCL_AST_ARRAY_REF,
   PCL_AST_STRUCT_REF,
+  /* PCL_AST_SYMBOL_REF, for symbols */
   /* Leafs.  */
   PCL_AST_INTEGER,
   PCL_AST_STRING,
@@ -63,54 +65,12 @@ enum pcl_ast_code
   PCL_AST_LOC
 };
 
-/* Pleae update the static `opcodes' array in pcl-ast.c:pcl_ast_print
-   if you augment, diminish or change the ordering of opcodes in the
-   following enumeration.  */
-
+#define PCL_DEF_OP(SYM, STRING) SYM,
 enum pcl_ast_op
 {
-  /* Binary operators.  */
-  PCL_AST_OP_OR,
-  PCL_AST_OP_IOR,
-  PCL_AST_OP_XOR,
-  PCL_AST_OP_AND,
-  PCL_AST_OP_BAND,
-  PCL_AST_OP_EQ,
-  PCL_AST_OP_NE,
-  PCL_AST_OP_SL,
-  PCL_AST_OP_SR,
-  PCL_AST_OP_ADD,
-  PCL_AST_OP_SUB,
-  PCL_AST_OP_MUL,
-  PCL_AST_OP_DIV,
-  PCL_AST_OP_MOD,
-  PCL_AST_OP_LT,
-  PCL_AST_OP_GT,
-  PCL_AST_OP_LE,
-  PCL_AST_OP_GE,
-  /* Unary operators.  */
-  PCL_AST_OP_INC,
-  PCL_AST_OP_DEC,
-  PCL_AST_OP_SIZEOF,
-  PCL_AST_OP_ADDRESS,
-  PCL_AST_OP_POS,
-  PCL_AST_OP_NEG,
-  PCL_AST_OP_BNOT,
-  PCL_AST_OP_NOT,
-  /* Assign operators.  */
-  PCL_AST_OP_ASSIGN,
-  PCL_AST_OP_MULA,
-  PCL_AST_OP_DIVA,
-  PCL_AST_OP_MODA,
-  PCL_AST_OP_ADDA,
-  PCL_AST_OP_SUBA,
-  PCL_AST_OP_SLA,
-  PCL_AST_OP_SRA,
-  PCL_AST_OP_BANDA,
-  PCL_AST_OP_XORA,
-  PCL_AST_OP_IORA,
-  PCL_MAX_OPERATOR = PCL_AST_OP_IORA
+#include "pcl-ops.def"
 };
+#undef PCL_DEF_OP
 
 enum pcl_ast_endian
 {

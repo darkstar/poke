@@ -698,22 +698,17 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
 
     case PCL_AST_EXP:
       {
-        /* XXX: replace this with an #include hack.  */
-        /* Please keep the following array in sync with the enum
-           pcl_ast_op in pcl-ast.h.  */
-        static char *opcodes[] =
-          { "OR", "IOR", "XOR", "AND", "BAND", "EQ", "NE",
-            "SL", "SR", "ADD", "SUB", "MUL", "DIV", "MOD",
-            "LT", "GT", "LE", "GE", "INC", "DEC", "SIZEOF",
-            "ADDRESS", "POS", "NEG", "BNOT", "NOT", "ASSIGN",
-            "MULA", "DIVA", "MODA", "ADDA", "SUBA", "SLA",
-            "SRA", "BANDA", "XORA", "IORA"
+
+#define PCL_DEF_OP(SYM, STRING) STRING,
+        static char *pcl_ast_op_name[] =
+          {
+#include "pcl-ops.def"
           };
+#undef PCL_DEF_OP
 
         IPRINTF ("EXPRESSION::\n");
         IPRINTF ("opcode: %s\n",
-                 PCL_AST_EXP_CODE (ast) <= PCL_MAX_OPERATOR
-                 ? opcodes[PCL_AST_EXP_CODE (ast)] : "unknown");
+                 pcl_ast_op_name[PCL_AST_EXP_CODE (ast)]);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
         IPRINTF ("operands:\n");
         for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); i++)
@@ -813,7 +808,7 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
         case PCL_TYPE_INT: IPRINTF ("  int\n"); break;
         case PCL_TYPE_LONG: IPRINTF ("  long\n"); break;
         case PCL_TYPE_ENUM: IPRINTF (" enum\n"); break;
-        case PCL_TYPE_STRUCT: printf ("  struct"); break;
+        case PCL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
         };
       PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
 
@@ -828,8 +823,11 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
         }
 
       if (PCL_AST_TYPE_STRUCT (ast))
-        IPRINTF ("struct: tag '%s'\n",
-                 PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+        {
+          IPRINTF ("struct:\n");
+          IPRINTF ("  'struct %s'\n",
+                   PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+        }
       break;
 
     case PCL_AST_ASSERTION:

@@ -37,6 +37,10 @@
 #include "pcl-tab.h"
 #include "pcl-lex.h"
 
+#ifdef PCL_DEBUG
+# include "pcl-gen.h"
+#endif
+  
 /* YYLLOC_DEFAULT -> default code for computing locations.  */
   
 #define PCL_AST_CHILDREN_STEP 12
@@ -64,6 +68,8 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
   // XXX
   //  if (YYRECOVERING ())
   //    return;
+  // XXX: store the line read and other info for pretty
+  //      error printing in EXTRA.
   fprintf (stderr, "stdin: %d: %s\n", llocp->first_line, err);
 }
 
@@ -204,6 +210,7 @@ program: declaration_list
 
 #ifdef PCL_DEBUG
                   pcl_ast_print (stdout, $$);
+                  pcl_gen ($$);
 #endif                  
                 }
         ;
