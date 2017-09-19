@@ -77,10 +77,35 @@ pcl_parser_init (void)
 
 /* Free resources used by a parser.  */
 
+static void
+free_hash_table (pcl_hash *hash_table)
+{
+  size_t i;
+  pcl_ast t, n;
+
+  for (i = 0; i < HASH_TABLE_SIZE; ++i)
+    if ((*hash_table)[i])
+      for (t = (*hash_table)[i]; t; t = n)
+        {
+          n = PCL_AST_CHAIN (t);
+          pcl_ast_free (t);
+        }
+}
+                 
+
 void
 pcl_parser_destroy (struct pcl_parser *parser)
 {
-  /* XXX: free pcl_parser->ast  */
+  size_t i;
+  pcl_ast t, n;
+  
+  pcl_ast_free (parser->ast);
+
+  free_hash_table (&parser->ids_hash_table);
+  free_hash_table (&parser->types_hash_table);
+  free_hash_table (&parser->enums_hash_table);
+  free_hash_table (&parser->structs_hash_table);
+
   pcl_tab_lex_destroy (parser->scanner);
   free (parser);
 

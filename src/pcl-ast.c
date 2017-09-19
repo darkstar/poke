@@ -18,13 +18,10 @@
 
 #include <config.h>
 
-#ifdef PCL_DEBUG
-# include <stdio.h>
-#endif
-
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "xalloc.h"
 #include "pcl-ast.h"
 
@@ -387,6 +384,162 @@ pcl_ast_make_program (void)
   pcl_ast program = pcl_ast_make_node (PCL_AST_PROGRAM);
 
   return program;
+}
+
+/* Free all allocated resources used by AST.  Note that nodes marked
+   as "registered", as well as their children, are not disposed.  */
+
+void
+pcl_ast_free (pcl_ast ast)
+{
+  pcl_ast t;
+  int i;
+  
+  if (ast == NULL
+      || PCL_AST_REGISTERED_P (ast))
+    return;
+
+  switch (PCL_AST_CODE (ast))
+    {
+    case PCL_AST_PROGRAM:
+
+      for (t = PCL_AST_PROGRAM_DECLARATIONS (ast);
+           t;
+           t = PCL_AST_CHAIN (t))
+        pcl_ast_free (t);
+      
+      break;
+
+    case PCL_AST_EXP:
+
+      for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); i++)
+        pcl_ast_free (PCL_AST_EXP_OPERAND (ast, i));
+
+      break;
+      
+    case PCL_AST_COND_EXP:
+
+      pcl_ast_free (PCL_AST_COND_EXP_COND (ast));
+      pcl_ast_free (PCL_AST_COND_EXP_THENEXP (ast));
+      pcl_ast_free (PCL_AST_COND_EXP_ELSEEXP (ast));
+      break;
+      
+    case PCL_AST_ENUM:
+
+      pcl_ast_free (PCL_AST_ENUM_TAG (ast));
+      pcl_ast_free (PCL_AST_ENUM_DOCSTR (ast));
+
+      for (t = PCL_AST_ENUM_VALUES (ast);
+           t;
+           t = PCL_AST_CHAIN (t))
+        pcl_ast_free (t);
+
+      break;
+      
+    case PCL_AST_ENUMERATOR:
+
+      pcl_ast_free (PCL_AST_ENUMERATOR_IDENTIFIER (ast));
+      pcl_ast_free (PCL_AST_ENUMERATOR_VALUE (ast));
+      pcl_ast_free (PCL_AST_ENUMERATOR_DOCSTR (ast));
+      break;
+      
+    case PCL_AST_STRUCT:
+
+      pcl_ast_free (PCL_AST_STRUCT_TAG (ast));
+      pcl_ast_free (PCL_AST_STRUCT_DOCSTR (ast));
+      pcl_ast_free (PCL_AST_STRUCT_MEM (ast));
+      break;
+      
+    case PCL_AST_MEM:
+
+      for (t = PCL_AST_MEM_COMPONENTS (ast);
+           t;
+           t = PCL_AST_CHAIN (t))
+        pcl_ast_free (t);
+
+      break;
+      
+    case PCL_AST_FIELD:
+
+      pcl_ast_free (PCL_AST_FIELD_NAME (ast));
+      pcl_ast_free (PCL_AST_FIELD_TYPE (ast));
+      pcl_ast_free (PCL_AST_FIELD_DOCSTR (ast));
+      pcl_ast_free (PCL_AST_FIELD_NUM_ENTS (ast));
+      pcl_ast_free (PCL_AST_FIELD_SIZE (ast));
+      break;
+      
+    case PCL_AST_COND:
+
+      pcl_ast_free (PCL_AST_COND_EXP (ast));
+      pcl_ast_free (PCL_AST_COND_THENPART (ast));
+      pcl_ast_free (PCL_AST_COND_ELSEPART (ast));
+      break;
+      
+    case PCL_AST_LOOP:
+
+      pcl_ast_free (PCL_AST_LOOP_PRE (ast));
+      pcl_ast_free (PCL_AST_LOOP_COND (ast));
+      pcl_ast_free (PCL_AST_LOOP_POST (ast));
+      pcl_ast_free (PCL_AST_LOOP_BODY (ast));
+      break;
+      
+    case PCL_AST_ASSERTION:
+
+      pcl_ast_free (PCL_AST_ASSERTION_EXP (ast));
+      break;
+      
+    case PCL_AST_TYPE:
+
+      free (PCL_AST_TYPE_NAME (ast));
+
+      /* XXX: this should not be necessary:
+         pcl_ast_free (PCL_AST_TYPE_ENUMERATION (ast));
+         pcl_ast_free (PCL_AST_TYPE_STRUCT (ast));
+      */
+      
+      break;
+      
+    case PCL_AST_ARRAY_REF:
+
+      pcl_ast_free (PCL_AST_ARRAY_REF_BASE (ast));
+      pcl_ast_free (PCL_AST_ARRAY_REF_INDEX (ast));
+      break;
+      
+    case PCL_AST_STRUCT_REF:
+
+      pcl_ast_free (PCL_AST_STRUCT_REF_BASE (ast));
+      pcl_ast_free (PCL_AST_STRUCT_REF_IDENTIFIER (ast));
+      break;
+      
+    case PCL_AST_STRING:
+
+      free (PCL_AST_STRING_POINTER (ast));
+      break;
+      
+    case PCL_AST_IDENTIFIER:
+
+      free (PCL_AST_IDENTIFIER_POINTER (ast));
+      break;
+      
+    case PCL_AST_DOC_STRING:
+
+      free (PCL_AST_DOC_STRING_POINTER (ast));
+
+      /* XXX: this should not be necessary:
+         pcl_ast_free (PCL_AST_DOC_STRING_ENTITY (ast));
+      */
+      break;
+
+    case PCL_AST_INTEGER:
+      /* Fallthrough.  */
+    case PCL_AST_LOC:
+      break;
+      
+    default:
+      assert (1);
+    }
+
+  free (ast);
 }
 
 #ifdef PCL_DEBUG

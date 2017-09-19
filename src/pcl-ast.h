@@ -388,6 +388,7 @@ pcl_ast pcl_ast_make_loop (pcl_ast pre, pcl_ast cond, pcl_ast post, pcl_ast body
 pcl_ast pcl_ast_make_assertion (pcl_ast exp);
 pcl_ast pcl_ast_make_program (void);
 pcl_ast pcl_ast_make_loc (void);
+void pcl_ast_free (pcl_ast ast);
 
 #ifdef PCL_DEBUG
 
