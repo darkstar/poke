@@ -474,8 +474,8 @@ type_specifier:
         ;
 
 sign_qualifier:
-	  SIGNED		{ $$ = 1;  }
-	| UNSIGNED		{ $$ = 0; }
+	  SIGNED	{ $$ = 1; }
+	| UNSIGNED	{ $$ = 0; }
         ;
 
 /*
