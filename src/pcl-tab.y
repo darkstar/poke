@@ -23,7 +23,7 @@
 %name-prefix "pcl_tab_"
 
 %lex-param {void *scanner}
-%parse-param {void *scanner}
+%parse-param {struct pcl_parser *pcl_parser}
 
 
 %{
@@ -33,13 +33,16 @@
 #include <stdio.h>
 #include <xalloc.h>
 
-#include <pcl-ast.h>
+#include "pcl-ast.h"
+#include "pcl-parser.h" /* For struct pcl_parser.  */
 #include "pcl-tab.h"
 #include "pcl-lex.h"
 
 #ifdef PCL_DEBUG
 # include "pcl-gen.h"
 #endif
+
+#define scanner (pcl_parser->scanner)
   
 /* YYLLOC_DEFAULT -> default code for computing locations.  */
   
@@ -63,7 +66,9 @@
  */
   
 void
-pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
+pcl_tab_error (YYLTYPE *llocp,
+               struct pcl_parser *pcl_parser,
+               char const *err)
 {
   // XXX
   //  if (YYRECOVERING ())
@@ -83,7 +88,8 @@ pcl_tab_error (YYLTYPE *llocp, void *extra, char const *err)
    grammar rule invoking the function.  */
 
 static int
-enum_specifier_action (pcl_ast *enumeration,
+enum_specifier_action (struct pcl_parser *pcl_parser,
+                       pcl_ast *enumeration,
                        pcl_ast tag, YYLTYPE *loc_tag,
                        pcl_ast enumerators, YYLTYPE *loc_enumerators,
                        pcl_ast docstr, YYLTYPE *loc_docstr)
@@ -92,7 +98,7 @@ enum_specifier_action (pcl_ast *enumeration,
   if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER (tag),
                              *enumeration) == NULL)
     {
-      pcl_tab_error (loc_tag, NULL, "enum already defined");
+      pcl_tab_error (loc_tag, pcl_parser, "enum already defined");
       return 0;
     }
 
@@ -100,7 +106,8 @@ enum_specifier_action (pcl_ast *enumeration,
 }
 
 static int
-struct_specifier_action (pcl_ast *strct,
+struct_specifier_action (struct pcl_parser *pcl_parser,
+                         pcl_ast *strct,
                          pcl_ast tag, YYLTYPE *loc_tag,
                          pcl_ast docstr, YYLTYPE *loc_docstr,
                          pcl_ast mem, YYLTYPE *loc_mem)
@@ -110,7 +117,7 @@ struct_specifier_action (pcl_ast *strct,
   if (pcl_ast_register_struct (PCL_AST_IDENTIFIER_POINTER (tag),
                                *strct) == NULL)
     {
-      pcl_tab_error (loc_tag, NULL, "struct already defined");
+      pcl_tab_error (loc_tag, pcl_parser, "struct already defined");
       return 0;
     }
 
@@ -234,7 +241,7 @@ constant_expression:
           	{
                   if (!PCL_AST_LITERAL_P ($1))
                     {
-                      pcl_tab_error (&@1, NULL, "expected constant expression");
+                      pcl_tab_error (&@1, pcl_parser, "expected constant expression");
                       YYERROR;
                     }
 
@@ -432,7 +439,7 @@ typedef_specifier:
 
                   if (pcl_ast_register_type (id, type) == NULL)
                     {
-                      pcl_tab_error (&@2, NULL, "type already defined");
+                      pcl_tab_error (&@2, pcl_parser, "type already defined");
                       YYERROR;
                     }
                   /* XXX:
@@ -468,7 +475,7 @@ type_specifier:
 
                   if (!strct)
                     {
-                      pcl_tab_error (&@2, NULL,
+                      pcl_tab_error (&@2, pcl_parser,
                                      "expected struct tag");
                       YYERROR;
                     }
@@ -482,7 +489,7 @@ type_specifier:
 
                   if (!enumeration)
                     {
-                      pcl_tab_error (&@2, NULL, "expected enumeration tag");
+                      pcl_tab_error (&@2, pcl_parser, "expected enumeration tag");
                       YYERROR;
                     }
                   else
@@ -502,7 +509,8 @@ sign_qualifier:
 enum_specifier:
 	  ENUM IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (&$$,
+                  if (! enum_specifier_action (pcl_parser,
+                                               &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                NULL, NULL))
@@ -510,7 +518,8 @@ enum_specifier:
                 }
 	| ENUM IDENTIFIER DOCSTR '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (&$$,
+                  if (! enum_specifier_action (pcl_parser,
+                                               &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
@@ -518,7 +527,8 @@ enum_specifier:
                 }
         | ENUM DOCSTR IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (&$$,
+                  if (! enum_specifier_action (pcl_parser,
+                                               &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
@@ -526,7 +536,8 @@ enum_specifier:
                 }
         | ENUM IDENTIFIER '{' enumerator_list '}' DOCSTR
           	{
-                  if (! enum_specifier_action (&$$,
+                  if (! enum_specifier_action (pcl_parser,
+                                               &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
@@ -534,7 +545,8 @@ enum_specifier:
                 }
         | DOCSTR ENUM IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (&$$,
+                  if (! enum_specifier_action (pcl_parser,
+                                               &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
                                                $DOCSTR, &@DOCSTR))
@@ -582,7 +594,8 @@ enumerator:
 struct_specifier:
 	  STRUCT IDENTIFIER mem_layout
 			{
-                          if (!struct_specifier_action (&$$,
+                          if (!struct_specifier_action (pcl_parser,
+                                                        &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         NULL, NULL,
                                                         $mem_layout, &@mem_layout))
@@ -590,7 +603,8 @@ struct_specifier:
                         }
 	| DOCSTR STRUCT IDENTIFIER mem_layout
 			{
-                          if (!struct_specifier_action (&$$,
+                          if (!struct_specifier_action (pcl_parser,
+                                                        &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         $DOCSTR, &@DOCSTR,
                                                         $mem_layout, &@mem_layout))
@@ -598,7 +612,8 @@ struct_specifier:
                         }
         | STRUCT IDENTIFIER DOCSTR mem_layout
         	{
-                  if (!struct_specifier_action (&$$,
+                  if (!struct_specifier_action (pcl_parser,
+                                                &$$,
                                                 $IDENTIFIER, &@IDENTIFIER,
                                                 $DOCSTR, &@DOCSTR,
                                                 $mem_layout, &@mem_layout))
@@ -606,7 +621,8 @@ struct_specifier:
                 }
         | STRUCT IDENTIFIER mem_layout DOCSTR
         		{
-                          if (!struct_specifier_action (&$$,
+                          if (!struct_specifier_action (pcl_parser,
+                                                        &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         $DOCSTR, &@DOCSTR,
                                                         $mem_layout, &@mem_layout))
@@ -682,7 +698,7 @@ mem_field_with_size:
                           if (PCL_AST_TYPE_CODE (PCL_AST_FIELD_TYPE ($1))
                               == PCL_TYPE_STRUCT)
                             {
-                              pcl_tab_error (&@1, NULL,
+                              pcl_tab_error (&@1, pcl_parser,
                                              "fields of type struct can't have an\
  explicit size");
                               YYERROR;

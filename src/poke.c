@@ -220,10 +220,6 @@ repl ()
  *  yypull_parse () -> parse the rest of the input stream.
  */
 
-#include "pcl-ast.h"
-#include "pcl-tab.h"
-#include "pcl-lex.h"
-
 int
 main (int argc, char *argv[])
 {
@@ -237,22 +233,11 @@ main (int argc, char *argv[])
   //  if (poke_interactive_p)
   //    return repl ();
 
-  void *pcl_scanner;
-  void *pcl_parser;
-
-  pcl_tab_lex_init (&pcl_scanner);
-  /*  pcl_tab_set_extra (pcl_parser, pcl_scanner); */
-  pcl_tab_set_in (stdin, pcl_scanner);
-//  char foo[] = "struct foo { int a; };\0";
-//  YY_BUFFER_STATE buffer = pcl_tab__scan_buffer(foo, sizeof (foo), pcl_scanner);
-  int ret = pcl_tab_parse (pcl_scanner);
+  int ret = pcl_parse_file (stdin);
   if (ret == 1)
     printf ("SYNTAX ERROR\n");
   else if (ret == 2)
     printf ("MEMORY EXHAUSTION\n");
 
-//  pcl_tab__delete_buffer (buffer, pcl_scanner);
-  pcl_tab_lex_destroy (pcl_scanner);
-  
   return 0;
 }

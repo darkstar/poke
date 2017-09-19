@@ -27,7 +27,8 @@
 %option bison-bridge
 %option header-file="pcl-lex.h"
 %option bison-locations
-%option yylineno   
+%option yylineno
+%option extra-type="void *"
 
 %top {
    /* This code goes at the "top" of the generated file.  */
@@ -38,6 +39,7 @@
 #include <string.h>
 #include <xalloc.h>
 #include <pcl-ast.h>
+#include <pcl-parser.h>
 #include <pcl-tab.h>
 
 #define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;

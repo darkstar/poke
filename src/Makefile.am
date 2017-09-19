@@ -19,7 +19,8 @@ bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
                pcl-ast.h pcl-ast.c \
                pcl-tab.y pcl-lex.l \
-               pcl-gen.c
+               pcl-gen.h pcl-gen.c \
+               pcl-parser.h pcl-parser.c
 
 BUILT_SOURCES = pcl-tab.h pcl-lex.c
 AM_YFLAGS = -d
