@@ -183,7 +183,7 @@ pcl_gen (pcl_ast ast)
 
     case PCL_AST_FIELD:
       {
-        if (PCL_AST_FIELD_TYPE (ast) == PCL_TYPE_STRUCT)
+        if (PCL_AST_TYPE_CODE (PCL_AST_FIELD_TYPE (ast)) == PCL_TYPE_STRUCT)
           {
             /* if the field type is a STYPE, do a CALL to the referred
                struct passing LOC in the stack, and getting the new

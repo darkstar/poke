@@ -17,18 +17,13 @@
  */
 
 /* The first column is the constant used to identify the type.
-   The second column is the size of the type, in bits.  */
+   The second column is the identifier used by the type.
+   The third column is the size of the type, in bits.  */
 
-PCL_DEF_TYPE (PCL_TYPE_CHAR, 8)
-PCL_DEF_TYPE (PCL_TYPE_SHORT, 16)
-PCL_DEF_TYPE (PCL_TYPE_INT, 32)
-PCL_DEF_TYPE (PCL_TYPE_LONG, 64)
-PCL_DEF_TYPE (PCL_TYPE_ENUM, 32)
-
-/* Structs are special, since their size is not known at compile
-   time.  */
-
-PCL_DEF_TYPE (PCL_TYPE_STRUCT, 0)
+PCL_DEF_TYPE (PCL_TYPE_CHAR, "char", 8)
+PCL_DEF_TYPE (PCL_TYPE_SHORT, "short", 16)
+PCL_DEF_TYPE (PCL_TYPE_INT, "int", 32)
+PCL_DEF_TYPE (PCL_TYPE_LONG, "long", 64)
 
 /*
 Local variables:

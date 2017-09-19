@@ -78,11 +78,14 @@ enum pcl_ast_endian
   PCL_AST_LSB  /* Little-endian.  */
 };
 
-#define PCL_DEF_TYPE(CODE,SIZE) CODE,
+#define PCL_DEF_TYPE(CODE,ID,SIZE) CODE,
 
 enum pcl_ast_type_code
 {
+  PCL_TYPE_NOTYPE,
 #include "pcl-types.def"
+  PCL_TYPE_ENUM,
+  PCL_TYPE_STRUCT
 };
 
 #undef PCL_DEF_TYPE
@@ -100,6 +103,7 @@ enum pcl_ast_type_code
 #define PCL_AST_CHAIN(AST) ((AST)->common.chain)
 #define PCL_AST_CODE(AST) ((AST)->common.code)
 #define PCL_AST_LITERAL_P(AST) ((AST)->common.literal_p)
+#define PCL_AST_REGISTERED_P(AST) ((AST)->common.registered_p)
 
 struct pcl_ast_common
 {
@@ -107,6 +111,7 @@ struct pcl_ast_common
   enum pcl_ast_code code : 8;
 
   unsigned literal_p : 1;
+  unsigned registered_p :1;
 };
 
 #define PCL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->program.declarations)
@@ -354,22 +359,12 @@ pcl_ast pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2);
 
 enum pcl_ast_endian pcl_ast_default_endian (void);
 
-pcl_ast pcl_ast_get_identifier (const char *str);
-
-pcl_ast pcl_ast_register_type (const char *name, pcl_ast type);
-pcl_ast pcl_ast_get_type (const char *str);
-
-pcl_ast pcl_ast_register_enum (const char *tag, pcl_ast enumeration);
-pcl_ast pcl_ast_get_enum (const char *tag);
-
-pcl_ast pcl_ast_register_struct (const char *tag, pcl_ast strct);
-pcl_ast pcl_ast_get_struct (const char *tag);
-
 pcl_ast pcl_ast_make_integer (uint64_t value);
 pcl_ast pcl_ast_make_string (const char *str);
 pcl_ast pcl_ast_make_doc_string (const char *str, pcl_ast entity);
 pcl_ast pcl_ast_make_enumerator (pcl_ast identifier, pcl_ast value,
                                  pcl_ast docstr);
+pcl_ast pcl_ast_make_identifier (const char *str);
 pcl_ast pcl_ast_make_cond_exp (pcl_ast cond, pcl_ast thenexp,
                                pcl_ast elseexp);
 pcl_ast pcl_ast_make_binary_exp (enum pcl_ast_op code, pcl_ast op1,

@@ -52,18 +52,7 @@
 
    When this function returns, the parser tries to recover the error.
    If it is unable to recover, then it returns with 1 (syntax error)
-   immediately.
-
-   We use the default structure for YYLTYPE:
-
-     typedef struct YYLTYPE
-     {
-       int first_line;
-       int first_column;
-       int last_line;
-       int last_column;
-     } YYLTYPE;
- */
+   immediately.  */
   
 void
 pcl_tab_error (YYLTYPE *llocp,
@@ -95,8 +84,9 @@ enum_specifier_action (struct pcl_parser *pcl_parser,
                        pcl_ast docstr, YYLTYPE *loc_docstr)
 {
   *enumeration = pcl_ast_make_enum (tag, enumerators, docstr);
-  if (pcl_ast_register_enum (PCL_AST_IDENTIFIER_POINTER (tag),
-                             *enumeration) == NULL)
+  if (pcl_parser_register (pcl_parser,
+                           PCL_AST_IDENTIFIER_POINTER (tag),
+                           *enumeration) == NULL)
     {
       pcl_tab_error (loc_tag, pcl_parser, "enum already defined");
       return 0;
@@ -114,8 +104,9 @@ struct_specifier_action (struct pcl_parser *pcl_parser,
 {
   *strct = pcl_ast_make_struct (tag, docstr, mem);
 
-  if (pcl_ast_register_struct (PCL_AST_IDENTIFIER_POINTER (tag),
-                               *strct) == NULL)
+  if (pcl_parser_register (pcl_parser,
+                           PCL_AST_IDENTIFIER_POINTER (tag),
+                           *strct) == NULL)
     {
       pcl_tab_error (loc_tag, pcl_parser, "struct already defined");
       return 0;
@@ -176,7 +167,7 @@ struct_specifier_action (struct pcl_parser *pcl_parser,
 %token <opcode> XORA
 %token <opcode> IORA
 
-%token MSB LSB CHAR SHORT INT LONG
+%token MSB LSB
 %token SIGNED UNSIGNED
 
 %type <opcode> unary_operator assignment_operator
@@ -215,10 +206,7 @@ program: declaration_list
                   $$ = pcl_ast_make_program ();
                   PCL_AST_PROGRAM_DECLARATIONS ($$) = $1;
 
-#ifdef PCL_DEBUG
-                  pcl_ast_print (stdout, $$);
-                  pcl_gen ($$);
-#endif                  
+                  pcl_parser->ast = $$;
                 }
         ;
 
@@ -437,7 +425,7 @@ typedef_specifier:
                                                     PCL_AST_TYPE_ENUMERATION ($2),
                                                     PCL_AST_TYPE_STRUCT ($2));
 
-                  if (pcl_ast_register_type (id, type) == NULL)
+                  if (pcl_parser_register (pcl_parser, id, type) == NULL)
                     {
                       pcl_tab_error (&@2, pcl_parser, "type already defined");
                       YYERROR;
@@ -451,27 +439,15 @@ typedef_specifier:
         ;
 
 type_specifier:
-	  CHAR
-          	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, 1, 8, NULL, NULL); }
-	| sign_qualifier CHAR
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_CHAR, $1, 8, NULL, NULL); }
-        | SHORT
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_SHORT, 1, 16, NULL, NULL); }
-        | sign_qualifier SHORT
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_SHORT, $1, 16, NULL, NULL); }
-        | INT
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_INT, 1, 32, NULL, NULL); }
-        | sign_qualifier INT
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_INT, $1, 32, NULL, NULL); }
-        | LONG
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_LONG, 1, 64, NULL, NULL); }
-        | sign_qualifier LONG
-        	{ $$ = pcl_ast_make_type (PCL_TYPE_LONG, $1, 64, NULL, NULL); }
+	  sign_qualifier TYPENAME
+        	{ PCL_AST_TYPE_SIGNED ($2) = $1; $$ = $2; }
 	| TYPENAME
 	| STRUCT IDENTIFIER
         	{
                   pcl_ast strct
-                    = pcl_ast_get_struct (PCL_AST_IDENTIFIER_POINTER ($2));
+                    = pcl_parser_get_registered (pcl_parser,
+                                                 PCL_AST_IDENTIFIER_POINTER ($2),
+                                                 PCL_AST_STRUCT);
 
                   if (!strct)
                     {
@@ -485,7 +461,9 @@ type_specifier:
         | ENUM IDENTIFIER
         	{
                   pcl_ast enumeration
-                    = pcl_ast_get_enum (PCL_AST_IDENTIFIER_POINTER ($2));
+                    = pcl_parser_get_registered (pcl_parser,
+                                                 PCL_AST_IDENTIFIER_POINTER ($2),
+                                                 PCL_AST_ENUM);
 
                   if (!enumeration)
                     {

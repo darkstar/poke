@@ -75,221 +75,6 @@ pcl_ast_chainon (pcl_ast ast1, pcl_ast ast2)
   return ast2;
 }
 
-/* The PCL_AST_IDENTIFIER nodes are unique by name, and are stored in
-   a hash table to avoid replicating data unnecessarily.  */
-
-#define HASH_TABLE_SIZE 1008
-static pcl_ast ids_hash_table[HASH_TABLE_SIZE];
-
-static int
-hash_string (const char *name)
-{
-  size_t len;
-  int hash;
-  int i;
-
-  len = strlen (name);
-  hash = len;
-  for (i = 0; i < len; i++)
-    hash = ((hash * 613) + (unsigned)(name[i]));
-
-#define HASHBITS 30
-  hash &= (1 << HASHBITS) - 1;
-  hash %= HASH_TABLE_SIZE;
-#undef HASHBITS
-
-  return hash;
-}
-
-/* Return a PCL_AST_IDENTIFIER node whose name is the NULL-terminated
-   string STR.  If an identifier with that name has previously been
-   referred to, the name node is returned this time.  */
-
-pcl_ast 
-pcl_ast_get_identifier (const char *str)
-{
-  pcl_ast id;
-  int hash;
-  size_t len;
-
-  /* Compute the hash code for the identifier string.  */
-  len = strlen (str);
-
-  hash = hash_string (str);
-
-  /* Search the hash table for the identifier.  */
-  for (id = ids_hash_table[hash]; id != NULL; id = PCL_AST_CHAIN (id))
-    if (PCL_AST_IDENTIFIER_LENGTH (id) == len
-        && !strcmp (PCL_AST_IDENTIFIER_POINTER (id), str))
-      return id;
-
-  /* Create a new node for this identifier, and put it in the hash
-     table.  */
-  id = pcl_ast_make_node (PCL_AST_IDENTIFIER);
-  PCL_AST_IDENTIFIER_LENGTH (id) = len;
-  PCL_AST_IDENTIFIER_POINTER (id) = strdup (str);
-
-  PCL_AST_CHAIN (id) = ids_hash_table[hash];
-  ids_hash_table[hash] = id;
-
-  return id;
-}
-
-/* Named types are stored in a hash table, and are referred from AST
-   nodes.  */
-
-static pcl_ast types_hash_table[HASH_TABLE_SIZE];
-
-/* Register a named type, storing it in the types hash table, and
-   return a pointer to it.  If a type with the given name has been
-   already registered, return NULL.  */
-
-pcl_ast
-pcl_ast_register_type (const char *name, pcl_ast type)
-{
-  int hash;
-  pcl_ast t;
-
-  hash = hash_string (name);
-
-  /* Search the hash table for the type.  */
-  for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
-    if (PCL_AST_TYPE_NAME (t)
-        && !strcmp (PCL_AST_TYPE_NAME (t), name))
-      return NULL;
-
-  /* Put the passed type in the hash table.  */
-  PCL_AST_TYPE_NAME (type) = xstrdup (name);
-  PCL_AST_CHAIN (type) = types_hash_table[hash];
-  types_hash_table[hash] = type;
-
-  return type;
-}
-
-/* Return the type associated with the given NAME.  If the type name
-   has not been registered, return NULL.  */
-
-pcl_ast
-pcl_ast_get_type (const char *name)
-{
-  int hash;
-  pcl_ast t;
-  
-  hash = hash_string (name);
-
-  /* Search the hash table for the type.  */
-  for (t = types_hash_table[hash]; t != NULL; t = PCL_AST_CHAIN (t))
-    if (PCL_AST_TYPE_NAME (t)
-        && !strcmp (PCL_AST_TYPE_NAME (t), name))
-      return t;
-
-  return NULL;
-}
-
-/* Enumerations are stored in a hash table, and are referred from AST
-   nodes.  */
-
-static pcl_ast enums_hash_table[HASH_TABLE_SIZE];
-
-/* Register an enumeration, storing it in the enums hash table, and
-   return a pointer to it.  If an enumeration with the given tag has
-   been already registered, return NULL.  */
-
-pcl_ast
-pcl_ast_register_enum (const char *tag, pcl_ast enumeration)
-{
-  int hash;
-  pcl_ast e;
-
-  hash = hash_string (tag);
-
-  /* Search the hash table for the enumeration.  */
-  for (e = enums_hash_table[hash]; e != NULL; e = PCL_AST_CHAIN (e))
-    if (PCL_AST_ENUM_TAG (e)
-        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e))
-        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e)), tag))
-      return NULL;
-
-  /* Put the passed enumeration in the hash table.  */
-  PCL_AST_CHAIN (enumeration) = enums_hash_table[hash];
-  enums_hash_table[hash] = enumeration;
-
-  return enumeration;
-}
-
-/* Return the enumeration associated with the given TAG.  If the
-   enumeration tag has not been registered, return NULL.  */
-
-pcl_ast
-pcl_ast_get_enum (const char *tag)
-{
-  int hash;
-  pcl_ast e;
-
-  hash = hash_string (tag);
-
-  /* Search the hash table for the enumeration.  */
-  for (e = enums_hash_table[hash]; e != NULL; e = PCL_AST_CHAIN (e))
-    if (PCL_AST_ENUM_TAG (e)
-        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e))
-        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_ENUM_TAG (e)), tag))
-      return e;
-
-  return NULL;
-}
-
-/* Structs are stored in a hash table, and are referred from AST
-   nodes.  */
-
-static pcl_ast structs_hash_table[HASH_TABLE_SIZE];
-
-/* Register a struct, storing it in the structs hash table, and return
-   a pointer to it.  If a struct with the given tag has been already
-   registered, return NULL.  */
-
-pcl_ast
-pcl_ast_register_struct (const char *tag, pcl_ast strct)
-{
-  int hash;
-  pcl_ast s;
-
-  hash = hash_string (tag);
-
-  /* Search the hash table for the struct.  */
-  for (s = structs_hash_table[hash]; s != NULL; s = PCL_AST_CHAIN (s))
-    if (PCL_AST_STRUCT_TAG (s)
-        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s))
-        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s)), tag))
-      return NULL;
-
-  /* Put the passed struct in the hash table.  */
-  PCL_AST_CHAIN (strct) = structs_hash_table[hash];
-  structs_hash_table[hash] = strct;
-
-  return strct;
-}
-
-/* Return the struct associated with the given TAG.  If the struct tag
-   has not been registered, return NULL.  */
-
-pcl_ast
-pcl_ast_get_struct (const char *tag)
-{
-  int hash;
-  pcl_ast s;
-
-  hash = hash_string (tag);
-
-  /* Search the hash table for the struct.  */
-  for (s = structs_hash_table[hash]; s != NULL; s = PCL_AST_CHAIN (s))
-    if (PCL_AST_STRUCT_TAG (s)
-        && PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s))
-        && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (s)), tag))
-      return s;
-
-  return NULL;
-}
-
 /* Build and return an AST node for the location counter.  */
 
 pcl_ast
@@ -326,6 +111,19 @@ pcl_ast_make_string (const char *str)
   PCL_AST_LITERAL_P (new) = 1;
 
   return new;
+}
+
+/* Build and return an AST node for an identifier.  */
+
+pcl_ast
+pcl_ast_make_identifier (const char *str)
+{
+  pcl_ast id = pcl_ast_make_node (PCL_AST_IDENTIFIER);
+
+  PCL_AST_IDENTIFIER_POINTER (id) = xstrdup (str);
+  PCL_AST_IDENTIFIER_LENGTH (id) = strlen (str);
+
+  return id;
 }
 
 /* Build and return an AST node for a doc string.  */
@@ -593,10 +391,12 @@ pcl_ast_make_program (void)
 
 /* Return the size in bits of TYPE.  */
 
-#define PCL_DEF_TYPE(CODE,SIZE) SIZE,
+#define PCL_DEF_TYPE(CODE,ID,SIZE) SIZE,
 static enum pcl_ast_type_code pcl_type_size[] =
 {
 # include "pcl-types.def"
+  32, /* PCL_TYPE_ENUM */
+  0,  /* PCL_TYPE_SRUCT */
 };
 #undef PCL_DEF_TYPE
 
@@ -842,9 +642,11 @@ pcl_ast_print_1 (FILE *fd, pcl_ast ast, int indent)
 
       if (PCL_AST_TYPE_STRUCT (ast))
         {
+          pcl_ast strct = PCL_AST_TYPE_STRUCT (ast);
+          const char *tag
+            = PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (strct));
           IPRINTF ("struct:\n");
-          IPRINTF ("  'struct %s'\n",
-                   PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+          IPRINTF ("  'struct %s'\n", tag);
         }
       break;
 

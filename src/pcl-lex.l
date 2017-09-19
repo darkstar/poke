@@ -28,7 +28,7 @@
 %option header-file="pcl-lex.h"
 %option bison-locations
 %option yylineno
-%option extra-type="void *"
+%option extra-type="struct pcl_parser *"
 
 %top {
    /* This code goes at the "top" of the generated file.  */
@@ -152,11 +152,6 @@ D [0-9]
 "unsigned"	{ yylval->integer = 0; return UNSIGNED; }
 "signed"	{ yylval->integer = 1; return SIGNED; }
 
-"char"		{ return CHAR; /* XXX: handle with types.def  */ }
-"short"		{ return SHORT; /* XXX: handle with types.def  */ }
-"int"		{ return INT; /* XXX: handle with types.def  */ }
-"long"		{ return LONG; /* XXX: handle with types.def  */ }
-
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
 
@@ -210,14 +205,15 @@ D [0-9]
 {L}({L}|{D})* {
    pcl_ast type;
 
-   if ((type = pcl_ast_get_type (yytext)) != NULL)
+   if ((type = pcl_parser_get_registered (yyextra, 
+                                          yytext, PCL_AST_TYPE)) != NULL)
      {
        yylval->ast = type;
        return TYPENAME;
      }
    else
      {
-       yylval->ast = pcl_ast_get_identifier (yytext);
+       yylval->ast = pcl_parser_get_identifier (yyextra, yytext);
        return IDENTIFIER;
      }
 }
