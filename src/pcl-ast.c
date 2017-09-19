@@ -389,24 +389,6 @@ pcl_ast_make_program (void)
   return program;
 }
 
-/* Return the size in bits of TYPE.  */
-
-#define PCL_DEF_TYPE(CODE,ID,SIZE) SIZE,
-static enum pcl_ast_type_code pcl_type_size[] =
-{
-# include "pcl-types.def"
-  32, /* PCL_TYPE_ENUM */
-  0,  /* PCL_TYPE_SRUCT */
-};
-#undef PCL_DEF_TYPE
-
-size_t
-pcl_ast_type_size (pcl_ast type)
-{
-  assert (PCL_AST_CODE (type) == PCL_AST_TYPE);
-  return pcl_type_size[PCL_AST_TYPE_CODE (type)];
-}
-
 #ifdef PCL_DEBUG
 
 /* The following macros are commodities to be used to keep the

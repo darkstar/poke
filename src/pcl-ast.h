@@ -389,8 +389,6 @@ pcl_ast pcl_ast_make_assertion (pcl_ast exp);
 pcl_ast pcl_ast_make_program (void);
 pcl_ast pcl_ast_make_loc (void);
 
-size_t pcl_ast_type_size (pcl_ast type);
-
 #ifdef PCL_DEBUG
 
 void pcl_ast_print (FILE *fd, pcl_ast ast);
