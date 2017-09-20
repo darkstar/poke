@@ -45,8 +45,10 @@ pcl_ast_make_node (enum pcl_ast_code code)
   pcl_ast_node ast;
 
   ast = xmalloc (sizeof (union pcl_ast_node));
-  memset (ast, 0, sizeof (ast));
+  memset (ast, 0, sizeof (pcl_ast_node));
   PCL_AST_CODE (ast) = code;
+  PCL_AST_REFCOUNT (ast) = 0;  /* This is for valgrind.  */
+  PCL_AST_LITERAL_P (ast) = 0; /* Likewise.  */
 
   return ast;
 }
@@ -65,7 +67,7 @@ pcl_ast_chainon (pcl_ast_node ast1, pcl_ast_node ast2)
         if (tmp == ast2)
           abort ();
 
-      PCL_AST_CHAIN (tmp) = ast2;
+      PCL_AST_CHAIN (tmp) = ASTREF (ast2);
       return ast1;
     }
 
@@ -134,7 +136,6 @@ pcl_ast_make_doc_string (const char *str, pcl_ast_node entity)
 
   PCL_AST_DOC_STRING_POINTER (doc_string) = xstrdup (str);
   PCL_AST_DOC_STRING_LENGTH (doc_string) = strlen (str);
-  PCL_AST_DOC_STRING_ENTITY (doc_string) = entity;
 
   return doc_string;
 }
@@ -149,10 +150,10 @@ pcl_ast_make_enumerator (pcl_ast_node identifier,
   pcl_ast_node enumerator = pcl_ast_make_node (PCL_AST_ENUMERATOR);
 
   assert (identifier != NULL);
-  
-  PCL_AST_ENUMERATOR_IDENTIFIER (enumerator) = identifier;
-  PCL_AST_ENUMERATOR_VALUE (enumerator) = value;
-  PCL_AST_ENUMERATOR_DOCSTR (enumerator) = docstr;
+
+  PCL_AST_ENUMERATOR_IDENTIFIER (enumerator) = ASTREF (identifier);
+  PCL_AST_ENUMERATOR_VALUE (enumerator) = ASTREF (value);
+  PCL_AST_ENUMERATOR_DOCSTR (enumerator) = ASTREF (docstr);
 
   return enumerator;
 }
@@ -168,9 +169,9 @@ pcl_ast_make_cond_exp (pcl_ast_node cond,
 
   assert (cond && thenexp && elseexp);
 
-  PCL_AST_COND_EXP_COND (cond_exp) = cond;
-  PCL_AST_COND_EXP_THENEXP (thenexp) = thenexp;
-  PCL_AST_COND_EXP_ELSEEXP (elseexp) = elseexp;
+  PCL_AST_COND_EXP_COND (cond_exp) = ASTREF (cond);
+  PCL_AST_COND_EXP_THENEXP (thenexp) = ASTREF (thenexp);
+  PCL_AST_COND_EXP_ELSEEXP (elseexp) = ASTREF (elseexp);
 
   PCL_AST_LITERAL_P (cond_exp)
     = PCL_AST_LITERAL_P (thenexp) && PCL_AST_LITERAL_P (elseexp);
@@ -191,8 +192,8 @@ pcl_ast_make_binary_exp (enum pcl_ast_op code,
 
   PCL_AST_EXP_CODE (exp) = code;
   PCL_AST_EXP_NUMOPS (exp) = 2;
-  PCL_AST_EXP_OPERAND (exp, 0) = op1;
-  PCL_AST_EXP_OPERAND (exp, 1) = op2;
+  PCL_AST_EXP_OPERAND (exp, 0) = ASTREF (op1);
+  PCL_AST_EXP_OPERAND (exp, 1) = ASTREF (op2);
 
   PCL_AST_LITERAL_P (exp)
     = PCL_AST_LITERAL_P (op1) && PCL_AST_LITERAL_P (op2);
@@ -210,7 +211,7 @@ pcl_ast_make_unary_exp (enum pcl_ast_op code,
 
   PCL_AST_EXP_CODE (exp) = code;
   PCL_AST_EXP_NUMOPS (exp) = 1;
-  PCL_AST_EXP_OPERAND (exp, 0) = op;
+  PCL_AST_EXP_OPERAND (exp, 0) = ASTREF (op);
   PCL_AST_LITERAL_P (exp) = PCL_AST_LITERAL_P (op);
   
   return exp;
@@ -225,8 +226,8 @@ pcl_ast_make_array_ref (pcl_ast_node base, pcl_ast_node index)
 
   assert (base && index);
 
-  PCL_AST_ARRAY_REF_BASE (aref) = base;
-  PCL_AST_ARRAY_REF_INDEX (aref) = index;
+  PCL_AST_ARRAY_REF_BASE (aref) = ASTREF (base);
+  PCL_AST_ARRAY_REF_INDEX (aref) = ASTREF (index);
   PCL_AST_LITERAL_P (aref) = 0;
 
   return aref;
@@ -242,8 +243,8 @@ pcl_ast_make_struct_ref (pcl_ast_node base, pcl_ast_node identifier)
   assert (base && identifier
           && PCL_AST_CODE (identifier) == PCL_AST_IDENTIFIER);
 
-  PCL_AST_STRUCT_REF_BASE (sref) = base;
-  PCL_AST_STRUCT_REF_IDENTIFIER (sref) = identifier;
+  PCL_AST_STRUCT_REF_BASE (sref) = ASTREF (base);
+  PCL_AST_STRUCT_REF_IDENTIFIER (sref) = ASTREF (identifier);
 
   return sref;
 }
@@ -256,11 +257,12 @@ pcl_ast_make_type (enum pcl_ast_type_code code, int signed_p,
 {
   pcl_ast_node type = pcl_ast_make_node (PCL_AST_TYPE);
 
+  PCL_AST_TYPE_NAME (type) = NULL;
   PCL_AST_TYPE_CODE (type) = code;
   PCL_AST_TYPE_SIGNED (type) = signed_p;
   PCL_AST_TYPE_SIZE (type) = size;
-  PCL_AST_TYPE_ENUMERATION (type) = enumeration;
-  PCL_AST_TYPE_STRUCT (type) = strct;
+  PCL_AST_TYPE_ENUMERATION (type) = ASTREF (enumeration);
+  PCL_AST_TYPE_STRUCT (type) = ASTREF (strct);
 
   return type;
 }
@@ -275,9 +277,9 @@ pcl_ast_make_struct (pcl_ast_node tag, pcl_ast_node docstr,
 
   assert (tag);
 
-  PCL_AST_STRUCT_TAG (strct) = tag;
-  PCL_AST_STRUCT_DOCSTR (strct) = docstr;
-  PCL_AST_STRUCT_MEM (strct) = mem;
+  PCL_AST_STRUCT_TAG (strct) = ASTREF (tag);
+  PCL_AST_STRUCT_DOCSTR (strct) = ASTREF (docstr);
+  PCL_AST_STRUCT_MEM (strct) = ASTREF (mem);
 
   return strct;
 }
@@ -291,7 +293,7 @@ pcl_ast_make_mem (enum pcl_ast_endian endian,
   pcl_ast_node mem = pcl_ast_make_node (PCL_AST_MEM);
 
   PCL_AST_MEM_ENDIAN (mem) = endian;
-  PCL_AST_MEM_COMPONENTS (mem) = components;
+  PCL_AST_MEM_COMPONENTS (mem) = ASTREF (components);
 
   return mem;
 }
@@ -305,9 +307,9 @@ pcl_ast_make_enum (pcl_ast_node tag, pcl_ast_node values, pcl_ast_node docstr)
 
   assert (tag && values);
 
-  PCL_AST_ENUM_TAG (enumeration) = tag;
-  PCL_AST_ENUM_VALUES (enumeration) = values;
-  PCL_AST_ENUM_DOCSTR (enumeration) = docstr;
+  PCL_AST_ENUM_TAG (enumeration) = ASTREF (tag);
+  PCL_AST_ENUM_VALUES (enumeration) = ASTREF (values);
+  PCL_AST_ENUM_DOCSTR (enumeration) = ASTREF (docstr);
 
   return enumeration;
 }
@@ -323,12 +325,12 @@ pcl_ast_make_field (pcl_ast_node name, pcl_ast_node type, pcl_ast_node docstr,
 
   assert (name);
 
-  PCL_AST_FIELD_NAME (field) = name;
-  PCL_AST_FIELD_TYPE (field) = type;
-  PCL_AST_FIELD_DOCSTR (field) = docstr;
+  PCL_AST_FIELD_NAME (field) = ASTREF (name);
+  PCL_AST_FIELD_TYPE (field) = ASTREF (type);
+  PCL_AST_FIELD_DOCSTR (field) = ASTREF (docstr);
   PCL_AST_FIELD_ENDIAN (field) = endian;
-  PCL_AST_FIELD_NUM_ENTS (field) = num_ents;
-  PCL_AST_FIELD_SIZE (field) = size;
+  PCL_AST_FIELD_NUM_ENTS (field) = ASTREF (num_ents);
+  PCL_AST_FIELD_SIZE (field) = ASTREF (size);
 
   return field;
 }
@@ -342,9 +344,9 @@ pcl_ast_make_cond (pcl_ast_node exp, pcl_ast_node thenpart, pcl_ast_node elsepar
 
   assert (exp);
 
-  PCL_AST_COND_EXP (cond) = exp;
-  PCL_AST_COND_THENPART (cond) = thenpart;
-  PCL_AST_COND_ELSEPART (cond) = elsepart;
+  PCL_AST_COND_EXP (cond) = ASTREF (exp);
+  PCL_AST_COND_THENPART (cond) = ASTREF (thenpart);
+  PCL_AST_COND_ELSEPART (cond) = ASTREF (elsepart);
 
   return cond;
 }
@@ -357,10 +359,10 @@ pcl_ast_make_loop (pcl_ast_node pre, pcl_ast_node cond, pcl_ast_node post,
 {
   pcl_ast_node loop = pcl_ast_make_node (PCL_AST_LOOP);
 
-  PCL_AST_LOOP_PRE (loop) = pre;
-  PCL_AST_LOOP_COND (loop) = cond;
-  PCL_AST_LOOP_POST (loop) = post;
-  PCL_AST_LOOP_BODY (loop) = body;
+  PCL_AST_LOOP_PRE (loop) = ASTREF (pre);
+  PCL_AST_LOOP_COND (loop) = ASTREF (cond);
+  PCL_AST_LOOP_POST (loop) = ASTREF (post);
+  PCL_AST_LOOP_BODY (loop) = ASTREF (body);
 
   return loop;
 }
@@ -372,7 +374,7 @@ pcl_ast_make_assertion (pcl_ast_node exp)
 {
   pcl_ast_node assertion = pcl_ast_make_node (PCL_AST_ASSERTION);
 
-  PCL_AST_ASSERTION_EXP (assertion) = exp;
+  PCL_AST_ASSERTION_EXP (assertion) = ASTREF (exp);
   return assertion;
 }
 
@@ -383,31 +385,39 @@ pcl_ast_make_program (pcl_ast_node declarations)
 {
   pcl_ast_node program = pcl_ast_make_node (PCL_AST_PROGRAM);
 
-  PCL_AST_PROGRAM_DECLARATIONS (program) = declarations;
+  PCL_AST_PROGRAM_DECLARATIONS (program) = ASTREF (declarations);
   return program;
 }
 
 /* Free all allocated resources used by AST.  Note that nodes marked
    as "registered", as well as their children, are not disposed.  */
 
-static void
+void
 pcl_ast_node_free (pcl_ast_node ast)
 {
-  pcl_ast_node t;
+  pcl_ast_node t, n;
   int i;
   
-  if (ast == NULL
-      || PCL_AST_REGISTERED_P (ast))
+  if (ast == NULL)
     return;
+
+  assert (PCL_AST_REFCOUNT (ast) > 0);
+
+  if (PCL_AST_REFCOUNT (ast) > 1)
+    {
+      PCL_AST_REFCOUNT (ast) -= 1;
+      return;
+    }
 
   switch (PCL_AST_CODE (ast))
     {
     case PCL_AST_PROGRAM:
 
-      for (t = PCL_AST_PROGRAM_DECLARATIONS (ast);
-           t;
-           t = PCL_AST_CHAIN (t))
-        pcl_ast_node_free (t);
+      for (t = PCL_AST_PROGRAM_DECLARATIONS (ast); t; t = n)
+        {
+          n = PCL_AST_CHAIN (t);
+          pcl_ast_node_free (t);
+        }
       
       break;
 
@@ -429,11 +439,12 @@ pcl_ast_node_free (pcl_ast_node ast)
 
       pcl_ast_node_free (PCL_AST_ENUM_TAG (ast));
       pcl_ast_node_free (PCL_AST_ENUM_DOCSTR (ast));
-
-      for (t = PCL_AST_ENUM_VALUES (ast);
-           t;
-           t = PCL_AST_CHAIN (t))
-        pcl_ast_node_free (t);
+      
+      for (t = PCL_AST_ENUM_VALUES (ast); t; t = n)
+        {
+          n = PCL_AST_CHAIN (t);
+          pcl_ast_node_free (t);
+        }
 
       break;
       
@@ -453,10 +464,11 @@ pcl_ast_node_free (pcl_ast_node ast)
       
     case PCL_AST_MEM:
 
-      for (t = PCL_AST_MEM_COMPONENTS (ast);
-           t;
-           t = PCL_AST_CHAIN (t))
-        pcl_ast_node_free (t);
+      for (t = PCL_AST_MEM_COMPONENTS (ast); t; t = n)
+        {
+          n = PCL_AST_CHAIN (t);
+          pcl_ast_node_free (t);
+        }
 
       break;
       
@@ -492,11 +504,8 @@ pcl_ast_node_free (pcl_ast_node ast)
     case PCL_AST_TYPE:
 
       free (PCL_AST_TYPE_NAME (ast));
-
-      /* XXX: this should not be necessary:
-         pcl_ast_node_free (PCL_AST_TYPE_ENUMERATION (ast));
-         pcl_ast_node_free (PCL_AST_TYPE_STRUCT (ast));
-      */
+      pcl_ast_node_free (PCL_AST_TYPE_ENUMERATION (ast));
+      pcl_ast_node_free (PCL_AST_TYPE_STRUCT (ast));
       
       break;
       
@@ -525,10 +534,6 @@ pcl_ast_node_free (pcl_ast_node ast)
     case PCL_AST_DOC_STRING:
 
       free (PCL_AST_DOC_STRING_POINTER (ast));
-
-      /* XXX: this should not be necessary:
-         pcl_ast_node_free (PCL_AST_DOC_STRING_ENTITY (ast));
-      */
       break;
 
     case PCL_AST_INTEGER:
@@ -537,7 +542,7 @@ pcl_ast_node_free (pcl_ast_node ast)
       break;
       
     default:
-      assert (1);
+      assert (0);
     }
 
   free (ast);
@@ -570,7 +575,7 @@ free_hash_table (pcl_hash *hash_table)
     if ((*hash_table)[i])
       for (t = (*hash_table)[i]; t; t = n)
         {
-          n = PCL_AST_CHAIN (t);
+          n = PCL_AST_CHAIN2 (t);
           pcl_ast_node_free (t);
         }
 }
@@ -631,7 +636,7 @@ pcl_ast_get_identifier (struct pcl_ast *ast,
   /* Search the hash table for the identifier.  */
   for (id = ast->ids_hash_table[hash];
        id != NULL;
-       id = PCL_AST_CHAIN (id))
+       id = PCL_AST_CHAIN2 (id))
     if (PCL_AST_IDENTIFIER_LENGTH (id) == len
         && !strcmp (PCL_AST_IDENTIFIER_POINTER (id), str))
       return id;
@@ -639,9 +644,8 @@ pcl_ast_get_identifier (struct pcl_ast *ast,
   /* Create a new node for this identifier, and put it in the hash
      table.  */
   id = pcl_ast_make_identifier (str);
-  PCL_AST_REGISTERED_P (id) = 1;
-  PCL_AST_CHAIN (id) = ast->ids_hash_table[hash];
-  ast->ids_hash_table[hash] = id;
+  PCL_AST_CHAIN2 (id) = ast->ids_hash_table[hash];
+  ast->ids_hash_table[hash] = ASTREF (id);
 
   return id;
 
@@ -652,7 +656,8 @@ pcl_ast_get_identifier (struct pcl_ast *ast,
 
 pcl_ast_node
 pcl_ast_register (struct pcl_ast *ast,
-                  const char *name, pcl_ast_node ast_node)
+                  const char *name,
+                  pcl_ast_node ast_node)
 {
   enum pcl_ast_code code;
   enum pcl_ast_type_code type_code;
@@ -669,16 +674,7 @@ pcl_ast_register (struct pcl_ast *ast,
   else if (code == PCL_AST_STRUCT)
     hash_table = &ast->structs_hash_table;
   else
-    {
-      type_code = PCL_AST_TYPE_CODE (ast_node);
-      
-      if (type_code == PCL_TYPE_ENUM)
-        hash_table = &ast->enums_hash_table;
-      else if (type_code == PCL_TYPE_STRUCT)
-        hash_table = &ast->structs_hash_table;
-      else
-        hash_table = &ast->types_hash_table;
-    }
+    hash_table = &ast->types_hash_table;
 
   hash = hash_string (name);
 
@@ -696,15 +692,12 @@ pcl_ast_register (struct pcl_ast *ast,
             && !strcmp (PCL_AST_IDENTIFIER_POINTER (PCL_AST_STRUCT_TAG (t)), name)))
       return NULL;
 
-  /* Set the type as registered.  */
-  PCL_AST_REGISTERED_P (ast_node) = 1;
-
   if (code == PCL_AST_TYPE)
     /* Put the passed type in the hash table.  */
     PCL_AST_TYPE_NAME (ast_node) = xstrdup (name);
 
-  PCL_AST_CHAIN (ast_node) = (*hash_table)[hash];
-  (*hash_table)[hash] = ast_node;
+  PCL_AST_CHAIN2 (ast_node) = (*hash_table)[hash];
+  (*hash_table)[hash] = ASTREF (ast_node);
 
   return ast_node;
 }
@@ -734,7 +727,7 @@ pcl_ast_get_registered (pcl_ast ast,
   hash = hash_string (name);
 
   /* Search the hash table for the type.  */
-  for (t = (*hash_table)[hash]; t != NULL; t = PCL_AST_CHAIN (t))
+  for (t = (*hash_table)[hash]; t != NULL; t = PCL_AST_CHAIN2 (t))
     if ((code == PCL_AST_TYPE
          && (PCL_AST_TYPE_NAME (t)
              && !strcmp (PCL_AST_TYPE_NAME (t), name)))

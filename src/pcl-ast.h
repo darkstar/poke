@@ -123,12 +123,17 @@ typedef union pcl_ast_node *pcl_ast_node;
 /* The `pcl_ast_common' struct defines fields which are common to
    every node in the AST, regardless of their type.
 
-   CHAIN is used to chain AST nodes together.  This serves several
-   purposes in the compiler, like composing chains of related nodes
-   (such as the different enumerators in an enumeration) and
-   implementing hash bucket lists.  The `pcl_ast_chainon' utility
-   function is provided in order to confortably add elements to a list
-   of nodes chained by CHAIN.
+   CHAIN and CHAIN2 are used to chain AST nodes together.  This serves
+   several purposes in the compiler:
+
+   CHAIN is used to form sibling relationships in the tree.
+
+   CHAIN2 is used to link nodes together in containers, such as hash
+   table buckets.
+
+   The `pcl_ast_chainon' utility function is provided in order to
+   confortably add elements to a list of nodes.  It operates on CHAIN,
+   not CHAIN2.
 
    CODE identifies the type of node.
 
@@ -137,25 +142,31 @@ typedef union pcl_ast_node *pcl_ast_node;
    expression can be calculated at compile time.  This is used to
    implement some optimizations.
 
-   The REGISTERED_P flag can be used in any kind of node.  It tells
-   whether the memory storage of the node is handled externally.
-   "Registered" nodes (and their subnodes) will not be disposed when
-   the abstract syntax tree gets disposed.
+   It is possible for a node to be referred from more than one place.
+   To manage memory, we use a REFCOUNT that is initially 0.  The
+   ASTREF macro defined below tells the node a new reference is being
+   made.
 
    There is no constructor defined for common nodes.  */
 
 #define PCL_AST_CHAIN(AST) ((AST)->common.chain)
+#define PCL_AST_CHAIN2(AST) ((AST)->common.chain2)
 #define PCL_AST_CODE(AST) ((AST)->common.code)
 #define PCL_AST_LITERAL_P(AST) ((AST)->common.literal_p)
 #define PCL_AST_REGISTERED_P(AST) ((AST)->common.registered_p)
+#define PCL_AST_REFCOUNT(AST) ((AST)->common.refcount)
+
+#define ASTREF(AST) ((AST) ? (++((AST)->common.refcount), (AST)) \
+                     : NULL)
 
 struct pcl_ast_common
 {
   union pcl_ast_node *chain;
+  union pcl_ast_node *chain2;
   enum pcl_ast_code code : 8;
+  int refcount;
 
   unsigned literal_p : 1;
-  unsigned registered_p :1;
 };
 
 pcl_ast_node pcl_ast_chainon (pcl_ast_node ast1,
@@ -230,21 +241,16 @@ pcl_ast_node pcl_ast_make_string (const char *str);
    or the contents of other nodes/entities.
 
    POINTER must point to a NULL-terminated string.
-   LENGTH contains the size in bytes of the doc string.
-
-   ENTITY must point to the node whose meaning/contents are documented
-   by this docstring.  */
+   LENGTH contains the size in bytes of the doc string.  */
 
 #define PCL_AST_DOC_STRING_LENGTH(AST) ((AST)->doc_string.length)
 #define PCL_AST_DOC_STRING_POINTER(AST) ((AST)->doc_string.pointer)
-#define PCL_AST_DOC_STRING_ENTITY(AST) ((AST)->doc_string.entity)
 
 struct pcl_ast_doc_string
 {
   struct pcl_ast_common common;
   size_t length;
   char *pointer;
-  union pcl_ast_node *entity;
 };
 
 pcl_ast_node pcl_ast_make_doc_string (const char *str,
@@ -687,7 +693,11 @@ union pcl_ast_node
    pointer to it.
 
    `pcl_ast_free' frees all the memory allocated to store the AST
-   nodes and also the hash tables.  */
+   nodes and also the hash tables.
+
+   `pcl_ast_node_free' frees the memory allocated to store a single
+   node in the AST and its descendants.  This function is used by the
+   bison parser.  */
 
 #define HASH_TABLE_SIZE 1008
 typedef pcl_ast_node pcl_hash[HASH_TABLE_SIZE];
@@ -706,6 +716,7 @@ typedef struct pcl_ast *pcl_ast;
 
 pcl_ast pcl_ast_init (void);
 void pcl_ast_free (pcl_ast ast);
+void pcl_ast_node_free (pcl_ast_node ast);
 
 /* The following three functions are used by the lexer and the parser
    in order to populate/inquiry the hash tables in the AST.  */

@@ -84,6 +84,7 @@ enum_specifier_action (struct pcl_parser *pcl_parser,
                        pcl_ast_node docstr, YYLTYPE *loc_docstr)
 {
   *enumeration = pcl_ast_make_enum (tag, enumerators, docstr);
+
   if (pcl_ast_register (pcl_parser->ast,
                         PCL_AST_IDENTIFIER_POINTER (tag),
                         *enumeration) == NULL)
@@ -204,7 +205,7 @@ program: declaration_list
                     }
                   
                   $$ = pcl_ast_make_program ($1);
-                  pcl_parser->ast->ast = $$;
+                  pcl_parser->ast->ast = ASTREF ($$);
                 }
         ;
 
@@ -419,20 +420,17 @@ typedef_specifier:
           	{
                   const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
                   pcl_ast_node type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
-                                                    PCL_AST_TYPE_SIGNED ($2),
-                                                    PCL_AST_TYPE_SIZE ($2),
-                                                    PCL_AST_TYPE_ENUMERATION ($2),
-                                                    PCL_AST_TYPE_STRUCT ($2));
+                                                         PCL_AST_TYPE_SIGNED ($2),
+                                                         PCL_AST_TYPE_SIZE ($2),
+                                                         PCL_AST_TYPE_ENUMERATION ($2),
+                                                         PCL_AST_TYPE_STRUCT ($2));
 
                   if (pcl_ast_register (pcl_parser->ast, id, type) == NULL)
                     {
                       pcl_tab_error (&@2, pcl_parser, "type already defined");
                       YYERROR;
                     }
-                  /* XXX:
-                     pcl_ast_free ($1);
-                     pcl_ast_free ($3);
-                  */
+
                   $$ = NULL;
                 }
         ;
@@ -534,7 +532,7 @@ enum_specifier:
 enumerator_list:
 	  enumerator
 	| enumerator_list ',' enumerator
-		{ $$ = pcl_ast_chainon ($1, $3); }
+          	{ $$ = pcl_ast_chainon ($1, $3); }
 	;
 
 enumerator:
@@ -543,24 +541,20 @@ enumerator:
 	| IDENTIFIER DOCSTR
                 {
                   $$ = pcl_ast_make_enumerator ($1, NULL, $2);
-                  PCL_AST_DOC_STRING_ENTITY ($2) = $$;
                 }
         | IDENTIFIER '=' constant_expression
                 { $$ = pcl_ast_make_enumerator ($1, $3, NULL); }
         | IDENTIFIER '=' DOCSTR constant_expression
         	{
                   $$ = pcl_ast_make_enumerator ($1, $4, $3);
-                  PCL_AST_DOC_STRING_ENTITY ($3) = $$;
                 }
         | IDENTIFIER '=' constant_expression DOCSTR
 	        {
                   $$ = pcl_ast_make_enumerator ($1, $3, $4);
-                  PCL_AST_DOC_STRING_ENTITY ($4) = $$;
                 }
         | DOCSTR IDENTIFIER '=' constant_expression
         	{
                   $$ = pcl_ast_make_enumerator ($2, $4, $1);
-                  PCL_AST_DOC_STRING_ENTITY ($1) = $$;
                 }
 	;
 
@@ -649,12 +643,12 @@ mem_field_with_docstr:
 	  mem_field_with_endian
 	| DOCSTR mem_field_with_endian
           		{
-                          PCL_AST_FIELD_DOCSTR ($2) = $1;
+                          PCL_AST_FIELD_DOCSTR ($2) = ASTREF ($1);
                           $$ = $2;
                         }
         | mem_field_with_endian DOCSTR
 		        {
-                          PCL_AST_FIELD_DOCSTR ($1) = $2;
+                          PCL_AST_FIELD_DOCSTR ($1) = ASTREF ($2);
                           $$ = $1;
                         }
         ;
@@ -680,8 +674,12 @@ mem_field_with_size:
  explicit size");
                               YYERROR;
                             }
-                          
-                          PCL_AST_FIELD_SIZE ($1) = $3;
+
+                          /* Discard the size inferred from the field
+                             type and replace it with the
+                             field width expression.  */
+                          pcl_ast_node_free (PCL_AST_FIELD_SIZE ($1));
+                          PCL_AST_FIELD_SIZE ($1) = ASTREF ($3);
                           $$ = $1;
                         }
         ;
