@@ -20,7 +20,8 @@ poke_SOURCES = poke.c poke.h \
                pcl-ast.h pcl-ast.c \
                pcl-tab.y pcl-lex.l \
                pcl-gen.h pcl-gen.c \
-               pcl-parser.h pcl-parser.c
+               pcl-parser.h pcl-parser.c \
+               pcl-opt.h pcl-opt.c
 
 BUILT_SOURCES = pcl-tab.h pcl-lex.c
 AM_YFLAGS = -d

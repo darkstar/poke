@@ -200,7 +200,7 @@ program: declaration_list
           	{
                   if (yynerrs > 0)
                     {
-                      /* XXX pcl_ast_free ($1);  */
+                      pcl_ast_node_free ($1);
                       YYERROR;
                     }
                   

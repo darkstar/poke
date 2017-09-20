@@ -32,6 +32,7 @@
 #endif
 
 #include "pcl-parser.h"
+#include "pcl-opt.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -240,11 +241,21 @@ main (int argc, char *argv[])
     printf ("SYNTAX ERROR\n");
   else if (ret == 2)
     printf ("MEMORY EXHAUSTION\n");
+  else
+    {
+#ifdef PCL_DEBUG
+      pcl_ast_print (stdout, ast->ast);
+#endif
+
+      ast = pcl_opt (ast);
 
 #ifdef PCL_DEBUG
-  pcl_ast_print (stdout, ast->ast);
+      printf ("OPTIMIZED --------------------\n");
+      pcl_ast_print (stdout, ast->ast);
 #endif
-  pcl_ast_free (ast);
+      
+      pcl_ast_free (ast);
+    }
 
   return 0;
 }
