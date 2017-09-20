@@ -224,7 +224,7 @@ repl ()
 int
 main (int argc, char *argv[])
 {
-  set_program_name (xstrdup ("poke"));
+  set_program_name ("poke");
   parse_args (argc, argv);
 
   /* Determine whether the tool has been invoked interactively.  */
