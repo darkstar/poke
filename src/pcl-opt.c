@@ -33,7 +33,7 @@ pcl_opt_constfold (pcl_ast ast)
   if (ast == NULL)
     return ast;
 
-  if (PCL_AST_CODE (ast) == PCL_AST_EXP)
+  if (PCL_AST_CODE (ast->ast) == PCL_AST_EXP)
     {
       /* If all the operands are leafs and literals.  */
 
