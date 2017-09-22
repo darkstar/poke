@@ -1,4 +1,4 @@
-/* pcl.h - Poke Command Language definitions.  */
+/* pkl.h - Poke language support  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PCL_H
-#define PCL_H
+#ifndef PKL_H
+#define PKL_H
 
 #include <config.h>
 
 
 
-#endif /* ! PCL_H */
+#endif /* ! PKL_H */

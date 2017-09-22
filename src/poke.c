@@ -31,8 +31,8 @@
 # include <readline/history.h>
 #endif
 
-#include "pcl-parser.h"
-#include "pcl-opt.h"
+#include "pkl-parser.h"
+#include "pkl-opt.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -205,7 +205,7 @@ repl ()
  *
  * Parser:
  *
- *  int yyparse (void); (or pcl_tab_parse)
+ *  int yyparse (void); (or pkl_tab_parse)
  *
  *    0 -> parsing susccessful.
  *    1 -> syntax error, or YYABORT.
@@ -235,26 +235,26 @@ main (int argc, char *argv[])
   //  if (poke_interactive_p)
   //    return repl ();
 
-  pcl_ast ast;
-  int ret = pcl_parse_file (&ast, stdin);
+  pkl_ast ast;
+  int ret = pkl_parse_file (&ast, stdin);
   if (ret == 1)
     printf ("SYNTAX ERROR\n");
   else if (ret == 2)
     printf ("MEMORY EXHAUSTION\n");
   else
     {
-#ifdef PCL_DEBUG
-      pcl_ast_print (stdout, ast->ast);
+#ifdef PKL_DEBUG
+      pkl_ast_print (stdout, ast->ast);
 #endif
 
-      ast = pcl_opt (ast);
+      ast = pkl_opt (ast);
 
-#ifdef PCL_DEBUG
+#ifdef PKL_DEBUG
       printf ("OPTIMIZED --------------------\n");
-      pcl_ast_print (stdout, ast->ast);
+      pkl_ast_print (stdout, ast->ast);
 #endif
       
-      pcl_ast_free (ast);
+      pkl_ast_free (ast);
     }
 
   return 0;

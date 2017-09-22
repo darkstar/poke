@@ -1,4 +1,4 @@
-/* pcl-opt.h - Optimizer for PCL.  */
+/* pkl-gen.h - Code generator for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,37 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PKL_GEN_H
+#define PKL_GEN_H
+
 #include <config.h>
+#include <pkl-ast.h>
 
-#include "pcl-opt.h"
+int pkl_gen (pkl_ast_node ast);
 
-/* Constant folding.  */
-
-static pcl_ast
-pcl_opt_constfold (pcl_ast ast)
-{
-  /* integer literals can be folded.
-     enumerator constants can be folded.
-     0 * n can't be folded, because of possible IO side effects.
-     1 * n can be folded, because it keeps the IO access.  */
-  
-  if (ast == NULL)
-    return ast;
-
-  if (PCL_AST_CODE (ast->ast) == PCL_AST_EXP)
-    {
-      /* If all the operands are leafs and literals.  */
-
-    }
-  
-  return ast;
-}
-
-/* Run optimizations on AST and return it.  */
-
-pcl_ast
-pcl_opt (pcl_ast ast)
-{
-  ast = pcl_opt_constfold (ast);
-  return ast;
-}
+#endif /* !PKL_GEN_H  */

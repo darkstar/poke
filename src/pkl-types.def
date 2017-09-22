@@ -1,4 +1,4 @@
-/* pcl-gen.h - Code generator for PCL.  */
+/* pkl-types.def - Data types for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,12 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PCL_GEN_H
-#define PCL_GEN_H
+/* The first column is the constant used to identify the type.
+   The second column is the identifier used by the type.
+   The third column is the size of the type, in bits.  */
 
-#include <config.h>
-#include <pcl-ast.h>
+PKL_DEF_TYPE (PKL_TYPE_CHAR, "char", 8)
+PKL_DEF_TYPE (PKL_TYPE_SHORT, "short", 16)
+PKL_DEF_TYPE (PKL_TYPE_INT, "int", 32)
+PKL_DEF_TYPE (PKL_TYPE_LONG, "long", 64)
 
-int pcl_gen (pcl_ast_node ast);
-
-#endif /* !PCL_GEN_H  */
+/*
+Local variables:
+mode:c
+End:
+*/

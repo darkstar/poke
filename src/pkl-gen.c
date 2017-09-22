@@ -1,4 +1,4 @@
-/* pcl-gen.c - Code generator for PCL.  */
+/* pkl-gen.c - Code generator for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -19,18 +19,18 @@
 #include <config.h>
 #include <stdio.h>
 
-#include <pcl-gen.h>
+#include <pkl-gen.h>
 
-/* Emit the PVM code for a given PCL AST.
+/* Emit the PVM code for a given PKL AST.
   
    Returns 0 if an error occurs.
    Returns 1 otherwise.
 */
 
 int
-pcl_gen (pcl_ast_node ast)
+pkl_gen (pkl_ast_node ast)
 {
-  pcl_ast_node tmp;
+  pkl_ast_node tmp;
   size_t i;
   
   if (ast == NULL)
@@ -40,75 +40,75 @@ pcl_gen (pcl_ast_node ast)
       goto success;
     }
 
-  switch (PCL_AST_CODE (ast))
+  switch (PKL_AST_CODE (ast))
     {
-    case PCL_AST_PROGRAM:
+    case PKL_AST_PROGRAM:
 
-      for (tmp = PCL_AST_PROGRAM_DECLARATIONS (ast); tmp; tmp = PCL_AST_CHAIN (tmp))
+      for (tmp = PKL_AST_PROGRAM_DECLARATIONS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
         {
-          if (!pcl_gen (tmp))
+          if (!pkl_gen (tmp))
             goto error;
         }
 
       break;
-    case PCL_AST_INTEGER:
-      fprintf (stdout, "PUSH %d\n", PCL_AST_INTEGER_VALUE (ast));
+    case PKL_AST_INTEGER:
+      fprintf (stdout, "PUSH %d\n", PKL_AST_INTEGER_VALUE (ast));
       break;
         
-    case PCL_AST_STRING:
+    case PKL_AST_STRING:
       /* XXX: add string to the string table and push the offset plus
          a relocation.  */
-      fprintf (stdout, "PUSH '%s'\n", PCL_AST_STRING_POINTER (ast));
-      /* fprintf (stdout, "PUSH %d\n", PCL_AST_STRING_LENGTH (ast)); */
+      fprintf (stdout, "PUSH '%s'\n", PKL_AST_STRING_POINTER (ast));
+      /* fprintf (stdout, "PUSH %d\n", PKL_AST_STRING_LENGTH (ast)); */
       break;
 
-    case PCL_AST_IDENTIFIER:
-      fprintf (stdout, "PUSH '%s'\n", PCL_AST_IDENTIFIER_POINTER (ast));
-      fprintf (stdout, "PUSH %d\n", PCL_AST_IDENTIFIER_LENGTH (ast));
+    case PKL_AST_IDENTIFIER:
+      fprintf (stdout, "PUSH '%s'\n", PKL_AST_IDENTIFIER_POINTER (ast));
+      fprintf (stdout, "PUSH %d\n", PKL_AST_IDENTIFIER_LENGTH (ast));
       fprintf (stdout, "GETID\n");
       break;
 
-    case PCL_AST_DOC_STRING:
-      fprintf (stdout, "PUSH '%s'\n", PCL_AST_DOC_STRING_POINTER (ast));
+    case PKL_AST_DOC_STRING:
+      fprintf (stdout, "PUSH '%s'\n", PKL_AST_DOC_STRING_POINTER (ast));
       break;
 
-    case PCL_AST_LOC:
+    case PKL_AST_LOC:
       /* Pushes the current value of the location counter to the
          stack.  */
       fprintf (stdout, "LOC\n");
       break;
 
-    case PCL_AST_ARRAY_REF:
-      if (! pcl_gen (PCL_AST_ARRAY_REF_INDEX (ast)))
+    case PKL_AST_ARRAY_REF:
+      if (! pkl_gen (PKL_AST_ARRAY_REF_INDEX (ast)))
         goto error;
-      if (! pcl_gen (PCL_AST_ARRAY_REF_BASE (ast)))
+      if (! pkl_gen (PKL_AST_ARRAY_REF_BASE (ast)))
         goto error;
       fprintf (stdout, "AREF\n");
       break;
 
-    case PCL_AST_STRUCT_REF:
-      if (! pcl_gen (PCL_AST_STRUCT_REF_IDENTIFIER (ast)))
+    case PKL_AST_STRUCT_REF:
+      if (! pkl_gen (PKL_AST_STRUCT_REF_IDENTIFIER (ast)))
         goto error;
-      if (! pcl_gen (PCL_AST_STRUCT_REF_BASE (ast)))
+      if (! pkl_gen (PKL_AST_STRUCT_REF_BASE (ast)))
         goto error;
       fprintf (stdout, "SREF\n");
       break;
 
-    case PCL_AST_TYPE:
-      switch (PCL_AST_TYPE_CODE (ast))
+    case PKL_AST_TYPE:
+      switch (PKL_AST_TYPE_CODE (ast))
         {
-        case PCL_TYPE_CHAR:
-        case PCL_TYPE_SHORT:
-        case PCL_TYPE_INT:
-        case PCL_TYPE_LONG:
-          fprintf (stdout, "PUSH %d\n", PCL_AST_TYPE_CODE (ast));
+        case PKL_TYPE_CHAR:
+        case PKL_TYPE_SHORT:
+        case PKL_TYPE_INT:
+        case PKL_TYPE_LONG:
+          fprintf (stdout, "PUSH %d\n", PKL_AST_TYPE_CODE (ast));
           break;
-        case PCL_TYPE_ENUM:
-          fprintf (stdout, "PUSH '%s'\n", PCL_AST_ENUM_TAG (PCL_AST_TYPE_ENUMERATION (ast)));
+        case PKL_TYPE_ENUM:
+          fprintf (stdout, "PUSH '%s'\n", PKL_AST_ENUM_TAG (PKL_AST_TYPE_ENUMERATION (ast)));
           fprintf (stdout, "ETYPE\n");
           break;
-        case PCL_TYPE_STRUCT:
-          fprintf (stdout, "PUSH '%s'\n", PCL_AST_STRUCT_TAG (PCL_AST_TYPE_STRUCT (ast)));
+        case PKL_TYPE_STRUCT:
+          fprintf (stdout, "PUSH '%s'\n", PKL_AST_STRUCT_TAG (PKL_AST_TYPE_STRUCT (ast)));
           fprintf (stdout, "STYPE\n");
           break;
         default:
@@ -117,40 +117,40 @@ pcl_gen (pcl_ast_node ast)
         }
       break;
 
-    case PCL_AST_ASSERTION:
-      if (! pcl_gen (PCL_AST_ASSERTION_EXP (ast)))
+    case PKL_AST_ASSERTION:
+      if (! pkl_gen (PKL_AST_ASSERTION_EXP (ast)))
         goto error;
       fprintf (stdout, "ASSERT\n");
       break;
 
-    case PCL_AST_LOOP:     
-      if (PCL_AST_LOOP_PRE (ast))
+    case PKL_AST_LOOP:     
+      if (PKL_AST_LOOP_PRE (ast))
         {
-          if (!pcl_gen (PCL_AST_LOOP_PRE (ast)))
+          if (!pkl_gen (PKL_AST_LOOP_PRE (ast)))
             goto error;
         }
 
       /* XXX: get and generate label Ln.  */
       fprintf (stdout, "Ln:\n");
 
-      if (PCL_AST_LOOP_COND (ast))
+      if (PKL_AST_LOOP_COND (ast))
         {
-          if (!pcl_gen (PCL_AST_LOOP_COND (ast)))
+          if (!pkl_gen (PKL_AST_LOOP_COND (ast)))
             goto error;
         }
 
       /* XXX: get label for Le.  */
       fprintf (stdout, "BNZ Le\n");
 
-      if (PCL_AST_LOOP_BODY (ast))
+      if (PKL_AST_LOOP_BODY (ast))
         {
-          if (!pcl_gen (PCL_AST_LOOP_BODY (ast)))
+          if (!pkl_gen (PKL_AST_LOOP_BODY (ast)))
             goto error;
         }
 
-      if (PCL_AST_LOOP_POST (ast))
+      if (PKL_AST_LOOP_POST (ast))
         {
-          if (! pcl_gen (PCL_AST_LOOP_POST (ast)))
+          if (! pkl_gen (PKL_AST_LOOP_POST (ast)))
             goto error;
         }
 
@@ -160,46 +160,46 @@ pcl_gen (pcl_ast_node ast)
       fprintf (stdout, "Le:\n");
       break;
 
-    case PCL_AST_COND:
+    case PKL_AST_COND:
 
-      if (!pcl_gen (PCL_AST_COND_EXP (ast)))
+      if (!pkl_gen (PKL_AST_COND_EXP (ast)))
         goto error;
 
       /* Generate label Le.  */
       fprintf (stdout, "BZ Le\n");
 
-      if (!pcl_gen (PCL_AST_COND_THENPART (ast)))
+      if (!pkl_gen (PKL_AST_COND_THENPART (ast)))
         goto error;
 
       fprintf (stdout, "Le:\n");
 
-      if (PCL_AST_COND_ELSEPART (ast))
+      if (PKL_AST_COND_ELSEPART (ast))
         {
-          if (!pcl_gen (PCL_AST_COND_ELSEPART (ast)))
+          if (!pkl_gen (PKL_AST_COND_ELSEPART (ast)))
             goto error;
         }
       
       break;
 
-    case PCL_AST_FIELD:
+    case PKL_AST_FIELD:
       {
-        if (PCL_AST_TYPE_CODE (PCL_AST_FIELD_TYPE (ast)) == PCL_TYPE_STRUCT)
+        if (PKL_AST_TYPE_CODE (PKL_AST_FIELD_TYPE (ast)) == PKL_TYPE_STRUCT)
           {
             /* if the field type is a STYPE, do a CALL to the referred
                struct passing LOC in the stack, and getting the new
                LOC in the stack.  */
           }
         
-        if (!pcl_gen (PCL_AST_FIELD_SIZE (ast)))
+        if (!pkl_gen (PKL_AST_FIELD_SIZE (ast)))
           goto error;
-        if (!pcl_gen (PCL_AST_FIELD_NUM_ENTS (ast)))
+        if (!pkl_gen (PKL_AST_FIELD_NUM_ENTS (ast)))
           goto error;
-        if (!pcl_gen (PCL_AST_FIELD_DOCSTR (ast)))
+        if (!pkl_gen (PKL_AST_FIELD_DOCSTR (ast)))
           goto error;
-        if (!pcl_gen (PCL_AST_FIELD_TYPE (ast)))
+        if (!pkl_gen (PKL_AST_FIELD_TYPE (ast)))
           goto error;
-        fprintf (stdout, "PUSH %d\n", PCL_AST_FIELD_ENDIAN (ast));
-        if (!pcl_gen (PCL_AST_FIELD_NAME (ast)))
+        fprintf (stdout, "PUSH %d\n", PKL_AST_FIELD_ENDIAN (ast));
+        if (!pkl_gen (PKL_AST_FIELD_NAME (ast)))
           goto error;
         fprintf (stdout, "DFIELD\n");
 
@@ -211,83 +211,83 @@ pcl_gen (pcl_ast_node ast)
       
       break;
 
-    case PCL_AST_STRUCT:
+    case PKL_AST_STRUCT:
 
-      if (!pcl_gen (PCL_AST_STRUCT_MEM (ast)))
+      if (!pkl_gen (PKL_AST_STRUCT_MEM (ast)))
         goto error;
-      if (!pcl_gen (PCL_AST_STRUCT_DOCSTR (ast)))
+      if (!pkl_gen (PKL_AST_STRUCT_DOCSTR (ast)))
         goto error;
-      if (!pcl_gen (PCL_AST_STRUCT_TAG (ast)))
+      if (!pkl_gen (PKL_AST_STRUCT_TAG (ast)))
         goto error;
       fprintf (stdout, "DSTRUCT\n");
 
       break;
 
-    case PCL_AST_MEM:
+    case PKL_AST_MEM:
 
-      for (i = 0, tmp = PCL_AST_MEM_COMPONENTS (ast); tmp; tmp = PCL_AST_CHAIN (tmp), ++i)
+      for (i = 0, tmp = PKL_AST_MEM_COMPONENTS (ast); tmp; tmp = PKL_AST_CHAIN (tmp), ++i)
         {
-          if (!pcl_gen (tmp))
+          if (!pkl_gen (tmp))
             goto error;
         }
 
-      fprintf (stdout, "PUSH %d\n", PCL_AST_MEM_ENDIAN (ast));
+      fprintf (stdout, "PUSH %d\n", PKL_AST_MEM_ENDIAN (ast));
       fprintf (stdout, "PUSH %d\n", i); /* Number of components.  */
       fprintf (stdout, "DMEM\n");
       
       break;
 
-    case PCL_AST_ENUM:
+    case PKL_AST_ENUM:
 
-      if (!pcl_gen (PCL_AST_ENUM_DOCSTR (ast)))
+      if (!pkl_gen (PKL_AST_ENUM_DOCSTR (ast)))
         goto error;
 
-      for (i = 0, tmp = PCL_AST_ENUM_VALUES (ast); tmp; tmp = PCL_AST_CHAIN (tmp), ++i)
+      for (i = 0, tmp = PKL_AST_ENUM_VALUES (ast); tmp; tmp = PKL_AST_CHAIN (tmp), ++i)
         {
-          if (!pcl_gen (tmp))
+          if (!pkl_gen (tmp))
             goto error;
         }
 
       fprintf (stdout, "PUSH %d\n", i); /* Number of enumerators.  */
 
-      if (!pcl_gen (PCL_AST_ENUM_TAG (ast)))
+      if (!pkl_gen (PKL_AST_ENUM_TAG (ast)))
         goto error;
 
       fprintf (stdout, "DENUM\n");
       
       break;
 
-    case PCL_AST_ENUMERATOR:
+    case PKL_AST_ENUMERATOR:
 
-      if (!pcl_gen (PCL_AST_ENUMERATOR_DOCSTR (ast)))
+      if (!pkl_gen (PKL_AST_ENUMERATOR_DOCSTR (ast)))
         goto error;
-      if (!pcl_gen (PCL_AST_ENUMERATOR_VALUE (ast)))
+      if (!pkl_gen (PKL_AST_ENUMERATOR_VALUE (ast)))
         goto error;
-      if (!pcl_gen (PCL_AST_ENUMERATOR_IDENTIFIER (ast)))
+      if (!pkl_gen (PKL_AST_ENUMERATOR_IDENTIFIER (ast)))
         goto error;
 
       /* No need for explicit command for ENUMERATOR.  */
       
       break;
 
-    case PCL_AST_EXP:
+    case PKL_AST_EXP:
       {
-#define PCL_DEF_OP(SYM, OPCODE) OPCODE,
-        static char *pcl_ast_op_opcode[] =
+#define PKL_DEF_OP(SYM, OPCODE) OPCODE,
+        static char *pkl_ast_op_opcode[] =
           {
-#include "pcl-ops.def"
+#include "pkl-ops.def"
           };
-#undef PCL_DEF_OP
+#undef PKL_DEF_OP
 
         
       /* Generate operators.  */
-      for (i = 0; i < PCL_AST_EXP_NUMOPS (ast); ++i)
+      for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); ++i)
         {
-          if (!pcl_gen (PCL_AST_EXP_OPERAND (ast, i)))
+          if (!pkl_gen (PKL_AST_EXP_OPERAND (ast, i)))
             goto error;
         }
 
-      fprintf (stdout, "%s\n", pcl_ast_op_opcode [PCL_AST_EXP_CODE (ast)]);
+      fprintf (stdout, "%s\n", pkl_ast_op_opcode [PKL_AST_EXP_CODE (ast)]);
       break;
       }
       

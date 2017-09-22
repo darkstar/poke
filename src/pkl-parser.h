@@ -1,4 +1,4 @@
-/* pcl.c - Poke Command Language.  */
+/* pkl-parser.h - Parser for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,10 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef PKL_PARSER_H
+#define PKL_PARSER_H
+
 #include <config.h>
+#include <stdio.h>
 
+#include "pkl-ast.h"
 
-#include "pcl.h"
+/* The `pkl_parser' struct holds the parser state.
 
+   SCANNER is a flex scanner.
+   AST is the abstract syntax tree created by the bison parser.  */
 
+struct pkl_parser
+{
+  void *scanner;
+  pkl_ast ast;
+};
 
+/* Exported functions defined in pkl-parser.c.  */
+
+int pkl_parse_file (pkl_ast *ast, FILE *fd);
+int pkl_parse_buffer (pkl_ast *ast, char *buffer, size_t size);
+
+#endif /* !PKL_PARSER_H */

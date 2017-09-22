@@ -1,4 +1,4 @@
-/* pcl-tab.y - LARL(1) parser for the Poke Command Language.  */
+/* pkl-tab.y - LARL(1) parser for the Poke Command Language.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi.  */
 
@@ -20,10 +20,10 @@
 %define parse.lac full
 %define parse.error verbose
 %locations
-%name-prefix "pcl_tab_"
+%name-prefix "pkl_tab_"
 
 %lex-param {void *scanner}
-%parse-param {struct pcl_parser *pcl_parser}
+%parse-param {struct pkl_parser *pkl_parser}
 
 
 %{
@@ -33,30 +33,30 @@
 #include <stdio.h>
 #include <xalloc.h>
 
-#include "pcl-ast.h"
-#include "pcl-parser.h" /* For struct pcl_parser.  */
-#include "pcl-tab.h"
-#include "pcl-lex.h"
+#include "pkl-ast.h"
+#include "pkl-parser.h" /* For struct pkl_parser.  */
+#include "pkl-tab.h"
+#include "pkl-lex.h"
 
-#ifdef PCL_DEBUG
-# include "pcl-gen.h"
+#ifdef PKL_DEBUG
+# include "pkl-gen.h"
 #endif
 
-#define scanner (pcl_parser->scanner)
+#define scanner (pkl_parser->scanner)
   
 /* YYLLOC_DEFAULT -> default code for computing locations.  */
   
-#define PCL_AST_CHILDREN_STEP 12
+#define PKL_AST_CHILDREN_STEP 12
 
-/* Error reporting function for pcl_tab_parse.
+/* Error reporting function for pkl_tab_parse.
 
    When this function returns, the parser tries to recover the error.
    If it is unable to recover, then it returns with 1 (syntax error)
    immediately.  */
   
 void
-pcl_tab_error (YYLTYPE *llocp,
-               struct pcl_parser *pcl_parser,
+pkl_tab_error (YYLTYPE *llocp,
+               struct pkl_parser *pkl_parser,
                char const *err)
 {
   // XXX
@@ -77,19 +77,19 @@ pcl_tab_error (YYLTYPE *llocp,
    grammar rule invoking the function.  */
 
 static int
-enum_specifier_action (struct pcl_parser *pcl_parser,
-                       pcl_ast_node *enumeration,
-                       pcl_ast_node tag, YYLTYPE *loc_tag,
-                       pcl_ast_node enumerators, YYLTYPE *loc_enumerators,
-                       pcl_ast_node docstr, YYLTYPE *loc_docstr)
+enum_specifier_action (struct pkl_parser *pkl_parser,
+                       pkl_ast_node *enumeration,
+                       pkl_ast_node tag, YYLTYPE *loc_tag,
+                       pkl_ast_node enumerators, YYLTYPE *loc_enumerators,
+                       pkl_ast_node docstr, YYLTYPE *loc_docstr)
 {
-  *enumeration = pcl_ast_make_enum (tag, enumerators, docstr);
+  *enumeration = pkl_ast_make_enum (tag, enumerators, docstr);
 
-  if (pcl_ast_register (pcl_parser->ast,
-                        PCL_AST_IDENTIFIER_POINTER (tag),
+  if (pkl_ast_register (pkl_parser->ast,
+                        PKL_AST_IDENTIFIER_POINTER (tag),
                         *enumeration) == NULL)
     {
-      pcl_tab_error (loc_tag, pcl_parser, "enum already defined");
+      pkl_tab_error (loc_tag, pkl_parser, "enum already defined");
       return 0;
     }
 
@@ -97,19 +97,19 @@ enum_specifier_action (struct pcl_parser *pcl_parser,
 }
 
 static int
-struct_specifier_action (struct pcl_parser *pcl_parser,
-                         pcl_ast_node *strct,
-                         pcl_ast_node tag, YYLTYPE *loc_tag,
-                         pcl_ast_node docstr, YYLTYPE *loc_docstr,
-                         pcl_ast_node mem, YYLTYPE *loc_mem)
+struct_specifier_action (struct pkl_parser *pkl_parser,
+                         pkl_ast_node *strct,
+                         pkl_ast_node tag, YYLTYPE *loc_tag,
+                         pkl_ast_node docstr, YYLTYPE *loc_docstr,
+                         pkl_ast_node mem, YYLTYPE *loc_mem)
 {
-  *strct = pcl_ast_make_struct (tag, docstr, mem);
+  *strct = pkl_ast_make_struct (tag, docstr, mem);
 
-  if (pcl_ast_register (pcl_parser->ast,
-                        PCL_AST_IDENTIFIER_POINTER (tag),
+  if (pkl_ast_register (pkl_parser->ast,
+                        PKL_AST_IDENTIFIER_POINTER (tag),
                         *strct) == NULL)
     {
-      pcl_tab_error (loc_tag, pcl_parser, "struct already defined");
+      pkl_tab_error (loc_tag, pkl_parser, "struct already defined");
       return 0;
     }
 
@@ -119,12 +119,12 @@ struct_specifier_action (struct pcl_parser *pcl_parser,
 %}
 
 %union {
-  pcl_ast_node ast;
-  enum pcl_ast_op opcode;
+  pkl_ast_node ast;
+  enum pkl_ast_op opcode;
   int integer;
 }
 
-%destructor { /* pcl_ast_free ($$);*/ } <ast>
+%destructor { /* pkl_ast_free ($$);*/ } <ast>
 
 %token <ast> INTEGER
 %token <ast> STR
@@ -200,12 +200,12 @@ program: declaration_list
           	{
                   if (yynerrs > 0)
                     {
-                      pcl_ast_node_free ($1);
+                      pkl_ast_node_free ($1);
                       YYERROR;
                     }
                   
-                  $$ = pcl_ast_make_program ($1);
-                  pcl_parser->ast->ast = ASTREF ($$);
+                  $$ = pkl_ast_make_program ($1);
+                  pkl_parser->ast->ast = ASTREF ($$);
                 }
         ;
 
@@ -214,7 +214,7 @@ declaration_list:
 		{ $$ = NULL; }
 	| declaration
         | declaration_list declaration
-        	{ $$ = pcl_ast_chainon ($1, $2); }
+        	{ $$ = pkl_ast_chainon ($1, $2); }
         | error declaration
 	        { $$ = $2; }
 	;
@@ -226,9 +226,9 @@ declaration_list:
 constant_expression:
 	  conditional_expression
           	{
-                  if (!PCL_AST_LITERAL_P ($1))
+                  if (!PKL_AST_LITERAL_P ($1))
                     {
-                      pcl_tab_error (&@1, pcl_parser,
+                      pkl_tab_error (&@1, pkl_parser,
                                      "expected constant expression");
                       YYERROR;
                     }
@@ -240,148 +240,148 @@ constant_expression:
 expression:
 	  assignment_expression
         | expression ',' assignment_expression
-		{ $$ = pcl_ast_chainon ($1, $3); }
+		{ $$ = pkl_ast_chainon ($1, $3); }
         ;
 
 assignment_expression:
 	  conditional_expression
         | unary_expression assignment_operator assignment_expression
-		{ $$ = pcl_ast_make_binary_exp ($2, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp ($2, $1, $3); }
         ;
 
 assignment_operator:
-	'='		{ $$ = PCL_AST_OP_ASSIGN; }
-	| MULA	{ $$ = PCL_AST_OP_MULA; }
-	| DIVA	{ $$ = PCL_AST_OP_DIVA; }
-	| MODA	{ $$ = PCL_AST_OP_MODA; }
-	| ADDA	{ $$ = PCL_AST_OP_ADDA; }
-	| SUBA	{ $$ = PCL_AST_OP_SUBA; }
-	| SLA	{ $$ = PCL_AST_OP_SLA; }
-	| SRA	{ $$ = PCL_AST_OP_SRA; }
-	| BANDA	{ $$ = PCL_AST_OP_BANDA; }
-	| XORA	{ $$ = PCL_AST_OP_XORA; }
-	| IORA	{ $$ = PCL_AST_OP_IORA; }
+	'='		{ $$ = PKL_AST_OP_ASSIGN; }
+	| MULA	{ $$ = PKL_AST_OP_MULA; }
+	| DIVA	{ $$ = PKL_AST_OP_DIVA; }
+	| MODA	{ $$ = PKL_AST_OP_MODA; }
+	| ADDA	{ $$ = PKL_AST_OP_ADDA; }
+	| SUBA	{ $$ = PKL_AST_OP_SUBA; }
+	| SLA	{ $$ = PKL_AST_OP_SLA; }
+	| SRA	{ $$ = PKL_AST_OP_SRA; }
+	| BANDA	{ $$ = PKL_AST_OP_BANDA; }
+	| XORA	{ $$ = PKL_AST_OP_XORA; }
+	| IORA	{ $$ = PKL_AST_OP_IORA; }
         ;
 
 conditional_expression:
 	  logical_or_expression
 	| logical_or_expression '?' expression ':' conditional_expression
-          	{ $$ = pcl_ast_make_cond_exp ($1, $3, $5); }
+          	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
 	;
 
 logical_or_expression:
 	  logical_and_expression
         | logical_or_expression OR logical_and_expression
-          	{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_OR, $1, $3); }
+          	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR, $1, $3); }
         ;
 
 logical_and_expression:
 	  inclusive_or_expression
 	| logical_and_expression AND inclusive_or_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_AND, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND, $1, $3); }
 	;
 
 inclusive_or_expression:
 	  exclusive_or_expression
         | inclusive_or_expression '|' exclusive_or_expression
-	        { $$ = pcl_ast_make_binary_exp (PCL_AST_OP_IOR, $1, $3); }
+	        { $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR, $1, $3); }
 	;
 
 exclusive_or_expression:
 	  and_expression
         | exclusive_or_expression '^' and_expression
-          	{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_XOR, $1, $3); }
+          	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR, $1, $3); }
 	;
 
 and_expression:
 	  equality_expression
         | and_expression '&' equality_expression
-          { $$ = pcl_ast_make_binary_exp (PCL_AST_OP_BAND, $1, $3); }
+          { $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND, $1, $3); }
 	;
 
 equality_expression:
           relational_expression
 	| equality_expression EQ relational_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_EQ, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ, $1, $3); }
 	| equality_expression NE relational_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_NE, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE, $1, $3); }
 	;
 
 relational_expression:
 	  shift_expression
         | relational_expression '<' shift_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_LT, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT, $1, $3); }
         | relational_expression '>' shift_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_GT, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT, $1, $3); }
         | relational_expression LE shift_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_LE, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE, $1, $3); }
         | relational_expression GE shift_expression
-        	{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_GE, $1, $3); }
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE, $1, $3); }
         ;
 
 shift_expression:
 	  additive_expression
         | shift_expression SL additive_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_SL, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL, $1, $3); }
         | shift_expression SR additive_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_SR, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR, $1, $3); }
         ;
 
 additive_expression:
 	  multiplicative_expression
         | additive_expression '+' multiplicative_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_ADD, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD, $1, $3); }
         | additive_expression '-' multiplicative_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_SUB, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB, $1, $3); }
         ;
 
 multiplicative_expression:
 	  unary_expression
         | multiplicative_expression '*' unary_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_MUL, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL, $1, $3); }
         | multiplicative_expression '/' unary_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_DIV, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV, $1, $3); }
         | multiplicative_expression '%' unary_expression
-		{ $$ = pcl_ast_make_binary_exp (PCL_AST_OP_MOD, $1, $3); }
+		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD, $1, $3); }
         ;
 
 unary_expression:
 	  postfix_expression
         | INC unary_expression
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_INC, $2); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_INC, $2); }
         | DEC unary_expression
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_DEC, $2); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_DEC, $2); }
         | unary_operator multiplicative_expression
-		{ $$ = pcl_ast_make_unary_exp ($1, $2); }
+		{ $$ = pkl_ast_make_unary_exp ($1, $2); }
         | SIZEOF unary_expression
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $2); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2); }
         | SIZEOF '(' TYPENAME ')'
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_SIZEOF, $3); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3); }
         ;
 
 unary_operator:
-	  '&' 	{ $$ = PCL_AST_OP_ADDRESS; }
-	| '+'	{ $$ = PCL_AST_OP_POS; }
-	| '-'	{ $$ = PCL_AST_OP_NEG; }
-	| '~'	{ $$ = PCL_AST_OP_BNOT; }
-	| '!'	{ $$ = PCL_AST_OP_NOT; }
+	  '&' 	{ $$ = PKL_AST_OP_ADDRESS; }
+	| '+'	{ $$ = PKL_AST_OP_POS; }
+	| '-'	{ $$ = PKL_AST_OP_NEG; }
+	| '~'	{ $$ = PKL_AST_OP_BNOT; }
+	| '!'	{ $$ = PKL_AST_OP_NOT; }
 	;
 
 postfix_expression:
 	  primary_expression
         | postfix_expression '[' expression ']'
-		{ $$ = pcl_ast_make_array_ref ($1, $3); }
+		{ $$ = pkl_ast_make_array_ref ($1, $3); }
         | postfix_expression '.' IDENTIFIER
-		{ $$ = pcl_ast_make_struct_ref ($1, $3); }
+		{ $$ = pkl_ast_make_struct_ref ($1, $3); }
         | postfix_expression INC
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_INC, $1); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_INC, $1); }
 	| postfix_expression DEC
-		{ $$ = pcl_ast_make_unary_exp (PCL_AST_OP_DEC, $1); }
+		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_DEC, $1); }
 /*
         | '(' type_name ')' '{' initializer_list '}'
-		{ $$ = pcl_ast_make_initializer ($2, $5); }
+		{ $$ = pkl_ast_make_initializer ($2, $5); }
         | '(' type_name ')' '{' initializer_list ',' '}'
-		{ $$ = pcl_ast_make_initializer ($2, $5); }
+		{ $$ = pkl_ast_make_initializer ($2, $5); }
  */
 	;
 
@@ -390,7 +390,7 @@ primary_expression:
         | INTEGER
         | STR
         | '.'
-          	{ $$ = pcl_ast_make_loc (); }
+          	{ $$ = pkl_ast_make_loc (); }
         | '(' expression ')'
 		{ $$ = $2; }
         | '(' error ')'
@@ -418,16 +418,16 @@ declaration_specifiers:
 typedef_specifier:
 	  TYPEDEF type_specifier IDENTIFIER
           	{
-                  const char *id = PCL_AST_IDENTIFIER_POINTER ($3);
-                  pcl_ast_node type = pcl_ast_make_type (PCL_AST_TYPE_CODE ($2),
-                                                         PCL_AST_TYPE_SIGNED ($2),
-                                                         PCL_AST_TYPE_SIZE ($2),
-                                                         PCL_AST_TYPE_ENUMERATION ($2),
-                                                         PCL_AST_TYPE_STRUCT ($2));
+                  const char *id = PKL_AST_IDENTIFIER_POINTER ($3);
+                  pkl_ast_node type = pkl_ast_make_type (PKL_AST_TYPE_CODE ($2),
+                                                         PKL_AST_TYPE_SIGNED ($2),
+                                                         PKL_AST_TYPE_SIZE ($2),
+                                                         PKL_AST_TYPE_ENUMERATION ($2),
+                                                         PKL_AST_TYPE_STRUCT ($2));
 
-                  if (pcl_ast_register (pcl_parser->ast, id, type) == NULL)
+                  if (pkl_ast_register (pkl_parser->ast, id, type) == NULL)
                     {
-                      pcl_tab_error (&@2, pcl_parser, "type already defined");
+                      pkl_tab_error (&@2, pkl_parser, "type already defined");
                       YYERROR;
                     }
 
@@ -437,38 +437,38 @@ typedef_specifier:
 
 type_specifier:
 	  sign_qualifier TYPENAME
-        	{ PCL_AST_TYPE_SIGNED ($2) = $1; $$ = $2; }
+        	{ PKL_AST_TYPE_SIGNED ($2) = $1; $$ = $2; }
 	| TYPENAME
 	| STRUCT IDENTIFIER
         	{
-                  pcl_ast_node strct
-                    = pcl_ast_get_registered (pcl_parser->ast,
-                                              PCL_AST_IDENTIFIER_POINTER ($2),
-                                              PCL_AST_STRUCT);
+                  pkl_ast_node strct
+                    = pkl_ast_get_registered (pkl_parser->ast,
+                                              PKL_AST_IDENTIFIER_POINTER ($2),
+                                              PKL_AST_STRUCT);
 
                   if (!strct)
                     {
-                      pcl_tab_error (&@2, pcl_parser,
+                      pkl_tab_error (&@2, pkl_parser,
                                      "expected struct tag");
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (PCL_TYPE_STRUCT, 0, 0, NULL, strct);
+                    $$ = pkl_ast_make_type (PKL_TYPE_STRUCT, 0, 0, NULL, strct);
                 }
         | ENUM IDENTIFIER
         	{
-                  pcl_ast_node enumeration
-                    = pcl_ast_get_registered (pcl_parser->ast,
-                                              PCL_AST_IDENTIFIER_POINTER ($2),
-                                              PCL_AST_ENUM);
+                  pkl_ast_node enumeration
+                    = pkl_ast_get_registered (pkl_parser->ast,
+                                              PKL_AST_IDENTIFIER_POINTER ($2),
+                                              PKL_AST_ENUM);
 
                   if (!enumeration)
                     {
-                      pcl_tab_error (&@2, pcl_parser, "expected enumeration tag");
+                      pkl_tab_error (&@2, pkl_parser, "expected enumeration tag");
                       YYERROR;
                     }
                   else
-                    $$ = pcl_ast_make_type (PCL_TYPE_ENUM, 0, 32, enumeration, NULL);
+                    $$ = pkl_ast_make_type (PKL_TYPE_ENUM, 0, 32, enumeration, NULL);
                 }
         ;
 
@@ -484,7 +484,7 @@ sign_qualifier:
 enum_specifier:
 	  ENUM IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (pcl_parser,
+                  if (! enum_specifier_action (pkl_parser,
                                                &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
@@ -493,7 +493,7 @@ enum_specifier:
                 }
 	| ENUM IDENTIFIER DOCSTR '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (pcl_parser,
+                  if (! enum_specifier_action (pkl_parser,
                                                &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
@@ -502,7 +502,7 @@ enum_specifier:
                 }
         | ENUM DOCSTR IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (pcl_parser,
+                  if (! enum_specifier_action (pkl_parser,
                                                &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
@@ -511,7 +511,7 @@ enum_specifier:
                 }
         | ENUM IDENTIFIER '{' enumerator_list '}' DOCSTR
           	{
-                  if (! enum_specifier_action (pcl_parser,
+                  if (! enum_specifier_action (pkl_parser,
                                                &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
@@ -520,7 +520,7 @@ enum_specifier:
                 }
         | DOCSTR ENUM IDENTIFIER '{' enumerator_list '}'
           	{
-                  if (! enum_specifier_action (pcl_parser,
+                  if (! enum_specifier_action (pkl_parser,
                                                &$$,
                                                $IDENTIFIER, &@IDENTIFIER,
                                                $enumerator_list, &@enumerator_list,
@@ -532,29 +532,29 @@ enum_specifier:
 enumerator_list:
 	  enumerator
 	| enumerator_list ',' enumerator
-          	{ $$ = pcl_ast_chainon ($1, $3); }
+          	{ $$ = pkl_ast_chainon ($1, $3); }
 	;
 
 enumerator:
 	  IDENTIFIER
-                { $$ = pcl_ast_make_enumerator ($1, NULL, NULL); }
+                { $$ = pkl_ast_make_enumerator ($1, NULL, NULL); }
 	| IDENTIFIER DOCSTR
                 {
-                  $$ = pcl_ast_make_enumerator ($1, NULL, $2);
+                  $$ = pkl_ast_make_enumerator ($1, NULL, $2);
                 }
         | IDENTIFIER '=' constant_expression
-                { $$ = pcl_ast_make_enumerator ($1, $3, NULL); }
+                { $$ = pkl_ast_make_enumerator ($1, $3, NULL); }
         | IDENTIFIER '=' DOCSTR constant_expression
         	{
-                  $$ = pcl_ast_make_enumerator ($1, $4, $3);
+                  $$ = pkl_ast_make_enumerator ($1, $4, $3);
                 }
         | IDENTIFIER '=' constant_expression DOCSTR
 	        {
-                  $$ = pcl_ast_make_enumerator ($1, $3, $4);
+                  $$ = pkl_ast_make_enumerator ($1, $3, $4);
                 }
         | DOCSTR IDENTIFIER '=' constant_expression
         	{
-                  $$ = pcl_ast_make_enumerator ($2, $4, $1);
+                  $$ = pkl_ast_make_enumerator ($2, $4, $1);
                 }
 	;
 
@@ -565,7 +565,7 @@ enumerator:
 struct_specifier:
 	  STRUCT IDENTIFIER mem_layout
 			{
-                          if (!struct_specifier_action (pcl_parser,
+                          if (!struct_specifier_action (pkl_parser,
                                                         &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         NULL, NULL,
@@ -574,7 +574,7 @@ struct_specifier:
                         }
 	| DOCSTR STRUCT IDENTIFIER mem_layout
 			{
-                          if (!struct_specifier_action (pcl_parser,
+                          if (!struct_specifier_action (pkl_parser,
                                                         &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         $DOCSTR, &@DOCSTR,
@@ -583,7 +583,7 @@ struct_specifier:
                         }
         | STRUCT IDENTIFIER DOCSTR mem_layout
         	{
-                  if (!struct_specifier_action (pcl_parser,
+                  if (!struct_specifier_action (pkl_parser,
                                                 &$$,
                                                 $IDENTIFIER, &@IDENTIFIER,
                                                 $DOCSTR, &@DOCSTR,
@@ -592,7 +592,7 @@ struct_specifier:
                 }
         | STRUCT IDENTIFIER mem_layout DOCSTR
         		{
-                          if (!struct_specifier_action (pcl_parser,
+                          if (!struct_specifier_action (pkl_parser,
                                                         &$$,
                                                         $IDENTIFIER, &@IDENTIFIER,
                                                         $DOCSTR, &@DOCSTR,
@@ -607,15 +607,15 @@ struct_specifier:
 
 mem_layout:
 	  mem_endianness '{' mem_declarator_list '}'
-          			{ $$ = pcl_ast_make_mem ($1, $3); }
+          			{ $$ = pkl_ast_make_mem ($1, $3); }
 	| '{' mem_declarator_list '}'
-        			{ $$ = pcl_ast_make_mem (pcl_ast_default_endian (),
+        			{ $$ = pkl_ast_make_mem (pkl_ast_default_endian (),
                                                          $2); }
         ;
 
 mem_endianness:
-	  MSB		{ $$ = PCL_AST_MSB; }
-	| LSB		{ $$ = PCL_AST_LSB; }
+	  MSB		{ $$ = PKL_AST_MSB; }
+	| LSB		{ $$ = PKL_AST_LSB; }
 	;
 
 mem_declarator_list:
@@ -623,7 +623,7 @@ mem_declarator_list:
 			{ $$ = NULL; }
 	| mem_declarator ';'
         | mem_declarator_list  mem_declarator ';'
-		        { $$ = pcl_ast_chainon ($1, $2); }
+		        { $$ = pkl_ast_chainon ($1, $2); }
         | error ';'
         		{ $$ = NULL; }
         | mem_declarator_list error
@@ -643,12 +643,12 @@ mem_field_with_docstr:
 	  mem_field_with_endian
 	| DOCSTR mem_field_with_endian
           		{
-                          PCL_AST_FIELD_DOCSTR ($2) = ASTREF ($1);
+                          PKL_AST_FIELD_DOCSTR ($2) = ASTREF ($1);
                           $$ = $2;
                         }
         | mem_field_with_endian DOCSTR
 		        {
-                          PCL_AST_FIELD_DOCSTR ($1) = ASTREF ($2);
+                          PKL_AST_FIELD_DOCSTR ($1) = ASTREF ($2);
                           $$ = $1;
                         }
         ;
@@ -656,7 +656,7 @@ mem_field_with_docstr:
 mem_field_with_endian:
 	  mem_endianness mem_field_with_size
           		{
-                          PCL_AST_FIELD_ENDIAN ($2) = $1;
+                          PKL_AST_FIELD_ENDIAN ($2) = $1;
                           $$ = $2;
                         }
         | mem_field_with_size
@@ -666,10 +666,10 @@ mem_field_with_size:
 	  mem_field
         | mem_field ':' expression
           		{
-                          if (PCL_AST_TYPE_CODE (PCL_AST_FIELD_TYPE ($1))
-                              == PCL_TYPE_STRUCT)
+                          if (PKL_AST_TYPE_CODE (PKL_AST_FIELD_TYPE ($1))
+                              == PKL_TYPE_STRUCT)
                             {
-                              pcl_tab_error (&@1, pcl_parser,
+                              pkl_tab_error (&@1, pkl_parser,
                                              "fields of type struct can't have an\
  explicit size");
                               YYERROR;
@@ -678,8 +678,8 @@ mem_field_with_size:
                           /* Discard the size inferred from the field
                              type and replace it with the
                              field width expression.  */
-                          pcl_ast_node_free (PCL_AST_FIELD_SIZE ($1));
-                          PCL_AST_FIELD_SIZE ($1) = ASTREF ($3);
+                          pkl_ast_node_free (PKL_AST_FIELD_SIZE ($1));
+                          PKL_AST_FIELD_SIZE ($1) = ASTREF ($3);
                           $$ = $1;
                         }
         ;
@@ -687,40 +687,40 @@ mem_field_with_size:
 mem_field:
 	  type_specifier IDENTIFIER
           		{
-                          pcl_ast_node one = pcl_ast_make_integer (1);
-                          pcl_ast_node size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+                          pkl_ast_node one = pkl_ast_make_integer (1);
+                          pkl_ast_node size = pkl_ast_make_integer (PKL_AST_TYPE_SIZE ($1));
 
-                          $$ = pcl_ast_make_field ($2, $1, NULL,
-                                                   pcl_ast_default_endian (),
+                          $$ = pkl_ast_make_field ($2, $1, NULL,
+                                                   pkl_ast_default_endian (),
                                                    one, size);
                         }
         | type_specifier IDENTIFIER '[' assignment_expression ']'
 		        {
-                          pcl_ast_node size = pcl_ast_make_integer (PCL_AST_TYPE_SIZE ($1));
+                          pkl_ast_node size = pkl_ast_make_integer (PKL_AST_TYPE_SIZE ($1));
 
-                          $$ = pcl_ast_make_field ($2, $1, NULL,
-                                                   pcl_ast_default_endian (),
+                          $$ = pkl_ast_make_field ($2, $1, NULL,
+                                                   pkl_ast_default_endian (),
                                                    $4, size);
                         }
 	;
 
 mem_cond:
 	  IF '(' expression ')' mem_layout
-          		{ $$ = pcl_ast_make_cond ($3, $5, NULL); }
+          		{ $$ = pkl_ast_make_cond ($3, $5, NULL); }
         | IF '(' expression ')' mem_layout ELSE mem_layout
-        		{ $$ = pcl_ast_make_cond ($3, $5, $7); }
+        		{ $$ = pkl_ast_make_cond ($3, $5, $7); }
         ;
 
 mem_loop:
 	  FOR '(' expression ';' expression ';' expression ')' mem_layout
-          		{ $$ = pcl_ast_make_loop ($3, $5, $7, $9); }
+          		{ $$ = pkl_ast_make_loop ($3, $5, $7, $9); }
         | WHILE '(' expression ')' mem_layout
-        		{ $$ = pcl_ast_make_loop (NULL, $3, NULL, $5); }
+        		{ $$ = pkl_ast_make_loop (NULL, $3, NULL, $5); }
 	;
 
 assert:
 	  ASSERT expression
-          		{ $$ = pcl_ast_make_assertion ($2); }
+          		{ $$ = pkl_ast_make_assertion ($2); }
 	;
 
 %%

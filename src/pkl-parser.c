@@ -1,4 +1,4 @@
-/* pcl-parser.c - Parser for PCL.  */
+/* pkl-parser.c - Parser for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -22,24 +22,24 @@
 #include <string.h>
 #include <assert.h>
 
-#include "pcl-ast.h"
-#include "pcl-parser.h"
-#include "pcl-tab.h"
-#include "pcl-lex.h"
+#include "pkl-ast.h"
+#include "pkl-parser.h"
+#include "pkl-tab.h"
+#include "pkl-lex.h"
 
 /* Allocate and initialize a parser.  */
 
-static struct pcl_parser *
-pcl_parser_init (void)
+static struct pkl_parser *
+pkl_parser_init (void)
 {
   size_t i;
-  struct pcl_parser *parser;
+  struct pkl_parser *parser;
 
-  parser = xmalloc (sizeof (struct pcl_parser));
-  pcl_tab_lex_init (&(parser->scanner));
-  pcl_tab_set_extra (parser, parser->scanner);
+  parser = xmalloc (sizeof (struct pkl_parser));
+  pkl_tab_lex_init (&(parser->scanner));
+  pkl_tab_set_extra (parser, parser->scanner);
 
-  parser->ast = pcl_ast_init ();
+  parser->ast = pkl_ast_init ();
 
   /* Register standard types.  */
   {
@@ -50,20 +50,20 @@ pcl_parser_init (void)
       size_t size;
     } *type, stdtypes[] =
         {
-#define PCL_DEF_TYPE(CODE,ID,SIZE) {CODE, ID, SIZE},
-# include "pcl-types.def"
-#undef PCL_DEF_TYPE
-          { PCL_TYPE_NOTYPE, NULL, 0 }
+#define PKL_DEF_TYPE(CODE,ID,SIZE) {CODE, ID, SIZE},
+# include "pkl-types.def"
+#undef PKL_DEF_TYPE
+          { PKL_TYPE_NOTYPE, NULL, 0 }
         };
 
-    for (type = stdtypes; type->code != PCL_TYPE_NOTYPE; type++)
+    for (type = stdtypes; type->code != PKL_TYPE_NOTYPE; type++)
       {
-        pcl_ast_node t = pcl_ast_make_type (type->code,
+        pkl_ast_node t = pkl_ast_make_type (type->code,
                                             1, /* signed_p  */
                                             type->size,
                                             NULL /* enumeration */,
                                             NULL /* strct */);
-        pcl_ast_register (parser->ast, type->id, t);
+        pkl_ast_register (parser->ast, type->id, t);
       }
   }
   
@@ -74,58 +74,58 @@ pcl_parser_init (void)
 /* Free resources used by a parser, exceptuating the AST.  */
 
 void
-pcl_parser_free (struct pcl_parser *parser)
+pkl_parser_free (struct pkl_parser *parser)
 {
   size_t i;
-  pcl_ast_node t, n;
+  pkl_ast_node t, n;
   
-  pcl_tab_lex_destroy (parser->scanner);
+  pkl_tab_lex_destroy (parser->scanner);
   free (parser);
 
   return;
 }
 
-/* Read from FD until end of file, parsing its contents as a PCL
+/* Read from FD until end of file, parsing its contents as a PKL
    program.  Return 0 if the parsing was successful, 1 if there was a
    syntax error and 2 if there was a memory exhaustion.  */
 
 int
-pcl_parse_file (pcl_ast *ast, FILE *fd)
+pkl_parse_file (pkl_ast *ast, FILE *fd)
 {
   int ret;
-  struct pcl_parser *parser;
+  struct pkl_parser *parser;
 
-  parser = pcl_parser_init ();
+  parser = pkl_parser_init ();
 
-  pcl_tab_set_in (fd, parser->scanner);
-  ret = pcl_tab_parse (parser);
+  pkl_tab_set_in (fd, parser->scanner);
+  ret = pkl_tab_parse (parser);
   *ast = parser->ast;
-  pcl_parser_free (parser);
+  pkl_parser_free (parser);
 
   return ret;
 }
 
-/* Parse the contents of BUFFER as a PCL program.  Return 0 if the
+/* Parse the contents of BUFFER as a PKL program.  Return 0 if the
    parsing was successful, 1 if there was a syntax error and 2 if
    there was a memory exhaustion.  */
 
 int
-pcl_parse_buffer (pcl_ast *ast, char *buffer, size_t size)
+pkl_parse_buffer (pkl_ast *ast, char *buffer, size_t size)
 {
   YY_BUFFER_STATE yybuffer;
-  void *pcl_scanner;
-  struct pcl_parser *parser;
+  void *pkl_scanner;
+  struct pkl_parser *parser;
   int ret;
 
-  parser = pcl_parser_init ();
+  parser = pkl_parser_init ();
 
-  yybuffer = pcl_tab__scan_buffer(buffer, size, parser->scanner);
+  yybuffer = pkl_tab__scan_buffer(buffer, size, parser->scanner);
 
-  ret = pcl_tab_parse (pcl_scanner);
+  ret = pkl_tab_parse (pkl_scanner);
   *ast = parser->ast;
 
-  pcl_tab__delete_buffer (yybuffer, pcl_scanner);
-  pcl_parser_free (parser);
+  pkl_tab__delete_buffer (yybuffer, pkl_scanner);
+  pkl_parser_free (parser);
 
   return ret;
 }

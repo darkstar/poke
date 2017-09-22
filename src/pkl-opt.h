@@ -1,4 +1,4 @@
-/* pcl-types.def - Data types for PCL.  */
+/* pkl-opt.c - Optimizer for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,17 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* The first column is the constant used to identify the type.
-   The second column is the identifier used by the type.
-   The third column is the size of the type, in bits.  */
+#ifndef PKL_OPT_H
+#define PKL_OPT_H
 
-PCL_DEF_TYPE (PCL_TYPE_CHAR, "char", 8)
-PCL_DEF_TYPE (PCL_TYPE_SHORT, "short", 16)
-PCL_DEF_TYPE (PCL_TYPE_INT, "int", 32)
-PCL_DEF_TYPE (PCL_TYPE_LONG, "long", 64)
+#include <config.h>
+#include "pkl-ast.h"
 
-/*
-Local variables:
-mode:c
-End:
-*/
+/* `pkl_opt' runs several optimizations to the passed AST and returns
+   an optimized AST.  The optimized AST implements exactly the same
+   semantics than the original, but (hopefully) it does so more
+   efficiently.  */
+
+pkl_ast pkl_opt (pkl_ast ast);
+
+#endif /* !PKL_OPT_H */

@@ -1,5 +1,5 @@
 /* -*- mode: C -*- */
-/* pcl-lex.l - Lexer for the Poke Command Language.  */
+/* pkl-lex.l - Lexer for the Poke Command Language.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -19,16 +19,16 @@
 
 /* Automake needs this.  */
 %option outfile="lex.yy.c"
-%option prefix="pcl_tab_"
+%option prefix="pkl_tab_"
 %option warn nodefault
 %option pointer
 %option noyywrap
 %option reentrant
 %option bison-bridge
-%option header-file="pcl-lex.h"
+%option header-file="pkl-lex.h"
 %option bison-locations
 %option yylineno
-%option extra-type="struct pcl_parser *"
+%option extra-type="struct pkl_parser *"
 
 %top {
    /* This code goes at the "top" of the generated file.  */
@@ -38,16 +38,16 @@
 %{
 #include <string.h>
 #include <xalloc.h>
-#include <pcl-ast.h>
-#include <pcl-parser.h>
-#include <pcl-tab.h>
+#include <pkl-ast.h>
+#include <pkl-parser.h>
+#include <pkl-tab.h>
 
 #define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;
 
 /* Convert the printed representation of a number to an integer.  */
   
 static int
-pcl_atoi (const char *str, int *number)
+pkl_atoi (const char *str, int *number)
 {
   int res;
   long int li;
@@ -101,7 +101,7 @@ make_docstring (const char *str)
   return dstring;
 }
 
-static pcl_ast_node cur_docstr;
+static pkl_ast_node cur_docstr;
  
 %}
 
@@ -133,7 +133,7 @@ D [0-9]
      return DOCSTR;
 }
 <C_DOCSTR>([^>]|>[^>]|>>[^>])* {
-     cur_docstr = pcl_ast_make_doc_string (yytext, NULL);
+     cur_docstr = pkl_ast_make_doc_string (yytext, NULL);
 }      
 
 "enum"		{ return ENUM; }
@@ -203,17 +203,17 @@ D [0-9]
 "."		{ return '.'; }
 
 {L}({L}|{D})* {
-   pcl_ast_node type;
+   pkl_ast_node type;
 
-   if ((type = pcl_ast_get_registered (yyextra->ast, 
-                                       yytext, PCL_AST_TYPE)) != NULL)
+   if ((type = pkl_ast_get_registered (yyextra->ast, 
+                                       yytext, PKL_AST_TYPE)) != NULL)
      {
        yylval->ast = type;
        return TYPENAME;
      }
    else
      {
-       yylval->ast = pcl_ast_get_identifier (yyextra->ast, yytext);
+       yylval->ast = pkl_ast_get_identifier (yyextra->ast, yytext);
        return IDENTIFIER;
      }
 }
@@ -221,9 +221,9 @@ D [0-9]
 "-"?((0x[0-9a-fA-F]+)|{DIGIT}+) {
   int integer_value;
 
-  pcl_atoi (yytext, &integer_value);
+  pkl_atoi (yytext, &integer_value);
 
-  yylval->ast = pcl_ast_make_integer (integer_value);
+  yylval->ast = pkl_ast_make_integer (integer_value);
   return INTEGER;    
 }
 
@@ -231,7 +231,7 @@ D [0-9]
   /* Strip the quoting characters */
   yytext[strlen(yytext) - 1] = 0;
 
-  yylval->ast = pcl_ast_make_string (yytext + 1);
+  yylval->ast = pkl_ast_make_string (yytext + 1);
   return STR;
 }
 

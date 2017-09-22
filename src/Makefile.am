@@ -17,17 +17,17 @@
 
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
-               pcl-ast.h pcl-ast.c \
-               pcl-tab.y pcl-lex.l \
-               pcl-gen.h pcl-gen.c \
-               pcl-parser.h pcl-parser.c \
-               pcl-opt.h pcl-opt.c
+               pkl-ast.h pkl-ast.c \
+               pkl-tab.y pkl-lex.l \
+               pkl-gen.h pkl-gen.c \
+               pkl-parser.h pkl-parser.c \
+               pkl-opt.h pkl-opt.c
 
-BUILT_SOURCES = pcl-tab.h pcl-lex.c
+BUILT_SOURCES = pkl-tab.h pkl-lex.c
 AM_YFLAGS = -d
 AM_LFLAGS = -d
 
-poke_CPPFLAGS = -I$(top_srcdir)/lib -DPCL_DEBUG
+poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
 poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE)

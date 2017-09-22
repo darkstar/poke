@@ -1,4 +1,4 @@
-/* pcl-opt.c - Optimizer for PCL.  */
+/* pkl-opt.h - Optimizer for PKL.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,17 +16,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PCL_OPT_H
-#define PCL_OPT_H
-
 #include <config.h>
-#include "pcl-ast.h"
 
-/* `pcl_opt' runs several optimizations to the passed AST and returns
-   an optimized AST.  The optimized AST implements exactly the same
-   semantics than the original, but (hopefully) it does so more
-   efficiently.  */
+#include "pkl-opt.h"
 
-pcl_ast pcl_opt (pcl_ast ast);
+/* Constant folding.  */
 
-#endif /* !PCL_OPT_H */
+static pkl_ast
+pkl_opt_constfold (pkl_ast ast)
+{
+  /* integer literals can be folded.
+     enumerator constants can be folded.
+     0 * n can't be folded, because of possible IO side effects.
+     1 * n can be folded, because it keeps the IO access.  */
+  
+  if (ast == NULL)
+    return ast;
+
+  if (PKL_AST_CODE (ast->ast) == PKL_AST_EXP)
+    {
+      /* If all the operands are leafs and literals.  */
+
+    }
+  
+  return ast;
+}
+
+/* Run optimizations on AST and return it.  */
+
+pkl_ast
+pkl_opt (pkl_ast ast)
+{
+  ast = pkl_opt_constfold (ast);
+  return ast;
+}
