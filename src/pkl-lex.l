@@ -80,9 +80,59 @@ pkl_read (FILE *file, char *buf, size_t max,
           || strncmp (line, ":exit", strlen (":exit")) == 0)
         exit (1); /* XXX: this should probably be a longjmp.  */
 
+      len = strlen (line);
+      if (len > max - 2)
+        len = max - 2;
+
       if (strncmp (line, ":hello", strlen (":hello")) == 0)
         {
           printf ("hello!\n");
+          return YY_NULL;
+        }
+
+      if (strncmp (line, ":load", strlen (":load")) == 0)
+        {
+          size_t i;
+
+          if (line[5] != ' ')
+            {
+              printf ("usage: :load FILENAME\n");
+            }
+          else
+            {
+              char *filename;
+              FILE *fin;
+              pkl_ast ast;
+              int ret;
+
+              i = 5;
+              while (line[i++] == ' ');
+              filename = line + i - 1;
+
+              fin = fopen (filename, "r");
+              if (fin == NULL)
+                {
+                  printf ("Can't open file '%s'\n", filename);
+                  return YY_NULL;
+                }
+              
+              ret = pkl_parse_file (&ast, fin, filename);
+              if (ret == 1)
+                ;
+              else if (ret == 2)
+                printf ("MEMORY EXHAUSTION\n");
+              else
+                {
+#ifdef PKL_DEBUG
+                  if (PKL_AST_PROGRAM_ELEMS (ast->ast))
+                    pkl_ast_print (stdout, ast->ast);
+#endif
+                  pkl_ast_free (ast);                  
+                }
+
+              fclose (fin);
+            }
+
           return YY_NULL;
         }
 
@@ -90,10 +140,6 @@ pkl_read (FILE *file, char *buf, size_t max,
       if (line && *line)
         add_history (line);
 #endif
-
-      len = strlen (line);
-      if (len > max - 2)
-        len = max - 2;
 
       memcpy(buf, line, len);
       buf[len++] = '\n';

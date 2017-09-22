@@ -64,7 +64,9 @@ pkl_tab_error (YYLTYPE *llocp,
   //    return;
   // XXX: store the line read and other info for pretty
   //      error printing in EXTRA.
-  fprintf (stderr, "stdin: %d: %s\n", llocp->first_line, err);
+  fprintf (stderr, "%s: %d: %s\n",
+           pkl_parser->interactive ? "cmdline" : pkl_parser->filename,
+           llocp->first_line, err);
 }
 
 /* The following functions are used in the actions in several grammar

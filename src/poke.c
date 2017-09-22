@@ -170,7 +170,7 @@ repl ()
       pkl_ast ast;
       int ret;
 
-      ret = pkl_parse_file (&ast, stdin);
+      ret = pkl_parse_cmdline (&ast);
       if (ret == 1)
         ;/*        printf ("SYNTAX ERROR\n"); */
       else if (ret == 2)
@@ -185,39 +185,6 @@ repl ()
         }
     }
 }
-
-/*
- * yyscan_t scanner;
- *
- * yylex_init ( &scanner ); | yylex_init_extra ( YY_EXTRA_TYPE, &scanner );
- * yyset_extra ( YY_EXTRA_TYPE, & scanner );
- * YY_EXTRA_TYPE yyget_extra ( & scanner );
- * yylex ( scanner );
- *  0 => success
- *  ENOMEM
- *  EINVAL
- * yylex_destroy ( &scanner );
- *
- * yyextra stores user-specific data.
- *
- * Parser:
- *
- *  int yyparse (void); (or pkl_tab_parse)
- *
- *    0 -> parsing susccessful.
- *    1 -> syntax error, or YYABORT.
- *    2 -> memory exhaustion.
- *
- * YYACCEPT - return immediately returning 0
- * YYABORT - return immediately returning 1
- *
- * %parse-param: make arguments available in yyparse, and thus
- *  in grammar actions.
- *
- *  yypush_parse () -> returns YYPUSH_MORE if more input is required
- *  to finish parsing the grammar.
- *  yypull_parse () -> parse the rest of the input stream.
- */
 
 int
 main (int argc, char *argv[])
