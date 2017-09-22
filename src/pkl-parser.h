@@ -33,6 +33,14 @@ struct pkl_parser
 {
   void *scanner;
   pkl_ast ast;
+
+  /* Fields for controlling the input in interactive-mode.  */
+  char *ps1; /* Normal prompt.  */
+  char *ps2; /* Continuation prompt.  */
+  int eof;
+  int at_start;
+  int at_end;
+  char *error;
 };
 
 /* Exported functions defined in pkl-parser.c.  */

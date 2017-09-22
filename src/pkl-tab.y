@@ -213,8 +213,17 @@ program_elem_list:
           %empty
 		{ $$ = NULL; }
 	| program_elem
+        	{
+                  pkl_parser->at_start = 1;
+                  pkl_parser->at_end = 1;
+                  $$ = $1;
+                }
         | program_elem_list program_elem
-        	{ $$ = pkl_ast_chainon ($1, $2); }
+        	{
+                  pkl_parser->at_start = 1;
+                  pkl_parser->at_end = 1;
+                  $$ = pkl_ast_chainon ($1, $2);
+                }
           | error program_elem
 	        { $$ = $2; }
 	;

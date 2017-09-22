@@ -26,10 +26,6 @@
 #define _(str) gettext (str)
 #include <unistd.h>
 #include <string.h>
-#include "readline.h"
-#if defined HAVE_READLINE_HISTORY_H
-# include <readline/history.h>
-#endif
 
 #include "pkl-parser.h"
 #include "poke.h"
@@ -167,24 +163,25 @@ repl ()
 {
   print_version ();
   puts ("");
-  
+
+  /*  while (!parser->eof) */
   while (1)
     {
-      char *line = readline ("(poke) ");
-      
-      if (line == NULL
-          || strcmp (line, "exit") == 0)
-        {
-          free (line);
-          break;
-        }
-          
-#if defined HAVE_READLINE_HISTORY_H
-      if (line && *line)
-        add_history (line);
-#endif      
+      pkl_ast ast;
+      int ret;
 
-      free (line);
+      ret = pkl_parse_file (&ast, stdin);
+      if (ret == 1)
+        printf ("SYNTAX ERROR\n");
+      else if (ret == 2)
+        printf ("MEMORY EXHAUSTION\n");
+      else
+        {
+#ifdef PKL_DEBUG
+          pkl_ast_print (stdout, ast->ast);
+#endif
+          pkl_ast_free (ast);
+        }
     }
 }
 
@@ -231,23 +228,8 @@ main (int argc, char *argv[])
   poke_interactive_p = isatty (fileno (stdin));
 
   /* Enter the REPL.  */
-  //  if (poke_interactive_p)
-  //    return repl ();
-
-  pkl_ast ast;
-  int ret = pkl_parse_file (&ast, stdin);
-  if (ret == 1)
-    printf ("SYNTAX ERROR\n");
-  else if (ret == 2)
-    printf ("MEMORY EXHAUSTION\n");
-  else
-    {
-#ifdef PKL_DEBUG
-      pkl_ast_print (stdout, ast->ast);
-#endif
-
-      pkl_ast_free (ast);
-    }
+  if (poke_interactive_p)
+    return repl ();
 
   return 0;
 }

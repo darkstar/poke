@@ -41,6 +41,13 @@ pkl_parser_init (void)
 
   parser->ast = pkl_ast_init ();
 
+  parser->ps1 = "(poke) ";
+  parser->ps2 = "> ";
+  parser->eof = 0;
+  parser->error = NULL;
+  parser->at_start = 1;
+  parser->at_end = 0;
+
   /* Register standard types.  */
   {
     static struct

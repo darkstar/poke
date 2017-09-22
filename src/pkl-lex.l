@@ -37,12 +37,82 @@
 
 %{
 #include <string.h>
+#include <unistd.h>
 #include <xalloc.h>
 #include <pkl-ast.h>
 #include <pkl-parser.h>
 #include <pkl-tab.h>
+#include "readline.h"
+#if defined HAVE_READLINE_HISTORY_H
+# include <readline/history.h>
+#endif
 
-#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno;
+#define YY_USER_ACTION                                          \
+  do                                                            \
+    {                                                           \
+    yylloc->first_line = yylloc->last_line = yylineno;          \
+    if (!isspace (*yytext))                                     \
+      {                                                         \
+        yyextra->at_start = 0;                                  \
+      }                                                         \
+ } while (0);
+
+#define YY_INPUT(buf,result,max_size) \
+  result = pkl_read (yyin, buf, max_size, yyextra);
+  
+size_t
+pkl_read (FILE *file, char *buf, size_t max,
+          struct pkl_parser *parser)
+{
+  size_t len;
+  
+  /* If yyin == NULL then we are interactive.  */
+  if (file == NULL || isatty (fileno (file)))
+    {
+      char *line;
+
+      if (parser->at_end)
+        return YY_NULL;
+      
+      line = readline (parser->at_start ? parser->ps1 : parser->ps2);
+
+      if (line == NULL
+          || strcmp (line, "exit") == 0)
+        exit (1); /* XXX: this should probably be a longjmp.  */
+
+#if defined HAVE_READLINE_HISTORY_H
+      if (line && *line)
+        add_history (line);
+#endif
+
+      len = strlen (line);
+      if (len > max - 1)
+        len = max - 1;
+
+      memcpy(buf, line, len);
+      free (line);
+
+      /* If the string is empty and we are continuing a command,
+         return a newline.  We assume that `max' is at least 1.  */
+      if (!parser->at_start && len == 0)
+        {
+          buf[len] = '\n';
+          len++;
+        }
+      
+      return len;
+    }
+  else
+    {
+      /* Non interactive.  */
+      len = fread (buf, 1, max, file);
+      if (len == 0 && ferror (file))
+        {
+          /* TODO: propagate error value.  */
+        }
+      return len;
+    }
+}
 
 /* Convert the printed representation of a number to an integer.  */
   
