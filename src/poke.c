@@ -32,7 +32,6 @@
 #endif
 
 #include "pkl-parser.h"
-#include "pkl-opt.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -247,13 +246,6 @@ main (int argc, char *argv[])
       pkl_ast_print (stdout, ast->ast);
 #endif
 
-      ast = pkl_opt (ast);
-
-#ifdef PKL_DEBUG
-      printf ("OPTIMIZED --------------------\n");
-      pkl_ast_print (stdout, ast->ast);
-#endif
-      
       pkl_ast_free (ast);
     }
 
