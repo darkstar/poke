@@ -381,11 +381,11 @@ pkl_ast_make_assertion (pkl_ast_node exp)
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node
-pkl_ast_make_program (pkl_ast_node declarations)
+pkl_ast_make_program (pkl_ast_node elems)
 {
   pkl_ast_node program = pkl_ast_make_node (PKL_AST_PROGRAM);
 
-  PKL_AST_PROGRAM_DECLARATIONS (program) = ASTREF (declarations);
+  PKL_AST_PROGRAM_ELEMS (program) = ASTREF (elems);
   return program;
 }
 
@@ -413,7 +413,7 @@ pkl_ast_node_free (pkl_ast_node ast)
     {
     case PKL_AST_PROGRAM:
 
-      for (t = PKL_AST_PROGRAM_DECLARATIONS (ast); t; t = n)
+      for (t = PKL_AST_PROGRAM_ELEMS (ast); t; t = n)
         {
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
@@ -817,7 +817,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_PROGRAM:
       IPRINTF ("PROGRAM::\n");
 
-      PRINT_AST_SUBAST_CHAIN (PROGRAM_DECLARATIONS);
+      PRINT_AST_SUBAST_CHAIN (PROGRAM_ELEMS);
       break;
 
     case PKL_AST_IDENTIFIER:

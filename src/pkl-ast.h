@@ -174,16 +174,16 @@ pkl_ast_node pkl_ast_chainon (pkl_ast_node ast1,
 
 /* PKL_AST_PROGRAM nodes represent PKL programs.
 
-   DECLARATIONS points to a possibly empty list of struct definitions
-   and enumerations, i.e. to nodes of types PKL_AST_STRUCT and
-   PKL_AST_ENUM respectively.  */
+   ELEMS points to a possibly empty list of struct definitions,
+   enumerations, and expressions i.e. to nodes of types
+   PKL_AST_STRUCT, PKL_AST_ENUM and PKL_AST_EXP respectively.  */
 
-#define PKL_AST_PROGRAM_DECLARATIONS(AST) ((AST)->program.declarations)
+#define PKL_AST_PROGRAM_ELEMS(AST) ((AST)->program.elems)
 
 struct pkl_ast_program
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *declarations;
+  union pkl_ast_node *elems;
 };
 
 pkl_ast_node pkl_ast_make_program (pkl_ast_node declarations);

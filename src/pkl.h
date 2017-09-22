@@ -21,6 +21,22 @@
 
 #include <config.h>
 
+#if 0
+struct pvm_mem
+{
+  pvm_prog type; /* Program for the type.  */
+  pvm_layout layout;  /* Recalculated running the type above.  */
+  pvm_addr addr;
+};
 
+struct pvm_var
+{
+  union
+  {
+    pvm_int integer;
+    pvm_mem mem;
+  };
+};
+#endif /* 0 */
 
 #endif /* ! PKL_H */

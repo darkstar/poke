@@ -186,7 +186,7 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 %type <ast> expression assignment_expression
 %type <ast> type_specifier declaration declaration_specifiers
 %type <ast> typedef_specifier enum_specifier struct_specifier 
-%type <ast> declaration_list program
+%type <ast> program program_elem_list program_elem
 %type <ast> mem_layout mem_declarator_list
 %type <ast> mem_declarator mem_field_with_docstr mem_field_with_endian
 %type <ast> mem_field_with_size mem_field mem_cond mem_loop
@@ -196,7 +196,7 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 
 %% /* The grammar follows.  */
 
-program: declaration_list
+program: program_elem_list
           	{
                   if (yynerrs > 0)
                     {
@@ -209,15 +209,20 @@ program: declaration_list
                 }
         ;
 
-declaration_list:
+program_elem_list:
           %empty
 		{ $$ = NULL; }
-	| declaration
-        | declaration_list declaration
+	| program_elem
+        | program_elem_list program_elem
         	{ $$ = pkl_ast_chainon ($1, $2); }
-        | error declaration
+          | error program_elem
 	        { $$ = $2; }
 	;
+
+program_elem:
+	  declaration
+        | expression
+        ;
 
 /*
  * Expressions.

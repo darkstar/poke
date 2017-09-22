@@ -44,7 +44,7 @@ pkl_gen (pkl_ast_node ast)
     {
     case PKL_AST_PROGRAM:
 
-      for (tmp = PKL_AST_PROGRAM_DECLARATIONS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
+      for (tmp = PKL_AST_PROGRAM_ELEMS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
         {
           if (!pkl_gen (tmp))
             goto error;
