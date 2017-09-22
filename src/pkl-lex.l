@@ -86,10 +86,11 @@ pkl_read (FILE *file, char *buf, size_t max,
 #endif
 
       len = strlen (line);
-      if (len > max - 1)
-        len = max - 1;
+      if (len > max - 2)
+        len = max - 2;
 
       memcpy(buf, line, len);
+      buf[len++] = '\n';
       free (line);
 
       /* If the string is empty and we are continuing a command,
@@ -114,6 +115,15 @@ pkl_read (FILE *file, char *buf, size_t max,
     }
 }
 
+/* The following macro is used in the lexer rules below, to handle
+   continuation prompts while operating in interactive mode.  */
+
+#define AFTER_END                               \
+  do                                            \
+    {                                           \
+      yyextra->at_end = 0;                      \
+    } while (0)
+ 
 /* Convert the printed representation of a number to an integer.  */
   
 static int
@@ -206,74 +216,76 @@ D [0-9]
      cur_docstr = pkl_ast_make_doc_string (yytext, NULL);
 }      
 
-"enum"		{ return ENUM; }
-"struct"	{ return STRUCT; }
-"typedef"	{ return TYPEDEF; }
-"break"		{ return BREAK; }
-"const"		{ return CONST; }
-"continue"	{ return CONTINUE; }
-"else"		{ return ELSE; }
-"for"		{ return FOR; }
-"while"		{ return WHILE; }
-"if"		{ return IF; }
-"sizeof"	{ return SIZEOF; }
-"assert"	{ return ASSERT; }
+"enum"		{ AFTER_END; return ENUM; }
+"struct"	{ AFTER_END; return STRUCT; }
+"typedef"	{ AFTER_END; return TYPEDEF; }
+"break"		{ AFTER_END; return BREAK; }
+"const"		{ AFTER_END; return CONST; }
+"continue"	{ AFTER_END; return CONTINUE; }
+"else"		{ AFTER_END; return ELSE; }
+"for"		{ AFTER_END; return FOR; }
+"while"		{ AFTER_END; return WHILE; }
+"if"		{ AFTER_END; return IF; }
+"sizeof"	{ AFTER_END; return SIZEOF; }
+"assert"	{ AFTER_END; return ASSERT; }
 
-"unsigned"	{ yylval->integer = 0; return UNSIGNED; }
-"signed"	{ yylval->integer = 1; return SIGNED; }
+"unsigned"	{ AFTER_END; yylval->integer = 0; return UNSIGNED; }
+"signed"	{ AFTER_END; yylval->integer = 1; return SIGNED; }
 
-"lsb"		{ return LSB; }
-"msb"		{ return MSB; }
+"lsb"		{ AFTER_END; return LSB; }
+"msb"		{ AFTER_END; return MSB; }
 
-"*="		{ return MULA; }
-"/="		{ return DIVA; }
-"%="		{ return MODA; }
-"+="		{ return ADDA; }
-"-="		{ return SUBA; }
-"<<="		{ return SLA; }
-">>="		{ return SRA; }
-"&="		{ return BANDA; }
-"|="		{ return IORA; }
-"^="		{ return XORA; }
+"*="		{ AFTER_END; return MULA; }
+"/="		{ AFTER_END; return DIVA; }
+"%="		{ AFTER_END; return MODA; }
+"+="		{ AFTER_END; return ADDA; }
+"-="		{ AFTER_END; return SUBA; }
+"<<="		{ AFTER_END; return SLA; }
+">>="		{ AFTER_END; return SRA; }
+"&="		{ AFTER_END; return BANDA; }
+"|="		{ AFTER_END; return IORA; }
+"^="		{ AFTER_END; return XORA; }
 
-"||"		{ return OR; }
-"&&"		{ return AND; }
-"=="		{ return EQ; }
-"!="		{ return NE; }
-"<="		{ return LE; }
-">="		{ return GE; }
-"<<"		{ return SL; }
-">>"		{ return SR; }
-"++"		{ return INC; }
-"--"		{ return DEC; }
+"||"		{ AFTER_END; return OR; }
+"&&"		{ AFTER_END; return AND; }
+"=="		{ AFTER_END; return EQ; }
+"!="		{ AFTER_END; return NE; }
+"<="		{ AFTER_END; return LE; }
+">="		{ AFTER_END; return GE; }
+"<<"		{ AFTER_END; return SL; }
+">>"		{ AFTER_END; return SR; }
+"++"		{ AFTER_END; return INC; }
+"--"		{ AFTER_END; return DEC; }
 
-"["		{ return '['; }
-"]"		{ return ']'; }
-"("		{ return '('; }
-")"		{ return ')'; }
-"{"		{ return '{'; }
-"}"		{ return '}'; }
-","		{ return ','; }
-"="		{ return '='; }
-"?"		{ return '?'; }
-":"		{ return ':'; }
-";"		{ return ';'; }
-"|"		{ return '|'; }
-"^"		{ return '^'; }
-"&"		{ return '&'; }
-"<"		{ return '<'; }
-">"		{ return '>'; }
-"+"		{ return '+'; }
-"-"		{ return '-'; }
-"*"		{ return '*'; }
-"/"		{ return '/'; }
-"%"		{ return '%'; }
-"!"		{ return '!'; }
-"~"		{ return '~'; }
-"."		{ return '.'; }
+"["		{ AFTER_END; return '['; }
+"]"		{ AFTER_END; return ']'; }
+"("		{ AFTER_END; return '('; }
+")"		{ AFTER_END; return ')'; }
+"{"		{ AFTER_END; return '{'; }
+"}"		{ AFTER_END; return '}'; }
+","		{ AFTER_END; return ','; }
+"="		{ AFTER_END; return '='; }
+"?"		{ AFTER_END; return '?'; }
+":"		{ AFTER_END; return ':'; }
+";"		{ AFTER_END; return ';'; }
+"|"		{ AFTER_END; return '|'; }
+"^"		{ AFTER_END; return '^'; }
+"&"		{ AFTER_END; return '&'; }
+"<"		{ AFTER_END; return '<'; }
+">"		{ AFTER_END; return '>'; }
+"+"		{ AFTER_END; return '+'; }
+"-"		{ AFTER_END; return '-'; }
+"*"		{ AFTER_END; return '*'; }
+"/"		{ AFTER_END; return '/'; }
+"%"		{ AFTER_END; return '%'; }
+"!"		{ AFTER_END; return '!'; }
+"~"		{ AFTER_END; return '~'; }
+"."		{ AFTER_END; return '.'; }
 
 {L}({L}|{D})* {
    pkl_ast_node type;
+
+   AFTER_END;
 
    if ((type = pkl_ast_get_registered (yyextra->ast, 
                                        yytext, PKL_AST_TYPE)) != NULL)
@@ -291,6 +303,8 @@ D [0-9]
 "-"?((0x[0-9a-fA-F]+)|{DIGIT}+) {
   int integer_value;
 
+  AFTER_END;
+
   pkl_atoi (yytext, &integer_value);
 
   yylval->ast = pkl_ast_make_integer (integer_value);
@@ -300,6 +314,8 @@ D [0-9]
 {STRING} {
   /* Strip the quoting characters */
   yytext[strlen(yytext) - 1] = 0;
+
+  AFTER_END;
 
   yylval->ast = pkl_ast_make_string (yytext + 1);
   return STR;
