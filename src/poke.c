@@ -172,13 +172,14 @@ repl ()
 
       ret = pkl_parse_file (&ast, stdin);
       if (ret == 1)
-        printf ("SYNTAX ERROR\n");
+        ;/*        printf ("SYNTAX ERROR\n"); */
       else if (ret == 2)
         printf ("MEMORY EXHAUSTION\n");
       else
         {
 #ifdef PKL_DEBUG
-          pkl_ast_print (stdout, ast->ast);
+          if (PKL_AST_PROGRAM_ELEMS (ast->ast))
+            pkl_ast_print (stdout, ast->ast);
 #endif
           pkl_ast_free (ast);
         }

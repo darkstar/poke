@@ -77,8 +77,14 @@ pkl_read (FILE *file, char *buf, size_t max,
       line = readline (parser->at_start ? parser->ps1 : parser->ps2);
 
       if (line == NULL
-          || strcmp (line, "exit") == 0)
+          || strncmp (line, ":exit", strlen (":exit")) == 0)
         exit (1); /* XXX: this should probably be a longjmp.  */
+
+      if (strncmp (line, ":hello", strlen (":hello")) == 0)
+        {
+          printf ("hello!\n");
+          return YY_NULL;
+        }
 
 #if defined HAVE_READLINE_HISTORY_H
       if (line && *line)

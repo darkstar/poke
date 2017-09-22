@@ -224,8 +224,6 @@ program_elem_list:
                   pkl_parser->at_end = 1;
                   $$ = pkl_ast_chainon ($1, $2);
                 }
-          | error program_elem
-	        { $$ = $2; }
 	;
 
 program_elem:
@@ -407,8 +405,6 @@ primary_expression:
           	{ $$ = pkl_ast_make_loc (); }
         | '(' expression ')'
 		{ $$ = $2; }
-        | '(' error ')'
-        	{ $$ = NULL; }
 	;
 
 /*
@@ -638,10 +634,6 @@ mem_declarator_list:
 	| mem_declarator ';'
         | mem_declarator_list  mem_declarator ';'
 		        { $$ = pkl_ast_chainon ($1, $2); }
-        | error ';'
-        		{ $$ = NULL; }
-        | mem_declarator_list error
-        		{ $$ = $1; }
 	;
 
 mem_declarator:
