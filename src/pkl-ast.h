@@ -52,7 +52,8 @@ enum pkl_ast_code
   PKL_AST_STRING,
   PKL_AST_IDENTIFIER,
   PKL_AST_DOC_STRING,
-  PKL_AST_LOC
+  PKL_AST_LOC,
+  PKL_AST_CAST
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -255,6 +256,22 @@ struct pkl_ast_doc_string
 
 pkl_ast_node pkl_ast_make_doc_string (const char *str,
                                       pkl_ast_node entity);
+
+/* PKL_AST_CAST nodes represent cast constructions, which are
+   applications of types to IO space.  XXX: explain.  */
+
+#define PKL_AST_CAST_TYPE(AST) ((AST)->cast.type)
+#define PKL_AST_CAST_ADDR(AST) ((AST)->cast.addr)
+
+struct pkl_ast_cast
+{
+  struct pkl_ast_common common;
+  union pkl_ast_node *type;
+  union pkl_ast_node *addr;
+};
+
+pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
+                                pkl_ast_node addr);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.
@@ -544,8 +561,9 @@ pkl_ast_node pkl_ast_make_loop (pkl_ast_node pre,
 /* PKL_AST_ARRAY_REF nodes represent references to elements stored in
    fields.
 
-   BASE must point to a PKL_AST_IDENTIFIER node, which in turn should
-   identify a field.
+   BASE must point to either a PKL_AST_IDENTIFIER node, which
+   identifies a variable, or to a PKL_AST_STRUCT_REF, which identifies
+   a field in a mem layout.
 
    INDEX must point to an expression whose evaluation is the offset of
    the element into the field, in units of the field's SIZE.  */
@@ -679,6 +697,7 @@ union pkl_ast_node
   struct pkl_ast_type type;
   struct pkl_ast_assertion assertion;
   struct pkl_ast_loc loc;
+  struct pkl_ast_cast cast;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

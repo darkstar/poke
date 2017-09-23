@@ -183,7 +183,7 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 %type <ast> exclusive_or_expression and_expression
 %type <ast> equality_expression relational_expression
 %type <ast> shift_expression additive_expression
-%type <ast> multiplicative_expression unary_expression
+%type <ast> multiplicative_expression unary_expression cast_expression
 %type <ast> postfix_expression primary_expression
 %type <ast> expression assignment_expression
 %type <ast> type_specifier declaration declaration_specifiers
@@ -350,13 +350,19 @@ additive_expression:
         ;
 
 multiplicative_expression:
-	  unary_expression
+	  cast_expression
         | multiplicative_expression '*' unary_expression
 		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL, $1, $3); }
         | multiplicative_expression '/' unary_expression
 		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV, $1, $3); }
         | multiplicative_expression '%' unary_expression
 		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD, $1, $3); }
+        ;
+
+cast_expression:
+	  unary_expression
+        | '(' type_specifier ')' cast_expression
+          	{ $$ = pkl_ast_make_cast ($2, $4); }
         ;
 
 unary_expression:
