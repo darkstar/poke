@@ -48,10 +48,23 @@ This manual documents version @value{VERSION} of GNU poke.
 @end ifnottex
 
 @menu
-The Basics
+Tutorial
+
+Basic Usage
+* Commands::
+
+The Poke Language
+* Values::			Contents of variables.
+* Variables::			Poke variables.
+* Integers::
+* Arrays::
+* Structs::
+* Loops::
+* Examples::			Examples of poke programs.
 
 Internals
 * Poke Architecture::		Overall architecture.
+* PKL grammar::			Grammar of the poke language.
 
 * GNU Free Documentation License:: Distribution terms for this document.
 
@@ -59,11 +72,169 @@ Indexes
 * Concept Index::
 @end menu
 
+@node Commands
+@chapter Commands
+
+@example
+:load
+:exit
+:info
+:print ?
+:peek  ?
+:poke  ?
+@end example
+
+@node Values
+@chapter Values
+
+The evaluation of both literals and expressions generates
+@dfn{values}.
+
+@table @emph
+@item NIL
+@item Integer numbers
+
+Numbers are multiple-precision.
+
+@item Strings
+
+Strings are... null-terminated?  No.
+
+@item Arrays
+@item Structs
+@end table
+
+@example
+poke> struct foo @{ int i; int a[10]; struct bar s; @};
+poke> foo.i;  /* Builds a numeric value.  */
+poke> foo.a[2];  /* Builds a numeric value.  */
+poke> foo.a; /* Builds an array value.  */
+poke> foo; /* Builds a struct value.  */
+poke> foo.s; /* Builds a struct value.  */
+
+poke> 1; /* Builds a numeric value.  */
+poke> "foo"; /* Builds a string value.  */
+poke> @{10, 20, 30@}; /* Builds an array value.  */
+poke> @{10, "foo", 30@}; /* Likewise.  */
+poke> (struct foo) @{10, @{1,2,3,4@}, (struct bar) @{10@}@}  /* builds a struct value.  */
+@end example
+
+Kind of value to build depends on the _type_ of the expression.
+
+@node Variables
+@chapter Variables
+
+Variables are the association between a symbol and a value in a given
+scope.
+
+Scopes: global scope, struct scope, function scope.
+
+Variables don't need to de declared: they are defined the first time
+they are used in a given scope.
+
+Variables defined in inner scopes ghost variables with the same symbol
+defined in an outer scope.
+
+@node Integers
+@chapter Integers
+
+The character @code{_} can appear anywhere in a numeric literal other
+than leading them.  It is ignored, and it's purpose is to make it
+easier for programmers to read them:
+
+@example
+aconst = 0xf000_0000_0000_0000;
+@end example
+
+@node Arrays
+@chapter Arrays
+
+Arrays are collection of values, indexed by an integer.  The values
+contained in an array don't need to be of the same type: numbers,
+strings, arrays and structs can be intermixed.
+
+Array literals are constructed by placing the elements as a list
+enclosed in curly brackets.  The following example builds an array of
+three elements, each storing a number:
+
+@example
+a = @{10, 20, 30@}
+@end example
+
+The elements can then be accessed using subscripts:
+
+@example
+a[0] /* This is 10 */
+a[1] /* This is 20 */
+a[2] /* This is 30 */
+@end example
+
+It is also possible to refer to specific array positions in
+initializers:
+
+@example
+a = @{10, .[2] = 30@};
+@end example
+
+The array contents are:
+
+@example
+@{10, 0, 30@}
+@end example
+
+
+
+@node Structs
+@chapter Structs
+
+@node Loops
+@chapter Loops
+
+Iterating over array contents: defines variable `i' in the scope of
+the following statement block (or single statement?):
+
+@example
+for (i in @{10, 20, 30@})
+ @{
+   print i;
+ @}
+@end example
+
+@node Examples
+@chapter Examples
+
+Function that checks for elf integrity:
+
+@example
+function elflint (addr)
+@{
+  /* The following may trigger some assert.  */
+     elf = (struct elf *) addr;
+
+  /* Check sections.  */
+  if (elf.e_shnum > 0)
+    @{
+      for (s in elf.shdr)
+        /* Works with both poke arrays and IO arrays?  Yes.
+           elf.shdr reads from IO and constructs an array
+           according to its field specification.  */
+       @{
+         if (s.sh_type == SHT_GROUP
+             && elf.ehdr.e_type != ET_REL)
+           diag[ndiag++] = "SHT_GROUP sections should only appear"
+                           " in relocatable objects.";
+       @}
+   @}
+
+ /* Return the array with diagnostics.  */
+ return diag;
+@}
+@end example
+
 @node Poke Architecture
 @chapter Poke Architecture
 
-PCL stands for ``Poke Control Language'', and also for ``Poke C-like
-Language''.  It is pronounced ``pickle''.
+PKL stands for ``Poke Language''.  It is pronounced ``pickle''.
 
 @verbatim
 
@@ -87,17 +258,35 @@ Language''.  It is pronounced ``pickle''.
 Files:
 
 @table @file
-@item pcl.h
-PCL compiler header file.
-@item pcl-ast.h pcl-ast.c
-PCL abstract syntax tree.
-@item pcl-gen.c
-PCL code generator.
-@item pcl-lex.l pcl-lex.y
-PCL parser and lexer.
+@item pkl.h
+PKL compiler header file.
+@item pkl-ast.h pkl-ast.c
+PKL abstract syntax tree.
+@item pkl-gen.c
+PKL code generator.
+@item pkl-lex.l pkl-lex.y
+PKL parser and lexer.
 @item pvm.h pvm.c
 Poke virtual machine.
 @end table
+
+@node PKL grammar
+@chapter PKL grammar
+
+The poke language uses the following grammar, expressed in Backus-Naur
+Form.
+
+@example
+program :: program_elem_list
+
+program_elem_list :: empty
+   | program_elem
+   | program_elem_list program_elem
+
+program_elem :: declaration
+              | expression ';'
+
+@end example
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License

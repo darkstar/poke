@@ -22,21 +22,38 @@
 #include <config.h>
 
 #if 0
-struct pvm_mem
+struct pvm_struct
 {
   pvm_prog type; /* Program for the type.  */
-  pvm_layout layout;  /* Recalculated running the type above.  */
-  pvm_addr addr;
+  pio_layout layout;  /* Recalculated running the type above.  */
+  pio_addr addr;
+};
+
+enum pvm_var_type
+{
+  PVM_VT_NUMBER,
+  PVM_VT_ARRAY,
+  PVM_VT_STRUCT
 };
 
 struct pvm_var
 {
+  enum pvm_var_type type;
+  
   union
   {
-    pvm_int integer;
-    pvm_mem mem;
-  };
+    pvm_int number;
+    pvm_array array;
+    pvm_struct strct;
+  } v;
 };
+
+struct pvm_scope
+{
+  /* Variables defined in this scope.  */
+  pvm_var *vars;
+};
+
 #endif /* 0 */
 
 #endif /* ! PKL_H */
