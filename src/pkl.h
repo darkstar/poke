@@ -42,9 +42,10 @@ struct pvm_var
   
   union
   {
-    pvm_int number;
+    pvm_int integer;
     pvm_array array;
     pvm_struct strct;
+    pio_addr addr;
   } v;
 };
 

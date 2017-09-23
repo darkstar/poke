@@ -59,6 +59,7 @@ The Poke Language
 * Integers::
 * Arrays::
 * Structs::
+* Addresses::
 * Loops::
 * Examples::			Examples of poke programs.
 
@@ -186,6 +187,9 @@ The array contents are:
 
 @node Structs
 @chapter Structs
+
+@node Addresses
+@chapter Addresses
 
 @node Loops
 @chapter Loops
