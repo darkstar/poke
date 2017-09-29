@@ -130,11 +130,14 @@ scope.
 
 Scopes: global scope, struct scope, function scope.
 
-Variables don't need to de declared: they are defined the first time
+Variables don't need to be declared: they are defined the first time
 they are used in a given scope.
 
 Variables defined in inner scopes ghost variables with the same symbol
 defined in an outer scope.
+
+Poke variables are _not_ stored in addressable memory, and thus the
+operator & doesn't make sense for them.
 
 @node Integers
 @chapter Integers
@@ -153,6 +156,8 @@ aconst = 0xf000_0000_0000_0000;
 Arrays are collection of values, indexed by an integer.  The values
 contained in an array don't need to be of the same type: numbers,
 strings, arrays and structs can be intermixed.
+
+Like tuples in other programming languages.
 
 Array literals are constructed by placing the elements as a list
 enclosed in curly brackets.  The following example builds an array of
@@ -183,7 +188,9 @@ The array contents are:
 @{10, 0, 30@}
 @end example
 
+Arrays are always passed by reference in function calls.
 
+Arrays elements are not necessarily stored in contiguous memory.
 
 @node Structs
 @chapter Structs
