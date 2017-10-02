@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "pkl-parser.h"
+#include "pk-io.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -155,7 +156,17 @@ parse_args (int argc, char *argv[])
         }
     }
 
-  /* XXX: open IO file.  */
+  if (optind < argc)
+    {
+      if (!pk_io_open (argv[optind++]))
+        exit (EXIT_FAILURE);
+    }
+
+  if (optind < argc)
+    {
+      print_help();
+      exit (EXIT_FAILURE);
+    }
 }
 
 static int
@@ -199,5 +210,8 @@ main (int argc, char *argv[])
   if (poke_interactive_p)
     return repl ();
 
+  /* Cleanup.  */
+  pk_io_close ();
+  
   return 0;
 }

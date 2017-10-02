@@ -1,4 +1,4 @@
-/* poke.h - Interactive editor for binary files.  */
+/* pk-cmd.h - Poke commands.  Definitions.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -16,9 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef POKE_H
-#define POKE_H
+#ifndef PK_H_CMD
+#define PK_H_CMD
 
-extern int poke_interactive_p;
+#include <config.h>
 
-#endif /* !POKE_H */
+int pk_cmd_dump (const char *str);
+
+#endif /* ! PK_H_CMD */

@@ -29,627 +29,908 @@
  * with these names.
  */
 
-enum elf_ei_class
+enum uint8 elf_ei_class
 {
-  ELFCLASSNONE = 0x0	<<<Invalid class>>>,
-  ELFCLASS32 = 0x1	<<<32-bit objects>>>,
-  ELFCLASS64 = 0x2	<<<64-bit objects>>>
+  /** Invalid class.  */
+  ELFCLASSNONE = 0x0,
+  /** 32-bit objects.  */
+  ELFCLASS32 = 0x1,
+  /** 64-bit objects.  */
+  ELFCLASS64 = 0x2
 };
 
-enum elf_e_type
+enum elf_half elf_e_type
 {
-  ET_NONE = 0x0000	<<<No file type>>>,
-  ET_REL  = 0x0001	<<<Relocatable file>>>,
-  ET_EXEC = 0x0002	<<<Executable file>>>,
-  ET_DYN  = 0x0003	<<<Shared object file>>>,
-  ET_CORE = 0x0004	<<<Core file>>>,
-  ET_LOOS = 0xFE00	<<<Operating system-specific>>>,
-  ET_HIOS = 0xFEFF	<<<Operating system-specific>>>,
-  ET_LOPROC = 0xFF00	<<<Processor-specific>>>,
-  ET_HIPROC = 0xFFFF	<<<Processor-specific>>>
+  /** No file type.  */
+  ET_NONE = 0x0000,
+  /** Relocatable file.  */
+  ET_REL  = 0x0001,
+  /** Executable file.  */
+  ET_EXEC = 0x0002,
+  /** Shared object file.  */
+  ET_DYN  = 0x0003,
+  /** Core file.  */
+  ET_CORE = 0x0004,
+  /** Begin of operating system-specific range.  */
+  ET_LOOS = 0xFE00,
+  /** End of operating system-specific range.  */
+  ET_HIOS = 0xFEFF,
+  /** Begin of processor-specific range.  */
+  ET_LOPROC = 0xFF00,
+  /** End of processor-specific range.  */
+  ET_HIPROC = 0xFFFF
 };
 
-enum elf_e_machine
+enum elf_half elf_e_machine
 {
-  EM_NONE  = 0		<<<No machine>>>,
-  EM_M32   = 1		<<<AT&T WE 32100>>>,
-  EM_SPARC = 2		<<<SPARC>>>,
-  EM_386   = 3		<<<Intel 80386>>>,
-  EM_68K   = 4		<<<Motorola 68000>>>,
-  EM_88K   = 5		<<<Motorola 88000>>>,
-  EM_IAMCU = 6		<<<Intel MCU>>>,
-  EM_860   = 7		<<<Intel 80860>>>,
-  EM_MIPS  = 8		<<<MIPS I Architecture>>>,
-  EM_S370  = 9		<<<IBM System/370 Processor>>>,
-  EM_MIPS_RS3_LE = 10	<<<MIPS RS3000 Little-endian>>>,
-  /* 11-14 are reserved.  */
-  EM_PARISC = 15	<<<Hewlett-Packard PA-RISC>>>,
+  /** No machine.  */
+  EM_NONE  = 0,
+  /** AT&T WE 32100 */
+  EM_M32   = 1,
+  /** SPARC */
+  EM_SPARC = 2,
+  /** Intel 80386 */
+  EM_386   = 3,
+  /** Motorola 68000 */
+  EM_68K   = 4,
+  /** Motorola 88000 */
+  EM_88K   = 5,
+  /** Intel MCU */
+  EM_IAMCU = 6,
+  /** Intel 80860 */
+  EM_860   = 7,
+  /** MIPS I Architecture */
+  EM_MIPS  = 8,
+  /** IBM System/370 Processor */
+  EM_S370  = 9,
+  /** MIPS RS3000 Little-endian */
+  EM_MIPS_RS3_LE = 10 
+  /* 11-14 are reserved. */
+  /** Hewlett-Packard PA-RISC */
+  EM_PARISC = 15,
   /* 16 is reserved.  */
-  EM_VPP500 = 17     	<<<Fujitsu VPP500>>>,
-  EM_SPARC32PLUS = 18	<<<32-bit on V9 SPARC>>>,
-  EM_960 = 19        	<<<Intel 80960>>>,
-  EM_PPC = 20        	<<<PowerPC>>>,
-  EM_PPC64 = 21      	<<<64-bit PowerPC>>>,
-  EM_S390 = 22		<<<IBM System/390 Processor>>>,
-  EM_SPU = 23		<<<IBM SPU/SPC>>>,
+  /** Fujitsu VPP500 */
+  EM_VPP500 = 1,
+  /** 32-bit on V9 SPARC */
+  EM_SPARC32PLUS = 18,
+  /** Intel 80960 */
+  EM_960 = 19,
+  /** PowerPC */
+  EM_PPC = 20,
+  /** 64-bit PowerPC */
+  EM_PPC64 = 21,
+  /** IBM System/390 Processor */
+  EM_S390 = 22,
+  /** IBM SPU/SPC */
+  EM_SPU = 23,
   /* 24-35 are reserved.  */
-  EM_V800 = 36		<<<NEC V800>>>,
-  EM_FR20 = 37		<<<Fujitsu FR20>>>,
-  EM_RH32 = 38		<<<TRW RH-32>>>,
-  EM_RCE = 39		<<<Motorola RCE>>>,
-  EM_ARM = 40		<<<ARM 32-bit architecture (AARCH32)>>>,
-  EM_ALPHA = 41		<<<Digital Alpha>>>,
-  EM_SH = 42		<<<Hitachi SH>>>,
-  EM_SPARCV9 = 43	<<<SPARC Version 9>>>,
-  EM_TRICORE = 44	<<<Siemens TriCore embedded processor>>>,
-  EM_ARC = 45		<<<Argonaut RISC Core, Argonaut Technologies Inc.>>>,
-  EM_H8_300 = 46	<<<Hitachi H8/300>>>,
-  EM_H8_300H = 47	<<<Hitachi H8/300H>>>,
-  EM_H8S = 48		<<<Hitachi H8S>>>,
-  EM_H8_500 = 49	<<<Hitachi H8/500>>>,
-  EM_IA_64 = 50		<<<Intel IA-64 processor architecture>>>,
-  EM_MIPS_X = 51	<<<Stanford MIPS-X>>>,
-  EM_COLDFIRE = 52	<<<Motorola ColdFire>>>,
-  EM_68HC12 = 53	<<<Motorola M68HC12>>>,
-  EM_MMA = 54		<<<Fujitsu MMA Multimedia Accelerator>>>,
-  EM_PCP = 55		<<<Siemens PCP>>>,
-  EM_NCPU = 56		<<<Sony nCPU embedded RISC processor>>>,
-  EM_NDR1 = 57		<<<Denso NDR1 microprocessor>>>,
-  EM_STARCORE = 58	<<<Motorola Star*Core processor>>>,
-  EM_ME16 = 59		<<<Toyota ME16 processor>>>,
-  EM_ST100 = 60		<<<STMicroelectronics ST100 processor>>>,
-  EM_TINYJ = 61		<<<Advanced Logic Corp. TinyJ embedded processor family>>>,
-  EM_X86_64 = 62	<<<AMD x86-64 architecture>>>,
-  EM_PDSP = 63		<<<Sony DSP Processor>>>,
-  EM_PDP10 = 64		<<<Digital Equipment Corp. PDP-10>>>,
-  EM_PDP11 = 65		<<<Digital Equipment Corp. PDP-11>>>,
-  EM_FX66 = 66		<<<Siemens FX66 microcontroller>>>,
-  EM_ST9PLUS = 67	<<<STMicroelectronics ST9+ 8/16 bit microcontroller>>>,
-  EM_ST7 = 68		<<<STMicroelectronics ST7 8-bit microcontroller>>>,
-  EM_68HC16 = 69	<<<Motorola MC68HC16 Microcontroller>>>,
-  EM_68HC11 = 70	<<<Motorola MC68HC11 Microcontroller>>>,
-  EM_68HC08 = 71	<<<Motorola MC68HC08 Microcontroller>>>,
-  EM_68HC05 = 72	<<<Motorola MC68HC05 Microcontroller>>>,
-  EM_SVX = 73		<<<Silicon Graphics SVx>>>,
-  EM_ST19 = 74		<<<STMicroelectronics ST19 8-bit microcontroller>>>,
-  EM_VAX = 75		<<<Digital VAX>>>,
-  EM_CRIS = 76		<<<Axis Communications 32-bit embedded processor>>>,
-  EM_JAVELIN = 77	<<<Infineon Technologies 32-bit embedded processor>>>,
-  EM_FIREPATH = 78	<<<Element 14 64-bit DSP Processor>>>,
-  EM_ZSP = 79		<<<LSI Logic 16-bit DSP Processor>>>,
-  EM_MMIX = 80		<<<Donald Knuth's educational 64-bit processor>>>,
-  EM_HUANY = 81		<<<Harvard University machine-independent object files>>>,
-  EM_PRISM = 82		<<<SiTera Prism>>>,
-  EM_AVR = 83		<<<Atmel AVR 8-bit microcontroller>>>,
-  EM_FR30 = 84		<<<Fujitsu FR30>>>,
-  EM_D10V = 85		<<<Mitsubishi D10V>>>,
-  EM_D30V = 86		<<<Mitsubishi D30V>>>,
-  EM_V850 = 87		<<<NEC v850>>>,
-  EM_M32R = 88		<<<Mitsubishi M32R>>>,
-  EM_MN10300 = 89	<<<Matsushita MN10300>>>,
-  EM_MN10200 = 90	<<<Matsushita MN10200>>>,
-  EM_PJ = 91		<<<picoJava>>>,
-  EM_OPENRISC = 92	<<<OpenRISC 32-bit embedded processor>>>,
-  EM_ARC_COMPACT = 93	<<<ARC International ARCompact processor>>>,
-  EM_XTENSA = 94	<<<Tensilica Xtensa Architecture>>>,
-  EM_VIDEOCORE = 95	<<<Alphamosaic VideoCore processor>>>,
-  EM_TMM_GPP = 96	<<<Thompson Multimedia General Purpose Processor>>>,
-  EM_NS32K = 97		<<<National Semiconductor 32000 series>>>,
-  EM_TPC = 98		<<<Tenor Network TPC processor>>>,
-  EM_SNP1K = 99		<<<Trebia SNP 1000 processor>>>,
-  EM_ST200 = 100	<<<STMicroelectronics (www.st.com) ST200 microcontroller>>>,
-  EM_IP2K = 101		<<<Ubicom IP2xxx microcontroller family>>>,
-  EM_MAX = 102		<<<MAX Processor>>>,
-  EM_CR = 103		<<<National Semiconductor CompactRISC microprocessor>>>,
-  EM_F2MC16 = 104	<<<Fujitsu F2MC16>>>,
-  EM_MSP430 = 105	<<<Texas Instruments embedded microcontroller msp430>>>,
-  EM_BLACKFIN = 106	<<<Analog Devices Blackfin (DSP) processor>>>,
-  EM_SE_C33 = 107	<<<S1C33 Family of Seiko Epson processors>>>,
-  EM_SEP = 108		<<<Sharp embedded microprocessor>>>,
-  EM_ARCA = 109		<<<Arca RISC Microprocessor>>>,
-
-  EM_UNICORE = 110	<<< Microprocessor series from PKU-Unity Ltd. and MPRC
-                     	    of Peking University.  >>>,
-
-  EM_EXCESS = 111	<<<eXcess: 16/32/64-bit configurable embedded CPU>>>,
-  EM_DXP = 112		<<<Icera Semiconductor Inc. Deep Execution Processor>>>,
-  EM_ALTERA_NIOS2 = 113	<<<Altera Nios II soft-core processor>>>,
-  EM_CRX = 114		<<<National Semiconductor CompactRISC CRX microprocessor>>>,
-  EM_XGATE = 115	<<<Motorola XGATE embedded processor>>>,
-  EM_C166 = 116		<<<Infineon C16x/XC16x processor>>>,
-  EM_M16C = 117		<<<Renesas M16C series microprocessors>>>,
-  EM_DSPIC30F = 118	<<<Microchip Technology dsPIC30F Digital Signal Controller>>>,
-  EM_CE = 119		<<<Freescale Communication Engine RISC core>>>,
-  EM_M32C = 120		<<<Renesas M32C series microprocessors>>>,
+  /** NEC V800 */
+  EM_V800 = 36,
+  /** Fujitsu FR20 */
+  EM_FR20 = 37,
+  /** TRW RH-32 */
+  EM_RH32 = 38,
+  /** Motorola RCE */
+  EM_RCE = 39,
+  /** ARM 32-bit architecture (AARCH32) */
+  EM_ARM = 40,
+  /** Digital Alpha */
+  EM_ALPHA = 41,
+  /** Hitachi SH */
+  EM_SH = 42,
+  /** SPARC Version 9 */
+  EM_SPARCV9 = 43,
+  /** Siemens TriCore embedded processor */
+  EM_TRICORE = 44,
+  /** Argonaut RISC Core, Argonaut Technologies Inc. */
+  EM_ARC = 45,
+  /** Hitachi H8/300 */
+  EM_H8_300 = 46,
+  /** Hitachi H8/300H */
+  EM_H8_300H = 47,
+  /** Hitachi H8S */
+  EM_H8S = 48,
+  /** Hitachi H8/500 */
+  EM_H8_500 = 49,
+  /** Intel IA-64 processor architecture */
+  EM_IA_64 = 50,
+  /** Stanford MIPS-X */
+  EM_MIPS_X = 51,
+  /** Motorola ColdFire */
+  EM_COLDFIRE = 52,
+  /** Motorola M68HC12 */
+  EM_68HC12 = 53,
+  /** Fujitsu MMA Multimedia Accelerator */
+  EM_MMA = 54,
+  /** Siemens PCP */
+  EM_PCP = 55,
+  /** Sony nCPU embedded RISC processor */
+  EM_NCPU = 56,
+  /** Denso NDR1 microprocessor */
+  EM_NDR1 = 57,
+  /** Motorola Star*Core processor */
+  EM_STARCORE = 58,
+  /** Toyota ME16 processor */
+  EM_ME16 = 59,
+  /** STMicroelectronics ST100 processor */
+  EM_ST100 = 60,
+  /** Advanced Logic Corp. TinyJ embedded processor family */
+  EM_TINYJ = 61,
+  /** AMD x86-64 architecture */
+  EM_X86_64 = 62,
+  /** Sony DSP Processor */
+  EM_PDSP = 63,
+  /** Digital Equipment Corp. PDP-10 */
+  EM_PDP10 = 64,
+  /** Digital Equipment Corp. PDP-11 */
+  EM_PDP11 = 65,
+  /** Siemens FX66 microcontroller */
+  EM_FX66 = 66,
+  /** STMicroelectronics ST9+ 8/16 bit microcontroller */
+  EM_ST9PLUS = 67,
+  /** STMicroelectronics ST7 8-bit microcontroller */
+  EM_ST7 = 68,
+  /** Motorola MC68HC16 Microcontroller */
+  EM_68HC16 = 69,
+  /** Motorola MC68HC11 Microcontroller */
+  EM_68HC11 = 70,
+  /** Motorola MC68HC08 Microcontroller */
+  EM_68HC08 = 71,
+  /** Motorola MC68HC05 Microcontroller */
+  EM_68HC05 = 72,
+  /** Silicon Graphics SVx */
+  EM_SVX = 73,
+  /** STMicroelectronics ST19 8-bit microcontroller */
+  EM_ST19 = 74,
+  /** Digital VAX */
+  EM_VAX = 75,
+  /** Axis Communications 32-bit embedded processor */
+  EM_CRIS = 76,
+  /** Infineon Technologies 32-bit embedded processor */
+  EM_JAVELIN = 77,
+  /** Element 14 64-bit DSP Processor */
+  EM_FIREPATH = 78,
+  /** LSI Logic 16-bit DSP Processor */
+  EM_ZSP = 79,
+  /** Donald Knuth's educational 64-bit processor */
+  EM_MMIX = 80,
+  /** Harvard University machine-independent object files */
+  EM_HUANY = 81,
+  /** SiTera Prism */
+  EM_PRISM = 82,
+  /** Atmel AVR 8-bit microcontroller */
+  EM_AVR = 83,
+  /** Fujitsu FR30 */
+  EM_FR30 = 84,
+  /** Mitsubishi D10V */
+  EM_D10V = 85,
+  /** Mitsubishi D30V */
+  EM_D30V = 86,
+  /** NEC v850 */
+  EM_V850 = 87,
+  /** Mitsubishi M32R */
+  EM_M32R = 88,
+  /** Matsushita MN10300 */
+  EM_MN10300 = 89,
+  /** Matsushita MN10200 */
+  EM_MN10200 = 90,
+  /** picoJava */
+  EM_PJ = 91,
+  /** OpenRISC 32-bit embedded processor */
+  EM_OPENRISC = 92,
+  /** ARC International ARCompact processor */
+  EM_ARC_COMPACT = 93,
+  /** Tensilica Xtensa Architecture */
+  EM_XTENSA = 94,
+  /** Alphamosaic VideoCore processor */
+  EM_VIDEOCORE = 95,
+  /** Thompson Multimedia General Purpose Processor */
+  EM_TMM_GPP = 96,
+  /** National Semiconductor 32000 series */
+  EM_NS32K = 97,
+  /** Tenor Network TPC processor */
+  EM_TPC = 98,
+  /** Trebia SNP 1000 processor */
+  EM_SNP1K = 99,
+  /** STMicroelectronics (www.st.com) ST200 microcontroller */
+  EM_ST200 = 100,
+  /** Ubicom IP2xxx microcontroller family */
+  EM_IP2K = 101,
+  /** MAX Processor */
+  EM_MAX = 102,
+  /** National Semiconductor CompactRISC microprocessor */
+  EM_CR = 103,
+  /** Fujitsu F2MC16 */
+  EM_F2MC16 = 104,
+  /** Texas Instruments embedded microcontroller msp430 */
+  EM_MSP430 = 105,
+  /** Analog Devices Blackfin (DSP) processor */
+  EM_BLACKFIN = 106,
+  /** S1C33 Family of Seiko Epson processors */
+  EM_SE_C33 = 107,
+  /** Sharp embedded microprocessor */
+  EM_SEP = 108,
+  /** Arca RISC Microprocessor */
+  EM_ARCA = 109,
+  /**  Microprocessor series from PKU-Unity.  */
+  EM_UNICORE = 110,
+  /** eXcess: 16/32/64-bit configurable embedded CPU */
+  EM_EXCESS = 111,
+  /** Icera Semiconductor Inc. Deep Execution Processor */
+  EM_DXP = 112,
+  /** Altera Nios II soft-core processor */
+  EM_ALTERA_NIOS2 = 113,
+  /** National Semiconductor CompactRISC CRX microprocessor */
+  EM_CRX = 114,
+  /** Motorola XGATE embedded processor */
+  EM_XGATE = 115,
+  /** Infineon C16x/XC16x processor */
+  EM_C166 = 116,
+  /** Renesas M16C series microprocessors */
+  EM_M16C = 117,
+  /** Microchip Technology dsPIC30F Digital Signal Controller */
+  EM_DSPIC30F = 118,
+  /** Freescale Communication Engine RISC core */
+  EM_CE = 119,
+  /** Renesas M32C series microprocessors */
+  EM_M32C = 120,
   /* 121-130 are reserved.  */
-  EM_TSK3000 = 131	<<<Altium TSK3000 core>>>,
-  EM_RS08 = 132		<<<Freescale RS08 embedded processor>>>,
-  EM_SHARC = 133	<<<Analog Devices SHARC family of 32-bit DSP processors>>>,
-  EM_ECOG2 = 134	<<<Cyan Technology eCOG2 microprocessor>>>,
-  EM_SCORE7 = 135	<<<Sunplus S+core7 RISC processor>>>,
-  EM_DSP24 = 136	<<<New Japan Radio (NJR) 24-bit DSP Processor>>>,
-  EM_VIDEOCORE3 = 137	<<<Broadcom VideoCore III processor>>>,
-  EM_LATTICEMICO32 = 138 <<<RISC processor for Lattice FPGA architecture>>>,
-  EM_SE_C17 = 139	<<<Seiko Epson C17 family>>>,
-  EM_TI_C6000 = 140	<<<The Texas Instruments TMS320C6000 DSP family>>>,
-  EM_TI_C2000 = 141	<<<The Texas Instruments TMS320C2000 DSP family>>>,
-  EM_TI_C5500 = 142	<<<The Texas Instruments TMS320C55x DSP family>>>,
-
-  EM_TI_ARP32 = 143	<<< Texas Instruments Application Specific RISC Processor,
-                     	    32bit fetch.  >>>,
-
-  EM_TI_PRU = 144	<<<Texas Instruments Programmable Realtime Unit>>>,
+  /** Altium TSK3000 co,re */
+  EM_TSK3000 = 131,
+  /** Freescale RS08 embedded processor */
+  EM_RS08 = 132,
+  /** Analog Devices SHARC family of 32-bit DSP processors */
+  EM_SHARC = 133,
+  /** Cyan Technology eCOG2 microprocessor */
+  EM_ECOG2 = 134,
+  /** Sunplus S+core7 RISC processor */
+  EM_SCORE7 = 135,
+  /** New Japan Radio (NJR) 24-bit DSP Processor */
+  EM_DSP24 = 136,
+  /** Broadcom VideoCore III processor */
+  EM_VIDEOCORE3 = 137	,,
+  /** RISC processor for Lattice FPGA architecture.  */
+  EM_LATTICEMICO32 = 138,
+  /** Seiko Epson C17 family */
+  EM_SE_C17 = 139,
+  /** The Texas Instruments TMS320C6000 DSP family */
+  EM_TI_C6000 = 140,
+  /** The Texas Instruments TMS320C2000 DSP family */
+  EM_TI_C2000 = 141,
+  /** The Texas Instruments TMS320C55x DSP family */
+  EM_TI_C5500 = 142,
+  /** Texas Instruments Application Specific RISC Processor, 32bit
+      fetch.  */
+  EM_TI_ARP32 = 143,
+  /** Texas Instruments Programmable Realtime Unit */
+  EM_TI_PRU = 144,
   /* 145-159 are reserved.  */
-  EM_MMDSP_PLUS = 160	<<<STMicroelectronics 64bit VLIW Data Signal Processor>>>,
-  EM_CYPRESS_M8C = 161	<<<Cypress M8C microprocessor>>>,
-  EM_R32C = 162		<<<Renesas R32C series microprocessors>>>,
-  EM_TRIMEDIA = 163	<<<NXP Semiconductors TriMedia architecture family>>>,
-  EM_QDSP6 = 164	<<<QUALCOMM DSP6 Processor>>>,
-  EM_8051 = 165		<<<Intel 8051 and variants>>>,
-  EM_STXP7X = 166	<<<STMicroelectronics STxP7x family of configurable and
-                     	   extensible RISC processors>>>,
-  EM_NDS32 = 167	<<<Andes Technology compact code size embedded RISC
-                     	<<<processor family>>>,
-  EM_ECOG1 = 168	<<<Cyan Technology eCOG1X family>>>,
-  EM_ECOG1X = 168	<<<Cyan Technology eCOG1X family>>>,
-  EM_MAXQ30 = 169	<<<Dallas Semiconductor MAXQ30 Core Micro-controllers>>>,
-  EM_XIMO16 = 170	<<<New Japan Radio (NJR) 16-bit DSP Processor>>>,
-  EM_MANIK = 171	<<<M2000 Reconfigurable RISC Microprocessor>>>,
-  EM_CRAYNV2 = 172	<<<Cray Inc. NV2 vector architecture>>>,
-  EM_RX = 173		<<<Renesas RX family>>>,
-  EM_METAG = 174	<<<Imagination Technologies META processor architecture>>>,
-  EM_MCST_ELBRUS = 175	<<<MCST Elbrus general purpose hardware architecture>>>,
-  EM_ECOG16 = 176	<<<Cyan Technology eCOG16 family>>>,
-  EM_CR16 = 177		<<<National Semiconductor CompactRISC CR16 16-bit
-                     	   microprocessor>>>,
-  EM_ETPU = 178		<<<Freescale Extended Time Processing Unit>>>,
-  EM_SLE9X = 179	<<<Infineon Technologies SLE9X core>>>,
-  EM_L10M = 180		<<<Intel L10M>>>,
-  EM_K10M = 181		<<<Intel K10M>>>,
+  /** STMicroelectronics 64bit VLIW Data Signal Processor */
+  EM_MMDSP_PLUS = 160,
+  /** Cypress M8C microprocessor */
+  EM_CYPRESS_M8C = 161,
+  /** Renesas R32C series microprocessors */
+  EM_R32C = 162,
+  /** NXP Semiconductors TriMedia architecture family */
+  EM_TRIMEDIA = 163,
+  /** QUALCOMM DSP6 Processor */
+  EM_QDSP6 = 164,
+  /** Intel 8051 and variants */
+  EM_8051 = 165,
+  /** STMicroelectronics STxP7x family of configurable and extensible
+      RISC processors.  */
+  EM_STXP7X = 166,
+  /** Andes Technology compact code size embedded RISC processor
+      family.  */
+    EM_NDS32 = 167,                        
+  /** Cyan Technology eCOG1X family */
+  EM_ECOG1 = 168,
+  /** Cyan Technology eCOG1X family */
+  EM_ECOG1X = 168,
+  /** Dallas Semiconductor MAXQ30 Core Micro-controllers */
+  EM_MAXQ30 = 169,
+  /** New Japan Radio (NJR) 16-bit DSP Processor */
+  EM_XIMO16 = 170,
+  /** M2000 Reconfigurable RISC Microprocessor */
+  EM_MANIK = 171,
+  /** Cray Inc. NV2 vector architecture */
+  EM_CRAYNV2 = 172,
+  /** Renesas RX family */
+  EM_RX = 173,
+  /** Imagination Technologies META processor architecture */
+  EM_METAG = 174,
+  /** MCST Elbrus general purpose hardware architecture */
+  EM_MCST_ELBRUS = 175,
+  /** Cyan Technology eCOG16 family */
+  EM_ECOG16 = 176,
+  /** National Semiconductor CompactRISC CR16 16-bit
+      microprocessor.  */
+  EM_CR16 = 177,
+  /** Freescale Extended Time Processing Unit */
+  EM_ETPU = 178
+  /** Infineon Technologies SLE9X core */
+  EM_SLE9X = 179,
+  /** Intel L10M */
+  EM_L10M = 180,
+  /** Intel K10M */
+  EM_K10M = 181,
   /* 182 is reserved.  */
-  EM_AARCH64 = 183	<<<ARM 64-bit architecture (AARCH64)>>>,
+  /** ARM 64-bit architecture (AARCH64) */
+  EM_AARCH64 = 183,
   /* 184 is reserved.  */
-  EM_AVR32 = 185	<<<Atmel Corporation 32-bit microprocessor family>>>,
-  EM_STM8 = 186		<<<STMicroeletronics STM8 8-bit microcontroller>>>,
-  EM_TILE64 = 187	<<<Tilera TILE64 multicore architecture family>>>,
-  EM_TILEPRO = 188	<<<Tilera TILEPro multicore architecture family>>>,
-  EM_MICROBLAZE = 189	<<<Xilinx MicroBlaze 32-bit RISC soft processor core>>>,
-  EM_CUDA = 190		<<<NVIDIA CUDA architecture>>>,
-  EM_TILEGX = 191	<<<Tilera TILE-Gx multicore architecture family>>>,
-  EM_CLOUDSHIELD = 192	<<<CloudShield architecture family>>>,
-  EM_COREA_1ST = 193	<<<KIPO-KAIST Core-A 1st generation processor family>>>,
-  EM_COREA_2ND = 194	<<<KIPO-KAIST Core-A 2nd generation processor family>>>,
-  EM_ARC_COMPACT2 = 195	<<<Synopsys ARCompact V2>>>,
-  EM_OPEN8 = 196	<<<Open8 8-bit RISC soft processor core>>>,
-  EM_RL78 = 197		<<<Renesas RL78 family>>>,
-  EM_VIDEOCORE5 = 198	<<<Broadcom VideoCore V processor>>>,
-  EM_78KOR = 199	<<<Renesas 78KOR family>>>,
-  EM_56800EX = 200	<<<Freescale 56800EX Digital Signal Controller (DSC)>>>,
-  EM_BA1 = 201		<<<Beyond BA1 CPU architecture>>>,
-  EM_BA2 = 202		<<<Beyond BA2 CPU architecture>>>,
-  EM_XCORE = 203	<<<XMOS xCORE processor family>>>,
-  EM_MCHP_PIC = 204	<<<Microchip 8-bit PIC(r) family>>>,
-  EM_INTEL205 = 205	<<<Reserved by Intel>>>,
-  EM_INTEL206 = 206	<<<Reserved by Intel>>>,
-  EM_INTEL207 = 207	<<<Reserved by Intel>>>,
-  EM_INTEL208 = 208	<<<Reserved by Intel>>>,
-  EM_INTEL209 = 209	<<<Reserved by Intel>>>,
-  EM_KM32 = 210		<<<KM211 KM32 32-bit processor>>>,
-  EM_KMX32 = 211	<<<KM211 KMX32 32-bit processor>>>,
-  EM_KMX16 = 212	<<<KM211 KMX16 16-bit processor>>>,
-  EM_KMX8 = 213		<<<KM211 KMX8 8-bit processor>>>,
-  EM_KVARC = 214	<<<KM211 KVARC processor>>>,
-  EM_CDP = 215		<<<Paneve CDP architecture family>>>,
-  EM_COGE = 216		<<<Cognitive Smart Memory Processor>>>,
-  EM_COOL = 217		<<<Bluechip Systems CoolEngine>>>,
-  EM_NORC = 218		<<<Nanoradio Optimized RISC>>>,
-  EM_CSR_KALIMBA  = 219	<<<CSR Kalimba architecture family>>>,
-  EM_Z80  = 220		<<<Zilog Z80>>>,
-  EM_VISIUM  = 221	<<<Controls and Data Services VISIUMcore processor>>>,
-
-  EM_FT32  = 222	<<< FTDI Chip FT32 high performance 32-bit
-                     	    RISC architecture.  >>>,
-
-  EM_MOXIE = 223	<<<Moxie processor family>>>,
-  EM_AMDGPU = 224	<<<AMD GPU architecture>>>,
+  /** Atmel Corporation 32-bit microprocessor family */
+  EM_AVR32 = 185,
+  /** STMicroeletronics STM8 8-bit microcontroller */
+  EM_STM8 = 186,
+  /** Tilera TILE64 multicore architecture family */
+  EM_TILE64 = 187,
+  /** Tilera TILEPro multicore architecture family */
+  EM_TILEPRO = 188,
+  /** Xilinx MicroBlaze 32-bit RISC soft processor core */
+  EM_MICROBLAZE = 189,
+  /** NVIDIA CUDA architecture */
+  EM_CUDA = 190,
+  /** Tilera TILE-Gx multicore architecture family */
+  EM_TILEGX = 191,
+  /** CloudShield architecture family */
+  EM_CLOUDSHIELD = 192,
+  /** KIPO-KAIST Core-A 1st generation processor family */
+  EM_COREA_1ST = 193,
+  /** KIPO-KAIST Core-A 2nd generation processor family */
+  EM_COREA_2ND = 194,
+  /** Synopsys ARCompact V2 */
+  EM_ARC_COMPACT2 = 195,
+  /** Open8 8-bit RISC soft processor core */
+  EM_OPEN8 = 196,
+  /** Renesas RL78 family */
+  EM_RL78 = 197,
+  /** Broadcom VideoCore V processor */
+  EM_VIDEOCORE5 = 198,
+  /** Renesas 78KOR family */
+  EM_78KOR = 199,
+  /** Freescale 56800EX Digital Signal Controller (DSC) */
+  EM_56800EX = 200,
+  /** Beyond BA1 CPU architecture */
+  EM_BA1 = 201,
+  /** Beyond BA2 CPU architecture */
+  EM_BA2 = 202,
+  /** XMOS xCORE processor family */
+  EM_XCORE = 203,
+  /** Microchip 8-bit PIC(r) family */
+  EM_MCHP_PIC = 204,
+  /** Reserved by Intel */
+  EM_INTEL205 = 205,
+  /** Reserved by Intel */
+  EM_INTEL206 = 206,
+  /** Reserved by Intel */
+  EM_INTEL207 = 207,
+  /** Reserved by Intel */
+  EM_INTEL208 = 208,
+  /** Reserved by Intel */
+  EM_INTEL209 = 209,
+  /** KM211 KM32 32-bit processor */
+  EM_KM32 = 210,
+  /** KM211 KMX32 32-bit processor */
+  EM_KMX32 = 211,
+  /** KM211 KMX16 16-bit processor */
+  EM_KMX16 = 212,
+  /** KM211 KMX8 8-bit processor */
+  EM_KMX8 = 213,
+  /** KM211 KVARC processor */
+  EM_KVARC = 214,
+  /** Paneve CDP architecture family */
+  EM_CDP = 215,
+  /** Cognitive Smart Memory Processor */
+  EM_COGE = 216,
+  /** Bluechip Systems CoolEngine */
+  EM_COOL = 217,
+  /** Nanoradio Optimized RISC */
+  EM_NORC = 218,
+  /** CSR Kalimba architecture family */
+  EM_CSR_KALIMBA  = 219,
+  /** Zilog Z80 */
+  EM_Z80  = 220,
+  /** Controls and Data Services VISIUMcore processor */
+  EM_VISIUM  = 221,
+  /**  FTDI Chip FT32 high performance 32-bit RISC architecture.  */
+  EM_FT32  = 222,
+  /** Moxie processor family */
+  EM_MOXIE = 223,
+  /** AMD GPU architecture */
+  EM_AMDGPU = 224,
   /* 225 - 242 are reserved.  */
-  EM_RISCV = 243	<<<RISC-V>>>
+  /** RISC-V */
+  EM_RISCV = 243
 };
 
-enum elf_e_version
+enum elf_word elf_e_version
 {
-  EV_NONE = 0		<<<Invalid version>>>,
-  EV_CURRENT = 1	<<<Current version>>>
+  /** Invalid version.  */
+  EV_NONE = 0,
+  /** Current version.  */
+  EV_CURRENT = 1
 };
 
-enum elf_sh_type
+enum elf_word elf_sh_type
 {
-  SHT_NULL = 0		<<<Inactive section>>>,
+  /** Inactive section.  */
+  SHT_NULL = 0,
 
-  <<< Section holds information defined by the program whose
-      format and meaning are determined solely by the program. >>>
-
+  /** Section holds information defined by the program whose format and
+      meaning are determined solely by the program.  */
   SHT_PROGBITS = 1,
 
-  SHT_SYMTAB = 2	<<<Section holds a symbol table>>>,
-  SHT_STRTAB = 3	<<<Section holds a string table>>>,
+  /** Section holds a symbol table.  */
+  SHT_SYMTAB = 2,
 
-  <<< Section holds relocation entries with explicit addens. >>>
+  /** Section holds a string table.  */
+  SHT_STRTAB = 3,
 
+  /** Section holds relocation entries with explicit addends.  */
   SHT_RELA = 4,
 
-  SHT_HASH = 5		<<<Section holds a symbol hash table>>>,
-  SHT_DYNAMIC = 6	<<<Section holds the dynamic section>>>,
+  /** Section holds a symbol hash table.  */
+  SHT_HASH = 5,
 
-  <<< Section holds information that marks the file in some way. >>>
+  /** Section holds the dynamic section.  */
+  SHT_DYNAMIC = 6,
 
+  /** Section holds information that marks the file in some way.  */
   SHT_NOTE = 7,
 
-  <<< Section occupies no space in the file but otherwise resembles
-      STH_PROGBITS. >>>
-
+  /** Section occupies no space in the file but otherwise resembles
+      SHT_PROGBITS.  */
   SHT_NOBITS = 8,
 
-  <<< Section contains relocation entries without explicit
-      addends. >>>
-
+  /** Section contains relocation entries without explicit
+      addends.  */
   SHT_REL = 9,
 
-  SHT_SHLIB = 10	<<<Section type reserved with undefined semantics>>>,
-  SHT_DYNSYM = 11	<<<Section holds a symbol table>>>,
+  /** Section type reserved with undefined semantics.  */
+  SHT_SHLIB = 10,
 
-  <<< Section contains an array of pointers to initialization
-      functions. >>>
+  /** Section holds a symbol table.  */
+  SHT_DYNSYM = 11,
 
+  /* Note that entries 12 and 13 are unused.  */
+    
+  /** Section contains an array of pointers to initialization
+      functions.  */
   SHT_INIT_ARRAY = 14,
 
-  <<< Section contains an array of pointers to termination
-      functions. >>>
-
+  /** Section contains an array of pointers to termination
+      functions.  */
   SHT_FINI_ARRAY = 15,
 
-  <<< Section contains an array of pointers to functions that are
-      invoked before all other initialization functions. >>>
-
+  /** Section contains an array of pointers to functions that are
+      invoked before all other initialization functions.  */
   SHT_PREINIT_ARRAY = 16,
 
-  SHT_GROUP = 17	<<<Section defines a section group>>>,
-  SHT_SYMTAB_SHNDX = 18	<<<Section is associated with a symbol table section>>>,
-  SHT_LOOS = 0x60000000	<<<Operating system-specific>>>,
-  SHT_HIOS = 0x6fffffff	<<<Operating system-specific>>>,
-  SHT_LOPROC = 0x70000000 <<<Processor-specific>>>,
-  SHT_HIPROC = 0x7fffffff <<<Processor-specific>>>,
-  SHT_LOUSER = 0x80000000 <<<Reserved for application programs>>>,
-  SHT_HIUSER = 0xffffffff <<<Reserved for application programs>>>
+  /** Section defines a section group.  */
+  SHT_GROUP = 17,
+
+  /** Section is associated with a symbol table section.  */
+  SHT_SYMTAB_SHNDX = 18,
+
+  /** Begin of operating system-specific range. */
+  SHT_LOOS = 0x60000000,
+
+  /** End of operating system-specific range.  */
+  SHT_HIOS = 0x6fffffff,
+
+  /** Begin of processor-specific range.  */
+  SHT_LOPROC = 0x70000000,
+
+  /** End of processor-specific range.  */
+  SHT_HIPROC = 0x7fffffff,
+
+  /** Begin of range resreved for application programs.  */
+  SHT_LOUSER = 0x80000000,
+
+  /** End of range reserved for application programs.  */
+  SHT_HIUSER = 0xffffffff
 };
 
-enum elf_sh_flags
+bitmask elf_xword elf_sh_flags
 {
-  <<< Section contains data that should be writable during
-      process execution.  >>>
-
+  /** Section contains data that should be writable during process
+      execution.  */
   SHF_WRITE = 0x1,
 
-  <<< Section occupies memory during process execution.  >>>
-
+  /** Section occupies memory during process execution.  */
   SHF_ALLOC = 0x2,
 
-  <<<Section contains executable machine instructions>>>
-
+  /** Section contains executable machine instructions.  */
   SHF_EXECINSTR = 0x4,
 
-  <<< The data in the section may be merged to eliminate
-      duplication.  >>>
-
+  /** The data in the section may be merged to eliminate
+      duplication.  */
   SHF_MERGE = 0x10,
 
-  <<< The data elements in the section consist of null-terminate
-      character strings.  >>>
-
+  /** The data elements in the section consist of null-terminate
+      character strings.  */
   SHF_STRINGS = 0x20,
 
-  <<< The sh_info field of this section header holds a section
-      header table index.  >>>
-
+  /** The sh_info field of this section header holds a section header
+      table index.  */
   SHF_INFO_LINK = 0x40,
 
-  <<< Special ordering requiremetns for link editors.  >>>
-
+  /** Special ordering requiremetns for link editors.  */
   SHF_LINK_ORDER = 0x80,
 
-  <<< This section equires special OS-specific processing, beyond
-      standard linking rules, to avoid incorrect behavior.  >>>
-
+  /** This section equires special OS-specific processing, beyond
+      standard linking rules, to avoid incorrect behavior.  */
   SHF_OS_NONCONFORMING = 0x100,
 
-  SHF_GROUP = 0x200		<<<This section is a member of a section group>>>,
-  SHF_TLS = 0x400		<<<This section holds thread-local storage>>>,
-  SHF_COMPRESSED = 0x800     	<<<This section holds compressed data>>>,
-  SHF_MASKOS = 0x0ff00000   	<<<Operating system-specific flags>>>,
-  SHF_MASKPROC = 0xf0000000 	<<<Processor-specific flags>>>
+  /** This section is a member of a section group.  */
+  SHF_GROUP = 0x200,
+
+  /** This section holds thread-local storage.  */
+  SHF_TLS = 0x400,
+
+  /** This section holds compressed data.  */
+  SHF_COMPRESSED = 0x800,
+
+  /** Operating system-specific flags.  */
+  SHF_MASKOS = 0x0ff00000,
+
+  /** Processor-specific flags.  */
+  SHF_MASKPROC = 0xf0000000
 };
 
-enum elf_p_type
+enum elf_word elf_p_type
 {
-  PT_NULL = 0		<<<Array element is unused>>>,
-  PT_LOAD = 1		<<<Loadable segment>>>,
-  PT_DYNAMIC = 2	<<<Dynamic linking information>>>,
-  PT_INTERP = 3		<<<Location and size of a null-terminated
-			   path name to invoke as an interpreter>>>,
-  PT_NOTE = 4		<<<Location and size of auxiliary
-			<<<information>>>,
-  PT_SHLIB = 5		<<<Reserved.  Unspecified semantics>>>,
-  PT_PHDR = 6		<<<Location and size of the program header
-                           table itself>>>,
-  PT_TLS = 7		<<<Thread-Local storage template>>>,
-  PT_LOOS = 0x60000000	<<<Operating system-specific>>>,
-  PT_HIOS = 0x6fffffff	<<<Operating system-specific>>>,
-  PT_LOPROC = 0x70000000 <<<Processor-specific>>>,
-  PT_HIPROC = 0x7fffffff <<<Processor-specific>>>
+  /** Array element is unused.  */
+  PT_NULL = 0,
+
+  /** Loadable segment.  */
+  PT_LOAD = 1,
+
+  /** Dynamic linking information.  */
+  PT_DYNAMIC = 2,
+
+  /** Location and size of a null-terminated path name to invoke as an
+      interpreter.  */
+  PT_INTERP = 3,
+
+  /** Location and size of auxiliary information.  */
+  PT_NOTE = 4,
+
+  /** Reserved.  Unspecified semantics.  */
+  PT_SHLIB = 5,
+
+  /** Location and size of the program header table itself.  */
+  PT_PHDR = 6,
+
+  /** Thread-local storage template.  */
+  PT_TLS = 7,
+
+  /** Begin of operating system-specific range.  */
+  PT_LOOS = 0x60000000,
+
+  /** End of operating system-specific range.  */
+  PT_HIOS = 0x6fffffff,
+
+  /** Begin of processor-specific range.  */
+  PT_LOPROC = 0x70000000,
+
+  /** End of processor-specific range.  */
+  PT_HIPROC = 0x7fffffff
 };
 
-enum elf_p_flags
+bitmask elf_word elf_p_flags
 {
-  PF_X = 0x1		<<<Execute>>>,
-  PF_W = 0x2		<<<Write>>>,
-  PF_R = 0x4		<<<Read>>>,
-  PF_MASKOS = 0xff00000	<<<Unspecified>>>,
-  PF_MASKPROC = 0xf0000000 <<<Unspecified>>>
+  /** Segment is executable.  */
+  PF_X = 0x1,
+
+  /** Segment is writeable.  */
+  PF_W = 0x2,
+
+  /** Segment is readable.  */
+  PF_R = 0x4,
+
+  /** OS-specific flags mask.  */
+  PF_MASKOS = 0xff00000,
+
+  /** Processor-specific flags mask.  */
+  PF_MASKPROC = 0xf0000000
 };
 
-enum elf_ch_type
+enum elf_word elf_ch_type
 {
-  ELFCOMPRESS_ZLIB = 1		<<<ZLIB algorithm>>>,
-  ELFCOMPRESS_LOOS = 0x60000000	<<<Operating system-specific>>>,
-  ELFCOMPRESS_HIOS = 0x6fffffff	<<<Operating system-specific>>>,
-  ELFCOMPRESS_LOPROC = 0x70000000 <<<Processor-specific>>>,
-  ELFCOMPRESS_HIPROC = 0x7fffffff <<<Processor-specific>>>
+  /** Section is compressed with ZLIB.  */
+  ELFCOMPRESS_ZLIB = 1,
+
+  /** Begin of operating system-specific compression range.  */
+  ELFCOMPRESS_LOOS = 0x60000000,
+
+  /** End of operating system-specific compression range.  */
+  ELFCOMPRESS_HIOS = 0x6fffffff,
+
+  /** Begin of processor-specific compression range.  */
+  ELFCOMPRESS_LOPROC = 0x70000000,
+
+  /** End of processo-specific compression range.  */
+  ELFCOMPRESS_HIPROC = 0x7fffffff
 };
 
-/*
-	#define ELF32_R_SYM(i)	((i) >>> 8)
-	#define ELF32_R_TYPE(i)   ((unsigned char)(i))
-	#define ELF32_R_INFO(s,t) (((s) <<< 8)+(unsigned char)(t))
-   
-               sym     |type
-        |----|----|----|----|
-
-	#define ELF64_R_SYM(i)    ((i) >>> 32)
-	#define ELF64_R_TYPE(i)   ((i) & 0xffffffffL)
-	#define ELF64_R_INFO(s,t) (((s) <<< 32)+((t) & 0xffffffffL))
-
-                sym         |        type 
-        |----|----|----|----|----|----|----|----|
-
- */
-
-struct elf_rel <<<ELF relocation>>>
+/** ELF relocation.  */
+struct elf_rel
 {
-  elf_addr r_offset	<<<Relocation location>>>;
+  /** Relocation location.  */
+  elf_addr r_offset;
 
-  /* info_start = .; */
-  elf_xword r_info	<<<Relocation info: symbol + type>>>;
+  /** Relocation info: symbol + type.  */
+  elf_xword r_info;
 
-  /* . -= info_start; */
-  unsigned int r_sym : elf_r_sym_size 	<<<Relocation symbol>>>;
-  unsigned int r_type : elf_r_type_size	<<<Relocation type>>>;
+  . -= sizeof (r_info);
+
+  /** Relocation symbol.  */
+  elf_r_sym r_sym;
+
+  /** Relocation type.  */
+  elf_r_type r_type;
+
+  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
-struct elf_rela <<<ELF relocation with addend>>>
+/** ELF relocation with addend.  */
+struct elf_rela
 {
-  elf_addr r_offset	<<<Relocation location>>>;
+  /** Relocation location.  */
+  elf_addr r_offset;
 
-  /* info_start = .; */
-  elf_xword r_info	<<<Relocation info: symbol + type>>>;
+  /** Relocation info: symbol + type.  */
+  elf_xword r_info;
 
-  /* . = info_start; */
-  unsigned int r_sym : elf_r_sym_size;	<<<Relocation symbol>>>
-  unsigned int r_type : elf_r_type_size;<<<Relocation type>>>
+  . -= sizeof (r_info);
 
-  /* assert (sizeof (elf_r_sym) + sizeof (elf_r_type) == sizeof (elf_xword)); */
+  /** Relocation symbol.  */
+  elf_r_sym r_sym;
 
-  elf_sxword r_addend	<<<
-                           Constant addend used to compute
-                           the value to be stored into the
-                           relocatable field.
-                        >>>;
+  /** Relocation type.  */
+  elf_r_type r_type;
+
+  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+
+  /** Constant addend used to compute the value to be stored into the
+      relocatable field.  */
+  elf_sxword r_addend;
 };
 
-struct elf_ident <<<ELF identification>>>
+/** ELF identification.  */
+struct elf_ident
 {
-  byte ei_mag[4];
+  uint8 ei_mag[4] = {0x7f, 'E', 'L', 'F'};
 
-  enum elf_ei_class ei_class : 8 <<<File class>>>;
-  byte ei_data            <<<Data encoding>>>;
-  byte ei_version         <<<File version>>>;
-  byte ei_osabi           <<<Operating system/ABI identification>>>;
-  byte ei_abiversion      <<<ABI version>>>;
-  byte ei_pad             <<<Start of padding bytes>>>;
+  /** File class.  */
+  enum elf_ei_class ei_class;
+
+  /** Data encoding.  */
+  uint8 ei_data;
+
+  /** File version.  */
+  uint8 ei_version;
+
+  /** Operating system/ABI identification.  */
+  uint8 ei_osabi;
+
+  /** ABI version.  */
+  uint8 ei_abiversion;
+
+  /** Start of padding bytes.  */
+  uint8 ei_pad;
   . = 16;
-  byte ei_nident          <<<Size of e_ident, in bytes>>>;
+
+  /* Size of e_ident, in bytes.  */
+  uint8 ei_nident;
 };
 
-struct elf_ehdr <<<ELF header>>>
-{
-  <<< Magic number and machine-independent data for
-      decoding the file. >>>
 
+/** ELF header.  */
+struct elf_ehdr
+{
+  /** Magic number and machine-independent data for decoding the
+      file.  */
   struct elf_ident e_ident;
 
-  enum elf_e_type e_type : 16	    <<<File type>>>;
-  enum elf_e_machine e_machine : 16 <<<Required architecture>>>;
-  enum elf_e_version e_version : 32 <<<Object file version>>>;
+  /** File type.  */
+  enum elf_e_type e_type :
 
-  <<< Virtual address of entry point.  If the file has no
-      associated entry point, holds zero.  >>>
+    /* Relocatable files require a section header table.  */
+    e_type == ET_REL => e_shnum > 0
+    /* Executable files require a program header table.  */
+    && e_type == ET_EXEC => e_phnum > 0
+  ;
 
+  /** Required architecture.  */
+  enum elf_e_machine e_machine;
+
+  /** Object file version.  */
+  enum elf_e_version e_version;
+
+  /** Virtual address of entry point.  If the file has no associated
+      entry point, holds zero.  */
   elf_xword e_entry;
 
-  <<< Program header table's file offset in bytes.  If the file
-      has no program header table, holds zero.  >>>
-
+  /** Program header table's file offset in bytes.  If the file has no
+      program header table, holds zero.  */
   elf_xword e_phoff;
 
-  <<< Section header table's file offset in bytes.  If the file
-      has no section header table, holds zero.  >>>
-
+  /** Section header table's file offset in bytes.  If the file has no
+      section header table, holds zero.  */
   elf_xword e_shoff;
 
-  elf_word  e_flags;    /* XXX: this is machine-specific.  */
-  elf_half  e_ehsize    <<<ELF header size in bytes>>>;
+  /** XXX: this is machine-specific.  */
+  elf_word  e_flags;
 
-  <<< Size in bytes of one entry in the file's program header
-      table.  >>>
+  /** ELF header size in bytes.  */
+  elf_half  e_ehsize; /* XXX  = sizeof (struct elf_ehdr);*/
 
-  elf_half  e_phentsize;
+  /** Size in bytes of one entry in the file's program header
+      table.  */
+  elf_half  e_phentsize; /* XXX = sizeof (struct elf_phdr); */
 
-  <<< Number of entries in the program header table.  If the file
-      has no program header table, holds zero.  >>>
-
+  /** Number of entries in the program header table.  If the file has
+      no program header table, holds zero.  */
   elf_half  e_phnum;
 
-  <<< Size in bytes of one entry in the file's section header
-      table.  >>>
+  /** Size in bytes of one entry in the file's section header
+      table.  */
+  elf_half  e_shentsize; /* XXX  = sizeof (struct elf_shdr); */
 
-  elf_half  e_shentsize;
-
-  <<< Number of entries in the section header table.  If the file
-      has no section header table, holds zero.  >>>
-
+  /** Number of entries in the section header table.  If the file has
+      no section header table, holds zero.  */
   elf_half  e_shnum;
 
-  <<< Section header table index of the entry associated with
-      the section name string table, or SHN_UNDEF.  >>>
-
+  /** Section header table index of the entry associated with the
+      section name string table, or SHN_UNDEF.  */
   elf_half  e_shstrndx;
 };
 
-struct elf_phdr <<<ELF segment>>>
+/** ELF program header.  */
+struct elf_phdr (struct elf_ehdr ehdr)
 {
-  enum elf_p_type p_type : 32	<<<Segment type>>>;
-  enum elf_p_flags p_flags : 32	<<<Section flags>>>;
+  /** Segment type.  */
+  enum elf_p_type p_type :
+
+    /* SHT_GROUP sections should only appear in relocatable
+       objects.  */
+    p_type == SHT_GROUP => ehdr.e_type == ET_REL
+  ;
+
+  /** This member gives flags relevant to the segment.  */
+  bitmask elf_p_flags p_flags;
+
+  /** Offset into the beginning of the file at which the first byte of
+      the segment resides.  */
   elf_off p_offset;
+
+  /** Virtual address at which the first byte of the segment resides
+      in memory.  */
   elf_addr p_vaddr;
+
+  /** On systems for which physical addressing is relevant, this
+      member is reserved for the segment's physical address.  Becase
+      System V ignores physical addressing for application programs,
+      this member has unspecified contents for executable files and
+      shared objects.  */
   elf_addr p_paddr;
+
+  /** This member gives the number of bytes in the file image of the
+      segment; it may be zero.  */
   elf_xword p_filesz;
+
+  /** This member gives the number of bytes in the memory image of the
+      segment; it may be zero.  */
   elf_xword p_memsz;
+
+  /** This member gives the value to which the segments are aligned in
+      memory and in the file.  VAlues 0 and 1 mean no alignment is
+      required.  Otherwise, p_align should be a positive, integral
+      power of 2, and p_vaddr should equal p_offset, modulo
+      p_align.  */
   elf_xword p_align;
 };
 
-struct elf_shdr <<<ELF section header>>>
+/** ELF section header.  */
+struct elf_shdr (struct elf_ehdr ehdr)
 {
-   <<< Index of the section's name into the section header
-       string table section. >>>
-
-   elf_word  sh_name;
+  /** Index of the section's name into the section header string table
+      section.  */
+  elf_word sh_name
+    [[read=elf_str_table (elf, sh_name)]];
     
-   enum elf_sh_type  sh_type : 32 <<<Section type>>>;
-   enum elf_sh_flags sh_flags : sizeof (elf_xword) * 8
-     				  <<<Section flags>>>;
+  /** Section type.  */
+  enum elf_sh_type sh_type;
 
-   <<< If the section will appear in the memory image of a process,
-       this member gives the address at which the section's first
-       byte should reside.  Otherwise the member contains 0.  >>>
+  /** Section flags.  */
+  bitmask elf_sh_flags sh_flags;
 
-   elf_addr sh_addr;
+  /** If the section will appear in the memory image of a process,
+      this member gives the address at which the section's first byte
+      should reside.  Otherwise the member contains 0.  */
+  elf_addr sh_addr;
 
-   <<< Byte offset from the beginning of the file to the first byte
-       in the section.  For SHT_NOBITS sections, this is the
-       conceptual placement on the file.  >>>
+  /** Byte offset from the beginning of the file to the first byte in
+      the section.  For SHT_NOBITS sections, this is the conceptual
+      placement on the file.  */
+  elf_off sh_offset;
 
-   elf_off sh_offset;
-   
-   elf_xword sh_size    <<<Section size in bytes>>>;
-   elf_word  sh_link    <<<Section header table index link>>>;
+  /** Section size in bytes.  */
+  elf_xword sh_size;
 
-   <<< Extra inforamtion, whose interpretation depends on the
-       section type.  >>>
+  /** Section header table index link.  */
+  elf_word sh_link;
 
-   elf_word  sh_info;
+  /** Extra information, whose interpretation depends on the section
+      type.  */
+  elf_word  sh_info;
 
-   <<< Alignment constraint for the section. >>>
-   elf_xword sh_addralign;
+  /**  Alignment constraint for the section.  */
+  elf_xword sh_addralign;
 
-   <<< If the section holds a table of fixed-size entries, this
-       holds the size of each entry in bits.  Holds 0 if the section
-       does not hold a table of fixed-size entries.  >>>
-
-   elf_xword sh_entsize;
+  /** If the section holds a table of fixed-size entries, this holds
+      the size of each entry in bits.  Holds 0 if the section does not
+      hold a table of fixed-size entries.  */
+  elf_xword sh_entsize;
 };
 
 /* structs for the contents of certain ELF sections.  */
 
+/** ELF compressed section header.
+    Used in sections with SHF_COMPRESSED.  */
 struct elf_chdr
-<<<
-   ELF compressed section header.
-   Used in sections with SHF_COMPRESSED
->>>
 {
-  enum elf_ch_type ch_type : 32	<<< Compression algorithm. >>>;
-  elf_xword ch_size		<<< Size in bytes of the uncompressed data. >>>;
-  elf_xword ch_addralign	<<< Required alignment of the uncompressed data. >>>;
+  /** Compression algorithm.  */
+  enum elf_ch_type ch_type;
+
+  /** Size in bytes of the uncompressed data.  */
+  elf_xword ch_size;
+
+  /** Required alignment of the uncompressed data.  */
+  elf_xword ch_addralign;
 };
 
 /* Finally, the ELF object file itself.  */
 
-struct elf <<<ELF object file>>>
+/** ELF object file.  */
+struct elf
 {
-  /* The ELF header is always present, and it is always located at the
-  beginning of the object file.  */
-
-  struct elf_ehdr ehdr <<<ELF header>>>;
+  /** ELF header.   */
+  struct elf_ehdr ehdr :
+    sizeof (ehdr.e_ident) == ehdr.e_ident.ei_nident
+      && sizeof (ehdr) == ehdr.e_ehsize;
+  ;
 
   /* Both the section header table and the program header table are
      optional.  */
 
-  if (ehdr.e_shnum > 0)
-    {
-      . = ehdr.e_shoff;
-      struct elf_shdr shdr[ehdr.e_shnum] <<<ELF section header table>>>;
-    }
+  /** ELF section header table.  */
+ehdr.e_shoff:
+  struct elf_shdr shdr[ehdr.e_shnum] (ehdr) if ehdr.e_shnum > 0;
 
-  if (ehdr.e_phnum > 0)
-    {
-      . = ehdr.e_phoff;
-      struct elf_phdr phdr[ehdr.e_phnum] <<<ELF program header table>>>;
-    }
+  /** ELF program header table.
+     
+     Some entries describe process segments; others give supplementary
+     information and do not contribute to the process image.  */
+ehdr.e_phoff:
+  struct elf_phdr phdr[ehdr.e_phnum] (ehdr) if ehdr.e_phnum > 0;
 
-  /* The sections and segments are defined in terms of the contents of
-     the two tables defined above.  Note that sections and segments
-     usually overlap. */
+  /* The sections and segments themselves are defined in terms of the
+     contents of the two tables defined above.  Note that sections and
+     segments usually overlap. */
 
-  for (i = 0; i < ehdr.e_shnum; i++)
-    {
-      . = shdr[i].sh_offset;
-      byte section<i>[shdr[i].sh_size] <<<ELF section>>>;
-    }
+shdr[i].sh_offset:
+  struct elf_section section for i in 0..ehdr.e_shnum;
 
-  for (i = 0; i < ehdr.e_phnum; i++)
-    {
-      . = phdr[i].p_offset;
-      byte segment<i>[pdhr[i].p_size] <<<ELF segment>>>;
-    }
+phdr[i].p_offset:
+  struct elf_segment segment for i in 0..ehdr.e_phnum;
 };
-
 
 /* Integrity for struct elf:
 
      - Only one SHT_DYNAMIC section.
-     - SHT_GROUP sections should only appear in objects with
-       ehdr.e_type == ET_REL (relocatable objects).
-     - ET_REL requires a section header table.
-     - ET_EXEC requires a program header table.
      - Only one PT_INTERP segment in a file.
      - Only one PT_PHDR segment in a file.
-
-   Integrity for elf_ident:
-
-     - ei_mag[0] == 0x7f && ei_mag[1] == 'E'
-       && ei_mag[2] == 'L'  && ei_mag[3] == 'F'
-
-   Integrity for elf_ehdr:
-
-     - sizeof (e_ident) == e_ident.ei_nident
-       && sizeof (struct elf_header) == e_ehsize);
-
 */

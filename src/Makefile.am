@@ -17,6 +17,8 @@
 
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
+               pk-io.c pk-io.h \
+               pk-cmd.c pk-cmd.h \
                pkl-ast.h pkl-ast.c \
                pkl-tab.y pkl-lex.l \
                pkl-gen.h pkl-gen.c \

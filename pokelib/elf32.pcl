@@ -18,11 +18,11 @@
 
 include std;
 
-typedef unsigned int elf_addr;
-typedef unsigned int elf_off;
-typedef unsigned short elf_half;
-typedef unsigned int elf_word;
-typedef int elf_sword;
+typedef uint32 elf_addr;
+typedef uint32 elf_off;
+typedef uint16 elf_half;
+typedef uint32 elf_word;
+typedef int32  elf_sword;
 
 /* Note that the gABI doesn't define Elf32_XWord and Elf32_Sxword
    types, but we nevertheless define elf_xword and elf_sxword so we
@@ -31,22 +31,16 @@ typedef int elf_sword;
 typedef elf_word elf_xword;
 typedef elf_sword elf_sxword;
 
-typedef unsigned int elf_r_sym;
-typedef unsigned char elf_r_type;
-
-enum elf_constants
-{
-  elf_r_sym_size = 24,
-  elf_r_type_size = 8
-};
+typedef bit:24 elf_r_sym;
+typedef bit:8  elf_r_type;
 
 struct elf_sym
 {
   elf_word st_name;
   elf_addr st_value;
   elf_word st_size;
-  ubyte st_info;
-  ubyte st_other;
+  uint8 st_info;
+  uint8 st_other;
   elf_half st_shndx;
 };
 

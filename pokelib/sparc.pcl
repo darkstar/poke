@@ -16,7 +16,71 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+struct sparc_insn_call
+{
+   bit:30 disp30;
+};
 
+struct sparc_insn_sethi_branch
+{
+  . += 5;
+  bit:3 op2;
+
+  . -= 5;
+  union
+  {
+    struct
+    {
+      bit:5 rd;
+      . += 3;
+      bit:22 imm22;
+    } xxx : op2 == XXX;
+
+    struct
+    {
+      bit:1 a;
+      bit:4 cond;
+      . += 3;
+      bit:22 disp22;
+    } yyy : op2 == YYY;
+
+    struct
+    {
+      bit:1 a;
+      bit:4 cond;
+      . += 3;
+      bit:1 cc1;
+      bit:1 cc0;
+      bit:1 p;
+      bit:19 disp19;    
+    } zzz : op2 == ZZZ;
+
+    struct
+    {
+      bit:1 a;
+      bit:1 zero = 0;
+      bit:3 rcond;
+      . += 3;
+      bit:2 d16hi;
+      bit:1 p;
+      bit:5 rs1;
+      bit:14 d16lo;      
+    } vvv : op2 == VVV;
+
+  } insn;
+};
+
+struct sparc_insn
+{
+  bit:2  op;
+
+  union
+  {
+     struct sparc_insn_sethi_branch sethi_branch : op = 0x0;
+     struct sparc_insn_call call : op == 0x1;
+     struct sparc_insn_other other;
+  } insn;
+};
 
 
 /*

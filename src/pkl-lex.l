@@ -42,6 +42,7 @@
 #include <pkl-ast.h>
 #include <pkl-parser.h>
 #include <pkl-tab.h>
+#include "pk-cmd.h"
 #include "readline.h"
 #if defined HAVE_READLINE_HISTORY_H
 # include <readline/history.h>
@@ -84,9 +85,10 @@ pkl_read (FILE *file, char *buf, size_t max,
       if (len > max - 2)
         len = max - 2;
 
-      if (strncmp (line, ":hello", strlen (":hello")) == 0)
+      if (strncmp (line, "dump", strlen ("dump")) == 0)
         {
-          printf ("hello!\n");
+          if (!pk_cmd_dump (line + strlen ("dump")))
+            printf ("invalid command.\n");
           return YY_NULL;
         }
 

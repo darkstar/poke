@@ -53,14 +53,15 @@ Tutorial
 Basic Usage
 * Commands::
 
-The Poke Language
-* Values::			Contents of variables.
+Poke Templates
+* Values::                      Integers, characters and strings.
+* Constants::			Named values.
 * Variables::			Poke variables.
-* Integers::
-* Arrays::
+* Enumerations::		Collections of related constants.
+* Bitmasks::                    Sets of or-ed values.
 * Structs::
-* Addresses::
-* Loops::
+@c * Unions::
+@c * Arrays::
 * Examples::			Examples of poke programs.
 
 Internals
@@ -77,50 +78,208 @@ Indexes
 @chapter Commands
 
 @example
-:load
-:exit
-:info
-:print ?
-:peek  ?
-:poke  ?
+(poke) map 0x0, struct elf
+(poke) maps
+elf	struct elf	0x00000000
+(poke) dump elf.shdr[2]
+87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789abcdef
+000001b0: 6100 0000 0000 0000 3c00 0000 0000 0000  a.......<.......
+000001c0: 0400 0000 0000 0000 51e5 7464 0600 0000  ........Q.td....
+000001d0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000001e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000001f0: 0000 0000 0000 0000 1000 0000 0000 0000  ................
+(poke) peek 0x1b0+8
+0x3c
+(poke) poke 0x1b0+8, 0xff
+(poke) dump elf.shdr[2]
+87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789abcdef
+000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
+000001c0: 0400 0000 0000 0000 51e5 7464 0600 0000  ........Q.td....
+000001d0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000001e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+000001f0: 0000 0000 0000 0000 1000 0000 0000 0000  ................
+(poke) peek elf.shdr[0].sh_name, elf.shdr[0].sh_flags
+00000000: elf
+00000000:   shdr[0]
+00000000:     sh_name	0x000000000 ("foobar")
+00000000:     sh_flags	SHF_ALLOC (0x2) | SHF_WRITE (0x1)
+(poke) peek -i elf.shdr[0].sh_name, elf.shdr[0].sh_flags
+00000000: elf
+000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
+000001b0:   shdr[0]
+000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
+00000000:     sh_name	0x000000000 ("foobar")
+00000000:     sh_flags	SHF_ALLOC (0x2) | SHF_WRITE (0x1)
+(poke) poke elf.shdr[0].sh_flags, elf.shdr[0].sh_flags | SHF_GROUP
+(poke) tell
+000001b0
+(poke) seek 0
+(poke) tell
+00000000
+(poke) peek elf.e_ident
+00000000: elf
+00000000:  e_ident
+00000000:    ei_mag[0]	0x7f
+00000001:    ei_mag[1]	'E'
+00000002:    ei_mag[2]	'L'
+00000003:    ei_mag[3]	'F'
+00000004:    ei_class	ELFCLASS64 (0x1)
+00000008:    ei_data	1
+0000000b:    ei_version	2
+00000010:    ei_osabi	0
+00000018:    ei_abiversion	0
+0000001c:    ei_pad	0
+00000020:    ei_nident	0xab00ef
+(poke) poke elf.e_ident.ei_osabi, calculate_osabi()
+(poke) peek elf.e_ident.ei_osabi
+00000000: elf
+00000000:  e_ident
+00000010:    ei_osabi	3
+(poke)
 @end example
 
 @node Values
 @chapter Values
 
-The evaluation of both literals and expressions generates
-@dfn{values}.
+@menu
+* Integers::
+* Characters::
+* Strings::
+@end menu
+
+@node Integers
+@section Integers
+
+Integers can be expressed in several numeration bases:
 
 @table @emph
-@item NIL
-@item Integer numbers
-
-Numbers are multiple-precision.
-
-@item Strings
-
-Strings are... null-terminated?  No.
-
-@item Arrays
-@item Structs
-@end table
-
+@item Decimal numbers
 @example
-poke> struct foo @{ int i; int a[10]; struct bar s; @};
-poke> foo.i;  /* Builds a numeric value.  */
-poke> foo.a[2];  /* Builds a numeric value.  */
-poke> foo.a; /* Builds an array value.  */
-poke> foo; /* Builds a struct value.  */
-poke> foo.s; /* Builds a struct value.  */
-
-poke> 1; /* Builds a numeric value.  */
-poke> "foo"; /* Builds a string value.  */
-poke> @{10, 20, 30@}; /* Builds an array value.  */
-poke> @{10, "foo", 30@}; /* Likewise.  */
-poke> (struct foo) @{10, @{1,2,3,4@}, (struct bar) @{10@}@}  /* builds a struct value.  */
+[1-9][0-9]*
 @end example
 
-Kind of value to build depends on the _type_ of the expression.
+@item Octal numbers
+
+Prefix @code{0}.
+
+@example
+0[0-9]*
+@end example
+
+@item Hexadecimal numbers
+
+Prefix @code{0x} or @code{0X}.
+
+@example
+0x[0-9a-fA-F][0-9a-fA-F]*
+@end example
+
+@item Binary numbers
+
+Suffix @code{b} or @code{B}:
+
+@example
+[01][01_]*[bB]
+@end example
+@end table
+
+The character @code{_} can appear anywhere in a numeric literal other
+than leading them.  It is ignored, and it's purpose is to make it
+easier for programmers to read them:
+
+@example
+aconst = 0xf000_0000_0000_0000;
+@end example
+
+The type of a numeric literal is the smallest integer capable of
+holding it, starting with 32 bits, in steps of powers of two.
+
+@example
+2             /* Of type bit:32 or int */
+0xffff_ffff   /* Likewise.  */
+0x1_ffff_ffff /* Of type bit:64 or long */
+@end example
+
+@node Characters
+@section Characters
+
+Character literals are enclosed in @code{'} characters, and correspond
+to an ASCII character.
+
+@example
+'o' /* 0x6f */
+@end example
+
+The type of a character literal is @code{char}.
+
+@node Strings
+@section Strings
+
+String literals are enclosed in @code{"} characters, and correspond to
+zero-terminated ASCII-encoded strings.
+
+@example
+"You"  /* 0x59_6f_75_00 size 4 bytes */
+@end example
+
+The following escape sequences are supported inside string literals:
+
+@table @code
+@item \DDD
+Where @var{ddd} is a one to three digits octal number.  The escape
+sequence denotes the ASCII character having that code.  For example
+@code{\000} denotes the null character.
+@item \xHH
+Where @var{hh} is a one to two digits hexadecimal number.  The escape
+sequence denotes the ASCII character having that code.  For example
+@code{\x38} denotes the @code{8} character.
+@item \"
+Denotes a double quote in asciiz strings.
+@item \'
+Denotes a single quote in ascii strings.
+@item \n
+Denotes a new line character.
+@item \t
+Denotes an horizontal tab.
+@end table
+
+Consecutive string literals are concatenated:
+
+@example
+"foo " "bar"
+@end example
+
+is equivalent to:
+
+@example
+"foo bar"
+@end example
+
+@node Constants
+@chapter Constants
+
+Constants are named values which are known at compile time.  They can
+only be defined at the top-level, and their values never change.
+
+The definition of a constant has the following form:
+
+@example
+const @var{type} @var{name} = @var{val};
+@end example
+
+This declares a constant @var{name} of type @var{type}, with a value
+@var{val}.
+
+@var{val} should be a constant expression that can be converted to a
+value of type @var{type}.
+
+Examples:
+
+@example
+const int limit = 256;
+const string section_name = ".text";
+const char x = 'x';
+@end example
 
 @node Variables
 @chapter Variables
@@ -133,83 +292,130 @@ Scopes: global scope, struct scope, function scope.
 Variables don't need to be declared: they are defined the first time
 they are used in a given scope.
 
+Function arguments are variables whose scope is the function.
+
 Variables defined in inner scopes ghost variables with the same symbol
 defined in an outer scope.
 
 Poke variables are _not_ stored in addressable memory, and thus the
 operator & doesn't make sense for them.
 
-@node Integers
-@chapter Integers
-
-The character @code{_} can appear anywhere in a numeric literal other
-than leading them.  It is ignored, and it's purpose is to make it
-easier for programmers to read them:
+A variable can contain values of different types at different times:
 
 @example
-aconst = 0xf000_0000_0000_0000;
+i = 10;    /* Holds an integer.  */
+i = "foo"; /* But now it holds a string.  */
 @end example
 
-@node Arrays
-@chapter Arrays
+@node Enumerations
+@chapter Enumerations
 
-Arrays are collection of values, indexed by an integer.  The values
-contained in an array don't need to be of the same type: numbers,
-strings, arrays and structs can be intermixed.
-
-Like tuples in other programming languages.
-
-Array literals are constructed by placing the elements as a list
-enclosed in curly brackets.  The following example builds an array of
-three elements, each storing a number:
+Enumerations are collections of related constants.  They use the
+following syntax:
 
 @example
-a = @{10, 20, 30@}
+enum @var{type} @var{tag}
+@{
+   @var{enumerator1} [= @var{value1}],
+   @var{enumerator2} [= @var{value2}],
+   ...
+   @var{enumeratorN} [= @var{valueN}][,]
+@}
 @end example
 
-The elements can then be accessed using subscripts:
+Where:
+
+@table @var
+@item type
+Is the base type of the enumeration.  It should be an integer type.
+@item tag
+Is the name of the enumeration.  It should be unique in the global
+scope.
+@item enumeratorN
+Are the names of the enumerators.
+@item valueN
+Are initialization values.  They should be expressions evaluating to
+constant values valid for @var{type}.
+
+If an explicit initialization value is not specified for an
+enumerator, an implicit value is used.  The implicit value is
+initially @code{0}, and increased by one every time it is used.
+@end table
+
+An enumeration  must contain at least one enumerator.
+
+Enumerations do not provide its own lexical scope.  The enumerators
+should be unique in the global scope.  It is highly recommended to use
+prefixes to avoid conflicts.
+
+@node Bitmasks
+@chapter Bitmasks
 
 @example
-a[0] /* This is 10 */
-a[1] /* This is 20 */
-a[2] /* This is 30 */
+bitmask elf_xword elf_sh_flags
+@{
+  /** Section contains data that should be writable during process
+      execution.  */
+  SHF_WRITE = 0x1,
+
+  /** Section occupies memory during process execution.  */
+  SHF_ALLOC = 0x2,
+
+  /** Section contains executable machine instructions.  */
+  SHF_EXECINSTR = 0x4,
+@}
 @end example
-
-It is also possible to refer to specific array positions in
-initializers:
-
-@example
-a = @{10, .[2] = 30@};
-@end example
-
-The array contents are:
-
-@example
-@{10, 0, 30@}
-@end example
-
-Arrays are always passed by reference in function calls.
-
-Arrays elements are not necessarily stored in contiguous memory.
 
 @node Structs
 @chapter Structs
 
-@node Addresses
-@chapter Addresses
-
-@node Loops
-@chapter Loops
-
-Iterating over array contents: defines variable `i' in the scope of
-the following statement block (or single statement?):
+A struct defines the layout of an area in IO space.  They are defined
+as follows:
 
 @example
-for (i in @{10, 20, 30@})
- @{
-   print i;
- @}
+struct @var{tag} [@var{qualifiers}]
+@{
+  @var{field1};
+  @var{field2};
+  ...
+  @var{fieldN};
+@};
 @end example
+
+where @var{field1}..@var{fieldN} are the definitions of fields.  It is
+legal to have an empty struct, i.e. with no field defined.
+
+@var{qualifiers} is a list of optional qualifiers for the struct
+contents:
+
+@table @code
+@item lsb
+The default endianness of the struct contents is little-endian.
+@item msb
+The default endianness of the struct contents is big-endian.
+@end table
+
+Each field is defined as follows:
+
+@example
+[@var{label}:] [@var{qualifiers}] @var{type} @var{field}[: @var{constraint}];
+@end example
+
+where @var{label} is an optional offset relative to the beginning of
+the struct.  The field is located @var{label} bytes in the struct.
+
+@var{qualifiers} is a list of optional qualifiers for the field:
+
+@table @code
+@item lsb
+The contents of the field are stored in little-endian.
+@item msb
+The contents of the field are stored in big-endian.
+@end table
+
+@var{type} is the type of the field.  @var{field} is the name of the
+field, which must be unique in the containing struct.
+
 
 @node Examples
 @chapter Examples
