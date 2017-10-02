@@ -50,6 +50,8 @@ pk_io_close (void)
   if (pk_io_file && fclose (pk_io_file) != 0)
     perror (pk_io_filename);
   free (pk_io_filename);
+  pk_io_file = NULL;
+  pk_io_filename = NULL;
 }
 
 int
@@ -68,4 +70,10 @@ int
 pk_io_seek (pk_io_off offset, int whence)
 {
   return fseeko (pk_io_file, offset, whence);
+}
+
+int
+pk_io_p (void)
+{
+  return pk_io_file != NULL;
 }

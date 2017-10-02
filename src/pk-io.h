@@ -58,4 +58,8 @@ int pk_io_seek (pk_io_off offset, int whence);
 
 int pk_io_getc (void);
 
+/* Return 1 if there is an IO stream.  Return 0 otherwise.  */
+
+int pk_io_p (void);
+
 #endif /* ! PK_IO_H */

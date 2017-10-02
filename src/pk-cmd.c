@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <limits.h>
+#include <wordexp.h> /* For tilde-expansion.  */
 
 #include "poke.h"
 #include "pk-io.h"
@@ -80,6 +81,7 @@ pk_cmd_load (char *str)
   char *p;
   size_t i;
   char filename[NAME_MAX];
+  wordexp_t exp_result;
 
   p = skip_blanks (str);
 
@@ -90,6 +92,25 @@ pk_cmd_load (char *str)
   
   if (filename[0] == '\0')
     goto usage;
+
+  switch (wordexp (filename, &exp_result, 0))
+    {
+    case 0: /* Successful.  */
+      break;
+    case WRDE_NOSPACE:
+      wordfree (&exp_result);
+    default:
+      goto usage;
+    }
+
+  if (exp_result.we_wordc != 1)
+    {
+      wordfree (&exp_result);
+      goto usage;
+    }
+  
+  strcpy (filename, exp_result.we_wordv[0]);
+  wordfree (&exp_result);
 
   if (access (filename, R_OK) != 0)
     {
@@ -122,6 +143,14 @@ pk_cmd_dump (char *str)
   string[17] = '\0';
   pk_io_off cur, address, count, top;
 
+  /* This command requires an IO stream.  */
+
+  if (!pk_io_p ())
+    {
+      puts ("this command requires a loaded file");
+      return 0;
+    }
+  
   /* Parse arguments.  */
   p = skip_blanks (str);
 
@@ -160,7 +189,7 @@ pk_cmd_dump (char *str)
     goto usage;
   
   top = address + 0x10 * count;
-  
+
   /* Dump the requested address.  */
   
   pk_io_seek (address, PK_SEEK_SET);
