@@ -22,58 +22,166 @@
 #include <stdio.h>
 #include <gettext.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <assert.h>
+#include <xalloc.h>
 #define _(str) gettext (str)
 
-/* The current IO file.  */
+/* List of IO streams, and pointer to the current one.  */
 
-static FILE *pk_io_file;
-static char *pk_io_filename;
+static struct pk_io *ios;
+static struct pk_io *cur_io;
 
 int
 pk_io_open (const char *filename)
 {
-  pk_io_file = fopen (filename, "rb");
-  if (!pk_io_file)
+  const char *mode;
+  pk_io io;
+  FILE *f;
+  mode_t fmode = 0;
+
+  /* Open the requested file.  The open mode is read-write if
+     possible.  Otherwise read-only.  */
+
+  if (access (filename, R_OK | W_OK) != 0)
+    {
+      fmode |= O_RDONLY;
+      mode = "rb";
+    }
+  else
+    {
+      fmode |= O_RDWR;
+      mode = "r+b";
+    }
+  
+  f = fopen (filename, mode);
+  if (!f)
     {
       perror (filename);
       return 0;
     }
 
-  pk_io_filename = xstrdup (filename);
+  /* Allocate and initialize the new IO stream.  */
+  io = xmalloc (sizeof (struct pk_io));
+  io->next = NULL;
+  io->mode = fmode;
+  io->file = f;
+  io->filename = xstrdup (filename);
+
+  /* Add it to the list, and update the current stream.  */
+  if (ios == NULL)
+    ios = io;
+  else
+    {
+      io->next = ios;
+      ios = io;
+    }
+
+  cur_io = io;
   
   return 1;
 }
 
 void
-pk_io_close (void)
+pk_io_close (pk_io io)
 {
-  if (pk_io_file && fclose (pk_io_file) != 0)
-    perror (pk_io_filename);
-  free (pk_io_filename);
-  pk_io_file = NULL;
-  pk_io_filename = NULL;
+  struct pk_io *tmp;
+  
+  /* Close the file stream and free resources.  */
+  /* XXX: if not saved, ask before closing.  */
+  if (fclose (io->file) != 0)
+    perror (io->filename);
+  free (io->filename);
+
+  /* Unlink the IO from the list.  */
+
+  assert (ios != NULL); /* The list must contain at least io.  */
+
+  if (ios == io)
+    ios = ios->next;
+  else
+    {
+      for (tmp = ios; tmp->next != io; tmp = tmp->next)
+        {
+          tmp->next = io->next;
+          break;
+        }
+    }
+  free (io);
+  
+  /* Set the new current IO.  */
+  cur_io = ios;
 }
 
 int
 pk_io_getc (void)
 {
-  return fgetc (pk_io_file);
+  return fgetc (cur_io->file);
 }
 
 pk_io_off
-pk_io_tell (void)
+pk_io_tell (pk_io io)
 {
-  return ftello (pk_io_file);
+  return ftello (io->file);
 }
 
 int
-pk_io_seek (pk_io_off offset, int whence)
+pk_io_seek (pk_io io, pk_io_off offset, int whence)
 {
-  return fseeko (pk_io_file, offset, whence);
+  return fseeko (io->file, offset, whence);
 }
 
-int
-pk_io_p (void)
+pk_io
+pk_io_cur (void)
 {
-  return pk_io_file != NULL;
+  return cur_io;
+}
+
+void
+pk_io_set_cur (pk_io io)
+{
+  cur_io = io;
+}
+
+void
+pk_io_map (pk_io_map_fn cb, void *data)
+{
+  pk_io io;
+
+  for (io = ios; io; io = io->next)
+    (*cb) (io, data);
+}
+
+pk_io
+pk_io_search (const char *filename)
+{
+  pk_io io;
+
+  for (io = ios; io; io = io->next)
+    if (strcmp (io->filename, filename) == 0)
+      break;
+
+  return io;
+}
+
+pk_io
+pk_io_get (int n)
+{
+  pk_io io;
+  
+  if (n < 0)
+    return NULL;
+
+  for (io = ios; io && n > 0; n--, io = io->next)
+    ;
+
+  return io;
+}
+
+void
+pk_io_shutdown (void)
+{
+  /* Close and free all open IO streams.  */
+  while (ios)
+    pk_io_close (ios);
 }

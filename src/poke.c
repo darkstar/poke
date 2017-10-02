@@ -41,6 +41,12 @@
 
 int poke_interactive_p;
 
+/* This is used by commands to indicate the repl that it must
+   exit.  */
+
+int poke_exit_p;
+int poke_exit_code;
+
 /* Command line options management.  */
 
 enum
@@ -174,20 +180,20 @@ parse_args (int argc, char *argv[])
     }
 }
 
-static int
+static void
 repl ()
 {
   print_version ();
   puts ("");
 
-  while (1)
+  while (!poke_exit_p)
     {
       int ret;
       char *line;
 
       line = readline ("(poke) ");
       if (line == NULL)
-        /* Ctrl-D.  */
+        /* EOF in stdin (probably Ctrl-D).  */
         break;
 
       /* Ignore empty lines.  */
@@ -200,6 +206,7 @@ repl ()
 #endif
 
       ret = pk_cmd_exec (line);
+      free (line);
     }
 }
 
@@ -214,10 +221,10 @@ main (int argc, char *argv[])
 
   /* Enter the REPL.  */
   if (poke_interactive_p)
-    return repl ();
+    repl ();
 
   /* Cleanup.  */
-  pk_io_close ();
-  
-  return 0;
+  pk_io_shutdown ();
+
+  return poke_exit_code;
 }

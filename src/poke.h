@@ -20,5 +20,7 @@
 #define POKE_H
 
 extern int poke_interactive_p;
+extern int poke_exit_p;
+extern int poke_exit_code;
 
 #endif /* !POKE_H */

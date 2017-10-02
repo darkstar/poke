@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <limits.h>
+#include <fcntl.h>
 #include <wordexp.h> /* For tilde-expansion.  */
 
 #include "poke.h"
@@ -74,61 +75,98 @@ pk_atoi (char **p, long int *number)
 /* Commands follow.  */
 
 static int
-pk_cmd_load (char *str)
+pk_cmd_file (char *str)
 {
-  /* load FILENAME */
+  /* file FILENAME */
 
   char *p;
-  size_t i;
-  char filename[NAME_MAX];
-  wordexp_t exp_result;
 
   p = skip_blanks (str);
 
-  i = 0;
-  while (!isblank (*p) && *p != '\0')
-    filename[i++] = *(p++);
-  filename[i] = '\0';
-  
-  if (filename[0] == '\0')
-    goto usage;
-
-  switch (wordexp (filename, &exp_result, 0))
+  if (*p == '#')
     {
-    case 0: /* Successful.  */
-      break;
-    case WRDE_NOSPACE:
+      /* Switch to an already opened IO stream.  */
+
+      long int io_id = 0;
+      pk_io io;
+
+      p++;  /* Skip #  */
+      if (!pk_atoi (&p, &io_id))
+        goto usage;
+      p = skip_blanks (p);
+      if (*p != '\0')
+        goto usage;
+
+      io = pk_io_get (io_id);
+      if (io == NULL)
+        {
+          printf ("no such file #%d\n", io_id);
+          return 0;
+        }
+
+      pk_io_set_cur (io);
+    }
+  else
+    {
+      /* Create a new IO stream.  */
+      size_t i;
+      char filename[NAME_MAX];
+      wordexp_t exp_result;
+      
+      i = 0;
+      while (!isblank (*p) && *p != '\0')
+        filename[i++] = *(p++);
+      filename[i] = '\0';
+      
+      if (filename[0] == '\0')
+        goto usage;
+      
+      switch (wordexp (filename, &exp_result, 0))
+        {
+        case 0: /* Successful.  */
+          break;
+        case WRDE_NOSPACE:
+          wordfree (&exp_result);
+        default:
+          goto usage;
+        }
+      
+      if (exp_result.we_wordc != 1)
+        {
+          wordfree (&exp_result);
+          goto usage;
+        }
+      
+      strcpy (filename, exp_result.we_wordv[0]);
       wordfree (&exp_result);
-    default:
-      goto usage;
+      
+      if (access (filename, R_OK) != 0)
+        {
+          printf ("%s: file cannot be read\n", filename);
+          return 0;
+        }
+      
+      p = skip_blanks (p);
+      if (*p != '\0')
+        goto usage;
+
+      if (pk_io_search (filename) != NULL)
+        {
+          printf ("file %s already opened.  Use `file #N' to switch.\n",
+                  filename);
+          return 0;
+        }
+      
+      pk_io_open (filename);
     }
 
-  if (exp_result.we_wordc != 1)
-    {
-      wordfree (&exp_result);
-      goto usage;
-    }
-  
-  strcpy (filename, exp_result.we_wordv[0]);
-  wordfree (&exp_result);
-
-  if (access (filename, R_OK) != 0)
-    {
-      printf ("%s: file cannot be read\n", filename);
-      return 0;
-    }
-
-  p = skip_blanks (p);
-  if (*p != '\0')
-    goto usage;
-
-  pk_io_close ();
-  pk_io_open (filename);
+  if (poke_interactive_p)
+    printf ("current file is now %s\n", PK_IO_FILENAME (pk_io_cur ()));
 
   return 1;
 
  usage:
-  puts ("usage: load FILENAME");
+  puts ("usage: file (FILENAME|#ID)");
   return 0;
 }
 
@@ -145,7 +183,7 @@ pk_cmd_dump (char *str)
 
   /* This command requires an IO stream.  */
 
-  if (!pk_io_p ())
+  if (pk_io_cur () == NULL)
     {
       puts ("this command requires a loaded file");
       return 0;
@@ -157,7 +195,7 @@ pk_cmd_dump (char *str)
   /* Get the address.  */
   
   if (*p == '\0')
-    address = pk_io_tell ();
+    address = pk_io_tell (pk_io_cur ());
   else if (*p == ',')
     ;
   else
@@ -192,7 +230,7 @@ pk_cmd_dump (char *str)
 
   /* Dump the requested address.  */
   
-  pk_io_seek (address, PK_SEEK_SET);
+  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
   if (poke_interactive_p)
     printf ("%s87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF%s\n",
@@ -243,6 +281,87 @@ pk_cmd_dump (char *str)
 
 #define MAX_CMD_NAME 18
 
+static void
+pk_cmd_info_file (pk_io io, void *data)
+{
+  int *i = (int *) data;
+  printf ("%s#%d\t%s\t0x%08jx\t%s\n",
+          io == pk_io_cur () ? "* " : "  ",
+          (*i)++,
+          PK_IO_MODE (io) & O_RDWR ? "rw" : "r ",
+          pk_io_tell (io), PK_IO_FILENAME (io));
+}
+
+static int
+pk_cmd_info (char *str)
+{
+  /* info (files)  */
+
+  char *p;
+  size_t i;
+  char cmd_name[MAX_CMD_NAME];
+
+  /* Parse subcommand.  */
+  p = skip_blanks (str);
+  i = 0;
+  while (isalnum (*p) || *p == '_')
+    cmd_name[i++] = *(p++);
+  cmd_name[i] = '\0';
+
+  if (cmd_name[0] == '\0')
+    goto usage;
+  else if (strcmp (cmd_name, "files") == 0)
+    {
+      int id = 0;
+      printf ("  Id\tMode\tPosition\tFilename\n");
+      pk_io_map (pk_cmd_info_file, &id);
+    }
+  else
+    goto usage;
+  
+  return 1;
+  
+ usage:
+  puts ("usage: info (files)");
+  return 0;
+}
+
+static int
+pk_cmd_exit (char *str)
+{
+  /* exit CODE */
+
+  char *p;
+  long int code;
+
+  /* Parse arguments.  */
+  p = skip_blanks (str);
+
+  if (*p == '\0')
+    code = 0;
+  else
+    {
+      if (!pk_atoi (&p, &code))
+        goto usage;
+      p = skip_blanks (p);
+      if (*p != '\0')
+        goto usage;
+    }
+
+  if (poke_interactive_p)
+    {
+      /* XXX: if unsaved changes, ask and save.  */
+    }
+
+  poke_exit_p = 1;
+  poke_exit_code = code;
+  return 1;
+
+ usage:
+  puts ("usage: exit CODE");
+  return 0;
+}
+
 int
 pk_cmd_exec (char *str)
 {
@@ -267,10 +386,14 @@ pk_cmd_exec (char *str)
   ret = 0;
   if (cmd_name[0] == '\0')
     puts ("invalid command");
-  if (strcmp (cmd_name, "dump") == 0)
+  else if (strcmp (cmd_name, "dump") == 0)
     ret = pk_cmd_dump (p);
-  else if (strcmp (cmd_name, "load") == 0)
-    ret = pk_cmd_load (p);
+  else if (strcmp (cmd_name, "file") == 0)
+    ret = pk_cmd_file (p);
+  else if (strcmp (cmd_name, "info") == 0)
+    ret = pk_cmd_info (p);
+  else if (strcmp (cmd_name, "exit") == 0)
+    ret = pk_cmd_exit (p);
   else
     printf ("%s: command not found\n", cmd_name);
 

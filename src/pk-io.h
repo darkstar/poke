@@ -21,8 +21,7 @@
 
 #include <config.h>
 #include <stdio.h>
-
-/* Types and constants.  */
+#include <fcntl.h>
 
 #define PK_EOF EOF
 
@@ -30,36 +29,80 @@
 #define PK_SEEK_CUR SEEK_CUR
 #define PK_SEEK_END SEEK_END
 
+/* Offset into an IO stream.  */
 typedef off_t pk_io_off;
 
-/* Set FILENAME as the current IO stream and open it.  Return 0 if
-   there was an error opening the file, 1 otherwise.  */
+/* Type representing an IO stream, and accessor macros.  */
+
+#define PK_IO_FILE(io) ((io)->file)
+#define PK_IO_FILENAME(io) ((io)->filename)
+#define PK_IO_MODE(io) ((io)->mode)
+
+struct pk_io
+{
+  FILE *file;
+  char *filename;
+  mode_t mode;
+  /* XXX: status saved or not saved.  */
+
+  struct pk_io *next;
+};
+
+typedef struct pk_io *pk_io;
+
+/* Create an IO stream reading and writing to FILENAME and set it as
+   the current stream.  Return 0 if there was an error opening the
+   file, 1 otherwise.  */
 
 int pk_io_open (const char *filename);
 
-/* Close the IO stream and perform any other cleanup.  */
+/* Close the given IO stream and perform any other cleanup.  */
 
-void pk_io_close (void);
+void pk_io_close (pk_io io);
 
-/* Return the current position in the current IO stream.  Return -1 on
+/* Return the current position in the given IO stream.  Return -1 on
    error.  */
 
-pk_io_off pk_io_tell (void);
+pk_io_off pk_io_tell (pk_io io);
 
-/* Change the current IO position according to OFFSET and WHENCE.
-   WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR and PK_SEEK_END.
-   Return 0 on successful completion, and -1 on error.  */
+/* Change the current position in the given IO according to OFFSET and
+   WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR and
+   PK_SEEK_END.  Return 0 on successful completion, and -1 on
+   error.  */
 
-int pk_io_seek (pk_io_off offset, int whence);
+int pk_io_seek (pk_io io, pk_io_off offset, int whence);
 
-/* Read the next character from the IO stream and return it as an
-   unsigned char cast to an int, or PK_EOF on end of file or
+/* Read the next character from the current IO stream and return it as
+   an unsigned char cast to an int, or PK_EOF on end of file or
    error.  */
 
 int pk_io_getc (void);
 
-/* Return 1 if there is an IO stream.  Return 0 otherwise.  */
+/* Return the current IO stream.  */
 
-int pk_io_p (void);
+pk_io pk_io_cur (void);
+
+/* Set the current IO stream to IO.  */
+
+void pk_io_set_cur (pk_io io);
+
+/* Map over all the IO streams executing a handler.  */
+
+typedef void (*pk_io_map_fn) (pk_io io, void *data);
+void pk_io_map (pk_io_map_fn cb, void *data);
+
+/* Return the IO stream with the given filename.  Return NULL if no
+   such IO stream exists.  */
+
+pk_io pk_io_search (const char *filename);
+
+/* Return the Nth IO stream.  If N is negative or bigger than the
+   number of IO streams, return NULL.  */
+
+pk_io pk_io_get (int n);
+
+/* Shutdown the IO subsystem.  */
+
+void pk_io_shutdown (void);
 
 #endif /* ! PK_IO_H */
