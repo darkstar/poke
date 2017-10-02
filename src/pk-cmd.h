@@ -21,6 +21,6 @@
 
 #include <config.h>
 
-int pk_cmd_dump (const char *str);
+int pk_cmd_exec (char *str);
 
 #endif /* ! PK_H_CMD */

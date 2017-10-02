@@ -20,7 +20,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
 
+#include "poke.h"
 #include "pk-io.h"
 #include "pk-cmd.h"
 
@@ -34,46 +38,100 @@
 #define KMAG  "\x1B[35m"
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
-#define KBOLD "\033[1m"
-#define KNONE "\033[0m"
+#define KBOLD (poke_interactive_p ? "\033[1m" : "")
+#define KNONE (poke_interactive_p ? "\033[0m" : "")
 
-int
-pk_cmd_dump (const char *str)
+/* Convenience macros and functions for parsing.  */
+
+static inline char *
+skip_blanks (char *p)
+{
+  while (isblank (*p))
+    p++;
+  return p;
+}
+
+static inline int
+pk_atoi (char **p, long int *number)
+{
+  long int li;
+  char *end;
+
+  errno = 0;
+  li = strtol (*p, &end, 0);
+  if (errno != 0 && li == 0
+      || end == *p)
+    return 0;
+
+  *number = li;
+  *p = end;
+  return 1;
+}
+
+/* Commands follow.  */
+
+static int
+pk_cmd_dump (char *str)
 {
   int c = 0;
-  char string[18];
+  char string[18], *p;
   string[0] = ' ';
   string[17] = '\0';
-  pk_io_off cur, address, top;
+  pk_io_off cur, address, count, top;
 
-  /* Parse arguments.  */
-  if (str[0] == '\0')
+  /* Parse arguments:
+
+     dump [ADDR] [,COUNT]
+
+  */
+
+  p = skip_blanks (str);
+
+  /* Get the address.  */
+  
+  if (*p == '\0')
     address = pk_io_tell ();
+  else if (*p == ',')
+    ;
   else
     {
-      long int li;
-      char *end;
-      int i = 0;
-      while (str[i] == ' ' || str[i] == '\t')
-        i++;
-      
-      li = strtol (str + i, &end, 0);
-      if (str[i] != '\0' && (*end == '\0'))
-        {
-          address = li;
-        }
-      else
-        return 0;
+      if (!pk_atoi (&p, &address))
+        goto usage;
     }
 
-  top = address + 0x10 * 8;
+  /* Get the count.  */
+
+  p = skip_blanks (p);
+  
+  if (*p == '\0')
+    count = 8;
+  else if (*p == ',')
+    {
+      p++;  /* Skip ,  */
+      if (!pk_atoi (&p, &count))
+        goto usage;
+    }
+  else
+    goto usage;
+
+  p = skip_blanks (p);
+
+  if (*p != '\0')
+    goto usage;
+
+  if (count < 0)
+    goto usage;
+  
+  top = address + 0x10 * count;
   
   /* Dump the requested address.  */
   
   pk_io_seek (address, PK_SEEK_SET);
+
+  if (poke_interactive_p)
+    printf ("%s87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF%s\n",
+            KBOLD, KNONE);
   
-  printf ("%s87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF%s\n",
-          KBOLD, KNONE);
   for (; 0 <= c && address < top; address += 0x10)
     {
       int i;
@@ -111,4 +169,42 @@ pk_cmd_dump (const char *str)
     }
 
   return 1;
+
+ usage:
+  puts ("usage: dump [ADDRESS] [,COUNT]");
+  return 0;
+}
+
+#define MAX_CMD_NAME 18
+
+int
+pk_cmd_exec (char *str)
+{
+  int ret;
+  size_t i;
+  char cmd_name[MAX_CMD_NAME], *p;
+
+  /* Skip blanks, and return if the command is composed by only blank
+     characters.  */
+
+  p = skip_blanks (str);
+  if (*p == '\0')
+    return 1;
+
+  /* Get the command name.  */
+  i = 0;
+  while (isalnum (*p) || *p == '_')
+    cmd_name[i++] = *(p++);
+  cmd_name[i] = '\0';
+
+  /* Dispatch to the appropriate command handler.  */
+  ret = 0;
+  if (cmd_name[0] == '\0')
+    puts ("invalid command");
+  if (strcmp (cmd_name, "dump") == 0)
+    ret = pk_cmd_dump (p);
+  else
+    printf ("%s: command not found\n", cmd_name);
+
+  return ret;
 }

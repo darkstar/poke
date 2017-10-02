@@ -85,12 +85,12 @@ pkl_read (FILE *file, char *buf, size_t max,
       if (len > max - 2)
         len = max - 2;
 
-      if (strncmp (line, "dump", strlen ("dump")) == 0)
+      /*      if (strncmp (line, "dump", strlen ("dump")) == 0)
         {
           if (!pk_cmd_dump (line + strlen ("dump")))
             printf ("invalid command.\n");
           return YY_NULL;
-        }
+          } */
 
       if (strncmp (line, ":load", strlen (":load")) == 0)
         {

@@ -26,9 +26,14 @@
 #define _(str) gettext (str)
 #include <unistd.h>
 #include <string.h>
+#include "readline.h"
+#if defined HAVE_READLINE_HISTORY_H
+# include <readline/history.h>
+#endif
 
 #include "pkl-parser.h"
 #include "pk-io.h"
+#include "pk-cmd.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -175,25 +180,26 @@ repl ()
   print_version ();
   puts ("");
 
-  /*  while (!parser->eof) */
   while (1)
     {
-      pkl_ast ast;
       int ret;
+      char *line;
 
-      ret = pkl_parse_cmdline (&ast);
-      if (ret == 1)
-        ;/*        printf ("SYNTAX ERROR\n"); */
-      else if (ret == 2)
-        printf ("MEMORY EXHAUSTION\n");
-      else
-        {
-#ifdef PKL_DEBUG
-          if (PKL_AST_PROGRAM_ELEMS (ast->ast))
-            pkl_ast_print (stdout, ast->ast);
+      line = readline ("(poke) ");
+      if (line == NULL)
+        /* Ctrl-D.  */
+        break;
+
+      /* Ignore empty lines.  */
+      if (*line == '\0')
+        continue;
+
+#if defined HAVE_READLINE_HISTORY_H
+      if (line && *line)
+        add_history (line);
 #endif
-          pkl_ast_free (ast);
-        }
+
+      ret = pk_cmd_exec (line);
     }
 }
 
