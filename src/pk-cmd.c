@@ -23,6 +23,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "poke.h"
 #include "pk-io.h"
@@ -71,20 +73,56 @@ pk_atoi (char **p, long int *number)
 /* Commands follow.  */
 
 static int
+pk_cmd_load (char *str)
+{
+  /* load FILENAME */
+
+  char *p;
+  size_t i;
+  char filename[NAME_MAX];
+
+  p = skip_blanks (str);
+
+  i = 0;
+  while (!isblank (*p) && *p != '\0')
+    filename[i++] = *(p++);
+  filename[i] = '\0';
+  
+  if (filename[0] == '\0')
+    goto usage;
+
+  if (access (filename, R_OK) != 0)
+    {
+      printf ("%s: file cannot be read\n", filename);
+      return 0;
+    }
+
+  p = skip_blanks (p);
+  if (*p != '\0')
+    goto usage;
+
+  pk_io_close ();
+  pk_io_open (filename);
+
+  return 1;
+
+ usage:
+  puts ("usage: load FILENAME");
+  return 0;
+}
+
+static int
 pk_cmd_dump (char *str)
 {
+  /* dump [ADDR] [,COUNT]  */
+
   int c = 0;
   char string[18], *p;
   string[0] = ' ';
   string[17] = '\0';
   pk_io_off cur, address, count, top;
 
-  /* Parse arguments:
-
-     dump [ADDR] [,COUNT]
-
-  */
-
+  /* Parse arguments.  */
   p = skip_blanks (str);
 
   /* Get the address.  */
@@ -115,7 +153,6 @@ pk_cmd_dump (char *str)
     goto usage;
 
   p = skip_blanks (p);
-
   if (*p != '\0')
     goto usage;
 
@@ -203,6 +240,8 @@ pk_cmd_exec (char *str)
     puts ("invalid command");
   if (strcmp (cmd_name, "dump") == 0)
     ret = pk_cmd_dump (p);
+  else if (strcmp (cmd_name, "load") == 0)
+    ret = pk_cmd_load (p);
   else
     printf ("%s: command not found\n", cmd_name);
 
