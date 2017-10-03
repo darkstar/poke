@@ -103,8 +103,6 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
 #endif
   fputs (_("General help using GNU software: <http://www.gnu.org/gethelp/>\n"),
          stdout);
-
-
 }
 
 static void
