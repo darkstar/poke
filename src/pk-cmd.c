@@ -26,6 +26,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
+#include <assert.h>
 #include <wordexp.h> /* For tilde-expansion.  */
 
 #include "poke.h"
@@ -76,28 +77,20 @@ pk_atoi (char **p, long int *number)
 /* Commands follow.  */
 
 static int
-pk_cmd_file (char *str)
+pk_cmd_file (int argc, struct pk_cmd_arg argv[])
 {
   /* file FILENAME */
 
-  char *p;
+  assert (argc == 1);
 
-  p = skip_blanks (str);
-
-  if (*p == '#')
+  if (argv[0].type == PK_CMD_ARG_TAG)
     {
       /* Switch to an already opened IO stream.  */
 
-      long int io_id = 0;
+      long int io_id;
       pk_io io;
 
-      p++;  /* Skip #  */
-      if (!pk_atoi (&p, &io_id))
-        goto usage;
-      p = skip_blanks (p);
-      if (*p != '\0')
-        goto usage;
-
+      io_id = argv[0].val.tag;
       io = pk_io_get (io_id);
       if (io == NULL)
         {
@@ -111,35 +104,7 @@ pk_cmd_file (char *str)
     {
       /* Create a new IO stream.  */
       size_t i;
-      char filename[NAME_MAX];
-      wordexp_t exp_result;
-      
-      i = 0;
-      while (!isblank (*p) && *p != '\0')
-        filename[i++] = *(p++);
-      filename[i] = '\0';
-      
-      if (filename[0] == '\0')
-        goto usage;
-      
-      switch (wordexp (filename, &exp_result, 0))
-        {
-        case 0: /* Successful.  */
-          break;
-        case WRDE_NOSPACE:
-          wordfree (&exp_result);
-        default:
-          goto usage;
-        }
-      
-      if (exp_result.we_wordc != 1)
-        {
-          wordfree (&exp_result);
-          goto usage;
-        }
-      
-      strcpy (filename, exp_result.we_wordv[0]);
-      wordfree (&exp_result);
+      const char *filename = argv[0].val.str;
       
       if (access (filename, R_OK) != 0)
         {
@@ -147,10 +112,6 @@ pk_cmd_file (char *str)
           return 0;
         }
       
-      p = skip_blanks (p);
-      if (*p != '\0')
-        goto usage;
-
       if (pk_io_search (filename) != NULL)
         {
           printf ("File %s already opened.  Use `file #N' to switch.\n",
@@ -165,14 +126,10 @@ pk_cmd_file (char *str)
     printf ("The current file is now `%s'.\n", PK_IO_FILENAME (pk_io_cur ()));
 
   return 1;
-
- usage:
-  puts ("Usage: file (FILENAME|#ID)");
-  return 0;
 }
 
 static int
-pk_cmd_dump (char *str)
+pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 {
   /* dump [ADDR] [,COUNT]  */
 
@@ -182,51 +139,18 @@ pk_cmd_dump (char *str)
   string[17] = '\0';
   pk_io_off cur, address, count, top;
 
-  /* This command requires an IO stream.  */
+  assert (argc == 2);
 
-  if (pk_io_cur () == NULL)
-    {
-      puts ("This command requires an IO stream.  Use the `file' command.");
-      return 0;
-    }
-  
-  /* Parse arguments.  */
-  p = skip_blanks (str);
-
-  /* Get the address.  */
-  
-  if (*p == '\0')
+  if (argv[0].type == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
-  else if (*p == ',')
-    ;
   else
-    {
-      if (!pk_atoi (&p, &address))
-        goto usage;
-    }
+    address = argv[0].val.addr;
 
-  /* Get the count.  */
-
-  p = skip_blanks (p);
-  
-  if (*p == '\0')
+  if (argv[1].type == PK_CMD_ARG_NULL)
     count = 8;
-  else if (*p == ',')
-    {
-      p++;  /* Skip ,  */
-      if (!pk_atoi (&p, &count))
-        goto usage;
-    }
   else
-    goto usage;
+    count = argv[1].val.integer;
 
-  p = skip_blanks (p);
-  if (*p != '\0')
-    goto usage;
-
-  if (count < 0)
-    goto usage;
-  
   top = address + 0x10 * count;
 
   /* Dump the requested address.  */
@@ -279,10 +203,6 @@ pk_cmd_dump (char *str)
   /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
 
   return 1;
-
- usage:
-  puts ("Usage: dump [ADDRESS] [,COUNT]");
-  return 0;
 }
 
 #define MAX_CMD_NAME 18
@@ -299,88 +219,36 @@ pk_cmd_info_file (pk_io io, void *data)
 }
 
 static int
-pk_cmd_info (char *str)
+pk_cmd_info_files (int argc, struct pk_cmd_arg argv[])
 {
-  /* info (files)  */
+  int id;
 
-  char *p;
-  size_t i;
-  char cmd_name[MAX_CMD_NAME];
+  assert (argc == 0);
 
-  /* Parse subcommand.  */
-  p = skip_blanks (str);
-  i = 0;
-  while (isalnum (*p) || *p == '_')
-    cmd_name[i++] = *(p++);
-  cmd_name[i] = '\0';
+  id = 0;
+  printf ("  Id\tMode\tPosition\tFilename\n");
+  pk_io_map (pk_cmd_info_file, &id);
 
-  if (cmd_name[0] == '\0')
-    goto usage;
-  else if (strcmp (cmd_name, "files") == 0)
-    {
-      int id = 0;
-      printf ("  Id\tMode\tPosition\tFilename\n");
-      pk_io_map (pk_cmd_info_file, &id);
-    }
-  else
-    goto usage;
-  
   return 1;
-  
- usage:
-  puts ("Usage: info (files)");
-  return 0;
 }
 
 static int
-pk_cmd_poke (char *str)
+pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 {
   /* poke ADDR, VAL */
 
-  char *p;
   pk_io_off address;
   long int value;
 
-  /* This command requires an IO stream.  */
-
-  if (pk_io_cur () == NULL)
-    {
-      puts ("This command requires an IO stream.  Use the `file' command.");
-      return 0;
-    }
-  
-  /* Parse arguments.  */
-  p = skip_blanks (str);
-
-  if (*p == '\0')
-    goto usage;
-
-  /* Get the address.  */
-  if (*p == ',')
+  if (argv[0].type == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
   else
-    {
-      if (!pk_atoi (&p, &address))
-        goto usage;
-    }
-
-  /* Get the value.  */
-  p = skip_blanks (p);
-
-  if (*p == '\0')
+    address = argv[0].val.addr;
+  
+  if (argv[1].type == PK_CMD_ARG_NULL)
     value = 0;
-  else if (*p == ',')
-    {
-      p++; /* Skip ,  */
-      if (!pk_atoi (&p, &value))
-        goto usage;
-    }
   else
-    goto usage;
-
-  p = skip_blanks (p);
-  if (*p != '\0')
-    goto usage;
+    value = argv[1].val.integer;
 
   /* XXX: endianness, and what not.   */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
@@ -393,34 +261,21 @@ pk_cmd_poke (char *str)
     printf ("0x%08jx <- 0x%x\n", address, value);
 
   return 1;
-  
- usage:
-  puts ("Usage: poke ADDRESS, VALUE");
-  return 0;
 }
 
 static int
-pk_cmd_exit (char *str)
+pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
 {
   /* exit CODE */
 
-  char *p;
-  long int code;
+  int code;
+  assert (argc == 1);
 
-  /* Parse arguments.  */
-  p = skip_blanks (str);
-
-  if (*p == '\0')
+  if (argv[0].type == PK_CMD_ARG_NULL)
     code = 0;
   else
-    {
-      if (!pk_atoi (&p, &code))
-        goto usage;
-      p = skip_blanks (p);
-      if (*p != '\0')
-        goto usage;
-    }
-
+    code = (int) argv[0].val.integer;
+  
   if (poke_interactive_p)
     {
       /* XXX: if unsaved changes, ask and save.  */
@@ -429,42 +284,46 @@ pk_cmd_exit (char *str)
   poke_exit_p = 1;
   poke_exit_code = code;
   return 1;
-
- usage:
-  puts ("Usage: exit CODE");
-  return 0;
 }
 
 /* Table of commands.  */
 
 static struct pk_cmd info_cmds[] =
   {
-    {"files", "", 0, NULL, /* pk_cmd_info_files */ NULL},
+    {"files", "", 0, NULL, pk_cmd_info_files, "info files"}
   };
 
 static struct pk_cmd cmds[] =
   {
-    {"dump", "[a],[o]", PK_CMD_F_REQ_IO,                  NULL, pk_cmd_dump},
-    {"poke", "[a],[i]", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, pk_cmd_poke},
-    {"file", "ft",                                     0, NULL, pk_cmd_file},
-    {"exit", "[I]",                                    0, NULL, pk_cmd_exit},
-    {"info", "s",                                      0, info_cmds, NULL},
-    {NULL, NULL,                                       0, NULL, NULL}
+    {"poke", "a,?i", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, pk_cmd_poke,
+     "poke ADDRESS [,VALUE]"},
+    {"dump", "?a,?n", PK_CMD_F_REQ_IO, NULL, pk_cmd_dump,
+     "dump [ADDRESS] [,COUNT]"},
+    {"file", "tf", 0, NULL, pk_cmd_file, "file (FILENAME|#ID)"},
+    {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"},
+    {"info", "", 0, info_cmds, NULL, "info (files)"},
+    {NULL, NULL, 0, NULL, NULL}
   };
 
-int
-pk_cmd_exec (char *str)
+static int
+pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
 {
-  int ret;
+  int ret = 1;
   size_t i;
   char cmd_name[MAX_CMD_NAME], *p;
+  struct pk_cmd *cmd;
+  int argc;
+  struct pk_cmd_arg argv[8];
+  const char *a;
+  char filename[NAME_MAX];
+
 
   /* Skip blanks, and return if the command is composed by only blank
      characters.  */
 
   p = skip_blanks (str);
   if (*p == '\0')
-    return 1;
+    return 0;
 
   /* Get the command name.  */
   i = 0;
@@ -472,23 +331,208 @@ pk_cmd_exec (char *str)
     cmd_name[i++] = *(p++);
   cmd_name[i] = '\0';
 
-  /* Dispatch to the appropriate command handler.  */
-  ret = 0;
-  if (cmd_name[0] == '\0')
-    puts ("Invalid command.");
-  else if (strcmp (cmd_name, "dump") == 0)
-    ret = pk_cmd_dump (p);
-  else if (strcmp (cmd_name, "poke") == 0)
-    ret = pk_cmd_poke (p);
-  else if (strcmp (cmd_name, "file") == 0)
-    ret = pk_cmd_file (p);
-  else if (strcmp (cmd_name, "info") == 0)
-    ret = pk_cmd_info (p);
-  else if (strcmp (cmd_name, "exit") == 0)
-    ret = pk_cmd_exit (p);
-  else
-    printf ("%s: command not found.\n", cmd_name);
+  /* Find the command in the commands table.  */
+  for (cmd = &cmds[0]; cmd->name != NULL; cmd++)
+    {
+      if (strcmp (cmd->name, cmd_name) == 0)
+        break;
+    }
+  if (cmd->name == NULL)
+    {
+      if (prefix != NULL)
+        printf ("%s ", prefix);
+      printf ("%s: command not found.\n", cmd_name);
+      return 0;
+    }
 
+  /* If this command has subcommands, process them and be done.  */
+  if (cmd->sub != NULL)
+    return pk_cmd_exec_1 (p, cmd->sub, cmd_name);
+  
+  /* Parse arguments.  */
+  argc = 0;
+  a = cmd->arg_fmt;
+  while (*a != '\0')
+    {
+      /* Handle an argument. */
+      int match = 0;
+
+      p = skip_blanks (p);
+      if (*a == '?' && ((*p == ',' || *p == '\0')))
+        {
+          if (*p == ',')
+            p++;
+          argv[argc].type = PK_CMD_ARG_NULL;
+          match = 1;
+        }
+      else
+        {
+          if (*a == '?')
+            a++;
+          
+          /* Try the different options, in order, until one succeeds or
+             the next argument or the end of the input is found.  */
+          while (*a != ',' && *a != '\0')
+            {
+              char *beg = p;
+              
+              switch (*a)
+                {
+                case 'i':
+                case 'n':
+                  /* Parse an integer or natural.  */
+                  p = skip_blanks (p);
+                  if (pk_atoi (&p, &(argv[argc].val.integer))
+                      && *a == 'i' || argv[argc].val.integer >= 0)
+                    {
+                      p = skip_blanks (p);
+                      if (*p == ',' || *p == '\0')
+                        {
+                          argv[argc].type = PK_CMD_ARG_INT;
+                          match = 1;
+                        }
+                    }
+                  
+                  break;
+                case 'a':
+                  /* Parse an address.  */
+                  p = skip_blanks (p);
+                  if (pk_atoi (&p, &(argv[argc].val.addr)))
+                    {
+                      p = skip_blanks (p);
+                      if (*p == ',' || *p == '\0')
+                        {
+                          argv[argc].type = PK_CMD_ARG_ADDR;
+                          match = 1;
+                        }
+                    }
+                  
+                  break;
+                case 't':
+                  /* Parse a #N tag.  */
+                  p = skip_blanks (p);
+                  if (*p == '#'
+                      && p++
+                      && pk_atoi (&p, &(argv[argc].val.tag))
+                      && argv[argc].val.tag >= 0)
+                    {
+                      if (*p == ',' || *p == '\0')
+                        {
+                          argv[argc].type = PK_CMD_ARG_TAG;
+                          match = 1;
+                        }
+                    }
+                  
+                  break;
+                case 'f':
+                  {
+                    /* Parse a filename.  */
+
+                    size_t i;
+                    wordexp_t exp_result;
+
+                    p = skip_blanks (p);
+                    i = 0;
+                    while (!isblank (*p) && *p != '\0' && *p != ',')
+                      filename[i++] = *(p++);
+                    filename[i] = '\0';
+
+                    if (filename[0] == '\0')
+                      goto usage;
+
+                    switch (wordexp (filename, &exp_result, 0))
+                      {
+                      case 0: /* Successful.  */
+                        break;
+                      case WRDE_NOSPACE:
+                        wordfree (&exp_result);
+                      default:
+                        goto usage;
+                      }
+
+                    if (exp_result.we_wordc != 1)
+                      {
+                        wordfree (&exp_result);
+                        goto usage;
+                      }
+
+                    strcpy (filename, exp_result.we_wordv[0]);
+                    wordfree (&exp_result);
+
+                    if (*p == ',' || *p == '\0')
+                      {
+                        argv[argc].type = PK_CMD_ARG_STR;
+                        argv[argc].val.str = filename;
+                        match = 1;
+                      }
+                    
+                    break;
+                  }
+                default:
+                  /* This should NOT happen.  */
+                  assert (1);
+                }
+              
+              if (match)
+                break;
+              
+
+              /* Rewind input and investigate next option.  */
+              p = beg;
+              a++;
+            }
+        }
+      
+      /* Boo, could not find valid input for this argument.  */
+      if (!match)
+        goto usage;
+
+      if (*p == ',')
+        p++;
+
+      /* Skip any further options for this argument.  */
+      while (*a != ',' && *a != '\0')
+        a++;
+      if (*a == ',')
+        a++;
+
+      /* Ok, next argument!  */
+      argc++;
+    }
+
+  /* Make sure there is no trailer contents in the input.  */
+  p = skip_blanks (p);
+  if (*p != '\0')
+    goto usage;
+
+  /* Process command flags.  */
+  if (cmd->flags & PK_CMD_F_REQ_IO
+      && pk_io_cur () == NULL)
+    {
+      puts ("This command requires an IO stream.  Use the `file' command.");
+      return 0;
+    }
+
+  if (cmd->flags & PK_CMD_F_REQ_W)
+    {
+      pk_io cur_io = pk_io_cur ();
+      if (cur_io == NULL
+          || !(PK_IO_MODE (cur_io) & O_RDWR))
+        puts ("This command requires a writable IO stream.");
+    }
+
+  /* Call the command handler, passing the arguments.  */
+  ret = (*cmd->handler) (argc, argv);
+  
   return ret;
+
+ usage:
+  printf ("Usage: %s\n", cmd->usage);
+  return 0;
 }
 
+int
+pk_cmd_exec (char *str)
+{
+  return pk_cmd_exec_1 (str, cmds, NULL);
+}

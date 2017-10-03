@@ -27,9 +27,10 @@
 
 enum pk_cmd_arg_type
 {
+  PK_CMD_ARG_NULL,
   PK_CMD_ARG_INT,
   PK_CMD_ARG_ADDR,
-  PK_CMD_ARG_STRING,
+  PK_CMD_ARG_STR,
   PK_CMD_ARG_TAG
 };
 
@@ -40,12 +41,12 @@ struct pk_cmd_arg
   {
     long int integer;
     pk_io_off addr;
-    const char *string;
-    int tag;
+    const char *str;
+    long int tag;
   } val;
 };
 
-typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg *argv[]);
+typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg argv[]);
 
 #define PK_CMD_F_REQ_IO 0x1  /* Command requires an IO stream.  */
 #define PK_CMD_F_REQ_W  0x2  /* Command requires a writable IO stream.  */
@@ -63,6 +64,8 @@ struct pk_cmd
   struct pk_cmd *sub;
   /* Function implementing the command.  */
   pk_cmd_fn handler;
+  /* Usage message.  */
+  const char *usage;
 };
 
 int pk_cmd_exec (char *str);
