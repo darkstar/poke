@@ -35,7 +35,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
     {
       /* Switch to an already opened IO stream.  */
 
-      long int io_id;
+      int io_id;
       pk_io io;
 
       io_id = PK_CMD_ARG_TAG (argv[0]);
@@ -51,7 +51,6 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
   else
     {
       /* Create a new IO stream.  */
-      size_t i;
       const char *filename = PK_CMD_ARG_STR (argv[0]);
       
       if (access (filename, R_OK) != 0)

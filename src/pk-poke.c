@@ -27,7 +27,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   /* poke ADDR, VAL */
 
   pk_io_off address;
-  long int value;
+  int value;
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());

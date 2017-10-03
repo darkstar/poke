@@ -72,6 +72,7 @@ struct pk_cmd
   const char *usage;
 };
 
+/* Parse STR and execute a command.  */
 
 int pk_cmd_exec (char *str);
 

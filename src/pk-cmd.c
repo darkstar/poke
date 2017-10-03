@@ -32,6 +32,29 @@
 #include "pk-io.h"
 #include "pk-cmd.h"
 
+/* Table of supported commands.  */
+
+extern struct pk_cmd dump_cmd; /* pk-dump.c  */
+extern struct pk_cmd peek_cmd; /* pk-peek.c  */
+extern struct pk_cmd poke_cmd; /* pk-poke.c  */
+extern struct pk_cmd file_cmd; /* pk-file.c  */
+extern struct pk_cmd info_cmd; /* pk-info.c  */
+extern struct pk_cmd exit_cmd; /* pk-misc.c  */
+
+struct pk_cmd null_cmd =
+  {NULL, NULL, 0, NULL, NULL};
+
+static struct pk_cmd *cmds[] =
+  {
+    &peek_cmd,
+    &poke_cmd,
+    &dump_cmd,
+    &file_cmd,
+    &exit_cmd,
+    &info_cmd,
+    &null_cmd
+  };
+
 /* Convenience macros and functions for parsing.  */
 
 static inline char *
@@ -50,7 +73,7 @@ pk_atoi (char **p, long int *number)
 
   errno = 0;
   li = strtol (*p, &end, 0);
-  if (errno != 0 && li == 0
+  if ((errno != 0 && li == 0)
       || end == *p)
     return 0;
 
@@ -58,6 +81,8 @@ pk_atoi (char **p, long int *number)
   *p = end;
   return 1;
 }
+
+/* Routines to execute a command.  */
 
 #define MAX_CMD_NAME 18
 
@@ -145,7 +170,7 @@ pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
                   /* Parse an integer or natural.  */
                   p = skip_blanks (p);
                   if (pk_atoi (&p, &(argv[argc].val.integer))
-                      && *a == 'i' || argv[argc].val.integer >= 0)
+                      && (*a == 'i' || argv[argc].val.integer >= 0))
                     {
                       p = skip_blanks (p);
                       if (*p == ',' || *p == '\0')
@@ -292,31 +317,6 @@ pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
   printf ("Usage: %s\n", cmd->usage);
   return 0;
 }
-
-/* Supported commands.  */
-
-extern struct pk_cmd dump_cmd; /* pk-dump.c  */
-extern struct pk_cmd peek_cmd; /* pk-peek.c  */
-extern struct pk_cmd poke_cmd; /* pk-poke.c  */
-extern struct pk_cmd file_cmd; /* pk-file.c  */
-extern struct pk_cmd info_cmd; /* pk-info.c  */
-extern struct pk_cmd exit_cmd; /* pk-misc.c  */
-
-/* Table of commands.  */
-
-struct pk_cmd null_cmd =
-  {NULL, NULL, 0, NULL, NULL};
-
-static struct pk_cmd *cmds[] =
-  {
-    &peek_cmd,
-    &poke_cmd,
-    &dump_cmd,
-    &file_cmd,
-    &exit_cmd,
-    &info_cmd,
-    &null_cmd
-  };
 
 int
 pk_cmd_exec (char *str)

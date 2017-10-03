@@ -31,7 +31,7 @@ AM_YFLAGS = -d
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
-poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS)
+poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS) -Wall
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE)
 

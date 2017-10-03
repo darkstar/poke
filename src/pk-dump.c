@@ -42,7 +42,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
   /* dump [ADDR] [,COUNT]  */
 
   int c = 0;
-  char string[18], *p;
+  char string[18];
   string[0] = ' ';
   string[17] = '\0';
   pk_io_off cur, address, count, top;
@@ -63,7 +63,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 
   /* Dump the requested address.  */
 
-  cur = pk_io_tell (pk_io_cur ());
+  /*XXX see below   cur = pk_io_tell (pk_io_cur ());*/
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
   if (poke_interactive_p)
