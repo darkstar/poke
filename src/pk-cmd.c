@@ -23,7 +23,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <unistd.h>
 #include <limits.h>
 #include <fcntl.h>
 #include <assert.h>
@@ -32,19 +31,6 @@
 #include "poke.h"
 #include "pk-io.h"
 #include "pk-cmd.h"
-
-/* Escape sequences for changing text attributes on the terminal.  */
-
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
-#define KBOLD (poke_interactive_p ? "\033[1m" : "")
-#define KNONE (poke_interactive_p ? "\033[0m" : "")
 
 /* Convenience macros and functions for parsing.  */
 
@@ -73,240 +59,10 @@ pk_atoi (char **p, long int *number)
   return 1;
 }
 
-
-/* Commands follow.  */
-
-static int
-pk_cmd_file (int argc, struct pk_cmd_arg argv[])
-{
-  /* file FILENAME */
-
-  assert (argc == 1);
-
-  if (argv[0].type == PK_CMD_ARG_TAG)
-    {
-      /* Switch to an already opened IO stream.  */
-
-      long int io_id;
-      pk_io io;
-
-      io_id = argv[0].val.tag;
-      io = pk_io_get (io_id);
-      if (io == NULL)
-        {
-          printf ("No such file #%d\n", io_id);
-          return 0;
-        }
-
-      pk_io_set_cur (io);
-    }
-  else
-    {
-      /* Create a new IO stream.  */
-      size_t i;
-      const char *filename = argv[0].val.str;
-      
-      if (access (filename, R_OK) != 0)
-        {
-          printf ("%s: file cannot be read\n", filename);
-          return 0;
-        }
-      
-      if (pk_io_search (filename) != NULL)
-        {
-          printf ("File %s already opened.  Use `file #N' to switch.\n",
-                  filename);
-          return 0;
-        }
-      
-      pk_io_open (filename);
-    }
-
-  if (poke_interactive_p)
-    printf ("The current file is now `%s'.\n", PK_IO_FILENAME (pk_io_cur ()));
-
-  return 1;
-}
-
-static int
-pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
-{
-  /* dump [ADDR] [,COUNT]  */
-
-  int c = 0;
-  char string[18], *p;
-  string[0] = ' ';
-  string[17] = '\0';
-  pk_io_off cur, address, count, top;
-
-  assert (argc == 2);
-
-  if (argv[0].type == PK_CMD_ARG_NULL)
-    address = pk_io_tell (pk_io_cur ());
-  else
-    address = argv[0].val.addr;
-
-  if (argv[1].type == PK_CMD_ARG_NULL)
-    count = 8;
-  else
-    count = argv[1].val.integer;
-
-  top = address + 0x10 * count;
-
-  /* Dump the requested address.  */
-
-  cur = pk_io_tell (pk_io_cur ());
-  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
-
-  if (poke_interactive_p)
-    printf ("%s87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF%s\n",
-            KBOLD, KNONE);
-  
-  for (; 0 <= c && address < top; address += 0x10)
-    {
-      int i;
-      for (i = 0; i < 16; i++)
-        {
-          if (0 <= c)
-            c = pk_io_getc ();
-          if (c < 0)
-            {
-              if (!i)
-                break;
-              
-              fputs ("  ", stdout);
-              string[i + 1] = '\0';
-            }
-          else
-            {
-              if (!i)
-                printf ("%s%08jx: %s", KBOLD, address, KNONE);
-              
-              string[i + 1]
-                = (c < 0x20 || (0x7F <= c && (c < 0xa0))
-                   ? '.'
-                   : isprint (c) ? c : '?');
-              
-              printf ("%02x", c + 0u);
-            }
-
-          if (i & 0x1)
-            putchar (' ');
-        }
-      
-      if (i)
-        puts (string);
-    }
-
-  /* XXX: save last position in case the next command is also a
-     dump.  */
-  /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
-
-  return 1;
-}
-
 #define MAX_CMD_NAME 18
 
-static void
-pk_cmd_info_file (pk_io io, void *data)
-{
-  int *i = (int *) data;
-  printf ("%s#%d\t%s\t0x%08jx\t%s\n",
-          io == pk_io_cur () ? "* " : "  ",
-          (*i)++,
-          PK_IO_MODE (io) & O_RDWR ? "rw" : "r ",
-          pk_io_tell (io), PK_IO_FILENAME (io));
-}
-
 static int
-pk_cmd_info_files (int argc, struct pk_cmd_arg argv[])
-{
-  int id;
-
-  assert (argc == 0);
-
-  id = 0;
-  printf ("  Id\tMode\tPosition\tFilename\n");
-  pk_io_map (pk_cmd_info_file, &id);
-
-  return 1;
-}
-
-static int
-pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
-{
-  /* poke ADDR, VAL */
-
-  pk_io_off address;
-  long int value;
-
-  if (argv[0].type == PK_CMD_ARG_NULL)
-    address = pk_io_tell (pk_io_cur ());
-  else
-    address = argv[0].val.addr;
-  
-  if (argv[1].type == PK_CMD_ARG_NULL)
-    value = 0;
-  else
-    value = argv[1].val.integer;
-
-  /* XXX: endianness, and what not.   */
-  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
-  if (pk_io_putc ((int) value) == PK_EOF)
-    {
-      printf ("Error writing byte 0x%x to 0x%08jx\n",
-              value, address);
-    }
-  else
-    printf ("0x%08jx <- 0x%x\n", address, value);
-
-  return 1;
-}
-
-static int
-pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
-{
-  /* exit CODE */
-
-  int code;
-  assert (argc == 1);
-
-  if (argv[0].type == PK_CMD_ARG_NULL)
-    code = 0;
-  else
-    code = (int) argv[0].val.integer;
-  
-  if (poke_interactive_p)
-    {
-      /* XXX: if unsaved changes, ask and save.  */
-    }
-
-  poke_exit_p = 1;
-  poke_exit_code = code;
-  return 1;
-}
-
-/* Table of commands.  */
-
-static struct pk_cmd info_cmds[] =
-  {
-    {"files", "", 0, NULL, pk_cmd_info_files, "info files"}
-  };
-
-static struct pk_cmd cmds[] =
-  {
-    {"poke", "a,?i", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, pk_cmd_poke,
-     "poke ADDRESS [,VALUE]"},
-    {"dump", "?a,?n", PK_CMD_F_REQ_IO, NULL, pk_cmd_dump,
-     "dump [ADDRESS] [,COUNT]"},
-    {"file", "tf", 0, NULL, pk_cmd_file, "file (FILENAME|#ID)"},
-    {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"},
-    {"info", "", 0, info_cmds, NULL, "info (files)"},
-    {NULL, NULL, 0, NULL, NULL}
-  };
-
-static int
-pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
+pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
 {
   int ret = 1;
   size_t i;
@@ -320,7 +76,6 @@ pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
 
   /* Skip blanks, and return if the command is composed by only blank
      characters.  */
-
   p = skip_blanks (str);
   if (*p == '\0')
     return 0;
@@ -332,7 +87,9 @@ pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
   cmd_name[i] = '\0';
 
   /* Find the command in the commands table.  */
-  for (cmd = &cmds[0]; cmd->name != NULL; cmd++)
+  for (i = 0, cmd = cmds[0];
+       cmd->name != NULL;
+       cmd = cmds[++i])
     {
       if (strcmp (cmd->name, cmd_name) == 0)
         break;
@@ -535,6 +292,31 @@ pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
   printf ("Usage: %s\n", cmd->usage);
   return 0;
 }
+
+/* Supported commands.  */
+
+extern struct pk_cmd dump_cmd; /* pk-dump.c  */
+extern struct pk_cmd peek_cmd; /* pk-peek.c  */
+extern struct pk_cmd poke_cmd; /* pk-poke.c  */
+extern struct pk_cmd file_cmd; /* pk-file.c  */
+extern struct pk_cmd info_cmd; /* pk-info.c  */
+extern struct pk_cmd exit_cmd; /* pk-misc.c  */
+
+/* Table of commands.  */
+
+struct pk_cmd null_cmd =
+  {NULL, NULL, 0, NULL, NULL};
+
+static struct pk_cmd *cmds[] =
+  {
+    &peek_cmd,
+    &poke_cmd,
+    &dump_cmd,
+    &file_cmd,
+    &exit_cmd,
+    &info_cmd,
+    &null_cmd
+  };
 
 int
 pk_cmd_exec (char *str)
