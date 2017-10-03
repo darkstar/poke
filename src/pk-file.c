@@ -31,14 +31,14 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
 
   assert (argc == 1);
 
-  if (argv[0].type == PK_CMD_ARG_TAG)
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_TAG)
     {
       /* Switch to an already opened IO stream.  */
 
       long int io_id;
       pk_io io;
 
-      io_id = argv[0].val.tag;
+      io_id = PK_CMD_ARG_TAG (argv[0]);
       io = pk_io_get (io_id);
       if (io == NULL)
         {
@@ -52,7 +52,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
     {
       /* Create a new IO stream.  */
       size_t i;
-      const char *filename = argv[0].val.str;
+      const char *filename = PK_CMD_ARG_STR (argv[0]);
       
       if (access (filename, R_OK) != 0)
         {

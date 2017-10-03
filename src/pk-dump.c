@@ -49,15 +49,15 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 
   assert (argc == 2);
 
-  if (argv[0].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
   else
-    address = argv[0].val.addr;
+    address = PK_CMD_ARG_ADDR (argv[0]);
 
-  if (argv[1].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     count = 8;
   else
-    count = argv[1].val.integer;
+    count = PK_CMD_ARG_INT (argv[1]);
 
   top = address + 0x10 * count;
 

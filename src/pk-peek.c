@@ -32,10 +32,10 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
 
   assert (argc == 1);
 
-  if (argv[0].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
   else
-    address = argv[0].val.addr;
+    address = PK_CMD_ARG_ADDR (argv[0]);
 
   /* XXX: endianness, and what not.  */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);

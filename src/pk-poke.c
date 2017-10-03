@@ -29,15 +29,15 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   pk_io_off address;
   long int value;
 
-  if (argv[0].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
   else
-    address = argv[0].val.addr;
+    address = PK_CMD_ARG_ADDR (argv[0]);
   
-  if (argv[1].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     value = 0;
   else
-    value = argv[1].val.integer;
+    value = PK_CMD_ARG_INT (argv[1]);
 
   /* XXX: endianness, and what not.   */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);

@@ -30,10 +30,10 @@ pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
   int code;
   assert (argc == 1);
 
-  if (argv[0].type == PK_CMD_ARG_NULL)
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     code = 0;
   else
-    code = (int) argv[0].val.integer;
+    code = (int) PK_CMD_ARG_INT (argv[0]);
   
   if (poke_interactive_p)
     {

@@ -23,8 +23,6 @@
 
 #include "pk-io.h"
 
-/* Commands management.  */
-
 enum pk_cmd_arg_type
 {
   PK_CMD_ARG_NULL,
@@ -33,6 +31,12 @@ enum pk_cmd_arg_type
   PK_CMD_ARG_STR,
   PK_CMD_ARG_TAG
 };
+
+#define PK_CMD_ARG_TYPE(arg) ((arg).type)
+#define PK_CMD_ARG_INT(arg) ((arg).val.integer)
+#define PK_CMD_ARG_ADDR(arg) ((arg).val.addr)
+#define PK_CMD_ARG_STR(arg) ((arg).val.str)
+#define PK_CMD_ARG_TAG(arg) ((arg).val.tag)
 
 struct pk_cmd_arg
 {
