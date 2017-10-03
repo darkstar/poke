@@ -1,4 +1,4 @@
-/* pk-file.c - `file' and `info files' commands.  */
+/* pk-file.c - Commands for operating files.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -75,6 +75,44 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
   return 1;
 }
 
+static int
+pk_cmd_close (int argc, struct pk_cmd_arg argv[])
+{
+  /* close [#ID]  */
+  pk_io io;
+  int changed;
+
+  assert (argc == 1);
+
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
+    io = pk_io_cur ();
+  else
+    {
+      int io_id = PK_CMD_ARG_TAG (argv[0]);
+
+      io = pk_io_get (io_id);
+      if (io == NULL)
+        {
+          printf ("No such file #%d\n", io_id);
+          return 0;
+        }
+    }
+
+  changed = (io == pk_io_cur ());
+  pk_io_close (io);
+
+  if (changed)
+    {
+      if (pk_io_cur () == NULL)
+        puts ("No more IO streams.");
+      else
+        printf ("The current file is now `%s'.\n",
+                PK_IO_FILENAME (pk_io_cur ()));
+    }
+  
+  return 1;
+}
+
 static void
 print_info_file (pk_io io, void *data)
 {
@@ -101,14 +139,11 @@ pk_cmd_info_files (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd file_cmd =
-  {
-    "file",
-    "tf",
-    0,
-    NULL,
-    pk_cmd_file,
-    "file (FILENAME|#ID)"
-  };
+  {"file", "tf", 0, NULL, pk_cmd_file, "file (FILENAME|#ID)"};
+
+
+struct pk_cmd close_cmd =
+  {"close", "?t", PK_CMD_F_REQ_IO, NULL, pk_cmd_close, "close [#ID]"};
 
 struct pk_cmd info_files_cmd =
   {"files", "", 0, NULL, pk_cmd_info_files, "info files"};

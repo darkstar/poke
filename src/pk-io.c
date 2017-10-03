@@ -102,10 +102,8 @@ pk_io_close (pk_io io)
   else
     {
       for (tmp = ios; tmp->next != io; tmp = tmp->next)
-        {
-          tmp->next = io->next;
-          break;
-        }
+        ;
+      tmp->next = io->next;
     }
   free (io);
   
