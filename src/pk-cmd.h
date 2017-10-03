@@ -65,7 +65,6 @@ struct pk_cmd
   /* A value composed of or-ed PK_CMD_F_* flags.  See above.  */
   int flags;
   /* Subcommands.  */
-  struct pk_cmd **sub;
   struct pk_trie **subtrie;
   /* Function implementing the command.  */
   pk_cmd_fn handler;

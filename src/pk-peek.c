@@ -48,5 +48,21 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   return 1;
 }
 
+static int
+pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[])
+{
+  /* help peek  */
+
+  assert (argc == 0);
+
+  puts ("The peek command fetches a value from the current IO");
+  puts ("stream.");
+  
+  return 1;
+}
+
 struct pk_cmd peek_cmd =
-  {"peek", "?a", PK_CMD_F_REQ_IO, NULL, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+  {"peek", "?a", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+
+struct pk_cmd help_peek_cmd =
+  {"peek", "", 0, NULL, pk_cmd_help_peek, "help peek"};

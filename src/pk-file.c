@@ -139,11 +139,11 @@ pk_cmd_info_files (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd file_cmd =
-  {"file", "tf", 0, NULL, NULL, pk_cmd_file, "file (FILENAME|#ID)"};
+  {"file", "tf", 0, NULL, pk_cmd_file, "file (FILENAME|#ID)"};
 
 
 struct pk_cmd close_cmd =
-  {"close", "?t", PK_CMD_F_REQ_IO, NULL, NULL, pk_cmd_close, "close [#ID]"};
+  {"close", "?t", PK_CMD_F_REQ_IO, NULL, pk_cmd_close, "close [#ID]"};
 
 struct pk_cmd info_files_cmd =
-  {"files", "", 0, NULL, NULL, pk_cmd_info_files, "info files"};
+  {"files", "", 0, NULL, pk_cmd_info_files, "info files"};

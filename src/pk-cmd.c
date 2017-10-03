@@ -43,6 +43,7 @@ extern struct pk_cmd file_cmd; /* pk-file.c  */
 extern struct pk_cmd close_cmd; /* pk-file.c */
 extern struct pk_cmd info_cmd; /* pk-info.c  */
 extern struct pk_cmd exit_cmd; /* pk-misc.c  */
+extern struct pk_cmd help_cmd; /* pk-help.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, 0, NULL, NULL};
@@ -56,6 +57,7 @@ static struct pk_cmd *cmds[] =
     &exit_cmd,
     &info_cmd,
     &close_cmd,
+    &help_cmd,
     &null_cmd
   };
 
@@ -462,6 +464,9 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 extern struct pk_cmd *info_cmds[]; /* pk-info.c  */
 extern struct pk_trie *info_trie; /* pk-info.c  */
 
+extern struct pk_cmd *help_cmds[]; /* pk-help.c */
+extern struct pk_trie *help_trie; /* pk-help.c */
+
 static struct pk_trie *cmds_trie;
 
 int
@@ -471,6 +476,8 @@ pk_cmd_exec (char *str)
     cmds_trie = pk_trie_from_cmds (cmds);
   if (info_trie == NULL)
     info_trie = pk_trie_from_cmds (info_cmds);
+  if (help_trie == NULL)
+    help_trie = pk_trie_from_cmds (help_cmds);
 
 #if 0
   pk_print_trie (0, cmds_trie);
@@ -484,4 +491,5 @@ pk_cmd_shutdown (void)
 {
   pk_trie_free (cmds_trie);
   pk_trie_free (info_trie);
+  pk_trie_free (help_trie);
 }

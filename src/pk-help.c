@@ -1,4 +1,4 @@
-/* pk-misc.c - Miscellaneous commands.  */
+/* pk-help.c - `help' command.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -17,33 +17,18 @@
  */
 
 #include <config.h>
-#include <assert.h>
-
-#include "poke.h"
 #include "pk-cmd.h"
 
-static int
-pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
-{
-  /* exit CODE */
+extern struct pk_cmd null_cmd; /* pk-cmd.c  */
+extern struct pk_cmd help_peek_cmd; /* pk-peek.c */
 
-  int code;
-  assert (argc == 1);
+struct pk_cmd *help_cmds[] =
+  {
+    &help_peek_cmd,
+    &null_cmd
+  };
 
-  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
-    code = 0;
-  else
-    code = (int) PK_CMD_ARG_INT (argv[0]);
-  
-  if (poke_interactive_p)
-    {
-      /* XXX: if unsaved changes, ask and save.  */
-    }
+struct pk_trie *help_trie;
 
-  poke_exit_p = 1;
-  poke_exit_code = code;
-  return 1;
-}
-
-struct pk_cmd exit_cmd =
-  {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"};
+struct pk_cmd help_cmd =
+  {"help", "", 0, &help_trie, NULL, "help COMMAND"};
