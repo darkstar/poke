@@ -49,4 +49,4 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd peek_cmd =
-  {"peek", "?a", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+  {"peek", "?a", PK_CMD_F_REQ_IO, NULL, NULL, pk_cmd_peek, "peek [ADDRESS]"};

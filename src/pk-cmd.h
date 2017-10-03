@@ -23,6 +23,15 @@
 
 #include "pk-io.h"
 
+struct pk_trie
+{
+  char c;
+  struct pk_trie *parent;
+  int num_children;
+  struct pk_trie *children[256];
+  struct pk_cmd *cmd;
+};
+
 enum pk_cmd_arg_type
 {
   PK_CMD_ARG_NULL,
@@ -66,6 +75,7 @@ struct pk_cmd
   int flags;
   /* Subcommands.  */
   struct pk_cmd **sub;
+  struct pk_trie **subtrie;
   /* Function implementing the command.  */
   pk_cmd_fn handler;
   /* Usage message.  */
@@ -75,5 +85,9 @@ struct pk_cmd
 /* Parse STR and execute a command.  */
 
 int pk_cmd_exec (char *str);
+
+/* Shutdown the cmd subsystem, freeing all used resources.  */
+
+void pk_cmd_shutdown (void);
 
 #endif /* ! PK_H_CMD */

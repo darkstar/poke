@@ -45,7 +45,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
   char string[18];
   string[0] = ' ';
   string[17] = '\0';
-  pk_io_off cur, address, count, top;
+  pk_io_off address, count, top;
 
   assert (argc == 2);
 
@@ -114,5 +114,5 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd dump_cmd =
-  {"dump", "?a,?n", PK_CMD_F_REQ_IO, NULL, pk_cmd_dump,
+  {"dump", "?a,?n", PK_CMD_F_REQ_IO, NULL, NULL, pk_cmd_dump,
    "dump [ADDRESS] [,COUNT]"};

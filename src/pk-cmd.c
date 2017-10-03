@@ -27,6 +27,8 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <wordexp.h> /* For tilde-expansion.  */
+#include <xalloc.h>
+#include <ctype.h>
 
 #include "poke.h"
 #include "pk-io.h"
@@ -84,12 +86,143 @@ pk_atoi (char **p, long int *number)
   return 1;
 }
 
+/* Little implementation of prefix trees, or tries.  */
+
+static struct pk_trie *
+pk_trie_new (char c, struct pk_trie *parent)
+{
+  struct pk_trie *trie;
+  size_t i;
+
+  trie = xmalloc (sizeof (struct pk_trie));
+  trie->c = c;
+  trie->parent = parent;
+  trie->cmd = NULL;
+  trie->num_children = 0;
+  for (i = 0; i < 256; i++)
+    trie->children[i] = NULL;
+
+  return trie;
+}
+
+static void
+pk_trie_free (struct pk_trie *trie)
+{
+  int i;
+
+  if (trie == NULL)
+    return;
+
+  for (i = 0; i < 256; i++)
+    pk_trie_free (trie->children[i]);
+
+  free (trie);
+  return;
+}
+
+static void
+pk_trie_expand_cmds (struct pk_trie *root,
+                     struct pk_trie *trie)
+{
+  size_t i;
+  struct pk_trie *t;
+
+  if (trie->cmd != NULL)
+    {
+      t = trie->parent;
+      while (t != root && t->num_children == 1)
+        {
+          t->cmd = trie->cmd;
+          t = t->parent;
+        }
+    }
+  else
+    for (i = 0; i < 256; i++)
+      {
+        if (trie->children[i] != NULL)
+          pk_trie_expand_cmds (root, trie->children[i]);
+      }
+}
+
+static struct pk_trie *
+pk_trie_from_cmds (struct pk_cmd *cmds[])
+{
+  size_t i;
+  struct pk_trie *root;
+  struct pk_trie *t;
+  struct pk_cmd *cmd;
+
+  root = pk_trie_new (' ', NULL);
+  t = root;
+
+  for (i = 0, cmd = cmds[0];
+       cmd->name != NULL;
+       cmd = cmds[++i])
+    {
+      const char *p;
+
+      for (p = cmd->name; *p != '\0'; p++)
+        {
+          int c = *p;
+
+          if (t->children[c] == NULL)
+            {
+              t->num_children++;
+              t->children[c] = pk_trie_new (c, t);
+            }
+          t = t->children[c];
+        }
+
+      /* Note this assumes no commands with empty names.  */
+      t->cmd = cmd;
+      t = root;
+    }
+
+  pk_trie_expand_cmds (root, root);
+  return root;
+}
+
+static struct pk_cmd *
+pk_trie_get_cmd (struct pk_trie *trie, const char *str)
+{
+  const char *pc;
+
+  for (pc = str; *pc; pc++)
+    {
+      int n = *pc;
+      
+      if (trie->children[n] == NULL)
+        return NULL;
+
+      trie = trie->children[n];
+    }
+
+  return trie->cmd;
+}
+
+#if 0
+static void
+pk_print_trie (int indent, struct pk_trie *trie)
+{
+  size_t i;
+
+  for (i = 0; i < indent; i++)
+    printf (" ");
+  printf ("TRIE:: '%c' cmd='%s'\n",
+          trie->c, trie->cmd != NULL ? trie->cmd->name : "NULL");
+
+  for (i =0 ; i < 256; i++)
+    if (trie->children[i] != NULL)
+      pk_print_trie (indent + 2, trie->children[i]);
+}
+#endif
+
 /* Routines to execute a command.  */
 
 #define MAX_CMD_NAME 18
 
 static int
-pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
+pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 {
   int ret = 1;
   size_t i;
@@ -113,29 +246,23 @@ pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
     cmd_name[i++] = *(p++);
   cmd_name[i] = '\0';
 
-  /* Find the command in the commands table.  */
-  for (i = 0, cmd = cmds[0];
-       cmd->name != NULL;
-       cmd = cmds[++i])
-    {
-      if (strcmp (cmd->name, cmd_name) == 0)
-        break;
-    }
-  if (cmd->name == NULL)
+  /* Look for the command in the prefix table.  */
+  cmd = pk_trie_get_cmd (cmds_trie, cmd_name);
+  if (cmd == NULL)
     {
       if (prefix != NULL)
         printf ("%s ", prefix);
       printf ("%s: command not found.\n", cmd_name);
-      return 0;
+      return 0;      
     }
 
   /* If this command has subcommands, process them and be done.  */
-  if (cmd->sub != NULL)
+  if (cmd->subtrie != NULL)
     {
       p = skip_blanks (p);
       if (*p == '\0')
         goto usage;
-      return pk_cmd_exec_1 (p, cmd->sub, cmd_name);
+      return pk_cmd_exec_1 (p, *cmd->subtrie, cmd_name);
     }
   
   /* Parse arguments.  */
@@ -320,8 +447,29 @@ pk_cmd_exec_1 (char *str, struct pk_cmd *cmds[], char *prefix)
   return 0;
 }
 
+extern struct pk_cmd *info_cmds[]; /* pk-info.c  */
+extern struct pk_trie *info_trie; /* pk-info.c  */
+
+static struct pk_trie *cmds_trie;
+
 int
 pk_cmd_exec (char *str)
 {
-  return pk_cmd_exec_1 (str, cmds, NULL);
+  if (cmds_trie == NULL)
+    cmds_trie = pk_trie_from_cmds (cmds);
+  if (info_trie == NULL)
+    info_trie = pk_trie_from_cmds (info_cmds);
+
+#if 0
+  pk_print_trie (0, cmds_trie);
+#endif
+  
+  return pk_cmd_exec_1 (str, cmds_trie, NULL);
+}
+
+void
+pk_cmd_shutdown (void)
+{
+  pk_trie_free (cmds_trie);
+  pk_trie_free (info_trie);
 }

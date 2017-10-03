@@ -53,5 +53,5 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd poke_cmd =
-  {"poke", "a,?i", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, pk_cmd_poke,
-   "poke ADDRESS [,VALUE]"};
+  {"poke", "a,?i", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, NULL,
+   pk_cmd_poke, "poke ADDRESS [,VALUE]"};

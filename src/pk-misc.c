@@ -46,4 +46,4 @@ pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd exit_cmd =
-  {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"};
+  {"exit", "?i", 0, NULL, NULL, pk_cmd_exit, "exit [CODE]"};
