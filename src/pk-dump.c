@@ -1,4 +1,4 @@
-/* pk-dump.c - Poke `dump' command.  */
+/* pk-dump.c - `dump' command.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

@@ -1,4 +1,4 @@
-/* pk-info.c - Poke `info' command.  */
+/* pk-info.c - `info' command.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

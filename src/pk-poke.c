@@ -1,4 +1,4 @@
-/* pk-poke.c - Poke `poke' command.  */
+/* pk-poke.c - `poke' command.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

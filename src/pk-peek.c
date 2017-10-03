@@ -1,4 +1,4 @@
-/* pk-peek.c - Poke `peek' command.  */
+/* pk-peek.c - `peek' command.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
