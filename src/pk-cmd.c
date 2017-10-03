@@ -448,7 +448,10 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
       pk_io cur_io = pk_io_cur ();
       if (cur_io == NULL
           || !(PK_IO_MODE (cur_io) & O_RDWR))
-        puts ("This command requires a writable IO stream.");
+        {
+          puts ("This command requires a writable IO stream.");
+          return 0;
+        }
     }
 
   /* Call the command handler, passing the arguments.  */
@@ -479,10 +482,6 @@ pk_cmd_exec (char *str)
   if (help_trie == NULL)
     help_trie = pk_trie_from_cmds (help_cmds);
 
-#if 0
-  pk_print_trie (0, cmds_trie);
-#endif
-  
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }
 
