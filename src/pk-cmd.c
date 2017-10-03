@@ -86,7 +86,19 @@ pk_atoi (char **p, long int *number)
   return 1;
 }
 
-/* Little implementation of prefix trees, or tries.  */
+/* Little implementation of prefix trees, or tries.  This is used in
+   order to support calling to commands and subcommands using
+   unambiguous prefixes.  It is also a pretty efficient way to decode
+   command names.  */
+
+struct pk_trie
+{
+  char c;
+  struct pk_trie *parent;
+  int num_children;
+  struct pk_trie *children[256];
+  struct pk_cmd *cmd;
+};
 
 static struct pk_trie *
 pk_trie_new (char c, struct pk_trie *parent)

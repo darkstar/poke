@@ -23,15 +23,6 @@
 
 #include "pk-io.h"
 
-struct pk_trie
-{
-  char c;
-  struct pk_trie *parent;
-  int num_children;
-  struct pk_trie *children[256];
-  struct pk_cmd *cmd;
-};
-
 enum pk_cmd_arg_type
 {
   PK_CMD_ARG_NULL,
