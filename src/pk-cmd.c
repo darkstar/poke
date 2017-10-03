@@ -347,7 +347,12 @@ pk_cmd_exec_1 (char *str, struct pk_cmd cmds[], char *prefix)
 
   /* If this command has subcommands, process them and be done.  */
   if (cmd->sub != NULL)
-    return pk_cmd_exec_1 (p, cmd->sub, cmd_name);
+    {
+      p = skip_blanks (p);
+      if (*p == '\0')
+        goto usage;
+      return pk_cmd_exec_1 (p, cmd->sub, cmd_name);
+    }
   
   /* Parse arguments.  */
   argc = 0;
