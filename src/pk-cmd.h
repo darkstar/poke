@@ -21,6 +21,50 @@
 
 #include <config.h>
 
+#include "pk-io.h"
+
+/* Commands management.  */
+
+enum pk_cmd_arg_type
+{
+  PK_CMD_ARG_INT,
+  PK_CMD_ARG_ADDR,
+  PK_CMD_ARG_STRING,
+  PK_CMD_ARG_TAG
+};
+
+struct pk_cmd_arg
+{
+  enum pk_cmd_arg_type type;
+  union
+  {
+    long int integer;
+    pk_io_off addr;
+    const char *string;
+    int tag;
+  } val;
+};
+
+typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg *argv[]);
+
+#define PK_CMD_F_REQ_IO 0x1  /* Command requires an IO stream.  */
+#define PK_CMD_F_REQ_W  0x2  /* Command requires a writable IO stream.  */
+
+struct pk_cmd
+{
+  /* Name of the command.  It is a NULL-terminated string composed by
+     alphanumeric characters and '_'.  */
+  const char *name;
+  /* String specifying the arguments accepted by the command.  */
+  const char *arg_fmt;
+  /* A value composed of or-ed PK_CMD_F_* flags.  See above.  */
+  int flags;
+  /* Subcommands.  */
+  struct pk_cmd *sub;
+  /* Function implementing the command.  */
+  pk_cmd_fn handler;
+};
+
 int pk_cmd_exec (char *str);
 
 #endif /* ! PK_H_CMD */

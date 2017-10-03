@@ -119,6 +119,13 @@ pk_io_getc (void)
   return fgetc (cur_io->file);
 }
 
+int
+pk_io_putc (int c)
+{
+  int ret = putc (c, cur_io->file);
+  return ret == EOF ? PK_EOF : ret;
+}
+
 pk_io_off
 pk_io_tell (pk_io io)
 {

@@ -72,6 +72,7 @@ pk_atoi (char **p, long int *number)
   return 1;
 }
 
+
 /* Commands follow.  */
 
 static int
@@ -100,7 +101,7 @@ pk_cmd_file (char *str)
       io = pk_io_get (io_id);
       if (io == NULL)
         {
-          printf ("no such file #%d\n", io_id);
+          printf ("No such file #%d\n", io_id);
           return 0;
         }
 
@@ -152,7 +153,7 @@ pk_cmd_file (char *str)
 
       if (pk_io_search (filename) != NULL)
         {
-          printf ("file %s already opened.  Use `file #N' to switch.\n",
+          printf ("File %s already opened.  Use `file #N' to switch.\n",
                   filename);
           return 0;
         }
@@ -161,12 +162,12 @@ pk_cmd_file (char *str)
     }
 
   if (poke_interactive_p)
-    printf ("current file is now %s\n", PK_IO_FILENAME (pk_io_cur ()));
+    printf ("The current file is now `%s'.\n", PK_IO_FILENAME (pk_io_cur ()));
 
   return 1;
 
  usage:
-  puts ("usage: file (FILENAME|#ID)");
+  puts ("Usage: file (FILENAME|#ID)");
   return 0;
 }
 
@@ -185,7 +186,7 @@ pk_cmd_dump (char *str)
 
   if (pk_io_cur () == NULL)
     {
-      puts ("this command requires a loaded file");
+      puts ("This command requires an IO stream.  Use the `file' command.");
       return 0;
     }
   
@@ -229,7 +230,8 @@ pk_cmd_dump (char *str)
   top = address + 0x10 * count;
 
   /* Dump the requested address.  */
-  
+
+  cur = pk_io_tell (pk_io_cur ());
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
   if (poke_interactive_p)
@@ -272,10 +274,14 @@ pk_cmd_dump (char *str)
         puts (string);
     }
 
+  /* XXX: save last position in case the next command is also a
+     dump.  */
+  /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
+
   return 1;
 
  usage:
-  puts ("usage: dump [ADDRESS] [,COUNT]");
+  puts ("Usage: dump [ADDRESS] [,COUNT]");
   return 0;
 }
 
@@ -322,7 +328,74 @@ pk_cmd_info (char *str)
   return 1;
   
  usage:
-  puts ("usage: info (files)");
+  puts ("Usage: info (files)");
+  return 0;
+}
+
+static int
+pk_cmd_poke (char *str)
+{
+  /* poke ADDR, VAL */
+
+  char *p;
+  pk_io_off address;
+  long int value;
+
+  /* This command requires an IO stream.  */
+
+  if (pk_io_cur () == NULL)
+    {
+      puts ("This command requires an IO stream.  Use the `file' command.");
+      return 0;
+    }
+  
+  /* Parse arguments.  */
+  p = skip_blanks (str);
+
+  if (*p == '\0')
+    goto usage;
+
+  /* Get the address.  */
+  if (*p == ',')
+    address = pk_io_tell (pk_io_cur ());
+  else
+    {
+      if (!pk_atoi (&p, &address))
+        goto usage;
+    }
+
+  /* Get the value.  */
+  p = skip_blanks (p);
+
+  if (*p == '\0')
+    value = 0;
+  else if (*p == ',')
+    {
+      p++; /* Skip ,  */
+      if (!pk_atoi (&p, &value))
+        goto usage;
+    }
+  else
+    goto usage;
+
+  p = skip_blanks (p);
+  if (*p != '\0')
+    goto usage;
+
+  /* XXX: endianness, and what not.   */
+  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
+  if (pk_io_putc ((int) value) == PK_EOF)
+    {
+      printf ("Error writing byte 0x%x to 0x%08jx\n",
+              value, address);
+    }
+  else
+    printf ("0x%08jx <- 0x%x\n", address, value);
+
+  return 1;
+  
+ usage:
+  puts ("Usage: poke ADDRESS, VALUE");
   return 0;
 }
 
@@ -358,9 +431,26 @@ pk_cmd_exit (char *str)
   return 1;
 
  usage:
-  puts ("usage: exit CODE");
+  puts ("Usage: exit CODE");
   return 0;
 }
+
+/* Table of commands.  */
+
+static struct pk_cmd info_cmds[] =
+  {
+    {"files", "", 0, NULL, /* pk_cmd_info_files */ NULL},
+  };
+
+static struct pk_cmd cmds[] =
+  {
+    {"dump", "[a],[o]", PK_CMD_F_REQ_IO,                  NULL, pk_cmd_dump},
+    {"poke", "[a],[i]", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL, pk_cmd_poke},
+    {"file", "ft",                                     0, NULL, pk_cmd_file},
+    {"exit", "[I]",                                    0, NULL, pk_cmd_exit},
+    {"info", "s",                                      0, info_cmds, NULL},
+    {NULL, NULL,                                       0, NULL, NULL}
+  };
 
 int
 pk_cmd_exec (char *str)
@@ -385,9 +475,11 @@ pk_cmd_exec (char *str)
   /* Dispatch to the appropriate command handler.  */
   ret = 0;
   if (cmd_name[0] == '\0')
-    puts ("invalid command");
+    puts ("Invalid command.");
   else if (strcmp (cmd_name, "dump") == 0)
     ret = pk_cmd_dump (p);
+  else if (strcmp (cmd_name, "poke") == 0)
+    ret = pk_cmd_poke (p);
   else if (strcmp (cmd_name, "file") == 0)
     ret = pk_cmd_file (p);
   else if (strcmp (cmd_name, "info") == 0)
@@ -395,7 +487,8 @@ pk_cmd_exec (char *str)
   else if (strcmp (cmd_name, "exit") == 0)
     ret = pk_cmd_exit (p);
   else
-    printf ("%s: command not found\n", cmd_name);
+    printf ("%s: command not found.\n", cmd_name);
 
   return ret;
 }
+

@@ -78,6 +78,11 @@ int pk_io_seek (pk_io io, pk_io_off offset, int whence);
 
 int pk_io_getc (void);
 
+/* Write a character in the current IO stream.  Return the character
+   written as an unsigned char cast ot an int, or PK_EOF on error.  */
+
+int pk_io_putc (int c);
+
 /* Return the current IO stream.  */
 
 pk_io pk_io_cur (void);
