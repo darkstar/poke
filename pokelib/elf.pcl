@@ -561,7 +561,7 @@ enum elf_word elf_sh_type
   SHT_HIUSER = 0xffffffff
 };
 
-bitmask elf_xword elf_sh_flags
+bitmask elf_word elf_sh_flags
 {
   /** Section contains data that should be writable during process
       execution.  */
@@ -767,9 +767,8 @@ enum int elf_sym_visibility
 /** ELF relocation.  */
 struct elf_rel (enum elf_ei_class class)
 {
-  switch (class)
+  if (class == ELFCLASS32)
     {
-    case ELFCLASS32:
       /** Relocation location.  */
       elf32_addr r_offset;
       /** Relocation info: symbol + type.  */
@@ -779,10 +778,9 @@ struct elf_rel (enum elf_ei_class class)
       int r_sym : 24;
       /** Relocation type.  */
       int r_type : 8;
-
-      break;
-
-    case ELFCLASS64:
+    }
+  else
+    {
       /** Relocation location.  */
       elf64_addr r_offset;
       /** Relocation info: symbol + type.  */
@@ -791,11 +789,6 @@ struct elf_rel (enum elf_ei_class class)
       /** Relocation symbol.  */
       int r_sym : 32;
       int r_type : 32;
-
-      break;
-
-    case ELFCLASSNONE:
-      break;
     }
 
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
@@ -804,9 +797,8 @@ struct elf_rel (enum elf_ei_class class)
 /** ELF relocation with addend.  */
 struct elf_rela (enum elf_ei_class class)
 {
-  switch (class)
+  if (class == ELFCLASS32)
     {
-    case ELFCLASS32:
       /** Relocation info: symbol + type.  */
       elf_word r_info;
       . = @r_info;
@@ -814,10 +806,9 @@ struct elf_rela (enum elf_ei_class class)
       int r_sym : 24;
       /** Relocation type.  */
       int r_type : 8;
-      
-      break;
-
-    case ELFCLASS64:
+    }
+  else
+    {
       /** Relocation location.  */
       elf64_addr r_offset;
       /** Relocation info: symbol + type.  */
@@ -826,11 +817,6 @@ struct elf_rela (enum elf_ei_class class)
       /** Relocation symbol.  */
       int r_sym : 32;
       int r_type : 32;
-
-      break;
-
-    case ELFCLASSNONE:
-      break;
     }
 
   /** Constant addend used to compute the value to be stored into the
@@ -881,11 +867,11 @@ struct elf_ehdr
       break;
     case ELFDATA2LSB:
       .endian = lsb;
-      .nencoding = neg2c;
+      .nencoding = n2c;
       break;
     case ELFDATA2MSB:
       .endian = msb;
-      .nencoding = neg2c;
+      .nencoding = n2c;
       break;
     }
   
@@ -903,17 +889,34 @@ struct elf_ehdr
   /** Object file version.  */
   enum elf_e_version e_version;
 
-  /** Virtual address of entry point.  If the file has no associated
-      entry point, holds zero.  */
-  elf_xword e_entry;
+  if (ehdr.e_ident.ei_class == ELFCLASS32)
+    {
+      /** Virtual address of entry point.  If the file has no
+          associated entry point, holds zero.  */
+      elf32_addr e_entry;
 
-  /** Program header table's file offset in bytes.  If the file has no
-      program header table, holds zero.  */
-  elf_xword e_phoff;
+      /** Program header table's file offset in bytes.  If the file
+          has no program header table, holds zero.  */
+      elf32_off e_phoff;
 
-  /** Section header table's file offset in bytes.  If the file has no
-      section header table, holds zero.  */
-  elf_xword e_shoff;
+      /** Section header table's file offset in bytes.  If the file
+          has no section header table, holds zero.  */
+      elf32_off e_shoff;
+    }
+  else
+    {
+      /** Virtual address of entry point.  If the file has no
+          associated entry point, holds zero.  */
+      elf64_addr e_entry;
+
+      /** Program header table's file offset in bytes.  If the file
+          has no program header table, holds zero.  */
+      elf64_off e_phoff;
+
+      /** Section header table's file offset in bytes.  If the file
+          has no section header table, holds zero.  */
+      elf64_off e_shoff;
+    }
 
   /** XXX: this is machine-specific.  */
   elf_word  e_flags;
@@ -931,7 +934,7 @@ struct elf_ehdr
 
   /** Size in bytes of one entry in the file's section header
       table.  */
-  elf_half  e_shentsize; /* XXX  = sizeof (struct elf_shdr); */
+  elf_half  e_shentsize;
 
   /** Number of entries in the section header table.  If the file has
       no section header table, holds zero.  */
@@ -943,52 +946,82 @@ struct elf_ehdr
 };
 
 /** ELF program header.  */
-struct elf_phdr (struct elf_ehdr ehdr)
+struct elf_phdr (enum elf_ei_class class)
 {
   /** Segment type.  */
   enum elf_p_type p_type;
 
-  /* SHT_GROUP sections should only appear in relocatable
-     objects.  */
+  if (class == ELFCLASS32)
+    {
+      /** Offset into the beginning of the file at which the first
+          byte of the segment resides.  */
+      elf32_off p_offset;
+
+      /** Virtual address at which the first byte of the segment
+          resides in memory.  */
+      elf32_addr p_vaddr;
+
+      /** On systems for which physical addressing is relevant, this
+          member is reserved for the segment's physical address.
+          Becase System V ignores physical addressing for application
+          programs, this member has unspecified contents for
+          executable files and shared objects.  */
+      elf32_addr p_paddr;
+
+      /** This member gives the number of bytes in the file image of
+          the segment; it may be zero.  */
+      elf_word p_filesz;
   
-  assert (p_type == SHT_GROUP => ehdr.e_type == ET_REL);
+      /** This member gives the number of bytes in the memory image of
+          the segment; it may be zero.  */
+      elf_word p_memsz;
 
-  /** This member gives flags relevant to the segment.  */
-  bitmask elf_p_flags p_flags;
+      /** This member gives the value to which the segments are
+          aligned in memory and in the file.  VAlues 0 and 1 mean no
+          alignment is required.  Otherwise, p_align should be a
+          positive, integral power of 2, and p_vaddr should equal
+          p_offset, modulo p_align.  */
+      elf_word p_align;
+    }
+  else
+    {
+      /** This member gives flags relevant to the segment.  */
+      bitmask elf_p_flags p_flags;
 
-  /** Offset into the beginning of the file at which the first byte of
-      the segment resides.  */
-  elf_off p_offset;
+      /** Offset into the beginning of the file at which the first
+          byte of the segment resides.  */
+      elf64_off p_offset;
 
-  /** Virtual address at which the first byte of the segment resides
-      in memory.  */
-  elf_addr p_vaddr;
+      /** Virtual address at which the first byte of the segment
+          resides in memory.  */
+      elf64_addr p_vaddr;
 
-  /** On systems for which physical addressing is relevant, this
-      member is reserved for the segment's physical address.  Becase
-      System V ignores physical addressing for application programs,
-      this member has unspecified contents for executable files and
-      shared objects.  */
-  elf_addr p_paddr;
+      /** On systems for which physical addressing is relevant, this
+          member is reserved for the segment's physical address.
+          Becase System V ignores physical addressing for application
+          programs, this member has unspecified contents for
+          executable files and shared objects.  */
+      elf64_addr p_paddr;
 
-  /** This member gives the number of bytes in the file image of the
-      segment; it may be zero.  */
-  elf_xword p_filesz;
+      /** This member gives the number of bytes in the file image of
+          the segment; it may be zero.  */
+      elf64_xword p_filesz;
+  
+      /** This member gives the number of bytes in the memory image of
+          the segment; it may be zero.  */
+      elf64_xword p_memsz;
 
-  /** This member gives the number of bytes in the memory image of the
-      segment; it may be zero.  */
-  elf_xword p_memsz;
-
-  /** This member gives the value to which the segments are aligned in
-      memory and in the file.  VAlues 0 and 1 mean no alignment is
-      required.  Otherwise, p_align should be a positive, integral
-      power of 2, and p_vaddr should equal p_offset, modulo
-      p_align.  */
-  elf_xword p_align;
+      /** This member gives the value to which the segments are
+          aligned in memory and in the file.  VAlues 0 and 1 mean no
+          alignment is required.  Otherwise, p_align should be a
+          positive, integral power of 2, and p_vaddr should equal
+          p_offset, modulo p_align.  */
+      elf64_xword p_align;
+    }
 };
 
 /** ELF section header.  */
-struct elf_shdr (struct elf_ehdr ehdr)
+struct elf_shdr (enum elf_ei_class class)
 {
   /** Index of the section's name into the section header string table
       section.  */
@@ -999,21 +1032,39 @@ struct elf_shdr (struct elf_ehdr ehdr)
   enum elf_sh_type sh_type;
 
   /** Section flags.  */
-  bitmask elf_sh_flags sh_flags;
+  bitmask elf_sh_flags sh_flags : class == ELFCLASS32 ? 32 : 64;
 
-  /** If the section will appear in the memory image of a process,
-      this member gives the address at which the section's first byte
-      should reside.  Otherwise the member contains 0.  */
-  elf_addr sh_addr;
-
-  /** Byte offset from the beginning of the file to the first byte in
-      the section.  For SHT_NOBITS sections, this is the conceptual
-      placement on the file.  */
-  elf_off sh_offset;
-
-  /** Section size in bytes.  */
-  elf_xword sh_size;
-
+  if (class == ELFCLASS32)
+    {
+      /** If the section will appear in the memory image of a process,
+          this member gives the address at which the section's first
+          byte should reside.  Otherwise the member contains 0.  */
+      elf32_addr sh_addr;
+      
+      /** Byte offset from the beginning of the file to the first byte
+          in the section.  For SHT_NOBITS sections, this is the
+          conceptual placement on the file.  */
+      elf32_off sh_offset;
+      
+      /** Section size in bytes.  */
+      elf_word sh_size;
+    }
+  else if (class == ELFCLASS64)
+    {
+      /** If the section will appear in the memory image of a process,
+          this member gives the address at which the section's first
+          byte should reside.  Otherwise the member contains 0.  */
+      elf64_addr sh_addr;
+      
+      /** Byte offset from the beginning of the file to the first byte
+          in the section.  For SHT_NOBITS sections, this is the
+          conceptual placement on the file.  */
+      elf64_off sh_offset;
+      
+      /** Section size in bytes.  */
+      elf64_xword sh_size;
+    }
+  
   /** Section header table index link.  */
   elf_word sh_link;
 
@@ -1021,13 +1072,26 @@ struct elf_shdr (struct elf_ehdr ehdr)
       type.  */
   elf_word  sh_info;
 
-  /**  Alignment constraint for the section.  */
-  elf_xword sh_addralign;
+  if (class == ELFCLASS32)
+    {
+      /**  Alignment constraint for the section.  */
+      elf_word sh_addralign;
 
-  /** If the section holds a table of fixed-size entries, this holds
-      the size of each entry in bits.  Holds 0 if the section does not
-      hold a table of fixed-size entries.  */
-  elf_xword sh_entsize;
+      /** If the section holds a table of fixed-size entries, this
+          holds the size of each entry in bits.  Holds 0 if the
+          section does not hold a table of fixed-size entries.  */
+      elf_word sh_entsize;
+    }
+  else
+    {
+      /**  Alignment constraint for the section.  */
+      elf64_xword sh_addralign;
+
+      /** If the section holds a table of fixed-size entries, this
+          holds the size of each entry in bits.  Holds 0 if the
+          section does not hold a table of fixed-size entries.  */
+      elf64_xword sh_entsize;
+    }
 
   assert (sh_size % sh_entsize == 0);
 };
@@ -1036,24 +1100,34 @@ struct elf_shdr (struct elf_ehdr ehdr)
 
 /** ELF compressed section header.
     Used in sections with SHF_COMPRESSED.  */
-struct elf_chdr
+struct elf_chdr (enum elf_ei_class class)
 {
   /** Compression algorithm.  */
   enum elf_ch_type ch_type;
 
-  /** Size in bytes of the uncompressed data.  */
-  elf_xword ch_size;
-
-  /** Required alignment of the uncompressed data.  */
-  elf_xword ch_addralign;
+  if (class == ELFCLASS32)
+    {
+      /** Size in bytes of the uncompressed data.  */
+      elf_xword ch_size;
+      /** Required alignment of the uncompressed data.  */
+      elf_word ch_addralign;
+    }
+  else
+    {
+      /** Reserved.  */
+      elf64_word ch_reserved;
+      /** Size in bytes of the uncompressed data.  */
+      elf64_xword ch_size;
+      /** Required alignment of the uncompressed data.  */
+      elf64_xword ch_addralign;
+    }
 };
 
 /** ELF symbol table entry.  */
 struct elf_sym (enum elf_ei_class class)
 {
-  switch (class)
+  if (class == ELFCLASS32)
     {
-    case ELFCLASS32:
       /** Index into the object file's symbol string table,
           which holds the character representations of the
           symbol names.  */
@@ -1082,9 +1156,9 @@ struct elf_sym (enum elf_ei_class class)
       /* Section header table index of the section related to this
          symbol.  */
       elf32_half st_shndx;
-      break;
-
-    case ELFCLASS64:
+    }
+  else
+    {
       /** Index into the object file's symbol string table,
           which holds the character representations of the
           symbol names.  */
@@ -1114,11 +1188,7 @@ struct elf_sym (enum elf_ei_class class)
       elf64_addr st_value;
       /** Size associated with this symbol.  */
       elf64_xword st_size;
-      break;
-      
-    case ELFCLASSNONE:
-      break;
-    };
+    }
 
   /* Constraints.  */
 
@@ -1178,7 +1248,7 @@ struct elf
     {
       . = ehdr.e_shoff;
       /** ELF section header table.  */      
-      struct elf_shdr shdr[ehdr.e_shnum] (ehdr);
+      struct elf_shdr shdr (ehdr.e_ident.ei_class) [ehdr.e_shnum];
     };
 
   if (ehdr.e_phnum > 0)
@@ -1189,7 +1259,7 @@ struct elf
           Some entries describe process segments; others give
           supplementary information and do not contribute to the
           process image.  */
-      struct elf_phdr phdr[ehdr.e_phnum] (ehdr);
+      struct elf_phdr phdr (ehdr.e_ident.ei_class) [ehdr.e_phnum];
     };
 
   /* The sections and segments themselves are defined in terms of the
@@ -1217,6 +1287,10 @@ struct elf
      - Only one SHT_DYNAMIC section.
      - Only one PT_INTERP segment in a file.
      - Only one PT_PHDR segment in a file.
+
+     - SHT_GROUP sections should only appear in relocatable
+       objects.
+    assert (p_type == SHT_GROUP => ehdr.e_type == ET_REL);
 */
 
 /* Functions for:
