@@ -29,7 +29,25 @@
  * with these names.
  */
 
-enum uint8 elf_ei_class
+/* First of all, define some types.  */
+
+typedef unsigned int elf_word;
+typedef int elf_sword;
+typedef unsigned short elf_half;
+
+typedef unsigned int elf32_addr;
+typedef unsigned int elf32_off;
+typedef unsigned int elf32_sword;
+
+typedef unsigned long elf64_addr;
+typedef unsigned long elf64_off;
+typedef unsigned long elf64_xword;
+typedef int elf64_sword;
+typedef long elf64_sxword;
+
+/* Now enumerations.  */
+
+enum byte elf_ei_class
 {
   /** Invalid class.  */
   ELFCLASSNONE = 0x0,
@@ -37,6 +55,18 @@ enum uint8 elf_ei_class
   ELFCLASS32 = 0x1,
   /** 64-bit objects.  */
   ELFCLASS64 = 0x2
+};
+
+enum byte elf_ei_data
+{
+  /** Invalid data encoding.  */
+  ELFDATANONE = 0,
+  /** 2's complement values, with the least significant byte occupying
+      the lowest address.  */
+  ELFDATA2LSB = 1,
+  /** 2's complement values, with the most significant byte occupying
+      the lowest address.  */
+  ELFDATA2MSB = 2
 };
 
 enum elf_half elf_e_type
@@ -654,76 +684,182 @@ enum elf_word elf_ch_type
   ELFCOMPRESS_HIPROC = 0x7fffffff
 };
 
-/** ELF relocation.  */
-struct elf_rel
+enum int elf_sym_binding
 {
-  /** Relocation location.  */
-  elf_addr r_offset;
+  /** Local symbols are not visible outside the object file containing
+      their definition.  Local symbols of the same name exist in multiple
+      files without interfering with each other.  */
+  STB_LOCAL = 0,
+  /** Global symbols are visible to all object files being combined.
+      One file's definition of a global symbol will satisfy another
+      file's undefined reference to the same global symbol.  */
+  STB_GLOBAL = 1,
+  /** Weak symbols resemble global symbols, but their definitions have
+      lower precedence.  */
+  STB_WEAK = 2,
+  /** Operating system-specific semantics.  */
+  STB_LOOS = 10,
+  /** Operating system-specific semantics.  */
+  STB_HIOS = 12,
+  /** Processor-specific semantics.  */
+  STB_LOPROC = 13,
+  /** Processor-specific semantics.  */
+  STB_HIPROC = 15
+};
 
-  /** Relocation info: symbol + type.  */
-  elf_xword r_info;
+enum int elf_st_type
+{
+  /** The symbol's type is not specified.  */
+  STT_NOTYPE = 0,
+  /** The symbol is associated with a data object, such as a
+      variable, an array, and so on.  */
+  STT_OBJECT = 1,
+  /** The symbol is associated with a function or other executable
+      code.  */
+  STT_FUNC = 2,
+  /** The symbol is associated with a section.  Symbol table entries
+      of this type exist primarily for relocation and normally have
+      STB_LOCAL binding.  */
+  STT_SECTION = 3,
+  /** Conventionally, the symbol's name gives the name of the source
+      file associated with the object file.  A file symbol has
+      STB_LOCAL binding, its section index is SHN_ABS and it precedes
+      the other STB_LOCAL symbols for the file, if it is present.  */
+  STT_FILE = 4,
+  /** This symbol labels an uninitialized common block.  */
+  STT_COMMON = 5,
+  /** The symbol specifies a Thread-Local Storage entity.  When
+      defined, it gives the assigned offset for the symbol, not the
+      actual address.  */
+  STT_TLS = 6,
+  /** Operating system-specific semantics.  */
+  STT_LOOS = 10,
+  /** Operating system-specific semantics.  */
+  STT_HIOS = 12,
+  /** Processor-specific semantics.  */
+  STT_LOPROC = 13,
+  /** Processor-specific semantics.  */
+  STT_HIPROC = 15
+};
 
-  . -= sizeof (r_info);
+enum int elf_sym_visibility
+{
+  /** The visibility of this symbol is specified by the symbol's
+      binding type.  That is, global and weak symbols are visible
+      outside of their defining component (executable file or shared
+      object).  Local symbols are hidden.  Global and weak symbols are
+      also preemptable, taht is, they may be preempted by definitions
+      of the same name in another component.  */
+  STV_DEFAULT = 0,
+  /** The visibility of this symbol is defined by processor
+      supplements, to further constrain hidden symbols.  */
+  STV_INTERNAL = 1,
+  /** This symbol is not visible to other components.  */
+  STV_HIDDEN = 2,
+  /** This symbol is visible in other components but not preemptable,
+      meaning that any reference to such a symbol from within the
+      defining component must be resolved to the definition in that
+      component, even if there is a definition in another component
+      that would preempt by the default rules.  */
+  STV_PROTECTED = 3
+};
 
-  /** Relocation symbol.  */
-  elf_r_sym r_sym;
+/** ELF relocation.  */
+struct elf_rel (enum elf_ei_class class)
+{
+  switch (class)
+    {
+    case ELFCLASS32:
+      /** Relocation location.  */
+      elf32_addr r_offset;
+      /** Relocation info: symbol + type.  */
+      elf_word r_info;
+      . = @r_info;
+      /** Relocation symbol.  */
+      int r_sym : 24;
+      /** Relocation type.  */
+      int r_type : 8;
 
-  /** Relocation type.  */
-  elf_r_type r_type;
+      break;
+
+    case ELFCLASS64:
+      /** Relocation location.  */
+      elf64_addr r_offset;
+      /** Relocation info: symbol + type.  */
+      elf64_xword r_info;
+      . = @r_info;
+      /** Relocation symbol.  */
+      int r_sym : 32;
+      int r_type : 32;
+
+      break;
+
+    case ELFCLASSNONE:
+      break;
+    }
 
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
 /** ELF relocation with addend.  */
-struct elf_rela
+struct elf_rela (enum elf_ei_class class)
 {
-  /** Relocation location.  */
-  elf_addr r_offset;
+  switch (class)
+    {
+    case ELFCLASS32:
+      /** Relocation info: symbol + type.  */
+      elf_word r_info;
+      . = @r_info;
+      /** Relocation symbol.  */
+      int r_sym : 24;
+      /** Relocation type.  */
+      int r_type : 8;
+      
+      break;
 
-  /** Relocation info: symbol + type.  */
-  elf_xword r_info;
+    case ELFCLASS64:
+      /** Relocation location.  */
+      elf64_addr r_offset;
+      /** Relocation info: symbol + type.  */
+      elf64_xword r_info;
+      . = @r_info;
+      /** Relocation symbol.  */
+      int r_sym : 32;
+      int r_type : 32;
 
-  . -= sizeof (r_info);
+      break;
 
-  /** Relocation symbol.  */
-  elf_r_sym r_sym;
-
-  /** Relocation type.  */
-  elf_r_type r_type;
-
-  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+    case ELFCLASSNONE:
+      break;
+    }
 
   /** Constant addend used to compute the value to be stored into the
       relocatable field.  */
-  elf_sxword r_addend;
+  elf_sword r_addend;
+
+  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
 /** ELF identification.  */
 struct elf_ident
 {
-  uint8 ei_mag[4] = {0x7f, 'E', 'L', 'F'};
+  byte ei_mag[4] = {0x7f, 'E', 'L', 'F'};
 
   /** File class.  */
   enum elf_ei_class ei_class;
-
   /** Data encoding.  */
-  uint8 ei_data;
-
+  byte ei_data;
   /** File version.  */
-  uint8 ei_version;
-
+  byte ei_version;
   /** Operating system/ABI identification.  */
-  uint8 ei_osabi;
-
+  byte ei_osabi;
   /** ABI version.  */
-  uint8 ei_abiversion;
-
+  byte ei_abiversion;
   /** Start of padding bytes.  */
-  uint8 ei_pad;
+  byte ei_pad;
   . = 16;
-
   /* Size of e_ident, in bytes.  */
-  uint8 ei_nident;
+  byte ei_nident;
 };
 
 
@@ -734,14 +870,32 @@ struct elf_ehdr
       file.  */
   struct elf_ident e_ident;
 
+  /* Set the endianness for the data stored in the ELF file using the
+     data encoding information in the header.  This applies to every
+     field defined from this point on.  */
+  switch (e_ident.ei_data)
+    {
+    case ELFDATANONE:
+      /* This should NOT happend.  */
+      assert (1);
+      break;
+    case ELFDATA2LSB:
+      .endian = lsb;
+      .nencoding = neg2c;
+      break;
+    case ELFDATA2MSB:
+      .endian = msb;
+      .nencoding = neg2c;
+      break;
+    }
+  
   /** File type.  */
-  enum elf_e_type e_type :
+  enum elf_e_type e_type;
 
-    /* Relocatable files require a section header table.  */
-    e_type == ET_REL => e_shnum > 0
-    /* Executable files require a program header table.  */
-    && e_type == ET_EXEC => e_phnum > 0
-  ;
+  /* Relocatable files require a section header table.  */
+  /* Executable files require a program header table.  */
+  assert (e_type == ET_REL => e_shnum > 0
+          && e_type == ET_EXEC => e_phnum > 0);
 
   /** Required architecture.  */
   enum elf_e_machine e_machine;
@@ -792,12 +946,12 @@ struct elf_ehdr
 struct elf_phdr (struct elf_ehdr ehdr)
 {
   /** Segment type.  */
-  enum elf_p_type p_type :
+  enum elf_p_type p_type;
 
-    /* SHT_GROUP sections should only appear in relocatable
-       objects.  */
-    p_type == SHT_GROUP => ehdr.e_type == ET_REL
-  ;
+  /* SHT_GROUP sections should only appear in relocatable
+     objects.  */
+  
+  assert (p_type == SHT_GROUP => ehdr.e_type == ET_REL);
 
   /** This member gives flags relevant to the segment.  */
   bitmask elf_p_flags p_flags;
@@ -874,6 +1028,8 @@ struct elf_shdr (struct elf_ehdr ehdr)
       the size of each entry in bits.  Holds 0 if the section does not
       hold a table of fixed-size entries.  */
   elf_xword sh_entsize;
+
+  assert (sh_size % sh_entsize == 0);
 };
 
 /* structs for the contents of certain ELF sections.  */
@@ -892,40 +1048,168 @@ struct elf_chdr
   elf_xword ch_addralign;
 };
 
+/** ELF symbol table entry.  */
+struct elf_sym (enum elf_ei_class class)
+{
+  switch (class)
+    {
+    case ELFCLASS32:
+      /** Index into the object file's symbol string table,
+          which holds the character representations of the
+          symbol names.  */
+      elf32_word st_name;
+      /** Value of the associated symbol.  */
+      elf32_addr st_value;
+      /** Size associated with this symbol.  */
+      elf32_word st_size;
+      unsigned char st_info;
+
+      . = @st_info;
+      enum elf_sym_binding st_bind : 28;
+      enum elf_sym_type st_type : 4;
+
+      assert (sizeof (st_info) ==
+              sizeof (st_bind) + sizeof (st_type));
+
+      /** Other information about the symbol.  */
+      unsigned char st_other;
+
+      . = @st_other;
+      /** Symbol's visibility.  */
+      enum elf_sym_visibility st_visibility : 3;
+      . += 5;
+
+      /* Section header table index of the section related to this
+         symbol.  */
+      elf32_half st_shndx;
+      break;
+
+    case ELFCLASS64:
+      /** Index into the object file's symbol string table,
+          which holds the character representations of the
+          symbol names.  */
+      elf64_word st_name;
+      /** Symbol's type and binding attributes.  */
+      unsigned char st_info;
+
+      . = @st_info;
+      enum elf_sym_binding st_bind : 60;
+      enum elf_sym_type st_type : 4;
+
+      assert (sizeof (st_info) ==
+              sizeof (st_bind) + sizeof (st_type));
+
+      /** Other information about the symbol.  */
+      unsigned char st_other;
+
+      . = @st_other;
+      /** Symbol's visibility.  */
+      enum elf_sym_visibility st_visibility : 3;
+      . += 5;
+
+      /* Section header table index of the section related to this
+         symbol.  */
+      elf64_half st_shndx;
+      /** Value of the associated symbol.  */
+      elf64_addr st_value;
+      /** Size associated with this symbol.  */
+      elf64_xword st_size;
+      break;
+      
+    case ELFCLASSNONE:
+      break;
+    };
+
+  /* Constraints.  */
+
+  /* A symbol with STB_LOCAL binding may not have STV_PROTECTED
+     visibility.  */
+  assert (st_bind == STV_LOCAL => st_visibility != STV_PROTECTED);
+
+  /* XXX: a STT_FILE symbol has STB_LOCAL binding, its section index
+     is SHN_ABS and it precedes the other STB_LOCAL symbols for the
+     file.  */
+};
+
+struct elf_section (enum elf_ei_class class,
+                    struct elf_shdr shdr)
+{
+  switch (shdr.sh_type)
+    {
+    case SHT_NULL:
+      break;
+
+    case SHT_PROGBITS:
+      char progbits[sh_size];
+      break;
+
+    case SHT_SYMTAB:
+      struct elf_sym symtab (class) [sh_size / sh_entsize];
+      break;
+
+    case SHT_REL:
+      struct elf_rel rel (class) [sh_size / sh_entsize];
+      break;
+
+    case SHT_RELA:
+      struct elf_rela rela (class) [sh_size / sh_entsize];
+      break;
+
+    default:
+      break;
+    };
+};
+
 /* Finally, the ELF object file itself.  */
 
 /** ELF object file.  */
 struct elf
 {
   /** ELF header.   */
-  struct elf_ehdr ehdr :
-    sizeof (ehdr.e_ident) == ehdr.e_ident.ei_nident
-      && sizeof (ehdr) == ehdr.e_ehsize;
-  ;
+  struct elf_ehdr ehdr;
+
+  assert (sizeof (ehdr.e_ident) == ehdr.e_ident.ei_nident
+          && sizeof (ehdr) == ehdr.e_ehsize);
 
   /* Both the section header table and the program header table are
      optional.  */
 
-  /** ELF section header table.  */
-ehdr.e_shoff:
-  struct elf_shdr shdr[ehdr.e_shnum] (ehdr) if ehdr.e_shnum > 0;
+  if (ehdr.e_shnum > 0)
+    {
+      . = ehdr.e_shoff;
+      /** ELF section header table.  */      
+      struct elf_shdr shdr[ehdr.e_shnum] (ehdr);
+    };
 
-  /** ELF program header table.
+  if (ehdr.e_phnum > 0)
+    {
+      . = ehdr.e_phoff;
+      /** ELF program header table.
      
-     Some entries describe process segments; others give supplementary
-     information and do not contribute to the process image.  */
-ehdr.e_phoff:
-  struct elf_phdr phdr[ehdr.e_phnum] (ehdr) if ehdr.e_phnum > 0;
+          Some entries describe process segments; others give
+          supplementary information and do not contribute to the
+          process image.  */
+      struct elf_phdr phdr[ehdr.e_phnum] (ehdr);
+    };
 
   /* The sections and segments themselves are defined in terms of the
      contents of the two tables defined above.  Note that sections and
      segments usually overlap. */
 
-shdr[i].sh_offset:
-  struct elf_section section for i in 0..ehdr.e_shnum;
+  let int i;
 
-phdr[i].p_offset:
-  struct elf_segment segment for i in 0..ehdr.e_phnum;
+  for (i = 0; i < ehdr.e_shnum; i++)
+    {
+      . = shdr[i].sh_offset;
+      struct elf_section section (ehdr.e_ident.ei_class,
+                                  shdr[i]);
+    }
+
+  for (i = 0; i < ehdr.e_phnum; i++)
+    {
+      . = phdr[i].p_offset;
+      struct elf_segment segment (ehdr, phdr[i]);
+    }
 };
 
 /* Integrity for struct elf:
@@ -934,3 +1218,10 @@ phdr[i].p_offset:
      - Only one PT_INTERP segment in a file.
      - Only one PT_PHDR segment in a file.
 */
+
+/* Functions for:
+
+   - Getting a section (array) given a name.
+
+*/
+ 
