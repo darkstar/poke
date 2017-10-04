@@ -1,4 +1,4 @@
-/* elf.pcl -- ELF implementation for GNU poke.  */  /* -*- mode: c -*- */
+/* elf.pkl -- ELF implementation for GNU poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi.  */
 
@@ -1710,4 +1710,10 @@ struct elf [[doc="ELF object file."]]
 
    - Getting a section (array) given a name.
 
+*/
+
+/*
+Local variables:
+mode:c
+End:
 */
