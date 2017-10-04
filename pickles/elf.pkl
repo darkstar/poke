@@ -47,6 +47,30 @@ typedef long elf64_sxword;
 
 /* Now enumerations.  */
 
+bitmask elf_word elf_e_flags (enum elf_e_machine mach)
+{
+  if (mach == EM_SPARC || mach == EM_SPARCV9
+      || mach == EM_SPARC32PLUS)
+    {
+      EF_SPARC_TSO = 0,
+      EF_SPARCV9_PSO = 1,
+      EF_SPARCV9_RMO = 2,
+      EF_SPARCV9_MM = 3,
+      EF_SPARC_LEDATA = 0x80_0000
+        [[doc="Little-endian data."]],
+      EF_SPARC_EX_MASK = 0xff_ff00
+        [[doc="Generic V8+ features."]],
+      EF_SPARC_32PLUS = 0x00_0100
+        [[doc="Generic V8+ features."]],
+      EF_SPARC_SUN_US1 = 0x00_0200
+        [[doc="Sun UltraSPARC1 extensions."]],
+      EF_SPARC_HAL_R1 = 0x00_0400
+        [[doc="HAL R1 extensions."]],
+      EF_SPARC_SUN_US3 = 0x00_0800
+        [[doc="Sun UltraSPARCIII extensions."]]
+    }
+};
+
 enum byte elf_ei_class
 {
   ELFCLASSNONE = 0x0 [[doc="Invalid class."]],
@@ -80,6 +104,165 @@ enum elf_half elf_e_type
   ET_HIOS = 0xFEFF,
   ET_LOPROC = 0xFF00,
   ET_HIPROC = 0xFFFF
+};
+
+enum elf_word elf_r_type (enum elf_e_machine mach)
+  [[doc="ELF relocation type."]]
+{
+  if (mach == EM_SPARC || mach == EM_SPARCV9
+      || mach == EM_SPARC32PLUS)
+    {
+      R_SPARC_NONE = 0
+        [[doc="No reloc."]],
+      R_SPARC_8 = 1
+        [[doc="Direct 8 bit."]],
+      R_SPARC_16 = 2
+        [[doc="Direct 16 bit."]],
+      R_SPARC_32 = 3
+        [[doc="Direct 32 bit."]],
+      R_SPARC_DISP8 = 4
+        [[doc="PC relative 8 bit."]],
+      R_SPARC_DISP16 = 5
+        [[doc="PC relative 16 bit."]],
+      R_SPARC_DISP32 = 6
+        [[doc="PC relative 32 bit."]],
+      R_SPARC_WDISP30 = 7
+        [[doc="PC relative 30 bit shifted."]],
+      R_SPARC_WDISP22 = 8
+        [[doc="PC relative 22 bit shifted."]],
+      R_SPARC_HI22 = 9
+        [[doc="High 22 bit."]],
+      R_SPARC_22 = 10
+        [[doc="Direct 22 bit."]],
+      R_SPARC_13 = 11
+        [[doc="Direct 13 bit."]],
+      R_SPARC_LO10 = 12
+        [[doc="Truncated 10 bit."]],
+      R_SPARC_GOT10 = 13
+        [[doc="Truncated 10 bit GOT entry."]],
+      R_SPARC_GOT13 = 14
+        [[doc="13 bit GOT entry."]],
+      R_SPARC_GOT22 = 15
+        [[doc="22 bit GOT entry shifted."]],
+      R_SPARC_PC10 = 16
+        [[doc="PC relative 10 bit truncated."]],
+      R_SPARC_PC22 = 17
+        [[doc="PC relative 22 bit shifted."]],
+      R_SPARC_WPLT30 = 18
+        [[doc="30 bit PC relative PLT address."]],
+      R_SPARC_COPY = 19
+        [[doc="Copy symbol at runtime."]],
+      R_SPARC_GLOB_DAT = 20
+        [[doc="Create GOT entry."]],
+      R_SPARC_JMP_SLOT = 21
+        [[doc="Create PLT entry."]],
+      R_SPARC_RELATIVE = 22
+        [[doc="Adjust by program base."]],
+      R_SPARC_UA32 = 23
+        [[doc="Direct 32 bit unaligned."]],
+      R_SPARC_PLT32 = 24
+        [[doc="Direct 32 bit ref to PLT entry."]],
+      R_SPARC_HIPLT22 = 25
+        [[doc="High 22 bit PLT entry."]],
+      R_SPARC_LOPLT10 = 26
+        [[doc="Truncated 10 bit PLT entry."]],
+      R_SPARC_PCPLT32 = 27
+        [[doc="PC rel 32 bit ref to PLT entry."]],
+      R_SPARC_PCPLT22 = 28
+        [[doc="PC rel high 22 bit PLT entry."]],
+      R_SPARC_PCPLT10 = 29
+        [[doc="PC rel trunc 10 bit PLT entry."]],
+      R_SPARC_10 = 30
+        [[doc="Direct 10 bit."]],
+      R_SPARC_11 = 31
+        [[doc="Direct 11 bit."]],
+      R_SPARC_64 = 32
+        [[doc="Direct 64 bit."]],
+      R_SPARC_OLO10 = 33
+        [[doc="10bit with secondary 13bit addend."]],
+      R_SPARC_HH22 = 34
+        [[doc="Top 22 bits of direct 64 bit."]],
+      R_SPARC_HM10 = 35
+        [[doc="High middle 10 bits of ...."]],
+      R_SPARC_LM22 = 36
+        [[doc="Low middle 22 bits of ...."]],
+      R_SPARC_PC_HH22 = 37
+        [[doc="Top 22 bits of pc rel 64 bit."]],
+      R_SPARC_PC_HM10 = 38
+        [[doc="High middle 10 bit of ...."]],
+      R_SPARC_PC_LM22 = 39
+        [[doc="Low miggle 22 bits of ...."]],
+      R_SPARC_WDISP16 = 40
+        [[doc="PC relative 16 bit shifted."]],
+      R_SPARC_WDISP19 = 41
+        [[doc="PC relative 19 bit shifted."]],
+      R_SPARC_GLOB_JM = 42
+        [[doc="was part of v9 ABI but was removed."]],
+      R_SPARC_7 = 43
+        [[doc="Direct 7 bit."]],
+      R_SPARC_5 = 44
+        [[doc="Direct 5 bit."]],
+      R_SPARC_6 = 45
+        [[doc="Direct 6 bit."]],
+      R_SPARC_DISP64 = 46
+        [[doc="PC relative 64 bit."]],
+      R_SPARC_PLT64 = 47
+        [[doc="Direct 64 bit ref to PLT entry."]],
+      R_SPARC_HIX22 = 48
+        [[doc="High 22 bit complemented."]],
+      R_SPARC_LOX10 = 49
+        [[doc="Truncated 11 bit complemented."]],
+      R_SPARC_H44 = 50
+        [[doc="Direct high 12 of 44 bit."]],
+      R_SPARC_M44 = 51
+        [[doc="Direct mid 22 of 44 bit."]],
+      R_SPARC_L44 = 52
+        [[doc="Direct low 10 of 44 bit."]],
+      R_SPARC_REGISTE = 53
+        [[doc="Global register usage."]],
+      R_SPARC_UA64 = 54
+        [[doc="Direct 64 bit unaligned."]],
+      R_SPARC_UA16 = 55
+        [[doc="Direct 16 bit unaligned."]],
+      R_SPARC_TLS_GD_HI2 = 56,
+      R_SPARC_TLS_GD_LO1 = 57,
+      R_SPARC_TLS_GD_AD = 58,
+      R_SPARC_TLS_GD_CAL = 59,
+      R_SPARC_TLS_LDM_HI2 = 60,
+      R_SPARC_TLS_LDM_LO1 = 61,
+      R_SPARC_TLS_LDM_AD = 62,
+      R_SPARC_TLS_LDM_CAL = 63,
+      R_SPARC_TLS_LDO_HIX2 = 64,
+      R_SPARC_TLS_LDO_LOX1 = 65,
+      R_SPARC_TLS_LDO_AD = 66,
+      R_SPARC_TLS_IE_HI2 = 67,
+      R_SPARC_TLS_IE_LO1 = 68,
+      R_SPARC_TLS_IE_L = 69,
+      R_SPARC_TLS_IE_LD = 70,
+      R_SPARC_TLS_IE_AD = 71,
+      R_SPARC_TLS_LE_HIX2 = 72,
+      R_SPARC_TLS_LE_LOX1 = 73,
+      R_SPARC_TLS_DTPMOD3 = 74,
+      R_SPARC_TLS_DTPMOD6 = 75,
+      R_SPARC_TLS_DTPOFF3 = 76,
+      R_SPARC_TLS_DTPOFF6 = 77,
+      R_SPARC_TLS_TPOFF3 = 78,
+      R_SPARC_TLS_TPOFF6 = 79,
+      R_SPARC_GOTDATA_HIX2 = 80,
+      R_SPARC_GOTDATA_LOX1 = 81,
+      R_SPARC_GOTDATA_OP_HIX2 = 82,
+      R_SPARC_GOTDATA_OP_LOX1 = 83,
+      R_SPARC_GOTDATA_O = 84,
+      R_SPARC_H34 = 85,
+      R_SPARC_SIZE32 = 86,
+      R_SPARC_SIZE64 = 87,
+      R_SPARC_WDISP10 = 88,
+      R_SPARC_JMP_IRE = 248,
+      R_SPARC_IRELATIV = 249,
+      R_SPARC_GNU_VTINHERI = 250,
+      R_SPARC_GNU_VTENTR = 251,
+      R_SPARC_REV32 = 252,
+    }
 };
 
 enum elf_half elf_e_machine
@@ -854,7 +1037,7 @@ enum int elf_sym_binding
   STB_HIPROC = 15
 };
 
-enum int elf_st_type
+enum int elf_st_type (enum elf_e_machine mach)
 {
   STT_NOTYPE = 0
     [[doc="The symbol's type is not specified."]],
@@ -889,6 +1072,13 @@ enum int elf_st_type
   STT_LOOS = 10,
   STT_HIOS = 12,
   STT_LOPROC = 13,
+
+  if (mach == EM_SPARCV9 || mach == EM_SPARC32PLUS)
+    {
+      STT_SPARC_REGISTER = 13
+        [[doc=""Global register reserved to app.]],
+    }
+    
   STT_HIPROC = 15
 };
 
@@ -955,7 +1145,7 @@ bitmask elf64_xsword elf_d_tag_flag
 
 };
 
-enum elf64_sxword elf_d_tag
+enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
 {
   DT_NULL = 0
     [[doc="Tags the end of the dynamic array."]],
@@ -1116,10 +1306,17 @@ enum elf64_sxword elf_d_tag
   DT_LOOS = 0x6000_000d,
   DT_HIOS = 0x6fff_f000,
   DT_LOPROC = 0x7000_0000,
+
+  if (mach == EM_SPARCV9 || mach == EM_SPARC32PLUS)
+    {
+      DT_SPARC_REGISTER = 0x7000_0001,
+    }
+    
   DT_HIPROC = 0x7fff_ffff
 };
 
-struct elf_rel (enum elf_ei_class class)
+struct elf_rel (enum elf_e_machine mach,
+                enum elf_ei_class class)
   [[doc="ELF relocation."]]
 {
   let r_offset_doc = "Relocation offset.";
@@ -1133,7 +1330,7 @@ struct elf_rel (enum elf_ei_class class)
       elf_word r_info [[doc=r_info_doc]];
       . = @r_info;
       int r_sym : 24 [[doc=r_sym_doc]];
-      int r_type : 8 [[doc=r_type_doc]];
+      enum elf_r_type (mach) r_type : 8 [[doc=r_type_doc]];
     }
   else
     {
@@ -1141,13 +1338,14 @@ struct elf_rel (enum elf_ei_class class)
       elf64_xword r_info [[doc=r_info_doc]];
       . = @r_info;
       int r_sym : 32 [[doc=r_sym_doc]];
-      int r_type : 32 [[doc=r_type_doc]];
+      enum elf_r_type (mach) r_type : 32 [[doc=r_type_doc]];
     }
 
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
-struct elf_rela (enum elf_ei_class class)
+struct elf_rela (enum elf_e_machine mach,
+                 enum elf_ei_class class)
   [[doc="ELF relocation with addend."]]
 {
   let r_offset_doc = "Relocation offset.";
@@ -1161,7 +1359,7 @@ struct elf_rela (enum elf_ei_class class)
       elf_word r_info [[doc=r_info_doc]];
       . = @r_info;
       int r_sym : 24 [[doc=r_sym_doc]];
-      int r_type : 8 [[doc=r_sym_type]];
+      enum elf_r_type (mach) r_type : 8 [[doc=r_sym_type]];
     }
   else
     {
@@ -1169,7 +1367,7 @@ struct elf_rela (enum elf_ei_class class)
       elf64_xword r_info [[doc=r_info_doc]];
       . = @r_info;
       int r_sym : 32 [[doc=r_sym_doc]];
-      int r_type : 32 [[doc=r_type_doc]];
+      enum elf_r_type (mach) r_type : 32 [[doc=r_type_doc]];
     }
 
   elf_sword r_addend
@@ -1244,8 +1442,7 @@ struct elf_ehdr [[doc="ELF header."]]
       elf64_off e_shoff [[doc=e_shoff_doc]];
     }
 
-  /* XXX: this is machine-specific.  */
-  elf_word  e_flags;
+  bitmask elf_e_flags (e_machine) e_flags;
   elf_half  e_ehsize [[doc="ELF header size in bytes."]];
 
   elf_half  e_phentsize
@@ -1420,7 +1617,8 @@ struct elf_chdr (enum elf_ei_class class)
     }
 };
 
-struct elf_sym (enum elf_ei_class class)
+struct elf_sym (enum elf_e_machine mach,
+                enum elf_ei_class class)
   [[doc ("ELF symbol table entry.")]]
 {
   let st_name_doc
@@ -1440,7 +1638,7 @@ struct elf_sym (enum elf_ei_class class)
       unsigned char st_info;
       . = @st_info;
       enum elf_sym_binding st_bind : 28;
-      enum elf_sym_type st_type : 4;
+      enum elf_st_type (mach) st_type : 4;
 
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
@@ -1461,7 +1659,7 @@ struct elf_sym (enum elf_ei_class class)
 
       . = @st_info;
       enum elf_sym_binding st_bind : 60;
-      enum elf_sym_type st_type : 4;
+      enum elf_st_type (mach) st_type : 4;
 
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
@@ -1500,13 +1698,14 @@ struct elf_hash [[doc ("ELF hash table.")]]
   elf_word chain[nchain];
 };
 
-struct elf_dyn (enum elf_ei_class class)
+struct elf_dyn (enum elf_e_machine mach,
+                enum elf_ei_class class)
   [[doc ("ELF dynamic section.")]]
 {
   if (class == ELFCLASS32)
-    elf_sword d_tag;
+    enum elf_d_tag (mach) d_tag : bsizeof (elf_word);
   else
-    elf64_xword d_tag;
+    enum elf_d_tag (mach) d_tag : bsizeof (elf64_xword);
 
   switch (d_tag)
     {
@@ -1600,7 +1799,8 @@ struct elf_dyn (enum elf_ei_class class)
     byte pad[pad_size];
 };
 
-struct elf_section (enum elf_ei_class class,
+struct elf_section (enum elf_e_machine mach,
+                    enum elf_ei_class class,                    
                     struct elf_shdr shdr)
 {
   switch (shdr.sh_type)
@@ -1613,7 +1813,7 @@ struct elf_section (enum elf_ei_class class,
       break;
 
     case SHT_SYMTAB:
-      struct elf_sym (class) symtab [sh_size / sh_entsize];
+      struct elf_sym (mach, class) symtab [sh_size / sh_entsize];
       break;
 
     case SHT_STRTAB:
@@ -1627,11 +1827,11 @@ struct elf_section (enum elf_ei_class class,
       break;
 
     case SHT_RELA:
-      struct elf_rela (class) rela [sh_size / sh_entsize];
+      struct elf_rela (mach, class) rela [sh_size / sh_entsize];
       break;
 
     case SHT_REL:
-      struct elf_rel (class) rel [sh_size / sh_entsize];
+      struct elf_rel (mach, class) rel [sh_size / sh_entsize];
       break;
 
     case SHT_HASH:
@@ -1639,7 +1839,7 @@ struct elf_section (enum elf_ei_class class,
       break;
 
     case SHT_DYNAMIC:
-      struct elf_dyn (class) dynamic [sh_size / sh_entsize];
+      struct elf_dyn (mach, class) dynamic [sh_size / sh_entsize];
       /* XXX: constraints on the tag array, as documented in the enum
          elf_d_tag.  */
       break;
@@ -1684,7 +1884,8 @@ struct elf [[doc="ELF object file."]]
   for (i = 0; i < ehdr.e_shnum; i++)
     {
       . = shdr[i].sh_offset;
-      struct elf_section section (ehdr.e_ident.ei_class,
+      struct elf_section section (ehdr.e_machine,
+                                  ehdr.e_ident.ei_class,
                                   shdr[i]);
     }
 
