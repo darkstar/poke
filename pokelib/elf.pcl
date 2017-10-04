@@ -1201,6 +1201,16 @@ struct elf_sym (enum elf_ei_class class)
      file.  */
 };
 
+/** ELF hash table.  */
+struct elf_hash
+{
+  elf_word nbucket;
+  elf_word nchain;
+
+  elf_word bucket[nbucket];
+  elf_word chain[nchain];
+};
+
 struct elf_section (enum elf_ei_class class,
                     struct elf_shdr shdr)
 {
@@ -1217,12 +1227,26 @@ struct elf_section (enum elf_ei_class class,
       struct elf_sym symtab (class) [sh_size / sh_entsize];
       break;
 
-    case SHT_REL:
-      struct elf_rel rel (class) [sh_size / sh_entsize];
+    case SHT_STRTAB:
+      if (sh_size > 0)
+        {
+          char strtab [sh_size];
+          /* The first and last byes in the strtab section must
+             contain NULL characters.  */
+          assert (strtab[0] == '\0' && strtab[sh_size - 1] == '\0');
+        }
       break;
 
     case SHT_RELA:
       struct elf_rela rela (class) [sh_size / sh_entsize];
+      break;
+
+    case SHT_REL:
+      struct elf_rel rel (class) [sh_size / sh_entsize];
+      break;
+
+    case SHT_HASH:
+      struct elf_hash hash;
       break;
 
     default:
