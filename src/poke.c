@@ -108,13 +108,12 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
 static void
 print_version ()
 {
-  /* TRANSLATORS: ascii-art in here.  */
-  fprintf (stdout, "     _____\n");
-  fprintf (stdout, " ---'   __\\_______\n");
-  fprintf (stdout, "            ______)  GNU poke %s\n", VERSION);
-  fprintf (stdout, "            __)\n");
-  fprintf (stdout, "           __)\n");
-  fprintf (stdout, " ---._______)\n");
+  puts ("     _____");
+  puts (" ---'   __\\_______");
+  printf ("            ______)  GNU poke %s\n", VERSION);
+  puts ("            __)");
+  puts ("           __)");
+  puts (" ---._______)");
   /* xgettesxt: no-wrap */
   puts ("");
 
