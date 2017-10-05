@@ -49,7 +49,8 @@ typedef long elf64_sxword;
 
 bitmask elf_word elf_e_flags (enum elf_e_machine mach)
 {
-  if (mach == EM_SPARC || mach == EM_SPARCV9
+  if (mach == EM_SPARC
+      || mach == EM_SPARCV9
       || mach == EM_SPARC32PLUS)
     {
       EF_SPARC_TSO = 0,
