@@ -1,0 +1,78 @@
+/* qsort.pkl - Quicksort in PKL.  */
+
+/* Copyright (C) 2017 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+function qsort (array, left = 0, right = sizeof (array))
+  [[doc="Sort an array using QuickSort."]]
+{
+  function partition (left, right)
+  {
+    let pivot, i, j, t;
+
+    pivot = a[left];
+    i = left;
+    j = right + 1;
+
+    while (1)
+      {
+        do ++i; while (array[i] <= pivot && i <= r);
+        do --j; while (array[j] > pivot);
+        if (i >= j) break;
+
+        t = array[i];
+        array[i] = array[j];
+        array[j] = t;
+      }
+
+    /* Swap.  */
+    t = array[left];
+    array[left] = array[j];
+    array[j] = t;
+
+    return j;
+  }
+
+  if (left < right)
+    {
+      let j = partition (left, right);
+
+      qsort (array, left, right - 1);
+      qsort (array, left, right);
+    }
+}
+
+function test_qsort ()
+{
+  /* Sort several arrays in the current IO stream.  them.*/
+  byte[2048] bytes @ 0x0;
+  int[512] integers;
+  long[256] longs;
+
+  qsort (bytes);
+  qsort (integers);
+  qsort (longs);
+
+  /* Now sort an unmapped array variable.  */
+  let array = {3, 2, 1, 0};
+  qsort (array);
+}
+
+/*
+Local variables:
+mode:c
+End:
+*/
