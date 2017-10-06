@@ -31,21 +31,19 @@
 
 /* First of all, define some types.  */
 
-typedef unsigned int elf_word;
-typedef int elf_sword;
-typedef unsigned short elf_half;
+typedef uint32 elf_word;
+typedef int32 elf_sword;
+typedef uint16 elf_half;
 
-typedef unsigned int elf32_addr;
-typedef unsigned int elf32_off;
-typedef unsigned int elf32_sword;
+typedef uint32 elf32_addr;
+typedef uint32 elf32_off;
+typedef uint32 elf32_sword;
 
-typedef unsigned long elf64_addr;
-typedef unsigned long elf64_off;
-typedef unsigned long elf64_xword;
-typedef int elf64_sword;
-typedef long elf64_sxword;
-
-/* Now enumerations.  */
+typedef uint64 elf64_addr;
+typedef uint64 elf64_off;
+typedef uint64 elf64_xword;
+typedef int32 elf64_sword;
+typedef int64 elf64_sxword;
 
 bitmask elf_word elf_e_flags (enum elf_e_machine mach)
 {
@@ -1016,7 +1014,7 @@ enum elf_word elf_ch_type
   ELFCOMPRESS_HIPROC = 0x7fffffff
 };
 
-enum int elf_sym_binding
+enum elf_word elf_sym_binding
 {
   STB_LOCAL = 0
     [[doc="Local symbols are not visible outside the object file containing\n\
@@ -1038,7 +1036,7 @@ enum int elf_sym_binding
   STB_HIPROC = 15
 };
 
-enum int elf_st_type (enum elf_e_machine mach)
+enum elf_word elf_st_type (enum elf_e_machine mach)
 {
   STT_NOTYPE = 0
     [[doc="The symbol's type is not specified."]],
@@ -1083,7 +1081,7 @@ enum int elf_st_type (enum elf_e_machine mach)
   STT_HIPROC = 15
 };
 
-enum int elf_sym_visibility
+enum elf_word elf_sym_visibility
 {
   STV_DEFAULT = 0
     [[doc="The visibility of this symbol is specified by the symbol's\n\
@@ -1107,8 +1105,6 @@ enum int elf_sym_visibility
            component, even if there is a definition in another component\n\
            that would preempt by the default rules."]]
 };
-
-/* Flags for the  DT_FLAGS dynamic tag.  */
 
 bitmask elf64_xsword elf_d_tag_flag
 {
@@ -1146,7 +1142,7 @@ bitmask elf64_xsword elf_d_tag_flag
 
 };
 
-bitmask elf32_word elf_group_flags
+bitmask elf_word elf_group_flags
 {
   GRP_COMDAT = 0x1 [[doc="COMDAT group."]],
     
@@ -1648,7 +1644,7 @@ struct elf_sym (enum elf_e_machine mach,
       elf32_addr st_value [[doc=st_value_doc]];
       elf32_word st_size [[doc=st_size_doc]];
 
-      unsigned char st_info;
+      byte st_info;
       . = @st_info;
       enum elf_sym_binding st_bind : 28;
       enum elf_st_type (mach) st_type : 4;
@@ -1656,7 +1652,7 @@ struct elf_sym (enum elf_e_machine mach,
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
 
-      unsigned char st_other;
+      byte st_other;
       . = @st_other;
       enum elf_sym_visibility st_visibility : 3;
       . += 5;
@@ -1668,7 +1664,7 @@ struct elf_sym (enum elf_e_machine mach,
   else
     {
       elf64_word st_name [[doc=st_name_doc]];
-      unsigned char st_info;
+      byte st_info;
 
       . = @st_info;
       enum elf_sym_binding st_bind : 60;
@@ -1677,7 +1673,7 @@ struct elf_sym (enum elf_e_machine mach,
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
 
-      unsigned char st_other;
+      byte st_other;
 
       . = @st_other;
       enum elf_sym_visibility st_visibility : 3;
@@ -1826,7 +1822,7 @@ struct elf_note (enum elf_ei_class class)
   let type_doc
     = "Unsigned word giving the interpretation of the descriptor.";
 
-  function padding (int nchars,  int width)
+  function padding (int nchars, int width)
     [[hidden=1]]
   {
     let m = nchars % width;
@@ -1871,7 +1867,7 @@ struct elf_section (enum elf_e_machine mach,
       break;
 
     case SHT_PROGBITS:
-      char[sh_size] progbits;
+      byte[sh_size] progbits;
       break;
 
     case SHT_SYMTAB:
@@ -1881,7 +1877,7 @@ struct elf_section (enum elf_e_machine mach,
     case SHT_STRTAB:
       if (sh_size > 0)
         {
-          char strtab [sh_size];
+          byte strtab [sh_size];
           /* The first and last byes in the strtab section must
              contain NULL characters.  */
           assert (strtab[0] == '\0' && strtab[sh_size - 1] == '\0');

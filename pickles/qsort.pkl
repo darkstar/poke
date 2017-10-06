@@ -57,7 +57,7 @@ function qsort (array, left = 0, right = sizeof (array))
 
 function test_qsort ()
 {
-  /* Sort several arrays in the current IO stream.  them.*/
+  /* Sort several arrays in the current IO stream.  */
   byte[2048] bytes @ 0x0;
   int[512] integers;
   long[256] longs;
