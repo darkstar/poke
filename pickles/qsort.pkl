@@ -17,7 +17,8 @@
  */
 
 function qsort (array, left = 0, right = sizeof (array))
-  [[doc="Sort an array using QuickSort."]]
+  [[doc="Sort an array using QuickSort.",
+    typecheck=0]]
 {
   function partition (left, right)
   {

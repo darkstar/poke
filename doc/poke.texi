@@ -48,25 +48,27 @@ This manual documents version @value{VERSION} of GNU poke.
 @end ifnottex
 
 @menu
-Tutorial
+Invoking Poke
 
-Basic Usage
+Editing Bytes
 * Commands::
 
-Poke Templates
-* Values::                      Integers, characters and strings.
-* Constants::			Named values.
-* Variables::			Poke variables.
-* Enumerations::		Collections of related constants.
-* Bitmasks::                    Sets of or-ed values.
-* Structs::
-@c * Unions::
-@c * Arrays::
-* Examples::			Examples of poke programs.
+The Poke Language
+* Basic Data Types::		Numbers, characters, arrays and strings.
+* Expressions::			Operators and values.
+* Constants::			Named constant values.
+* Variables::			Variables and scopes.
+* Statements::			Basic execution units.
+* Functions::			Defining and calling routines.
+* Mapped Variables::            Accessing the IO stream from poke programs.
+* Enumerations::		Integers with a restricted domain.
+* Bitmasks::                    Integers composed of OR-ed values.
+* Structs and Unions::		Structures of heterogeneous data.
+
+Editing Data Structures
 
 Internals
 * Poke Architecture::		Overall architecture.
-* PKL grammar::			Grammar of the poke language.
 
 * GNU Free Documentation License:: Distribution terms for this document.
 
@@ -77,235 +79,852 @@ Indexes
 @node Commands
 @chapter Commands
 
-@example
-(poke) map 0x0, struct elf
-(poke) maps
-elf	struct elf	0x00000000
-(poke) dump elf.shdr[2]
-87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789abcdef
-000001b0: 6100 0000 0000 0000 3c00 0000 0000 0000  a.......<.......
-000001c0: 0400 0000 0000 0000 51e5 7464 0600 0000  ........Q.td....
-000001d0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
-000001e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
-000001f0: 0000 0000 0000 0000 1000 0000 0000 0000  ................
-(poke) peek 0x1b0+8
-0x3c
-(poke) poke 0x1b0+8, 0xff
-(poke) dump elf.shdr[2]
-87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789abcdef
-000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
-000001c0: 0400 0000 0000 0000 51e5 7464 0600 0000  ........Q.td....
-000001d0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
-000001e0: 0000 0000 0000 0000 0000 0000 0000 0000  ................
-000001f0: 0000 0000 0000 0000 1000 0000 0000 0000  ................
-(poke) peek elf.shdr[0].sh_name, elf.shdr[0].sh_flags
-00000000: elf
-00000000:   shdr[0]
-00000000:     sh_name	0x000000000 ("foobar")
-00000000:     sh_flags	SHF_ALLOC (0x2) | SHF_WRITE (0x1)
-(poke) peek -i elf.shdr[0].sh_name, elf.shdr[0].sh_flags
-00000000: elf
-000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
-000001b0:   shdr[0]
-000001b0: 6100 0000 0000 0000 ff00 0000 0000 0000  a.......<.......
-00000000:     sh_name	0x000000000 ("foobar")
-00000000:     sh_flags	SHF_ALLOC (0x2) | SHF_WRITE (0x1)
-(poke) poke elf.shdr[0].sh_flags, elf.shdr[0].sh_flags | SHF_GROUP
-(poke) tell
-000001b0
-(poke) seek 0
-(poke) tell
-00000000
-(poke) peek elf.e_ident
-00000000: elf
-00000000:  e_ident
-00000000:    ei_mag[0]	0x7f
-00000001:    ei_mag[1]	'E'
-00000002:    ei_mag[2]	'L'
-00000003:    ei_mag[3]	'F'
-00000004:    ei_class	ELFCLASS64 (0x1)
-00000008:    ei_data	1
-0000000b:    ei_version	2
-00000010:    ei_osabi	0
-00000018:    ei_abiversion	0
-0000001c:    ei_pad	0
-00000020:    ei_nident	0xab00ef
-(poke) poke elf.e_ident.ei_osabi, calculate_osabi()
-(poke) peek elf.e_ident.ei_osabi
-00000000: elf
-00000000:  e_ident
-00000010:    ei_osabi	3
-(poke)
-@end example
+@node Basic Data Types
+@chapter Basic Data Types
 
-@node Values
-@chapter Values
+The poke language is a strongly typed programming language.  It is
+(almost) always possible to infer the type of a value, and it is
+always possible to infer the storage properties and needs of any type.
+
+The following sections document how these typed values are constructed
+and what are the types available for constructing numbers and arrays.
 
 @menu
-* Integers::
-* Characters::
-* Strings::
+* Null::			One value to bind them all.
+* Integers::			Integer numbers.
+* Arrays::			Sequences of elements.
 @end menu
+
+@node Null
+@section Null
+
+@code{null} is a special value in poke that can be of any type.  And
+not much more can be said about it at this point, even if it is
+actually used for many purposes in the language.  Patience... for now,
+just remember that it can also mimic the semantics of the number
+@code{0} in every context where a number is expected.
 
 @node Integers
 @section Integers
 
-Integers can be expressed in several numeration bases:
+Poke supports the following primitive types for integers:
 
-@table @emph
-@item Decimal numbers
-@example
-[1-9][0-9]*
-@end example
-
-@item Octal numbers
-
-Prefix @code{0}.
-
-@example
-0[0-9]*
-@end example
-
-@item Hexadecimal numbers
-
-Prefix @code{0x} or @code{0X}.
-
-@example
-0x[0-9a-fA-F][0-9a-fA-F]*
-@end example
-
-@item Binary numbers
-
-Suffix @code{b} or @code{B}:
-
-@example
-[01][01_]*[bB]
-@end example
+@table @code
+@item char
+8-bit ASCII code.
+@item byte
+@item uint8
+Unsigned 8-bit integer.
+@item int8
+Signed 8-bit integer.
+@item int
+@item int32
+Signed 32-bit integer.
+@item uint32
+Unsigned 32-bit integer.
+@item long
+@item int64
+Signed 64-bit integer.
+@item uint64
+Unsigned 64-bit integer.
 @end table
+
+Integers literals can be expressed in several numeration bases.
+
+@emph{Decimal numbers} use the usual syntax @code{[1-9][0-9]*}.  For
+example, @code{2345}.
+
+@emph{Octal numbers} are expressed using a prefix of zero or more
+@code{0} digits with syntax @code{0[0-9]+}.  Examples are @code{00},
+@code{0100} and @code{0777}.
+
+@emph{Hexadecimal numbers} are expressed using the syntax
+@code{0[xX][0-9a-fA-F]+}.  Examples are @code{0x0} and
+@code{0xfe00ffff}.  Note that both the @code{x} in the prefix and the
+letters in the hexadecimal number are case insensitive.  Thus,
+@code{0XdeadBEEF} is a valid (but ugly as hell) literal.
+
+@emph{Binary numbers} are expressed using the syntax
+@code{0[bB][01]+}.  Again, the @code{b} in the prefix is
+case-insensitive.  Examples of binary literals are @code{0b0} and
+@code{0B010}.
+
+Note that negative numbers, of any numeration base, are constructed
+using the minus operator as explained below.
+
+@subsection Characters
+
+8-bit unsigned integers can use an alternative literal notation that
+is useful when working with @emph{ASCII character codes}.  Printable
+character codes can be denoted with @code{'c'}.  Both printable and
+non-printable character codes can be denoted using the notation
+@code{'\NNN'} where @code{NNN} is an octal number featuring up to
+three digits.  The number should be in the range @code{0-255}.
+
+Examples:
+
+@example
+'o'
+'\000'
+@end example
+
+The type of a character literal is always @code{char}.
+
+@subsection The digits separator @code{_}
 
 The character @code{_} can appear anywhere in a numeric literal other
 than leading them.  It is ignored, and it's purpose is to make it
 easier for programmers to read them:
 
 @example
-aconst = 0xf000_0000_0000_0000;
+0xf000_0000_0000_0000
+0b0000_0001_0000_0001
 @end example
 
-The type of a numeric literal is the smallest integer capable of
-holding it, starting with 32 bits, in steps of powers of two.
+@subsection Types of integer literals
+
+The type of a numeric literal is the smallest signed integer capable
+of holding it, starting with 32 bits, in steps of powers of two and up
+to 64 bits.
+
+So, for example, the value @code{2} has type @code{int32}, but the
+value @code{0xffff_ffff} has type @code{int64}, because it is out of
+the range of signed 32-bit numbers.
+
+It is possible to construct unsigned numerical literals using the
+suffix @code{u} or @code{U}.  So, for example @code{0xffff_ffffU} has
+type @code{uint32} and @code{0u} has type @code{int32}.
+
+@node Arrays
+@section Arrays
+
+Arrays types are denoted using the following syntax:
 
 @example
-2             /* Of type bit:32 or int */
-0xffff_ffff   /* Likewise.  */
-0x1_ffff_ffff /* Of type bit:64 or long */
+@var{type}[]
 @end example
 
-@node Characters
-@section Characters
+Where @var{type} is the type of the elements contained in the
+array.
 
-Character literals are enclosed in @code{'} characters, and correspond
-to an ASCII character.
+Examples:
 
 @example
-'o' /* 0x6f */
+int32[]
+uint64[]
+string[]
+char[]
 @end example
 
-The type of a character literal is @code{char}.
-
-@node Strings
-@section Strings
-
-String literals are enclosed in @code{"} characters, and correspond to
-zero-terminated ASCII-encoded strings.
+The elements contained in an array can be arrays themselves.  This is
+how you would declare a type of such an array:
 
 @example
-"You"  /* 0x59_6f_75_00 size 4 bytes */
+int[][]
 @end example
+
+Note that, unlike in many other programming languages, no boundaries
+are expressed in the array type definitions.  This is because in poke
+the actual size of an array is not part of its type.  This means that,
+for example, an array containing four 32-bit integers has the same
+type than an array containing four hundred 32-bit integers:
+@code{int[]}.
+
+Array literals are constructed using the following syntax:
+
+@example
+@{@var{elem1}, @var{elem2}, ..., @var{elemn}@}
+@end example
+
+For example, @code{@{1,2,3@}} constructs an array of type
+@code{int32[]} containing three elements.  Likewise,
+@code{@{'a','b','c'@}} constructs an array of type @code{char[]}
+containing three elements.
+
+The type of the array literal is inferred from the type of its
+elements.  Accordingly, all the elements in an array literal must be
+of the same type.  Examples of invalid array literals that will raise
+an error:
+
+@example
+@{1,2u,3@}
+@{1,0xffff_ffff,3@}
+@{'a',"b",'c'@}
+@end example
+
+Arrays must contain at least one element.  Accordingly, @code{@{@}} is
+not a valid array literal.
+
+This is how a @code{3x3} matrix could be constructed using an array of
+arrays:
+
+@example
+@{@{1, 2, 3@}, @{4, 5, 6@}, @{7, 8, 9@}@}
+@end example
+
+It is possible to refer to specific elements when constructing array
+literals.  For example, @code{@{1, 2, 3, .[3] = 4@}} denotes the same
+array than @code{@{1, 2, 3, 4@}}.
+
+This allows creating arrays without having to specify all its
+elements.  Unspecified elements have the value @code{null}.  For
+example, @code{@{.[2] = 2@}} denotes the same array than @code{@{null,
+null, 20@}}.
+
+Note that an array element should only be referred once.  Accordingly,
+@code{@{1, 2, 3, .[1] = 10@}} is not a valid array literal.
+
+@subsection Strings
+
+Arrays of ASCII codes can be denoted using an alternative literal
+notation that is useful when working with ASCII null-terminated
+strings:
+
+@example
+"foo"
+@end example
+
+The above string is of type @code{char[]} or @code{string}, and is
+equivalent to:
+
+@example
+@{0x66, 0x6f, 0x6f, null@}
+@end example
+
+or to:
+
+@example
+@{0x66, 0x6f, 0x6f, 0x0@}
+@end example
+
+Note that the empty string @code{""} corresponds to the array
+@code{@{0x0@}}, which is a valid array containing at least one
+element.
 
 The following escape sequences are supported inside string literals:
 
 @table @code
 @item \DDD
 Where @var{ddd} is a one to three digits octal number.  The escape
-sequence denotes the ASCII character having that code.  For example
-@code{\000} denotes the null character.
+sequence denotes the ASCII character having that code.  It must be in
+the range @code{0-255}.  For example @code{\000} denotes the ASCII
+@code{NULL} character.
 @item \xHH
 Where @var{hh} is a one to two digits hexadecimal number.  The escape
 sequence denotes the ASCII character having that code.  For example
 @code{\x38} denotes the @code{8} character.
 @item \"
-Denotes a double quote in asciiz strings.
-@item \'
-Denotes a single quote in ascii strings.
+Denotes a double quote.
 @item \n
 Denotes a new line character.
 @item \t
 Denotes an horizontal tab.
 @end table
 
-Consecutive string literals are concatenated:
+@node Expressions
+@chapter Expressions
+
+PCL supports expressions in a very similar way than other programming
+languages.
+
+@menu
+* Arithmetic Operators::	Operating with numbers.
+* Logical Operators::		Building predicates.
+* Relational Operators::	Equality and ordering.
+* Bitwise Operators::		Working with bits.
+* Operators on Arrays::		Operating on arrays.
+* Conditional Operator::	if-then-else.
+* The Comma Operator::	        Sequencing expressions.
+* The Cast Operator::		Changing the type of a value.
+* Other Operators::		Stuff that is explained elsewhere.
+* Operators Precedence::	What gets executed first.
+* Parenthesized Expressions::	Grouping and changing precedence.
+@end menu
+
+@node Arithmetic Operators
+@section Arithmetic Operators
+
+The following left-associative binary arithmetic operators are
+supported, in descending precedence order:
+
+@itemize
+@item Multiplication @code{*}, integer division @code{/} and modulus
+      @code{%}.
+@item Addition @code{+} and subtraction @code{-}.
+@end itemize
+
+The following right-associative unary arithmetic operators are
+supported:
+
+@itemize
+@item Unary minus @code{-} and unary plus @code{+}.
+@end itemize
+
+The arithmetic operators are defined on integer and character values.
+Attempting to use them on another kind of value results on a run-time
+error.
+
+@node Logical Operators
+@section Logical Operators
+
+The following left-associative, short-circuited binary logical
+operators are supported, in descending precedence order:
+
+@itemize
+@item Logical AND @code{&&}.
+@item Inclusive OR: @code{||}.
+@end itemize
+
+The following right-associative unary logical operators are supported:
+
+@itemize
+@item Logical negation @code{!}.
+@end itemize
+
+@node Relational Operators
+@section Relational Operators
+
+The following binary relational operators are supported, in descending
+precedence order:
+
+@itemize
+@item Equality @code{==} and inequality @code{!=}.
+@item Less than @code{<} and less or equal than @code{<=}.
+@item Greater than @code{>} and greater or equal than @code{>=}.
+@end itemize
+
+When applied to integer and character values, these operators
+implement an arithmetic ordering.  When applied to strings, these
+operators implement a lexicographic ordering.
+
+Only equality and inequality can be applied to arrays, structs and
+unions.
+
+These operators resolve in boolean values encoded as 32-bit integers:
+@code{0} meaning false and @code{1} meaning true.
+
+@node Bitwise Operators
+@section Bitwise Operators
+
+The following left-associative bitwise binary operators are supported,
+in descending precedence order:
+
+@itemize
+@item Bitwise shift left @code{<<} and bitwise shift right @code{>>}.
+@item Bitwise AND @code{&}.
+@item Bitwise exclusive OR @code{^}.
+@item Bitwise inclusive OR @code{|}.
+@end itemize
+
+The following right-associative unary bitwise operators are supported:
+
+@itemize
+@item Bitwise complement @code{~}.
+@end itemize
+
+Bitwise operators can be applied to integer values, with the expected
+semantics.
+
+@node Operators on Arrays
+@section Operators on Arrays
+
+@subsection Concatenation
+
+The elements of two arrays can be concatenated using the
+left-associative binary operator @code{+}.  For example:
 
 @example
-"foo " "bar"
+@{1, 2, 3@} + @{4, 5, 6@}
 @end example
 
-is equivalent to:
+evaluates to @code{@{1, 2, 3, 4, 5, 6@}}
+
+The operator can also be applied to an array and a value of the same
+type than the elements of the array.  This is called a @dfn{cons}, and
+it is very useful to build arrays recursively.  For example:
 
 @example
-"foo bar"
+@{1, 2, 3@} + 4
 @end example
+
+evaluates to @code{@{1, 2, 3, 4@}}.
+
+Note that the semantics of this operator vary a bit when applied to
+arrays of ASCII codes, also known as strings.  In this case, the
+@code{NULL} ASCII character finishing the first array is not included
+in the concatenated value.  Thus the operation:
+
+@example
+@{'a', 'b', 0x0@} + @{'c', 'd', 0x0@}
+@end example
+
+evaluates to @code{@{'a', 'b', 'c', 'd', 0x0@}}.  Or, using string
+notation:
+
+@example
+"ab" + "cd"
+@end example
+
+evaluates to @code{"abcd"}.
+
+Likewise, the semantics of the cons operator also vary with arrays of
+@code{char}:
+
+@example
+@{'f', 'o', 0x0@} + 'o'
+@end example
+
+evaluates to @code{@{'f', 'o', 'o', 0x0@}}.  Or, using string
+notation:
+
+@example
+"fo" + 'o'
+@end example
+
+evaluates to @code{"foo"}.
+
+@subsection Indexing
+
+The elements of an array can be referred to using the left-associative
+unary operator @code{[@var{idx}]}, where @var{idx} is a positive
+integer.
+
+For example, the operation @code{@{1, 2, 3@}[0]} evaluates to
+@code{1}, while @code{@{1, 2, 3@}[2]} evaluates to @code{2}.
+
+If the index refers past to the last element contained in the array,
+then the operation evaluates to @code{null}, i.e. @code{@{1, 2,
+3@}[4]} evaluates to @code{null}.
+
+Negative indexes are not allowed and an error is raised if they are
+used.
+
+@c XXX: play with the idea of negative indexes?  Some formats may
+@c store information before pointers, like ghostscript's memory
+@c allocators do.
+
+The indexing operator can also be used to refer to a region of the
+array, using a range of indexes @code{[@var{idx1}:@var{idx2}]}.  The
+denoted range is @code{[@var{idx1},@var{idx2}]}, i.e. the elements in
+both positions are included in the range.  Note that @var{idx1} should
+be less or equal than @var{idx2}, or an error is raised.
+
+For example, the operation @code{@{1, 2, 3@}[0:1]} evaluates to
+@code{@{1,2@}} and the operation @code{@{1, 2, 3@}[2:3]} evaluates
+to @code{@{2,3@}}.
+
+If @var{idx1} equals to @var{idx2}, the result of the operation is an
+array of one element.  Thus, @code{@{1, 2, 3@}[1:1]} evaluates to
+@code{@{2@}} whereas @code{@{1, 2, 3@}[1]} evaluates to @code{2}.  The
+indexation of an array with a range always evaluates to an array.
+
+If the range includes indexes past the end of the array, @code{null}
+values are used accordingly.  For example, the operation @code{@{1, 2,
+3@}[1:3]} evaluates to @code{@{2, 3, null@}}.
+
+Note that indexing an array range does not create a copy of the
+elements.  Instead, both the operand array and the array resulting
+from the operation refer to the same instance of the elements.  The
+importance of this will become apparent when we talk about variables
+later in this manual.
+
+@node Conditional Operator
+@section Conditional Operator
+
+The following right-associative ternary conditional operators are
+supported:
+
+@itemize
+@item Conditional operator @code{? :}.
+@end itemize
+
+The conditional operator can be applied to integer and character
+values.
+
+@node The Comma Operator
+@section The Comma Operator
+
+The comma operator @code{,} is a left-associative operator that
+evaluates its operands and returns the value of the rightmost
+operand.  It is used to separate expressions.
+
+@node The Cast Operator
+@section The Cast Operator
+
+The right-associative unary operator cast @code{(type)} can be used to
+derive a new value having a different type from an existing value.
+
+Casts between integer types are always allowed.  If the new type is
+narrower than the existing type, truncation may be performed to
+accommodate the value in its new type.  For example, the expression
+@code{(uint8) 0x8765_4321} evaluates to @code{0x4321}.  If the new type
+is wider than the existing type, either zero-extension or
+sign-extension is performed depending on the signedness of the
+operand.
+
+The semantics of the sign-extension operation depends on the currently
+selected negative representation encoding in @code{.nencoding}. @c
+XXX: xref to section documenting .nencoding.
+
+For example, in two's complement the expression @code{(uint16) 0xffff}
+evaluates to @code{0x0000_ffff}.  However, @code{(int16)0xffff}
+evaluates to @code{0xffff_ffff} in two's complement, and it evaluates
+to @code{0xffff_0000} in one's complement.
+
+Casts are also used in order to construct struct, union, enumerated
+and bitmask values, as it is explained later in this manual. @c XXX:
+@c xref to section documenting it.
+
+@node Other Operators
+@section Other Operators
+
+Other operators, whose meaning and purpose is explained in full later
+in this manual, are summarized here.
+
+Left-associative unary operators:
+
+@itemize
+@item Member selection operator @code{.}.
+@end itemize
+
+Right-associative unary operators:
+
+@itemize
+@item @code{sizeof} and @code{startof}
+@end itemize
+
+@node Operators Precedence
+@section Operators Precedence
+
+The following table summarizes the precedence and the associativity of
+all the operators described above, in descending order:
+
+@table @code
+@item Array subscript operator @code{[ ]}.
+@item Member selection operator @code{.}.
+@item Postfix increment @code{++} and postfix decrement @code{--}.
+@item Prefix increment @code{++} and prefix decrement @code{--}.
+@item Unary minus @code{-} and unary plus @code{+}.
+@item Logical negation @code{!} and bitwise complement @code{~}.
+@item Cast @code{(type)}.
+@item @code{sizeof} and @code{startof}.
+@item Array concatenation @code{+}.
+@item Multiplication @code{*}, integer division @code{/} and modulus
+      @code{%}.
+@item Addition @code{+} and subtraction @code{-}.
+@item Bitwise shift left @code{<<} and bitwise shift right @code{>>}.
+@item Less than @code{<} and less or equal than @code{<=}.
+@item Greater than @code{>} and greater or equal than @code{>=},
+@item Equality @code{==} and inequality @code{!=}.
+@item Bitwise AND @code{&}.
+@item Bitwise exclusive OR @code{^}.
+@item Bitwise inclusive OR @code{|}.
+@item Logical AND @code{&&}.
+@item Inclusive OR: @code{||}.
+@item Ternary conditional operator @code{? :}.
+@item Comma operator @code{,}.
+@end table
+
+@node Parenthesized Expressions
+@section Parenthesized Expressions
+
+Parentheses can be used in order to change the precedence of
+sub-expressions, the usual way.
 
 @node Constants
 @chapter Constants
 
-Constants are named values which are known at compile time.  They can
-only be defined at the top-level, and their values never change.
+Constants are named values that don't change during the lifetime of a
+poke program.
 
-The definition of a constant has the following form:
+The definition of a constant uses the following syntax:
 
 @example
-const @var{type} @var{name} = @var{val};
+const [@var{type}] @var{name} = @var{const_exp}
+      (,[@var{type}] @var{name} = @var{const_exp})*;
 @end example
 
-This declares a constant @var{name} of type @var{type}, with a value
-@var{val}.
+This declares a set of constants with the given @var{name}s having the
+value of the corresponding @var{const_exp}.  The expressions must be
+constant, i.e. it should be possible to compute their values at
+compile-time.
 
-@var{val} should be a constant expression that can be converted to a
-value of type @var{type}.
+If a @var{type} is specified in a constant definition then the value
+computed by the assignment expression must be of the same type, or an
+error is raised.  Otherwise the type of the constant is the type of
+the value computed by the expression.
 
 Examples:
 
 @example
-const int limit = 256;
-const string section_name = ".text";
-const char x = 'x';
+const limit = 256;
+const balance = 23U;
+const offset = (uint64) 256;
+const uint64 offset = 256;
+const section_name = ".text";
+const x = 'x', y = 'y';
 @end example
 
 @node Variables
 @chapter Variables
 
-Variables are the association between a symbol and a value in a given
-scope.
-
-Scopes: global scope, struct scope, function scope.
-
-Variables don't need to be declared: they are defined the first time
-they are used in a given scope.
-
-Function arguments are variables whose scope is the function.
-
-Variables defined in inner scopes ghost variables with the same symbol
-defined in an outer scope.
-
-Poke variables are _not_ stored in addressable memory, and thus the
-operator & doesn't make sense for them.
-
-A variable can contain values of different types at different times:
+Variables are the association between a symbol and a value.  They are
+declared using the @code{let} construction:
 
 @example
-i = 10;    /* Holds an integer.  */
-i = "foo"; /* But now it holds a string.  */
+let [<type>] <name> [= <exp>]
+    (,[<type>] <name> [= <exp>)*;
 @end example
+
+Where @code{<name>} is a literal with the form
+@code{[a-zA-Z_][a-zA-Z0-9_]*}.
+
+The variable can be initialized with a value, which is the result of
+computing the expression @code{<exp>}.  If no initial value is
+provided then it is @code{null}.
+
+Generally a variable can hold values of different types during its
+life time.  However, if @code{<type>} is specified in a variable
+declaration then only values of that type are allowed to be stored in
+the variable.
+
+It is important to note that poke variables are not stored in
+addressable memory; and if they are, that is none of the business of
+the poke programmer!
+
+@section Variables Lifetime
+
+Variables exist until the execution flow exits the scope where they
+are declared:
+
+@itemize
+@item Variables declared in the top-level exist until poke exists.
+@item Variables declared in the body of a function exist until the
+      function exits.
+@item Variables declared in the body of a struct or an union exist
+      until the execution flow exits the struct or union.
+@end itemize
+
+@section Variables Scope
+
+A variable is accessible in the lexical scope where they are declared,
+and in the lexical scopes nested in the lexical scope where they are
+declared.
+
+For example, this is an error:
+
+@example
+@{
+  let i;
+@}
+
+i = 30;
+@end example
+
+But this is not:
+
+@example
+@{
+  let i;
+
+  @{
+    i = 30;
+  @}
+@}
+@end example
+
+Note that variables defined in inner scopes ghost variables with the
+same symbol defined in an outer scope.
+
+@node Statements
+@chapter Statements
+
+Statements are the basic execution units of poke programs.  Executing
+a program means executing its statements one by one.  Their main
+purpose is to perform some side-effect.
+
+@menu
+* Assignments::			Setting the value of a variable.
+* Print::			Printing values to the terminal.
+* Prompt::			Prompting values from the terminal.
+* Statement Blocks::		Sequences of statements.
+* If::				Simple conditional.
+* Switch::			Multiple conditional.
+* While::			Iterating while some condition is met.
+* For::				Iterating on indexes.
+* Foreach::			Iterating on arrays.
+* Continue::			Jumping to the next iteration.
+* Break::			Escaping a loop or a switch.
+* Function Calls::		Calling a subroutine.
+@end menu
+
+@node Assignments
+@section Assignments
+
+The assignment statement stores a value in a variable.  It's syntax
+is:
+
+@example
+<variable> = <exp>;
+@end example
+
+Where @code{<variable>} is the name of the variable and @code{<exp>}
+is an expression.  The value computed by the expression can be of any
+type, unless the variable is declared with a fixed type.
+
+The value previously stored in the variable is lost, unless there are
+other references to it. (This can happen with arrays, structs and
+unions.)
+
+There are several variants of the assignment statement that are
+provided to shorten common idioms:
+
+@example
+<variable> <op>= <exp>;
+@end example
+
+which is equivalent to:
+
+@example
+<variable> = <variable> <op> <exp>;
+@end example
+
+Valid @code{<op>}s are addition @code{+}, subtraction @code{-},
+multiplication @code{*}, integer division @code{/}, modulus @code{%},
+bit-wise AND @code{&}, bit-wise exclusive OR @code{^}, bit-wise
+inclusive OR @code{|}, bit-wise shift left @code{<<} and bit-wise
+shift right @code{>>}.  @c xref to operators chapter.
+
+@node Print
+@section Print
+
+@node Prompt
+@section Prompt
+
+@node Statement Blocks
+@section Statement Blocks
+
+Statements that are to be executed sequentially can be grouped in
+@dfn{blocks} using curly brackets:
+
+@example
+@{
+  <stmt>
+  <stmt>
+  ...
+  <stmt>
+@}
+@end example
+
+Syntactically a block is equivalent to a single statement.  This means
+that in every place where a statement is valid, a block is also valid.
+
+Statement blocks introduce a new lexical scope.
+
+@node If
+@section If
+
+The @code{if} statement has the following form:
+
+@example
+if (<exp>) <then_stmt> [else <else_stmt>]
+@end example
+
+The expression @code{<exp>} is evaluated.  If it evaluates to
+@code{true} then @code{<then_stmt>} is executed.  If
+@code{<else_stmt>} is specified and @code{<exp>} evaluates to either
+@code{false} or @code{null} then @code{<else_stmt>} is executed
+instead.
+
+@node Switch
+@section Switch
+
+The @code{switch} statement looks like:
+
+@example
+switch (<exp>)
+@{
+   case <exp>:
+   <stmt>
+   ...
+   <stmt>
+   case <exp>:
+   <stmt>
+   ...
+   <stmt>
+   ...
+   default:
+   <stmt>
+@}
+@end example
+
+The expression @code{<exp>} is evaluated and the case expressions are
+evaluated in order.  Whenever the value of a ase expression matches
+the value of @code{<exp>}, the statements following it are executed.
+More than one case may be entered.  The statements following
+@code{default:} are always executed if the control flow reaches there.
+
+If the special statement @code{break} is found, the control flow jumps
+to the end of the switch statement.
+
+@node While
+@section While
+
+@code{while} statements have the form:
+
+@example
+while (<exp>) <stmt>
+@end example
+
+@code{do-while} statements have the form:
+
+@example
+do <stmt> while (<exp>);
+@end example
+
+@code{for} statements have the form:
+
+@node For
+@section For
+
+@example
+for ([<exp>];[<exp>];[<exp>]) <stmt>
+@end example
+
+@node Foreach
+@section Foreach
+
+@code {foreach} statements have the form:
+
+@example
+foreach ([variable] in <exp>) <stmt>
+@end example
+
+@node Continue
+@section Continue
+
+The @code{continue} statement makes the control flow to jump to the
+beginning of the nearest loop instruction.  If no such loop
+instruction is found an error is raised.
+
+@node Break
+@section Break
+
+The @code{break} statement makes the control flow to exit the nearest
+containing loop or switch statement.
+
+@node Function Calls
+@section Function Calls
+
+Function call statements are documented in the following chapter.
+
+@node Functions
+@chapter Functions
+
+The body of a function introduces a new lexical scope.
+
+@node Mapped Variables
+@chapter Mapped Variables
 
 @node Enumerations
 @chapter Enumerations
@@ -366,8 +985,8 @@ bitmask elf_xword elf_sh_flags
 @}
 @end example
 
-@node Structs
-@chapter Structs
+@node Structs and Unions
+@chapter Structs and Unions
 
 A struct defines the layout of an area in IO space.  They are defined
 as follows:
@@ -416,38 +1035,6 @@ The contents of the field are stored in big-endian.
 @var{type} is the type of the field.  @var{field} is the name of the
 field, which must be unique in the containing struct.
 
-
-@node Examples
-@chapter Examples
-
-Function that checks for elf integrity:
-
-@example
-function elflint (addr)
-@{
-  /* The following may trigger some assert.  */
-     elf = (struct elf *) addr;
-
-  /* Check sections.  */
-  if (elf.e_shnum > 0)
-    @{
-      for (s in elf.shdr)
-        /* Works with both poke arrays and IO arrays?  Yes.
-           elf.shdr reads from IO and constructs an array
-           according to its field specification.  */
-       @{
-         if (s.sh_type == SHT_GROUP
-             && elf.ehdr.e_type != ET_REL)
-           diag[ndiag++] = "SHT_GROUP sections should only appear"
-                           " in relocatable objects.";
-       @}
-   @}
-
- /* Return the array with diagnostics.  */
- return diag;
-@}
-@end example
-
 @node Poke Architecture
 @chapter Poke Architecture
 
@@ -486,24 +1073,6 @@ PKL parser and lexer.
 @item pvm.h pvm.c
 Poke virtual machine.
 @end table
-
-@node PKL grammar
-@chapter PKL grammar
-
-The poke language uses the following grammar, expressed in Backus-Naur
-Form.
-
-@example
-program :: program_elem_list
-
-program_elem_list :: empty
-   | program_elem
-   | program_elem_list program_elem
-
-program_elem :: declaration
-              | expression ';'
-
-@end example
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
