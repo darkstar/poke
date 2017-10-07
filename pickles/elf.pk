@@ -1,4 +1,4 @@
-/* elf.pkl - ELF implementation for GNU poke.  */
+/* elf.pk - ELF implementation for GNU poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi.  */
 
