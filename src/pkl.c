@@ -1,4 +1,4 @@
-/* pkl.c - Poke language support  */
+/* pkl.c - Poke compiler.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

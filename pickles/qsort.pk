@@ -27,7 +27,7 @@ function qsort (array, left = 0, right = sizeof (array))
     pivot = a[left];
     i = left;
     j = right + 1;
-
+ 
     while (1)
       {
         do ++i; while (array[i] <= pivot && i <= r);

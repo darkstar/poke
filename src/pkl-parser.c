@@ -1,4 +1,4 @@
-/* pkl-parser.c - Parser for PKL.  */
+/* pkl-parser.c - Parser for Poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

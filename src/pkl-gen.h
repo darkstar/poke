@@ -1,4 +1,4 @@
-/* pkl-gen.h - Code generator for PKL.  */
+/* pkl-gen.h - Code generator for Poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

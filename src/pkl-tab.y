@@ -1,4 +1,4 @@
-/* pkl-tab.y - LARL(1) parser for the Poke Command Language.  */
+/* pkl-tab.y - LARL(1) parser for Poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi.  */
 

@@ -1,4 +1,4 @@
-/* pkl-ast.c - Abstract Syntax Tree for PKL.  */
+/* pkl-ast.c - Abstract Syntax Tree for Poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 

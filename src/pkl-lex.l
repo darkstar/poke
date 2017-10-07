@@ -1,5 +1,4 @@
-/* -*- mode: C -*- */
-/* pkl-lex.l - Lexer for the Poke Command Language.  */
+/* pkl-lex.l - Lexer for Poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi */
 
@@ -378,3 +377,9 @@ D [0-9]
 . { return ERR; }
 
 %%
+
+/*
+Local variables:
+mode:c
+End:
+*/

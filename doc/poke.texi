@@ -50,11 +50,11 @@ This manual documents version @value{VERSION} of GNU poke.
 @menu
 Invoking Poke
 
-Editing Bytes
-* Commands::
+Basic Editing
+@c* Commands::
 
 The Poke Language
-* Basic Data Types::		Numbers, characters, arrays and strings.
+* Data Types::			Numbers, arrays and tuples.
 * Expressions::			Operators and values.
 * Constants::			Named constant values.
 * Variables::			Variables and scopes.
@@ -65,9 +65,13 @@ The Poke Language
 * Bitmasks::                    Integers composed of OR-ed values.
 * Structs and Unions::		Structures of heterogeneous data.
 
-Editing Data Structures
+Advanced Editing
 
-Internals
+Extending Poke
+@c * Writing commands in C::
+@c * Writing commands in Poke::
+
+Poke Internals
 * Poke Architecture::		Overall architecture.
 
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -76,11 +80,8 @@ Indexes
 * Concept Index::
 @end menu
 
-@node Commands
-@chapter Commands
-
-@node Basic Data Types
-@chapter Basic Data Types
+@node Data Types
+@chapter Data Types
 
 The poke language is a strongly typed programming language.  It is
 (almost) always possible to infer the type of a value, and it is
@@ -92,7 +93,9 @@ and what are the types available for constructing numbers and arrays.
 @menu
 * Null::			One value to bind them all.
 * Integers::			Integer numbers.
-* Arrays::			Sequences of elements.
+* Arrays::			Sequences of elements of the same type.
+* Tuples::                      Collections of elements of arbitrary types.
+* Type Conversions::		Automatic conversions between types.
 @end menu
 
 @node Null
@@ -117,6 +120,11 @@ Poke supports the following primitive types for integers:
 Unsigned 8-bit integer.
 @item int8
 Signed 8-bit integer.
+@item uint16
+Unsigned 16-bit integer.
+@item short
+@item int16
+Signed 16-bit integer.
 @item int
 @item int32
 Signed 32-bit integer.
@@ -233,46 +241,48 @@ type than an array containing four hundred 32-bit integers:
 Array literals are constructed using the following syntax:
 
 @example
-@{@var{elem1}, @var{elem2}, ..., @var{elemn}@}
+[<exp>, <exp>, ..., <exp>]
 @end example
 
-For example, @code{@{1,2,3@}} constructs an array of type
+Where @code{<exp>} is an arbitrary expression.
+
+For example, @code{[1,2,3]} constructs an array of type
 @code{int32[]} containing three elements.  Likewise,
-@code{@{'a','b','c'@}} constructs an array of type @code{char[]}
+@code{['a','b','c']} constructs an array of type @code{char[]}
 containing three elements.
 
 The type of the array literal is inferred from the type of its
 elements.  Accordingly, all the elements in an array literal must be
-of the same type.  Examples of invalid array literals that will raise
-an error:
+of the same type.  Examples of invalid array literals, that will raise
+an error if evaluated, are:
 
 @example
-@{1,2u,3@}
-@{1,0xffff_ffff,3@}
-@{'a',"b",'c'@}
+[1,2u,3]
+[1,0xffff_ffff,3]
+['a',"b",'c']
 @end example
 
-Arrays must contain at least one element.  Accordingly, @code{@{@}} is
+Arrays must contain at least one element.  Accordingly, @code{[]} is
 not a valid array literal.
 
 This is how a @code{3x3} matrix could be constructed using an array of
 arrays:
 
 @example
-@{@{1, 2, 3@}, @{4, 5, 6@}, @{7, 8, 9@}@}
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
 @end example
 
 It is possible to refer to specific elements when constructing array
-literals.  For example, @code{@{1, 2, 3, .[3] = 4@}} denotes the same
-array than @code{@{1, 2, 3, 4@}}.
+literals.  For example, @code{[1, 2, 3, .[3] = 4]} denotes the same
+array than @code{[1, 2, 3, 4]}.
 
 This allows creating arrays without having to specify all its
 elements.  Unspecified elements have the value @code{null}.  For
-example, @code{@{.[2] = 2@}} denotes the same array than @code{@{null,
-null, 20@}}.
+example, @code{[.[2] = 2]} denotes the same array than @code{[null,
+null, 20]}.
 
 Note that an array element should only be referred once.  Accordingly,
-@code{@{1, 2, 3, .[1] = 10@}} is not a valid array literal.
+@code{[1, 2, 3, .[1] = 10]} is not a valid array literal.
 
 @subsection Strings
 
@@ -288,17 +298,17 @@ The above string is of type @code{char[]} or @code{string}, and is
 equivalent to:
 
 @example
-@{0x66, 0x6f, 0x6f, null@}
+[0x66, 0x6f, 0x6f, null]
 @end example
 
 or to:
 
 @example
-@{0x66, 0x6f, 0x6f, 0x0@}
+[0x66, 0x6f, 0x6f, 0x0]
 @end example
 
 Note that the empty string @code{""} corresponds to the array
-@code{@{0x0@}}, which is a valid array containing at least one
+@code{[0x0]}, which is a valid array containing at least one
 element.
 
 The following escape sequences are supported inside string literals:
@@ -320,6 +330,124 @@ Denotes a new line character.
 @item \t
 Denotes an horizontal tab.
 @end table
+
+@node Tuples
+@section Tuples
+
+Tuples are collections of heterogeneous values.
+
+@subsection Tuple Types
+
+A tuple type is
+denoted using the following syntax:
+
+@example
+(<type> [<name>][,<type> [<name>]]...)
+@end example
+
+Where @code{<type>} is any type or @code{<null>}.
+
+The type of a tuple containing three 32-bit signed integers is
+@code{(int64, int64, int64)}.  Similarly, the type of a tuple
+containing a string, an unsigned 8-bit number, and a character is
+@code{(string, byte, char)}.
+
+The order of the tuple elements is significant.  For example, the
+tuple type @code{(int,long)} is different than the tuple type
+@code{(long,int)}.
+
+The type of an empty tuple, i.e. a tuple with no elements, is
+@code{(null)}.
+
+It is possible to name some (or all) of the tuple constituents.  For
+example, if we wanted to define a tuple to store information about a
+person, we could do it like @code{(int age, string name)}.  The
+element names are significant, i.e. the tuple type @code{(int foo, int
+bar)} denotes a different type than @code{(int baz, int quux)}.
+
+@subsection Tuple Literals
+
+Tuple literals are constructed using the following syntax:
+
+@example
+@{[[[.<name> =] <exp>][,[.<name> = ] <exp>]...]@}
+@end example
+
+Where @code{<exp>} are arbitrary expressions.  For example, a tuple
+containing three signed 32-bit integers can be constructed as
+@code{@{10, 20, 30@}} and it is of type @code{(int,int,int)}.
+Similarly, @code{@{age, name@}} would construct a type
+@code{int,string)} provided @code{age} and @code{string} are variable
+holding values of the appropriate type.
+
+For example:
+
+@example
+@{10, "foo", 'x'@}
+@end example
+
+An empty tuple literal is denoted by @code{@{@}}.
+
+Casts can be used to change the type of a tuple.  The tuple
+@code{@{10, 20@}} is of type @code{(int32,int32)}, but
+@code{(int32,int64) @{10, 20@}} turns the second element into a 64-bit
+signed integer.
+
+It is possible to specify named elements in a tuple literal, like in
+@code{@{.age = 37, .name = "Jose"@}}.  The tuple constructed this way
+has type @code{(int age, string name)}, i.e. the ordering of the named
+members follows their appearance in the literal.
+
+@subsection Casting Tuples
+
+Casts to tuples use the usual syntax @code{(<type>) <exp>} and can be
+applied to tuple values.
+
+However, when casting to tuple types featuring more than one element,
+an alternative syntax can be used: @code{(int,long) <exp>} is
+equivalent to @code{((int,long)) <exp>}.  This abbreviated form can't
+be used to cast to tuples having one element, because it is
+indistinguishable to casts to other types.  For example @code{(int)
+<exp>} is a cast to type @code{int}, not to type @code{(int)}.
+
+Casts can be used to ``augment'' a tuple.  For example
+@code{(int,long,long)@{10,20@}} is augmented to the tuple
+@code{@{10,20,null@}}.
+
+Casts can be used to ``reorder'' the named elements in a tuple
+literal.  For example, @code{(string name, int age) @{.age = 30, .name
+= "Jose"@}} generates the tuple @code{@{"Jose", 30@}} of type
+@code{(string name, int age)}.
+
+@subsection Accessing Tuples
+
+Tuple elements can be accessed using subscripts, pretty much like
+they are used in arrays. @code{@{10, "foo", 'x'@}[0]} evaluates to
+@code{10}, @code{@{10, "foo", 'x'@}[2]} evaluates to @code{'x'} and
+@code{@{10, "foo", 'x'@}[3]} evaluates to @code{null}.
+
+The number of elements of a tuple are obtained with the @code{sizeof}
+operator.
+
+@subsection Building Tuples
+
+@c structuring operator.
+@c destructuring operator.
+
+@subsection Destructuring Tuples
+
+Tuples can be destructured using @code{let}:
+
+@example
+let (number, name, character) = @{10, "foo", 'x'@}
+@end example
+
+XXX: no, dont like this.
+
+@node Type Conversions
+@section Type Conversions
+
+XXX: automatic type conversions?
 
 @node Expressions
 @chapter Expressions
@@ -564,7 +692,7 @@ operand.
 
 The semantics of the sign-extension operation depends on the currently
 selected negative representation encoding in @code{.nencoding}. @c
-XXX: xref to section documenting .nencoding.
+XXX: xref to section documenting @code{.nencoding}.
 
 For example, in two's complement the expression @code{(uint16) 0xffff}
 evaluates to @code{0x0000_ffff}.  However, @code{(int16)0xffff}
@@ -590,7 +718,7 @@ Left-associative unary operators:
 Right-associative unary operators:
 
 @itemize
-@item @code{sizeof} and @code{startof}
+@item @code{sizeof}, @code{startof} and @code{typeof}
 @end itemize
 
 @node Operators Precedence
@@ -607,7 +735,7 @@ all the operators described above, in descending order:
 @item Unary minus @code{-} and unary plus @code{+}.
 @item Logical negation @code{!} and bitwise complement @code{~}.
 @item Cast @code{(type)}.
-@item @code{sizeof} and @code{startof}.
+@item @code{sizeof}, @code{startof} and @code{typeof}.
 @item Array concatenation @code{+}.
 @item Multiplication @code{*}, integer division @code{/} and modulus
       @code{%}.
@@ -745,14 +873,12 @@ purpose is to perform some side-effect.
 
 @menu
 * Assignments::			Setting the value of a variable.
-* Print::			Printing values to the terminal.
-* Prompt::			Prompting values from the terminal.
 * Statement Blocks::		Sequences of statements.
 * If::				Simple conditional.
 * Switch::			Multiple conditional.
 * While::			Iterating while some condition is met.
 * For::				Iterating on indexes.
-* Foreach::			Iterating on arrays.
+* For-in::			Iterating on arrays.
 * Continue::			Jumping to the next iteration.
 * Break::			Escaping a loop or a switch.
 * Function Calls::		Calling a subroutine.
@@ -794,12 +920,6 @@ multiplication @code{*}, integer division @code{/}, modulus @code{%},
 bit-wise AND @code{&}, bit-wise exclusive OR @code{^}, bit-wise
 inclusive OR @code{|}, bit-wise shift left @code{<<} and bit-wise
 shift right @code{>>}.  @c xref to operators chapter.
-
-@node Print
-@section Print
-
-@node Prompt
-@section Prompt
 
 @node Statement Blocks
 @section Statement Blocks
@@ -891,13 +1011,13 @@ do <stmt> while (<exp>);
 for ([<exp>];[<exp>];[<exp>]) <stmt>
 @end example
 
-@node Foreach
-@section Foreach
+@node For-in
+@section For-in
 
-@code {foreach} statements have the form:
+@code {for} statements have the form:
 
 @example
-foreach ([variable] in <exp>) <stmt>
+for ([variable] in <exp>) <stmt>
 @end example
 
 @node Continue
@@ -916,15 +1036,149 @@ containing loop or switch statement.
 @node Function Calls
 @section Function Calls
 
-Function call statements are documented in the following chapter.
+Functions are called:
+
+@example
+<name> ((<arg>[,<arg>])*);
+@end example
+
+Where @code{<name>} is the name of a defined function.  When called as
+a statement, a warning is issued if a function returns anything but
+@code{null}, because in that case the return value is discarded.
+
+It is possible to name specific function arguments in a function call:
+
+@example
+printf (fmt = "this is %d", number);
+@end example
 
 @node Functions
 @chapter Functions
 
+Functions are defined using the following syntax:
+
+@example
+function <name> ((<arg> [,<arg>]*)*) [<return_type>]
+@{
+  <function_body>
+@}
+@end example
+
+Function arguments follow the following syntax:
+
+@example
+[<type>] <name> [= <exp>]
+@end example
+
+Where @code{<name>} is the name of the argument.  If a @code{<type>}
+is indicated, the value in the argument must be of that type.
+
 The body of a function introduces a new lexical scope.
+
+A @code{return} statement with the form:
+
+@example
+return [<value>];
+@end example
+
+may be used to return a value for the function.  If the function
+doesn't return any value, it returns @code{null}.
+
+A function can be defined at top-level scope, or inside a lexical
+scope.  This included another functions.  This is useful to write
+auxiliary functions without polluting the global name space (Poke is a
+truly block-oriented language.)
+
+@section Optional Arguments
+
+If an assignment operator and an expression is included, then the
+argument is optional and has the value of @code{<exp>} should it not
+be specified in a function call.
+
+@section Variadic Functions
+
+If the last argument of a function is initialized to an empty tuple,
+then it will contain any extra argument.
+
+@example
+function printf (string fmt, args = @{@})
+@{
+   let i;
+   for (i = 0; i < sizeof (args); i++)
+   @{
+      /* Process argument.  */
+   @}
+@}
+@end example
+
+@section Recursive Functions
+
+Functions can be recursive, both directly and indirectly.  For
+example, this is a factorial implementation in poke:
+
+@example
+function factorial (n)
+@{
+  if (n == 0)
+     return 1;
+  else
+     return n * factorial (n - 1);
+@}
+@end example
+
+GNU poke supports tail-recursion.  This means that if a recursive
+function is written in certain way, it is equivalent to iteration with
+no memory allocated in each iteration.  This is important, since it
+allows writing recursive functions operating on large structures in IO
+space.
 
 @node Mapped Variables
 @chapter Mapped Variables
+
+The idea is that the same poke code will execute on mapped and
+non-mapped variables, with no changes.
+
+@section Endianness and Negative Encoding
+
+The encoding of a mapped variable depends on its value, its type, the
+current endianness and the current negative encoding method.
+
+The current endianness is determined by the value of the special
+variable @code{.endian}.  If @code{.endian == msb} then the encoding is
+big-endian.  If @code{.endian == lsb} then the encoding is
+little-endian.  The default endianness is determined by the endianness
+used by the machine where GNU poke is running.
+
+The current negative encoding method is determined by the value of the
+special variable @code{.nencoding}.  If @code{.nencoding == 1} the
+negative quantities in integer values are encoded using one's
+complement.  If @code{.nencoding == 2} then they are encoded using
+two's complement.  The default is @code{2}.
+
+@section Encoding
+
+Integer values are de/encoded as follows:
+
+@itemize
+@item @code{char}, @code{byte}, @code{uint8} values are encoded as 8-bit
+      unsigned stored values.  Nulls of this type are encoded to
+      @code{0x00}.
+@item @code{uint16}, @code{uint32} and @code{uint64} values map to
+      16-bit, 32-bit and 64-bit unsigned stored values, respectively,
+      with endianness @code{.endian}.  Nulls of this type are encoded
+      to @code{0x0000}, @code{0x0000_0000} and
+      @code{0x0000_0000_0000_0000} respectively.
+@item @code{int8} maps to a 8-bit signed stored values with negative
+      encoding @code{.nencoding}.  Nulls of this type are encoded to
+      @code{0x00}.
+@item @code{short}, @code{int16}, @code{int},
+      @code{int32}, @code{long} and @code{int64} values map to 16-bit,
+      16-bit, 32-bit, 32-bit, 64-bit and 64-bit signed stored values,
+      respectively, with negative encoding @code{.nencoding} and
+      endianness @code{.endian}.  Nulls of this type are encoded to
+      @code{0x0000}, @code{0x0000_0000} and
+      @code{0x0000_0000_0000_0000} respectively.
+@end itemize
 
 @node Enumerations
 @chapter Enumerations
@@ -987,6 +1241,19 @@ bitmask elf_xword elf_sh_flags
 
 @node Structs and Unions
 @chapter Structs and Unions
+
+Structs are programs whose execution generate tuple types.
+
+   - Structs and unions: programs that generate tuple types with sophisticated
+     physical layouts that can't be expressed using tuple notation.
+
+
+A tuple can be casted into a tuple type generated by a struct, using
+the rules documented above in Tuples, using the following syntax:
+
+@example
+(struct foo) @{10, "name"@}
+@end example
 
 A struct defines the layout of an area in IO space.  They are defined
 as follows:
