@@ -101,10 +101,10 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
 #define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) CODE,
 enum pkl_ast_type_code
 {
-  PKL_TYPE_NOTYPE,
 #include "pkl-types.def"
   PKL_TYPE_ENUM,
-  PKL_TYPE_STRUCT
+  PKL_TYPE_STRUCT,
+  PKL_TYPE_NOTYPE,
 };
 #undef PKL_DEF_TYPE
 
