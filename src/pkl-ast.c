@@ -886,7 +886,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("IDENTIFIER::\n");
 
       PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "0x%p");
+      PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, IDENTIFIER_POINTER, "'%s'");
       break;
 
@@ -902,7 +902,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (length, STRING_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, STRING_POINTER, "0x%p");
+      PRINT_AST_IMM (pointer, STRING_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, STRING_POINTER, "'%s'");
       break;
 
@@ -910,7 +910,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("DOCSTR::\n");
 
       PRINT_AST_IMM (length, DOC_STRING_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "0x%p");
+      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, DOC_STRING_POINTER, "'%s'");
       break;
 
@@ -1020,7 +1020,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       IPRINTF ("code:\n");
       {
-#define PKL_DEF_TYPE(CODE,NAME,WIDTH,SIZE) NAME        
+#define PKL_DEF_TYPE(CODE,NAME,WIDTH,SIZE) NAME,
         static char *pkl_type_names[] =
           {
 # include "pkl-types.def"

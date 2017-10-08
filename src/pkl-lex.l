@@ -49,6 +49,12 @@
 # include <readline/history.h>
 #endif
 
+#define YY_USER_ACTION                          \
+  do                                            \
+    {                                           \
+      yyextra->nchars += yyleng;                \
+    } while (0);
+
 %}
 
 NEWLINE            \n
@@ -60,7 +66,7 @@ STRING             \"([^"]|\\(.|\n))*\"
 HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]
 OCTCST             0[0-9][0-9_]*
-DECCST             [1-9][0-9_]*
+DECCST             [0-9][0-9_]*
 
 L [a-zA-Z_]
 D [0-9]
@@ -73,8 +79,8 @@ D [0-9]
 
 "/*" { BEGIN(C_COMMENT); }          
 <C_COMMENT>"*/" { BEGIN(INITIAL); } 
-<C_COMMENT>. { }                    
-<C_COMMENT>\n { }                   
+<C_COMMENT>.    {  }                    
+<C_COMMENT>\n   {  }                   
 
 "enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }
@@ -120,7 +126,7 @@ D [0-9]
 ")"		{ return ')'; }
 "{"		{ return '{'; }
 "}"		{ return '}'; }
-","		{ return ','; }
+","		{ return (yyextra->what == PKL_PARSE_EXPRESSION) ? EOF : ','; }
 "="		{ return '='; }
 "?"		{ return '?'; }
 ":"		{ return ':'; }

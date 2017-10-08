@@ -64,9 +64,9 @@ pkl_tab_error (YYLTYPE *llocp,
   //    return;
   // XXX: store the line read and other info for pretty
   //      error printing in EXTRA.
-  fprintf (stderr, "%s: %d: %s\n",
-           pkl_parser->interactive ? "cmdline" : pkl_parser->filename,
-           llocp->first_line, err);
+  if (!pkl_parser->interactive)
+    fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
+             llocp->first_line, err);
 }
 
 #if 0
@@ -213,17 +213,10 @@ program_elem_list:
           %empty
 		{ $$ = NULL; }
 	| program_elem
-        	{
-                  pkl_parser->at_start = 1;
-                  pkl_parser->at_end = 1;
-                  $$ = $1;
-                }
         | program_elem_list program_elem
         	{
                   if (pkl_parser->what == PKL_PARSE_EXPRESSION)
                     YYERROR;
-                  pkl_parser->at_start = 1;
-                  pkl_parser->at_end = 1;
                   $$ = pkl_ast_chainon ($1, $2);
                 }
 	;

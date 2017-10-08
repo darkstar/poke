@@ -18,9 +18,11 @@
 
 #include <config.h>
 #include <assert.h>
+#include <stdio.h> /* For stdout */
 
 #include "pk-cmd.h"
 #include "pk-io.h"
+#include "pkl-ast.h" /* For pkl_ast_print */
 
 static int
 pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
@@ -33,7 +35,18 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   assert (argc == 1);
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
-    address = pk_io_tell (pk_io_cur ());
+    {
+      address = pk_io_tell (pk_io_cur ());
+    }
+  else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
+    {
+#ifdef PKL_DEBUG      
+      /* XXX: debugging.  */
+      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[0])->ast);
+#endif
+      
+      return 1;
+    }
   else
     address = PK_CMD_ARG_ADDR (argv[0]);
 
@@ -62,7 +75,7 @@ pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd peek_cmd =
-  {"peek", "?a", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+  {"peek", "?ea", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
 
 struct pk_cmd help_peek_cmd =
   {"peek", "", 0, NULL, pk_cmd_help_peek, "help peek"};

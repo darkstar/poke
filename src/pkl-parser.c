@@ -39,14 +39,9 @@ pkl_parser_init (void)
   pkl_tab_set_extra (parser, parser->scanner);
 
   parser->ast = pkl_ast_init ();
-
-  parser->ps1 = "(poke) ";
-  parser->ps2 = "> ";
-  parser->eof = 0;
-  parser->error = NULL;
-  parser->at_start = 1;
-  parser->at_end = 0;
   parser->interactive = 0;
+  parser->filename = NULL;
+  parser->nchars = 0;
 
   return parser;
 }
@@ -112,12 +107,13 @@ pkl_parse_file (pkl_ast *ast, int what, FILE *fd, const char *fname)
   return ret;
 }
 
-/* Parse the contents of BUFFER as a PKL program.  Return 0 if the
-   parsing was successful, 1 if there was a syntax error and 2 if
+/* Parse the contents of BUFFER as a PKL program.  If END is not NULL,
+   set it to the first character after the parsed string.  Return 0 if
+   the parsing was successful, 1 if there was a syntax error and 2 if
    there was a memory exhaustion.  */
 
 int
-pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, size_t size)
+pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
 {
   YY_BUFFER_STATE yybuffer;
   struct pkl_parser *parser;
@@ -125,13 +121,16 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, size_t size)
 
   parser = pkl_parser_init ();
   parser->what = what;
+  parser->interactive = 1;
 
-  yybuffer = pkl_tab__scan_buffer(buffer, size, parser->scanner);
+  yybuffer = pkl_tab__scan_string(buffer, parser->scanner);
 
   ret = pkl_tab_parse (parser);
   *ast = parser->ast;
+  if (end != NULL)
+    *end = buffer + parser->nchars;
 
-  pkl_tab__delete_buffer (yybuffer, parser);
+  //  pkl_tab__delete_buffer (yybuffer, parser);
   pkl_parser_free (parser);
 
   return ret;

@@ -31,13 +31,33 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
     address = pk_io_tell (pk_io_cur ());
+  else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
+    {
+#ifdef PKL_DEBUG      
+      /* XXX: debugging.  */
+      printf ("AST for ADDRESS:\n");
+      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[0])->ast);      
+#endif
+    }
   else
     address = PK_CMD_ARG_ADDR (argv[0]);
   
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     value = 0;
+  else if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP)
+    {
+#ifdef PKL_DEBUG      
+      /* XXX: debugging.  */
+      printf ("AST for VALUE:\n");
+      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[1])->ast);      
+#endif
+    }
   else
     value = PK_CMD_ARG_INT (argv[1]);
+
+  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP
+      || PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP)
+    return 1;
 
   /* XXX: endianness, and what not.   */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
@@ -53,5 +73,5 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd poke_cmd =
-  {"poke", "a,?i", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
+  {"poke", "ea,?ei", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
    pk_cmd_poke, "poke ADDRESS [,VALUE]"};

@@ -21,11 +21,13 @@
 
 #include <config.h>
 
+#include "pkl-ast.h" /* For pkl_ast  */
 #include "pk-io.h"
 
 enum pk_cmd_arg_type
 {
   PK_CMD_ARG_NULL,
+  PK_CMD_ARG_EXP,
   PK_CMD_ARG_INT,
   PK_CMD_ARG_ADDR,
   PK_CMD_ARG_STR,
@@ -33,6 +35,7 @@ enum pk_cmd_arg_type
 };
 
 #define PK_CMD_ARG_TYPE(arg) ((arg).type)
+#define PK_CMD_ARG_EXP(arg) ((arg).val.exp)
 #define PK_CMD_ARG_INT(arg) ((arg).val.integer)
 #define PK_CMD_ARG_ADDR(arg) ((arg).val.addr)
 #define PK_CMD_ARG_STR(arg) ((arg).val.str)
@@ -43,6 +46,7 @@ struct pk_cmd_arg
   enum pk_cmd_arg_type type;
   union
   {
+    pkl_ast exp;
     long int integer;
     pk_io_off addr;
     const char *str;
