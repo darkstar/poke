@@ -45,10 +45,8 @@ pkl_ast_make_node (enum pkl_ast_code code)
   pkl_ast_node ast;
 
   ast = xmalloc (sizeof (union pkl_ast_node));
-  memset (ast, 0, sizeof (pkl_ast_node));
+  memset (ast, 0, sizeof (union pkl_ast_node));
   PKL_AST_CODE (ast) = code;
-  PKL_AST_REFCOUNT (ast) = 0;  /* This is for valgrind.  */
-  PKL_AST_LITERAL_P (ast) = 0; /* Likewise.  */
 
   return ast;
 }
@@ -92,7 +90,6 @@ pkl_ast_make_integer (uint64_t value)
   PKL_AST_INTEGER_VALUE (new) = value;
   PKL_AST_LITERAL_P (new) = 1;
   
-
   return new;
 }
 
@@ -573,10 +570,43 @@ pkl_ast_node_free (pkl_ast_node ast)
 pkl_ast
 pkl_ast_init (void)
 {
+  static struct
+    {
+      int code;
+      char *id;
+      size_t size;
+      int signed_p;
+    } *type, stdtypes[] =
+        {
+#define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) {CODE, ID, SIZE, SIGNED},
+# include "pkl-types.def"
+#undef PKL_DEF_TYPE
+          { PKL_TYPE_NOTYPE, NULL, 0 }
+        };
   struct pkl_ast *ast;
+  size_t nentries;
 
+  /* Initialize a new AST and initialize it to 0.  */
+  
   ast = xmalloc (sizeof (struct pkl_ast));
   memset (ast, 0, sizeof (struct pkl_ast));
+
+  /* Create and register standard types in the types hash and also in
+     the stdtypes array for easy access by type code.  */
+
+  nentries = sizeof (stdtypes) / sizeof (stdtypes[0]);
+  ast->stdtypes = xmalloc (nentries * sizeof (pkl_ast_node *));
+  for (type = stdtypes; type->code != PKL_TYPE_NOTYPE; type++)
+    {
+      pkl_ast_node t = pkl_ast_make_type (type->code,
+                                          type->signed_p,
+                                          type->size,
+                                          NULL /* enumeration */,
+                                          NULL /* strct */);
+      pkl_ast_register (ast, type->id, t);
+      ast->stdtypes[type->code] = ASTREF (t);
+    }
+  ast->stdtypes[nentries - 1] = NULL;
 
   return ast;
 }
@@ -602,12 +632,17 @@ free_hash_table (pkl_hash *hash_table)
 void
 pkl_ast_free (pkl_ast ast)
 {
+  size_t i;
+  
   pkl_ast_node_free (ast->ast);
 
   free_hash_table (&ast->ids_hash_table);
   free_hash_table (&ast->types_hash_table);
   free_hash_table (&ast->enums_hash_table);
   free_hash_table (&ast->structs_hash_table);
+
+  for (i = 0; ast->stdtypes[i]; i++)
+    pkl_ast_node_free (ast->stdtypes[i]);
   
   free (ast);
 }
@@ -670,6 +705,15 @@ pkl_ast_get_identifier (struct pkl_ast *ast,
 
 }
 
+/* Return the node corresponding to the type code CODE, or NULL if no
+   such node exists in the type hash.  */
+
+pkl_ast_node
+pkl_ast_get_std_type (pkl_ast ast, enum pkl_ast_type_code code)
+{
+  return ast->stdtypes[code];
+}
+
 /* Register an AST node under the given NAME in the corresponding hash
    table maintained by the AST, and return a pointer to it.  */
 
@@ -679,7 +723,6 @@ pkl_ast_register (struct pkl_ast *ast,
                   pkl_ast_node ast_node)
 {
   enum pkl_ast_code code;
-  enum pkl_ast_type_code type_code;
   pkl_hash *hash_table;
   int hash;
   pkl_ast_node t;
@@ -842,22 +885,24 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_IDENTIFIER:
       IPRINTF ("IDENTIFIER::\n");
 
-      PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%d");
-      PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "0x%lx");
+      PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%lu");
+      PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "0x%p");
       PRINT_AST_OPT_IMM (*pointer, IDENTIFIER_POINTER, "'%s'");
       break;
 
     case PKL_AST_INTEGER:
       IPRINTF ("INTEGER::\n");
 
+      PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (value, INTEGER_VALUE, "%lu");
       break;
 
     case PKL_AST_STRING:
       IPRINTF ("STRING::\n");
 
+      PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (length, STRING_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, STRING_POINTER, "0x%lx");
+      PRINT_AST_IMM (pointer, STRING_POINTER, "0x%p");
       PRINT_AST_OPT_IMM (*pointer, STRING_POINTER, "'%s'");
       break;
 
@@ -865,7 +910,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("DOCSTR::\n");
 
       PRINT_AST_IMM (length, DOC_STRING_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "0x%lx");
+      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "0x%p");
       PRINT_AST_OPT_IMM (*pointer, DOC_STRING_POINTER, "'%s'");
       break;
 
@@ -974,15 +1019,17 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("TYPE::\n");
 
       IPRINTF ("code:\n");
-      switch (PKL_AST_TYPE_CODE (ast))
-        {
-        case PKL_TYPE_CHAR: IPRINTF ("  char\n"); break;
-        case PKL_TYPE_SHORT: IPRINTF ("  short\n"); break;
-        case PKL_TYPE_INT: IPRINTF ("  int\n"); break;
-        case PKL_TYPE_LONG: IPRINTF ("  long\n"); break;
-        case PKL_TYPE_ENUM: IPRINTF (" enum\n"); break;
-        case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
-        };
+      {
+#define PKL_DEF_TYPE(CODE,NAME,WIDTH,SIZE) NAME        
+        static char *pkl_type_names[] =
+          {
+# include "pkl-types.def"
+          };
+#undef PKL_DEF_TYPE
+
+        IPRINTF ("  %s\n", pkl_type_names[PKL_AST_TYPE_CODE (ast)]);
+      }
+      
       PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
       PRINT_AST_IMM (size, TYPE_SIZE, "%lu");
 

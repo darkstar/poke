@@ -18,12 +18,23 @@
 
 /* The first column is the constant used to identify the type.
    The second column is the identifier used by the type.
-   The third column is the size of the type, in bits.  */
+   The third column is the size of the type, in bits.
+   The fourth column is whether the type is signed.  */
 
-PKL_DEF_TYPE (PKL_TYPE_CHAR, "char", 8)
-PKL_DEF_TYPE (PKL_TYPE_SHORT, "short", 16)
-PKL_DEF_TYPE (PKL_TYPE_INT, "int", 32)
-PKL_DEF_TYPE (PKL_TYPE_LONG, "long", 64)
+PKL_DEF_TYPE (PKL_TYPE_CHAR, "char", 8, 0)
+PKL_DEF_TYPE (PKL_TYPE_BYTE, "byte", 8, 0)
+PKL_DEF_TYPE (PKL_TYPE_UINT8, "uint8", 8, 0)
+PKL_DEF_TYPE (PKL_TYPE_UINT16, "uint16", 16, 0)
+PKL_DEF_TYPE (PKL_TYPE_UINT32, "uint32", 32, 0)
+PKL_DEF_TYPE (PKL_TYPE_UINT64, "uint64", 64, 0)
+PKL_DEF_TYPE (PKL_TYPE_INT8, "int8", 8, 1)
+PKL_DEF_TYPE (PKL_TYPE_SHORT, "short", 16, 1)
+PKL_DEF_TYPE (PKL_TYPE_INT16, "int16", 16, 1)
+PKL_DEF_TYPE (PKL_TYPE_INT, "int", 32, 1)
+PKL_DEF_TYPE (PKL_TYPE_INT32, "int32", 32, 1)
+PKL_DEF_TYPE (PKL_TYPE_LONG, "long", 64, 1)
+PKL_DEF_TYPE (PKL_TYPE_INT64, "int64", 64, 1)
+PKL_DEF_TYPE (PKL_TYPE_STRING, "string", 0, 0)
 
 /*
 Local variables:

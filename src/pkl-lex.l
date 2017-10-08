@@ -37,7 +37,9 @@
 %{
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <xalloc.h>
+#include <assert.h>
 #include <pkl-ast.h>
 #include <pkl-parser.h>
 #include <pkl-tab.h>
@@ -47,208 +49,23 @@
 # include <readline/history.h>
 #endif
 
-#define YY_USER_ACTION                                          \
-  do                                                            \
-    {                                                           \
-    yylloc->first_line = yylloc->last_line = yylineno;          \
-    if (!isspace (*yytext))                                     \
-      {                                                         \
-        yyextra->at_start = 0;                                  \
-      }                                                         \
- } while (0);
-
-#define YY_INPUT(buf,result,max_size) \
-  result = pkl_read (yyin, buf, max_size, yyextra);
-  
-size_t
-pkl_read (FILE *file, char *buf, size_t max,
-          struct pkl_parser *parser)
-{
-  size_t len;
-  
-  /* If yyin == NULL then we are interactive.  */
-  if (file == NULL || isatty (fileno (file)))
-    {
-      char *line;
-
-      if (parser->at_end)
-        return YY_NULL;
-      
-      line = readline (parser->at_start ? parser->ps1 : parser->ps2);
-
-      if (line == NULL
-          || strncmp (line, ":exit", strlen (":exit")) == 0)
-        exit (1); /* XXX: this should probably be a longjmp.  */
-
-      len = strlen (line);
-      if (len > max - 2)
-        len = max - 2;
-
-      /*      if (strncmp (line, "dump", strlen ("dump")) == 0)
-        {
-          if (!pk_cmd_dump (line + strlen ("dump")))
-            printf ("invalid command.\n");
-          return YY_NULL;
-          } */
-
-      if (strncmp (line, ":load", strlen (":load")) == 0)
-        {
-          size_t i;
-
-          if (line[5] != ' ')
-            {
-              printf ("usage: :load FILENAME\n");
-            }
-          else
-            {
-              char *filename;
-              FILE *fin;
-              pkl_ast ast;
-              int ret;
-
-              i = 5;
-              while (line[i++] == ' ');
-              filename = line + i - 1;
-
-              fin = fopen (filename, "r");
-              if (fin == NULL)
-                {
-                  printf ("Can't open file '%s'\n", filename);
-                  return YY_NULL;
-                }
-              
-              ret = pkl_parse_file (&ast, fin, filename);
-              if (ret == 1)
-                ;
-              else if (ret == 2)
-                printf ("MEMORY EXHAUSTION\n");
-              else
-                {
-#ifdef PKL_DEBUG
-                  if (PKL_AST_PROGRAM_ELEMS (ast->ast))
-                    pkl_ast_print (stdout, ast->ast);
-#endif
-                  pkl_ast_free (ast);                  
-                }
-
-              fclose (fin);
-            }
-
-          return YY_NULL;
-        }
-
-#if defined HAVE_READLINE_HISTORY_H
-      if (line && *line)
-        add_history (line);
-#endif
-
-      memcpy(buf, line, len);
-      buf[len++] = '\n';
-      free (line);
-
-      /* If the string is empty and we are continuing a command,
-         return a newline.  We assume that `max' is at least 1.  */
-      if (!parser->at_start && len == 0)
-        {
-          buf[len] = '\n';
-          len++;
-        }
-      
-      return len;
-    }
-  else
-    {
-      /* Non interactive.  */
-      len = fread (buf, 1, max, file);
-      if (len == 0 && ferror (file))
-        {
-          /* TODO: propagate error value.  */
-        }
-      return len;
-    }
-}
-
-/* The following macro is used in the lexer rules below, to handle
-   continuation prompts while operating in interactive mode.  */
-
-#define AFTER_END                               \
-  do                                            \
-    {                                           \
-      yyextra->at_end = 0;                      \
-    } while (0)
- 
-/* Convert the printed representation of a number to an integer.  */
-  
-static int
-pkl_atoi (const char *str, int *number)
-{
-  int res;
-  long int li;
-  char *end;
-  int base = 0;
-
-  res = 0;
-
-  li = strtol (str, &end, base);
-  if ((*str != '\0') && (*end == '\0'))
-    {
-      /* The entire string is valid.  */
-      res = 0;
-      *number = (int) li;
-    }
-
-  return res;
-}
-
-/* Get a docstring literal, remove delimiters, format it according to
-   the rules documented below, and return it on a freshly allocated
-   string.  */
-
-static char *
-make_docstring (const char *str)
-{
-  /* Ok, these are the rules for docstrings:
-
-   - Docstrings are delimited by <<< and >>> sequences.
-   - Docstrings can't be nested.
-   - Newlines can be part of docstrings.
-   - Blank lines immediately following <<< are removed.
-   - Black lines immediately preceding >>> are removed.
-   - Any indentation in the first line of the docstring is removed.
-   - An uniform amount of indentation from the second and further
-     lines of a docstring, equal to the minimum indentation of all
-     non-blank lines after the first line, is removed.
-   - Relative indentation of the second and later lines in the
-     docstring is retained.
-   
-     Note STR is guaranteed to be a properly formatted docstring.
-   */
-
-
-  size_t len = strlen (str) - 6 + 1;
-  char *dstring = xmalloc (len);
-  
-  strncpy (dstring, str + 3, len - 1);
-  dstring [len] = '\0';
-
-  return dstring;
-}
-
-static pkl_ast_node cur_docstr;
- 
 %}
 
 NEWLINE            \n
 BLANK              [ \t\n]
-DIGIT              [0-9]
 LETTER             [a-zA-Z]
 FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
+CHAR		   '(.|\\[n0t])'
 STRING             \"([^"]|\\(.|\n))*\"
+HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
+BINCST		   0[bB][01][01_]
+OCTCST             0[0-9][0-9_]*
+DECCST             [1-9][0-9_]*
 
 L [a-zA-Z_]
 D [0-9]
 
-%x C_COMMENT C_DOCSTR
+%x C_COMMENT
 
 %%
 
@@ -259,86 +76,71 @@ D [0-9]
 <C_COMMENT>. { }                    
 <C_COMMENT>\n { }                   
 
-"<<<" 		{ BEGIN(C_DOCSTR); }
-<C_DOCSTR>">>>" {
-     BEGIN(INITIAL);
-     yylval->ast = cur_docstr;
-     return DOCSTR;
-}
-<C_DOCSTR>([^>]|>[^>]|>>[^>])* {
-     cur_docstr = pkl_ast_make_doc_string (yytext, NULL);
-}      
+"enum"		{ return ENUM; }
+"struct"	{ return STRUCT; }
+"typedef"	{ return TYPEDEF; }
+"break"		{ return BREAK; }
+"const"		{ return CONST; }
+"continue"	{ return CONTINUE; }
+"else"		{ return ELSE; }
+"for"		{ return FOR; }
+"while"		{ return WHILE; }
+"if"		{ return IF; }
+"sizeof"	{ return SIZEOF; }
+"assert"	{ return ASSERT; }
 
-"enum"		{ AFTER_END; return ENUM; }
-"struct"	{ AFTER_END; return STRUCT; }
-"typedef"	{ AFTER_END; return TYPEDEF; }
-"break"		{ AFTER_END; return BREAK; }
-"const"		{ AFTER_END; return CONST; }
-"continue"	{ AFTER_END; return CONTINUE; }
-"else"		{ AFTER_END; return ELSE; }
-"for"		{ AFTER_END; return FOR; }
-"while"		{ AFTER_END; return WHILE; }
-"if"		{ AFTER_END; return IF; }
-"sizeof"	{ AFTER_END; return SIZEOF; }
-"assert"	{ AFTER_END; return ASSERT; }
+"lsb"		{ return LSB; }
+"msb"		{ return MSB; }
 
-"unsigned"	{ AFTER_END; yylval->integer = 0; return UNSIGNED; }
-"signed"	{ AFTER_END; yylval->integer = 1; return SIGNED; }
+"*="		{ return MULA; }
+"/="		{ return DIVA; }
+"%="		{ return MODA; }
+"+="		{ return ADDA; }
+"-="		{ return SUBA; }
+"<<="		{ return SLA; }
+">>="		{ return SRA; }
+"&="		{ return BANDA; }
+"|="		{ return IORA; }
+"^="		{ return XORA; }
 
-"lsb"		{ AFTER_END; return LSB; }
-"msb"		{ AFTER_END; return MSB; }
+"||"		{ return OR; }
+"&&"		{ return AND; }
+"=="		{ return EQ; }
+"!="		{ return NE; }
+"<="		{ return LE; }
+">="		{ return GE; }
+"<<"		{ return SL; }
+">>"		{ return SR; }
+"++"		{ return INC; }
+"--"		{ return DEC; }
 
-"*="		{ AFTER_END; return MULA; }
-"/="		{ AFTER_END; return DIVA; }
-"%="		{ AFTER_END; return MODA; }
-"+="		{ AFTER_END; return ADDA; }
-"-="		{ AFTER_END; return SUBA; }
-"<<="		{ AFTER_END; return SLA; }
-">>="		{ AFTER_END; return SRA; }
-"&="		{ AFTER_END; return BANDA; }
-"|="		{ AFTER_END; return IORA; }
-"^="		{ AFTER_END; return XORA; }
-
-"||"		{ AFTER_END; return OR; }
-"&&"		{ AFTER_END; return AND; }
-"=="		{ AFTER_END; return EQ; }
-"!="		{ AFTER_END; return NE; }
-"<="		{ AFTER_END; return LE; }
-">="		{ AFTER_END; return GE; }
-"<<"		{ AFTER_END; return SL; }
-">>"		{ AFTER_END; return SR; }
-"++"		{ AFTER_END; return INC; }
-"--"		{ AFTER_END; return DEC; }
-
-"["		{ AFTER_END; return '['; }
-"]"		{ AFTER_END; return ']'; }
-"("		{ AFTER_END; return '('; }
-")"		{ AFTER_END; return ')'; }
-"{"		{ AFTER_END; return '{'; }
-"}"		{ AFTER_END; return '}'; }
-","		{ AFTER_END; return ','; }
-"="		{ AFTER_END; return '='; }
-"?"		{ AFTER_END; return '?'; }
-":"		{ AFTER_END; return ':'; }
-";"		{ AFTER_END; return ';'; }
-"|"		{ AFTER_END; return '|'; }
-"^"		{ AFTER_END; return '^'; }
-"&"		{ AFTER_END; return '&'; }
-"<"		{ AFTER_END; return '<'; }
-">"		{ AFTER_END; return '>'; }
-"+"		{ AFTER_END; return '+'; }
-"-"		{ AFTER_END; return '-'; }
-"*"		{ AFTER_END; return '*'; }
-"/"		{ AFTER_END; return '/'; }
-"%"		{ AFTER_END; return '%'; }
-"!"		{ AFTER_END; return '!'; }
-"~"		{ AFTER_END; return '~'; }
-"."		{ AFTER_END; return '.'; }
+"["		{ return '['; }
+"]"		{ return ']'; }
+"("		{ return '('; }
+")"		{ return ')'; }
+"{"		{ return '{'; }
+"}"		{ return '}'; }
+","		{ return ','; }
+"="		{ return '='; }
+"?"		{ return '?'; }
+":"		{ return ':'; }
+";"		{ return ';'; }
+"|"		{ return '|'; }
+"^"		{ return '^'; }
+"&"		{ return '&'; }
+"<"		{ return '<'; }
+">"		{ return '>'; }
+"+"		{ return '+'; }
+"-"		{ return '-'; }
+"*"		{ return '*'; }
+"/"		{ return '/'; }
+"%"		{ return '%'; }
+"!"		{ return '!'; }
+"~"		{ return '~'; }
+"."		{ return '.'; }
 
 {L}({L}|{D})* {
    pkl_ast_node type;
-
-   AFTER_END;
 
    if ((type = pkl_ast_get_registered (yyextra->ast, 
                                        yytext, PKL_AST_TYPE)) != NULL)
@@ -353,25 +155,121 @@ D [0-9]
      }
 }
 
-"-"?((0x[0-9a-fA-F]+)|{DIGIT}+) {
-  int integer_value;
+({HEXCST}|{BINCST}|{OCTCST}|{DECCST})[uU]? {
+  uint64_t value;
+  int base, offset, signed_p;
+  char *p, *end;
+  enum pkl_ast_type_code code;
+  pkl_ast_node type;
 
-  AFTER_END;
+  /* First of all, strip any '_' character from yytext.  */
+  for (p = yytext; *p != '\0'; p++)
+  {
+    char *tmp = p;
 
-  pkl_atoi (yytext, &integer_value);
+    if (*p == '_')
+     for (tmp = p; tmp != '\0'; tmp++)
+       *tmp = *(tmp + 1);
+  }
 
-  yylval->ast = pkl_ast_make_integer (integer_value);
+  /* We support hexadecimal, octal, decimal and binary integer
+     constants.  Set the base of the match and skip prefixes.  */
+
+  base = 10;
+  offset = 0;
+
+  if (yytext[0] == '0')
+  {
+    if (yytext[1] == 'x' || yytext[1] == 'X')
+    {
+      base = 16;
+      offset = 2;
+    }
+    else if (yytext[1] == 'b' || yytext[1] == 'B')
+    {
+      base = 2;
+      offset = 2;
+    }
+    else if (isdigit (yytext[1]))
+    {
+      base = 8;
+      offset = 1;
+    }
+  }
+
+  /* Note that strtol can't fail in this context.  */
+  value = strtol (yytext + offset, &end, base);
+  signed_p = *end != 'u' && *end != 'U';
+
+  /* The type of the integer constant is the smallest signed or
+     unsigned integer capable of holding it, starting with 32 bits, in
+     steps of power of two and up to 64 bits.  But note these are
+     positive values! */
+
+  if (value & 0xffff8000)
+    code = signed_p ? PKL_TYPE_INT64 : PKL_TYPE_UINT64;
+  else
+    code = signed_p ? PKL_TYPE_INT32 : PKL_TYPE_UINT32;
+
+  type = pkl_ast_get_std_type (yyextra->ast, code);
+  assert (type);
+
+  yylval->ast = pkl_ast_make_integer (value);
+  PKL_AST_TYPE (yylval->ast) = ASTREF (type);
+
   return INTEGER;    
 }
 
+{CHAR} {
+   uint8_t value;
+   pkl_ast_node type;
+
+   if (yytext[1] == '\\')
+    {
+      switch (yytext[2])
+      {
+      case 'n':
+        value = '\n';
+        break;
+      case 't':
+        value = '\t';
+        break;
+      case '0':
+        value = '\0';
+        break;
+      default:
+        /* To avoid compiler warnings.  */
+        value = 0;
+        break;
+      }
+    }
+   else
+     value = yytext[1];
+
+   type = pkl_ast_get_std_type (yyextra->ast, PKL_TYPE_CHAR);
+   assert (type);
+
+   yylval->ast = pkl_ast_make_integer (value);
+   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
+
+   return CHAR;  
+}
+
 {STRING} {
-  /* Strip the quoting characters */
-  yytext[strlen(yytext) - 1] = 0;
+   pkl_ast_node type;
 
-  AFTER_END;
+   /* Strip the quoting characters */
+   yytext[strlen(yytext) - 1] = 0;
 
-  yylval->ast = pkl_ast_make_string (yytext + 1);
-  return STR;
+   /* XXX: handle escape characters.  */
+
+   type = pkl_ast_get_std_type (yyextra->ast, PKL_TYPE_STRING);
+   assert (type);
+
+   yylval->ast = pkl_ast_make_string (yytext + 1);
+   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
+
+   return STR;
 }
 
 . { return ERR; }

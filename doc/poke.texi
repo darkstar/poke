@@ -164,16 +164,15 @@ using the minus operator as explained below.
 
 8-bit unsigned integers can use an alternative literal notation that
 is useful when working with @emph{ASCII character codes}.  Printable
-character codes can be denoted with @code{'c'}.  Both printable and
-non-printable character codes can be denoted using the notation
-@code{'\NNN'} where @code{NNN} is an octal number featuring up to
-three digits.  The number should be in the range @code{0-255}.
+character codes can be denoted with @code{'c'}
 
 Examples:
 
 @example
 'o'
-'\000'
+'\n'
+'\t'
+'\0'
 @end example
 
 The type of a character literal is always @code{char}.
@@ -317,7 +316,7 @@ The following escape sequences are supported inside string literals:
 @item \DDD
 Where @var{ddd} is a one to three digits octal number.  The escape
 sequence denotes the ASCII character having that code.  It must be in
-the range @code{0-255}.  For example @code{\000} denotes the ASCII
+the range @code{0-127}.  For example @code{\000} denotes the ASCII
 @code{NULL} character.
 @item \xHH
 Where @var{hh} is a one to two digits hexadecimal number.  The escape

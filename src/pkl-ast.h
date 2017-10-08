@@ -60,7 +60,7 @@ enum pkl_ast_code
    operators (see below in this file for more details on this.)  The
    following enumeration defines the operator codes.
 
-   The definitions of the operators are in pdl-ops.def.  */
+   The definitions of the operators are in pkl-ops.def.  */
 
 #define PKL_DEF_OP(SYM, STRING) SYM,
 enum pkl_ast_op
@@ -98,7 +98,7 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
 
    The definitions of the supported types are in pdl-types.def.  */
 
-#define PKL_DEF_TYPE(CODE,ID,SIZE) CODE,
+#define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) CODE,
 enum pkl_ast_type_code
 {
   PKL_TYPE_NOTYPE,
@@ -151,6 +151,7 @@ typedef union pkl_ast_node *pkl_ast_node;
    There is no constructor defined for common nodes.  */
 
 #define PKL_AST_CHAIN(AST) ((AST)->common.chain)
+#define PKL_AST_TYPE(AST) ((AST)->common.type)
 #define PKL_AST_CHAIN2(AST) ((AST)->common.chain2)
 #define PKL_AST_CODE(AST) ((AST)->common.code)
 #define PKL_AST_LITERAL_P(AST) ((AST)->common.literal_p)
@@ -163,6 +164,7 @@ typedef union pkl_ast_node *pkl_ast_node;
 struct pkl_ast_common
 {
   union pkl_ast_node *chain;
+  union pkl_ast_node *type;
   union pkl_ast_node *chain2;
   enum pkl_ast_code code : 8;
   int refcount;
@@ -206,8 +208,7 @@ struct pkl_ast_identifier
 
 pkl_ast_node pkl_ast_make_identifier (const char *str);
 
-/* PKL_AST_INTEGER nodes represent integer numeric literals in PKL
-   programs.
+/* PKL_AST_INTEGER nodes represent integer constants in poke programs.
 
    VALUE contains a 64-bit unsigned integer.  */
 
@@ -278,7 +279,7 @@ pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
 
    The supported operators are specified in pkl-ops.def.
 
-   We defined two constructors for this node type: one for unary
+   There are two constructors for this node type: one for unary
    expressions and another for binary expressions.  */
 
 #define PKL_AST_EXP_CODE(AST) ((AST)->exp.code)
@@ -729,6 +730,8 @@ struct pkl_ast
   pkl_hash types_hash_table;
   pkl_hash enums_hash_table;
   pkl_hash structs_hash_table;
+
+  pkl_ast_node *stdtypes;
 };
 
 typedef struct pkl_ast *pkl_ast;
@@ -737,8 +740,8 @@ pkl_ast pkl_ast_init (void);
 void pkl_ast_free (pkl_ast ast);
 void pkl_ast_node_free (pkl_ast_node ast);
 
-/* The following three functions are used by the lexer and the parser
-   in order to populate/inquiry the hash tables in the AST.  */
+/* The following functions are used by the lexer and the parser in
+   order to populate/inquiry the hash tables in the AST.  */
 
 pkl_ast_node pkl_ast_get_identifier (pkl_ast ast,
                                      const char *str);
@@ -750,6 +753,9 @@ pkl_ast_node pkl_ast_get_registered (pkl_ast ast,
 pkl_ast_node pkl_ast_register (pkl_ast ast,
                                const char *name,
                                pkl_ast_node ast_node);
+
+pkl_ast_node pkl_ast_get_std_type (pkl_ast ast,
+                                   enum pkl_ast_type_code code);
 
 #ifdef PKL_DEBUG
 

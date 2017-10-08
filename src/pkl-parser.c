@@ -32,7 +32,6 @@
 static struct pkl_parser *
 pkl_parser_init (void)
 {
-  size_t i;
   struct pkl_parser *parser;
 
   parser = xmalloc (sizeof (struct pkl_parser));
@@ -49,32 +48,6 @@ pkl_parser_init (void)
   parser->at_end = 0;
   parser->interactive = 0;
 
-  /* Register standard types.  */
-  {
-    static struct
-    {
-      int code;
-      char *id;
-      size_t size;
-    } *type, stdtypes[] =
-        {
-#define PKL_DEF_TYPE(CODE,ID,SIZE) {CODE, ID, SIZE},
-# include "pkl-types.def"
-#undef PKL_DEF_TYPE
-          { PKL_TYPE_NOTYPE, NULL, 0 }
-        };
-
-    for (type = stdtypes; type->code != PKL_TYPE_NOTYPE; type++)
-      {
-        pkl_ast_node t = pkl_ast_make_type (type->code,
-                                            1, /* signed_p  */
-                                            type->size,
-                                            NULL /* enumeration */,
-                                            NULL /* strct */);
-        pkl_ast_register (parser->ast, type->id, t);
-      }
-  }
-  
   return parser;
 }
 
@@ -84,9 +57,6 @@ pkl_parser_init (void)
 void
 pkl_parser_free (struct pkl_parser *parser)
 {
-  size_t i;
-  pkl_ast_node t, n;
-  
   pkl_tab_lex_destroy (parser->scanner);
   free (parser->filename);
   free (parser);
@@ -125,13 +95,14 @@ pkl_parse_cmdline (pkl_ast *ast)
    syntax error and 2 if there was a memory exhaustion.  */
 
 int
-pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
+pkl_parse_file (pkl_ast *ast, int what, FILE *fd, const char *fname)
 {
   int ret;
   struct pkl_parser *parser;
 
   parser = pkl_parser_init ();
   parser->filename = xstrdup (fname);
+  parser->what = what;
 
   pkl_tab_set_in (fd, parser->scanner);
   ret = pkl_tab_parse (parser);
@@ -146,21 +117,21 @@ pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
    there was a memory exhaustion.  */
 
 int
-pkl_parse_buffer (pkl_ast *ast, char *buffer, size_t size)
+pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, size_t size)
 {
   YY_BUFFER_STATE yybuffer;
-  void *pkl_scanner;
   struct pkl_parser *parser;
   int ret;
 
   parser = pkl_parser_init ();
+  parser->what = what;
 
   yybuffer = pkl_tab__scan_buffer(buffer, size, parser->scanner);
 
-  ret = pkl_tab_parse (pkl_scanner);
+  ret = pkl_tab_parse (parser);
   *ast = parser->ast;
 
-  pkl_tab__delete_buffer (yybuffer, pkl_scanner);
+  pkl_tab__delete_buffer (yybuffer, parser);
   pkl_parser_free (parser);
 
   return ret;

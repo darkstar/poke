@@ -69,6 +69,8 @@ pkl_tab_error (YYLTYPE *llocp,
            llocp->first_line, err);
 }
 
+#if 0
+
 /* The following functions are used in the actions in several grammar
    rules below.  This is to avoid replicating code in situations where
    the difference between rules are just a different permutation of
@@ -117,6 +119,7 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 
   return 1;
 }
+#endif
  
 %}
 
@@ -128,11 +131,15 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 
 %destructor { /* pkl_ast_free ($$);*/ } <ast>
 
+/* Primaries.  */
+
 %token <ast> INTEGER
+%token <ast> CHAR
 %token <ast> STR
 %token <ast> IDENTIFIER
 %token <ast> TYPENAME
-%token <ast> DOCSTR
+
+/* Reserved words.  */
 
 %token ENUM
 %token STRUCT
@@ -148,16 +155,22 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 %token ASSERT
 %token ERR
 
-%token AND
-%token OR
-%token LE
-%token GE
-%token INC
-%token DEC
-%token SL
-%token SR
-%token EQ
-%token NE
+/* Operator tokens and their precedences, in ascending order.  */
+
+%right '?' ':'
+%left OR
+%left AND
+%left '|'
+%left '^'
+%left '&'
+%left EQ NE
+%left LE GE
+%left SL SR
+%left '+' '-'
+%left '*' '/' '%'
+%right UNARY INC DEC
+%left HYPERUNARY
+%left '.'
 
 %token <opcode> MULA
 %token <opcode> DIVA
@@ -173,26 +186,11 @@ struct_specifier_action (struct pkl_parser *pkl_parser,
 %token MSB LSB
 %token SIGNED UNSIGNED
 
-%type <opcode> unary_operator assignment_operator
+%type <opcode> unary_operator
 
-%type <integer> mem_endianness sign_qualifier
-
-%type <ast> enumerator_list enumerator constant_expression
-%type <ast> conditional_expression logical_or_expression
-%type <ast> logical_and_expression inclusive_or_expression
-%type <ast> exclusive_or_expression and_expression
-%type <ast> equality_expression relational_expression
-%type <ast> shift_expression additive_expression
-%type <ast> multiplicative_expression unary_expression cast_expression
-%type <ast> postfix_expression primary_expression
-%type <ast> expression assignment_expression
-%type <ast> type_specifier declaration declaration_specifiers
-%type <ast> typedef_specifier enum_specifier struct_specifier 
 %type <ast> program program_elem_list program_elem
-%type <ast> mem_layout mem_declarator_list
-%type <ast> mem_declarator mem_field_with_docstr mem_field_with_endian
-%type <ast> mem_field_with_size mem_field mem_cond mem_loop
-%type <ast> assert
+%type <ast> expression expression_primary
+%type <ast> type_specifier
 
 %start program
 
@@ -222,6 +220,8 @@ program_elem_list:
                 }
         | program_elem_list program_elem
         	{
+                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
+                    YYERROR;
                   pkl_parser->at_start = 1;
                   pkl_parser->at_end = 1;
                   $$ = pkl_ast_chainon ($1, $2);
@@ -229,210 +229,120 @@ program_elem_list:
 	;
 
 program_elem:
-	  declaration
-        | expression ';'
+          expression
+        	{
+                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
+                    YYERROR;
+                  $$ = $1;
+                }
+/*	  declaration
+          	{
+                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
+                    YYERROR;
+                  $$ = $1;
+                  }*/
         ;
 
 /*
  * Expressions.
  */
 
-constant_expression:
-	  conditional_expression
-          	{
-                  if (!PKL_AST_LITERAL_P ($1))
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "expected constant expression");
-                      YYERROR;
-                    }
-
-                  $$ = $1;
-                }
-        ;
-
 expression:
-	  assignment_expression
-        | expression ',' assignment_expression
-		{ $$ = pkl_ast_chainon ($1, $3); }
-        ;
-
-assignment_expression:
-	  conditional_expression
-        | unary_expression assignment_operator assignment_expression
-		{ $$ = pkl_ast_make_binary_exp ($2, $1, $3); }
-        ;
-
-assignment_operator:
-	'='		{ $$ = PKL_AST_OP_ASSIGN; }
-	| MULA	{ $$ = PKL_AST_OP_MULA; }
-	| DIVA	{ $$ = PKL_AST_OP_DIVA; }
-	| MODA	{ $$ = PKL_AST_OP_MODA; }
-	| ADDA	{ $$ = PKL_AST_OP_ADDA; }
-	| SUBA	{ $$ = PKL_AST_OP_SUBA; }
-	| SLA	{ $$ = PKL_AST_OP_SLA; }
-	| SRA	{ $$ = PKL_AST_OP_SRA; }
-	| BANDA	{ $$ = PKL_AST_OP_BANDA; }
-	| XORA	{ $$ = PKL_AST_OP_XORA; }
-	| IORA	{ $$ = PKL_AST_OP_IORA; }
-        ;
-
-conditional_expression:
-	  logical_or_expression
-	| logical_or_expression '?' expression ':' conditional_expression
-          	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
-	;
-
-logical_or_expression:
-	  logical_and_expression
-        | logical_or_expression OR logical_and_expression
-          	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR, $1, $3); }
-        ;
-
-logical_and_expression:
-	  inclusive_or_expression
-	| logical_and_expression AND inclusive_or_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND, $1, $3); }
-	;
-
-inclusive_or_expression:
-	  exclusive_or_expression
-        | inclusive_or_expression '|' exclusive_or_expression
-	        { $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR, $1, $3); }
-	;
-
-exclusive_or_expression:
-	  and_expression
-        | exclusive_or_expression '^' and_expression
-          	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR, $1, $3); }
-	;
-
-and_expression:
-	  equality_expression
-        | and_expression '&' equality_expression
-          { $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND, $1, $3); }
-	;
-
-equality_expression:
-          relational_expression
-	| equality_expression EQ relational_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ, $1, $3); }
-	| equality_expression NE relational_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE, $1, $3); }
-	;
-
-relational_expression:
-	  shift_expression
-        | relational_expression '<' shift_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT, $1, $3); }
-        | relational_expression '>' shift_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT, $1, $3); }
-        | relational_expression LE shift_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE, $1, $3); }
-        | relational_expression GE shift_expression
+	  expression_primary
+        | unary_operator expression %prec UNARY
+          	{ $$ = pkl_ast_make_unary_exp ($1, $2); }
+        | '(' type_specifier ')' expression %prec UNARY
+        	{ $$ = pkl_ast_make_cast ($2, $4); }
+        | SIZEOF expression %prec UNARY
+        	{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2); }
+        | SIZEOF '(' type_specifier ')' %prec HYPERUNARY
+        	{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3); }
+        | expression '+' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD, $1, $3); }
+        | expression '-' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB, $1, $3); }
+        | expression '*' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL, $1, $3); }
+        | expression '/' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV, $1, $3); }
+        | expression '%' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD, $1, $3); }
+        | expression SL expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL, $1, $3); }
+        | expression SR expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR, $1, $3); }
+        | expression EQ expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ, $1, $3); }
+	| expression NE expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE, $1, $3); }
+        | expression '<' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT, $1, $3); }
+        | expression '>' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT, $1, $3); }
+        | expression LE expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE, $1, $3); }
+	| expression GE expression
         	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE, $1, $3); }
-        ;
-
-shift_expression:
-	  additive_expression
-        | shift_expression SL additive_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL, $1, $3); }
-        | shift_expression SR additive_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR, $1, $3); }
-        ;
-
-additive_expression:
-	  multiplicative_expression
-        | additive_expression '+' multiplicative_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD, $1, $3); }
-        | additive_expression '-' multiplicative_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB, $1, $3); }
-        ;
-
-multiplicative_expression:
-	  cast_expression
-        | multiplicative_expression '*' unary_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL, $1, $3); }
-        | multiplicative_expression '/' unary_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV, $1, $3); }
-        | multiplicative_expression '%' unary_expression
-		{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD, $1, $3); }
-        ;
-
-cast_expression:
-	  unary_expression
-        | '(' type_specifier ')' cast_expression
-          	{ $$ = pkl_ast_make_cast ($2, $4); }
-        ;
-
-unary_expression:
-	  postfix_expression
-        | INC unary_expression
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_INC, $2); }
-        | DEC unary_expression
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_DEC, $2); }
-        | unary_operator multiplicative_expression
-		{ $$ = pkl_ast_make_unary_exp ($1, $2); }
-        | SIZEOF unary_expression
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2); }
-        | SIZEOF '(' TYPENAME ')'
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3); }
+        | expression '|' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR, $1, $3); }
+        | expression '^' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR, $1, $3); }
+	| expression '&' expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND, $1, $3); }
+        | expression AND expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND, $1, $3); }
+	| expression OR expression
+        	{ $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR, $1, $3); }
+        | expression '?' expression ':' expression
+        	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
         ;
 
 unary_operator:
-	  '&' 	{ $$ = PKL_AST_OP_ADDRESS; }
-	| '+'	{ $$ = PKL_AST_OP_POS; }
-	| '-'	{ $$ = PKL_AST_OP_NEG; }
-	| '~'	{ $$ = PKL_AST_OP_BNOT; }
-	| '!'	{ $$ = PKL_AST_OP_NOT; }
+	  '-'		{ $$ = PKL_AST_OP_NEG; }
+	| '+'		{ $$ = PKL_AST_OP_POS; }
+	| INC		{ $$ = PKL_AST_OP_PREINC; }
+	| DEC		{ $$ = PKL_AST_OP_PREDEC; }
+	| '~'		{ $$ = PKL_AST_OP_BNOT; }
+	| '!'		{ $$ = PKL_AST_OP_NOT; }
 	;
 
-postfix_expression:
-	  primary_expression
-        | postfix_expression '[' expression ']'
-		{ $$ = pkl_ast_make_array_ref ($1, $3); }
-        | postfix_expression '.' IDENTIFIER
-		{ $$ = pkl_ast_make_struct_ref ($1, $3); }
-        | postfix_expression INC
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_INC, $1); }
-	| postfix_expression DEC
-		{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_DEC, $1); }
-/*
-        | '(' type_name ')' '{' initializer_list '}'
-		{ $$ = pkl_ast_make_initializer ($2, $5); }
-        | '(' type_name ')' '{' initializer_list ',' '}'
-		{ $$ = pkl_ast_make_initializer ($2, $5); }
- */
-	;
-
-primary_expression:
-	  IDENTIFIER
-        | INTEGER
+expression_primary:
+	  INTEGER
+        | CHAR
         | STR
-        | '.'
-          	{ $$ = pkl_ast_make_loc (); }
+        | IDENTIFIER
         | '(' expression ')'
 		{ $$ = $2; }
+	| expression_primary INC
+        	{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC, $1); }
+        | expression_primary DEC
+        	{ $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTDEC, $1); }
+        /* XXX: add foo.bar here.  */
+	/* XXX: add tuple and array literals here.  */
 	;
 
 /*
  * Declarations.
  */
 
+/*
 declaration:
 	  declaration_specifiers ';'
         ;
 
 declaration_specifiers:
           typedef_specifier
-	| struct_specifier
-        | enum_specifier
+          	| struct_specifier
+                | enum_specifier 
         ;
+
+*/
 
 /*
  * Typedefs
  */
 
+/*
 typedef_specifier:
 	  TYPEDEF type_specifier IDENTIFIER
           	{
@@ -452,12 +362,11 @@ typedef_specifier:
                   $$ = NULL;
                 }
         ;
+*/
 
 type_specifier:
-	  sign_qualifier TYPENAME
-        	{ PKL_AST_TYPE_SIGNED ($2) = $1; $$ = $2; }
-	| TYPENAME
-	| STRUCT IDENTIFIER
+	  TYPENAME
+          /*          	| STRUCT IDENTIFIER
         	{
                   pkl_ast_node strct
                     = pkl_ast_get_registered (pkl_parser->ast,
@@ -487,18 +396,15 @@ type_specifier:
                     }
                   else
                     $$ = pkl_ast_make_type (PKL_TYPE_ENUM, 0, 32, enumeration, NULL);
-                }
+                    }
         ;
-
-sign_qualifier:
-	  SIGNED	{ $$ = 1; }
-	| UNSIGNED	{ $$ = 0; }
-        ;
+*/
 
 /*
  * Enumerations.
  */
 
+/*
 enum_specifier:
 	  ENUM IDENTIFIER '{' enumerator_list '}'
           	{
@@ -576,10 +482,25 @@ enumerator:
                 }
 	;
 
+constant_expression:
+	  conditional_expression
+          	{
+                  if (!PKL_AST_LITERAL_P ($1))
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "expected constant expression");
+                      YYERROR;
+                    }
+
+                  $$ = $1;
+                }
+        ;
+*/
 /*
  * Structs.
  */
 
+/*
 struct_specifier:
 	  STRUCT IDENTIFIER mem_layout
 			{
@@ -618,11 +539,12 @@ struct_specifier:
                             YYERROR;
                         }
 	;
-
+*/
 /*
  * Memory layouts.
  */
 
+/*
 mem_layout:
 	  mem_endianness '{' mem_declarator_list '}'
           			{ $$ = pkl_ast_make_mem ($1, $3); }
@@ -689,9 +611,9 @@ mem_field_with_size:
                               YYERROR;
                             }
 
-                          /* Discard the size inferred from the field
+                          * Discard the size inferred from the field
                              type and replace it with the
-                             field width expression.  */
+                             field width expression.  *
                           pkl_ast_node_free (PKL_AST_FIELD_SIZE ($1));
                           PKL_AST_FIELD_SIZE ($1) = ASTREF ($3);
                           $$ = $1;
@@ -736,5 +658,6 @@ assert:
 	  ASSERT expression
           		{ $$ = pkl_ast_make_assertion ($2); }
 	;
+*/
 
 %%

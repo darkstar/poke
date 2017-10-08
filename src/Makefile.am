@@ -23,7 +23,6 @@ poke_SOURCES = poke.c poke.h \
                pk-info.c pk-misc.c pk-help.c \
                pkl-ast.h pkl-ast.c \
                pkl-tab.y pkl-lex.l \
-               pkl-gen.h pkl-gen.c \
                pkl-parser.h pkl-parser.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c

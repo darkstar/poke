@@ -56,48 +56,48 @@ bitmask elf_word elf_e_flags (enum elf_e_machine mach)
       EF_SPARCV9_RMO = 2,
       EF_SPARCV9_MM = 3,
       EF_SPARC_LEDATA = 0x80_0000
-        [[doc="Little-endian data."]],
+        <doc="Little-endian data.">,
       EF_SPARC_EX_MASK = 0xff_ff00
-        [[doc="Generic V8+ features."]],
+        <doc="Generic V8+ features.">,
       EF_SPARC_32PLUS = 0x00_0100
-        [[doc="Generic V8+ features."]],
+        <doc="Generic V8+ features.">,
       EF_SPARC_SUN_US1 = 0x00_0200
-        [[doc="Sun UltraSPARC1 extensions."]],
+        <doc="Sun UltraSPARC1 extensions.">,
       EF_SPARC_HAL_R1 = 0x00_0400
-        [[doc="HAL R1 extensions."]],
+        <doc="HAL R1 extensions.">,
       EF_SPARC_SUN_US3 = 0x00_0800
-        [[doc="Sun UltraSPARCIII extensions."]]
+        <doc="Sun UltraSPARCIII extensions.">
     }
 };
 
 enum byte elf_ei_class
 {
-  ELFCLASSNONE = 0x0 [[doc="Invalid class."]],
-  ELFCLASS32 = 0x1 [[doc="32-bit object."]],
-  ELFCLASS64 = 0x2 [[doc="64-bit object."]]
+  ELFCLASSNONE = 0x0 <doc="Invalid class.">,
+  ELFCLASS32 = 0x1 <doc="32-bit object.">,
+  ELFCLASS64 = 0x2 <doc="64-bit object.">
 };
 
 enum byte elf_ei_data
 {
   ELFDATANONE = 0
-    [[doc="Invalid data encoding."]],
+    <doc="Invalid data encoding.">,
 
   ELFDATA2LSB = 1
-    [[doc="2's complement values, with the least significant\n\
-           byte occupying the lowest address."]],
+    <doc="2's complement values, with the least significant\n\
+           byte occupying the lowest address.">,
 
   ELFDATA2MSB = 2
-    [[doc="2's complement values, with the most significant\n\
-           byte occupying the lowest address."]];
+    <doc="2's complement values, with the most significant\n\
+           byte occupying the lowest address.">;
 };
 
 enum elf_half elf_e_type
 {
-  ET_NONE = 0x0000 [[doc="No file type."]],
-  ET_REL  = 0x0001 [[doc="Relocatable file."]],
-  ET_EXEC = 0x0002 [[doc="Executable file."]],
-  ET_DYN  = 0x0003 [[doc="Shared object file."]],
-  ET_CORE = 0x0004 [[doc="Core file."]],
+  ET_NONE = 0x0000 <doc="No file type.">,
+  ET_REL  = 0x0001 <doc="Relocatable file.">,
+  ET_EXEC = 0x0002 <doc="Executable file.">,
+  ET_DYN  = 0x0003 <doc="Shared object file.">,
+  ET_CORE = 0x0004 <doc="Core file.">,
 
   ET_LOOS = 0xFE00,
   ET_HIOS = 0xFEFF,
@@ -106,123 +106,123 @@ enum elf_half elf_e_type
 };
 
 enum elf_word elf_r_type (enum elf_e_machine mach)
-  [[doc="ELF relocation type."]]
+  <doc="ELF relocation type.">
 {
   if (mach == EM_SPARC || mach == EM_SPARCV9
       || mach == EM_SPARC32PLUS)
     {
       R_SPARC_NONE = 0
-        [[doc="No reloc."]],
+        <doc="No reloc.">,
       R_SPARC_8 = 1
-        [[doc="Direct 8 bit."]],
+        <doc="Direct 8 bit.">,
       R_SPARC_16 = 2
-        [[doc="Direct 16 bit."]],
+        <doc="Direct 16 bit.">,
       R_SPARC_32 = 3
-        [[doc="Direct 32 bit."]],
+        <doc="Direct 32 bit.">,
       R_SPARC_DISP8 = 4
-        [[doc="PC relative 8 bit."]],
+        <doc="PC relative 8 bit.">,
       R_SPARC_DISP16 = 5
-        [[doc="PC relative 16 bit."]],
+        <doc="PC relative 16 bit.">,
       R_SPARC_DISP32 = 6
-        [[doc="PC relative 32 bit."]],
+        <doc="PC relative 32 bit.">,
       R_SPARC_WDISP30 = 7
-        [[doc="PC relative 30 bit shifted."]],
+        <doc="PC relative 30 bit shifted.">,
       R_SPARC_WDISP22 = 8
-        [[doc="PC relative 22 bit shifted."]],
+        <doc="PC relative 22 bit shifted.">,
       R_SPARC_HI22 = 9
-        [[doc="High 22 bit."]],
+        <doc="High 22 bit.">,
       R_SPARC_22 = 10
-        [[doc="Direct 22 bit."]],
+        <doc="Direct 22 bit.">,
       R_SPARC_13 = 11
-        [[doc="Direct 13 bit."]],
+        <doc="Direct 13 bit.">,
       R_SPARC_LO10 = 12
-        [[doc="Truncated 10 bit."]],
+        <doc="Truncated 10 bit.">,
       R_SPARC_GOT10 = 13
-        [[doc="Truncated 10 bit GOT entry."]],
+        <doc="Truncated 10 bit GOT entry.">,
       R_SPARC_GOT13 = 14
-        [[doc="13 bit GOT entry."]],
+        <doc="13 bit GOT entry.">,
       R_SPARC_GOT22 = 15
-        [[doc="22 bit GOT entry shifted."]],
+        <doc="22 bit GOT entry shifted.">,
       R_SPARC_PC10 = 16
-        [[doc="PC relative 10 bit truncated."]],
+        <doc="PC relative 10 bit truncated.">,
       R_SPARC_PC22 = 17
-        [[doc="PC relative 22 bit shifted."]],
+        <doc="PC relative 22 bit shifted.">,
       R_SPARC_WPLT30 = 18
-        [[doc="30 bit PC relative PLT address."]],
+        <doc="30 bit PC relative PLT address.">,
       R_SPARC_COPY = 19
-        [[doc="Copy symbol at runtime."]],
+        <doc="Copy symbol at runtime.">,
       R_SPARC_GLOB_DAT = 20
-        [[doc="Create GOT entry."]],
+        <doc="Create GOT entry.">,
       R_SPARC_JMP_SLOT = 21
-        [[doc="Create PLT entry."]],
+        <doc="Create PLT entry.">,
       R_SPARC_RELATIVE = 22
-        [[doc="Adjust by program base."]],
+        <doc="Adjust by program base.">,
       R_SPARC_UA32 = 23
-        [[doc="Direct 32 bit unaligned."]],
+        <doc="Direct 32 bit unaligned.">,
       R_SPARC_PLT32 = 24
-        [[doc="Direct 32 bit ref to PLT entry."]],
+        <doc="Direct 32 bit ref to PLT entry.">,
       R_SPARC_HIPLT22 = 25
-        [[doc="High 22 bit PLT entry."]],
+        <doc="High 22 bit PLT entry.">,
       R_SPARC_LOPLT10 = 26
-        [[doc="Truncated 10 bit PLT entry."]],
+        <doc="Truncated 10 bit PLT entry.">,
       R_SPARC_PCPLT32 = 27
-        [[doc="PC rel 32 bit ref to PLT entry."]],
+        <doc="PC rel 32 bit ref to PLT entry.">,
       R_SPARC_PCPLT22 = 28
-        [[doc="PC rel high 22 bit PLT entry."]],
+        <doc="PC rel high 22 bit PLT entry.">,
       R_SPARC_PCPLT10 = 29
-        [[doc="PC rel trunc 10 bit PLT entry."]],
+        <doc="PC rel trunc 10 bit PLT entry.">,
       R_SPARC_10 = 30
-        [[doc="Direct 10 bit."]],
+        <doc="Direct 10 bit.">,
       R_SPARC_11 = 31
-        [[doc="Direct 11 bit."]],
+        <doc="Direct 11 bit.">,
       R_SPARC_64 = 32
-        [[doc="Direct 64 bit."]],
+        <doc="Direct 64 bit.">,
       R_SPARC_OLO10 = 33
-        [[doc="10bit with secondary 13bit addend."]],
+        <doc="10bit with secondary 13bit addend.">,
       R_SPARC_HH22 = 34
-        [[doc="Top 22 bits of direct 64 bit."]],
+        <doc="Top 22 bits of direct 64 bit.">,
       R_SPARC_HM10 = 35
-        [[doc="High middle 10 bits of ...."]],
+        <doc="High middle 10 bits of ....">,
       R_SPARC_LM22 = 36
-        [[doc="Low middle 22 bits of ...."]],
+        <doc="Low middle 22 bits of ....">,
       R_SPARC_PC_HH22 = 37
-        [[doc="Top 22 bits of pc rel 64 bit."]],
+        <doc="Top 22 bits of pc rel 64 bit.">,
       R_SPARC_PC_HM10 = 38
-        [[doc="High middle 10 bit of ...."]],
+        <doc="High middle 10 bit of ....">,
       R_SPARC_PC_LM22 = 39
-        [[doc="Low miggle 22 bits of ...."]],
+        <doc="Low miggle 22 bits of ....">,
       R_SPARC_WDISP16 = 40
-        [[doc="PC relative 16 bit shifted."]],
+        <doc="PC relative 16 bit shifted.">,
       R_SPARC_WDISP19 = 41
-        [[doc="PC relative 19 bit shifted."]],
+        <doc="PC relative 19 bit shifted.">,
       R_SPARC_GLOB_JM = 42
-        [[doc="was part of v9 ABI but was removed."]],
+        <doc="was part of v9 ABI but was removed.">,
       R_SPARC_7 = 43
-        [[doc="Direct 7 bit."]],
+        <doc="Direct 7 bit.">,
       R_SPARC_5 = 44
-        [[doc="Direct 5 bit."]],
+        <doc="Direct 5 bit.">,
       R_SPARC_6 = 45
-        [[doc="Direct 6 bit."]],
+        <doc="Direct 6 bit.">,
       R_SPARC_DISP64 = 46
-        [[doc="PC relative 64 bit."]],
+        <doc="PC relative 64 bit.">,
       R_SPARC_PLT64 = 47
-        [[doc="Direct 64 bit ref to PLT entry."]],
+        <doc="Direct 64 bit ref to PLT entry.">,
       R_SPARC_HIX22 = 48
-        [[doc="High 22 bit complemented."]],
+        <doc="High 22 bit complemented.">,
       R_SPARC_LOX10 = 49
-        [[doc="Truncated 11 bit complemented."]],
+        <doc="Truncated 11 bit complemented.">,
       R_SPARC_H44 = 50
-        [[doc="Direct high 12 of 44 bit."]],
+        <doc="Direct high 12 of 44 bit.">,
       R_SPARC_M44 = 51
-        [[doc="Direct mid 22 of 44 bit."]],
+        <doc="Direct mid 22 of 44 bit.">,
       R_SPARC_L44 = 52
-        [[doc="Direct low 10 of 44 bit."]],
+        <doc="Direct low 10 of 44 bit.">,
       R_SPARC_REGISTE = 53
-        [[doc="Global register usage."]],
+        <doc="Global register usage.">,
       R_SPARC_UA64 = 54
-        [[doc="Direct 64 bit unaligned."]],
+        <doc="Direct 64 bit unaligned.">,
       R_SPARC_UA16 = 55
-        [[doc="Direct 16 bit unaligned."]],
+        <doc="Direct 16 bit unaligned.">,
       R_SPARC_TLS_GD_HI2 = 56,
       R_SPARC_TLS_GD_LO1 = 57,
       R_SPARC_TLS_GD_AD = 58,
@@ -267,451 +267,451 @@ enum elf_word elf_r_type (enum elf_e_machine mach)
 enum elf_half elf_e_machine
 {
   EM_NONE  = 0
-    [[doc="No machine."]],
+    <doc="No machine.">,
   EM_M32   = 1
-    [[doc="AT&T WE 32100."]],
+    <doc="AT&T WE 32100.">,
   EM_SPARC = 2
-    [[doc="SPARC."]],
+    <doc="SPARC.">,
   EM_386   = 3
-    [[doc="Intel 80386."]],
+    <doc="Intel 80386.">,
   EM_68K   = 4
-    [[doc="Motorola 68000."]],
+    <doc="Motorola 68000.">,
   EM_88K   = 5
-    [[doc="Motorola 88000."]],
+    <doc="Motorola 88000.">,
   EM_IAMCU = 6
-    [[doc="Intel MCU."]],
+    <doc="Intel MCU.">,
   EM_860   = 7
-    [[doc="Intel 80860."]],
+    <doc="Intel 80860.">,
   EM_MIPS  = 8
-    [[doc="MIPS I Architecture."]],
+    <doc="MIPS I Architecture.">,
   EM_S370  = 9
-    [[doc="IBM System/370 Processor."]],
+    <doc="IBM System/370 Processor.">,
   EM_MIPS_RS3_LE = 10
-    [[doc="MIPS RS3000 Little-endian."]] 
+    <doc="MIPS RS3000 Little-endian."> 
   /* 11-14 are reserved. */
   EM_PARISC = 15
-    [[doc="Hewlett-Packard PA-RISC."]],
+    <doc="Hewlett-Packard PA-RISC.">,
   /* 16 is reserved.  */
   EM_VPP500 = 1
-    [[doc="Fujitsu VPP500."]],
+    <doc="Fujitsu VPP500.">,
   EM_SPARC32PLUS = 18
-    [[doc="32-bit on V9 SPARC."]],
+    <doc="32-bit on V9 SPARC.">,
   EM_960 = 19
-    [[doc="Intel 80960."]],
+    <doc="Intel 80960.">,
   EM_PPC = 20
-    [[doc="PowerPC."]],
+    <doc="PowerPC.">,
   EM_PPC64 = 21
-    [[doc="64-bit PowerPC."]],
+    <doc="64-bit PowerPC.">,
   EM_S390 = 22
-    [[doc="IBM System/390 Processor."]],
+    <doc="IBM System/390 Processor.">,
   EM_SPU = 23
-    [[doc="IBM SPU/SPC."]],
+    <doc="IBM SPU/SPC.">,
   /* 24-35 are reserved.  */
   EM_V800 = 36
-    [[doc="NEC V800."]],
+    <doc="NEC V800.">,
   EM_FR20 = 37
-    [[doc="Fujitsu FR20."]],
+    <doc="Fujitsu FR20.">,
   EM_RH32 = 38
-    [[doc="TRW RH-32."]],
+    <doc="TRW RH-32.">,
   EM_RCE = 39
-    [[doc="Motorola RCE."]],
+    <doc="Motorola RCE.">,
   EM_ARM = 40
-    [[doc="ARM 32-bit architecture (AARCH32)."]],
+    <doc="ARM 32-bit architecture (AARCH32).">,
   EM_ALPHA = 41
-    [[doc="Digital Alpha."]],
+    <doc="Digital Alpha.">,
   EM_SH = 42
-    [[doc="Hitachi SH."]],
+    <doc="Hitachi SH.">,
   EM_SPARCV9 = 43
-    [[doc="SPARC Version 9."]],
+    <doc="SPARC Version 9.">,
   EM_TRICORE = 44
-    [[doc="Siemens TriCore embedded processor."]],
+    <doc="Siemens TriCore embedded processor.">,
   EM_ARC = 45
-    [[doc="Argonaut RISC Core, Argonaut Technologies Inc.."]],
+    <doc="Argonaut RISC Core, Argonaut Technologies Inc..">,
   EM_H8_300 = 46
-    [[doc="Hitachi H8/300."]],
+    <doc="Hitachi H8/300.">,
   EM_H8_300H = 47
-    [[doc="Hitachi H8/300H."]],
+    <doc="Hitachi H8/300H.">,
   EM_H8S = 48
-    [[doc="Hitachi H8S."]],
+    <doc="Hitachi H8S.">,
   EM_H8_500 = 49
-    [[doc="Hitachi H8/500."]],
+    <doc="Hitachi H8/500.">,
   EM_IA_64 = 50
-    [[doc="Intel IA-64 processor architecture."]],
+    <doc="Intel IA-64 processor architecture.">,
   EM_MIPS_X = 51
-    [[doc="Stanford MIPS-X."]],
+    <doc="Stanford MIPS-X.">,
   EM_COLDFIRE = 52
-    [[doc="Motorola ColdFire."]],
+    <doc="Motorola ColdFire.">,
   EM_68HC12 = 53
-    [[doc="Motorola M68HC12."]],
+    <doc="Motorola M68HC12.">,
   EM_MMA = 54
-    [[doc="Fujitsu MMA Multimedia Accelerator."]],
+    <doc="Fujitsu MMA Multimedia Accelerator.">,
   EM_PCP = 55
-    [[doc="Siemens PCP."]],
+    <doc="Siemens PCP.">,
   EM_NCPU = 56
-    [[doc="Sony nCPU embedded RISC processor."]],
+    <doc="Sony nCPU embedded RISC processor.">,
   EM_NDR1 = 57
-    [[doc="Denso NDR1 microprocessor."]],
+    <doc="Denso NDR1 microprocessor.">,
   EM_STARCORE = 58
-    [[doc="Motorola Star*Core processor."]],
+    <doc="Motorola Star*Core processor.">,
   EM_ME16 = 59
-    [[doc="Toyota ME16 processor."]],
+    <doc="Toyota ME16 processor.">,
   EM_ST100 = 60
-    [[doc="STMicroelectronics ST100 processor."]],
+    <doc="STMicroelectronics ST100 processor.">,
   EM_TINYJ = 61
-    [[doc="Advanced Logic Corp. TinyJ embedded processor family."]],
+    <doc="Advanced Logic Corp. TinyJ embedded processor family.">,
   EM_X86_64 = 62
-    [[doc="AMD x86-64 architecture."]],
+    <doc="AMD x86-64 architecture.">,
   EM_PDSP = 63
-    [[doc="Sony DSP Processor."]],
+    <doc="Sony DSP Processor.">,
   EM_PDP10 = 64
-    [[doc="Digital Equipment Corp. PDP-10."]],
+    <doc="Digital Equipment Corp. PDP-10.">,
   EM_PDP11 = 65
-    [[doc="Digital Equipment Corp. PDP-11."]],
+    <doc="Digital Equipment Corp. PDP-11.">,
   EM_FX66 = 66
-    [[doc="Siemens FX66 microcontroller."]],
+    <doc="Siemens FX66 microcontroller.">,
   EM_ST9PLUS = 67
-    [[doc="STMicroelectronics ST9+ 8/16 bit microcontroller."]],
+    <doc="STMicroelectronics ST9+ 8/16 bit microcontroller.">,
   EM_ST7 = 68
-    [[doc="STMicroelectronics ST7 8-bit microcontroller."]],
+    <doc="STMicroelectronics ST7 8-bit microcontroller.">,
   EM_68HC16 = 69
-    [[doc="Motorola MC68HC16 Microcontroller."]],
+    <doc="Motorola MC68HC16 Microcontroller.">,
   EM_68HC11 = 70
-    [[doc="Motorola MC68HC11 Microcontroller."]],
+    <doc="Motorola MC68HC11 Microcontroller.">,
   EM_68HC08 = 71
-    [[doc="Motorola MC68HC08 Microcontroller."]],
+    <doc="Motorola MC68HC08 Microcontroller.">,
   EM_68HC05 = 72
-    [[doc="Motorola MC68HC05 Microcontroller."]],
+    <doc="Motorola MC68HC05 Microcontroller.">,
   EM_SVX = 73
-    [[doc="Silicon Graphics SVx."]],
+    <doc="Silicon Graphics SVx.">,
   EM_ST19 = 74
-    [[doc="STMicroelectronics ST19 8-bit microcontroller."]],
+    <doc="STMicroelectronics ST19 8-bit microcontroller.">,
   EM_VAX = 75
-    [[doc="Digital VAX."]],
+    <doc="Digital VAX.">,
   EM_CRIS = 76
-    [[doc="Axis Communications 32-bit embedded processor."]],
+    <doc="Axis Communications 32-bit embedded processor.">,
   EM_JAVELIN = 77
-    [[doc="Infineon Technologies 32-bit embedded processor."]],
+    <doc="Infineon Technologies 32-bit embedded processor.">,
   EM_FIREPATH = 78
-    [[doc="Element 14 64-bit DSP Processor."]],
+    <doc="Element 14 64-bit DSP Processor.">,
   EM_ZSP = 79
-    [[doc="LSI Logic 16-bit DSP Processor."]],
+    <doc="LSI Logic 16-bit DSP Processor.">,
   EM_MMIX = 80
-    [[doc="Donald Knuth's educational 64-bit processor."]],
+    <doc="Donald Knuth's educational 64-bit processor.">,
   EM_HUANY = 81
-    [[doc="Harvard University machine-independent object files."]],
+    <doc="Harvard University machine-independent object files.">,
   EM_PRISM = 82
-    [[doc="SiTera Prism."]],
+    <doc="SiTera Prism.">,
   EM_AVR = 83
-    [[doc="Atmel AVR 8-bit microcontroller."]],
+    <doc="Atmel AVR 8-bit microcontroller.">,
   EM_FR30 = 84
-    [[doc="Fujitsu FR30."]],
+    <doc="Fujitsu FR30.">,
   EM_D10V = 85
-    [[doc="Mitsubishi D10V."]],
+    <doc="Mitsubishi D10V.">,
   EM_D30V = 86
-    [[doc="Mitsubishi D30V."]],
+    <doc="Mitsubishi D30V.">,
   EM_V850 = 87
-    [[doc="NEC v850."]],
+    <doc="NEC v850.">,
   EM_M32R = 88
-    [[doc="Mitsubishi M32R."]],
+    <doc="Mitsubishi M32R.">,
   EM_MN10300 = 89
-    [[doc="Matsushita MN10300."]],
+    <doc="Matsushita MN10300.">,
   EM_MN10200 = 90
-    [[doc="Matsushita MN10200."]],
+    <doc="Matsushita MN10200.">,
   EM_PJ = 91
-    [[doc="picoJava."]],
+    <doc="picoJava.">,
   EM_OPENRISC = 92
-    [[doc="OpenRISC 32-bit embedded processor."]],
+    <doc="OpenRISC 32-bit embedded processor.">,
   EM_ARC_COMPACT = 93
-    [[doc="ARC International ARCompact processor."]],
+    <doc="ARC International ARCompact processor.">,
   EM_XTENSA = 94
-    [[doc="Tensilica Xtensa Architecture."]],
+    <doc="Tensilica Xtensa Architecture.">,
   EM_VIDEOCORE = 95
-    [[doc="Alphamosaic VideoCore processor."]],
+    <doc="Alphamosaic VideoCore processor.">,
   EM_TMM_GPP = 96
-    [[doc="Thompson Multimedia General Purpose Processor."]],
+    <doc="Thompson Multimedia General Purpose Processor.">,
   EM_NS32K = 97
-    [[doc="National Semiconductor 32000 series."]],
+    <doc="National Semiconductor 32000 series.">,
   EM_TPC = 98
-    [[doc="Tenor Network TPC processor."]],
+    <doc="Tenor Network TPC processor.">,
   EM_SNP1K = 99
-    [[doc="Trebia SNP 1000 processor."]],
+    <doc="Trebia SNP 1000 processor.">,
   EM_ST200 = 100
-    [[doc="STMicroelectronics (www.st.com) ST200 microcontroller."]],
+    <doc="STMicroelectronics (www.st.com) ST200 microcontroller.">,
   EM_IP2K = 101
-    [[doc="Ubicom IP2xxx microcontroller family."]],
+    <doc="Ubicom IP2xxx microcontroller family.">,
   EM_MAX = 102
-    [[doc="MAX Processor."]],
+    <doc="MAX Processor.">,
   EM_CR = 103
-    [[doc="National Semiconductor CompactRISC microprocessor."]],
+    <doc="National Semiconductor CompactRISC microprocessor.">,
   EM_F2MC16 = 104
-    [[doc="Fujitsu F2MC16."]],
+    <doc="Fujitsu F2MC16.">,
   EM_MSP430 = 105
-    [[doc="Texas Instruments embedded microcontroller msp430."]],
+    <doc="Texas Instruments embedded microcontroller msp430.">,
   EM_BLACKFIN = 106
-    [[doc="Analog Devices Blackfin (DSP) processor."]],
+    <doc="Analog Devices Blackfin (DSP) processor.">,
   EM_SE_C33 = 107
-    [[doc="S1C33 Family of Seiko Epson processors."]],
+    <doc="S1C33 Family of Seiko Epson processors.">,
   EM_SEP = 108
-    [[doc="Sharp embedded microprocessor."]],
+    <doc="Sharp embedded microprocessor.">,
   EM_ARCA = 109
-    [[doc="Arca RISC Microprocessor."]],
+    <doc="Arca RISC Microprocessor.">,
   EM_UNICORE = 110
-    [[doc=" Microprocessor series from PKU-Unity. ."]],
+    <doc=" Microprocessor series from PKU-Unity. .">,
   EM_EXCESS = 111
-    [[doc="eXcess: 16/32/64-bit configurable embedded CPU."]],
+    <doc="eXcess: 16/32/64-bit configurable embedded CPU.">,
   EM_DXP = 112
-    [[doc="Icera Semiconductor Inc. Deep Execution Processor."]],
+    <doc="Icera Semiconductor Inc. Deep Execution Processor.">,
   EM_ALTERA_NIOS2 = 113
-    [[doc="Altera Nios II soft-core processor."]],
+    <doc="Altera Nios II soft-core processor.">,
   EM_CRX = 114
-    [[doc="National Semiconductor CompactRISC CRX microprocessor."]],
+    <doc="National Semiconductor CompactRISC CRX microprocessor.">,
   EM_XGATE = 115
-    [[doc="Motorola XGATE embedded processor."]],
+    <doc="Motorola XGATE embedded processor.">,
   EM_C166 = 116
-    [[doc="Infineon C16x/XC16x processor."]],
+    <doc="Infineon C16x/XC16x processor.">,
   EM_M16C = 117
-    [[doc="Renesas M16C series microprocessors."]],
+    <doc="Renesas M16C series microprocessors.">,
   EM_DSPIC30F = 118
-    [[doc="Microchip Technology dsPIC30F Digital Signal Controller."]],
+    <doc="Microchip Technology dsPIC30F Digital Signal Controller.">,
   EM_CE = 119
-    [[doc="Freescale Communication Engine RISC core."]],
+    <doc="Freescale Communication Engine RISC core.">,
   EM_M32C = 120
-    [[doc="Renesas M32C series microprocessors."]],
+    <doc="Renesas M32C series microprocessors.">,
   /* 121-130 are reserved.  */
   EM_TSK3000 = 131
-    [[doc="Altium TSK3000 co,re."]],
+    <doc="Altium TSK3000 co,re.">,
   EM_RS08 = 132
-    [[doc="Freescale RS08 embedded processor."]],
+    <doc="Freescale RS08 embedded processor.">,
   EM_SHARC = 133
-    [[doc="Analog Devices SHARC family of 32-bit DSP processors."]],
+    <doc="Analog Devices SHARC family of 32-bit DSP processors.">,
   EM_ECOG2 = 134
-    [[doc="Cyan Technology eCOG2 microprocessor."]],
+    <doc="Cyan Technology eCOG2 microprocessor.">,
   EM_SCORE7 = 135
-    [[doc="Sunplus S+core7 RISC processor."]],
+    <doc="Sunplus S+core7 RISC processor.">,
   EM_DSP24 = 136
-    [[doc="New Japan Radio (NJR) 24-bit DSP Processor."]],
+    <doc="New Japan Radio (NJR) 24-bit DSP Processor.">,
   EM_VIDEOCORE3 = 137
-    [[doc="Broadcom VideoCore III processor."]],
+    <doc="Broadcom VideoCore III processor.">,
   EM_LATTICEMICO32 = 138
-    [[doc="RISC processor for Lattice FPGA architecture. ."]],
+    <doc="RISC processor for Lattice FPGA architecture. .">,
   EM_SE_C17 = 139
-    [[doc="Seiko Epson C17 family."]],
+    <doc="Seiko Epson C17 family.">,
   EM_TI_C6000 = 140
-    [[doc="The Texas Instruments TMS320C6000 DSP family."]],
+    <doc="The Texas Instruments TMS320C6000 DSP family.">,
   EM_TI_C2000 = 141
-    [[doc="The Texas Instruments TMS320C2000 DSP family."]],
+    <doc="The Texas Instruments TMS320C2000 DSP family.">,
   EM_TI_C5500 = 142
-    [[doc="The Texas Instruments TMS320C55x DSP family."]],
+    <doc="The Texas Instruments TMS320C55x DSP family.">,
   EM_TI_ARP32 = 143
-    [[doc="Texas Instruments Application Specific RISC Processor,\n\
-           32bit fetch. ."]],
+    <doc="Texas Instruments Application Specific RISC Processor,\n\
+           32bit fetch. .">,
   EM_TI_PRU = 144
-    [[doc="Texas Instruments Programmable Realtime Unit."]],
+    <doc="Texas Instruments Programmable Realtime Unit.">,
   /* 145-159 are reserved.  */
   EM_MMDSP_PLUS = 160
-    [[doc="STMicroelectronics 64bit VLIW Data Signal Processor."]],
+    <doc="STMicroelectronics 64bit VLIW Data Signal Processor.">,
   EM_CYPRESS_M8C = 161
-    [[doc="Cypress M8C microprocessor."]],
+    <doc="Cypress M8C microprocessor.">,
   EM_R32C = 162
-    [[doc="Renesas R32C series microprocessors."]],
+    <doc="Renesas R32C series microprocessors.">,
   EM_TRIMEDIA = 163
-    [[doc="NXP Semiconductors TriMedia architecture family."]],
+    <doc="NXP Semiconductors TriMedia architecture family.">,
   EM_QDSP6 = 164
-    [[doc="QUALCOMM DSP6 Processor."]],
+    <doc="QUALCOMM DSP6 Processor.">,
   EM_8051 = 165
-    [[doc="Intel 8051 and variants."]],
+    <doc="Intel 8051 and variants.">,
   EM_STXP7X = 166
-    [[doc="STMicroelectronics STxP7x family of configurable and extensible\n\
-           RISC processors."]],
+    <doc="STMicroelectronics STxP7x family of configurable and extensible\n\
+           RISC processors.">,
   EM_NDS32 = 167
-    [[doc="Andes Technology compact code size embedded RISC processor\n\
-           family."]],
+    <doc="Andes Technology compact code size embedded RISC processor\n\
+           family.">,
   EM_ECOG1 = 168
-    [[doc="Cyan Technology eCOG1X family."]],
+    <doc="Cyan Technology eCOG1X family.">,
   EM_ECOG1X = 168
-    [[doc="Cyan Technology eCOG1X family."]],
+    <doc="Cyan Technology eCOG1X family.">,
   EM_MAXQ30 = 169
-    [[doc="Dallas Semiconductor MAXQ30 Core Micro-controllers."]],
+    <doc="Dallas Semiconductor MAXQ30 Core Micro-controllers.">,
   EM_XIMO16 = 170
-    [[doc="New Japan Radio (NJR) 16-bit DSP Processor."]],
+    <doc="New Japan Radio (NJR) 16-bit DSP Processor.">,
   EM_MANIK = 171
-    [[doc="M2000 Reconfigurable RISC Microprocessor."]],
+    <doc="M2000 Reconfigurable RISC Microprocessor.">,
   EM_CRAYNV2 = 172
-    [[doc="Cray Inc. NV2 vector architecture."]],
+    <doc="Cray Inc. NV2 vector architecture.">,
   EM_RX = 173
-    [[doc="Renesas RX family."]],
+    <doc="Renesas RX family.">,
   EM_METAG = 174
-    [[doc="Imagination Technologies META processor architecture."]],
+    <doc="Imagination Technologies META processor architecture.">,
   EM_MCST_ELBRUS = 175
-    [[doc="MCST Elbrus general purpose hardware architecture."]],
+    <doc="MCST Elbrus general purpose hardware architecture.">,
   EM_ECOG16 = 176
-    [[doc="Cyan Technology eCOG16 family."]],
+    <doc="Cyan Technology eCOG16 family.">,
   EM_CR16 = 177
-    [[doc="National Semiconductor CompactRISC CR16 16-bit microprocessor."]],
+    <doc="National Semiconductor CompactRISC CR16 16-bit microprocessor.">,
   EM_ETPU = 178
-    [[doc="Freescale Extended Time Processing Unit."]],
+    <doc="Freescale Extended Time Processing Unit.">,
   EM_SLE9X = 179
-    [[doc="Infineon Technologies SLE9X core."]],
+    <doc="Infineon Technologies SLE9X core.">,
   EM_L10M = 180
-    [[doc="Intel L10M."]],
+    <doc="Intel L10M.">,
   EM_K10M = 181
-    [[doc="Intel K10M."]],
+    <doc="Intel K10M.">,
   /* 182 is reserved.  */
   EM_AARCH64 = 183
-    [[doc="ARM 64-bit architecture (AARCH64)."]],
+    <doc="ARM 64-bit architecture (AARCH64).">,
   /* 184 is reserved.  */
   EM_AVR32 = 185
-    [[doc="Atmel Corporation 32-bit microprocessor family."]],
+    <doc="Atmel Corporation 32-bit microprocessor family.">,
   EM_STM8 = 186
-    [[doc="STMicroeletronics STM8 8-bit microcontroller."]],
+    <doc="STMicroeletronics STM8 8-bit microcontroller.">,
   EM_TILE64 = 187
-    [[doc="Tilera TILE64 multicore architecture family."]],
+    <doc="Tilera TILE64 multicore architecture family.">,
   EM_TILEPRO = 188
-    [[doc="Tilera TILEPro multicore architecture family."]],
+    <doc="Tilera TILEPro multicore architecture family.">,
   EM_MICROBLAZE = 189
-    [[doc="Xilinx MicroBlaze 32-bit RISC soft processor core."]],
+    <doc="Xilinx MicroBlaze 32-bit RISC soft processor core.">,
   EM_CUDA = 190
-    [[doc="NVIDIA CUDA architecture."]],
+    <doc="NVIDIA CUDA architecture.">,
   EM_TILEGX = 191
-    [[doc="Tilera TILE-Gx multicore architecture family."]],
+    <doc="Tilera TILE-Gx multicore architecture family.">,
   EM_CLOUDSHIELD = 192
-    [[doc="CloudShield architecture family."]],
+    <doc="CloudShield architecture family.">,
   EM_COREA_1ST = 193
-    [[doc="KIPO-KAIST Core-A 1st generation processor family."]],
+    <doc="KIPO-KAIST Core-A 1st generation processor family.">,
   EM_COREA_2ND = 194
-    [[doc="KIPO-KAIST Core-A 2nd generation processor family."]],
+    <doc="KIPO-KAIST Core-A 2nd generation processor family.">,
   EM_ARC_COMPACT2 = 195
-    [[doc="Synopsys ARCompact V2."]],
+    <doc="Synopsys ARCompact V2.">,
   EM_OPEN8 = 196
-    [[doc="Open8 8-bit RISC soft processor core."]],
+    <doc="Open8 8-bit RISC soft processor core.">,
   EM_RL78 = 197
-    [[doc="Renesas RL78 family."]],
+    <doc="Renesas RL78 family.">,
   EM_VIDEOCORE5 = 198
-    [[doc="Broadcom VideoCore V processor."]],
+    <doc="Broadcom VideoCore V processor.">,
   EM_78KOR = 199
-    [[doc="Renesas 78KOR family."]],
+    <doc="Renesas 78KOR family.">,
   EM_56800EX = 200
-    [[doc="Freescale 56800EX Digital Signal Controller (DSC)."]],
+    <doc="Freescale 56800EX Digital Signal Controller (DSC).">,
   EM_BA1 = 201
-    [[doc="Beyond BA1 CPU architecture."]],
+    <doc="Beyond BA1 CPU architecture.">,
   EM_BA2 = 202
-    [[doc="Beyond BA2 CPU architecture."]],
+    <doc="Beyond BA2 CPU architecture.">,
   EM_XCORE = 203
-    [[doc="XMOS xCORE processor family."]],
+    <doc="XMOS xCORE processor family.">,
   EM_MCHP_PIC = 204
-    [[doc="Microchip 8-bit PIC(r) family."]],
+    <doc="Microchip 8-bit PIC(r) family.">,
   EM_INTEL205 = 205
-    [[doc="Reserved by Intel."]],
+    <doc="Reserved by Intel.">,
   EM_INTEL206 = 206
-    [[doc="Reserved by Intel."]],
+    <doc="Reserved by Intel.">,
   EM_INTEL207 = 207
-    [[doc="Reserved by Intel."]],
+    <doc="Reserved by Intel.">,
   EM_INTEL208 = 208
-    [[doc="Reserved by Intel."]],
+    <doc="Reserved by Intel.">,
   EM_INTEL209 = 209
-    [[doc="Reserved by Intel."]],
+    <doc="Reserved by Intel.">,
   EM_KM32 = 210
-    [[doc="KM211 KM32 32-bit processor."]],
+    <doc="KM211 KM32 32-bit processor.">,
   EM_KMX32 = 211
-    [[doc="KM211 KMX32 32-bit processor."]],
+    <doc="KM211 KMX32 32-bit processor.">,
   EM_KMX16 = 212
-    [[doc="KM211 KMX16 16-bit processor."]],
+    <doc="KM211 KMX16 16-bit processor.">,
   EM_KMX8 = 213
-    [[doc="KM211 KMX8 8-bit processor."]],
+    <doc="KM211 KMX8 8-bit processor.">,
   EM_KVARC = 214
-    [[doc="KM211 KVARC processor."]],
+    <doc="KM211 KVARC processor.">,
   EM_CDP = 215
-    [[doc="Paneve CDP architecture family."]],
+    <doc="Paneve CDP architecture family.">,
   EM_COGE = 216
-    [[doc="Cognitive Smart Memory Processor."]],
+    <doc="Cognitive Smart Memory Processor.">,
   EM_COOL = 217
-    [[doc="Bluechip Systems CoolEngine."]],
+    <doc="Bluechip Systems CoolEngine.">,
   EM_NORC = 218
-    [[doc="Nanoradio Optimized RISC."]],
+    <doc="Nanoradio Optimized RISC.">,
   EM_CSR_KALIMBA  = 219
-    [[doc="CSR Kalimba architecture family."]],
+    <doc="CSR Kalimba architecture family.">,
   EM_Z80  = 220
-    [[doc="Zilog Z80."]],
+    <doc="Zilog Z80.">,
   EM_VISIUM  = 221
-    [[doc="Controls and Data Services VISIUMcore processor."]],
+    <doc="Controls and Data Services VISIUMcore processor.">,
   EM_FT32  = 222
-    [[doc="FTDI Chip FT32 high performance 32-bit RISC\n\
-           architecture. ."]],
+    <doc="FTDI Chip FT32 high performance 32-bit RISC\n\
+           architecture. .">,
   EM_MOXIE = 223
-    [[doc="Moxie processor family."]],
+    <doc="Moxie processor family.">,
   EM_AMDGPU = 224
-    [[doc="AMD GPU architecture."]],
+    <doc="AMD GPU architecture.">,
   /* 225 - 242 are reserved.  */
   EM_RISCV = 24
-    [[doc="RISC-V."]]3
+    <doc="RISC-V.">3
 };
 
 enum elf_word elf_e_version
 {
-  EV_NONE = 0 [[doc="Invalid version."]],
-  EV_CURRENT = 1 [[doc="Current version."]]
+  EV_NONE = 0 <doc="Invalid version.">,
+  EV_CURRENT = 1 <doc="Current version.">
 };
 
 enum elf_word elf_sh_type
 {
   SHT_NULL = 0
-    [[doc="Inactive section."]],
+    <doc="Inactive section.">,
 
   SHT_PROGBITS = 1
-    [[doc="Section holds information defined by the program whose format\n\
-           and meaning are determined solely by the program."]],
+    <doc="Section holds information defined by the program whose format\n\
+           and meaning are determined solely by the program.">,
 
   SHT_SYMTAB = 2
-    [[doc="Section holds a symbol table."]],
+    <doc="Section holds a symbol table.">,
 
   SHT_STRTAB = 3
-    [[doc="Section holds a string table."]],
+    <doc="Section holds a string table.">,
 
   SHT_RELA = 4
-    [[doc="Section holds relocation entries with explicit addends."]],
+    <doc="Section holds relocation entries with explicit addends.">,
 
   SHT_HASH = 5
-    [[doc="Section holds a symbol hash table."]],
+    <doc="Section holds a symbol hash table.">,
 
   SHT_DYNAMIC = 6
-    [[doc="Section holds the dynamic section."]],
+    <doc="Section holds the dynamic section.">,
 
   SHT_NOTE = 7
-    [[doc="Section holds information that marks the file in some way."]],
+    <doc="Section holds information that marks the file in some way.">,
 
   SHT_NOBITS = 8
-    [[doc="Section occupies no space in the file but otherwise resembles\n\
-           SHT_PROGBITS."]],
+    <doc="Section occupies no space in the file but otherwise resembles\n\
+           SHT_PROGBITS.">,
 
   SHT_REL = 9
-    [[doc="Section contains relocation entries without explicit\n\
-           addends."]],
+    <doc="Section contains relocation entries without explicit\n\
+           addends.">,
 
   SHT_SHLIB = 10
-    [[doc="Section reserved with undefined semantics."]],
+    <doc="Section reserved with undefined semantics.">,
 
   SHT_DYNSYM = 11
-    [[doc="Section holds a symbol table."]],
+    <doc="Section holds a symbol table.">,
 
   /* Entries 12 and 13 are unused.  */
 
   SHT_INIT_ARRAY = 14
-    [[doc="Section contains an array of pointers to initialization\n\
-           functions."]],
+    <doc="Section contains an array of pointers to initialization\n\
+           functions.">,
 
   SHT_FINI_ARRAY = 15
-    [[doc="Section contains an array of pointers to termination\n\
-           functions."]],
+    <doc="Section contains an array of pointers to termination\n\
+           functions.">,
 
   SHT_PREINIT_ARRAY = 16
-    [[doc="Section contains an array of pointers to functions that are\n\
-           invoked before all other initialization functions."]],
+    <doc="Section contains an array of pointers to functions that are\n\
+           invoked before all other initialization functions.">,
 
   SHT_GROUP = 17
-    [[doc="Section defines a section group."]],
+    <doc="Section defines a section group.">,
 
   SHT_SYMTAB_SHNDX = 18
-    [[doc="Section is associated with a symbol table section."]],
+    <doc="Section is associated with a symbol table section.">,
 
   SHT_LOOS = 0x60000000,
   SHT_HIOS = 0x6fffffff,
@@ -724,42 +724,42 @@ enum elf_word elf_sh_type
 bitmask elf_word elf_sh_flags
 {
   SHF_WRITE = 0x1
-    [[doc="Section contains data that should be writable during process\n\
-           execution."]],
+    <doc="Section contains data that should be writable during process\n\
+           execution.">,
 
   SHF_ALLOC = 0x2
-    [[doc="Section occupies memory during process execution."]],
+    <doc="Section occupies memory during process execution.">,
 
   SHF_EXECINSTR = 0x4
-    [[doc="Section contains executable machine instructions."]],
+    <doc="Section contains executable machine instructions.">,
 
   SHF_MERGE = 0x10
-    [[doc="The data in the section may be merged to eliminate\n\
-           duplication."]],
+    <doc="The data in the section may be merged to eliminate\n\
+           duplication.">,
 
   SHF_STRINGS = 0x20
-    [[doc="The data elements in the section consist of null-terminated\n\
-           character strings."]],
+    <doc="The data elements in the section consist of null-terminated\n\
+           character strings.">,
 
   SHF_INFO_LINK = 0x40
-    [[doc="The sh_info field of this section header holds a section header\n\
-           table index."]],
+    <doc="The sh_info field of this section header holds a section header\n\
+           table index.">,
 
   SHF_LINK_ORDER = 0x80
-    [[doc="Special ordering requirements for link editors."]],
+    <doc="Special ordering requirements for link editors.">,
 
   SHF_OS_NONCONFORMING = 0x100
-    [[doc="This section requires special OS-specific processing,\n\
-           beyond standard linking rules, to avoid incorrect behavior."]],
+    <doc="This section requires special OS-specific processing,\n\
+           beyond standard linking rules, to avoid incorrect behavior.">,
 
   SHF_GROUP = 0x200
-    [[doc="This section is a member of a section group."]],
+    <doc="This section is a member of a section group.">,
 
   SHF_TLS = 0x400
-    [[doc="This section holds thread-local storage."]],
+    <doc="This section holds thread-local storage.">,
 
   SHF_COMPRESSED = 0x800
-    [[doc="This section holds compressed data."]],
+    <doc="This section holds compressed data.">,
 
   SHF_MASKOS = 0x0ff00000,
   SHF_MASKPROC = 0xf0000000
@@ -768,29 +768,29 @@ bitmask elf_word elf_sh_flags
 enum elf_word elf_p_type
 {
   PT_NULL = 0
-    [[doc="Array element is unused."]],
+    <doc="Array element is unused.">,
 
   PT_LOAD = 1
-    [[doc="Loadable segment."]],
+    <doc="Loadable segment.">,
 
   PT_DYNAMIC = 2
-    [[doc="Dynamic linking information."]],
+    <doc="Dynamic linking information.">,
 
   PT_INTERP = 3
-    [[doc="Location and size of a null-terminated path name to invoke\n\
-           as an interpreter."]],
+    <doc="Location and size of a null-terminated path name to invoke\n\
+           as an interpreter.">,
 
   PT_NOTE = 4
-    [[doc="Location and size of auxiliary information."]],
+    <doc="Location and size of auxiliary information.">,
 
   PT_SHLIB = 5
-    [[doc="Reserved.  Unspecified semantics."]],
+    <doc="Reserved.  Unspecified semantics.">,
 
   PT_PHDR = 6
-    [[doc="Location and size of the program header table itself."]],
+    <doc="Location and size of the program header table itself.">,
 
   PT_TLS = 7
-    [[doc="Thread-local storage template."]],
+    <doc="Thread-local storage template.">,
 
   PT_LOOS = 0x60000000,
   PT_HIOS = 0x6fffffff,
@@ -800,9 +800,9 @@ enum elf_word elf_p_type
 
 bitmask elf_word elf_p_flags
 {
-  PF_X = 0x1 [[doc="Segment is executable."]],
-  PF_W = 0x2 [[doc="Segment is writeable."]],
-  PF_R = 0x4 [[doc="Segment is readable."]],
+  PF_X = 0x1 <doc="Segment is executable.">,
+  PF_W = 0x2 <doc="Segment is writeable.">,
+  PF_R = 0x4 <doc="Segment is readable.">,
 
   PF_MASKOS = 0xff00000,
   PF_MASKPROC = 0xf0000000
@@ -811,7 +811,7 @@ bitmask elf_word elf_p_flags
 enum elf_word elf_ch_type
 {
   ELFCOMPRESS_ZLIB = 1
-    [[doc="Section is compressed with ZLIB."]],
+    <doc="Section is compressed with ZLIB.">,
 
   ELFCOMPRESS_LOOS = 0x60000000,
   ELFCOMPRESS_HIOS = 0x6fffffff,
@@ -822,18 +822,18 @@ enum elf_word elf_ch_type
 enum elf_word elf_sym_binding
 {
   STB_LOCAL = 0
-    [[doc="Local symbols are not visible outside the object file containing\n\
+    <doc="Local symbols are not visible outside the object file containing\n\
            their definition.  Local symbols of the same name exist in multiple\n\
-           files without interfering with each other."]],
+           files without interfering with each other.">,
 
   STB_GLOBAL = 1
-    [[doc="Global symbols are visible to all object files being combined.\n\
+    <doc="Global symbols are visible to all object files being combined.\n\
            One file's definition of a global symbol will satisfy another\n\
-           file's undefined reference to the same global symbol."]],
+           file's undefined reference to the same global symbol.">,
 
   STB_WEAK = 2
-    [[doc="Weak symbols resemble global symbols, but their definitions have\n\
-           lower precedence."]],
+    <doc="Weak symbols resemble global symbols, but their definitions have\n\
+           lower precedence.">,
 
   STB_LOOS = 10,
   STB_HIOS = 12,
@@ -844,34 +844,34 @@ enum elf_word elf_sym_binding
 enum elf_word elf_st_type (enum elf_e_machine mach)
 {
   STT_NOTYPE = 0
-    [[doc="The symbol's type is not specified."]],
+    <doc="The symbol's type is not specified.">,
 
   STT_OBJECT = 1
-    [[doc="The symbol is associated with a data object, such as a\n\
-      variable, an array, and so on."]],
+    <doc="The symbol is associated with a data object, such as a\n\
+      variable, an array, and so on.">,
 
   STT_FUNC = 2
-    [[doc="The symbol is associated with a function or other executable\n\
-           code."]],
+    <doc="The symbol is associated with a function or other executable\n\
+           code.">,
 
   STT_SECTION = 3
-    [[doc="The symbol is associated with a section.  Symbol table entries\n\
+    <doc="The symbol is associated with a section.  Symbol table entries\n\
            of this type exist primarily for relocation and normally have\n\
-           STB_LOCAL binding."]],
+           STB_LOCAL binding.">,
 
   STT_FILE = 4
-    [[doc="Conventionally, the symbol's name gives the name of the source\n\
+    <doc="Conventionally, the symbol's name gives the name of the source\n\
            file associated with the object file.  A file symbol has\n\
            STB_LOCAL binding, its section index is SHN_ABS and it precedes\n\
-           the other STB_LOCAL symbols for the file, if it is present."]],
+           the other STB_LOCAL symbols for the file, if it is present.">,
 
   STT_COMMON = 5
-    [[doc="This symbol labels an uninitialized common block."]],
+    <doc="This symbol labels an uninitialized common block.">,
 
   STT_TLS = 6
-    [[doc="The symbol specifies a Thread-Local Storage entity.  When
+    <doc="The symbol specifies a Thread-Local Storage entity.  When
            defined, it gives the assigned offset for the symbol, not the
-           actual address."]],
+           actual address.">,
 
   STT_LOOS = 10,
   STT_HIOS = 12,
@@ -880,7 +880,7 @@ enum elf_word elf_st_type (enum elf_e_machine mach)
   if (mach == EM_SPARCV9 || mach == EM_SPARC32PLUS)
     {
       STT_SPARC_REGISTER = 13
-        [[doc=""Global register reserved to app.]],
+        <doc=""Global register reserved to app.>,
     }
     
   STT_HIPROC = 15
@@ -889,66 +889,66 @@ enum elf_word elf_st_type (enum elf_e_machine mach)
 enum elf_word elf_sym_visibility
 {
   STV_DEFAULT = 0
-    [[doc="The visibility of this symbol is specified by the symbol's\n\
+    <doc="The visibility of this symbol is specified by the symbol's\n\
            binding type.  That is, global and weak symbols are visible\n\
            outside of their defining component (executable file or shared\n\
            object).  Local symbols are hidden.  Global and weak symbols area\n\
            also preemptable, taht is, they may be preempted by definitions\n\
-           of the same name in another component."]],
+           of the same name in another component.">,
 
   STV_INTERNAL = 1
-    [[doc="The visibility of this symbol is defined by processor\n\
-           supplements, to further constrain hidden symbols."]],
+    <doc="The visibility of this symbol is defined by processor\n\
+           supplements, to further constrain hidden symbols.">,
 
   STV_HIDDEN = 2
-    [[doc="This symbol is not visible to other components."]],
+    <doc="This symbol is not visible to other components.">,
 
   STV_PROTECTED = 3
-    [[doc="This symbol is visible in other components but not preemptable,\n\
+    <doc="This symbol is visible in other components but not preemptable,\n\
            meaning that any reference to such a symbol from within the\n\
            defining component must be resolved to the definition in that\n\
            component, even if there is a definition in another component\n\
-           that would preempt by the default rules."]]
+           that would preempt by the default rules.">
 };
 
 bitmask elf64_xsword elf_d_tag_flag
 {
   DF_ORIGIN = 0x1
-    [[doc="This flag signifies that the object being loaded may make\n\
-           reference to the $ORIGIN substitution string."]],
+    <doc="This flag signifies that the object being loaded may make\n\
+           reference to the $ORIGIN substitution string.">,
 
   DF_SYMBOLIC = 0x2
-    [[doc="If this flag is set in a shared object library, the dynamic\n\
+    <doc="If this flag is set in a shared object library, the dynamic\n\
            linker's symbol resolution algorithm for references within the\n\
            library is changed.  Instead of starting a symbol search with\n\
            the executable file, the dynamic linker starts from the shared\n\
            object itself.  If the shared object fails to supply the\n\
            referened symbol, the dynamic linker then searches the\n\
-           executable file and other shared objects as usual."]],
+           executable file and other shared objects as usual.">,
 
   DF_TEXTREL = 0x4
-    [[doc="If this flag is not set, no relocation entry should cause a\n\
+    <doc="If this flag is not set, no relocation entry should cause a\n\
            modification to a non-writable segment, as specified by the\n\
            segment permissions in the program header table.  If this flag\n\
            is set, one or more relocation entries might request\n\
            modifications to a non-writable segment, and the dynamic linker\n\
-           can prepare accordingly."]],
+           can prepare accordingly.">,
 
   DF_BIND_NOW = 0x8
-    [[doc="If set in a shared object or executable, this flag instructs the\n\
+    <doc="If set in a shared object or executable, this flag instructs the\n\
            dynamic linker to process all relocations for the object\n\
            containing this entry before transferring control to the\n\
-           program."]],
+           program.">,
 
   DF_STATIC_TLS = 0x10
-    [[doc="If set in a shared object or executable, this flag instructs\n\
+    <doc="If set in a shared object or executable, this flag instructs\n\
            the dynamic linker to reject attempts to load this file\n\
-           dynamically."]]
+           dynamically.">
 };
 
 bitmask elf_word elf_group_flags
 {
-  GRP_COMDAT = 0x1 [[doc="COMDAT group."]],
+  GRP_COMDAT = 0x1 <doc="COMDAT group.">,
     
   GRP_MASKOS = 0x0ff0_0000,
   GRP_MASKPROC = 0xf0000000
@@ -957,160 +957,160 @@ bitmask elf_word elf_group_flags
 enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
 {
   DT_NULL = 0
-    [[doc="Tags the end of the dynamic array."]],
+    <doc="Tags the end of the dynamic array.">,
 
   DT_NEEDED = 1
-    [[doc="d_val holds the string table offset of a null-terminated string,\n\
+    <doc="d_val holds the string table offset of a null-terminated string,\n\
            giving the name of a needed library.  The dynamic array may\n\
-           contain multiple entries with this type."]],
+           contain multiple entries with this type.">,
 
   DT_PLTRELSZ = 2 /* d_val, optional, optional */
-    [[doc="d_val holds the total size, in bytes, of the relocation entries\n\
+    <doc="d_val holds the total size, in bytes, of the relocation entries\n\
            associated with the procedure linkage table.  If an entry of\n\
-           type DT_JMPREL is present, a DT_PLTRELSZ must accompany it."]],
+           type DT_JMPREL is present, a DT_PLTRELSZ must accompany it.">,
 
   DT_PLTGOT = 3 /* d_ptr, opt, opt */
-    [[doc="d_ptr holds an address associated with the procedure linkage\n\
-           table and/or the global offset table."]],
+    <doc="d_ptr holds an address associated with the procedure linkage\n\
+           table and/or the global offset table.">,
 
   DT_HASH = 4 /* d_ptr, mandatory, mandatory */
-    [[doc="d_ptr holds the address of the symbol hash table.  This hash\n\
+    <doc="d_ptr holds the address of the symbol hash table.  This hash\n\
            table refers to the symbol table referenced by the DT_SYMTAB\n\
-           element."]],
+           element.">,
 
   DT_STRTAB = 5 /* d_ptr, mandatory , mandatory */
-    [[doc="d_ptr holds the address of the string table.  Symbol names,\n\
-           library names, and other strings reside in this table."]],
+    <doc="d_ptr holds the address of the string table.  Symbol names,\n\
+           library names, and other strings reside in this table.">,
 
   DT_SYMTAB = 6 /* d_ptr, mandatory, mandatory */
-    [[doc="d_ptr holds the address of the symbol table."]],
+    <doc="d_ptr holds the address of the symbol table.">,
 
   DT_RELA = 7 /* d_ptr, mandatory, optional */
-    [[doc="d_ptr holds the address of a relocation table.  Entries in the\n\
+    <doc="d_ptr holds the address of a relocation table.  Entries in the\n\
            table have explicit addends.  An object file may have multiple\n\
            relocation sections.  If this element is present, the dynamic\n\
-           vector must also have DT_RELASZ and DT_RELAENT elements."]],
+           vector must also have DT_RELASZ and DT_RELAENT elements.">,
 
   DT_RELASZ = 8 /* d_val, mandatory, optional */
-    [[doc="d_val holds the total size, in bytes, of the DT_RELA relocation\n\
-           entry."]],
+    <doc="d_val holds the total size, in bytes, of the DT_RELA relocation\n\
+           entry.">,
 
   DT_RELAENT = 9 /* d_val, mandatory, optional */
-    [[doc="d_val holds the size, in bytes, of the DT_RELA relocation\n\
-           entry."]],
+    <doc="d_val holds the size, in bytes, of the DT_RELA relocation\n\
+           entry.">,
 
   DT_STRSZ = 10 /* d_val, mandatory, mandatory */
-    [[doc="d_val holds the size, in bytes, of the string table."]],
+    <doc="d_val holds the size, in bytes, of the string table.">,
 
   DT_SYMENT = 11 /* d_val, mandatory, mandatory */
-    [[doc="d_val holds the size, in bytes, of a symbol table entry."]],
+    <doc="d_val holds the size, in bytes, of a symbol table entry.">,
 
   DT_INIT = 12 /* d_ptr, opt, opt */
-    [[doc="d_ptr holds the addresss of the initialization function."]],
+    <doc="d_ptr holds the addresss of the initialization function.">,
 
   DT_FINI = 13 /* d_ptr, opt, opt */
-    [[doc="d_ptr holds the address of the finalization function."]],
+    <doc="d_ptr holds the address of the finalization function.">,
 
   DT_SONAME = 14 /* d_val, ignored, optional */
-    [[doc="d_val holds the string table offset of a null-terminated string,\n\
+    <doc="d_val holds the string table offset of a null-terminated string,\n\
            giving the name of the shared object.  The offset is an index\n\
-           into the table recorded in the DT_STRTAB entry."]],
+           into the table recorded in the DT_STRTAB entry.">,
 
   DT_RPATH = 15 /* d_val, optional, ignored */
-    [[doc="d_val holds the string table offset of a null-terminated search\n\
+    <doc="d_val holds the string table offset of a null-terminated search\n\
            library search path string.  The offset is an index into the\n\
            table recorded in the DT_STRTAB entry.  This entry is at level\n\
-           2.  Its use has been superseded by DT_RUNPATH."]],
+           2.  Its use has been superseded by DT_RUNPATH.">,
 
   DT_SYMBOLIC = 16 /* ignored, ignored, optional */
-    [[doc="This element's presence in a shared object library alters the\n\
+    <doc="This element's presence in a shared object library alters the\n\
            dynamic linker's symbol resolution algorithm for references\n\
-           within the library."]],
+           within the library.">,
 
   DT_REL = 17 /* d_tpr, mandatory, optional */
-    [[doc="d_ptr holds the address of a relocation table containing rela\n\
+    <doc="d_ptr holds the address of a relocation table containing rela\n\
            relocations.  If this element is present, the dynamic structure\n\
-           must also have DT_RELSZ and DT_RELENT elements."]],
+           must also have DT_RELSZ and DT_RELENT elements.">,
 
   DT_RELSZ = 18 /* d_val, mandatory, optional */
-    [[doc="d_val holds the total size, in bytes, of the DT_REL relocation\n\
-          table."]],
+    <doc="d_val holds the total size, in bytes, of the DT_REL relocation\n\
+          table.">,
 
   DT_RELENT = 19 /* d_val, mandatory, optional */
-    [[doc="d_val holds the size, in bytes, of the DT_REL relocation\n\
-           entry."]],
+    <doc="d_val holds the size, in bytes, of the DT_REL relocation\n\
+           entry.">,
 
   DT_PLTREL = 20 /* d_val, optional, optional */
-    [[doc="d_val specifies the type of relocation entry to which the\n\
-           procedure linkage table refers: DT_REL or DT_RELA."]],
+    <doc="d_val specifies the type of relocation entry to which the\n\
+           procedure linkage table refers: DT_REL or DT_RELA.">,
 
   DT_DEBUG = 21 /* d_ptr, optional, ignored */
-    [[doc="This tag is used for debugging.  Its contents are not specified\n\
-           for the ABI."]],
+    <doc="This tag is used for debugging.  Its contents are not specified\n\
+           for the ABI.">,
 
   DT_TEXTREL = 22 /* ignored, optional, optional */
-    [[doc="This tag's absence signifies that no relocation entry should\n\
+    <doc="This tag's absence signifies that no relocation entry should\n\
            cause a modification to a non-writable segment, as specified by\n\
            the segment permissions in the program header table.  If this\n\
            tag is present, one or more relocation entries might request\n\
            modifications to a non-writable segement, and the dynamic linker\n\
            can prepare accordingly.  This entry is at level 2.  Its use has\n\
-           been superseded by the DF_TEXTREL flag."]],
+           been superseded by the DF_TEXTREL flag.">,
 
   DT_JMPREL = 23 /* d_ptr, optional, optional */
-    [[doc="d_ptr holds the address of relocation entries associated solely\n\
+    <doc="d_ptr holds the address of relocation entries associated solely\n\
            with the procedure linkage table.  If this tag is present, the\n\
            related entries of types DT_PLTRELSZ and DT_PLTREL must also be\n\
-           present."]],
+           present.">,
 
   DT_BIND_NOW = 24 /* ignored, optional, optional */
-    [[doc="If present, this tag instructs the dynamic linker to process all\n\
+    <doc="If present, this tag instructs the dynamic linker to process all\n\
            relocations for the object containing this entry before\n\
-           transferring control to the program."]],
+           transferring control to the program.">,
 
   DT_INIT_ARRAY = 25 /* d_ptr, optional, optional */
-    [[doc="d_ptr holds the address of the array of pointers to\n\
-           initialization functions."]],
+    <doc="d_ptr holds the address of the array of pointers to\n\
+           initialization functions.">,
 
   DT_FINI_ARRAY = 26 /* d_ptr, optional, optional */
-    [[doc="d_ptr holds the address of the array of pointers to finalization\n\
-           functions."]],
+    <doc="d_ptr holds the address of the array of pointers to finalization\n\
+           functions.">,
 
   DT_INIT_ARRAYSZ = 27 /* d_val, optional, optional */
-    [[doc="d_val holds the size in bytes of the array of initialization\n\
+    <doc="d_val holds the size in bytes of the array of initialization\n\
            functions pointed to by the DT_INIT_ARRAY entry.  If an object\n\
            has a DT_INIT_ARRAY entry, it must also have a DT_INIT_ARRAYSZ\n\
-           entry."]],
+           entry.">,
 
   DT_FINI_ARRAYSZ = 28 /* d_val, optional, optional */
-    [[doc="d_val holds the size in bytes of the array of termination\n\
+    <doc="d_val holds the size in bytes of the array of termination\n\
            functions pointed to by the DT_FINI_ARRAY entry.  If an object\n\
            has a DT_fINI_ARRAY entry, it must also have a DT_FINI_ARRAYSZ\n\
-           entry."]],
+           entry.">,
 
   DT_RUNPATH = 29 /* d_val, opt, opt */
-    [[doc="d_val holds the string table offset of a null-terminated library\n\
+    <doc="d_val holds the string table offset of a null-terminated library\n\
            search path string.  The offset is an index into the table\n\
-           recorded in the DT_STRTAB entry."]],
+           recorded in the DT_STRTAB entry.">,
 
   DT_FLAGS = 30 /* d_val, opt, opt */
-    [[doc="d_val holds flag values specific to the object being\n\
-           loaded."]],
+    <doc="d_val holds flag values specific to the object being\n\
+           loaded.">,
 
   DT_ENCODING = 32,
 
   DT_PREINIT_ARRAY = 32 /* d_ptr, opt, ignored */
-    [[doc="d_ptr holds the address of the array of pointers to\n\
-           pre-initialization functions."]],
+    <doc="d_ptr holds the address of the array of pointers to\n\
+           pre-initialization functions.">,
 
   DT_PREINIT_ARRAYSZ = 33 /* d_val, opt, ignored */
-    [[doc="d_val holds the size in bytes of the array of pre-initialization\n\
-           functions pointed to by the DT_PREINIT_ARRAY entry."]],
+    <doc="d_val holds the size in bytes of the array of pre-initialization\n\
+           functions pointed to by the DT_PREINIT_ARRAY entry.">,
 
   DT_SYMTAB_SHNDX = 34 /* d_ptr, opt, opt */
-    [[doc="d_ptr holds the address of the SHT_SYMTAB_SHNDX section\n\
+    <doc="d_ptr holds the address of the SHT_SYMTAB_SHNDX section\n\
            associated with the dynamic symbol table referenced by the\n\
-           DT_SYMTAB element."]],
+           DT_SYMTAB element.">,
     
   DT_LOOS = 0x6000_000d,
   DT_HIOS = 0x6fff_f000,
@@ -1126,7 +1126,7 @@ enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
 
 struct elf_rel (enum elf_e_machine mach,
                 enum elf_ei_class class)
-  [[doc="ELF relocation."]]
+  <doc="ELF relocation.">
 {
   let r_offset_doc = "Relocation offset.";
   let r_info_doc = "Relocation symbol + type.";
@@ -1135,19 +1135,19 @@ struct elf_rel (enum elf_e_machine mach,
   
   if (class == ELFCLASS32)
     {
-      elf32_addr r_offset [[doc=r_offset_doc]];
-      elf_word r_info [[doc=r_info_doc]];
+      elf32_addr r_offset <doc=r_offset_doc>;
+      elf_word r_info <doc=r_info_doc>;
       . = @r_info;
-      int r_sym : 24 [[doc=r_sym_doc]];
-      enum elf_r_type (mach) r_type : 8 [[doc=r_type_doc]];
+      int r_sym : 24 <doc=r_sym_doc>;
+      enum elf_r_type (mach) r_type : 8 <doc=r_type_doc>;
     }
   else
     {
-      elf64_addr r_offset [[doc=r_offset_doc]];
-      elf64_xword r_info [[doc=r_info_doc]];
+      elf64_addr r_offset <doc=r_offset_doc>;
+      elf64_xword r_info <doc=r_info_doc>;
       . = @r_info;
-      int r_sym : 32 [[doc=r_sym_doc]];
-      enum elf_r_type (mach) r_type : 32 [[doc=r_type_doc]];
+      int r_sym : 32 <doc=r_sym_doc>;
+      enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
     }
 
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
@@ -1155,7 +1155,7 @@ struct elf_rel (enum elf_e_machine mach,
 
 struct elf_rela (enum elf_e_machine mach,
                  enum elf_ei_class class)
-  [[doc="ELF relocation with addend."]]
+  <doc="ELF relocation with addend.">
 {
   let r_offset_doc = "Relocation offset.";
   let r_info_doc = "Relocation symbol + type.";
@@ -1164,47 +1164,47 @@ struct elf_rela (enum elf_e_machine mach,
   
   if (class == ELFCLASS32)
     {
-      elf32_addr r_offset [[doc=r_offset_doc]];
-      elf_word r_info [[doc=r_info_doc]];
+      elf32_addr r_offset <doc=r_offset_doc>;
+      elf_word r_info <doc=r_info_doc>;
       . = @r_info;
-      int r_sym : 24 [[doc=r_sym_doc]];
-      enum elf_r_type (mach) r_type : 8 [[doc=r_sym_type]];
+      int r_sym : 24 <doc=r_sym_doc>;
+      enum elf_r_type (mach) r_type : 8 <doc=r_sym_type>;
     }
   else
     {
-      elf64_addr r_offset [[doc=r_offset_doc]];
-      elf64_xword r_info [[doc=r_info_doc]];
+      elf64_addr r_offset <doc=r_offset_doc>;
+      elf64_xword r_info <doc=r_info_doc>;
       . = @r_info;
-      int r_sym : 32 [[doc=r_sym_doc]];
-      enum elf_r_type (mach) r_type : 32 [[doc=r_type_doc]];
+      int r_sym : 32 <doc=r_sym_doc>;
+      enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
     }
 
   elf_sword r_addend
-    [[doc="Constant addend used to compute the value to be stored\n\
-           into the relocatable field."]];
+    <doc="Constant addend used to compute the value to be stored\n\
+           into the relocatable field.">;
 
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
 struct elf_ident
-  [[doc="ELF identification."]]
+  <doc="ELF identification.">
 {
   byte ei_mag[4];
 
   assert (ei_mag == {0x7f, 'E', 'L', 'F'});
 
-  enum elf_ei_class ei_class [[doc="File class."]];
-  byte ei_data [[doc="Data encoding."]];
-  byte ei_version [[doc="File version."]];
-  byte ei_osabi [[doc="Operating system/ABI identification."]];
-  byte ei_abiversion [[doc="ABI version."]];
-  byte ei_pad [[doc="Start of padding bytes."]];
+  enum elf_ei_class ei_class <doc="File class.">;
+  byte ei_data <doc="Data encoding.">;
+  byte ei_version <doc="File version.">;
+  byte ei_osabi <doc="Operating system/ABI identification.">;
+  byte ei_abiversion <doc="ABI version.">;
+  byte ei_pad <doc="Start of padding bytes.">;
   . = 16;
-  byte ei_nident [[doc="Size of e_ident, in bytes."]];
+  byte ei_nident <doc="Size of e_ident, in bytes.">;
 };
 
 struct elf_ehdr
-  [[doc="ELF header."]]
+  <doc="ELF header.">
 {
   let e_entry_doc
     = "Virtual address of entry point.  If the file has no\n\
@@ -1238,45 +1238,45 @@ struct elf_ehdr
       break;
     }
   
-  enum elf_e_type e_type [[doc="File type."]];
-  enum elf_e_machine e_machine [[doc="Required architecture."]];
-  enum elf_e_version e_version [[doc="Object file version."]];
+  enum elf_e_type e_type <doc="File type.">;
+  enum elf_e_machine e_machine <doc="Required architecture.">;
+  enum elf_e_version e_version <doc="Object file version.">;
 
   if (ehdr.e_ident.ei_class == ELFCLASS32)
     {
-      elf32_addr e_entry [[doc=e_entry_doc]];
-      elf32_off e_phoff [[doc=e_phoff_doc]];
-      elf32_off e_shoff [[doc=e_shoff_doc]];
+      elf32_addr e_entry <doc=e_entry_doc>;
+      elf32_off e_phoff <doc=e_phoff_doc>;
+      elf32_off e_shoff <doc=e_shoff_doc>;
     }
   else
     {
-      elf64_addr e_entry [[doc=e_entry_doc]];
-      elf64_off e_phoff [[doc=e_phoff_doc]];
-      elf64_off e_shoff [[doc=e_shoff_doc]];
+      elf64_addr e_entry <doc=e_entry_doc>;
+      elf64_off e_phoff <doc=e_phoff_doc>;
+      elf64_off e_shoff <doc=e_shoff_doc>;
     }
 
   bitmask elf_e_flags (e_machine) e_flags;
-  elf_half e_ehsize [[doc="ELF header size in bytes."]];
+  elf_half e_ehsize <doc="ELF header size in bytes.">;
 
   elf_half e_phentsize
-    [[doc="Size in bytes of one entry in the file's program header\n\
-           table."]];
+    <doc="Size in bytes of one entry in the file's program header\n\
+           table.">;
 
   elf_half e_phnum
-    [[doc="Number of entries in the program header table.  If the file\n\
-           has no program header table, holds zero."]];
+    <doc="Number of entries in the program header table.  If the file\n\
+           has no program header table, holds zero.">;
 
   elf_half e_shentsize
-    [[doc="Size in bytes of one entry in the file's section header\n\
-           table."]];
+    <doc="Size in bytes of one entry in the file's section header\n\
+           table.">;
 
   elf_half e_shnum
-    [[doc="Number of entries in the section header table.  If the file\n\
-           has no section header table, holds zero."]];
+    <doc="Number of entries in the section header table.  If the file\n\
+           has no section header table, holds zero.">;
 
   elf_half e_shstrndx
-    [[doc="Section header table index of the entry associated with the\n\
-           section name string table, or SHN_UNDEF."]];
+    <doc="Section header table index of the entry associated with the\n\
+           section name string table, or SHN_UNDEF.">;
 
   /* Relocatable files require a section header table.  */
   /* Executable files require a program header table.  */
@@ -1285,7 +1285,7 @@ struct elf_ehdr
 };
 
 struct elf_phdr (enum elf_ei_class class)
-  [[doc="ELF program header."]]
+  <doc="ELF program header.">
 {
   let p_offset_doc
     = "Offset into the beginning of the file at which the first\n\
@@ -1321,27 +1321,27 @@ struct elf_phdr (enum elf_ei_class class)
   
   if (class == ELFCLASS32)
     {
-      elf32_off p_offset [[doc=p_offset_doc]];
-      elf32_addr p_vaddr [[doc=p_vaddr_doc]];
-      elf32_addr p_paddr [[doc=p_paddr_doc]];
-      elf_word p_filesz [[doc=p_filesz_doc]];
-      elf_word p_memsz [[doc=p_memsz_doc]];
-      elf_word p_align [[doc=p_align_doc]];
+      elf32_off p_offset <doc=p_offset_doc>;
+      elf32_addr p_vaddr <doc=p_vaddr_doc>;
+      elf32_addr p_paddr <doc=p_paddr_doc>;
+      elf_word p_filesz <doc=p_filesz_doc>;
+      elf_word p_memsz <doc=p_memsz_doc>;
+      elf_word p_align <doc=p_align_doc>;
     }
   else
     {
       bitmask elf_p_flags p_flags;
-      elf64_off p_offset [[doc=p_offset_doc]];
-      elf64_addr p_vaddr [[doc=p_vaddr_doc]];
-      elf64_addr p_paddr [[doc=p_vaddr_doc]];
-      elf64_xword p_filesz [[doc=p_filesz_doc]];
-      elf64_xword p_memsz [[doc=p_memsz_doc]];
-      elf64_xword p_align [[doc=p_align_doc]];
+      elf64_off p_offset <doc=p_offset_doc>;
+      elf64_addr p_vaddr <doc=p_vaddr_doc>;
+      elf64_addr p_paddr <doc=p_vaddr_doc>;
+      elf64_xword p_filesz <doc=p_filesz_doc>;
+      elf64_xword p_memsz <doc=p_memsz_doc>;
+      elf64_xword p_align <doc=p_align_doc>;
     }
 };
 
 struct elf_shdr (enum elf_ei_class class)
-  [[doc="ELF section header."]]
+  <doc="ELF section header.">
 {
   let sh_addr_doc
     = "If the section will appear in the memory image of a process,\n\
@@ -1363,9 +1363,9 @@ struct elf_shdr (enum elf_ei_class class)
        section does not hold a table of fixed-size entries.";
   
   elf_word sh_name
-    [[read=elf_str_table,
+    <read=elf_str_table,
       doc="Index of the section's name into the section header\n\
-           string table section."]];
+           string table section.">;
     
   enum elf_sh_type sh_type;
 
@@ -1373,33 +1373,33 @@ struct elf_shdr (enum elf_ei_class class)
 
   if (class == ELFCLASS32)
     {
-      elf32_addr sh_addr [[doc=sh_addr_doc]];
-      elf32_off sh_offset [[doc=sh_offset_doc]];
-      elf_word sh_size [[doc=sh_size_doc]];
+      elf32_addr sh_addr <doc=sh_addr_doc>;
+      elf32_off sh_offset <doc=sh_offset_doc>;
+      elf_word sh_size <doc=sh_size_doc>;
     }
   else if (class == ELFCLASS64)
     {
-      elf64_addr sh_addr [[doc=sh_addr_doc]];
-      elf64_off sh_offset [[doc=sh_offset_doc]];
-      elf64_xword sh_size [[doc=sh_size_doc]];
+      elf64_addr sh_addr <doc=sh_addr_doc>;
+      elf64_off sh_offset <doc=sh_offset_doc>;
+      elf64_xword sh_size <doc=sh_size_doc>;
     }
   
   elf_word sh_link
-    [[doc="Section header table index link."]];
+    <doc="Section header table index link.">;
 
   elf_word sh_info
-    [[doc="Extra information, whose interpretation depends on the\n\
-           section type."]];
+    <doc="Extra information, whose interpretation depends on the\n\
+           section type.">;
 
   if (class == ELFCLASS32)
     {
-      elf_word sh_addralign [[doc=sh_addralign_doc]];
-      elf_word sh_entsize [[doc=sh_entsize_doc]];
+      elf_word sh_addralign <doc=sh_addralign_doc>;
+      elf_word sh_entsize <doc=sh_entsize_doc>;
     }
   else
     {
-      elf64_xword sh_addralign [[doc=sh_addralign_doc]];
-      elf64_xword sh_entsize [[doc=sh_entsize_doc]];
+      elf64_xword sh_addralign <doc=sh_addralign_doc>;
+      elf64_xword sh_entsize <doc=sh_entsize_doc>;
     }
 
   assert (sh_size % sh_entsize == 0);
@@ -1408,31 +1408,31 @@ struct elf_shdr (enum elf_ei_class class)
 /* structs for the contents of certain ELF sections.  */
 
 struct elf_chdr (enum elf_ei_class class)
-  [[doc="ELF compressed section header.\n\
-         Used in sections with SHF_COMPRESSED."]]
+  <doc="ELF compressed section header.\n\
+         Used in sections with SHF_COMPRESSED.">
 {
-  enum elf_ch_type ch_type [[doc="Compression algorithm."]];
+  enum elf_ch_type ch_type <doc="Compression algorithm.">;
 
   if (class == ELFCLASS32)
     {
       elf_xword ch_size
-        [[doc="Size in bytes of the uncompressed data."]];
+        <doc="Size in bytes of the uncompressed data.">;
       elf_word ch_addralign
-        [[doc="Required alignment of the uncompressed data."]];
+        <doc="Required alignment of the uncompressed data.">;
     }
   else
     {
       elf64_word ch_reserved;
       elf64_xword ch_size
-        [[doc="Size in bytes of the uncompressed data."]];
+        <doc="Size in bytes of the uncompressed data.">;
       elf64_xword ch_addralign
-        [[doc="Required alignment of the uncompressed data"]];
+        <doc="Required alignment of the uncompressed data">;
     }
 };
 
 struct elf_sym (enum elf_e_machine mach,
                 enum elf_ei_class class)
-  [[doc ("ELF symbol table entry.")]]
+  <doc ("ELF symbol table entry.")>
 {
   let st_name_doc
     = "Index into the object file's symbol string table,\n\
@@ -1444,9 +1444,9 @@ struct elf_sym (enum elf_e_machine mach,
 
   if (class == ELFCLASS32)
     {
-      elf32_word st_name [[doc=st_name_doc]];
-      elf32_addr st_value [[doc=st_value_doc]];
-      elf32_word st_size [[doc=st_size_doc]];
+      elf32_word st_name <doc=st_name_doc>;
+      elf32_addr st_value <doc=st_value_doc>;
+      elf32_word st_size <doc=st_size_doc>;
 
       byte st_info;
       . = @st_info;
@@ -1467,7 +1467,7 @@ struct elf_sym (enum elf_e_machine mach,
     }
   else
     {
-      elf64_word st_name [[doc=st_name_doc]];
+      elf64_word st_name <doc=st_name_doc>;
       byte st_info;
 
       . = @st_info;
@@ -1484,11 +1484,11 @@ struct elf_sym (enum elf_e_machine mach,
       . += 5;
 
       elf64_half st_shndx
-        [[doc="Section header table index of the section related to this\n\
-               symbol."]];
+        <doc="Section header table index of the section related to this\n\
+               symbol.">;
 
-      elf64_addr st_value [[doc=st_value_doc]];
-      elf64_xword st_size [[doc=st_size_doc]];
+      elf64_addr st_value <doc=st_value_doc>;
+      elf64_xword st_size <doc=st_size_doc>;
     }
 
   /* Constraints.  */
@@ -1502,7 +1502,7 @@ struct elf_sym (enum elf_e_machine mach,
      file.  */
 };
 
-struct elf_hash [[doc ("ELF hash table.")]]
+struct elf_hash <doc ("ELF hash table.")>
 {
   elf_word nbucket;
   elf_word nchain;
@@ -1513,7 +1513,7 @@ struct elf_hash [[doc ("ELF hash table.")]]
 
 struct elf_dyn (enum elf_e_machine mach,
                 enum elf_ei_class class)
-  [[doc ("ELF dynamic section.")]]
+  <doc ("ELF dynamic section.")>
 {
   if (class == ELFCLASS32)
     enum elf_d_tag (mach) d_tag : bsizeof (elf_word);
@@ -1613,7 +1613,7 @@ struct elf_dyn (enum elf_e_machine mach,
 };
 
 struct elf_note (enum elf_ei_class class)
-  [[doc="ELF note section."]]
+  <doc="ELF note section.">
 {
   let namesz_doc
     = "The first namesz bytes in name contain a null-terminated\n\
@@ -1627,7 +1627,7 @@ struct elf_note (enum elf_ei_class class)
     = "Unsigned word giving the interpretation of the descriptor.";
 
   function padding (int nchars, int width)
-    [[hidden=1]]
+    <hidden=1>
   {
     let m = nchars % width;
     return nchars + (m == 0 ? m : width - m);
@@ -1635,24 +1635,24 @@ struct elf_note (enum elf_ei_class class)
   
   if (class == ELFCLASS32)
     {
-      elf_word namesz [[doc=namesz_doc]];
-      elf_word descsz [[doc=descz_doc]];
-      elf_word type [[doc=type_doc]];
+      elf_word namesz <doc=namesz_doc>;
+      elf_word descsz <doc=descz_doc>;
+      elf_word type <doc=type_doc>;
       byte name[ndsize (namesz, 4)];
       byte desc[ndsize (descsz, 4)];
     }
   else
     {
-      elf64_xword namesz [[doc=namesz_doc]];
-      elf64_xword descsz [[doc=descsz_doc]];
-      elf64_xword type [[doc=type_doc]];
+      elf64_xword namesz <doc=namesz_doc>;
+      elf64_xword descsz <doc=descsz_doc>;
+      elf64_xword type <doc=type_doc>;
       byte[ndsize (namesz, 8)] name;
       byte[ndsize (descsz, 8)] desc;
     }
 };
 
 struct elf_group (elf_off num_idxs)
-  [[doc="ELF group."]]
+  <doc="ELF group.">
 {
   bitmask elf_group_flags flags;
   elf32_word[num_idxs] shidx;
@@ -1758,7 +1758,7 @@ struct elf_section (enum elf_e_machine mach,
 
 struct elf_segment (enum elf_ei_class class,
                     struct elf_phdr phdr)
-  [[doc="ELF segment."]]
+  <doc="ELF segment.">
 {
   switch (phdr.p_type)
     {
@@ -1790,9 +1790,9 @@ struct elf_segment (enum elf_ei_class class,
 
 /* Finally, the ELF object file itself.  */
 
-struct elf [[doc="ELF object file."]]
+struct elf <doc="ELF object file.">
 {
-  struct elf_ehdr ehdr [[doc="ELF header."]];
+  struct elf_ehdr ehdr <doc="ELF header.">;
 
   assert (sizeof (ehdr.e_ident) == ehdr.e_ident.ei_nident
           && sizeof (ehdr) == ehdr.e_ehsize);
@@ -1804,14 +1804,14 @@ struct elf [[doc="ELF object file."]]
     {
       . = ehdr.e_shoff;
       struct elf_shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr
-        [[doc="ELF section header table."]];
+        <doc="ELF section header table.">;
     };
 
   if (ehdr.e_phnum > 0)
     {
       . = ehdr.e_phoff;
       struct elf_phdr(ehdr.e_ident.ei_class)[ehdr.e_phnum] phdr
-        [[doc="ELF program header table."]];
+        <doc="ELF program header table.">;
     };
 
   /* The sections and segments themselves are defined in terms of the
