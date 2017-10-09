@@ -23,7 +23,8 @@ poke_SOURCES = poke.c poke.h \
                pk-info.c pk-misc.c pk-help.c \
                pkl-ast.h pkl-ast.c \
                pkl-tab.y pkl-lex.l \
-               pkl-parser.h pkl-parser.c
+               pkl-parser.h pkl-parser.c \
+               pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c
 AM_YFLAGS = -d
@@ -33,5 +34,19 @@ poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
 poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS) -Wall
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE)
+
+# Integration with jitter.
+
+JITTER=/home/jemarch/tmp/jitter
+BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
+poke_CPPFLAGS += -I$(JITTER)/include
+poke_LDADD += -L$(JITTER)/lib -ljitter -ljitter--no-threading
+
+pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter
+	$(JITTER)/bin/jitterc $< \
+                   --output $(builddir) \
+	           --max-fast-register-no=5 \
+	           --max-nonresidual-no=-1 \
+	           --template-directory=/home/jemarch/gnu/src/jitter/templates
 
 # End of Makefile.am

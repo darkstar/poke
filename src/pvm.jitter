@@ -35,21 +35,22 @@ wrapped-functions
   printf
 end
 
-wrapped-globals
-  pvm_printf_format_string
-end
+#wrapped-globals
+#  pvm_printf_format_string
+#end
 
 ## Prologue and epilogue for the generated code.
 
 early-c
   code
 #   include <pvm.h>
+
+#   define PARG(A) ((pvm_stack)(A).pointer)
   end
 end
 
 late-c
   code
-    static const char *stack_printf_format_string = "%" JITTER_PRIi "\n";
   end
 end
 
@@ -68,17 +69,17 @@ state-struct-backing-c
   end
 end
 
-state-initialization-c-code
-  code
-    jitter_state_backing->pvm = pvm_init ();
-  end
-end
+#state-initialization-c-code
+#  code
+#    jitter_state_backing->pvm = pvm_init ();
+#  end
+#end
 
-state-finalization-c-code
-  code
-    pvm_shutdown (jitter_state-backing->pvm);
-  end
-end
+#state-finalization-c-code
+#  code
+#    pvm_shutdown (jitter_state-backing->pvm);
+#  end
+#end
 
 ## Miscellaneous Instructions
 
@@ -117,13 +118,13 @@ instruction pop (!R)
   end
 end
 
-instruction print ()
-  code
-    union jitter_word top = JITTER_TOP_STACK();
-    JITTER_DROP_STACK();
-    printf (stack_printf_format_string, top);
-  end
-end
+#instruction print ()
+#  code
+#    union jitter_word top = JITTER_TOP_STACK();
+#    JITTER_DROP_STACK();
+#    printf (stack_printf_format_string, top);
+#  end
+#end
 
 ## Operators instructions.
 
@@ -131,7 +132,7 @@ end
 
 instruction add ()
   code
-#define F(res, a, b) { pvm_op_add (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_add (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -139,7 +140,7 @@ end
 
 instruction sub ()
   code
-#define F(res, a, b) { pvm_op_sub (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_sub (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -147,7 +148,7 @@ end
 
 instruction mul ()
   code
-#define F(res, a, b) { pvm_op_mul (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_mul (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -155,7 +156,7 @@ end
 
 instruction div ()
   code
-#define F(res, a, b) { pvm_op_div (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_div (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -163,7 +164,7 @@ end
 
 instruction mod ()
   code
-#define F(res, a, b) { pvm_op_mod (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_mod (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -179,7 +180,7 @@ end
 # Negation.
 instruction neg ()
   code
-    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
     pvm_op_neg (s, s);
   end
 end
@@ -187,7 +188,7 @@ end
 # Pre-increment.
 instruction preinc ()
   code
-    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
     pvm_op_preinc (s, s);
   end  
 end
@@ -195,7 +196,7 @@ end
 # Pre-decrement.
 instruction predec ()
   code
-    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
     pvm_op_predec (s, s);
   end  
 end
@@ -204,7 +205,7 @@ end
 
 instruction ieq ()
   code
-#define F(res, a, b) { pvm_op_ieq (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_ieq (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -212,7 +213,7 @@ end
 
 instruction ine ()
   code
-#define F(res, a, b) { pvm_op_ine (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_ine (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -220,7 +221,7 @@ end
 
 instruction seq ()
   code
-#define F(res, a, b) { pvm_op_seq (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_seq (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -228,7 +229,7 @@ end
 
 instruction sne ()
   code
-#define F(res, a, b) { pvm_op_sne (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_sne (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -238,7 +239,7 @@ end
 
 instruction ilt ()
   code
-#define F(res, a, b) { pvm_op_ilt (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_ilt (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -246,7 +247,7 @@ end
 
 instruction ile ()
   code
-#define F(res, a, b) { pvm_op_ile (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_ile (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -254,7 +255,7 @@ end
 
 instruction igt ()
   code
-#define F(res, a, b) { pvm_op_igt (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_igt (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -262,7 +263,7 @@ end
 
 instruction ige ()
   code
-#define F(res, a, b) { pvm_op_ige (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_ige (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -270,7 +271,7 @@ end
 
 instruction slt ()
   code
-#define F(res, a, b) { pvm_op_slt (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_slt (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -278,7 +279,7 @@ end
 
 instruction sle ()
   code
-#define F(res, a, b) { pvm_op_sle (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_sle (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -286,7 +287,7 @@ end
 
 instruction sgt ()
   code
-#define F(res, a, b) { pvm_op_sgt (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_sgt (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -294,7 +295,7 @@ end
 
 instruction sge ()
   code
-#define F(res, a, b) { pvm_op_sge (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_sge (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -304,7 +305,7 @@ end
 
 instruction and ()
   code
-#define F(res, a, b) { pvm_op_and (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_and (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -312,7 +313,7 @@ end
 
 instruction or ()
   code
-#define F(res, a, b) { pvm_op_or (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_or (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -320,7 +321,7 @@ end
 
 instruction not ()
   code
-    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
     pvm_op_not (s, s);
   end
 end
@@ -329,7 +330,7 @@ end
 
 instruction bxor ()
   code
-#define F(res, a, b) { pvm_op_bxor (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_bxor (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -337,7 +338,7 @@ end
 
 instruction bior ()
   code
-#define F(res, a, b) { pvm_op_bior (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_bior (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -345,7 +346,7 @@ end
 
 instruction band ()
   code
-#define F(res, a, b) { pvm_op_band (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_band (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -353,14 +354,14 @@ end
 
 instruction bnot ()
   code
-    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
     pvm_op_bnot (s, s);
   end
 end
 
 instruction bsl ()
   code
-#define F(res, a, b) { pvm_op_bsl (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_bsl (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -368,7 +369,7 @@ end
 
 instruction bsr ()
   code
-#define F(res, a, b) { pvm_op_bsr (res.pointer, a.pointer, b.pointer); }
+#define F(res, a, b) { pvm_op_bsr (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -420,7 +421,7 @@ end
 
 instruction branch-if-not-type-top (?n,?f)
   code
-     pvm_stack s = ((pvm_stack)JITTER_UNER_TOP_STACK().pointer);
+     pvm_stack s = ((pvm_stack)JITTER_UNDER_TOP_STACK().pointer);
 
      JITTER_BRANCH_FAST_IF_ZERO (PVM_STACK_TYPE (s) == JITTER_ARGN0,
                                  JITTER_ARGF1);

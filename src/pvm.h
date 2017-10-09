@@ -21,15 +21,20 @@
 
 #include <config.h>
 #include <string.h>
+#include <stdint.h>
 
-enum pvm_stack_elem
+typedef int64_t pvm_int;
+typedef uint64_t pvm_uint;
+
+enum pvm_stack_elem_type
   {
     PVM_STACK_E_INTEGER,
     PVM_STACK_E_STRING
   };
 
-#define PVM_STACK_TYPE(S) ((S).type)
-#define PVM_STACK_INTEGER(S) ((S).v.integer)
+#define PVM_STACK_TYPE(S) ((S)->type)
+#define PVM_STACK_INTEGER(S) ((S)->v.integer)
+#define PVM_STACK_STRING(S) ((S)->v.string)
 
 struct pvm_stack_elem
 {
