@@ -428,7 +428,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                   }
                 default:
                   /* This should NOT happen.  */
-                  assert (1);
+                  assert (0);
                 }
               
               if (match)

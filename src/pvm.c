@@ -76,6 +76,10 @@ pvm_stack_free (pvm_stack s)
 int
 pvm_execute (pvm_program prog)
 {
+  pvm_stack_free (pvm_state.pvm_state_backing.result_value);
+  pvm_state.pvm_state_backing.result_value = NULL;
+  pvm_state.pvm_state_backing.exit_code = PVM_EXIT_OK;
+    
   pvm_interpret (prog, &pvm_state);
   return 1;
 }

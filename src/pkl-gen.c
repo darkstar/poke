@@ -90,12 +90,12 @@ pkl_gen_exp (pkl_ast_node ast,
         PVM_APPEND_INSTRUCTION (program, bnt);                          \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T1));     \
-        pvm_append_symbolic_label_parameter (program, "Lexit");         \
+        pvm_append_symbolic_label_parameter (program, "Lerror");         \
                                                                         \
         PVM_APPEND_INSTRUCTION (program, bntut);                        \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T2));     \
-        pvm_append_symbolic_label_parameter (program, "Lexit");         \
+        pvm_append_symbolic_label_parameter (program, "Lerror");         \
                                                                         \
         PVM_APPEND_INSTRUCTION (program, OP);                           \
       } while (0)
@@ -106,7 +106,7 @@ pkl_gen_exp (pkl_ast_node ast,
         PVM_APPEND_INSTRUCTION (program, bnt);                          \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T));      \
-        pvm_append_symbolic_label_parameter (program, "Lexit");         \
+        pvm_append_symbolic_label_parameter (program, "Lerror");         \
                                                                         \
         PVM_APPEND_INSTRUCTION (program, OP);                           \
       } while (0)
@@ -160,7 +160,7 @@ pkl_gen_exp (pkl_ast_node ast,
         PVM_APPEND_INSTRUCTION (program, bnt);
         pvm_append_unsigned_literal_parameter (program,
                                                (jitter_uint) (PVM_STACK_INT));
-        pvm_append_symbolic_label_parameter (program, "Lexit");
+        pvm_append_symbolic_label_parameter (program, "Lerror");
         PVM_APPEND_INSTRUCTION (program, add);
         
         PVM_APPEND_INSTRUCTION (program, ba);
@@ -171,7 +171,7 @@ pkl_gen_exp (pkl_ast_node ast,
         PVM_APPEND_INSTRUCTION (program, bnt);
         pvm_append_unsigned_literal_parameter (program,
                                                (jitter_uint) (PVM_STACK_STR));
-        pvm_append_symbolic_label_parameter (program, "Lexit");
+        pvm_append_symbolic_label_parameter (program, "Lerror");
         PVM_APPEND_INSTRUCTION (program, sconc);
         
         pvm_append_symbolic_label (program, label_1);

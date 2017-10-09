@@ -117,14 +117,6 @@ instruction drop ()
   end
 end
 
-# Can be a register of class "r" (R), or a literal (n), or a label (l)
-# 0 1 -1 and 2 are the literal values this instruction is specialized
-# on.
-
-# ? means Read-only/Input.
-# ! means output
-# ?! or !? means both
-
 instruction push (?Rnl)
   code
     union jitter_word k;
