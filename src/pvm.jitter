@@ -1,0 +1,437 @@
+## Jitter specification for the GNU Poke Virtual Machine.
+
+## Copyright (C) 2017 Jose E. Marchesi
+## Written by Jose E. Marchesi
+
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+vm
+  set prefix "pvm"
+  tos-stack "union jitter_word" "stack"
+end
+
+## Register classes.
+
+register-class r 5
+  code
+    union jitter_word
+  end
+end
+
+## Functions and globals to wrap.
+
+wrapped-functions
+  printf
+end
+
+wrapped-globals
+  pvm_printf_format_string
+end
+
+## Prologue and epilogue for the generated code.
+
+early-c
+  code
+#   include <pvm.h>
+  end
+end
+
+late-c
+  code
+    static const char *stack_printf_format_string = "%" JITTER_PRIi "\n";
+  end
+end
+
+## PVM state.
+
+# Initialize the extra field:
+#  pvm_state_initialize (&s);
+#  s->pvm = pvm_init ();
+# Finalize the extra field:
+# pvm_shutdown (s->pvm);
+# pvm_state_finalize (&s);
+
+state-struct-backing-c
+  code
+   struct pvm *pvm;
+  end
+end
+
+state-initialization-c-code
+  code
+    jitter_state_backing->pvm = pvm_init ();
+  end
+end
+
+state-finalization-c-code
+  code
+    pvm_shutdown (jitter_state-backing->pvm);
+  end
+end
+
+## Miscellaneous Instructions
+
+instruction nop ()
+  code
+  end
+end
+
+instruction drop ()
+  code
+    JITTER_DROP_STACK();
+  end
+end
+
+# Can be a register of class "r" (R), or a literal (n), or a label (l)
+# 0 1 -1 and 2 are the literal values this instruction is specialized
+# on.
+
+# ? means Read-only/Input.
+# ! means output
+# ?! or !? means both
+
+instruction push (?Rnl)
+  code
+    union jitter_word k;
+    k.pointer = JITTER_ARGP0;
+    JITTER_PUSH_STACK(k);
+  end
+end
+
+instruction pop (!R)
+  code
+    union jitter_word top = JITTER_TOP_STACK();
+    JITTER_DROP_STACK();
+    JITTER_ARGP0 = top.pointer;
+  end
+end
+
+instruction print ()
+  code
+    union jitter_word top = JITTER_TOP_STACK();
+    JITTER_DROP_STACK();
+    printf (stack_printf_format_string, top);
+  end
+end
+
+## Operators instructions.
+
+# Integer arithmetic.
+
+instruction add ()
+  code
+#define F(res, a, b) { pvm_op_add (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction sub ()
+  code
+#define F(res, a, b) { pvm_op_sub (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction mul ()
+  code
+#define F(res, a, b) { pvm_op_mul (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction div ()
+  code
+#define F(res, a, b) { pvm_op_div (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction mod ()
+  code
+#define F(res, a, b) { pvm_op_mod (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+# Positive.
+instruction pos ()
+  code
+    /* Nothing.  */
+  end
+end
+
+# Negation.
+instruction neg ()
+  code
+    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_op_neg (s, s);
+  end
+end
+
+# Pre-increment.
+instruction preinc ()
+  code
+    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_op_preinc (s, s);
+  end  
+end
+
+# Pre-decrement.
+instruction predec ()
+  code
+    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_op_predec (s, s);
+  end  
+end
+
+# Equality/inequality instructions.
+
+instruction ieq ()
+  code
+#define F(res, a, b) { pvm_op_ieq (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction ine ()
+  code
+#define F(res, a, b) { pvm_op_ine (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction seq ()
+  code
+#define F(res, a, b) { pvm_op_seq (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction sne ()
+  code
+#define F(res, a, b) { pvm_op_sne (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+# Comparison instructions.
+
+instruction ilt ()
+  code
+#define F(res, a, b) { pvm_op_ilt (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction ile ()
+  code
+#define F(res, a, b) { pvm_op_ile (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction igt ()
+  code
+#define F(res, a, b) { pvm_op_igt (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction ige ()
+  code
+#define F(res, a, b) { pvm_op_ige (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction slt ()
+  code
+#define F(res, a, b) { pvm_op_slt (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction sle ()
+  code
+#define F(res, a, b) { pvm_op_sle (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction sgt ()
+  code
+#define F(res, a, b) { pvm_op_sgt (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction sge ()
+  code
+#define F(res, a, b) { pvm_op_sge (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+# Logical instructions.
+
+instruction and ()
+  code
+#define F(res, a, b) { pvm_op_and (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction or ()
+  code
+#define F(res, a, b) { pvm_op_or (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction not ()
+  code
+    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_op_not (s, s);
+  end
+end
+
+# Bitwise operators.
+
+instruction bxor ()
+  code
+#define F(res, a, b) { pvm_op_bxor (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bior ()
+  code
+#define F(res, a, b) { pvm_op_bior (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction band ()
+  code
+#define F(res, a, b) { pvm_op_band (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bnot ()
+  code
+    pvm_stack s = JITTER_TOP_STACK().pointer;
+    pvm_op_bnot (s, s);
+  end
+end
+
+instruction bsl ()
+  code
+#define F(res, a, b) { pvm_op_bsl (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsr ()
+  code
+#define F(res, a, b) { pvm_op_bsr (res.pointer, a.pointer, b.pointer); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+## Checking instructions.
+
+# To access the pvm state from withing the instructions:
+#
+# original_state->pvm_state_backing->pvm
+
+# To add pointers:
+#
+# stack_append_unsigned_literal_parameter (program,
+#                                          (jitter_uint) pvm_elem);
+
+# This code pushes the address
+# $shared_error_routine to the stack, but does
+# not execute the routine.
+#   push $shared_error_routine
+#   end
+#
+# $shared_error_routine:
+#   set-exit-status -1
+#   end
+#
+# Or even better:
+#
+# This code sets the global variable number zero to the address
+# $shared_error_routine , but does not execute the routine.
+# set-global is a VM instruction popping an element from the stack
+# and assigning it to the global whose index is given.
+#
+# push $shared_error_routine
+# set-global 0
+# end
+#
+# $shared_error_routine:
+# set-exit-status -1
+# end
+
+instruction branch-if-zero-undertop (?f)
+  code
+    pvm_stack s = ((pvm_stack) JITTER_TOP_STACK().pointer);
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_STACK_INTEGER (s),
+                                JITTER_ARGF0);
+  end
+end
+
+instruction branch-if-not-type-top (?n,?f)
+  code
+     pvm_stack s = ((pvm_stack)JITTER_UNER_TOP_STACK().pointer);
+
+     JITTER_BRANCH_FAST_IF_ZERO (PVM_STACK_TYPE (s) == JITTER_ARGN0,
+                                 JITTER_ARGF1);
+  end
+end
+
+instruction branch-if-not-type-undertop (?n,?f)
+  code
+     pvm_stack s = ((pvm_stack)JITTER_UNDER_TOP_STACK().pointer);
+
+     JITTER_BRANCH_FAST_IF_ZERO (PVM_STACK_TYPE (s) == JITTER_ARGN0,
+                                 JITTER_ARGF1);
+  end
+end
