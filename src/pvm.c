@@ -20,15 +20,19 @@
 #include <stdlib.h>
 #include "pvm.h"
 
+static struct pvm_state pvm_state;
+
 void
 pvm_init (void)
 {
   pvm_initialize ();
+  pvm_state_initialize (&pvm_state);
 }
 
 void
 pvm_shutdown (void)
 {
+  pvm_state_finalize (&pvm_state);
   pvm_finalize ();
 }
 
@@ -60,12 +64,23 @@ pvm_stack_free (pvm_stack s)
 int
 pvm_execute (pvm_program prog)
 {
-  struct pvm_state s;
-  pvm_state_initialize (&s);
-  pvm_interpret (prog, &s);
-  pvm_state_finalize (&s);
-
+  pvm_interpret (prog, &pvm_state);
   return 1;
+}
+
+struct pvm_extra_state *
+pvm_extra_state_new (void)
+{
+  struct pvm_extra_state *s;
+
+  s = xmalloc (sizeof (struct pvm_extra_state));
+  return s;
+}
+
+void
+pvm_extra_state_free (struct pvm_extra_state *pvm)
+{
+  free (pvm);
 }
 
 void

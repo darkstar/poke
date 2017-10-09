@@ -77,17 +77,18 @@ state-struct-backing-c
   end
 end
 
-#state-initialization-c-code
-#  code
-#    jitter_state_backing->pvm = pvm_init ();
-#  end
-#end
+state-initialization-c
+  code
+    jitter_state_backing->pvm
+      = pvm_extra_state_new ();
+  end
+end
 
-#state-finalization-c-code
-#  code
-#    pvm_shutdown (jitter_state-backing->pvm);
-#  end
-#end
+state-finalization-c
+  code
+    pvm_extra_state_free (jitter_state_backing->pvm);
+  end
+end
 
 ## VM instructions
 
