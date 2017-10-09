@@ -45,6 +45,15 @@ early-c
   code
 #   include <pvm.h>
 #   define PARG(A) ((pvm_stack)(A).pointer)
+#   define PVM_BINOP(OP,RES,A,B)         \
+    {                                    \
+      pvm_stack  s = pvm_stack_new ();   \
+      pvm_op_##OP (s, PARG(A), PARG(B)); \
+      pvm_stack_free (PARG(A));          \
+      pvm_stack_free (PARG(B));          \
+      RES.pointer = (union jitter_word *) p;\
+    }
+
   end
 end
 
@@ -146,7 +155,7 @@ end
 
 instruction add ()
   code
-#define F(res, a, b) { pvm_op_add (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (add, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -154,7 +163,7 @@ end
 
 instruction sub ()
   code
-#define F(res, a, b) { pvm_op_sub (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sub, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -162,7 +171,7 @@ end
 
 instruction mul ()
   code
-#define F(res, a, b) { pvm_op_mul (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (mul, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -170,7 +179,7 @@ end
 
 instruction div ()
   code
-#define F(res, a, b) { pvm_op_div (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (div, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -178,7 +187,7 @@ end
 
 instruction mod ()
   code
-#define F(res, a, b) { pvm_op_mod (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (mod, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -219,7 +228,7 @@ end
 
 instruction ieq ()
   code
-#define F(res, a, b) { pvm_op_ieq (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (ieq, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -227,7 +236,7 @@ end
 
 instruction ine ()
   code
-#define F(res, a, b) { pvm_op_ine (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (ine, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -235,7 +244,7 @@ end
 
 instruction seq ()
   code
-#define F(res, a, b) { pvm_op_seq (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (seq, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -243,7 +252,7 @@ end
 
 instruction sne ()
   code
-#define F(res, a, b) { pvm_op_sne (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sne, res, a, b)
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -253,7 +262,7 @@ end
 
 instruction ilt ()
   code
-#define F(res, a, b) { pvm_op_ilt (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (ilt, res, a, b)
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -261,7 +270,7 @@ end
 
 instruction ile ()
   code
-#define F(res, a, b) { pvm_op_ile (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (ile, res, a, b)
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -269,7 +278,7 @@ end
 
 instruction igt ()
   code
-#define F(res, a, b) { pvm_op_igt (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (igt, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -277,7 +286,7 @@ end
 
 instruction ige ()
   code
-#define F(res, a, b) { pvm_op_ige (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (ige, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -285,7 +294,7 @@ end
 
 instruction slt ()
   code
-#define F(res, a, b) { pvm_op_slt (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (slt, res, a, b)
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -293,7 +302,7 @@ end
 
 instruction sle ()
   code
-#define F(res, a, b) { pvm_op_sle (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sle, res, a, b)
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -301,7 +310,7 @@ end
 
 instruction sgt ()
   code
-#define F(res, a, b) { pvm_op_sgt (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sgt, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -309,7 +318,7 @@ end
 
 instruction sge ()
   code
-#define F(res, a, b) { pvm_op_sge (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sge, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -319,7 +328,7 @@ end
 
 instruction sconc ()
   code
-#define F(res, a, b) { pvm_op_sconc (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (sconc, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -329,7 +338,7 @@ end
 
 instruction and ()
   code
-#define F(res, a, b) { pvm_op_and (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (and, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -337,7 +346,7 @@ end
 
 instruction or ()
   code
-#define F(res, a, b) { pvm_op_or (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (or, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -354,7 +363,7 @@ end
 
 instruction bxor ()
   code
-#define F(res, a, b) { pvm_op_bxor (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (bxor, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -362,7 +371,7 @@ end
 
 instruction bior ()
   code
-#define F(res, a, b) { pvm_op_bior (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (bior, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -370,7 +379,7 @@ end
 
 instruction band ()
   code
-#define F(res, a, b) { pvm_op_band (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (band, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -385,7 +394,7 @@ end
 
 instruction bsl ()
   code
-#define F(res, a, b) { pvm_op_bsl (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (bsl, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -393,7 +402,7 @@ end
 
 instruction bsr ()
   code
-#define F(res, a, b) { pvm_op_bsr (PARG(res), PARG(a), PARG(b)); }
+#define F(res, a, b) PVM_BINOP (bsr, res, a, b)
     JITTER_BINARY_STACK(F);
 #undef F
   end
