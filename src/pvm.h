@@ -53,18 +53,6 @@ struct pvm_stack
 };
 
 typedef struct pvm_stack *pvm_stack;
-
-/* The following structure contains the state of the virtual
-   machine.  */
-
-struct pvm_extra_state
-{
-  /* Types, variables, etc.  */
-};
-
-struct pvm_extra_state *pvm_extra_state_new (void);
-void pvm_extra_state_free (struct pvm_extra_state *pvm);
-
 typedef struct pvm_program *pvm_program;
 
 pvm_stack pvm_stack_new (void);

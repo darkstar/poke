@@ -73,20 +73,19 @@ end
 
 state-struct-backing-c
   code
-   struct pvm *pvm;
+    /* Add extra types, variables, etc.  */
   end
 end
 
 state-initialization-c
   code
-    jitter_state_backing->pvm
-      = pvm_extra_state_new ();
+    /* Initialize extra state here.  */
   end
 end
 
 state-finalization-c
   code
-    pvm_extra_state_free (jitter_state_backing->pvm);
+   /* Finalize extra state here.  */
   end
 end
 

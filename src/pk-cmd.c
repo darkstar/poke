@@ -48,6 +48,7 @@ extern struct pk_cmd exit_cmd; /* pk-misc.c  */
 extern struct pk_cmd version_cmd; /* pk-misc.c */
 extern struct pk_cmd help_cmd; /* pk-help.c */
 extern struct pk_cmd disas_cmd; /* pk-vm.c  */
+extern struct pk_cmd print_cmd; /* pk-print.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, 0, NULL, NULL};
@@ -64,6 +65,7 @@ static struct pk_cmd *cmds[] =
     &close_cmd,
     &help_cmd,
     &disas_cmd,
+    &print_cmd,
     &null_cmd
   };
 

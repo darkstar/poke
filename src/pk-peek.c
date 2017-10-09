@@ -22,7 +22,6 @@
 
 #include "pk-cmd.h"
 #include "pk-io.h"
-#include "pkl-ast.h" /* For pkl_ast_print */
 
 static int
 pk_cmd_peek (int argc, struct pk_cmd_arg argv[])

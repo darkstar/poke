@@ -261,16 +261,13 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
   if (program == NULL)
     goto error;
 
-
   /* Standard prologue.  */
-
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_symbolic_label_parameter (program, "Lstart");
   pvm_append_symbolic_label (program, "Lexit");
   PVM_APPEND_INSTRUCTION (program, exit);
   pvm_append_symbolic_label (program, "Lstart");
-  
-  
+
   if (!pkl_gen_1 (ast->ast, program, &label))
     {
       /* XXX: handle code generation errors.  */

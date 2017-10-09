@@ -21,6 +21,7 @@ poke_SOURCES = poke.c poke.h \
                pk-cmd.c pk-cmd.h \
                pk-dump.c pk-peek.c pk-poke.c pk-file.c \
                pk-info.c pk-misc.c pk-help.c pk-vm.c \
+               pk-print.c \
                pkl.h pkl.c \
                pkl-ast.h pkl-ast.c \
                pkl-tab.y pkl-lex.l \
@@ -42,6 +43,7 @@ poke_LDADD = $(top_builddir)/lib/libpoke.la \
 
 JITTER=/home/jemarch/tmp/jitter
 poke_CPPFLAGS += -I$(JITTER)/include
+#poke_CFLAGS += -O2 -fomit-frame-pointer -fno-reorder-blocks -fno-crossjumping -fno-thread-jumps -fno-tree-tail-merge -fno-isolate-erroneous-paths-dereference -fno-split-paths -fno-gcse -fPIC -fno-align-loops -fno-align-jumps -fno-align-labels -fno-jump-tables -fno-tree-switch-conversion -flive-range-shrinkage -fno-ipa-icf -fno-ipa-cp -fno-ipa-cp-clone -fno-gcse -mcmodel=large
 poke_LDADD += -L$(JITTER)/lib -ljitter--no-threading
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 

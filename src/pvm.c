@@ -68,21 +68,6 @@ pvm_execute (pvm_program prog)
   return 1;
 }
 
-struct pvm_extra_state *
-pvm_extra_state_new (void)
-{
-  struct pvm_extra_state *s;
-
-  s = xmalloc (sizeof (struct pvm_extra_state));
-  return s;
-}
-
-void
-pvm_extra_state_free (struct pvm_extra_state *pvm)
-{
-  free (pvm);
-}
-
 void
 pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b)
 {
