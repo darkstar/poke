@@ -26,7 +26,18 @@
 static int
 pk_cmd_disas_exp (int argc, struct pk_cmd_arg argv[])
 {
-  printf ("HOLA\n");
+  /* disassemble expression EXP */
+
+  pvm_program prog;
+  
+  assert (argc == 1);
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+
+  prog = PK_CMD_ARG_EXP (argv[0]);
+  pvm_print_program (prog);
+  pvm_disassemble_program (prog, 1, JITTER_CROSS_OBJDUMP, NULL);
+  pvm_destroy_program (prog);
+  
   return 1;
 }
 

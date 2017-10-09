@@ -27,6 +27,6 @@
 /* Lower an AST to a PVM program and return it.  Return 0 if a
    compilation error occurs.  Return 1 otherwise.  */
 
-int pkl_gen (pvm_program *prog, pkl_ast_node ast);
+int pkl_gen (pvm_program *prog, pkl_ast ast);
 
 #endif /* !PKL_GEN_H  */

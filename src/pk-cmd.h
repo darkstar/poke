@@ -21,7 +21,7 @@
 
 #include <config.h>
 
-#include "pkl-ast.h" /* For pkl_ast  */
+#include "pvm.h" /* For pvm_program */
 #include "pk-io.h"
 
 enum pk_cmd_arg_type
@@ -46,7 +46,7 @@ struct pk_cmd_arg
   enum pk_cmd_arg_type type;
   union
   {
-    pkl_ast exp;
+    pvm_program exp;
     long int integer;
     pk_io_off addr;
     const char *str;

@@ -24,6 +24,10 @@
 #include <stdint.h>
 #include <xalloc.h>
 
+#ifndef PVM_VM_H_
+# include "pvm-vm.h"
+#endif
+
 typedef int64_t pvm_int;
 typedef uint64_t pvm_uint;
 

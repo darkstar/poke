@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "pvm-vm.h"
 #include "pvm.h"
 #include "pkl-gen.h"
 
@@ -248,7 +247,7 @@ pkl_gen_1 (pkl_ast_node ast,
 }
 
 int
-pkl_gen (pvm_program *prog, pkl_ast_node ast)
+pkl_gen (pvm_program *prog, pkl_ast ast)
 {
   struct pvm_program *program;
   size_t label;
@@ -266,7 +265,7 @@ pkl_gen (pvm_program *prog, pkl_ast_node ast)
        end
   */
   
-  if (!pkl_gen_1 (ast, program, &label))
+  if (!pkl_gen_1 (ast->ast, program, &label))
     {
       /* XXX: handle code generation errors.  */
       pvm_destroy_program (program);

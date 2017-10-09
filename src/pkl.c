@@ -19,7 +19,8 @@
 #include <config.h>
 
 #include "pkl.h"
-#include "pkl-ast.h"
+#include "pkl-gen.h"
+#include "pkl-parser.h"
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -27,12 +28,21 @@ pkl_compile_buffer (pvm_program *prog,
 {
   pkl_ast ast = NULL;
   pvm_program p;
+  int ret;
 
-  if (!pkl_parse_buffer (&ast, what, buffer, end))
-    /* Compiler front-end error.  */
+  ret = pkl_parse_buffer (&ast, what, buffer, end);
+  if (ret == 1)
+    /* Parse error.  */
     goto error;
+  else if (ret == 2)
+    {
+      /* Memory exhaustion.  */
+      printf ("out of memory\n");
+    }
+    
+  pkl_ast_print (stdout, ast->ast);
 
-  if (!pkl_gen (&p, ast);)
+  if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
     goto error;
 
@@ -48,14 +58,21 @@ pkl_compile_file (pvm_program *prog,
                   FILE *fd,
                   const char *fname)
 {
+  int ret;
   pkl_ast ast = NULL;
   pvm_program p;
 
-  if (!pkl_parse_file (&ast, PKL_PARSE_PROGRAM, fd, fname))
-    /* Compiler front-end error.  */
+  ret = pkl_parse_file (&ast, PKL_PARSE_PROGRAM, fd, fname);
+  if (ret == 1)
+    /* Parse error.  */
     goto error;
+  else if (ret == 2)
+    {
+      /* Memory exhaustion.  */
+      printf ("out of memory\n");
+    }
 
-  if (!pkl_gen (&p, ast);)
+  if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
     goto error;
 

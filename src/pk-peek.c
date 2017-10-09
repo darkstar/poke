@@ -40,11 +40,6 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
     }
   else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
     {
-#ifdef PKL_DEBUG      
-      /* XXX: debugging.  */
-      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[0])->ast);
-#endif
-      
       return 1;
     }
   else

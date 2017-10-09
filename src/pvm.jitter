@@ -43,7 +43,65 @@ end
 
 early-c
   code
-#   include <pvm.h>
+/*#   include <pvm.h> guard crap */
+
+#   include <stdint.h>
+
+typedef int64_t pvm_int;
+typedef uint64_t pvm_uint;
+
+enum pvm_stack_type
+  {
+    PVM_STACK_INT,
+    PVM_STACK_STR,
+  };
+
+#define PVM_STACK_TYPE(S) ((S)->type)
+#define PVM_STACK_INTEGER(S) ((S)->v.integer)
+#define PVM_STACK_STRING(S) ((S)->v.string)
+
+struct pvm_stack
+{
+  enum pvm_stack_type type;
+
+  union
+  {
+    pvm_int integer;
+    char *string;
+  } v;
+};
+
+typedef struct pvm_stack *pvm_stack;
+void pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_sub (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_mul (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_div (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_mod (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_ieq (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_ine (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_seq (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_sne (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_ilt (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_ile (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_igt (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_ige (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_slt (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_sle (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_sgt (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_sge (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_and (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_or (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_not (pvm_stack res, pvm_stack a);
+void pvm_op_bxor (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_bior (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_band (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_bnot (pvm_stack res, pvm_stack a);
+void pvm_op_bsl (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_bsr (pvm_stack res, pvm_stack a, pvm_stack b);
+void pvm_op_neg (pvm_stack res, pvm_stack a);
+void pvm_op_preinc (pvm_stack res, pvm_stack a);
+void pvm_op_predec (pvm_stack res, pvm_stack a);
+void pvm_op_sconc (pvm_stack res, pvm_stack a, pvm_stack b);
 
 #   define PARG(A) ((pvm_stack)(A).pointer)
   end

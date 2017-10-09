@@ -33,11 +33,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
     address = pk_io_tell (pk_io_cur ());
   else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
     {
-#ifdef PKL_DEBUG      
-      /* XXX: debugging.  */
-      printf ("AST for ADDRESS:\n");
-      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[0])->ast);      
-#endif
+      return 1;
     }
   else
     address = PK_CMD_ARG_ADDR (argv[0]);
@@ -46,11 +42,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
     value = 0;
   else if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP)
     {
-#ifdef PKL_DEBUG      
-      /* XXX: debugging.  */
-      printf ("AST for VALUE:\n");
-      pkl_ast_print (stdout, PK_CMD_ARG_EXP (argv[1])->ast);      
-#endif
+      return 1;
     }
   else
     value = PK_CMD_ARG_INT (argv[1]);

@@ -31,6 +31,7 @@
 #include <ctype.h>
 
 #include "poke.h"
+#include "pkl.h" /* For pkl_compile_buffer  */
 #include "pkl-parser.h"
 #include "pk-io.h"
 #include "pk-cmd.h"
@@ -315,16 +316,18 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                 {
                 case 'e':
                   {
-                    /* Parse a poke expression.  */
-                    pkl_ast ast;
+                    /* Compile a poke expression.  */
+                    pvm_program prog;
                     int ret;
                     char *end;
 
-                    ret = pkl_parse_buffer (&ast, PKL_PARSE_EXPRESSION, p, &end);
+                    ret = pkl_compile_buffer (&prog,
+                                              PKL_EXPRESSION,
+                                              p, &end);
                     
-                    if (ret == 0)
+                    if (ret != 0)
                       {
-                        argv[argc].val.exp = ast;
+                        argv[argc].val.exp = prog;
                         argv[argc].type = PK_CMD_ARG_EXP;
                         match = 1;
                         p = end;
