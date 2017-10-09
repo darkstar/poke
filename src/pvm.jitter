@@ -118,6 +118,13 @@ instruction pop (!R)
   end
 end
 
+instruction setr (!R)
+  code
+    JITTER_ARGP0 = JITTER_TOP_STACK().pointer;
+  end
+end
+
+
 #instruction print ()
 #  code
 #    union jitter_word top = JITTER_TOP_STACK();
@@ -296,6 +303,16 @@ end
 instruction sge ()
   code
 #define F(res, a, b) { pvm_op_sge (PARG(res), PARG(a), PARG(b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+# Concatenation instructions.
+
+instruction sconc ()
+  code
+#define F(res, a, b) { pvm_op_sconc (PARG(res), PARG(a), PARG(b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end

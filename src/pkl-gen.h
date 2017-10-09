@@ -20,8 +20,12 @@
 #define PKL_GEN_H
 
 #include <config.h>
-#include <pkl-ast.h>
+#include <jitter/jitter.h>
+#include "pkl-ast.h"
 
-int pkl_gen (pkl_ast_node ast);
+/* Lower an AST to a PVM program and return it.  Return NULL if a
+   compilation error occurs.  */
+
+struct pvm_program *pkl_gen (pkl_ast_node ast);
 
 #endif /* !PKL_GEN_H  */

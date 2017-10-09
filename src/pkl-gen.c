@@ -18,27 +18,25 @@
 
 #include <config.h>
 #include <stdio.h>
+#include <assert.h>
 
-#include <pkl-gen.h>
+#include "pkl-gen.h"
 
-/* Emit the PVM code for a given PKL AST.
-  
-   Returns 0 if an error occurs.
-   Returns 1 otherwise.
-*/
+#define pvm_append_pointer_parameter \
+  pvm_append_unsigned_literal_parameter
+#define pvm_pointer \
+  jitter_uint
 
-int
-pkl_gen (pkl_ast_node ast)
+static struct int
+pkl_gen_1 (pkl_ast_node ast, struct pvm_program *program, size_t *label)
 {
   pkl_ast_node tmp;
+  pvm_stack s;
   size_t i;
+  char label_0[100], label_1[100];
   
   if (ast == NULL)
-    {
-      /* Pushes NIL to the stack.  */
-      fprintf (stdout, "NIL\n");
-      goto success;
-    }
+    goto success;
 
   switch (PKL_AST_CODE (ast))
     {
@@ -46,227 +44,33 @@ pkl_gen (pkl_ast_node ast)
 
       for (tmp = PKL_AST_PROGRAM_ELEMS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
         {
-          if (!pkl_gen (tmp))
+          if (pkl_gen (tmp) == NULL)
             goto error;
         }
 
       break;
+      
     case PKL_AST_INTEGER:
-      fprintf (stdout, "PUSH %d\n", PKL_AST_INTEGER_VALUE (ast));
-      break;
-        
+
+        s = pvm_stack_new ();
+        PVM_STACK_TYPE (s) = PVM_STACK_E_INTEGER;
+        PVM_STACK_INTEGER (s) = PKL_AST_INTEGER_VALUE (ast);
+
+        /* PUSH int_cst */
+        PVM_APPEND_INSTRUCTION (program, push);
+        pvm_append_pointer_parameter (program, (pvm_pointer) s);
+
+        break;
+
     case PKL_AST_STRING:
-      /* XXX: add string to the string table and push the offset plus
-         a relocation.  */
-      fprintf (stdout, "PUSH '%s'\n", PKL_AST_STRING_POINTER (ast));
-      /* fprintf (stdout, "PUSH %d\n", PKL_AST_STRING_LENGTH (ast)); */
-      break;
 
-    case PKL_AST_IDENTIFIER:
-      fprintf (stdout, "PUSH '%s'\n", PKL_AST_IDENTIFIER_POINTER (ast));
-      fprintf (stdout, "PUSH %d\n", PKL_AST_IDENTIFIER_LENGTH (ast));
-      fprintf (stdout, "GETID\n");
-      break;
+      s = pvm_stack_new ();
+      PVM_STACK_TYPE (s) = PVM_STACK_E_STRING;
+      PVM_STACK_STRING (s) = xstrdup (PKL_AST_STRING_POINTER (ast));
 
-    case PKL_AST_DOC_STRING:
-      fprintf (stdout, "PUSH '%s'\n", PKL_AST_DOC_STRING_POINTER (ast));
-      break;
-
-    case PKL_AST_LOC:
-      /* Pushes the current value of the location counter to the
-         stack.  */
-      fprintf (stdout, "LOC\n");
-      break;
-
-    case PKL_AST_ARRAY_REF:
-      if (! pkl_gen (PKL_AST_ARRAY_REF_INDEX (ast)))
-        goto error;
-      if (! pkl_gen (PKL_AST_ARRAY_REF_BASE (ast)))
-        goto error;
-      fprintf (stdout, "AREF\n");
-      break;
-
-    case PKL_AST_STRUCT_REF:
-      if (! pkl_gen (PKL_AST_STRUCT_REF_IDENTIFIER (ast)))
-        goto error;
-      if (! pkl_gen (PKL_AST_STRUCT_REF_BASE (ast)))
-        goto error;
-      fprintf (stdout, "SREF\n");
-      break;
-
-    case PKL_AST_TYPE:
-      switch (PKL_AST_TYPE_CODE (ast))
-        {
-        case PKL_TYPE_CHAR:
-        case PKL_TYPE_SHORT:
-        case PKL_TYPE_INT:
-        case PKL_TYPE_LONG:
-          fprintf (stdout, "PUSH %d\n", PKL_AST_TYPE_CODE (ast));
-          break;
-        case PKL_TYPE_ENUM:
-          fprintf (stdout, "PUSH '%s'\n", PKL_AST_ENUM_TAG (PKL_AST_TYPE_ENUMERATION (ast)));
-          fprintf (stdout, "ETYPE\n");
-          break;
-        case PKL_TYPE_STRUCT:
-          fprintf (stdout, "PUSH '%s'\n", PKL_AST_STRUCT_TAG (PKL_AST_TYPE_STRUCT (ast)));
-          fprintf (stdout, "STYPE\n");
-          break;
-        default:
-          fprintf (stderr, "unknown type code\n");
-          goto error;
-        }
-      break;
-
-    case PKL_AST_ASSERTION:
-      if (! pkl_gen (PKL_AST_ASSERTION_EXP (ast)))
-        goto error;
-      fprintf (stdout, "ASSERT\n");
-      break;
-
-    case PKL_AST_LOOP:     
-      if (PKL_AST_LOOP_PRE (ast))
-        {
-          if (!pkl_gen (PKL_AST_LOOP_PRE (ast)))
-            goto error;
-        }
-
-      /* XXX: get and generate label Ln.  */
-      fprintf (stdout, "Ln:\n");
-
-      if (PKL_AST_LOOP_COND (ast))
-        {
-          if (!pkl_gen (PKL_AST_LOOP_COND (ast)))
-            goto error;
-        }
-
-      /* XXX: get label for Le.  */
-      fprintf (stdout, "BNZ Le\n");
-
-      if (PKL_AST_LOOP_BODY (ast))
-        {
-          if (!pkl_gen (PKL_AST_LOOP_BODY (ast)))
-            goto error;
-        }
-
-      if (PKL_AST_LOOP_POST (ast))
-        {
-          if (! pkl_gen (PKL_AST_LOOP_POST (ast)))
-            goto error;
-        }
-
-      fprintf (stdout, "BA Ln\n");
-
-      /* XXX: generate label for Le. */
-      fprintf (stdout, "Le:\n");
-      break;
-
-    case PKL_AST_COND:
-
-      if (!pkl_gen (PKL_AST_COND_EXP (ast)))
-        goto error;
-
-      /* Generate label Le.  */
-      fprintf (stdout, "BZ Le\n");
-
-      if (!pkl_gen (PKL_AST_COND_THENPART (ast)))
-        goto error;
-
-      fprintf (stdout, "Le:\n");
-
-      if (PKL_AST_COND_ELSEPART (ast))
-        {
-          if (!pkl_gen (PKL_AST_COND_ELSEPART (ast)))
-            goto error;
-        }
-      
-      break;
-
-    case PKL_AST_FIELD:
-      {
-        if (PKL_AST_TYPE_CODE (PKL_AST_FIELD_TYPE (ast)) == PKL_TYPE_STRUCT)
-          {
-            /* if the field type is a STYPE, do a CALL to the referred
-               struct passing LOC in the stack, and getting the new
-               LOC in the stack.  */
-          }
-        
-        if (!pkl_gen (PKL_AST_FIELD_SIZE (ast)))
-          goto error;
-        if (!pkl_gen (PKL_AST_FIELD_NUM_ENTS (ast)))
-          goto error;
-        if (!pkl_gen (PKL_AST_FIELD_DOCSTR (ast)))
-          goto error;
-        if (!pkl_gen (PKL_AST_FIELD_TYPE (ast)))
-          goto error;
-        fprintf (stdout, "PUSH %d\n", PKL_AST_FIELD_ENDIAN (ast));
-        if (!pkl_gen (PKL_AST_FIELD_NAME (ast)))
-          goto error;
-        fprintf (stdout, "DFIELD\n");
-
-        /* Update LOC.  */
-        fprintf (stdout, "LOC\n");
-        fprintf (stdout, "ADD\n");
-        fprintf (stdout, "SETLOC\n");
-      }
-      
-      break;
-
-    case PKL_AST_STRUCT:
-
-      if (!pkl_gen (PKL_AST_STRUCT_MEM (ast)))
-        goto error;
-      if (!pkl_gen (PKL_AST_STRUCT_DOCSTR (ast)))
-        goto error;
-      if (!pkl_gen (PKL_AST_STRUCT_TAG (ast)))
-        goto error;
-      fprintf (stdout, "DSTRUCT\n");
-
-      break;
-
-    case PKL_AST_MEM:
-
-      for (i = 0, tmp = PKL_AST_MEM_COMPONENTS (ast); tmp; tmp = PKL_AST_CHAIN (tmp), ++i)
-        {
-          if (!pkl_gen (tmp))
-            goto error;
-        }
-
-      fprintf (stdout, "PUSH %d\n", PKL_AST_MEM_ENDIAN (ast));
-      fprintf (stdout, "PUSH %d\n", i); /* Number of components.  */
-      fprintf (stdout, "DMEM\n");
-      
-      break;
-
-    case PKL_AST_ENUM:
-
-      if (!pkl_gen (PKL_AST_ENUM_DOCSTR (ast)))
-        goto error;
-
-      for (i = 0, tmp = PKL_AST_ENUM_VALUES (ast); tmp; tmp = PKL_AST_CHAIN (tmp), ++i)
-        {
-          if (!pkl_gen (tmp))
-            goto error;
-        }
-
-      fprintf (stdout, "PUSH %d\n", i); /* Number of enumerators.  */
-
-      if (!pkl_gen (PKL_AST_ENUM_TAG (ast)))
-        goto error;
-
-      fprintf (stdout, "DENUM\n");
-      
-      break;
-
-    case PKL_AST_ENUMERATOR:
-
-      if (!pkl_gen (PKL_AST_ENUMERATOR_DOCSTR (ast)))
-        goto error;
-      if (!pkl_gen (PKL_AST_ENUMERATOR_VALUE (ast)))
-        goto error;
-      if (!pkl_gen (PKL_AST_ENUMERATOR_IDENTIFIER (ast)))
-        goto error;
-
-      /* No need for explicit command for ENUMERATOR.  */
+      /* PUSH str_cst */
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_pointer_parameter (program, (pvm_pointer) s);
       
       break;
 
@@ -278,7 +82,6 @@ pkl_gen (pkl_ast_node ast)
 #include "pkl-ops.def"
           };
 #undef PKL_DEF_OP
-
         
       /* Generate operators.  */
       for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); ++i)
@@ -287,19 +90,148 @@ pkl_gen (pkl_ast_node ast)
             goto error;
         }
 
+#define GEN_BINARY_OP (OP,T1,T2)                                        \
+        do                                                              \
+          {                                                             \
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_top);   \
+            pvm_append_unsigned_literal_parameter (program,             \
+                                                   (jitter_uint) (T1)); \
+            pvm_append_symbolic_label (program, "Lrterror");            \
+                                                                        \
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_undertop); \
+            pvm_append_unsigned_literal_parameter (program,             \
+                                                   (jitter_uint) (T2)); \
+            pvm_append_symbolic_label_parameter (program, "Lrterror");  \
+                                                                        \
+            PVM_APPEND_INSTRUCTION (program, OP);                       \
+          } while (0)
+
+#define GEN_UNARY_OP (OP,T)                                             \
+        do                                                              \
+          {                                                             \
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_top);   \
+            pvm_append_unsigned_literal_parameter (program,             \
+                                                   (jitter_uint) (T));  \
+            pvm_append_symbolic_label_parameter (program, "Lrterror");  \
+                                                                        \
+            PVM_APPEND_INSTRUCTION (program, OP);                       \
+          } while (0)
+
+#define GEN_BINARY_OP_II (OP)                                           \
+        GEN_BINARY_OP (OP, PVM_STACK_E_INTEGER, PVM_STACK_E_INTEGER)
+
+#define GEN_UNARY_OP_I (OP)                     \
+        GEN_UNARY_OP (OP, PVM_STACK_E_INTEGER)
+      
+      switch (PKL_AST_EXP_CODE (ast))
+        {
+        case PKL_AST_OP_OR:   GEN_BINARY_OP_II (or); break;
+        case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (ior); break;
+        case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (xor); break;
+        case PKL_AST_OP_AND:  GEN_BINARY_OP_II (and); break;
+        case PKL_AST_OP_BAND: GEN_BINARY_OP_II (band); break;
+        case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (ieq); break;
+        case PKL_AST_OP_NE:   GEN_BINARY_OP_II (ine); break;
+        case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsl); break;
+        case PKL_AST_OP_SR:   GEN_BINARY_OP_II (bsr); break;
+        case PKL_AST_OP_SUB:  GEN_BINARY_OP_II (sub); break;
+        case PKL_AST_OP_MUL:  GEN_BINARY_OP_II (mul); break;
+        case PKL_AST_OP_DIV:  GEN_BINARY_OP_II (div); break;
+        case PKL_AST_OP_MOD:  GEN_BINARY_OP_II (mod); break;
+        case PKL_AST_OP_LT:   GEN_BINARY_OP_II (ilt); break;
+        case PKL_AST_OP_GT:   GEN_BINARY_OP_II (igt); break;
+        case PKL_AST_OP_LE:   GEN_BINARY_OP_II (ile); break;
+        case PKL_AST_OP_GE:   GEN_BINARY_OP_II (ige); break;
+
+        case PKL_AST_OP_PREINC:  GEN_UNARY_OP_I (precinc); break;
+        case PKL_AST_OP_PREDEC:  GEN_UNARY_OP_I (predec); break;
+        case PKL_AST_OP_POS:     GEN_UNARY_OP_I (pos); break;
+        case PKL_AST_OP_NEG:     GEN_UNARY_OP_I (neg); break;
+        case PKL_AST_OP_BNOT:    GEN_UNARY_OP_I (bnot); break;
+        case PKL_AST_OP_NOT:     GEN_UNARY_OP_I (not); break;
+
+        case PKL_AST_OP_ADD:
+          {
+            pvm_stack a, b;
+
+            sprintf (label_0, "L%li", (*label)++);
+            sprintf (label_1, "L%li", (*label)++);
+
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_undertop);
+            pvm_append_unsigned_literal_parameter (program,
+                                                   (jitter_uint) (PVM_STACK_E_INTEGER));
+            pvm_append_symbolic_label_parameter (program, label_0);
+
+            /* Arithmetic addition.  */
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_top);
+            pvm_append_symbolic_label_parameter (program, "Lrterror");
+            PVM_APPEND_INSTRUCTION (program, add);
+
+            PVM_APPEND_INSTRUCTION (program, ba);
+            pvm_append_symbolic_label_parameter (program, label_1);
+            pvm_append_symbolic_label (program, label_0);
+
+            /* String concatenation.  */
+            PVM_APPEND_INSTRUCTION (program, branch_if_not_type_top);
+            pvm_append_symbolic_label_parameter (program, "Lrterror");
+            PVM_APPEND_INSTRUCTION (program, sconc);
+            
+            pvm_append_symbolic_label (program, label_1);
+            break;
+          }
+
+        default:
+          fprintf (stderr, "gen: unhandled expression code %d\n",
+                   PKL_AST_EXP_CODE (ast));
+          goto error;
+        }
+      
       fprintf (stdout, "%s\n", pkl_ast_op_opcode [PKL_AST_EXP_CODE (ast)]);
       break;
       }
+
+    case PKL_AST_COND_EXP:
+      break;
       
     default:
-      fprintf (stderr, "Unknown AST node.\n");
+      fprintf (stderr, "gen: unknown AST node.\n");
       goto error;
     }
 
  success:
-  
   return 1;
   
  error:
-    return 0;
+  pvm_destroy_program (program);
+  return NULL;
+}
+
+struct pvm_program *
+pkl_gen (pkl_ast_node ast)
+{
+  int ret;
+  struct pvm_program program;
+  size_t label;
+
+  label = 0;
+  program = pvm_make_program ();
+  /* XXX: add the standard prologue to the program.
+
+     Lcheckopii:
+     Lcheckopi:
+ 
+     Lrterror:
+       push exit_status : error or OK.
+       end
+  */
+
+  ret pkl_gen_1 (ast, program, &label);
+  if (!ret)
+    {
+      /* XXX: handle code generation errors.  */
+
+      return NULL;
+    }
+
+  return program;
 }
