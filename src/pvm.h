@@ -57,30 +57,8 @@ struct pvm
 {
 };
 
-static inline pvm_stack
-pvm_stack_new (void)
-{
-  pvm_stack s;
-
-  s = xmalloc (sizeof (struct pvm_stack));
-  memset (s, 0, sizeof (struct pvm_stack));
-  return s;
-}
-
-static inline void
-pvm_stack_free (pvm_stack s)
-{
-  switch (PVM_STACK_TYPE (s))
-    {
-    case PVM_STACK_E_STRING:
-      free (s->v.string);
-      break;
-    default:
-      break;
-    }
-  
-  free (s);
-}
+pvm_stack pvm_stack_new (void);
+void pvm_stack_free (pvm_stack s);
 
 static inline void
 pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b)
