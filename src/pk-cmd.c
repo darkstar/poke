@@ -46,6 +46,7 @@ extern struct pk_cmd info_cmd; /* pk-info.c  */
 extern struct pk_cmd exit_cmd; /* pk-misc.c  */
 extern struct pk_cmd version_cmd; /* pk-misc.c */
 extern struct pk_cmd help_cmd; /* pk-help.c */
+extern struct pk_cmd disas_cmd; /* pk-vm.c  */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, 0, NULL, NULL};
@@ -61,6 +62,7 @@ static struct pk_cmd *cmds[] =
     &info_cmd,
     &close_cmd,
     &help_cmd,
+    &disas_cmd,
     &null_cmd
   };
 
@@ -314,7 +316,6 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                 case 'e':
                   {
                     /* Parse a poke expression.  */
-
                     pkl_ast ast;
                     int ret;
                     char *end;
@@ -380,7 +381,6 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                 case 'f':
                   {
                     /* Parse a filename.  */
-
                     size_t i;
                     wordexp_t exp_result;
 
@@ -492,6 +492,9 @@ extern struct pk_trie *info_trie; /* pk-info.c  */
 extern struct pk_cmd *help_cmds[]; /* pk-help.c */
 extern struct pk_trie *help_trie; /* pk-help.c */
 
+extern struct pk_cmd *disas_cmds[]; /* pk-vm.c  */
+extern struct pk_trie *disas_trie;  /* pk-vm.c  */
+
 static struct pk_trie *cmds_trie;
 
 int
@@ -503,6 +506,8 @@ pk_cmd_exec (char *str)
     info_trie = pk_trie_from_cmds (info_cmds);
   if (help_trie == NULL)
     help_trie = pk_trie_from_cmds (help_cmds);
+  if (disas_trie == NULL)
+    disas_trie = pk_trie_from_cmds (disas_cmds);
 
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }
@@ -513,4 +518,5 @@ pk_cmd_shutdown (void)
   pk_trie_free (cmds_trie);
   pk_trie_free (info_trie);
   pk_trie_free (help_trie);
+  pk_trie_free (disas_trie);
 }
