@@ -43,17 +43,9 @@ end
 
 early-c
   code
+#   include <string.h>
 #   include <pvm.h>
 #   define PARG(A) ((pvm_stack)(A).pointer)
-#   define PVM_BINOP(OP,RES,A,B)         \
-    {                                    \
-      pvm_stack  s = pvm_stack_new ();   \
-      pvm_op_##OP (s, PARG(A), PARG(B)); \
-      pvm_stack_free (PARG(A));          \
-      pvm_stack_free (PARG(B));          \
-      RES.pointer = (union jitter_word *) p;\
-    }
-
   end
 end
 
@@ -155,7 +147,16 @@ end
 
 instruction add ()
   code
-#define F(res, a, b) PVM_BINOP (add, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) + PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -163,7 +164,16 @@ end
 
 instruction sub ()
   code
-#define F(res, a, b) PVM_BINOP (sub, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) - PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -171,24 +181,51 @@ end
 
 instruction mul ()
   code
-#define F(res, a, b) PVM_BINOP (mul, res, a, b)
-    JITTER_BINARY_STACK(F);
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) * PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
 instruction div ()
   code
-#define F(res, a, b) PVM_BINOP (div, res, a, b)
-    JITTER_BINARY_STACK(F);
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) / PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
 instruction mod ()
   code
-#define F(res, a, b) PVM_BINOP (mod, res, a, b)
-    JITTER_BINARY_STACK(F);
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) % PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -204,7 +241,7 @@ end
 instruction neg ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    pvm_op_neg (s, s);
+    PVM_STACK_INTEGER (s) = - PVM_STACK_INTEGER (s);
   end
 end
 
@@ -212,7 +249,7 @@ end
 instruction preinc ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    pvm_op_preinc (s, s);
+    PVM_STACK_INTEGER (s) = ++ PVM_STACK_INTEGER (s);
   end  
 end
 
@@ -220,7 +257,7 @@ end
 instruction predec ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    pvm_op_predec (s, s);
+    PVM_STACK_INTEGER (s) == -- PVM_STACK_INTEGER (s);
   end  
 end
 
@@ -228,7 +265,16 @@ end
 
 instruction ieq ()
   code
-#define F(res, a, b) PVM_BINOP (ieq, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) == PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -236,7 +282,16 @@ end
 
 instruction ine ()
   code
-#define F(res, a, b) PVM_BINOP (ine, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) != PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -244,7 +299,16 @@ end
 
 instruction seq ()
   code
-#define F(res, a, b) PVM_BINOP (seq, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) == 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -252,7 +316,16 @@ end
 
 instruction sne ()
   code
-#define F(res, a, b) PVM_BINOP (sne, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) != 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -262,7 +335,16 @@ end
 
 instruction ilt ()
   code
-#define F(res, a, b) PVM_BINOP (ilt, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) < PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -270,7 +352,16 @@ end
 
 instruction ile ()
   code
-#define F(res, a, b) PVM_BINOP (ile, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) <= PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -278,7 +369,16 @@ end
 
 instruction igt ()
   code
-#define F(res, a, b) PVM_BINOP (igt, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) > PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -286,7 +386,16 @@ end
 
 instruction ige ()
   code
-#define F(res, a, b) PVM_BINOP (ige, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) >= PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -294,7 +403,16 @@ end
 
 instruction slt ()
   code
-#define F(res, a, b) PVM_BINOP (slt, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) < 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -302,7 +420,16 @@ end
 
 instruction sle ()
   code
-#define F(res, a, b) PVM_BINOP (sle, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) <= 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -310,7 +437,16 @@ end
 
 instruction sgt ()
   code
-#define F(res, a, b) PVM_BINOP (sgt, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) > 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -318,7 +454,16 @@ end
 
 instruction sge ()
   code
-#define F(res, a, b) PVM_BINOP (sge, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s) = strcmp (PVM_STACK_STRING (PARG(a)), \
+                                     PVM_STACK_STRING (PARG(b))) >= 0; \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -328,7 +473,20 @@ end
 
 instruction sconc ()
   code
-#define F(res, a, b) PVM_BINOP (sconc, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     char *ss = PVM_STACK_STRING (PARG(res));           \
+     char *sa = PVM_STACK_STRING (PARG(a));             \
+     char *sb = PVM_STACK_STRING (PARG(b));             \
+     PVM_STACK_TYPE (s) = PVM_STACK_STR;                \
+     ss = xmalloc (strlen (sa) + strlen (sb) + 1);      \
+     ss = strcpy (ss, sa);                              \
+     ss = strcat (ss, sb);                              \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -338,7 +496,16 @@ end
 
 instruction and ()
   code
-#define F(res, a, b) PVM_BINOP (and, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) && PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -346,7 +513,16 @@ end
 
 instruction or ()
   code
-#define F(res, a, b) PVM_BINOP (or, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) || PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -355,7 +531,7 @@ end
 instruction not ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    pvm_op_not (s, s);
+    PVM_STACK_INTEGER (s) = ! PVM_STACK_INTEGER (s);
   end
 end
 
@@ -363,7 +539,16 @@ end
 
 instruction bxor ()
   code
-#define F(res, a, b) PVM_BINOP (bxor, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) ^ PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -371,7 +556,16 @@ end
 
 instruction bior ()
   code
-#define F(res, a, b) PVM_BINOP (bior, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) | PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -379,7 +573,16 @@ end
 
 instruction band ()
   code
-#define F(res, a, b) PVM_BINOP (band, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) & PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -388,13 +591,22 @@ end
 instruction bnot ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    pvm_op_bnot (s, s);
+    PVM_STACK_INTEGER (s) = ~ PVM_STACK_INTEGER (s);
   end
 end
 
 instruction bsl ()
   code
-#define F(res, a, b) PVM_BINOP (bsl, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) << PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -402,7 +614,16 @@ end
 
 instruction bsr ()
   code
-#define F(res, a, b) PVM_BINOP (bsr, res, a, b)
+#define F(res, a, b)                                    \
+  {                                                     \
+     pvm_stack  s = pvm_stack_new ();                   \
+     PVM_STACK_TYPE (s) = PVM_STACK_INT;                \
+     PVM_STACK_INTEGER (s)                              \
+       = PVM_STACK_INTEGER (PARG(a)) >> PVM_STACK_INTEGER (PARG(b)); \
+     pvm_stack_free (PARG(a));                          \
+     pvm_stack_free (PARG(b));                          \
+     res.pointer = (union jitter_word *) s;             \
+  }
     JITTER_BINARY_STACK(F);
 #undef F
   end

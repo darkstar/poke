@@ -63,37 +63,4 @@ void pvm_shutdown (void);
 
 int pvm_execute (pvm_program prog);
 
-/* Instructions.  */
-
-void pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sub (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_mul (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_div (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_mod (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ieq (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ine (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_seq (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sne (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ilt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ile (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_igt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ige (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_slt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sle (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sgt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sge (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_and (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_or (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_not (pvm_stack res, pvm_stack a);
-void pvm_op_bxor (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bior (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_band (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bnot (pvm_stack res, pvm_stack a);
-void pvm_op_bsl (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bsr (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_neg (pvm_stack res, pvm_stack a);
-void pvm_op_preinc (pvm_stack res, pvm_stack a);
-void pvm_op_predec (pvm_stack res, pvm_stack a);
-void pvm_op_sconc (pvm_stack res, pvm_stack a, pvm_stack b);
-
 #endif /* ! PVM_H */
