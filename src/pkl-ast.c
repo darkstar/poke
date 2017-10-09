@@ -633,6 +633,9 @@ void
 pkl_ast_free (pkl_ast ast)
 {
   size_t i;
+
+  if (ast == NULL)
+    return;
   
   pkl_ast_node_free (ast->ast);
 

@@ -58,6 +58,7 @@ struct pvm
 };
 
 typedef struct pvm *pvm;
+typedef struct pvm_program *pvm_program;
 
 pvm_stack pvm_stack_new (void);
 void pvm_stack_free (pvm_stack s);

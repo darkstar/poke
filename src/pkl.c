@@ -18,8 +18,27 @@
 
 #include <config.h>
 
-
 #include "pkl.h"
+#include "pkl-ast.h"
 
+int
+pkl_compile_buffer (pvm_program *prog,
+                    int what, char *buffer, char **end)
+{
+  pkl_ast ast = NULL;
+  pvm_program p;
 
+  if (!pkl_parse_buffer (&ast, what, buffer, end))
+    /* Compiler front-end error.  */
+    goto error;
 
+  if (!pkl_gen (&p, ast);)
+    /* Compiler back-end error.  */
+    goto error;
+
+  return 1;
+
+ error:
+  pkl_ast_free (ast);
+  return 0;
+}

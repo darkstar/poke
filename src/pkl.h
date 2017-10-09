@@ -21,40 +21,16 @@
 
 #include <config.h>
 
-#if 0
-struct pvm_struct
-{
-  pvm_prog type; /* Program for the type.  */
-  pio_layout layout;  /* Recalculated running the type above.  */
-  pio_addr addr;
-};
+#include "pvm.h"
 
-enum pvm_var_type
-{
-  PVM_VT_NUMBER,
-  PVM_VT_ARRAY,
-  PVM_VT_STRUCT
-};
+/* Compile a poke expression, or a program, from a NULL-terminated
+   string BUFFER.  Return 0 in case of a compilation error.  Return 1
+   otherwise.  If not NULL, END is set to the first character in
+   BUFFER that is not part of the program/expression.  */
 
-struct pvm_var
-{
-  enum pvm_var_type type;
-  
-  union
-  {
-    pvm_int integer;
-    pvm_array array;
-    pvm_struct strct;
-    pio_addr addr;
-  } v;
-};
+#define PKL_PROGRAM 0
+#define PKL_EXPRESSION 1
 
-struct pvm_scope
-{
-  /* Variables defined in this scope.  */
-  pvm_var *vars;
-};
-
-#endif /* 0 */
+int pkl_compile_buffer (pvm_program *prog, int what, char *buffer, char **end);
 
 #endif /* ! PKL_H */

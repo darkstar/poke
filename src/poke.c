@@ -31,9 +31,9 @@
 # include <readline/history.h>
 #endif
 
-#include "pkl-parser.h"
 #include "pk-io.h"
 #include "pk-cmd.h"
+#include "pvm.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.

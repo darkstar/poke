@@ -29,9 +29,14 @@
 #define pvm_pointer \
   jitter_uint
 
+/* Forward declaration.  */
+static int pkl_gen_1 (pkl_ast_node ast,
+                      pvm_program program,
+                      size_t *label);
+
 static int
 pkl_gen_integer (pkl_ast_node ast,
-                 struct pvm_program *program,
+                 pvm_program program,
                  size_t *label)
 {
   pvm_stack s;
@@ -49,7 +54,7 @@ pkl_gen_integer (pkl_ast_node ast,
 
 static int
 pkl_gen_string (pkl_ast_node ast,
-                struct pvm_program *program,
+                pvm_program program,
                 size_t *label)
 {
   pvm_stack s;
@@ -67,7 +72,7 @@ pkl_gen_string (pkl_ast_node ast,
 
 static int
 pkl_gen_exp (pkl_ast_node ast,
-             struct pvm_program *program,
+             pvm_program program,
              size_t *label)
 {
   size_t i;
@@ -75,7 +80,8 @@ pkl_gen_exp (pkl_ast_node ast,
   /* Generate operators.  */
   for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); ++i)
     {
-      if (!pkl_gen (PKL_AST_EXP_OPERAND (ast, i)))
+      if (!pkl_gen_1 (PKL_AST_EXP_OPERAND (ast, i),
+                      program, label))
         return 0;
     }
 
@@ -179,7 +185,22 @@ pkl_gen_exp (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_1 (pkl_ast_node ast, struct pvm_program *program, size_t *label)
+pkl_gen_cast (pkl_ast_node ast,
+              pvm_program program,
+              size_t *label)
+{
+  /* INT <- INT
+       Sign extension or zero extension.
+     TUPLE <- TUPLE
+       Reordering. */
+  
+  return 0; 
+}
+
+static int
+pkl_gen_1 (pkl_ast_node ast,
+           pvm_program program,
+           size_t *label)
 {
   pkl_ast_node tmp;
   
@@ -190,7 +211,7 @@ pkl_gen_1 (pkl_ast_node ast, struct pvm_program *program, size_t *label)
     {
     case PKL_AST_PROGRAM:
       for (tmp = PKL_AST_PROGRAM_ELEMS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
-        if (pkl_gen (tmp) == NULL)
+        if (!pkl_gen_1 (tmp, program, label))
           goto error;
       break;
       
@@ -208,12 +229,12 @@ pkl_gen_1 (pkl_ast_node ast, struct pvm_program *program, size_t *label)
         goto error;
       break;
 
-    case PKL_AST_COND_EXP:
+    case PKL_AST_CAST:
+      if (!pkl_gen_cast (ast, program, label))
+        goto error;
       break;
 
-    case PKL_AST_CAST:
-      break;
-      
+    case PKL_AST_COND_EXP:
     default:
       fprintf (stderr, "gen: unknown AST node.\n");
       goto error;
@@ -226,30 +247,35 @@ pkl_gen_1 (pkl_ast_node ast, struct pvm_program *program, size_t *label)
   return 0;
 }
 
-struct pvm_program *
-pkl_gen (pkl_ast_node ast)
+int
+pkl_gen (pvm_program *prog, pkl_ast_node ast)
 {
   struct pvm_program *program;
   size_t label;
 
   label = 0;
   program = pvm_make_program ();
+  if (program == NULL)
+    goto error;
+
+
   /* XXX: add the standard prologue to the program.
 
-     Lcheckopii:
-     Lcheckopi:
- 
      Lrterror:
        push exit_status : error or OK.
        end
   */
-
+  
   if (!pkl_gen_1 (ast, program, &label))
     {
       /* XXX: handle code generation errors.  */
       pvm_destroy_program (program);
-      return NULL;
+      goto error;
     }
 
-  return program;
+  *prog = program;
+  return 1;
+  
+ error:
+  return 0;
 }
