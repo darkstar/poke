@@ -68,7 +68,7 @@ function test_qsort ()
   qsort (longs);
 
   /* Now sort an unmapped array variable.  */
-  let array = {3, 2, 1, 0};
+  let array = [3, 2, 1, 0];
   qsort (array);
 }
 
