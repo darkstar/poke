@@ -23,4 +23,6 @@ extern int poke_interactive_p;
 extern int poke_exit_p;
 extern int poke_exit_code;
 
+void pk_print_version ();
+
 #endif /* !POKE_H */

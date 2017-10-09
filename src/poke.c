@@ -105,8 +105,8 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
          stdout);
 }
 
-static void
-print_version ()
+void
+pk_print_version ()
 {
   puts ("     _____");
   puts (" ---'   __\\_______");
@@ -155,7 +155,7 @@ parse_args (int argc, char *argv[])
           }
         case VERSION_ARG:
           {
-            print_version ();
+            pk_print_version ();
             exit (EXIT_SUCCESS);
             break;
           }
@@ -180,7 +180,7 @@ parse_args (int argc, char *argv[])
 static void
 repl ()
 {
-  print_version ();
+  pk_print_version ();
   puts ("");
 
   while (!poke_exit_p)

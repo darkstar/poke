@@ -64,7 +64,7 @@ FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
 CHAR		   '(.|\\[n0t])'
 STRING             \"([^"]|\\(.|\n))*\"
 HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
-BINCST		   0[bB][01][01_]
+BINCST		   0[bB][01][01_]*
 OCTCST             0[0-9][0-9_]*
 DECCST             [0-9][0-9_]*
 

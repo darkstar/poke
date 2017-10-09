@@ -45,5 +45,16 @@ pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
   return 1;
 }
 
+static int
+pk_cmd_version (int argc, struct pk_cmd_arg argv[])
+{
+  /* version */
+  pk_print_version ();
+  return 1;
+}
+
 struct pk_cmd exit_cmd =
   {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"};
+
+struct pk_cmd version_cmd =
+  {"version", "", 0, NULL, pk_cmd_version, "version"};
