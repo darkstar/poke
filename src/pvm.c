@@ -57,6 +57,17 @@ pvm_stack_free (pvm_stack s)
   free (s);
 }
 
+int
+pvm_execute (pvm_program prog)
+{
+  struct pvm_state s;
+  pvm_state_initialize (&s);
+  pvm_interpret (prog, &s);
+  pvm_state_finalize (&s);
+
+  return 1;
+}
+
 void
 pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b)
 {

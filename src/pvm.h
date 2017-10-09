@@ -70,6 +70,8 @@ void pvm_stack_free (pvm_stack s);
 void pvm_init (void);
 void pvm_shutdown (void);
 
+int pvm_execute (pvm_program prog);
+
 /* Instructions.  */
 
 void pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b);
