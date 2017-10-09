@@ -211,11 +211,17 @@ program: program_elem_list
 
 program_elem_list:
           %empty
-		{ $$ = NULL; }
+		{
+                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
+                    /* We should parse exactly one expression.  */
+                    YYERROR;
+                  $$ = NULL;
+                }
 	| program_elem
         | program_elem_list program_elem
         	{
                   if (pkl_parser->what == PKL_PARSE_EXPRESSION)
+                    /* We should parse exactly one expression.  */
                     YYERROR;
                   $$ = pkl_ast_chainon ($1, $2);
                 }
@@ -225,6 +231,8 @@ program_elem:
           expression
         	{
                   if (pkl_parser->what != PKL_PARSE_EXPRESSION)
+                    /* Expressions are not valid top-level structures
+                       in full poke programs.  */
                     YYERROR;
                   $$ = $1;
                 }
