@@ -17,6 +17,7 @@
  */
 
 #include <config.h>
+#include <stdlib.h>
 #include "pvm.h"
 
 pvm_stack

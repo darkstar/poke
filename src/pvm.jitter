@@ -392,6 +392,14 @@ instruction bsr ()
   end
 end
 
+## Branches
+
+instruction ba (?f)
+  code
+    JITTER_BRANCH_FAST(JITTER_ARGF0);
+  end
+end
+
 ## Checking instructions.
 
 # To access the pvm state from withing the instructions:
