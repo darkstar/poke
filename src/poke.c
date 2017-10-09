@@ -223,6 +223,7 @@ main (int argc, char *argv[])
   /* Cleanup.  */
   pk_io_shutdown ();
   pk_cmd_shutdown ();
-
+  pvm_shutdown ();
+    
   return poke_exit_code;
 }
