@@ -28,6 +28,9 @@
 # include "pvm-vm.h"
 #endif
 
+/* The pvm_stack opaque type implements the boxed values that are
+   native to the poke virtual machine.  */
+
 typedef int64_t pvm_int;
 typedef uint64_t pvm_uint;
 
@@ -53,14 +56,27 @@ struct pvm_stack
 };
 
 typedef struct pvm_stack *pvm_stack;
+
+/* The struct pvm_program is defined by Jitter.  Provide a convenient
+   opaque type to the PVM users.  */
+
 typedef struct pvm_program *pvm_program;
 
-pvm_stack pvm_stack_new (void);
-void pvm_stack_free (pvm_stack s);
+/* The following enumeration contains every possible exit code
+   resulting from the execution of a program in the PVM.  */
+
+enum pvm_exit_code
+  {
+    PVM_EXIT_OK,
+    PVM_EXIT_ERROR
+  };
+
+/* Public functions.  */
 
 void pvm_init (void);
 void pvm_shutdown (void);
-
 int pvm_execute (pvm_program prog);
+pvm_stack pvm_stack_new (void);
+void pvm_stack_free (pvm_stack s);
 
 #endif /* ! PVM_H */

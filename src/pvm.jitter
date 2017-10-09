@@ -41,10 +41,15 @@ end
 
 ## Prologue and epilogue for the generated code.
 
+early-header-c
+  code
+#   include "pvm.h"
+  end
+end
+
 early-c
   code
 #   include <string.h>
-#   include <pvm.h>
 #   define PARG(A) ((pvm_stack)(A).pointer)
   end
 end
@@ -65,13 +70,14 @@ end
 
 state-struct-backing-c
   code
-    /* Add extra types, variables, etc.  */
+      /* XXX enum pvm_exit_code exit_code;  */
+      int exit_code;
   end
 end
 
 state-initialization-c
   code
-    /* Initialize extra state here.  */
+      jitter_state_backing->exit_code = PVM_EXIT_OK;
   end
 end
 
@@ -249,7 +255,7 @@ end
 instruction preinc ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    PVM_STACK_INTEGER (s) = ++ PVM_STACK_INTEGER (s);
+    PVM_STACK_INTEGER (s) += 1;
   end  
 end
 
@@ -257,7 +263,7 @@ end
 instruction predec ()
   code
     pvm_stack s = (pvm_stack) JITTER_TOP_STACK().pointer;
-    PVM_STACK_INTEGER (s) == -- PVM_STACK_INTEGER (s);
+    PVM_STACK_INTEGER (s) -= 1;
   end  
 end
 
