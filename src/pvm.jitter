@@ -43,66 +43,7 @@ end
 
 early-c
   code
-/*#   include <pvm.h> guard crap */
-
-#   include <stdint.h>
-
-typedef int64_t pvm_int;
-typedef uint64_t pvm_uint;
-
-enum pvm_stack_type
-  {
-    PVM_STACK_INT,
-    PVM_STACK_STR,
-  };
-
-#define PVM_STACK_TYPE(S) ((S)->type)
-#define PVM_STACK_INTEGER(S) ((S)->v.integer)
-#define PVM_STACK_STRING(S) ((S)->v.string)
-
-struct pvm_stack
-{
-  enum pvm_stack_type type;
-
-  union
-  {
-    pvm_int integer;
-    char *string;
-  } v;
-};
-
-typedef struct pvm_stack *pvm_stack;
-void pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sub (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_mul (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_div (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_mod (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ieq (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ine (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_seq (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sne (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ilt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ile (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_igt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_ige (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_slt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sle (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sgt (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_sge (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_and (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_or (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_not (pvm_stack res, pvm_stack a);
-void pvm_op_bxor (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bior (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_band (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bnot (pvm_stack res, pvm_stack a);
-void pvm_op_bsl (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_bsr (pvm_stack res, pvm_stack a, pvm_stack b);
-void pvm_op_neg (pvm_stack res, pvm_stack a);
-void pvm_op_preinc (pvm_stack res, pvm_stack a);
-void pvm_op_predec (pvm_stack res, pvm_stack a);
-void pvm_op_sconc (pvm_stack res, pvm_stack a, pvm_stack b);
-
+#   include <pvm.h>
 #   define PARG(A) ((pvm_stack)(A).pointer)
   end
 end
@@ -138,6 +79,14 @@ end
 #    pvm_shutdown (jitter_state-backing->pvm);
 #  end
 #end
+
+## VM instructions
+
+instruction exit ()
+  code
+    JITTER_EXIT ();
+  end
+end
 
 ## Miscellaneous Instructions
 
@@ -452,49 +401,15 @@ end
 
 ## Branches
 
+# Branch always.
 instruction ba (?f)
   code
     JITTER_BRANCH_FAST(JITTER_ARGF0);
   end
 end
 
-## Checking instructions.
-
-# To access the pvm state from withing the instructions:
-#
-# original_state->pvm_state_backing->pvm
-
-# To add pointers:
-#
-# stack_append_unsigned_literal_parameter (program,
-#                                          (jitter_uint) pvm_elem);
-
-# This code pushes the address
-# $shared_error_routine to the stack, but does
-# not execute the routine.
-#   push $shared_error_routine
-#   end
-#
-# $shared_error_routine:
-#   set-exit-status -1
-#   end
-#
-# Or even better:
-#
-# This code sets the global variable number zero to the address
-# $shared_error_routine , but does not execute the routine.
-# set-global is a VM instruction popping an element from the stack
-# and assigning it to the global whose index is given.
-#
-# push $shared_error_routine
-# set-global 0
-# end
-#
-# $shared_error_routine:
-# set-exit-status -1
-# end
-
-instruction branch-if-zero-undertop (?f)
+# Branch if zero undertop.
+instruction bzut (?f)
   code
     pvm_stack s = ((pvm_stack) JITTER_TOP_STACK().pointer);
     JITTER_BRANCH_FAST_IF_ZERO (PVM_STACK_INTEGER (s),
@@ -502,7 +417,8 @@ instruction branch-if-zero-undertop (?f)
   end
 end
 
-instruction branch-if-not-type-top (?n,?f)
+# Branch if not type top
+instruction bnt (?n,?f)
   code
      pvm_stack s = ((pvm_stack)JITTER_UNDER_TOP_STACK().pointer);
 
@@ -511,7 +427,8 @@ instruction branch-if-not-type-top (?n,?f)
   end
 end
 
-instruction branch-if-not-type-undertop (?n,?f)
+# Branch if not type undertop.
+instruction bntut (?n,?f)
   code
      pvm_stack s = ((pvm_stack)JITTER_UNDER_TOP_STACK().pointer);
 

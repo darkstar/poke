@@ -42,7 +42,7 @@ poke_LDADD = $(top_builddir)/lib/libpoke.la \
 
 JITTER=/home/jemarch/tmp/jitter
 poke_CPPFLAGS += -I$(JITTER)/include
-poke_LDADD += -L$(JITTER)/lib -ljitter -ljitter--no-threading
+poke_LDADD += -L$(JITTER)/lib -ljitter--no-threading
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter

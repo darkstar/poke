@@ -39,12 +39,13 @@ pkl_compile_buffer (pvm_program *prog,
       /* Memory exhaustion.  */
       printf ("out of memory\n");
     }
-    
-  pkl_ast_print (stdout, ast->ast);
 
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
     goto error;
+
+  pvm_specialize_program (p);
+  *prog = p;
 
   return 1;
 
@@ -75,6 +76,9 @@ pkl_compile_file (pvm_program *prog,
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
     goto error;
+
+  pvm_specialize_program (p);
+  *prog = p;
 
   return 1;
 

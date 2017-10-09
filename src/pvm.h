@@ -67,6 +67,7 @@ typedef struct pvm_program *pvm_program;
 pvm_stack pvm_stack_new (void);
 void pvm_stack_free (pvm_stack s);
 
+void pvm_init (void);
 void pvm_shutdown (void);
 
 /* Instructions.  */

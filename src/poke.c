@@ -216,6 +216,9 @@ main (int argc, char *argv[])
   /* Determine whether the tool has been invoked interactively.  */
   poke_interactive_p = isatty (fileno (stdin));
 
+  /* Initialization.  */
+  pvm_init ();
+
   /* Enter the REPL.  */
   if (poke_interactive_p)
     repl ();

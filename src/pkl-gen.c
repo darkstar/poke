@@ -87,15 +87,15 @@ pkl_gen_exp (pkl_ast_node ast,
 #define GEN_BINARY_OP(OP,T1,T2)                                         \
     do                                                                  \
       {                                                                 \
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mtop);   \
+        PVM_APPEND_INSTRUCTION (program, bnt);                          \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T1));     \
-        pvm_append_symbolic_label (program, "Lrterror");                \
+        pvm_append_symbolic_label_parameter (program, "Lexit");         \
                                                                         \
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mundertop); \
+        PVM_APPEND_INSTRUCTION (program, bntut);                        \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T2));     \
-        pvm_append_symbolic_label_parameter (program, "Lrterror");      \
+        pvm_append_symbolic_label_parameter (program, "Lexit");         \
                                                                         \
         PVM_APPEND_INSTRUCTION (program, OP);                           \
       } while (0)
@@ -103,10 +103,10 @@ pkl_gen_exp (pkl_ast_node ast,
 #define GEN_UNARY_OP(OP,T)                                              \
     do                                                                  \
       {                                                                 \
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mtop);   \
+        PVM_APPEND_INSTRUCTION (program, bnt);                          \
         pvm_append_unsigned_literal_parameter (program,                 \
                                                (jitter_uint) (T));      \
-        pvm_append_symbolic_label_parameter (program, "Lrterror");      \
+        pvm_append_symbolic_label_parameter (program, "Lexit");         \
                                                                         \
         PVM_APPEND_INSTRUCTION (program, OP);                           \
       } while (0)
@@ -151,14 +151,16 @@ pkl_gen_exp (pkl_ast_node ast,
         sprintf (label_0, "L%li", (*label)++);
         sprintf (label_1, "L%li", (*label)++);
         
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mundertop);
+        PVM_APPEND_INSTRUCTION (program, bntut);
         pvm_append_unsigned_literal_parameter (program,
                                                (jitter_uint) (PVM_STACK_INT));
         pvm_append_symbolic_label_parameter (program, label_0);
         
         /* Arithmetic addition.  */
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mtop);
-        pvm_append_symbolic_label_parameter (program, "Lrterror");
+        PVM_APPEND_INSTRUCTION (program, bnt);
+        pvm_append_unsigned_literal_parameter (program,
+                                               (jitter_uint) (PVM_STACK_INT));
+        pvm_append_symbolic_label_parameter (program, "Lexit");
         PVM_APPEND_INSTRUCTION (program, add);
         
         PVM_APPEND_INSTRUCTION (program, ba);
@@ -166,8 +168,10 @@ pkl_gen_exp (pkl_ast_node ast,
         pvm_append_symbolic_label (program, label_0);
         
         /* String concatenation.  */
-        PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mtop);
-        pvm_append_symbolic_label_parameter (program, "Lrterror");
+        PVM_APPEND_INSTRUCTION (program, bnt);
+        pvm_append_unsigned_literal_parameter (program,
+                                               (jitter_uint) (PVM_STACK_STR));
+        pvm_append_symbolic_label_parameter (program, "Lexit");
         PVM_APPEND_INSTRUCTION (program, sconc);
         
         pvm_append_symbolic_label (program, label_1);
@@ -258,12 +262,14 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     goto error;
 
 
-  /* XXX: add the standard prologue to the program.
+  /* Standard prologue.  */
 
-     Lrterror:
-       push exit_status : error or OK.
-       end
-  */
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lstart");
+  pvm_append_symbolic_label (program, "Lexit");
+  PVM_APPEND_INSTRUCTION (program, exit);
+  pvm_append_symbolic_label (program, "Lstart");
+  
   
   if (!pkl_gen_1 (ast->ast, program, &label))
     {
@@ -271,6 +277,10 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
       pvm_destroy_program (program);
       goto error;
     }
+
+  /* Standard epilogue.  */
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lexit");
 
   *prog = program;
   return 1;

@@ -21,9 +21,15 @@
 #include "pvm.h"
 
 void
+pvm_init (void)
+{
+  pvm_initialize ();
+}
+
+void
 pvm_shutdown (void)
 {
-
+  pvm_finalize ();
 }
 
 pvm_stack
