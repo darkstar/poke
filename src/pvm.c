@@ -61,6 +61,9 @@ pvm_stack_new (void)
 void
 pvm_stack_free (pvm_stack s)
 {
+  if (s == NULL)
+    return;
+  
   switch (PVM_STACK_TYPE (s))
     {
     case PVM_STACK_STR:

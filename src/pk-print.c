@@ -34,7 +34,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   prog = PK_CMD_ARG_EXP (argv[0]);
 
   /* Run the program in the pvm.  */
-  jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL);
+  //  jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL);
   pvm_execute (prog);
   if (pvm_exit_code () == PVM_EXIT_OK)
     {
