@@ -61,23 +61,19 @@ end
 
 ## PVM state.
 
-# Initialize the extra field:
-#  pvm_state_initialize (&s);
-#  s->pvm = pvm_init ();
-# Finalize the extra field:
-# pvm_shutdown (s->pvm);
-# pvm_state_finalize (&s);
-
 state-struct-backing-c
   code
       /* XXX enum pvm_exit_code exit_code;  */
       int exit_code;
+      /* pvm_stack result_value */
+      void *result_value;
   end
 end
 
 state-initialization-c
   code
       jitter_state_backing->exit_code = PVM_EXIT_OK;
+      jitter_state_backing->result_value = NULL;
   end
 end
 
@@ -91,6 +87,19 @@ end
 
 instruction exit ()
   code
+    /* The element at the top of the stack is the exit
+       code to report to the PVM caller.  */
+    original_state->pvm_state_backing.exit_code
+      = PVM_STACK_INTEGER (PARG(JITTER_TOP_STACK()));
+    JITTER_DROP_STACK ();
+
+    /* Get the result of the execution, if any.  */
+    if (1 /* !EOS */)
+    {
+      original_state->pvm_state_backing.result_value
+        = PARG(JITTER_TOP_STACK());
+    }
+
     JITTER_EXIT ();
   end
 end

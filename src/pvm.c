@@ -36,6 +36,18 @@ pvm_shutdown (void)
   pvm_finalize ();
 }
 
+enum pvm_exit_code
+pvm_exit_code (void)
+{
+  return pvm_state.pvm_state_backing.exit_code;
+}
+
+pvm_stack
+pvm_result (void)
+{
+  return (pvm_stack) pvm_state.pvm_state_backing.result_value;
+}
+
 pvm_stack
 pvm_stack_new (void)
 {

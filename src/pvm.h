@@ -79,4 +79,7 @@ int pvm_execute (pvm_program prog);
 pvm_stack pvm_stack_new (void);
 void pvm_stack_free (pvm_stack s);
 
+enum pvm_exit_code pvm_exit_code (void);
+pvm_stack pvm_result (void);
+
 #endif /* ! PVM_H */

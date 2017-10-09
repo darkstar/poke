@@ -262,11 +262,26 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     goto error;
 
   /* Standard prologue.  */
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lstart");
-  pvm_append_symbolic_label (program, "Lexit");
-  PVM_APPEND_INSTRUCTION (program, exit);
-  pvm_append_symbolic_label (program, "Lstart");
+  {
+    pvm_stack s;
+    
+    PVM_APPEND_INSTRUCTION (program, ba);
+    pvm_append_symbolic_label_parameter (program, "Lstart");
+    
+    pvm_append_symbolic_label (program, "Lerror");
+    
+    /* The exit status is ERROR.  */
+    s = pvm_stack_new ();
+    PVM_STACK_TYPE (s) = PVM_STACK_INT;
+    PVM_STACK_INTEGER (s) = PVM_EXIT_ERROR;
+    PVM_APPEND_INSTRUCTION (program, push);
+    pvm_append_pointer_parameter (program, (pvm_pointer) s);
+    
+    pvm_append_symbolic_label (program, "Lexit");
+    PVM_APPEND_INSTRUCTION (program, exit);
+
+    pvm_append_symbolic_label (program, "Lstart");
+  }
 
   if (!pkl_gen_1 (ast->ast, program, &label))
     {
@@ -276,8 +291,19 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     }
 
   /* Standard epilogue.  */
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lexit");
+  {
+    pvm_stack s;
+
+    /* The exit status is OK.  */
+    s = pvm_stack_new ();
+    PVM_STACK_TYPE (s) = PVM_STACK_INT;
+    PVM_STACK_INTEGER (s) = PVM_EXIT_OK;
+    PVM_APPEND_INSTRUCTION (program, push);
+    pvm_append_pointer_parameter (program, (pvm_pointer) s);
+    
+    PVM_APPEND_INSTRUCTION (program, ba);
+    pvm_append_symbolic_label_parameter (program, "Lexit");
+  }
 
   *prog = program;
   return 1;

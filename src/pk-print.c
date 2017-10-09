@@ -36,6 +36,35 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   /* Run the program in the pvm.  */
   jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL);
   pvm_execute (prog);
+
+  if (pvm_exit_code () == PVM_EXIT_OK)
+    {
+      /* Get the result value and print it out.  */
+
+      pvm_stack res = pvm_result ();
+
+      if (res == NULL)
+        {
+          printf ("NULL\n");
+        }
+      else
+        {
+          switch (PVM_STACK_TYPE (res))
+            {
+            case PVM_STACK_INT:
+              printf ("%d\n", PVM_STACK_INTEGER (res));
+              break;
+            case PVM_STACK_STR:
+              printf ("\"%s\"\n",  PVM_STACK_STRING (res));
+              break;
+            }
+        }
+    }
+  else
+    {
+      printf ("run-time error\n");
+      return 0;
+    }
   
   return 1;
 }
