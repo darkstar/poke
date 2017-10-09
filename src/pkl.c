@@ -42,3 +42,26 @@ pkl_compile_buffer (pvm_program *prog,
   pkl_ast_free (ast);
   return 0;
 }
+
+int
+pkl_compile_file (pvm_program *prog,
+                  FILE *fd,
+                  const char *fname)
+{
+  pkl_ast ast = NULL;
+  pvm_program p;
+
+  if (!pkl_parse_file (&ast, PKL_PARSE_PROGRAM, fd, fname))
+    /* Compiler front-end error.  */
+    goto error;
+
+  if (!pkl_gen (&p, ast);)
+    /* Compiler back-end error.  */
+    goto error;
+
+  return 1;
+
+ error:
+  pkl_ast_free (ast);
+  return 0;
+}

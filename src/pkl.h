@@ -20,6 +20,7 @@
 #define PKL_H
 
 #include <config.h>
+#include <stdio.h>
 
 #include "pvm.h"
 
@@ -31,6 +32,12 @@
 #define PKL_PROGRAM 0
 #define PKL_EXPRESSION 1
 
-int pkl_compile_buffer (pvm_program *prog, int what, char *buffer, char **end);
+int pkl_compile_buffer (pvm_program *prog, int what, char *buffer,
+                        char **end);
+
+/* Compile a poke program from a file.  Return 0 in case of a
+   compilation error.  Return 1 otherwise.  */
+
+int pkl_compile_file (pvm_program *prog, FILE *fd, const char *fname);
 
 #endif /* ! PKL_H */
