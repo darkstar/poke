@@ -27,10 +27,10 @@
 typedef int64_t pvm_int;
 typedef uint64_t pvm_uint;
 
-enum pvm_stack_elem_type
+enum pvm_stack_type
   {
-    PVM_STACK_E_INTEGER,
-    PVM_STACK_E_STRING
+    PVM_STACK_INT,
+    PVM_STACK_STR,
   };
 
 #define PVM_STACK_TYPE(S) ((S)->type)
@@ -39,7 +39,7 @@ enum pvm_stack_elem_type
 
 struct pvm_stack
 {
-  enum pvm_stack_elem_type type;
+  enum pvm_stack_type type;
 
   union
   {

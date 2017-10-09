@@ -37,7 +37,7 @@ pkl_gen_integer (pkl_ast_node ast,
   pvm_stack s;
   
   s = pvm_stack_new ();
-  PVM_STACK_TYPE (s) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (s) = PVM_STACK_INT;
   PVM_STACK_INTEGER (s) = PKL_AST_INTEGER_VALUE (ast);
 
   /* PUSH int_cst */
@@ -55,7 +55,7 @@ pkl_gen_string (pkl_ast_node ast,
   pvm_stack s;
   
   s = pvm_stack_new ();
-  PVM_STACK_TYPE (s) = PVM_STACK_E_STRING;
+  PVM_STACK_TYPE (s) = PVM_STACK_STR;
   PVM_STACK_STRING (s) = xstrdup (PKL_AST_STRING_POINTER (ast));
   
   /* PUSH str_cst */
@@ -107,10 +107,10 @@ pkl_gen_exp (pkl_ast_node ast,
       } while (0)
 
 #define GEN_BINARY_OP_II(OP)                                            \
-    GEN_BINARY_OP (OP, PVM_STACK_E_INTEGER, PVM_STACK_E_INTEGER)
+    GEN_BINARY_OP (OP, PVM_STACK_INT, PVM_STACK_INT)
 
 #define GEN_UNARY_OP_I(OP)                      \
-    GEN_UNARY_OP (OP, PVM_STACK_E_INTEGER)
+    GEN_UNARY_OP (OP, PVM_STACK_INT)
       
   switch (PKL_AST_EXP_CODE (ast))
     {
@@ -148,7 +148,7 @@ pkl_gen_exp (pkl_ast_node ast,
         
         PVM_APPEND_INSTRUCTION (program, branch_mif_mnot_mtype_mundertop);
         pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_STACK_E_INTEGER));
+                                               (jitter_uint) (PVM_STACK_INT));
         pvm_append_symbolic_label_parameter (program, label_0);
         
         /* Arithmetic addition.  */

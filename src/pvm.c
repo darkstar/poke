@@ -41,7 +41,7 @@ pvm_stack_free (pvm_stack s)
 {
   switch (PVM_STACK_TYPE (s))
     {
-    case PVM_STACK_E_STRING:
+    case PVM_STACK_STR:
       free (s->v.string);
       break;
     default:
@@ -54,7 +54,7 @@ pvm_stack_free (pvm_stack s)
 void
 pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) + PVM_STACK_INTEGER (b);
 }
@@ -62,7 +62,7 @@ pvm_op_add (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_sub (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) - PVM_STACK_INTEGER (b);
 }
@@ -70,14 +70,14 @@ pvm_op_sub (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_mul (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) * PVM_STACK_INTEGER (b);
 }
 void
 pvm_op_div (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) / PVM_STACK_INTEGER (b);
 }
@@ -85,7 +85,7 @@ pvm_op_div (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_mod (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) % PVM_STACK_INTEGER (b);
 }
@@ -93,7 +93,7 @@ pvm_op_mod (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_ieq (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) == PVM_STACK_INTEGER (b);
 }
@@ -101,7 +101,7 @@ pvm_op_ieq (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_ine (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) != PVM_STACK_INTEGER (b);
 }
@@ -109,7 +109,7 @@ pvm_op_ine (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_seq (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) == 0;
 }
@@ -117,7 +117,7 @@ pvm_op_seq (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_sne (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) != 0;
 }
@@ -125,7 +125,7 @@ pvm_op_sne (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_ilt (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) < PVM_STACK_INTEGER (b);
 }
@@ -133,7 +133,7 @@ pvm_op_ilt (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_ile (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) <= PVM_STACK_INTEGER (b);
 }
@@ -141,7 +141,7 @@ pvm_op_ile (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_igt (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) > PVM_STACK_INTEGER (b);
 }
@@ -149,7 +149,7 @@ pvm_op_igt (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_ige (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)
     = PVM_STACK_INTEGER (a) >= PVM_STACK_INTEGER (b);
 }
@@ -157,7 +157,7 @@ pvm_op_ige (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_slt (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res)= strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) < 0;
 }
@@ -165,7 +165,7 @@ pvm_op_slt (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_sle (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) <= 0;
 }
@@ -173,7 +173,7 @@ pvm_op_sle (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_sgt (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) > 0;
 }
@@ -181,7 +181,7 @@ pvm_op_sgt (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_sge (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = strcmp (PVM_STACK_STRING (a),
                                     PVM_STACK_STRING (b)) >= 0;
 }
@@ -189,7 +189,7 @@ pvm_op_sge (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_and (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) && PVM_STACK_INTEGER (b);
 }
@@ -197,7 +197,7 @@ pvm_op_and (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_or (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) || PVM_STACK_INTEGER (b);
 }
@@ -205,14 +205,14 @@ pvm_op_or (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_not (pvm_stack res, pvm_stack a)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = ! PVM_STACK_INTEGER (a);
 }
 
 void
 pvm_op_bxor (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) ^ PVM_STACK_INTEGER (b);
 }
@@ -220,7 +220,7 @@ pvm_op_bxor (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_bior (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) | PVM_STACK_INTEGER (b);
 }
@@ -228,7 +228,7 @@ pvm_op_bior (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_band (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) & PVM_STACK_INTEGER (b);
 }
@@ -236,14 +236,14 @@ pvm_op_band (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_bnot (pvm_stack res, pvm_stack a)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = ~PVM_STACK_INTEGER (a);
 }
 
 void
 pvm_op_bsl (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) << PVM_STACK_INTEGER (b);
 }
@@ -252,7 +252,7 @@ pvm_op_bsl (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_bsr (pvm_stack res, pvm_stack a, pvm_stack b)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) =
     PVM_STACK_INTEGER (a) >> PVM_STACK_INTEGER (b);
 }
@@ -260,21 +260,21 @@ pvm_op_bsr (pvm_stack res, pvm_stack a, pvm_stack b)
 void
 pvm_op_neg (pvm_stack res, pvm_stack a)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = - PVM_STACK_INTEGER (a);
 }
 
 void
 pvm_op_preinc (pvm_stack res, pvm_stack a)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = ++PVM_STACK_INTEGER (a);
 }
 
 void
 pvm_op_predec (pvm_stack res, pvm_stack a)
 {
-  PVM_STACK_TYPE (res) = PVM_STACK_E_INTEGER;
+  PVM_STACK_TYPE (res) = PVM_STACK_INT;
   PVM_STACK_INTEGER (res) = --PVM_STACK_INTEGER (a);
 }
 
@@ -285,7 +285,7 @@ pvm_op_sconc (pvm_stack res, pvm_stack a, pvm_stack b)
   char *sa = PVM_STACK_STRING (a);
   char *sb = PVM_STACK_STRING (b);
   
-  PVM_STACK_TYPE (res) = PVM_STACK_E_STRING;
+  PVM_STACK_TYPE (res) = PVM_STACK_STR;
   sres = xmalloc (strlen (sa) + strlen (sb) + 1);
   sres = strcpy (sres, sa);
   sres = strcat (sres, sb);
