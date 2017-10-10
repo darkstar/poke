@@ -31,7 +31,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   pvm_program prog;
   pk_io_off address;
   int c;
-  pvm_val res;
+  pvm_val val;
 
   assert (argc == 1);
 
@@ -42,23 +42,21 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   else
     {
       assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
-      
       prog = PK_CMD_ARG_EXP (argv[0]);
-      if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+
+      if (pvm_run (prog, &val) != PVM_EXIT_OK)
         {
           printf ("run-time error.\n");
           return 0;
         }
-      
-      assert (res != NULL); /* Compiling an expression always returns a
-                               value.  */
-      if (PVM_VAL_TYPE (res) != PVM_VAL_INT)
+
+      if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
         {
           printf ("Bad ADDRESS.\n");
           return 0;
         }
-      
-      address = PVM_VAL_INTEGER (res);
+
+      address = PVM_VAL_NUMBER (val);
     }
   
   /* XXX: endianness, and what not.  */

@@ -23,82 +23,83 @@
 #include "pk-io.h"
 
 static int
+pk_cmd_poke_byte (pk_io_off address, uint8_t byte)
+{
+  if (pk_io_putc ((int) byte) == PK_EOF)
+    {
+      printf ("Error writing byte 0x%x to 0x%08jx\n",
+              byte, address);
+      return 0;
+    }
+
+  printf ("0x%08jx <- 0x%x\n", address, byte);
+  return 1;
+}
+
+static int
 pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 {
   /* poke ADDR, VAL */
 
   pk_io_off address;
-  int value;
-  char *svalue = NULL;
   pvm_program prog;
-  pvm_val res;
+  pvm_val val;
+  size_t i;
 
   assert (argc == 2);
 
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
   prog = PK_CMD_ARG_EXP (argv[0]);
-  if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+
+  if (pvm_run (prog, &val) != PVM_EXIT_OK)
     goto rterror;
 
-  assert (res != NULL); /* Compiling an expression always gives a
-                           result.  */
-  if (PVM_VAL_TYPE (res) != PVM_VAL_INT)
+  if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
     {
       printf ("Bad ADDRESS.\n");
       return 0;
     }
       
-  address = PVM_VAL_INTEGER (res);
+  address = PVM_VAL_NUMBER (val);
 
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
-    value = 0;
+    pk_cmd_poke_byte (address, 0);
   else
     {
       assert (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP);
       prog = PK_CMD_ARG_EXP (argv[1]);
 
-      if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+      if (pvm_run (prog, &val) != PVM_EXIT_OK)
         goto rterror;
 
-      assert (res != NULL); /* Compiling an expression always gives a
-                               result.  */
-      value = 0;
-      switch (PVM_VAL_TYPE (res))
-        {
-        case PVM_VAL_INT:
-          value = PVM_VAL_INTEGER (res);
-          break;
-        case PVM_VAL_STR:
-          svalue = xstrdup (PVM_VAL_STRING (res));
-          break;
-        }
-    }
-  
-  /* XXX: endianness, and what not.   */
-  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
+      pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
-  if (svalue != NULL)
-    {
-      size_t i, slen;
-
-      slen = strlen (svalue);
-      for (i = 0; i < slen; i++)
+      if (PVM_IS_INT (val) || PVM_IS_UINT (val))
         {
-          if (pk_io_putc ((int) svalue[i]) == PK_EOF)
-            printf ("Error writing byte 0x%x to 0x%08jx\n",
-                    svalue[i], address);
-          else
-            printf ("0x%08jx <- 0x%x\n", address + i, svalue[i]);
+          uint32_t pval = PVM_VAL_NUMBER (val);
+
+          for (i = 0; i < 4; i++)
+            pk_cmd_poke_byte (address,
+                              (pval >> ((3 - i) * 8)) & 0xff);
         }
-      free (svalue);
-    }
-  else
-    {
-      if (pk_io_putc ((int) value) == PK_EOF)
-        printf ("Error writing byte 0x%x to 0x%08jx\n",
-                value, address);
+      else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
+        {
+          uint64_t pval = PVM_VAL_NUMBER (val);
+
+          for (i = 0; i < 8; i++)
+            pk_cmd_poke_byte (address,
+                              (pval >> ((7 - i) * 8)) & 0xff);
+        }
+      else if (PVM_IS_STRING (val))
+        {
+          const char *pval = PVM_VAL_STR (val);
+          size_t slen = strlen (pval);
+
+          for (i = 0; i < slen; i++)
+            pk_cmd_poke_byte (address, pval[i]);
+        }
       else
-        printf ("0x%08jx <- 0x%x\n", address, value);
+        assert (0); /* XXX support more types.  */
     }
 
   return 1;

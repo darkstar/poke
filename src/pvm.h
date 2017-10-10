@@ -28,37 +28,137 @@
 # include "pvm-vm.h"
 #endif
 
-/* The pvm_val opaque type implements the boxed values that are
-   native to the poke virtual machine.  */
+/* The pvm_val opaque type implements values that are native to the
+   poke virtual machine:
 
-typedef int64_t pvm_int;
-typedef uint64_t pvm_uint;
+   - Signed 32-bit integers ("ints").
+   - Unsigned 32-bit integers ("uints").
+   - Signed 64-bit integers ("longs").
+   - Unsigned 64-bit integers ("ulongs").
+   - Strings.
+   - Arrays.
+   - Tuples.
 
-enum pvm_val_type
-  {
-    PVM_VAL_INT,
-    PVM_VAL_STR,
-  };
+   It is fundamental for pvm_val values to fit in 64-bit, in order to
+   avoid expensive allocations and to also improve the performance of
+   the virtual machine.  The 32-bit integers are unboxed.  64-bit
+   integers, strings, arrays and tuples are boxed.  Both boxed and
+   unboxed values are manipulated by the PVM users using the same API,
+   defined below in this header file.  */
 
-#define PVM_VAL_TYPE(S) ((S)->type)
-#define PVM_VAL_INTEGER(S) ((S)->v.integer)
-#define PVM_VAL_STRING(S) ((S)->v.string)
+typedef uint64_t pvm_val;
 
-struct pvm_val
+/* The most-significative bits of pvm_val are reserved for the tag,
+   which specifies the type of the value.  */
+
+#define PVM_VAL_TAG(V) (((V) >> 61) & 0x3)
+
+#define PVM_VAL_TAG_INT  0x0UL
+#define PVM_VAL_TAG_UINT 0x1UL
+#define PVM_VAL_TAG_LONG 0x2UL
+#define PVM_VAL_TAG_ULONG 0x3UL
+#define PVM_VAL_TAG_STR  0x4UL
+#define PVM_VAL_TAG_ARR  0x5UL
+#define PVM_VAL_TAG_TUP  0x6UL
+
+/* 32-bit integers (both signed and unsigned) are encoded in the
+   least-significative 32 bits of pvm_val.  */
+
+#define PVM_VAL_INT(V) ((int32_t) ((V) & 0xffffffff))
+#define PVM_VAL_UINT(V) ((uint32_t) ((V) & 0xffffffff))
+
+pvm_val pvm_make_int (int32_t value);
+pvm_val pvm_make_uint (uint32_t value);
+
+/* A pointer to a boxed value is encoded in the least significative 61
+   bits of pvm_val.  Note that this assumes all pointers are aligned
+   to 8 bytes.  The allocator for the boxed values makes sure this is
+   always the case.  */
+
+#define PVM_VAL_PTR(V) ((uint64_t *)((V) << 3))
+
+/* 64-bit integers (both signed and unsigned) are pointed by
+   PVM_VAL_PTR.  */
+
+#define PVM_VAL_LONG(V) ((int64_t) *PVM_VAL_PTR((V)))
+#define PVM_VAL_ULONG(V) ((uint64_t) *PVM_VAL_PTR((V)))
+
+pvm_val pvm_make_long (int64_t value);
+pvm_val pvm_make_ulong (uint64_t value);
+
+/* Strings are also pointed by PVM_VAL_PTR.  */
+
+#define PVM_VAL_STR(V) ((char *) PVM_VAL_PTR((V)))
+
+pvm_val pvm_make_string (const char *value);
+
+/* Arrays are stored in pvm_array structs pointed by PVM_VAL_PTR.  */
+
+#define PVM_VAL_ARR(V) ((struct pvm_array *) PVM_VAL_PTR((V)))
+#define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
+#define PVM_VAL_ARR_NELEMS(V) (PVM_VAL_ARR(V)->nelems)
+#define PVM_VAL_ARR_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
+
+struct pvm_array
 {
-  enum pvm_val_type type;
-
-  union
-  {
-    pvm_int integer;
-    char *string;
-  } v;
+  char type;
+  size_t nelems;
+  pvm_val *elems;
 };
 
-typedef struct pvm_val *pvm_val;
+typedef struct pvm_arr *pvm_arr;
 
-/* The struct pvm_program is defined by Jitter.  Provide a convenient
-   opaque type to the PVM users.  */
+pvm_val pvm_make_array (size_t nelems, int type);
+
+/* Tuples are stored in pvm_tuple structs pointed by PVM_VAL_PTR.  */
+
+#define PVM_VAL_TUP(V) ((pvm_tuple) PVM_VAL_PTR((V)))
+#define PVM_VAL_TUP_NELEMS(V) (PVM_VAL_TUP(V)->nelems)
+#define PVM_VAL_TUP_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
+
+struct pvm_tuple
+{
+  size_t nelems;
+  pvm_val *elems;
+};
+
+typedef struct pvm_tuple *pvm_tuple;
+
+pvm_val pvm_make_tuple (size_t nelems, int types[]);
+
+/* PVM_NULL is an invalid pvm_val.  */
+
+#define PVM_NULL (0x7UL << 61)
+
+/* Clients must call `pvm_val_free' in a PVM value when it stops
+   working with it.  */
+
+void pvm_val_free (pvm_val val);
+
+/* Public interface.  */
+
+#define PVM_IS_INT(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_INT)
+#define PVM_IS_UINT(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_UINT)
+#define PVM_IS_LONG(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_LONG)
+#define PVM_IS_ULONG(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_ULONG)
+#define PVM_IS_STRING(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_STR)
+#define PVM_IS_ARRAY(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_ARR)
+#define PVM_IS_TUPLE(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_TUP)
+
+#define PVM_IS_NUMBER(V)                                        \
+  (PVM_IS_INT(V) || PVM_IS_UINT(V)                              \
+   || PVM_IS_LONG(V) || PVM_IS_ULONG(V))
+
+#define PVM_VAL_NUMBER(V)                       \
+  (PVM_IS_INT ((V)) ? PVM_VAL_INT ((V))         \
+   : PVM_IS_UINT ((V)) ? PVM_VAL_UINT ((V))     \
+   : PVM_IS_LONG ((V)) ? PVM_VAL_LONG ((V))     \
+   : PVM_IS_ULONG ((V)) ? PVM_VAL_ULONG ((V))   \
+   : 0)
+
+/* A PVM program can be executed in the virtual machine at any time.
+   The struct pvm_program is provided by Jitter, but we provide here
+   an opaque type to the PVM users.  */
 
 typedef struct pvm_program *pvm_program;
 
@@ -75,8 +175,6 @@ enum pvm_exit_code
 
 void pvm_init (void);
 void pvm_shutdown (void);
-enum pvm_exit_code pvm_execute (pvm_program prog, pvm_val *res);
-pvm_val pvm_val_new (void);
-void pvm_val_free (pvm_val s);
+enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
 
 #endif /* ! PVM_H */

@@ -18,6 +18,8 @@
 
 #include <config.h>
 #include <stdlib.h>
+#include <assert.h>
+
 #include "pvm.h"
 
 static struct pvm_state pvm_state;
@@ -32,44 +34,37 @@ pvm_init (void)
 void
 pvm_shutdown (void)
 {
-  pvm_val_free (pvm_state.pvm_state_backing.result_value);
   pvm_state_finalize (&pvm_state);
   pvm_finalize ();
 }
 
-pvm_val
-pvm_val_new (void)
-{
-  pvm_val s;
-
-  s = xmalloc (sizeof (struct pvm_val));
-  memset (s, 0, sizeof (struct pvm_val));
-  return s;
-}
-
 void
-pvm_val_free (pvm_val s)
+pvm_val_free (pvm_val val)
 {
-  if (s == NULL)
-    return;
-  
-  switch (PVM_VAL_TYPE (s))
+  switch (PVM_VAL_TAG (val))
     {
-    case PVM_VAL_STR:
-      free (s->v.string);
+    case PVM_VAL_TAG_LONG:
+    case PVM_VAL_TAG_ULONG:
+    case PVM_VAL_TAG_STR:
+      free (PVM_VAL_PTR (val));
       break;
+    case PVM_VAL_TAG_ARR:
+      assert (0); /* XXX */
+      break;
+    case PVM_VAL_TAG_TUP:
+      assert (0); /* XXX */
+      break;
+    case PVM_VAL_TAG_INT:
+    case PVM_VAL_TAG_UINT:
     default:
       break;
     }
-  
-  free (s);
 }
 
 enum pvm_exit_code
-pvm_execute (pvm_program prog, pvm_val *res)
+pvm_run (pvm_program prog, pvm_val *res)
 {
-  pvm_val_free (pvm_state.pvm_state_backing.result_value);
-  pvm_state.pvm_state_backing.result_value = NULL;
+  pvm_state.pvm_state_backing.result_value = PVM_NULL;
   pvm_state.pvm_state_backing.exit_code = PVM_EXIT_OK;
     
   pvm_interpret (prog, &pvm_state);
@@ -78,4 +73,40 @@ pvm_execute (pvm_program prog, pvm_val *res)
     *res = pvm_state.pvm_state_backing.result_value;
   
   return pvm_state.pvm_state_backing.exit_code;
+}
+
+pvm_val
+pvm_make_int (int32_t value)
+{
+  return value;
+}
+
+pvm_val
+pvm_make_uint (uint32_t value)
+{
+  return value;
+}
+
+pvm_val
+pvm_make_long (int64_t value)
+{
+  int64_t *p = xmalloc (sizeof (int64_t));
+  *p = value;
+  return (PVM_VAL_TAG_LONG << 61) | ((uint64_t)p >> 3);
+}
+
+pvm_val
+pvm_make_ulong (uint64_t value)
+{
+  uint64_t *p = xmalloc (sizeof (uint64_t));
+  *p = value;
+  return (PVM_VAL_TAG_ULONG << 61) | ((uint64_t)p >> 3);
+}
+
+pvm_val
+pvm_make_string (const char *str)
+{
+  char *p = xmalloc (strlen (str) + 1);
+  memcpy (p, str, strlen (str) + 1);
+  return (PVM_VAL_TAG_STR << 61) | ((uint64_t)p >> 3);
 }

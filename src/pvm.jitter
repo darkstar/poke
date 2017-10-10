@@ -18,7 +18,7 @@
 
 vm
   set prefix "pvm"
-  tos-stack "union jitter_word" "stack"
+  tos-stack "jitter_uint" "stack"
 end
 
 ## Register classes.
@@ -50,7 +50,6 @@ end
 early-c
   code
 #   include <string.h>
-#   define PARG(A) ((pvm_val)(A).pointer)
   end
 end
 
@@ -66,14 +65,14 @@ state-struct-backing-c
       /* XXX enum pvm_exit_code exit_code;  */
       int exit_code;
       /* pvm_val result_value */
-      void *result_value;
+      uint64_t result_value;
   end
 end
 
 state-initialization-c
   code
       jitter_state_backing->exit_code = PVM_EXIT_OK;
-      jitter_state_backing->result_value = NULL;
+      jitter_state_backing->result_value = PVM_NULL;
   end
 end
 
@@ -90,14 +89,15 @@ instruction exit ()
     /* The element at the top of the stack is the exit
        code to report to the PVM caller.  */
     original_state->pvm_state_backing.exit_code
-      = PVM_VAL_INTEGER (PARG(JITTER_TOP_STACK()));
+      = pvm_make_int (JITTER_TOP_STACK());
     JITTER_DROP_STACK ();
 
     /* Get the result of the execution, if any.  */
-    if (1 /* !EOS */)
+    if (1 /* !EOS == expression */)
     {
       original_state->pvm_state_backing.result_value
-        = PARG(JITTER_TOP_STACK());
+        = pvm_make_int (JITTER_TOP_STACK());
+      JITTER_DROP_STACK ();
     }
 
     JITTER_EXIT ();
@@ -119,220 +119,316 @@ end
 
 instruction push (?Rnl)
   code
-    union jitter_word k;
-    k.pointer = JITTER_ARGP0;
+    jitter_uint k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
   end
 end
 
 instruction pop (!R)
   code
-    union jitter_word top = JITTER_TOP_STACK();
+    jitter_uint top = JITTER_TOP_STACK();
     JITTER_DROP_STACK();
-    JITTER_ARGP0 = top.pointer;
+    JITTER_ARGN0 = top;
   end
 end
 
 instruction setr (!R)
   code
-    JITTER_ARGP0 = JITTER_TOP_STACK().pointer;
+    JITTER_ARGN0 = JITTER_TOP_STACK();
   end
 end
-
-
-#instruction print ()
-#  code
-#    union jitter_word top = JITTER_TOP_STACK();
-#    JITTER_DROP_STACK();
-#    printf (stack_printf_format_string, top);
-#  end
-#end
 
 ## Operators instructions.
 
 # Integer arithmetic.
 
-instruction add ()
+# XXX: one of the references A or B are lost when assigning to RES.
+
+instruction addi () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) + PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) + PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction sub ()
+instruction addiu () # UINT UINT -> UINT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) - PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) + PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction mul ()
+instruction addl () # LONG LONG -> LONG
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) * PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) + PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction addlu () # ULONG ULONG -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction subi () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) - PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction subiu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) - PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction subl () # LONG LONG -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) - PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction sublu () # ULONG ULONG -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction muli () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) * PVM_VAL_INT (b)); }
   JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction div ()
+instruction muliu () # UINT UINT -> UINT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) / PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) * PVM_VAL_UINT (b)); }
   JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction mod ()
+instruction mull () # LONG LONG -> LONG
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) % PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) * PVM_VAL_LONG (b)); }
   JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-# Positive.
-instruction pos ()
+instruction mullu () # ULONG ULONG -> ULONG
   code
-    /* Nothing.  */
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
   end
 end
 
-# Negation.
-instruction neg ()
+instruction divi () # INT INT -> INT
   code
-    pvm_val s = (pvm_val) JITTER_TOP_STACK().pointer;
-    PVM_VAL_INTEGER (s) = - PVM_VAL_INTEGER (s);
+  /* XXX: handle division by 0.  */
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
   end
 end
 
-# Pre-increment.
-instruction preinc ()
+instruction diviu () # UINT UINT -> UINT
   code
-    pvm_val s = (pvm_val) JITTER_TOP_STACK().pointer;
-    PVM_VAL_INTEGER (s) += 1;
-  end  
+  /* XXX: handle division by 0.  */
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
 end
 
-# Pre-decrement.
-instruction predec ()
+instruction divl () # LONG LONG -> LONG
   code
-    pvm_val s = (pvm_val) JITTER_TOP_STACK().pointer;
-    PVM_VAL_INTEGER (s) -= 1;
-  end  
+  /* XXX: handle division by 0.  */
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
 end
 
-# Equality/inequality instructions.
-
-instruction ieq ()
+instruction divlu () # ULONG ULONG -> ULONG
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) == PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+  /* XXX: handle division by 0.  */
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction modi () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction modiu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) % PVM_VAL_UINT (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction modl () # LONG LONG -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction modlu () # ULONG ULONG -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b)); }
+  JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction negi () # INT -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int (- PVM_VAL_INT (JITTER_TOP_STACK()));
+  end
+end
+
+instruction negl () # LONG -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long (- PVM_VAL_LONG (JITTER_TOP_STACK()));
+  end
+end
+
+# Equality/inequality.
+
+instruction eqi () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) == PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction ine ()
+instruction eqiu () # UINT UINT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) != PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) == PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction seq ()
+instruction eql () # LONG LONG -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) == 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) == PVM_VAL_LONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction sne ()
+instruction eqlu () # ULONG ULONG -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) != 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) == PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction nei () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) != PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction neiu () # UINT UINT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) != PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction nel () # LONG LONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) != PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction nelu () # ULONG ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) != PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction eqs () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) == 0); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction nes () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) != 0); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -340,137 +436,181 @@ end
 
 # Comparison instructions.
 
-instruction ilt ()
+instruction lti () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) < PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) < PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
 end
 
-instruction ile ()
+instruction ltiu () # UINT UINT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) <= PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) < PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
 end
 
-instruction igt ()
+instruction ltl () # LONG LONG -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) > PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) < PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction ltlu () # ULONG ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction lei () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) <= PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction leiu () # UINT UINT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) <= PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction lel () # LONG LONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) <= PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction lelu () # ULONG ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) <= PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction gti () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) > PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction ige ()
+instruction gtiu () # UINT UINT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) >= PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) > PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction slt ()
+instruction gtl () # LONG LONG -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) < 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction sle ()
-  code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) <= 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction sgt ()
-  code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) > 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) > PVM_VAL_LONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction sge ()
+instruction gtlu () # ULONG ULONG - INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s) = strcmp (PVM_VAL_STRING (PARG(a)), \
-                                     PVM_VAL_STRING (PARG(b))) >= 0; \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction gei () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) >= PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction geiu () # UINT UINT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_UINT (a) >= PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction gel () # LONG LONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_LONG (a) >= PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction gelu () # ULONG ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ULONG (a) >= PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction lts () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) < 0); }
+    JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction gts () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) > 0); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction ges () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) >= 0); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction les () # STR STR -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) <= 0); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -478,21 +618,16 @@ end
 
 # Concatenation instructions.
 
-instruction sconc ()
+instruction sconc () # STR STR -> STR
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     char *ss = PVM_VAL_STRING (PARG(res));           \
-     char *sa = PVM_VAL_STRING (PARG(a));             \
-     char *sb = PVM_VAL_STRING (PARG(b));             \
-     PVM_VAL_TYPE (s) = PVM_VAL_STR;                \
-     ss = xmalloc (strlen (sa) + strlen (sb) + 1);      \
-     ss = strcpy (ss, sa);                              \
-     ss = strcat (ss, sb);                              \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
+#define F(res, a, b)                                  \
+  {                                                   \
+     char *sa = PVM_VAL_STR (a);                      \
+     char *sb = PVM_VAL_STR (b);                      \
+     char *s = xmalloc (strlen (sa) + strlen (sb) + 1);\
+     strcpy (s, sa);                                  \
+     strcat (s, sb);                                  \
+     res = pvm_make_string (s);                       \
   }
     JITTER_BINARY_STACK(F);
 #undef F
@@ -501,136 +636,232 @@ end
 
 # Logical instructions.
 
-instruction and ()
+instruction and () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) && PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) && PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction or ()
+instruction or () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) || PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) || PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction not ()
+instruction not () # INT -> INT
   code
-    pvm_val s = (pvm_val) JITTER_TOP_STACK().pointer;
-    PVM_VAL_INTEGER (s) = ! PVM_VAL_INTEGER (s);
+    JITTER_TOP_STACK()
+      = pvm_make_int (! PVM_VAL_INT(JITTER_TOP_STACK()));
   end
 end
 
 # Bitwise operators.
 
-instruction bxor ()
+instruction bxori () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) ^ PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) ^ PVM_VAL_INT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction bior ()
+instruction bxoriu () # UINT UINT -> UINT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) | PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) ^ PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction band ()
+instruction bxorl () # LONG LONG -> LONG
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) & PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) ^ PVM_VAL_LONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction bnot ()
+instruction bxorlu () # ULONG ULONG -> ULONG
   code
-    pvm_val s = (pvm_val) JITTER_TOP_STACK().pointer;
-    PVM_VAL_INTEGER (s) = ~ PVM_VAL_INTEGER (s);
-  end
-end
-
-instruction bsl ()
-  code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) << PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) ^ PVM_VAL_ULONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction bsr ()
+instruction bori () # INT INT -> INT
   code
-#define F(res, a, b)                                    \
-  {                                                     \
-     pvm_val  s = pvm_val_new ();                   \
-     PVM_VAL_TYPE (s) = PVM_VAL_INT;                \
-     PVM_VAL_INTEGER (s)                              \
-       = PVM_VAL_INTEGER (PARG(a)) >> PVM_VAL_INTEGER (PARG(b)); \
-     pvm_val_free (PARG(a));                          \
-     pvm_val_free (PARG(b));                          \
-     res.pointer = (union jitter_word *) s;             \
-  }
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) | PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction boriu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) | PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction borl () # LONG LONG -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) | PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction borlu () # ULONG ULONG -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) | PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bandi () # INT INT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) & PVM_VAL_INT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bandiu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) & PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bandl () # LONG LONG -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) & PVM_VAL_LONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bandlu () # ULONG ULONG -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) & PVM_VAL_ULONG (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bnoti () # INT -> INT
+  code
+    JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()));
+  end
+end
+
+instruction bnotiu () # UINT -> UINT
+  code
+    JITTER_TOP_STACK() = pvm_make_uint (~PVM_VAL_UINT (JITTER_TOP_STACK()));
+  end
+end
+
+instruction bnotl () # LONG -> LONG
+  code
+    JITTER_TOP_STACK() = pvm_make_long (~PVM_VAL_LONG (JITTER_TOP_STACK()));
+  end
+end
+
+instruction bnotlu () # ULONG -> ULONG
+  code
+   JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()));
+  end
+end
+
+instruction bsli () # INT UINT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) << PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsliu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) << PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsll () # LONG UINT -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) << PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsllu () # ULONG UINT -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) << PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsri () # INT UINT -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_INT (a) >> PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsriu () # UINT UINT -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_UINT (a) >> PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsrl () # LONG UINT -> LONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_LONG (a) >> PVM_VAL_UINT (b)); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction bsrlu () # ULONG UINT -> ULONG
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ULONG (a) >> PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -638,38 +869,34 @@ end
 
 ## Branches
 
-# Branch always.
-instruction ba (?f)
+instruction ba (?f) # Branch always.
   code
     JITTER_BRANCH_FAST(JITTER_ARGF0);
   end
 end
 
-# Branch if zero undertop.
-instruction bzut (?f)
+instruction bz (?f) # Branch if zero top.
   code
-    pvm_val s = ((pvm_val) JITTER_TOP_STACK().pointer);
-    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INTEGER (s),
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_TOP_STACK()),
                                 JITTER_ARGF0);
   end
 end
 
-# Branch if not type top
-instruction bnt (?n,?f)
+instruction bnt (?n,?f) # Branch if not type top
   code
-     pvm_val s = ((pvm_val)JITTER_UNDER_TOP_STACK().pointer);
-
-     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TYPE (s) == JITTER_ARGN0,
+     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_TOP_STACK())
+                                   == JITTER_ARGN0,
                                  JITTER_ARGF1);
   end
 end
 
-# Branch if not type undertop.
-instruction bntut (?n,?f)
+instruction bntut (?n,?f) # Branch if not type undertop.
   code
-     pvm_val s = ((pvm_val)JITTER_UNDER_TOP_STACK().pointer);
-
-     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TYPE (s) == JITTER_ARGN0,
+     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_UNDER_TOP_STACK())
+                                   == JITTER_ARGN0,
                                  JITTER_ARGF1);
   end
 end
+
+# Conversion instructions.
+

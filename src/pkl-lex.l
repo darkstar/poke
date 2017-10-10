@@ -174,7 +174,7 @@ D [0-9]
     char *tmp = p;
 
     if (*p == '_')
-     for (tmp = p; tmp != '\0'; tmp++)
+     for (tmp = p; *tmp != '\0'; tmp++)
        *tmp = *(tmp + 1);
   }
 

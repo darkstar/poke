@@ -23,10 +23,23 @@
 #include "pvm.h"
 #include "pkl-gen.h"
 
-#define pvm_append_pointer_parameter \
-  pvm_append_unsigned_literal_parameter
-#define pvm_pointer \
-  jitter_uint
+
+/* The following macros are used in the functions below in order to
+   append PVM values to a program.  */
+
+#define pvm_append_val_parameter(program,val)                           \
+  do                                                                    \
+    {                                                                   \
+     pvm_append_unsigned_literal_parameter ((program),                  \
+                                            (jitter_uint) (val));       \
+    } while (0)
+
+#define pvm_append_type_parameter(program,type)                         \
+  do                                                                    \
+    {                                                                   \
+     pvm_append_unsigned_literal_parameter ((program),                  \
+                                            (jitter_uint) (type));      \
+    } while (0)
 
 /* Forward declaration.  */
 static int pkl_gen_1 (pkl_ast_node ast,
@@ -38,15 +51,12 @@ pkl_gen_integer (pkl_ast_node ast,
                  pvm_program program,
                  size_t *label)
 {
-  pvm_val s;
+  pvm_val val;
   
-  s = pvm_val_new ();
-  PVM_VAL_TYPE (s) = PVM_VAL_INT;
-  PVM_VAL_INTEGER (s) = PKL_AST_INTEGER_VALUE (ast);
+  val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
 
-  /* PUSH int_cst */
   PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_pointer_parameter (program, (pvm_pointer) s);
+  pvm_append_val_parameter (program, val);
 
   return 1;
 }
@@ -56,15 +66,12 @@ pkl_gen_string (pkl_ast_node ast,
                 pvm_program program,
                 size_t *label)
 {
-  pvm_val s;
-  
-  s = pvm_val_new ();
-  PVM_VAL_TYPE (s) = PVM_VAL_STR;
-  PVM_VAL_STRING (s) = xstrdup (PKL_AST_STRING_POINTER (ast));
-  
-  /* PUSH str_cst */
+  pvm_val val;
+
+  val = pvm_make_string (xstrdup (PKL_AST_STRING_POINTER (ast)));
+
   PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_pointer_parameter (program, (pvm_pointer) s);
+  pvm_append_val_parameter (program, val);
 
   return 1;
 }
@@ -85,63 +92,60 @@ pkl_gen_exp (pkl_ast_node ast,
     }
 
 #define GEN_BINARY_OP(OP,T1,T2)                                         \
-    do                                                                  \
-      {                                                                 \
-        PVM_APPEND_INSTRUCTION (program, bnt);                          \
-        pvm_append_unsigned_literal_parameter (program,                 \
-                                               (jitter_uint) (T1));     \
-        pvm_append_symbolic_label_parameter (program, "Lerror");         \
+  do                                                                    \
+    {                                                                   \
+      PVM_APPEND_INSTRUCTION (program, bnt);                            \
+      pvm_append_type_parameter (program, (T1));                        \
                                                                         \
-        PVM_APPEND_INSTRUCTION (program, bntut);                        \
-        pvm_append_unsigned_literal_parameter (program,                 \
-                                               (jitter_uint) (T2));     \
-        pvm_append_symbolic_label_parameter (program, "Lerror");         \
+      pvm_append_symbolic_label_parameter (program, "Lerror");          \
                                                                         \
-        PVM_APPEND_INSTRUCTION (program, OP);                           \
-      } while (0)
+      PVM_APPEND_INSTRUCTION (program, bntut);                          \
+      pvm_append_type_parameter (program, (T2));                        \
+                                                                        \
+      pvm_append_symbolic_label_parameter (program, "Lerror");          \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, OP);                             \
+    } while (0)
   
 #define GEN_UNARY_OP(OP,T)                                              \
-    do                                                                  \
-      {                                                                 \
-        PVM_APPEND_INSTRUCTION (program, bnt);                          \
-        pvm_append_unsigned_literal_parameter (program,                 \
-                                               (jitter_uint) (T));      \
-        pvm_append_symbolic_label_parameter (program, "Lerror");         \
+  do                                                                    \
+    {                                                                   \
+      PVM_APPEND_INSTRUCTION (program, bnt);                            \
+      pvm_append_type_parameter (program, (T));                         \
                                                                         \
-        PVM_APPEND_INSTRUCTION (program, OP);                           \
-      } while (0)
+      pvm_append_symbolic_label_parameter (program, "Lerror");          \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, OP);                             \
+    } while (0)
 
-#define GEN_BINARY_OP_II(OP)                                            \
-    GEN_BINARY_OP (OP, PVM_VAL_INT, PVM_VAL_INT)
+#define GEN_BINARY_OP_II(OP)                    \
+  GEN_BINARY_OP (OP, PVM_VAL_TAG_LONG, PVM_VAL_TAG_LONG)
 
 #define GEN_UNARY_OP_I(OP)                      \
-    GEN_UNARY_OP (OP, PVM_VAL_INT)
+  GEN_UNARY_OP (OP, PVM_VAL_TAG_LONG)
       
   switch (PKL_AST_EXP_CODE (ast))
     {
     case PKL_AST_OP_OR:   GEN_BINARY_OP_II (or); break;
-    case PKL_AST_OP_BAND: GEN_BINARY_OP_II (band); break;
-    case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (bior); break;
-    case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (bxor); break;
+    case PKL_AST_OP_BAND: GEN_BINARY_OP_II (bandl); break;
+    case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (borl); break;
+    case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (bxorl); break;
     case PKL_AST_OP_AND:  GEN_BINARY_OP_II (and); break;
-    case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (ieq); break;
-    case PKL_AST_OP_NE:   GEN_BINARY_OP_II (ine); break;
-    case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsl); break;
-    case PKL_AST_OP_SR:   GEN_BINARY_OP_II (bsr); break;
-    case PKL_AST_OP_SUB:  GEN_BINARY_OP_II (sub); break;
-    case PKL_AST_OP_MUL:  GEN_BINARY_OP_II (mul); break;
-    case PKL_AST_OP_DIV:  GEN_BINARY_OP_II (div); break;
-    case PKL_AST_OP_MOD:  GEN_BINARY_OP_II (mod); break;
-    case PKL_AST_OP_LT:   GEN_BINARY_OP_II (ilt); break;
-    case PKL_AST_OP_GT:   GEN_BINARY_OP_II (igt); break;
-    case PKL_AST_OP_LE:   GEN_BINARY_OP_II (ile); break;
-    case PKL_AST_OP_GE:   GEN_BINARY_OP_II (ige); break;
+    case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (eql); break;
+    case PKL_AST_OP_NE:   GEN_BINARY_OP_II (nel); break;
+    case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsll); break;
+    case PKL_AST_OP_SR:   GEN_BINARY_OP_II (bsrl); break;
+    case PKL_AST_OP_SUB:  GEN_BINARY_OP_II (subl); break;
+    case PKL_AST_OP_MUL:  GEN_BINARY_OP_II (mull); break;
+    case PKL_AST_OP_DIV:  GEN_BINARY_OP_II (divl); break;
+    case PKL_AST_OP_MOD:  GEN_BINARY_OP_II (modl); break;
+    case PKL_AST_OP_LT:   GEN_BINARY_OP_II (ltl); break;
+    case PKL_AST_OP_GT:   GEN_BINARY_OP_II (gtl); break;
+    case PKL_AST_OP_LE:   GEN_BINARY_OP_II (lel); break;
+    case PKL_AST_OP_GE:   GEN_BINARY_OP_II (gel); break;
       
-    case PKL_AST_OP_PREINC:  GEN_UNARY_OP_I (preinc); break;
-    case PKL_AST_OP_PREDEC:  GEN_UNARY_OP_I (predec); break;
-    case PKL_AST_OP_POS:     GEN_UNARY_OP_I (pos); break;
-    case PKL_AST_OP_NEG:     GEN_UNARY_OP_I (neg); break;
-    case PKL_AST_OP_BNOT:    GEN_UNARY_OP_I (bnot); break;
+    case PKL_AST_OP_NEG:     GEN_UNARY_OP_I (negl); break;
+    case PKL_AST_OP_BNOT:    GEN_UNARY_OP_I (bnotl); break;
     case PKL_AST_OP_NOT:     GEN_UNARY_OP_I (not); break;
       
     case PKL_AST_OP_ADD:
@@ -152,25 +156,24 @@ pkl_gen_exp (pkl_ast_node ast,
         sprintf (label_1, "L%li", (*label)++);
         
         PVM_APPEND_INSTRUCTION (program, bntut);
-        pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_VAL_INT));
+        pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);
         pvm_append_symbolic_label_parameter (program, label_0);
         
         /* Arithmetic addition.  */
         PVM_APPEND_INSTRUCTION (program, bnt);
-        pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_VAL_INT));
+        pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);
+
         pvm_append_symbolic_label_parameter (program, "Lerror");
-        PVM_APPEND_INSTRUCTION (program, add);
+        PVM_APPEND_INSTRUCTION (program, addl);
         
         PVM_APPEND_INSTRUCTION (program, ba);
         pvm_append_symbolic_label_parameter (program, label_1);
+
         pvm_append_symbolic_label (program, label_0);
         
         /* String concatenation.  */
         PVM_APPEND_INSTRUCTION (program, bnt);
-        pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_VAL_STR));
+        pvm_append_type_parameter (program, PVM_VAL_TAG_STR);
         pvm_append_symbolic_label_parameter (program, "Lerror");
         PVM_APPEND_INSTRUCTION (program, sconc);
         
@@ -263,7 +266,7 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
 
   /* Standard prologue.  */
   {
-    pvm_val s;
+    pvm_val val;
     
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lstart");
@@ -271,11 +274,9 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     pvm_append_symbolic_label (program, "Lerror");
     
     /* The exit status is ERROR.  */
-    s = pvm_val_new ();
-    PVM_VAL_TYPE (s) = PVM_VAL_INT;
-    PVM_VAL_INTEGER (s) = PVM_EXIT_ERROR;
+    val = pvm_make_int (PVM_EXIT_ERROR);
     PVM_APPEND_INSTRUCTION (program, push);
-    pvm_append_pointer_parameter (program, (pvm_pointer) s);
+    pvm_append_val_parameter (program, val);
     
     pvm_append_symbolic_label (program, "Lexit");
     PVM_APPEND_INSTRUCTION (program, exit);
@@ -292,14 +293,12 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
 
   /* Standard epilogue.  */
   {
-    pvm_val s;
+    pvm_val val;
 
     /* The exit status is OK.  */
-    s = pvm_val_new ();
-    PVM_VAL_TYPE (s) = PVM_VAL_INT;
-    PVM_VAL_INTEGER (s) = PVM_EXIT_OK;
+    val = pvm_make_int (PVM_EXIT_OK);
     PVM_APPEND_INSTRUCTION (program, push);
-    pvm_append_pointer_parameter (program, (pvm_pointer) s);
+    pvm_append_val_parameter (program, val);
     
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lexit");

@@ -28,30 +28,31 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   /* print EXP */
 
   pvm_program prog;
-  pvm_val res;
+  pvm_val val;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
   prog = PK_CMD_ARG_EXP (argv[0]);
-  /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
 
-  if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+  /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
+  if (pvm_run (prog, &val) != PVM_EXIT_OK)
     goto rterror;
   
   /* Get the result value and print it out.  */
 
-  assert (res != NULL);  /* Compiling an expression always gives a
-                            value.  */
-  switch (PVM_VAL_TYPE (res))
-    {
-    case PVM_VAL_INT:
-      printf ("%lu\n", PVM_VAL_INTEGER (res));
-      break;
-    case PVM_VAL_STR:
-      printf ("\"%s\"\n",  PVM_VAL_STRING (res));
-      break;
-    }
+  if (PVM_IS_INT (val))
+    printf ("%d\n", PVM_VAL_INT (val));
+  else if (PVM_IS_UINT (val))
+    printf ("%u\n", PVM_VAL_UINT (val));
+  else if (PVM_IS_LONG (val))
+    printf ("%ld\n", PVM_VAL_LONG (val));
+  else if (PVM_IS_ULONG (val))
+    printf ("%lu\n", PVM_VAL_LONG (val));
+  else if (PVM_IS_STRING (val))
+    printf ("\"%s\"", PVM_VAL_STR (val));
+  else
+    assert (0); /* XXX support more types.  */
 
   return 1;
 
