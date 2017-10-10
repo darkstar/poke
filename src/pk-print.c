@@ -28,38 +28,36 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   /* print EXP */
 
   pvm_program prog;
+  pvm_stack res;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+
   prog = PK_CMD_ARG_EXP (argv[0]);
+  /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
 
-  /* Run the program in the pvm.  */
-  //  jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL);
-  pvm_execute (prog);
-  if (pvm_exit_code () == PVM_EXIT_OK)
-    {
-      /* Get the result value and print it out.  */
-
-      pvm_stack res = pvm_result ();
-      assert (res != NULL);
-
-      switch (PVM_STACK_TYPE (res))
-        {
-        case PVM_STACK_INT:
-          printf ("%lu\n", PVM_STACK_INTEGER (res));
-          break;
-        case PVM_STACK_STR:
-          printf ("\"%s\"\n",  PVM_STACK_STRING (res));
-          break;
-        }
-    }
-  else
-    {
-      printf ("run-time error\n");
-      return 0;
-    }
+  if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+    goto rterror;
   
+  /* Get the result value and print it out.  */
+
+  assert (res != NULL);  /* Compiling an expression always gives a
+                            value.  */
+  switch (PVM_STACK_TYPE (res))
+    {
+    case PVM_STACK_INT:
+      printf ("%lu\n", PVM_STACK_INTEGER (res));
+      break;
+    case PVM_STACK_STR:
+      printf ("\"%s\"\n",  PVM_STACK_STRING (res));
+      break;
+    }
+
   return 1;
+
+ rterror:
+  printf ("run-time error.\n");
+  return 0;
 }
 
 struct pk_cmd print_cmd =

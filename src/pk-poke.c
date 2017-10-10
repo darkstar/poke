@@ -31,28 +31,24 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   int value;
   char *svalue = NULL;
   pvm_program prog;
+  pvm_stack res;
 
   assert (argc == 2);
 
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
   prog = PK_CMD_ARG_EXP (argv[0]);
-  pvm_execute (prog);
-  if (pvm_exit_code () == PVM_EXIT_OK)
+  if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+    goto rterror;
+
+  assert (res != NULL); /* Compiling an expression always gives a
+                           result.  */
+  if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
     {
-      pvm_stack res = pvm_result ();
-      assert (res != NULL);
-      
-      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
-        /* XXX This should print usage!  */
-        return 0;
-      
-      address = PVM_STACK_INTEGER (res);
-    }
-  else
-    {
-      printf ("run-time error\n");
+      printf ("Bad ADDRESS.\n");
       return 0;
     }
+      
+  address = PVM_STACK_INTEGER (res);
 
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     value = 0;
@@ -60,30 +56,24 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
     {
       assert (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP);
       prog = PK_CMD_ARG_EXP (argv[1]);
-      pvm_execute (prog);
-      if (pvm_exit_code () == PVM_EXIT_OK)
-        {
-          pvm_stack res = pvm_result ();
-          assert (res != NULL);
 
-          value = 0;
-          switch (PVM_STACK_TYPE (res))
-            {
-            case PVM_STACK_INT:
-              value = PVM_STACK_INTEGER (res);
-              break;
-            case PVM_STACK_STR:
-              svalue = xstrdup (PVM_STACK_STRING (res));
-              break;
-            }
-        }
-      else
+      if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+        goto rterror;
+
+      assert (res != NULL); /* Compiling an expression always gives a
+                               result.  */
+      value = 0;
+      switch (PVM_STACK_TYPE (res))
         {
-          printf ("run-time error\n");
-          return 0;
+        case PVM_STACK_INT:
+          value = PVM_STACK_INTEGER (res);
+          break;
+        case PVM_STACK_STR:
+          svalue = xstrdup (PVM_STACK_STRING (res));
+          break;
         }
     }
-
+  
   /* XXX: endianness, and what not.   */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
@@ -112,6 +102,10 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
     }
 
   return 1;
+
+ rterror:
+  printf ("run-time error.\n");
+  return 0;
 }
 
 struct pk_cmd poke_cmd =

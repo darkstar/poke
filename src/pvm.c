@@ -32,14 +32,9 @@ pvm_init (void)
 void
 pvm_shutdown (void)
 {
+  pvm_stack_free (pvm_state.pvm_state_backing.result_value);
   pvm_state_finalize (&pvm_state);
   pvm_finalize ();
-}
-
-enum pvm_exit_code
-pvm_exit_code (void)
-{
-  return pvm_state.pvm_state_backing.exit_code;
 }
 
 pvm_stack
@@ -76,13 +71,17 @@ pvm_stack_free (pvm_stack s)
   free (s);
 }
 
-int
-pvm_execute (pvm_program prog)
+enum pvm_exit_code
+pvm_execute (pvm_program prog, pvm_stack *res)
 {
   pvm_stack_free (pvm_state.pvm_state_backing.result_value);
   pvm_state.pvm_state_backing.result_value = NULL;
   pvm_state.pvm_state_backing.exit_code = PVM_EXIT_OK;
     
   pvm_interpret (prog, &pvm_state);
-  return 1;
+
+  if (res != NULL)
+    *res = pvm_state.pvm_state_backing.result_value;
+  
+  return pvm_state.pvm_state_backing.exit_code;
 }

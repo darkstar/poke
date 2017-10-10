@@ -31,6 +31,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   pvm_program prog;
   pk_io_off address;
   int c;
+  pvm_stack res;
 
   assert (argc == 1);
 
@@ -38,26 +39,26 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
     {
       address = pk_io_tell (pk_io_cur ());
     }
-
-  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
-
-  prog = PK_CMD_ARG_EXP (argv[0]);
-  pvm_execute (prog);
-  if (pvm_exit_code () == PVM_EXIT_OK)
-    {
-      pvm_stack res = pvm_result ();
-      assert (res != NULL);
-
-      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
-        /* XXX This should print usage!  */
-        return 0;
-
-      address = PVM_STACK_INTEGER (res);
-    }
   else
     {
-      printf ("run-time error\n");
-      return 0;
+      assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+      
+      prog = PK_CMD_ARG_EXP (argv[0]);
+      if (pvm_execute (prog, &res) != PVM_EXIT_OK)
+        {
+          printf ("run-time error.\n");
+          return 0;
+        }
+      
+      assert (res != NULL); /* Compiling an expression always returns a
+                               value.  */
+      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
+        {
+          printf ("Bad ADDRESS.\n");
+          return 0;
+        }
+      
+      address = PVM_STACK_INTEGER (res);
     }
   
   /* XXX: endianness, and what not.  */

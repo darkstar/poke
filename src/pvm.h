@@ -75,7 +75,7 @@ enum pvm_exit_code
 
 void pvm_init (void);
 void pvm_shutdown (void);
-int pvm_execute (pvm_program prog);
+enum pvm_exit_code pvm_execute (pvm_program prog, pvm_stack *res);
 pvm_stack pvm_stack_new (void);
 void pvm_stack_free (pvm_stack s);
 
