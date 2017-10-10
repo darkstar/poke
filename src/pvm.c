@@ -38,12 +38,6 @@ pvm_shutdown (void)
 }
 
 pvm_stack
-pvm_result (void)
-{
-  return (pvm_stack) pvm_state.pvm_state_backing.result_value;
-}
-
-pvm_stack
 pvm_stack_new (void)
 {
   pvm_stack s;
