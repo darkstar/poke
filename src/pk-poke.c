@@ -17,6 +17,7 @@
  */
 
 #include <config.h>
+#include <assert.h>
 
 #include "pk-cmd.h"
 #include "pk-io.h"
@@ -28,42 +29,92 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 
   pk_io_off address;
   int value;
+  char *svalue = NULL;
+  pvm_program prog;
 
-  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
-    address = pk_io_tell (pk_io_cur ());
-  else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
+  assert (argc == 2);
+
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+  prog = PK_CMD_ARG_EXP (argv[0]);
+  pvm_execute (prog);
+  if (pvm_exit_code () == PVM_EXIT_OK)
     {
-      return 1;
+      pvm_stack res = pvm_result ();
+      assert (res != NULL);
+      
+      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
+        /* XXX This should print usage!  */
+        return 0;
+      
+      address = PVM_STACK_INTEGER (res);
     }
   else
-    address = PK_CMD_ARG_ADDR (argv[0]);
-  
+    {
+      printf ("run-time error\n");
+      return 0;
+    }
+
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     value = 0;
-  else if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP)
-    {
-      return 1;
-    }
   else
-    value = PK_CMD_ARG_INT (argv[1]);
+    {
+      assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+      prog = PK_CMD_ARG_EXP (argv[0]);
+      pvm_execute (prog);
+      if (pvm_exit_code () == PVM_EXIT_OK)
+        {
+          pvm_stack res = pvm_result ();
+          assert (res != NULL);
 
-  if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP
-      || PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP)
-    return 1;
+          value = 0;
+          switch (PVM_STACK_TYPE (res))
+            {
+            case PVM_STACK_INT:
+              value = PVM_STACK_INTEGER (res);
+              break;
+            case PVM_STACK_STR:
+              printf ("XXX: '%s'\n", PVM_STACK_STRING (res));
+              svalue = xstrdup (PVM_STACK_STRING (res));
+              break;
+            }
+        }
+      else
+        {
+          printf ("run-time error\n");
+          return 0;
+        }
+    }
 
   /* XXX: endianness, and what not.   */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
-  if (pk_io_putc ((int) value) == PK_EOF)
+
+  if (svalue != NULL)
     {
-      printf ("Error writing byte 0x%x to 0x%08jx\n",
-              value, address);
+      size_t i, slen;
+
+      slen = strlen (svalue);
+      for (i = 0; i < slen; i++)
+        {
+          if (pk_io_putc ((int) svalue[i]) == PK_EOF)
+            printf ("Error writing byte 0x%x to 0x%08jx\n",
+                    svalue[i], address);
+          else
+            printf ("0x%08jx <- 0x%x\n", address, svalue[i]);
+        }
+      free (svalue);
     }
   else
-    printf ("0x%08jx <- 0x%x\n", address, value);
+    {
+      if (pk_io_putc ((int) value) == PK_EOF)
+        printf ("Error writing byte 0x%x to 0x%08jx\n",
+                value, address);
+      else
+        printf ("0x%08jx <- 0x%x\n", address, value);
+    }
 
   return 1;
 }
 
 struct pk_cmd poke_cmd =
-  {"poke", "ea,?ei", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
+  {"poke", "e,?e", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
    pk_cmd_poke, "poke ADDRESS [,VALUE]"};
