@@ -53,7 +53,9 @@ enum pkl_ast_code
   PKL_AST_IDENTIFIER,
   PKL_AST_DOC_STRING,
   PKL_AST_LOC,
-  PKL_AST_CAST
+  PKL_AST_CAST,
+  PKL_AST_ARRAY,
+  PKL_AST_TUPLE
 };
 
 /* The AST nodes representing expressions are characterized by

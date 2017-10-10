@@ -212,7 +212,9 @@ D [0-9]
      steps of power of two and up to 64 bits.  But note these are
      positive values! */
 
-  if (value & 0xffff8000)
+  if (value >= 0x0000000080000000 && value <= 0x00000000ffffffff)
+    code = signed_p ? PKL_TYPE_INT64 : PKL_TYPE_UINT32;
+  else if (value & 0xffffffff80000000)
     code = signed_p ? PKL_TYPE_INT64 : PKL_TYPE_UINT64;
   else
     code = signed_p ? PKL_TYPE_INT32 : PKL_TYPE_UINT32;

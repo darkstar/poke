@@ -78,13 +78,13 @@ pvm_run (pvm_program prog, pvm_val *res)
 pvm_val
 pvm_make_int (int32_t value)
 {
-  return value;
+  return (PVM_VAL_TAG_INT << 61) | (value & 0xffffffff);
 }
 
 pvm_val
 pvm_make_uint (uint32_t value)
 {
-  return value;
+  return (PVM_VAL_TAG_UINT << 61) | value;
 }
 
 pvm_val

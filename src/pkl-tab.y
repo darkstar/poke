@@ -251,7 +251,22 @@ program_elem:
 expression:
 	  expression_primary
         | unary_operator expression %prec UNARY
-          	{ $$ = pkl_ast_make_unary_exp ($1, $2); }
+          	{
+                  /* All unary operators require an integer as an
+                     argument.  Detect the case when they are applied
+                     to non-integer literals.  XXX: add arrays and
+                     tuples.  */
+                  if (PKL_AST_CODE ($2) == PKL_AST_STRING
+                      || PKL_AST_CODE ($2) == PKL_AST_ARRAY
+                      || PKL_AST_CODE ($2) == PKL_AST_TUPLE)
+                    {
+                      pkl_tab_error (&@2, pkl_parser,
+                                     "unary operator requires an integer.");
+                      YYERROR;
+                    }
+                  
+                  $$ = pkl_ast_make_unary_exp ($1, $2);
+                }
         | '(' type_specifier ')' expression %prec UNARY
         	{ $$ = pkl_ast_make_cast ($2, $4); }
         | SIZEOF expression %prec UNARY

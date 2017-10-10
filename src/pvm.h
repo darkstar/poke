@@ -51,7 +51,7 @@ typedef uint64_t pvm_val;
 /* The most-significative bits of pvm_val are reserved for the tag,
    which specifies the type of the value.  */
 
-#define PVM_VAL_TAG(V) (((V) >> 61) & 0x3)
+#define PVM_VAL_TAG(V) (((V) >> 61) & 0x7)
 
 #define PVM_VAL_TAG_INT  0x0UL
 #define PVM_VAL_TAG_UINT 0x1UL

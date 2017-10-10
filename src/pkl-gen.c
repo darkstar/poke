@@ -51,10 +51,40 @@ pkl_gen_integer (pkl_ast_node ast,
                  pvm_program program,
                  size_t *label)
 {
+  pkl_ast_node type;
   pvm_val val;
-  
-  val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
 
+  type = PKL_AST_TYPE (ast);
+  assert (type != NULL);
+  
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_CHAR:
+    case PKL_TYPE_BYTE:
+    case PKL_TYPE_UINT8:
+    case PKL_TYPE_UINT16:
+    case PKL_TYPE_UINT32:
+      val = pvm_make_uint (PKL_AST_INTEGER_VALUE (ast));
+      break;
+    case PKL_TYPE_INT8:
+    case PKL_TYPE_INT16:
+    case PKL_TYPE_INT32:
+    case PKL_TYPE_INT:
+      val = pvm_make_int (PKL_AST_INTEGER_VALUE (ast));
+      break;
+    case PKL_TYPE_UINT64:
+      val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
+      break;
+    case PKL_TYPE_LONG:
+    case PKL_TYPE_INT64:
+      val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
+      break;
+    case PKL_TYPE_STRING:
+    default:
+      assert (0);
+      break;
+    }
+  
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program, val);
 
@@ -107,12 +137,36 @@ pkl_gen_exp (pkl_ast_node ast,
       PVM_APPEND_INSTRUCTION (program, OP);                             \
     } while (0)
   
-#define GEN_UNARY_OP(OP,T)                                              \
+#define GEN_UNARY_OP_IL(OP)                                             \
+  do                                                                    \
+    {                                                                   \
+      char label_0[100], label_1[100];                                  \
+      sprintf (label_0, "L%li", (*label)++);                            \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, bnt);                            \
+      pvm_append_type_parameter (program, PVM_VAL_TAG_INT);             \
+      pvm_append_symbolic_label_parameter (program, label_0);           \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, OP##i);                          \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, ba);                             \
+      pvm_append_symbolic_label_parameter (program, label_1);           \
+      pvm_append_symbolic_label (program, label_0);                     \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, bnt);                            \
+      pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);            \
+      pvm_append_symbolic_label_parameter (program, "Lerror");          \
+                                                                        \
+      PVM_APPEND_INSTRUCTION (program, OP##l);                          \
+                                                                        \
+      pvm_append_symbolic_label (program, label_1);                     \
+    } while (0)
+
+#define GEN_UNARY_OP_I(OP)                                              \
   do                                                                    \
     {                                                                   \
       PVM_APPEND_INSTRUCTION (program, bnt);                            \
-      pvm_append_type_parameter (program, (T));                         \
-                                                                        \
+      pvm_append_type_parameter (program, PVM_VAL_TAG_INT);             \
       pvm_append_symbolic_label_parameter (program, "Lerror");          \
                                                                         \
       PVM_APPEND_INSTRUCTION (program, OP);                             \
@@ -121,9 +175,7 @@ pkl_gen_exp (pkl_ast_node ast,
 #define GEN_BINARY_OP_II(OP)                    \
   GEN_BINARY_OP (OP, PVM_VAL_TAG_LONG, PVM_VAL_TAG_LONG)
 
-#define GEN_UNARY_OP_I(OP)                      \
-  GEN_UNARY_OP (OP, PVM_VAL_TAG_LONG)
-      
+
   switch (PKL_AST_EXP_CODE (ast))
     {
     case PKL_AST_OP_OR:   GEN_BINARY_OP_II (or); break;
@@ -144,8 +196,8 @@ pkl_gen_exp (pkl_ast_node ast,
     case PKL_AST_OP_LE:   GEN_BINARY_OP_II (lel); break;
     case PKL_AST_OP_GE:   GEN_BINARY_OP_II (gel); break;
       
-    case PKL_AST_OP_NEG:     GEN_UNARY_OP_I (negl); break;
-    case PKL_AST_OP_BNOT:    GEN_UNARY_OP_I (bnotl); break;
+    case PKL_AST_OP_NEG:     GEN_UNARY_OP_IL (neg); break;
+    case PKL_AST_OP_BNOT:    GEN_UNARY_OP_IL (bnot); break;
     case PKL_AST_OP_NOT:     GEN_UNARY_OP_I (not); break;
       
     case PKL_AST_OP_ADD:

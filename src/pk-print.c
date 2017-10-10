@@ -40,17 +40,17 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
     goto rterror;
   
   /* Get the result value and print it out.  */
-
+  
   if (PVM_IS_INT (val))
     printf ("%d\n", PVM_VAL_INT (val));
   else if (PVM_IS_UINT (val))
-    printf ("%u\n", PVM_VAL_UINT (val));
+      printf ("%u\n", PVM_VAL_UINT (val));
   else if (PVM_IS_LONG (val))
     printf ("%ld\n", PVM_VAL_LONG (val));
   else if (PVM_IS_ULONG (val))
-    printf ("%lu\n", PVM_VAL_LONG (val));
+    printf ("%lu\n", PVM_VAL_ULONG (val));
   else if (PVM_IS_STRING (val))
-    printf ("\"%s\"", PVM_VAL_STR (val));
+    printf ("\"%s\"\n", PVM_VAL_STR (val));
   else
     assert (0); /* XXX support more types.  */
 
