@@ -38,11 +38,11 @@ pkl_gen_integer (pkl_ast_node ast,
                  pvm_program program,
                  size_t *label)
 {
-  pvm_stack s;
+  pvm_val s;
   
-  s = pvm_stack_new ();
-  PVM_STACK_TYPE (s) = PVM_STACK_INT;
-  PVM_STACK_INTEGER (s) = PKL_AST_INTEGER_VALUE (ast);
+  s = pvm_val_new ();
+  PVM_VAL_TYPE (s) = PVM_VAL_INT;
+  PVM_VAL_INTEGER (s) = PKL_AST_INTEGER_VALUE (ast);
 
   /* PUSH int_cst */
   PVM_APPEND_INSTRUCTION (program, push);
@@ -56,11 +56,11 @@ pkl_gen_string (pkl_ast_node ast,
                 pvm_program program,
                 size_t *label)
 {
-  pvm_stack s;
+  pvm_val s;
   
-  s = pvm_stack_new ();
-  PVM_STACK_TYPE (s) = PVM_STACK_STR;
-  PVM_STACK_STRING (s) = xstrdup (PKL_AST_STRING_POINTER (ast));
+  s = pvm_val_new ();
+  PVM_VAL_TYPE (s) = PVM_VAL_STR;
+  PVM_VAL_STRING (s) = xstrdup (PKL_AST_STRING_POINTER (ast));
   
   /* PUSH str_cst */
   PVM_APPEND_INSTRUCTION (program, push);
@@ -112,10 +112,10 @@ pkl_gen_exp (pkl_ast_node ast,
       } while (0)
 
 #define GEN_BINARY_OP_II(OP)                                            \
-    GEN_BINARY_OP (OP, PVM_STACK_INT, PVM_STACK_INT)
+    GEN_BINARY_OP (OP, PVM_VAL_INT, PVM_VAL_INT)
 
 #define GEN_UNARY_OP_I(OP)                      \
-    GEN_UNARY_OP (OP, PVM_STACK_INT)
+    GEN_UNARY_OP (OP, PVM_VAL_INT)
       
   switch (PKL_AST_EXP_CODE (ast))
     {
@@ -153,13 +153,13 @@ pkl_gen_exp (pkl_ast_node ast,
         
         PVM_APPEND_INSTRUCTION (program, bntut);
         pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_STACK_INT));
+                                               (jitter_uint) (PVM_VAL_INT));
         pvm_append_symbolic_label_parameter (program, label_0);
         
         /* Arithmetic addition.  */
         PVM_APPEND_INSTRUCTION (program, bnt);
         pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_STACK_INT));
+                                               (jitter_uint) (PVM_VAL_INT));
         pvm_append_symbolic_label_parameter (program, "Lerror");
         PVM_APPEND_INSTRUCTION (program, add);
         
@@ -170,7 +170,7 @@ pkl_gen_exp (pkl_ast_node ast,
         /* String concatenation.  */
         PVM_APPEND_INSTRUCTION (program, bnt);
         pvm_append_unsigned_literal_parameter (program,
-                                               (jitter_uint) (PVM_STACK_STR));
+                                               (jitter_uint) (PVM_VAL_STR));
         pvm_append_symbolic_label_parameter (program, "Lerror");
         PVM_APPEND_INSTRUCTION (program, sconc);
         
@@ -263,7 +263,7 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
 
   /* Standard prologue.  */
   {
-    pvm_stack s;
+    pvm_val s;
     
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lstart");
@@ -271,9 +271,9 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     pvm_append_symbolic_label (program, "Lerror");
     
     /* The exit status is ERROR.  */
-    s = pvm_stack_new ();
-    PVM_STACK_TYPE (s) = PVM_STACK_INT;
-    PVM_STACK_INTEGER (s) = PVM_EXIT_ERROR;
+    s = pvm_val_new ();
+    PVM_VAL_TYPE (s) = PVM_VAL_INT;
+    PVM_VAL_INTEGER (s) = PVM_EXIT_ERROR;
     PVM_APPEND_INSTRUCTION (program, push);
     pvm_append_pointer_parameter (program, (pvm_pointer) s);
     
@@ -292,12 +292,12 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
 
   /* Standard epilogue.  */
   {
-    pvm_stack s;
+    pvm_val s;
 
     /* The exit status is OK.  */
-    s = pvm_stack_new ();
-    PVM_STACK_TYPE (s) = PVM_STACK_INT;
-    PVM_STACK_INTEGER (s) = PVM_EXIT_OK;
+    s = pvm_val_new ();
+    PVM_VAL_TYPE (s) = PVM_VAL_INT;
+    PVM_VAL_INTEGER (s) = PVM_EXIT_OK;
     PVM_APPEND_INSTRUCTION (program, push);
     pvm_append_pointer_parameter (program, (pvm_pointer) s);
     

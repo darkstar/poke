@@ -28,7 +28,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   /* print EXP */
 
   pvm_program prog;
-  pvm_stack res;
+  pvm_val res;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
@@ -43,13 +43,13 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
 
   assert (res != NULL);  /* Compiling an expression always gives a
                             value.  */
-  switch (PVM_STACK_TYPE (res))
+  switch (PVM_VAL_TYPE (res))
     {
-    case PVM_STACK_INT:
-      printf ("%lu\n", PVM_STACK_INTEGER (res));
+    case PVM_VAL_INT:
+      printf ("%lu\n", PVM_VAL_INTEGER (res));
       break;
-    case PVM_STACK_STR:
-      printf ("\"%s\"\n",  PVM_STACK_STRING (res));
+    case PVM_VAL_STR:
+      printf ("\"%s\"\n",  PVM_VAL_STRING (res));
       break;
     }
 

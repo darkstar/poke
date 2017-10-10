@@ -31,7 +31,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   int value;
   char *svalue = NULL;
   pvm_program prog;
-  pvm_stack res;
+  pvm_val res;
 
   assert (argc == 2);
 
@@ -42,13 +42,13 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 
   assert (res != NULL); /* Compiling an expression always gives a
                            result.  */
-  if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
+  if (PVM_VAL_TYPE (res) != PVM_VAL_INT)
     {
       printf ("Bad ADDRESS.\n");
       return 0;
     }
       
-  address = PVM_STACK_INTEGER (res);
+  address = PVM_VAL_INTEGER (res);
 
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     value = 0;
@@ -63,13 +63,13 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
       assert (res != NULL); /* Compiling an expression always gives a
                                result.  */
       value = 0;
-      switch (PVM_STACK_TYPE (res))
+      switch (PVM_VAL_TYPE (res))
         {
-        case PVM_STACK_INT:
-          value = PVM_STACK_INTEGER (res);
+        case PVM_VAL_INT:
+          value = PVM_VAL_INTEGER (res);
           break;
-        case PVM_STACK_STR:
-          svalue = xstrdup (PVM_STACK_STRING (res));
+        case PVM_VAL_STR:
+          svalue = xstrdup (PVM_VAL_STRING (res));
           break;
         }
     }

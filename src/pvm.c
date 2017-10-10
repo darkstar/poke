@@ -32,30 +32,30 @@ pvm_init (void)
 void
 pvm_shutdown (void)
 {
-  pvm_stack_free (pvm_state.pvm_state_backing.result_value);
+  pvm_val_free (pvm_state.pvm_state_backing.result_value);
   pvm_state_finalize (&pvm_state);
   pvm_finalize ();
 }
 
-pvm_stack
-pvm_stack_new (void)
+pvm_val
+pvm_val_new (void)
 {
-  pvm_stack s;
+  pvm_val s;
 
-  s = xmalloc (sizeof (struct pvm_stack));
-  memset (s, 0, sizeof (struct pvm_stack));
+  s = xmalloc (sizeof (struct pvm_val));
+  memset (s, 0, sizeof (struct pvm_val));
   return s;
 }
 
 void
-pvm_stack_free (pvm_stack s)
+pvm_val_free (pvm_val s)
 {
   if (s == NULL)
     return;
   
-  switch (PVM_STACK_TYPE (s))
+  switch (PVM_VAL_TYPE (s))
     {
-    case PVM_STACK_STR:
+    case PVM_VAL_STR:
       free (s->v.string);
       break;
     default:
@@ -66,9 +66,9 @@ pvm_stack_free (pvm_stack s)
 }
 
 enum pvm_exit_code
-pvm_execute (pvm_program prog, pvm_stack *res)
+pvm_execute (pvm_program prog, pvm_val *res)
 {
-  pvm_stack_free (pvm_state.pvm_state_backing.result_value);
+  pvm_val_free (pvm_state.pvm_state_backing.result_value);
   pvm_state.pvm_state_backing.result_value = NULL;
   pvm_state.pvm_state_backing.exit_code = PVM_EXIT_OK;
     

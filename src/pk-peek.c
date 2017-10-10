@@ -31,7 +31,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   pvm_program prog;
   pk_io_off address;
   int c;
-  pvm_stack res;
+  pvm_val res;
 
   assert (argc == 1);
 
@@ -52,13 +52,13 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
       
       assert (res != NULL); /* Compiling an expression always returns a
                                value.  */
-      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
+      if (PVM_VAL_TYPE (res) != PVM_VAL_INT)
         {
           printf ("Bad ADDRESS.\n");
           return 0;
         }
       
-      address = PVM_STACK_INTEGER (res);
+      address = PVM_VAL_INTEGER (res);
     }
   
   /* XXX: endianness, and what not.  */
