@@ -41,22 +41,16 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
       /* Get the result value and print it out.  */
 
       pvm_stack res = pvm_result ();
+      assert (res != NULL);
 
-      if (res == NULL)
+      switch (PVM_STACK_TYPE (res))
         {
-          printf ("NULL\n");
-        }
-      else
-        {
-          switch (PVM_STACK_TYPE (res))
-            {
-            case PVM_STACK_INT:
-              printf ("%d\n", PVM_STACK_INTEGER (res));
-              break;
-            case PVM_STACK_STR:
-              printf ("\"%s\"\n",  PVM_STACK_STRING (res));
-              break;
-            }
+        case PVM_STACK_INT:
+          printf ("%lu\n", PVM_STACK_INTEGER (res));
+          break;
+        case PVM_STACK_STR:
+          printf ("\"%s\"\n",  PVM_STACK_STRING (res));
+          break;
         }
     }
   else

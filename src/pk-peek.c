@@ -28,6 +28,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
 {
   /* peek [ADDR]  */
 
+  pvm_program prog;
   pk_io_off address;
   int c;
 
@@ -37,13 +38,28 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
     {
       address = pk_io_tell (pk_io_cur ());
     }
-  else if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP)
+
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+
+  prog = PK_CMD_ARG_EXP (argv[0]);
+  pvm_execute (prog);
+  if (pvm_exit_code () == PVM_EXIT_OK)
     {
-      return 1;
+      pvm_stack res = pvm_result ();
+      assert (res != NULL);
+
+      if (PVM_STACK_TYPE (res) != PVM_STACK_INT)
+        /* XXX This should print usage!  */
+        return 0;
+
+      address = PVM_STACK_INTEGER (res);
     }
   else
-    address = PK_CMD_ARG_ADDR (argv[0]);
-
+    {
+      printf ("run-time error\n");
+      return 0;
+    }
+  
   /* XXX: endianness, and what not.  */
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
   c = pk_io_getc ();
@@ -69,7 +85,7 @@ pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd peek_cmd =
-  {"peek", "?ea", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+  {"peek", "?e", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
 
 struct pk_cmd help_peek_cmd =
   {"peek", "", 0, NULL, pk_cmd_help_peek, "help peek"};
