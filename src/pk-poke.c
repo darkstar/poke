@@ -58,8 +58,8 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
     value = 0;
   else
     {
-      assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
-      prog = PK_CMD_ARG_EXP (argv[0]);
+      assert (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP);
+      prog = PK_CMD_ARG_EXP (argv[1]);
       pvm_execute (prog);
       if (pvm_exit_code () == PVM_EXIT_OK)
         {
@@ -73,7 +73,6 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
               value = PVM_STACK_INTEGER (res);
               break;
             case PVM_STACK_STR:
-              printf ("XXX: '%s'\n", PVM_STACK_STRING (res));
               svalue = xstrdup (PVM_STACK_STRING (res));
               break;
             }
@@ -99,7 +98,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
             printf ("Error writing byte 0x%x to 0x%08jx\n",
                     svalue[i], address);
           else
-            printf ("0x%08jx <- 0x%x\n", address, svalue[i]);
+            printf ("0x%08jx <- 0x%x\n", address + i, svalue[i]);
         }
       free (svalue);
     }

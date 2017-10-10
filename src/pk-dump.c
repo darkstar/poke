@@ -46,11 +46,12 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
   string[0] = ' ';
   string[17] = '\0';
   pk_io_off address, count, top;
+  static pk_io_off last_address;
 
   assert (argc == 2);
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
-    address = pk_io_tell (pk_io_cur ());
+    address = last_address;
   else
     address = PK_CMD_ARG_ADDR (argv[0]);
 
@@ -63,7 +64,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 
   /* Dump the requested address.  */
 
-  /*XXX see below   cur = pk_io_tell (pk_io_cur ());*/
+  last_address = address;
   pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
   if (poke_interactive_p)
@@ -105,9 +106,6 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
       if (i)
         puts (string);
     }
-
-  /* XXX: save last position in case the next command is also a
-     dump.  */
   /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
 
   return 1;
