@@ -99,34 +99,6 @@ pkl_gen_string (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_op_logic (pkl_ast_node ast,
-                  pvm_program program,
-                  size_t *label,
-                  enum pkl_ast_op what)
-{
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
-    {
-    case PKL_TYPE_INT:
-    case PKL_TYPE_INT32:
-      if (what == PKL_AST_OP_AND)
-        PVM_APPEND_INSTRUCTION (program, and);
-      else if (what == PKL_AST_OP_OR)
-        PVM_APPEND_INSTRUCTION (program, or);
-      else if (what == PKL_AST_OP_NOT)
-        PVM_APPEND_INSTRUCTION (program, not);
-      else
-        assert (0);
-      break;
-
-    default:
-      assert (0);
-      break;
-    }
-
-  return 1;
-}
-
-static int
 pkl_gen_op_arith (pkl_ast_node ast,
                   pvm_program program,
                   size_t *label,
@@ -164,6 +136,9 @@ pkl_gen_op_arith (pkl_ast_node ast,
       break;                                            \
     case PKL_AST_OP_XOR:                                \
       PVM_APPEND_INSTRUCTION (program, bxor##suffix);   \
+      break;                                            \
+    case PKL_AST_OP_BNOT:                               \
+      PVM_APPEND_INSTRUCTION (program, bnot##suffix);   \
       break;                                            \
     default:                                            \
       assert (0);                                       \
@@ -243,6 +218,44 @@ pkl_gen_op_arith (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_op_logic (pkl_ast_node ast,
+                  pvm_program program,
+                  size_t *label,
+                  enum pkl_ast_op what)
+{
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+    {
+    case PKL_TYPE_INT:
+    case PKL_TYPE_INT32:
+      if (what == PKL_AST_OP_AND)
+        PVM_APPEND_INSTRUCTION (program, and);
+      else if (what == PKL_AST_OP_OR)
+        PVM_APPEND_INSTRUCTION (program, or);
+      else if (what == PKL_AST_OP_NOT)
+        PVM_APPEND_INSTRUCTION (program, not);
+      else
+        assert (0);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 1;
+}
+
+static int
+pkl_gen_op_blogic (pkl_ast_node ast,
+                   pvm_program program,
+                   size_t *label,
+                   enum pkl_ast_op what)
+{
+  return pkl_gen_op_arith (ast, program, label, what);
+}
+
+
+static int
 pkl_gen_exp (pkl_ast_node ast,
              pvm_program program,
              size_t *label)
@@ -259,15 +272,6 @@ pkl_gen_exp (pkl_ast_node ast,
 
   switch (PKL_AST_EXP_CODE (ast))
     {
-    case PKL_AST_OP_AND:
-      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_AND);
-      break;
-    case PKL_AST_OP_OR:
-      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_OR);
-      break;
-    case PKL_AST_OP_NOT:
-      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_NOT);
-      break;
     case PKL_AST_OP_ADD:
       return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_ADD);
       break;
@@ -283,15 +287,26 @@ pkl_gen_exp (pkl_ast_node ast,
     case PKL_AST_OP_MOD:
       return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_MOD);
       break;
+    case PKL_AST_OP_AND:
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_AND);
+      break;
+    case PKL_AST_OP_OR:
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_OR);
+      break;
+    case PKL_AST_OP_NOT:
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_NOT);
+      break;
     case PKL_AST_OP_BAND:
-      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_BAND);
+      return pkl_gen_op_blogic (ast, program, label, PKL_AST_OP_BAND);
       break;
     case PKL_AST_OP_IOR:
-      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_IOR);
+      return pkl_gen_op_blogic (ast, program, label, PKL_AST_OP_IOR);
       break;
     case PKL_AST_OP_XOR:
-      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_XOR);
+      return pkl_gen_op_blogic (ast, program, label, PKL_AST_OP_XOR);
       break;
+    case PKL_AST_OP_BNOT:
+      return pkl_gen_op_blogic (ast, program, label, PKL_AST_OP_BNOT);
       
 #if 0
     case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (eql); break;
@@ -306,7 +321,7 @@ pkl_gen_exp (pkl_ast_node ast,
     case PKL_AST_OP_GE:   GEN_BINARY_OP_II (gel); break;
       
     case PKL_AST_OP_NEG:     GEN_UNARY_OP_IL (neg); break;
-    case PKL_AST_OP_BNOT:    GEN_UNARY_OP_IL (bnot); break;
+
 #endif
       
     default:
