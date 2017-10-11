@@ -254,11 +254,13 @@ expression:
           	{
                   /* All unary operators require an integer as an
                      argument.  Detect the case when they are applied
-                     to non-integer literals.  XXX: add arrays and
-                     tuples.  */
+                     to non-integer literals or to a casted value.
+                     XXX: add arrays and tuples.  */
                   if (PKL_AST_CODE ($2) == PKL_AST_STRING
                       || PKL_AST_CODE ($2) == PKL_AST_ARRAY
-                      || PKL_AST_CODE ($2) == PKL_AST_TUPLE)
+                      || PKL_AST_CODE ($2) == PKL_AST_TUPLE
+                      || (PKL_AST_CODE ($2) == PKL_AST_CAST
+                          && PKL_AST_TYPE_CODE (PKL_AST_CAST_TYPE ($2)) != PKL_AST_INTEGER))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "unary operator requires an integer.");

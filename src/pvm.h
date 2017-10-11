@@ -39,7 +39,7 @@
    - Arrays.
    - Tuples.
 
-   It is fundamental for pvm_val values to fit in 64-bit, in order to
+   It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
    the virtual machine.  The 32-bit integers are unboxed.  64-bit
    integers, strings, arrays and tuples are boxed.  Both boxed and

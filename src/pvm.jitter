@@ -142,7 +142,14 @@ end
 
 # Integer arithmetic.
 
-# XXX: one of the references A or B are lost when assigning to RES.
+# XXX: one of the references A or B may be lost when assigning to RES
+#      depending on TOS or no TOS.  So refcounts must be decremented
+#      in both A and B.
+
+# XXX: value preserving vs sign preserving?
+#      C standardized in value preserving, with promotions.
+#      Java avoids this problem by not having unsigned types.. the fuckers :D
+#      But we need unsigned types.
 
 instruction addi () # INT INT -> INT
   code
@@ -899,4 +906,3 @@ instruction bntut (?n,?f) # Branch if not type undertop.
 end
 
 # Conversion instructions.
-
