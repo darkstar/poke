@@ -47,36 +47,23 @@ pkl_gen_integer (pkl_ast_node ast,
   pvm_val val;
 
   type = PKL_AST_TYPE (ast);
-  assert (type != NULL);
-  
-  switch (PKL_AST_TYPE_CODE (type))
+  assert (type != NULL && PKL_AST_TYPE_INTEGRAL (type));
+
+  if (PKL_AST_TYPE_SIZE (type) == 64)
     {
-    case PKL_TYPE_CHAR:
-    case PKL_TYPE_BYTE:
-    case PKL_TYPE_UINT8:
-    case PKL_TYPE_UINT16:
-    case PKL_TYPE_UINT32:
-      val = pvm_make_uint (PKL_AST_INTEGER_VALUE (ast));
-      break;
-    case PKL_TYPE_INT8:
-    case PKL_TYPE_INT16:
-    case PKL_TYPE_INT32:
-    case PKL_TYPE_INT:
-      val = pvm_make_int (PKL_AST_INTEGER_VALUE (ast));
-      break;
-    case PKL_TYPE_UINT64:
-      val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
-      break;
-    case PKL_TYPE_LONG:
-    case PKL_TYPE_INT64:
-      val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
-      break;
-    case PKL_TYPE_STRING:
-    default:
-      assert (0);
-      break;
+      if (PKL_AST_TYPE_SIGNED (type))
+        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
+      else
+        val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
     }
-  
+  else
+    {
+      if (PKL_AST_TYPE_SIGNED (type))
+        val = pvm_make_int (PKL_AST_INTEGER_VALUE (ast));
+      else
+        val = pvm_make_uint (PKL_AST_INTEGER_VALUE (ast));
+    }
+    
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program, val);
 

@@ -104,6 +104,7 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
 enum pkl_ast_type_code
 {
 #include "pkl-types.def"
+  PKL_TYPE_STRING,
   PKL_TYPE_ENUM,
   PKL_TYPE_STRUCT,
   PKL_TYPE_NOTYPE,

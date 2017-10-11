@@ -140,10 +140,8 @@ promote_to_bool (pkl_ast ast,
 {
   if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
     {
-      enum pkl_ast_type_code ta
-        = PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a));
-
-      if (ta != PKL_TYPE_INT && ta != PKL_TYPE_INT32)
+      if (!(PKL_AST_TYPE_SIZE (*a) == 32
+            && PKL_AST_TYPE_SIGNED (*a)))
         {
           pkl_ast_node booltype
             = pkl_ast_get_std_type (ast, PKL_TYPE_INT);

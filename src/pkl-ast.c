@@ -584,6 +584,7 @@ pkl_ast_init (void)
 #define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) {CODE, ID, SIZE, SIGNED},
 # include "pkl-types.def"
 #undef PKL_DEF_TYPE
+          { PKL_TYPE_STRING, "string", 0, 0 },
           { PKL_TYPE_NOTYPE, NULL, 0 }
         };
   struct pkl_ast *ast;
