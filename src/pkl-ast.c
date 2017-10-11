@@ -709,12 +709,32 @@ pkl_ast_get_identifier (struct pkl_ast *ast,
 }
 
 /* Return the node corresponding to the type code CODE, or NULL if no
-   such node exists in the type hash.  */
+   such node exists.  */
 
 pkl_ast_node
 pkl_ast_get_std_type (pkl_ast ast, enum pkl_ast_type_code code)
 {
   return ast->stdtypes[code];
+}
+
+/* Return the node corresponding to the type having size SIZE and
+   signedness SIGNED_P, or NULL if no such node exists.  */
+
+pkl_ast_node
+pkl_ast_search_std_type (pkl_ast ast, size_t size, int signed_p)
+{
+  size_t i;
+
+  for (i = 0; ast->stdtypes[i]; i++)
+    {
+      pkl_ast_node stdtype = ast->stdtypes[i];
+
+      if (PKL_AST_TYPE_SIZE (stdtype) == size
+          && PKL_AST_TYPE_SIGNED (stdtype) == signed_p)
+        return stdtype;
+    }
+
+  return NULL;
 }
 
 /* Register an AST node under the given NAME in the corresponding hash

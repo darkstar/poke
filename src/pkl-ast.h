@@ -759,6 +759,9 @@ pkl_ast_node pkl_ast_register (pkl_ast ast,
 pkl_ast_node pkl_ast_get_std_type (pkl_ast ast,
                                    enum pkl_ast_type_code code);
 
+pkl_ast_node pkl_ast_search_std_type (pkl_ast ast,
+                                      size_t size, int signed_p);
+
 #ifdef PKL_DEBUG
 
 /* The following function dumps a human-readable description of the
