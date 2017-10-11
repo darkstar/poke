@@ -107,6 +107,84 @@ pkl_gen_string (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_op_add (pkl_ast_node ast,
+                pvm_program program,
+                size_t *label)
+{
+  pvm_val masku8 = pvm_make_uint (0xff);
+  pvm_val maski8 = pvm_make_int (0xff);
+  pvm_val masku16 = pvm_make_uint (0xffff);
+  pvm_val maski16 = pvm_make_int (0xffff);
+
+  
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+    {
+    case PKL_TYPE_CHAR:
+    case PKL_TYPE_BYTE:
+    case PKL_TYPE_UINT8:
+      PVM_APPEND_INSTRUCTION (program, addiu);
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program, masku8);
+      PVM_APPEND_INSTRUCTION (program, bandiu);
+      break;
+
+    case PKL_TYPE_INT8:
+      PVM_APPEND_INSTRUCTION (program, addi);
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program, maski8);
+      PVM_APPEND_INSTRUCTION (program, bandiu);
+      break;
+      
+    case PKL_TYPE_UINT16:
+      PVM_APPEND_INSTRUCTION (program, addiu);
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program, masku16);
+      PVM_APPEND_INSTRUCTION (program, bandiu);
+      break;
+
+    case PKL_TYPE_SHORT:
+    case PKL_TYPE_INT16:
+      PVM_APPEND_INSTRUCTION (program, addi);
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program, maski16);
+      PVM_APPEND_INSTRUCTION (program, bandiu);
+      break;
+
+    case PKL_TYPE_UINT32:
+      PVM_APPEND_INSTRUCTION (program, addiu);
+      break;
+
+    case PKL_TYPE_INT:
+    case PKL_TYPE_INT32:
+      PVM_APPEND_INSTRUCTION (program, addi);
+      break;
+
+    case PKL_TYPE_UINT64:
+      PVM_APPEND_INSTRUCTION (program, addlu);
+      break;
+
+    case PKL_TYPE_LONG:
+    case PKL_TYPE_INT64:
+      PVM_APPEND_INSTRUCTION (program, addl);
+      break;
+
+    case PKL_TYPE_STRING:
+      PVM_APPEND_INSTRUCTION (program, sconc);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 1;
+}
+
+static int
 pkl_gen_exp (pkl_ast_node ast,
              pvm_program program,
              size_t *label)
@@ -201,37 +279,8 @@ pkl_gen_exp (pkl_ast_node ast,
     case PKL_AST_OP_NOT:     GEN_UNARY_OP_I (not); break;
       
     case PKL_AST_OP_ADD:
-      {
-        char label_0[100], label_1[100];
-        
-        sprintf (label_0, "L%li", (*label)++);
-        sprintf (label_1, "L%li", (*label)++);
-        
-        PVM_APPEND_INSTRUCTION (program, bntut);
-        pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);
-        pvm_append_symbolic_label_parameter (program, label_0);
-        
-        /* Arithmetic addition.  */
-        PVM_APPEND_INSTRUCTION (program, bnt);
-        pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);
-
-        pvm_append_symbolic_label_parameter (program, "Lerror");
-        PVM_APPEND_INSTRUCTION (program, addl);
-        
-        PVM_APPEND_INSTRUCTION (program, ba);
-        pvm_append_symbolic_label_parameter (program, label_1);
-
-        pvm_append_symbolic_label (program, label_0);
-        
-        /* String concatenation.  */
-        PVM_APPEND_INSTRUCTION (program, bnt);
-        pvm_append_type_parameter (program, PVM_VAL_TAG_STR);
-        pvm_append_symbolic_label_parameter (program, "Lerror");
-        PVM_APPEND_INSTRUCTION (program, sconc);
-        
-        pvm_append_symbolic_label (program, label_1);
-        break;
-      }
+      return pkl_gen_op_add (ast, program, label);
+      break;
 
     default:
       fprintf (stderr, "gen: unhandled expression code %d\n",

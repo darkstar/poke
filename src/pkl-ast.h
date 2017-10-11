@@ -628,6 +628,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
 #define PKL_AST_TYPE_SIZE(AST) ((AST)->type.size)
 #define PKL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
 #define PKL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
+#define PKL_AST_TYPE_INTEGRAL(AST) ((AST)->type.size > 0)
 
 struct pkl_ast_type
 {

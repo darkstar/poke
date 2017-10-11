@@ -47,7 +47,7 @@ extern struct pk_cmd info_cmd; /* pk-info.c  */
 extern struct pk_cmd exit_cmd; /* pk-misc.c  */
 extern struct pk_cmd version_cmd; /* pk-misc.c */
 extern struct pk_cmd help_cmd; /* pk-help.c */
-extern struct pk_cmd disas_cmd; /* pk-vm.c  */
+extern struct pk_cmd vm_cmd; /* pk-vm.c  */
 extern struct pk_cmd print_cmd; /* pk-print.c */
 
 struct pk_cmd null_cmd =
@@ -64,7 +64,7 @@ static struct pk_cmd *cmds[] =
     &info_cmd,
     &close_cmd,
     &help_cmd,
-    &disas_cmd,
+    &vm_cmd,
     &print_cmd,
     &null_cmd
   };
@@ -497,8 +497,8 @@ extern struct pk_trie *info_trie; /* pk-info.c  */
 extern struct pk_cmd *help_cmds[]; /* pk-help.c */
 extern struct pk_trie *help_trie; /* pk-help.c */
 
-extern struct pk_cmd *disas_cmds[]; /* pk-vm.c  */
-extern struct pk_trie *disas_trie;  /* pk-vm.c  */
+extern struct pk_cmd *vm_cmds[]; /* pk-vm.c  */
+extern struct pk_trie *vm_trie;  /* pk-vm.c  */
 
 static struct pk_trie *cmds_trie;
 
@@ -511,8 +511,8 @@ pk_cmd_exec (char *str)
     info_trie = pk_trie_from_cmds (info_cmds);
   if (help_trie == NULL)
     help_trie = pk_trie_from_cmds (help_cmds);
-  if (disas_trie == NULL)
-    disas_trie = pk_trie_from_cmds (disas_cmds);
+  if (vm_trie == NULL)
+    vm_trie = pk_trie_from_cmds (vm_cmds);
 
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }
@@ -523,5 +523,5 @@ pk_cmd_shutdown (void)
   pk_trie_free (cmds_trie);
   pk_trie_free (info_trie);
   pk_trie_free (help_trie);
-  pk_trie_free (disas_trie);
+  pk_trie_free (vm_trie);
 }
