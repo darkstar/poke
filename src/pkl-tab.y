@@ -386,7 +386,9 @@ expression:
 	  expression_primary
         | unary_operator expression %prec UNARY
           	{
-                  if (!check_operand_unary (pkl_parser->ast, $1, &$2))
+                  if (($1 == PKL_AST_OP_NOT
+                       && !promote_to_bool (pkl_parser->ast, &$2))
+                      || (!check_operand_unary (pkl_parser->ast, $1, &$2)))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operand to unary operator");
@@ -658,11 +660,8 @@ expression:
                 }
 	| expression OR expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                  if (!promote_to_bool (pkl_parser->ast, &$1)
+                      || !promote_to_bool (pkl_parser->ast, &$3))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to ||");
