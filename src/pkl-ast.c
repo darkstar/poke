@@ -180,13 +180,15 @@ pkl_ast_make_cond_exp (pkl_ast_node cond,
 
 pkl_ast_node
 pkl_ast_make_binary_exp (enum pkl_ast_op code,
+                         pkl_ast_node type,
                          pkl_ast_node op1,
                          pkl_ast_node op2)
 {
   pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
 
-  assert (op1 && op2);
+  assert (type && op1 && op2);
 
+  PKL_AST_TYPE (exp) = ASTREF (type);
   PKL_AST_EXP_CODE (exp) = code;
   PKL_AST_EXP_NUMOPS (exp) = 2;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op1);
@@ -202,10 +204,12 @@ pkl_ast_make_binary_exp (enum pkl_ast_op code,
 
 pkl_ast_node
 pkl_ast_make_unary_exp (enum pkl_ast_op code,
+                        pkl_ast_node type,
                         pkl_ast_node op)
 {
   pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
 
+  PKL_AST_TYPE (exp) = ASTREF (type);
   PKL_AST_EXP_CODE (exp) = code;
   PKL_AST_EXP_NUMOPS (exp) = 1;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op);

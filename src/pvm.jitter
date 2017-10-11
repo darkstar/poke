@@ -888,6 +888,27 @@ instruction bsrlu () # ULONG UINT -> ULONG
   end
 end
 
+## Conversion instructions.
+
+instruction itol () # INT -> LONG
+  code
+  end
+end
+
+instruction itolu () # INT -> ULONG
+  code
+  end
+end
+
+instruction iutol () # UINT -> LONG
+  code
+  end
+end
+instruction iutolu () # UINT -> LONG
+  code
+  end
+end
+
 ## Branches
 
 instruction ba (?f) # Branch always.
