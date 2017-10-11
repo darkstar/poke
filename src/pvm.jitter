@@ -342,10 +342,24 @@ instruction negi () # INT -> INT
   end
 end
 
+instruction negiu () # UINT -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int (PVM_VAL_INT (JITTER_TOP_STACK()));
+  end
+end
+
 instruction negl () # LONG -> LONG
   code
     JITTER_TOP_STACK()
       = pvm_make_long (- PVM_VAL_LONG (JITTER_TOP_STACK()));
+  end
+end
+
+instruction neglu () # LONG -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long (PVM_VAL_LONG (JITTER_TOP_STACK()));
   end
 end
 
