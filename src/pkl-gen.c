@@ -107,6 +107,68 @@ pkl_gen_string (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_op_and (pkl_ast_node ast,
+               pvm_program program,
+               size_t *label)
+{
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+    {
+    case PKL_TYPE_INT:
+    case PKL_TYPE_INT32:
+      PVM_APPEND_INSTRUCTION (program, and);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 1;
+}
+
+static int
+pkl_gen_op_or (pkl_ast_node ast,
+               pvm_program program,
+               size_t *label)
+{
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+    {
+    case PKL_TYPE_INT:
+    case PKL_TYPE_INT32:
+      PVM_APPEND_INSTRUCTION (program, or);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 1;
+}
+
+static int
+pkl_gen_op_not (pkl_ast_node ast,
+               pvm_program program,
+               size_t *label)
+{
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+    {
+    case PKL_TYPE_INT:
+    case PKL_TYPE_INT32:
+      PVM_APPEND_INSTRUCTION (program, not);
+      break;
+
+    default:
+      assert (0);
+      break;
+    }
+
+  return 1;
+}
+
+
+
+static int
 pkl_gen_op_add (pkl_ast_node ast,
                 pvm_program program,
                 size_t *label)
@@ -256,15 +318,27 @@ pkl_gen_exp (pkl_ast_node ast,
 
   switch (PKL_AST_EXP_CODE (ast))
     {
-    case PKL_AST_OP_OR:   GEN_BINARY_OP_II (or); break;
+    case PKL_AST_OP_AND:
+      return pkl_gen_op_and (ast, program, label);
+      break;
+    case PKL_AST_OP_OR:
+      return pkl_gen_op_or (ast, program, label);
+      break;
+    case PKL_AST_OP_NOT:
+      return pkl_gen_op_not (ast, program, label);
+      break;
+
     case PKL_AST_OP_BAND: GEN_BINARY_OP_II (bandl); break;
     case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (borl); break;
     case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (bxorl); break;
-    case PKL_AST_OP_AND:  GEN_BINARY_OP_II (and); break;
+
     case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (eql); break;
     case PKL_AST_OP_NE:   GEN_BINARY_OP_II (nel); break;
     case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsll); break;
     case PKL_AST_OP_SR:   GEN_BINARY_OP_II (bsrl); break;
+    case PKL_AST_OP_ADD:
+      return pkl_gen_op_add (ast, program, label);
+      break;
     case PKL_AST_OP_SUB:  GEN_BINARY_OP_II (subl); break;
     case PKL_AST_OP_MUL:  GEN_BINARY_OP_II (mull); break;
     case PKL_AST_OP_DIV:  GEN_BINARY_OP_II (divl); break;
@@ -276,12 +350,8 @@ pkl_gen_exp (pkl_ast_node ast,
       
     case PKL_AST_OP_NEG:     GEN_UNARY_OP_IL (neg); break;
     case PKL_AST_OP_BNOT:    GEN_UNARY_OP_IL (bnot); break;
-    case PKL_AST_OP_NOT:     GEN_UNARY_OP_I (not); break;
-      
-    case PKL_AST_OP_ADD:
-      return pkl_gen_op_add (ast, program, label);
-      break;
 
+      
     default:
       fprintf (stderr, "gen: unhandled expression code %d\n",
                PKL_AST_EXP_CODE (ast));

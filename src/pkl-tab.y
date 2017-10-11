@@ -133,6 +133,30 @@ check_operand_unary (pkl_ast ast,
 
   return 1;
 }
+
+static int
+promote_to_bool (pkl_ast ast,
+                 pkl_ast_node *a)
+{
+  if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
+    {
+      enum pkl_ast_type_code ta
+        = PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a));
+
+      if (ta != PKL_TYPE_INT && ta != PKL_TYPE_INT32)
+        {
+          pkl_ast_node booltype
+            = pkl_ast_get_std_type (ast, PKL_TYPE_INT);
+          
+          assert (booltype);
+          *a = pkl_ast_make_cast (booltype, *a);
+        }
+
+      return 1;
+    }
+
+  return 0;
+}
  
 static int
 promote_operands_binary (pkl_ast ast,
@@ -622,11 +646,8 @@ expression:
                 }
         | expression AND expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                  if (!promote_to_bool (pkl_parser->ast, &$1)
+                      || !promote_to_bool (pkl_parser->ast, &$3))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to &&");
