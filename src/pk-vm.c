@@ -54,5 +54,5 @@ struct pk_cmd *vm_cmds[] =
 struct pk_trie *vm_trie;
 
 struct pk_cmd vm_cmd =
-  {"vm", "", 0, &vm_trie, NULL, "vm (expression)"};
+  {"vm", "", 0, &vm_trie, NULL, "vm (disassemble)"};
 
