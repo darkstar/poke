@@ -115,6 +115,7 @@ pkl_gen_op (pkl_ast_node ast,
     {                                                   \
     case PKL_AST_OP_NEG:                                \
       PVM_APPEND_INSTRUCTION (program, neg##suffix);    \
+      break;                                            \
     case PKL_AST_OP_ADD:                                \
       PVM_APPEND_INSTRUCTION (program, add##suffix);    \
       break;                                            \

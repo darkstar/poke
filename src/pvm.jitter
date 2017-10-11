@@ -345,7 +345,7 @@ end
 instruction negiu () # UINT -> UINT
   code
     JITTER_TOP_STACK()
-      = pvm_make_int (PVM_VAL_INT (JITTER_TOP_STACK()));
+      = pvm_make_uint ((uint32_t) -PVM_VAL_UINT (JITTER_TOP_STACK()));
   end
 end
 
@@ -359,7 +359,7 @@ end
 instruction neglu () # LONG -> LONG
   code
     JITTER_TOP_STACK()
-      = pvm_make_long (PVM_VAL_LONG (JITTER_TOP_STACK()));
+      = pvm_make_ulong ((uint64_t) -PVM_VAL_ULONG (JITTER_TOP_STACK()));
   end
 end
 

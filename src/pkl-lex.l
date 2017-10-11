@@ -67,6 +67,7 @@ HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
 OCTCST             0[0-9][0-9_]*
 DECCST             [0-9][0-9_]*
+IS		   ((u|U)|(u|U)?(l|L)|(l|L)(u|U))
 
 L [a-zA-Z_]
 D [0-9]
@@ -161,11 +162,10 @@ D [0-9]
      }
 }
 
-({HEXCST}|{BINCST}|{OCTCST}|{DECCST})[uU]? {
+({HEXCST}|{BINCST}|{OCTCST}|{DECCST}){IS}? {
   uint64_t value;
-  int base, offset, signed_p;
+  int base, offset, signed_p, width;
   char *p, *end;
-  enum pkl_ast_type_code code;
   pkl_ast_node type;
 
   /* First of all, strip any '_' character from yytext.  */
@@ -205,21 +205,33 @@ D [0-9]
 
   /* Note that strtol can't fail in this context.  */
   value = strtol (yytext + offset, &end, base);
-  signed_p = *end != 'u' && *end != 'U';
 
-  /* The type of the integer constant is the smallest signed or
-     unsigned integer capable of holding it, starting with 32 bits, in
-     steps of power of two and up to 64 bits.  But note these are
-     positive values! */
+  signed_p = 1;
+  if (*end == 'u' || *end == 'U'
+      || (*end != '\0' && (*(end + 1) == 'u' || *(end + 1) == 'U')))
+    signed_p = 0;
 
-  if (value >= 0x0000000080000000 && value <= 0x00000000ffffffff)
-    code = signed_p ? PKL_TYPE_INT64 : PKL_TYPE_UINT32;
-  else if (value & 0xffffffff80000000)
-    code = signed_p ? PKL_TYPE_INT64 : PKL_TYPE_UINT64;
-  else
-    code = signed_p ? PKL_TYPE_INT32 : PKL_TYPE_UINT32;
+  width = 0;
+  if (*end == 'l' || *end == 'L'
+      || (*end != '\0') && (*(end + 1) == 'l' || *(end + 1) == 'L'))
+    width = 64;
 
-  type = pkl_ast_get_std_type (yyextra->ast, code);
+  /* If not specified with the 'l' or 'L' suffix, the type of the
+     integer constant is the smallest signed or unsigned integer
+     capable of holding it, starting with 32 bits, in steps of power
+     of two and up to 64 bits.  But note these are positive values! */
+
+  if (width == 0)
+  {
+    if (value >= 0x0000000080000000 && value <= 0x00000000ffffffff)
+      width = signed_p ? 64 : 32;
+    else if (value & 0xffffffff80000000)
+      width = 64;
+    else
+      width = 32;
+  }
+
+  type = pkl_ast_search_std_type (yyextra->ast, width, signed_p);
   assert (type);
 
   yylval->ast = pkl_ast_make_integer (value);
