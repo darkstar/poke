@@ -24,7 +24,7 @@
 #include "pkl-gen.h"
 
 
-/* The following macros are used in the functions below in order to
+/* The following macro is used in the functions below in order to
    append PVM values to a program.  */
 
 #define pvm_append_val_parameter(program,val)                           \
@@ -34,16 +34,8 @@
                                             (jitter_uint) (val));       \
     } while (0)
 
-#define pvm_append_type_parameter(program,type)                         \
-  do                                                                    \
-    {                                                                   \
-     pvm_append_unsigned_literal_parameter ((program),                  \
-                                            (jitter_uint) (type));      \
-    } while (0)
-
 /* Forward declaration.  */
-static int pkl_gen_1 (pkl_ast_node ast,
-                      pvm_program program,
+static int pkl_gen_1 (pkl_ast_node ast, pvm_program program,
                       size_t *label);
 
 static int
@@ -107,15 +99,23 @@ pkl_gen_string (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_op_and (pkl_ast_node ast,
-               pvm_program program,
-               size_t *label)
+pkl_gen_op_logic (pkl_ast_node ast,
+                  pvm_program program,
+                  size_t *label,
+                  enum pkl_ast_op what)
 {
   switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
     {
     case PKL_TYPE_INT:
     case PKL_TYPE_INT32:
-      PVM_APPEND_INSTRUCTION (program, and);
+      if (what == PKL_AST_OP_AND)
+        PVM_APPEND_INSTRUCTION (program, and);
+      else if (what == PKL_AST_OP_OR)
+        PVM_APPEND_INSTRUCTION (program, or);
+      else if (what == PKL_AST_OP_NOT)
+        PVM_APPEND_INSTRUCTION (program, not);
+      else
+        assert (0);
       break;
 
     default:
@@ -127,64 +127,46 @@ pkl_gen_op_and (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_op_or (pkl_ast_node ast,
-               pvm_program program,
-               size_t *label)
-{
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
-    {
-    case PKL_TYPE_INT:
-    case PKL_TYPE_INT32:
-      PVM_APPEND_INSTRUCTION (program, or);
-      break;
-
-    default:
-      assert (0);
-      break;
-    }
-
-  return 1;
-}
-
-static int
-pkl_gen_op_not (pkl_ast_node ast,
-               pvm_program program,
-               size_t *label)
-{
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
-    {
-    case PKL_TYPE_INT:
-    case PKL_TYPE_INT32:
-      PVM_APPEND_INSTRUCTION (program, not);
-      break;
-
-    default:
-      assert (0);
-      break;
-    }
-
-  return 1;
-}
-
-
-
-static int
-pkl_gen_op_add (pkl_ast_node ast,
-                pvm_program program,
-                size_t *label)
+pkl_gen_op_arith (pkl_ast_node ast,
+                  pvm_program program,
+                  size_t *label,
+                  enum pkl_ast_op what)
 {
   pvm_val masku8 = pvm_make_uint (0xff);
   pvm_val maski8 = pvm_make_int (0xff);
   pvm_val masku16 = pvm_make_uint (0xffff);
   pvm_val maski16 = pvm_make_int (0xffff);
 
+#define PVM_APPEND_ARITH_INSTRUCTION(what,suffix)       \
+  /* Handle division by zero for div and mod. */        \
+  switch ((what))                                       \
+    {                                                   \
+    case PKL_AST_OP_ADD:                                \
+      PVM_APPEND_INSTRUCTION (program, add##suffix);    \
+      break;                                            \
+    case PKL_AST_OP_SUB:                                \
+      PVM_APPEND_INSTRUCTION (program, sub##suffix);    \
+      break;                                            \
+    case PKL_AST_OP_MUL:                                \
+      PVM_APPEND_INSTRUCTION (program, mul##suffix);    \
+      break;                                            \
+    case PKL_AST_OP_DIV:                                \
+      PVM_APPEND_INSTRUCTION (program, div##suffix);    \
+      break;                                            \
+    case PKL_AST_OP_MOD:                                \
+      PVM_APPEND_INSTRUCTION (program, mod##suffix);    \
+      break;                                            \
+    default:                                            \
+      assert (0);                                       \
+      break;                                            \
+     }
   
   switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
     {
     case PKL_TYPE_CHAR:
     case PKL_TYPE_BYTE:
     case PKL_TYPE_UINT8:
-      PVM_APPEND_INSTRUCTION (program, addiu);
+      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
 
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program, masku8);
@@ -192,7 +174,7 @@ pkl_gen_op_add (pkl_ast_node ast,
       break;
 
     case PKL_TYPE_INT8:
-      PVM_APPEND_INSTRUCTION (program, addi);
+      PVM_APPEND_ARITH_INSTRUCTION (what, i);
 
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program, maski8);
@@ -200,7 +182,7 @@ pkl_gen_op_add (pkl_ast_node ast,
       break;
       
     case PKL_TYPE_UINT16:
-      PVM_APPEND_INSTRUCTION (program, addiu);
+      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
 
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program, masku16);
@@ -209,7 +191,7 @@ pkl_gen_op_add (pkl_ast_node ast,
 
     case PKL_TYPE_SHORT:
     case PKL_TYPE_INT16:
-      PVM_APPEND_INSTRUCTION (program, addi);
+      PVM_APPEND_ARITH_INSTRUCTION (what, i);
 
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program, maski16);
@@ -217,25 +199,30 @@ pkl_gen_op_add (pkl_ast_node ast,
       break;
 
     case PKL_TYPE_UINT32:
-      PVM_APPEND_INSTRUCTION (program, addiu);
+      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
       break;
 
     case PKL_TYPE_INT:
     case PKL_TYPE_INT32:
-      PVM_APPEND_INSTRUCTION (program, addi);
+      PVM_APPEND_ARITH_INSTRUCTION (what, i);
       break;
 
     case PKL_TYPE_UINT64:
-      PVM_APPEND_INSTRUCTION (program, addlu);
+      PVM_APPEND_ARITH_INSTRUCTION (what, lu);
       break;
 
     case PKL_TYPE_LONG:
     case PKL_TYPE_INT64:
-      PVM_APPEND_INSTRUCTION (program, addl);
+      PVM_APPEND_ARITH_INSTRUCTION (what, l);
       break;
 
     case PKL_TYPE_STRING:
-      PVM_APPEND_INSTRUCTION (program, sconc);
+
+      if (what == PKL_AST_OP_ADD)
+        PVM_APPEND_INSTRUCTION (program, sconc);
+      else
+        assert (0);
+
       break;
 
     default:
@@ -261,73 +248,43 @@ pkl_gen_exp (pkl_ast_node ast,
         return 0;
     }
 
-#define GEN_BINARY_OP(OP,T1,T2)                                         \
-  do                                                                    \
-    {                                                                   \
-      PVM_APPEND_INSTRUCTION (program, bnt);                            \
-      pvm_append_type_parameter (program, (T1));                        \
-                                                                        \
-      pvm_append_symbolic_label_parameter (program, "Lerror");          \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, bntut);                          \
-      pvm_append_type_parameter (program, (T2));                        \
-                                                                        \
-      pvm_append_symbolic_label_parameter (program, "Lerror");          \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, OP);                             \
-    } while (0)
-  
-#define GEN_UNARY_OP_IL(OP)                                             \
-  do                                                                    \
-    {                                                                   \
-      char label_0[100], label_1[100];                                  \
-      sprintf (label_0, "L%li", (*label)++);                            \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, bnt);                            \
-      pvm_append_type_parameter (program, PVM_VAL_TAG_INT);             \
-      pvm_append_symbolic_label_parameter (program, label_0);           \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, OP##i);                          \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, ba);                             \
-      pvm_append_symbolic_label_parameter (program, label_1);           \
-      pvm_append_symbolic_label (program, label_0);                     \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, bnt);                            \
-      pvm_append_type_parameter (program, PVM_VAL_TAG_LONG);            \
-      pvm_append_symbolic_label_parameter (program, "Lerror");          \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, OP##l);                          \
-                                                                        \
-      pvm_append_symbolic_label (program, label_1);                     \
-    } while (0)
-
-#define GEN_UNARY_OP_I(OP)                                              \
-  do                                                                    \
-    {                                                                   \
-      PVM_APPEND_INSTRUCTION (program, bnt);                            \
-      pvm_append_type_parameter (program, PVM_VAL_TAG_INT);             \
-      pvm_append_symbolic_label_parameter (program, "Lerror");          \
-                                                                        \
-      PVM_APPEND_INSTRUCTION (program, OP);                             \
-    } while (0)
-
-#define GEN_BINARY_OP_II(OP)                    \
-  GEN_BINARY_OP (OP, PVM_VAL_TAG_LONG, PVM_VAL_TAG_LONG)
-
-
   switch (PKL_AST_EXP_CODE (ast))
     {
     case PKL_AST_OP_AND:
-      return pkl_gen_op_and (ast, program, label);
+      return pkl_gen_op_logic (ast, program, label,
+                               PKL_AST_OP_AND);
       break;
     case PKL_AST_OP_OR:
-      return pkl_gen_op_or (ast, program, label);
+      return pkl_gen_op_logic (ast, program, label,
+                               PKL_AST_OP_OR);
       break;
     case PKL_AST_OP_NOT:
-      return pkl_gen_op_not (ast, program, label);
+      return pkl_gen_op_logic (ast, program, label,
+                               PKL_AST_OP_NOT);
       break;
 
+    case PKL_AST_OP_ADD:
+      return pkl_gen_op_arith (ast, program, label,
+                               PKL_AST_OP_ADD);
+      break;
+    case PKL_AST_OP_SUB:
+      return pkl_gen_op_arith (ast, program, label,
+                               PKL_AST_OP_SUB);
+      break;
+    case PKL_AST_OP_MUL:
+      return pkl_gen_op_arith (ast, program, label,
+                               PKL_AST_OP_MUL);
+      break;
+    case PKL_AST_OP_DIV:
+      return pkl_gen_op_arith (ast, program, label,
+                               PKL_AST_OP_DIV);
+      break;
+    case PKL_AST_OP_MOD:
+      return pkl_gen_op_arith (ast, program, label,
+                               PKL_AST_OP_MOD);
+      break;
+
+#if 0
     case PKL_AST_OP_BAND: GEN_BINARY_OP_II (bandl); break;
     case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (borl); break;
     case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (bxorl); break;
@@ -336,13 +293,8 @@ pkl_gen_exp (pkl_ast_node ast,
     case PKL_AST_OP_NE:   GEN_BINARY_OP_II (nel); break;
     case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsll); break;
     case PKL_AST_OP_SR:   GEN_BINARY_OP_II (bsrl); break;
-    case PKL_AST_OP_ADD:
-      return pkl_gen_op_add (ast, program, label);
-      break;
-    case PKL_AST_OP_SUB:  GEN_BINARY_OP_II (subl); break;
-    case PKL_AST_OP_MUL:  GEN_BINARY_OP_II (mull); break;
-    case PKL_AST_OP_DIV:  GEN_BINARY_OP_II (divl); break;
-    case PKL_AST_OP_MOD:  GEN_BINARY_OP_II (modl); break;
+#endif
+#if 0
     case PKL_AST_OP_LT:   GEN_BINARY_OP_II (ltl); break;
     case PKL_AST_OP_GT:   GEN_BINARY_OP_II (gtl); break;
     case PKL_AST_OP_LE:   GEN_BINARY_OP_II (lel); break;
@@ -350,7 +302,7 @@ pkl_gen_exp (pkl_ast_node ast,
       
     case PKL_AST_OP_NEG:     GEN_UNARY_OP_IL (neg); break;
     case PKL_AST_OP_BNOT:    GEN_UNARY_OP_IL (bnot); break;
-
+#endif
       
     default:
       fprintf (stderr, "gen: unhandled expression code %d\n",

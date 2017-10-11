@@ -391,7 +391,7 @@ expression:
                       || (!check_operand_unary (pkl_parser->ast, $1, &$2)))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operand to unary operator");
+                                     "invalid operand to unary operator.");
                         YYERROR;
                     }
                   $$ = pkl_ast_make_unary_exp ($1, $2);
@@ -415,7 +415,7 @@ expression:
                                                 0 /* allow_tuples */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to +");
+                                     "invalid operators to '+'.");
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD, $1, $3);
@@ -430,7 +430,7 @@ expression:
                                                 0 /* allow_tuples */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to -");
+                                     "invalid operators to '-'.");
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB, $1, $3);
@@ -445,7 +445,7 @@ expression:
                                                 0 /* allow_tuples */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to *");
+                                     "invalid operators to '*'.");
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL, $1, $3);
@@ -460,7 +460,7 @@ expression:
                                                 0 /* allow_tuples */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to /");
+                                     "invalid operators to '/'.");
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV, $1, $3);
@@ -475,7 +475,7 @@ expression:
                                                 0 /* allow_tuples */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to %");
+                                     "invalid operators to '%'.");
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD, $1, $3);
