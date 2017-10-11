@@ -22,8 +22,8 @@
    The fourth column is whether the type is signed.  */
 
 /* Please note that the type codes defined here should NOT be used
-   anywhere in the compiler other than in the parser.  To discriminate
-   between the integral types use their size and signedness.  */
+   anywhere in the compiler code.  To discriminate between the
+   integral types use their size and signedness.  */
 
 PKL_DEF_TYPE (PKL_TYPE_CHAR, "char", 8, 0)
 PKL_DEF_TYPE (PKL_TYPE_BYTE, "byte", 8, 0)

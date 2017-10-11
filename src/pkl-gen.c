@@ -157,64 +157,80 @@ pkl_gen_op (pkl_ast_node ast,
     default:                                            \
       break;                                            \
      }
+
+  pkl_ast_node type = PKL_AST_TYPE (ast);
   
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+  if (PKL_AST_TYPE_INTEGRAL (type))
     {
-    case PKL_TYPE_CHAR:
-    case PKL_TYPE_BYTE:
-    case PKL_TYPE_UINT8:
-      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
+      switch (PKL_AST_TYPE_SIZE (type))
+        {
+        case 8:
+          if (PKL_AST_TYPE_SIGNED (type))
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, i);
+              
+              PVM_APPEND_INSTRUCTION (program, push);
+              pvm_append_val_parameter (program, maski8);
+              PVM_APPEND_INSTRUCTION (program, bandiu);
+            }
+          else
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
+              
+              PVM_APPEND_INSTRUCTION (program, push);
+              pvm_append_val_parameter (program, masku8);
+              PVM_APPEND_INSTRUCTION (program, bandiu);
+            }
+          break;
 
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, masku8);
-      PVM_APPEND_INSTRUCTION (program, bandiu);
-      break;
+        case 16:
+          if (PKL_AST_TYPE_SIGNED (type))
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, i);
+              
+              PVM_APPEND_INSTRUCTION (program, push);
+              pvm_append_val_parameter (program, maski16);
+              PVM_APPEND_INSTRUCTION (program, bandiu);
+            }
+          else
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
+              
+              PVM_APPEND_INSTRUCTION (program, push);
+              pvm_append_val_parameter (program, masku16);
+              PVM_APPEND_INSTRUCTION (program, bandiu);
+            }
+          break;
 
-    case PKL_TYPE_INT8:
-      PVM_APPEND_ARITH_INSTRUCTION (what, i);
+        case 32:
+          if (PKL_AST_TYPE_SIGNED (type))
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, i);
+            }
+          else
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
+            }
+          break;
 
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, maski8);
-      PVM_APPEND_INSTRUCTION (program, bandiu);
-      break;
-      
-    case PKL_TYPE_UINT16:
-      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
+        case 64:
+          if (PKL_AST_TYPE_SIGNED (type))
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, l);
+            }
+          else
+            {
+              PVM_APPEND_ARITH_INSTRUCTION (what, lu);
+            }
+          break;
 
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, masku16);
-      PVM_APPEND_INSTRUCTION (program, bandiu);
-      break;
-
-    case PKL_TYPE_SHORT:
-    case PKL_TYPE_INT16:
-      PVM_APPEND_ARITH_INSTRUCTION (what, i);
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, maski16);
-      PVM_APPEND_INSTRUCTION (program, bandiu);
-      break;
-
-    case PKL_TYPE_UINT32:
-      PVM_APPEND_ARITH_INSTRUCTION (what, iu);
-      break;
-
-    case PKL_TYPE_INT:
-    case PKL_TYPE_INT32:
-      PVM_APPEND_ARITH_INSTRUCTION (what, i);
-      break;
-
-    case PKL_TYPE_UINT64:
-      PVM_APPEND_ARITH_INSTRUCTION (what, lu);
-      break;
-
-    case PKL_TYPE_LONG:
-    case PKL_TYPE_INT64:
-      PVM_APPEND_ARITH_INSTRUCTION (what, l);
-      break;
-
-    case PKL_TYPE_STRING:
-
+        default:
+          assert (0);
+          break;
+        }
+    }
+  else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING)
+    {
       switch (what)
         {
         case PKL_AST_OP_ADD:
@@ -242,11 +258,6 @@ pkl_gen_op (pkl_ast_node ast,
           assert (0);
           break;
         }
-      break;
-
-    default:
-      assert (0);
-      break;
     }
 
   return 1;
@@ -258,10 +269,11 @@ pkl_gen_op_int (pkl_ast_node ast,
                 size_t *label,
                 enum pkl_ast_op what)
 {
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)))
+  pkl_ast_node type = PKL_AST_TYPE (ast);
+
+  if (PKL_AST_TYPE_INTEGRAL (type)
+      && PKL_AST_TYPE_SIZE (type) == 32)
     {
-    case PKL_TYPE_INT:
-    case PKL_TYPE_INT32:
       if (what == PKL_AST_OP_AND)
         PVM_APPEND_INSTRUCTION (program, and);
       else if (what == PKL_AST_OP_OR)
@@ -270,11 +282,6 @@ pkl_gen_op_int (pkl_ast_node ast,
         PVM_APPEND_INSTRUCTION (program, not);
       else
         assert (0);
-      break;
-
-    default:
-      assert (0);
-      break;
     }
 
   return 1;
