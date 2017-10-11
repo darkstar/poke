@@ -888,27 +888,6 @@ instruction bsrlu () # ULONG UINT -> ULONG
   end
 end
 
-## Conversion instructions.
-
-instruction itol () # INT -> LONG
-  code
-  end
-end
-
-instruction itolu () # INT -> ULONG
-  code
-  end
-end
-
-instruction iutol () # UINT -> LONG
-  code
-  end
-end
-instruction iutolu () # UINT -> LONG
-  code
-  end
-end
-
 ## Branches
 
 instruction ba (?f) # Branch always.
@@ -940,4 +919,88 @@ instruction bntut (?n,?f) # Branch if not type undertop.
   end
 end
 
-# Conversion instructions.
+## Conversion instructions.
+
+instruction ltoi () # LONG -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int64_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltoiu () # LONG -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutoi () # ULONG -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutoiu () # ULONG -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itol () # INT -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itolu () # INT -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutol () # UINT -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutolu () # UINT -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutol () # ULONG -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltolu () # LONG -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutoi () # UINT -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itoiu () # INT -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end

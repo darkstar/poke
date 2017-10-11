@@ -385,12 +385,126 @@ pkl_gen_cast (pkl_ast_node ast,
               pvm_program program,
               size_t *label)
 {
-  /* INT <- INT
-       Sign extension or zero extension.
-     TUPLE <- TUPLE
-       Reordering. */
+  pkl_ast_node to_type;
+  pkl_ast_node from_type;
+
+  pkl_gen_1 (PKL_AST_CAST_EXP (ast),
+             program,
+             label);
   
-  return 0; 
+  to_type = PKL_AST_TYPE (ast);
+  from_type = PKL_AST_TYPE (PKL_AST_CAST_EXP (ast));
+
+#define SIGN_EXTEND                                                     \
+  do                                                                    \
+    {                                                                   \
+      int shift = 32 - to_type_size;                                    \
+      if (shift > 0)                                                    \
+        {                                                               \
+          /* Extend sign when casting to signed 8-bit and */            \
+          /* 16-bit values.  */                                         \
+          pvm_val val = pvm_make_int (shift);                           \
+                                                                        \
+          PVM_APPEND_INSTRUCTION (program, push);                       \
+          pvm_append_val_parameter (program, val);                      \
+          PVM_APPEND_INSTRUCTION (program, bsli);                       \
+          PVM_APPEND_INSTRUCTION (program, push);                       \
+          pvm_append_val_parameter (program, val);                      \
+          PVM_APPEND_INSTRUCTION (program, bsri);                       \
+        }                                                               \
+    } while (0)
+  
+  if (PKL_AST_TYPE_INTEGRAL (from_type)
+      && PKL_AST_TYPE_INTEGRAL (to_type))
+    {
+      size_t from_type_size = PKL_AST_TYPE_SIZE (from_type);
+      int from_type_sign = PKL_AST_TYPE_SIGNED (from_type);
+      
+      size_t to_type_size = PKL_AST_TYPE_SIZE (to_type);
+      int to_type_sign = PKL_AST_TYPE_SIGNED (to_type);
+
+      if (from_type_size == to_type_size)
+        {
+          if (from_type_sign == to_type_sign)
+            /* Wheee, nothing to do.  */
+            return 1;
+
+          if (from_type_size == 64)
+            {
+              if (to_type_sign)
+                /* uint64 -> int64 */
+                PVM_APPEND_INSTRUCTION (program, lutol);
+              else
+                /* int64 -> uint64 */
+                PVM_APPEND_INSTRUCTION (program, ltolu);
+            }
+          else
+            {
+              if (to_type_sign)
+                {
+                  /* uint32 -> int32
+                     uint16 -> int16
+                     uint8  -> int8 */
+                  PVM_APPEND_INSTRUCTION (program, iutoi);
+                  SIGN_EXTEND;
+                }
+              else
+                /* int32 -> uint32
+                   int16 -> uint16
+                   int8  -> uint8 */
+                PVM_APPEND_INSTRUCTION (program, itoiu);
+            }
+        }
+      else /* from_type_size != to_type_size */
+        {
+          if (from_type_size == 64)
+            {
+              if (from_type_sign && to_type_sign)
+                /* int64 -> int{32,16,8} */
+                PVM_APPEND_INSTRUCTION (program, ltoi);
+              else if (from_type_sign && !to_type_sign)
+                /* int64 -> uint{32,16,8} */
+                PVM_APPEND_INSTRUCTION (program, ltoiu);
+              else if (!from_type_sign && to_type_sign)
+                /* uint64 -> int{32,16,8} */
+                PVM_APPEND_INSTRUCTION (program, lutoi);
+              else
+                /* uint64 -> uint{32,16,8} */
+                PVM_APPEND_INSTRUCTION (program, lutoiu);
+
+              if (to_type_sign)
+                SIGN_EXTEND;
+            }
+          else
+            {
+              if (to_type_size == 64)
+                {
+                  if (from_type_sign && to_type_sign)
+                    /* int{32,16,8} -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, itol);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int{32,16,8} -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, itolu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint{32,16,8} -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, iutol);
+                  else
+                    /* uint{32,16,8} -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, iutolu);
+                }
+              else
+                {
+                  /* [u]int{32,16,8} -> [u]int{32,16,8} */
+                  if (to_type_sign)
+                    SIGN_EXTEND;
+                }
+            }
+        }
+    }
+
+#undef SIGN_EXTEND
+  
+  return 1;
 }
 
 static int

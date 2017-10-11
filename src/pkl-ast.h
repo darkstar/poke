@@ -263,16 +263,16 @@ pkl_ast_node pkl_ast_make_doc_string (const char *str,
 /* PKL_AST_CAST nodes represent cast constructions, which are
    applications of types to IO space.  XXX: explain.  */
 
-#define PKL_AST_CAST_ADDR(AST) ((AST)->cast.addr)
+#define PKL_AST_CAST_EXP(AST) ((AST)->cast.exp)
 
 struct pkl_ast_cast
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *addr;
+  union pkl_ast_node *exp;
 };
 
 pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
-                                pkl_ast_node addr);
+                                pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.

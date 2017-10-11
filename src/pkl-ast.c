@@ -371,12 +371,12 @@ pkl_ast_make_loop (pkl_ast_node pre, pkl_ast_node cond, pkl_ast_node post,
 /* Build and return an AST node for a cast.  */
 
 pkl_ast_node
-pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node addr)
+pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
 {
   pkl_ast_node cast = pkl_ast_make_node (PKL_AST_CAST);
 
   PKL_AST_TYPE (cast) = ASTREF (type);
-  PKL_AST_CAST_ADDR (cast) = ASTREF (addr);
+  PKL_AST_CAST_EXP (cast) = ASTREF (exp);
 
   return cast;
 }
@@ -537,7 +537,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_CAST:
 
-      pkl_ast_node_free (PKL_AST_CAST_ADDR (ast));
+      pkl_ast_node_free (PKL_AST_CAST_EXP (ast));
       break;
       
     case PKL_AST_STRING:
@@ -1107,7 +1107,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("CAST::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_SUBAST (addr, CAST_ADDR);
+      PRINT_AST_SUBAST (exp, CAST_EXP);
       break;
 
     default:
