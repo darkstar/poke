@@ -43,7 +43,7 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[])
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd vm_disas_cmd =
-  {"disassemble", "e", 0, NULL, pk_cmd_vm_disas, "disassemble EXP"};
+  {"disassemble", "e", 0, NULL, pk_cmd_vm_disas, "vm disassemble EXP"};
 
 struct pk_cmd *vm_cmds[] =
   {
