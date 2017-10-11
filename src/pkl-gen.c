@@ -156,6 +156,15 @@ pkl_gen_op_arith (pkl_ast_node ast,
     case PKL_AST_OP_MOD:                                \
       PVM_APPEND_INSTRUCTION (program, mod##suffix);    \
       break;                                            \
+    case PKL_AST_OP_BAND:                               \
+      PVM_APPEND_INSTRUCTION (program, band##suffix);   \
+      break;                                            \
+    case PKL_AST_OP_IOR:                                \
+      PVM_APPEND_INSTRUCTION (program, bor##suffix);    \
+      break;                                            \
+    case PKL_AST_OP_XOR:                                \
+      PVM_APPEND_INSTRUCTION (program, bxor##suffix);   \
+      break;                                            \
     default:                                            \
       assert (0);                                       \
       break;                                            \
@@ -251,44 +260,40 @@ pkl_gen_exp (pkl_ast_node ast,
   switch (PKL_AST_EXP_CODE (ast))
     {
     case PKL_AST_OP_AND:
-      return pkl_gen_op_logic (ast, program, label,
-                               PKL_AST_OP_AND);
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_AND);
       break;
     case PKL_AST_OP_OR:
-      return pkl_gen_op_logic (ast, program, label,
-                               PKL_AST_OP_OR);
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_OR);
       break;
     case PKL_AST_OP_NOT:
-      return pkl_gen_op_logic (ast, program, label,
-                               PKL_AST_OP_NOT);
+      return pkl_gen_op_logic (ast, program, label, PKL_AST_OP_NOT);
       break;
-
     case PKL_AST_OP_ADD:
-      return pkl_gen_op_arith (ast, program, label,
-                               PKL_AST_OP_ADD);
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_ADD);
       break;
     case PKL_AST_OP_SUB:
-      return pkl_gen_op_arith (ast, program, label,
-                               PKL_AST_OP_SUB);
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_SUB);
       break;
     case PKL_AST_OP_MUL:
-      return pkl_gen_op_arith (ast, program, label,
-                               PKL_AST_OP_MUL);
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_MUL);
       break;
     case PKL_AST_OP_DIV:
-      return pkl_gen_op_arith (ast, program, label,
-                               PKL_AST_OP_DIV);
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_DIV);
       break;
     case PKL_AST_OP_MOD:
-      return pkl_gen_op_arith (ast, program, label,
-                               PKL_AST_OP_MOD);
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_MOD);
       break;
-
+    case PKL_AST_OP_BAND:
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_BAND);
+      break;
+    case PKL_AST_OP_IOR:
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_IOR);
+      break;
+    case PKL_AST_OP_XOR:
+      return pkl_gen_op_arith (ast, program, label, PKL_AST_OP_XOR);
+      break;
+      
 #if 0
-    case PKL_AST_OP_BAND: GEN_BINARY_OP_II (bandl); break;
-    case PKL_AST_OP_IOR:  GEN_BINARY_OP_II (borl); break;
-    case PKL_AST_OP_XOR:  GEN_BINARY_OP_II (bxorl); break;
-
     case PKL_AST_OP_EQ:   GEN_BINARY_OP_II (eql); break;
     case PKL_AST_OP_NE:   GEN_BINARY_OP_II (nel); break;
     case PKL_AST_OP_SL:   GEN_BINARY_OP_II (bsll); break;
