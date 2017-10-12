@@ -45,13 +45,15 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   pvm_program prog;
   pvm_val val;
   size_t i;
+  int pvm_ret;
 
   assert (argc == 2);
 
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
   prog = PK_CMD_ARG_EXP (argv[0]);
 
-  if (pvm_run (prog, &val) != PVM_EXIT_OK)
+  pvm_ret = pvm_run (prog, &val);
+  if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 
   if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
@@ -69,7 +71,8 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
       assert (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP);
       prog = PK_CMD_ARG_EXP (argv[1]);
 
-      if (pvm_run (prog, &val) != PVM_EXIT_OK)
+      pvm_ret = pvm_run (prog, &val);
+      if (pvm_ret != PVM_EXIT_OK)
         goto rterror;
 
       pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
@@ -105,7 +108,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   return 1;
 
  rterror:
-  printf ("run-time error.\n");
+  printf ("run-time error: %s\n", pvm_error (pvm_ret));
   return 0;
 }
 

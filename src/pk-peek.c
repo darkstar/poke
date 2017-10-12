@@ -32,6 +32,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
   pk_io_off address;
   int c;
   pvm_val val;
+  int pvm_ret;
 
   assert (argc == 1);
 
@@ -44,11 +45,9 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
       assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
       prog = PK_CMD_ARG_EXP (argv[0]);
 
-      if (pvm_run (prog, &val) != PVM_EXIT_OK)
-        {
-          printf ("run-time error.\n");
-          return 0;
-        }
+      pvm_ret = pvm_run (prog, &val);
+      if (pvm_ret != PVM_EXIT_OK)
+        goto rterror;
 
       if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
         {
@@ -68,6 +67,10 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
     printf ("0x%08jx 0x%x\n", address, c);
 
   return 1;
+
+ rterror:
+  printf ("run-time error: %s\n", pvm_error (pvm_ret));
+  return 0;
 }
 
 static int
