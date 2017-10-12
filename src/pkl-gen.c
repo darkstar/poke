@@ -539,7 +539,7 @@ pkl_gen_cast (pkl_ast_node ast,
                 case 64:
                   if (from_type_sign && to_type_sign)
                     /* int32 -> int64 */
-                    PVM_APPEND_INSTRUCTION (program, itoui);
+                    PVM_APPEND_INSTRUCTION (program, itol);
                   else if (from_type_sign && !to_type_sign)
                     /* int32 -> uint64 */
                     PVM_APPEND_INSTRUCTION (program, itolu);

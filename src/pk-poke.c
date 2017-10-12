@@ -77,21 +77,39 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 
       pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
-      if (PVM_IS_INT (val) || PVM_IS_UINT (val))
+      if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
+        {
+          uint8_t pval = PVM_VAL_BYTE (val);
+          pk_cmd_poke_byte (address, pval);
+        }
+      else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
+        {
+          uint16_t pval = PVM_VAL_HALF (val);
+
+          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
+          pk_cmd_poke_byte (address, pval & 0xff);
+        }
+      else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
         {
           uint32_t pval = PVM_VAL_NUMBER (val);
 
-          for (i = 0; i < 4; i++)
-            pk_cmd_poke_byte (address,
-                              (pval >> ((3 - i) * 8)) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 24) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 16) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
+          pk_cmd_poke_byte (address, pval & 0xff);
         }
       else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
         {
           uint64_t pval = PVM_VAL_NUMBER (val);
 
-          for (i = 0; i < 8; i++)
-            pk_cmd_poke_byte (address,
-                              (pval >> ((7 - i) * 8)) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 56) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 48) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 40) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 32) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 24) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 16) & 0xff);
+          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
+          pk_cmd_poke_byte (address, pval & 0xff);
         }
       else if (PVM_IS_STRING (val))
         {
