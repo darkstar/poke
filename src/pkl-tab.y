@@ -293,6 +293,7 @@ check_array_type (struct pkl_parser *parser,
       pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (t);
       
       /* First check the type of the element.  */
+      assert (PKL_AST_TYPE (elem));
       if (*type == NULL)
         *type = pkl_ast_type_dup (PKL_AST_TYPE (elem));
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (elem), *type))
@@ -380,7 +381,7 @@ check_array_type (struct pkl_parser *parser,
 %type <opcode> unary_operator
 
 %type <ast> program program_elem_list program_elem
-%type <ast> expression expression_primary
+%type <ast> expression primary
 %type <ast> array_elem_list array_elem
 %type <ast> type_specifier
 
@@ -451,7 +452,7 @@ program_elem:
  */
 
 expression:
-	  expression_primary
+	  primary
         | unary_operator expression %prec UNARY
           	{
                   if (($1 == PKL_AST_OP_NOT
@@ -775,26 +776,26 @@ unary_operator:
 	| '!'		{ $$ = PKL_AST_OP_NOT; }
 	;
 
-expression_primary:
+primary:
 	  INTEGER
         | CHAR
         | STR
-        | IDENTIFIER
+          /*        | IDENTIFIER */
         | '(' expression ')'
 		{ $$ = $2; }
-	| expression_primary INC
+	| primary INC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC,
                                                PKL_AST_TYPE ($1),
                                                $1);
                 }
-        | expression_primary DEC
+        | primary DEC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTDEC,
                                                PKL_AST_TYPE ($1),
                                                $1);
                 }
-        | expression_primary '[' expression ']' %prec '.'
+        | primary '[' expression ']' %prec '.'
         	{
                   if (PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE ($1)) < 1)
                     {
