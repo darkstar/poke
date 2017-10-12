@@ -133,7 +133,7 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
   if (end != NULL)
     *end = buffer + parser->nchars;
 
-  //  pkl_tab__delete_buffer (yybuffer, parser);
+  pkl_tab__delete_buffer (yybuffer, parser->scanner);
   pkl_parser_free (parser);
 
   return ret;
