@@ -42,6 +42,8 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
     goto rterror;
   
   /* Get the result value and print it out.  */
+
+  printf ("XXX: 0x%lx\n", val);
   
   if (PVM_IS_INT (val))
     printf ("%d\n", PVM_VAL_INT (val));

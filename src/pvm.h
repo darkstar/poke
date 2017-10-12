@@ -27,10 +27,10 @@
 /* The pvm_val opaque type implements values that are native to the
    poke virtual machine:
 
-   - Signed 32-bit integers ("ints").
-   - Unsigned 32-bit integers ("uints").
-   - Signed 64-bit integers ("longs").
-   - Unsigned 64-bit integers ("ulongs").
+   - Signed ("bytes") and unsigned ("ubytes") 8-bit integers.
+   - Signed ("halfs") and unsigned ("uhalfs") 16-bit integers.
+   - Signed ("ints") and unsigned ("uints") 32-bit integers.
+   - Signed ("longs") and unsigned ("ulongs") 64-bit integers.
    - Strings.
    - Arrays.
    - Tuples.
@@ -49,13 +49,33 @@ typedef uint64_t pvm_val;
 
 #define PVM_VAL_TAG(V) (((V) >> 61) & 0x7)
 
-#define PVM_VAL_TAG_INT  0x0UL
-#define PVM_VAL_TAG_UINT 0x1UL
-#define PVM_VAL_TAG_LONG 0x2UL
-#define PVM_VAL_TAG_ULONG 0x3UL
-#define PVM_VAL_TAG_STR  0x4UL
-#define PVM_VAL_TAG_ARR  0x5UL
-#define PVM_VAL_TAG_TUP  0x6UL
+#define PVM_VAL_TAG_INT   0x0UL
+#define PVM_VAL_TAG_BYTE  0x1UL
+#define PVM_VAL_TAG_UBYTE 0x2UL
+#define PVM_VAL_TAG_HALF  0x3UL
+#define PVM_VAL_TAG_UHALF 0x4UL
+#define PVM_VAL_TAG_UINT  0x5UL
+#define PVM_VAL_TAG_BOX   0x6UL
+/* Note that there is no tab 0x7.  It is used to implement PVM_NULL
+   below.  */
+
+/* 8-bit integers (both signed and unsigned) are encoded in the
+   least-significative 8 bits of pvm_val.  */
+
+#define PVM_VAL_BYTE(V) ((int8_t) ((V) & 0xff))
+#define PVM_VAL_UBYTE(V) ((uint8_t) ((V) & 0xff))
+
+pvm_val pvm_make_byte (int8_t value);
+pvm_val pvm_make_ubyte (uint8_t value);
+
+/* 16-bit integers (both signed and unsigned) are encoded in the
+   least-significative 16 bits of pvm_val.  */
+
+#define PVM_VAL_HALF(V) ((int16_t) ((V) & 0xffff))
+#define PVM_VAL_UHALF(V) ((int16_t) ((V) & 0xffff))
+
+pvm_val pvm_make_half (int16_t value);
+pvm_val pvm_make_uhalf (uint16_t value);
 
 /* 32-bit integers (both signed and unsigned) are encoded in the
    least-significative 32 bits of pvm_val.  */
@@ -73,24 +93,48 @@ pvm_val pvm_make_uint (uint32_t value);
 
 #define PVM_VAL_PTR(V) ((uint64_t *)((V) << 3))
 
-/* 64-bit integers (both signed and unsigned) are pointed by
-   PVM_VAL_PTR.  */
+/* A box is a header for a boxed value.  It is of type
+   `pvm_val_box'.  */
 
-#define PVM_VAL_LONG(V) ((int64_t) *PVM_VAL_PTR((V)))
-#define PVM_VAL_ULONG(V) ((uint64_t) *PVM_VAL_PTR((V)))
+typedef uint64_t pvm_val_box;
+
+#define PVM_VAL_BOX(V) ((pvm_val_box) *PVM_VAL_PTR((V)))
+
+/* The 3 most-significative bits of pvm_val_vox contain the box tag,
+   which specifies the type of the value stored in the box.  */
+
+#define PVM_VAL_BOX_TAG(B) (((B) >> 61) & 0x7)
+
+#define PVM_VAL_BOX_TAG_LONG  0x0UL
+#define PVM_VAL_BOX_TAG_ULONG 0x1UL
+#define PVM_VAL_BOX_TAG_STR   0x2UL
+#define PVM_VAL_BOX_TAG_ARR   0x3UL
+#define PVM_VAL_BOX_TAG_TUP   0x4UL
+
+/* The remaining 61 bits of pvm_val_vox contain a pointer to the
+   stored value.  Again, the pointer must be aligned to 8 bytes.  */
+
+#define PVM_VAL_BOX_PTR(B) ((uint64_t *)((B) << 3))
+
+/* 64-bit integers (both signed and unsigned) are pointed by
+   PVM_VAL_BOX_PTR.  */
+
+#define PVM_VAL_LONG(V) ((int64_t) *PVM_VAL_BOX_PTR(*PVM_VAL_PTR((V))))
+#define PVM_VAL_ULONG(V) ((uint64_t) *PVM_VAL_BOX_PTR(*PVM_VAL_PTR((V))))
 
 pvm_val pvm_make_long (int64_t value);
 pvm_val pvm_make_ulong (uint64_t value);
 
-/* Strings are also pointed by PVM_VAL_PTR.  */
+/* Strings are also pointed by PVM_VAL_BOX_PTR.  */
 
-#define PVM_VAL_STR(V) ((char *) PVM_VAL_PTR((V)))
+#define PVM_VAL_STR(V) ((char *) PVM_VAL_BOX_PTR(*PVM_VAL_PTR((V))))
 
 pvm_val pvm_make_string (const char *value);
 
-/* Arrays are stored in pvm_array structs pointed by PVM_VAL_PTR.  */
+/* Arrays are stored in pvm_array structs pointed by
+   PVM_VAL_BOX_PTR.  */
 
-#define PVM_VAL_ARR(V) ((struct pvm_array *) PVM_VAL_PTR((V)))
+#define PVM_VAL_ARR(V) ((struct pvm_array *) PVM_VAL_BOX_PTR(*PVM_VAL_PTR((V))))
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_NELEMS(V) (PVM_VAL_ARR(V)->nelems)
 #define PVM_VAL_ARR_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
@@ -106,9 +150,10 @@ typedef struct pvm_arr *pvm_arr;
 
 pvm_val pvm_make_array (size_t nelems, int type);
 
-/* Tuples are stored in pvm_tuple structs pointed by PVM_VAL_PTR.  */
+/* Tuples are stored in pvm_tuple structs pointed by
+   PVM_VAL_BOX_PTR.  */
 
-#define PVM_VAL_TUP(V) ((pvm_tuple) PVM_VAL_PTR((V)))
+#define PVM_VAL_TUP(V) ((pvm_tuple) PVM_VAL_BOX_PTR(*PVM_VAL_PTR((V))))
 #define PVM_VAL_TUP_NELEMS(V) (PVM_VAL_TUP(V)->nelems)
 #define PVM_VAL_TUP_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
 
