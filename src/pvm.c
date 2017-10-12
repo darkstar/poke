@@ -164,13 +164,14 @@ pvm_make_string (const char *str)
 }
 
 pvm_val
-pvm_make_array (int type, size_t nelem)
+pvm_make_array (int type, int arrayof, size_t nelem)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
   pvm_array arr = xmalloc (sizeof (struct pvm_array));
 
   arr->nelem = nelem;
   arr->type = type;
+  arr->arrayof = arrayof;
   arr->elems = xmalloc (sizeof (pvm_val) * nelem);
   memset (arr->elems, 0, sizeof (pvm_val) * nelem);
   

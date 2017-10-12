@@ -144,19 +144,21 @@ pvm_val pvm_make_string (const char *value);
 
 #define PVM_VAL_ARR(V) (PVM_VAL_BOX_ARR (PVM_VAL_BOX ((V))))
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
+#define PVM_VAL_ARR_ARRAYOF(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_NELEM(V) (PVM_VAL_ARR(V)->nelem)
 #define PVM_VAL_ARR_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
 
 struct pvm_array
 {
   int type;
+  int arrayof;
   size_t nelem;
   pvm_val *elems;
 };
 
 typedef struct pvm_array *pvm_array;
 
-pvm_val pvm_make_array (int type, size_t nelem);
+pvm_val pvm_make_array (int type, int arrayof, size_t nelem);
 
 /* Tuples are also boxed.  */
 
