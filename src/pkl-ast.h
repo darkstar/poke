@@ -668,6 +668,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_SIGNED(AST) ((AST)->type.signed_p)
+#define PKL_AST_TYPE_ARRAYOF(AST) ((AST)->type.arrayof)
 #define PKL_AST_TYPE_SIZE(AST) ((AST)->type.size)
 #define PKL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
 #define PKL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
@@ -680,15 +681,20 @@ struct pkl_ast_type
 
   enum pkl_ast_type_code code;
   int signed_p;
+  int arrayof;
   size_t size;
   union pkl_ast_node *enumeration;
   union pkl_ast_node *strt;
 };
 
 pkl_ast_node pkl_ast_make_type (enum pkl_ast_type_code code,
-                                int signed_p, size_t size,
+                                int signed_p,
+                                size_t size,
                                 pkl_ast_node enumeration,
                                 pkl_ast_node strct);
+
+pkl_ast_node pkl_ast_type_dup (pkl_ast_node type);
+int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 
 /* PKL_AST_LOC nodes represent the current struct's location
    counter.

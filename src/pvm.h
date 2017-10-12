@@ -58,6 +58,14 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_BOX   0x6UL
 /* Note that there is no tab 0x7.  It is used to implement PVM_NULL
    below.  */
+/* Note also that the tags below are stored in the box, not in the
+   val.  See below in this file.  */
+#define PVM_VAL_TAG_LONG  0x8
+#define PVM_VAL_TAG_ULONG 0x9
+#define PVM_VAL_TAG_STR   0xa
+#define PVM_VAL_TAG_ARR   0xb
+#define PVM_VAL_TAG_TUP   0xc
+
 
 /* 8-bit integers (both signed and unsigned) are encoded in the
    least-significative 8 bits of pvm_val.  */
@@ -105,11 +113,6 @@ pvm_val pvm_make_uint (uint32_t value);
 
 struct pvm_val_box
 {
-#define PVM_VAL_BOX_TAG_LONG  0x0
-#define PVM_VAL_BOX_TAG_ULONG 0x1
-#define PVM_VAL_BOX_TAG_STR   0x2
-#define PVM_VAL_BOX_TAG_ARR   0x3
-#define PVM_VAL_BOX_TAG_TUP   0x4
   uint8_t tag;
   union
   {
@@ -141,19 +144,19 @@ pvm_val pvm_make_string (const char *value);
 
 #define PVM_VAL_ARR(V) (PVM_VAL_BOX_ARR (PVM_VAL_BOX ((V))))
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
-#define PVM_VAL_ARR_NELEMS(V) (PVM_VAL_ARR(V)->nelems)
+#define PVM_VAL_ARR_NELEM(V) (PVM_VAL_ARR(V)->nelem)
 #define PVM_VAL_ARR_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
 
 struct pvm_array
 {
-  char type;
-  size_t nelems;
+  int type;
+  size_t nelem;
   pvm_val *elems;
 };
 
-typedef struct pvm_arr *pvm_arr;
+typedef struct pvm_array *pvm_array;
 
-pvm_val pvm_make_array (size_t nelems, int type);
+pvm_val pvm_make_array (int type, size_t nelem);
 
 /* Tuples are also boxed.  */
 
@@ -190,22 +193,22 @@ void pvm_val_free (pvm_val val);
 #define PVM_IS_UINT(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_UINT)
 #define PVM_IS_LONG(V)                                                  \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_LONG)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_LONG)
 #define PVM_IS_ULONG(V)                                                 \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_ULONG)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ULONG)
 #define PVM_IS_ULONG(V)                                                 \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_ULONG)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ULONG)
 #define PVM_IS_STRING(V)                                                 \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_STR)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_STR)
 #define PVM_IS_ARR(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_ARR)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ARR)
 #define PVM_IS_TUP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_BOX_TAG_ARR)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ARR)
 
 #define PVM_IS_NUMBER(V)                                        \
   (PVM_IS_BYTE(V) || PVM_IS_UBYTE(V)                            \

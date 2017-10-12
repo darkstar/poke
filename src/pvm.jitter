@@ -1979,3 +1979,154 @@ instruction butolu () # UBYTE -> ULONG
       = pvm_make_ulong ((uint64_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
   end
 end
+
+## Array instructions.
+
+# Array creation.
+
+instruction mkab () # ULONG -> ARRB
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_BYTE, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkabu () # ULONG -> ARRBU
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_UBYTE, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkah () # ULONG -> ARRH
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_HALF, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkahu () # ULONG -> ARRHU
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_UHALF, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkai () # ULONG -> ARRI
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_INT, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkaiu () # ULONG -> ARRIU
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_UINT, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkal () # ULONG -> ARRL
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_LONG, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkalu () # ULONG -> ARRLU
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_ULONG, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkas () # ULONG -> ARRS
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_STR, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction mkaa () # ULONG -> ARRS
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_array (PVM_VAL_TAG_ARR, PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+# Array composition.
+
+# Array indexing.
+
+instruction abref () # ARRB ULONG -> HALF
+  code
+#define F(res, a, b) \
+  { res = pvm_make_byte (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction aburef () # ARRBU ULONG -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ubyte (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction ahref () # ARRH ULONG -> HALF
+  code
+#define F(res, a, b) \
+  { res = pvm_make_half (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction ahuref () # ARRHU ULONG -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uhalf (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction airef () # ARRI ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_int (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction aiuref () # ARRIU ULONG -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_uint (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction alref () # ARRL ULONG -> INT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_long (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
+instruction aluref () # ARRLU ULONG -> UINT
+  code
+#define F(res, a, b) \
+  { res = pvm_make_ulong (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+

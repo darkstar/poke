@@ -19,6 +19,7 @@
 #include <config.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "pvm.h"
 
@@ -49,17 +50,17 @@ pvm_val_free (pvm_val val)
 
         switch (PVM_VAL_BOX_TAG (box))
         {
-        case PVM_VAL_BOX_TAG_STR:
+        case PVM_VAL_TAG_STR:
           free (PVM_VAL_BOX_STR (box));
           break;
-        case PVM_VAL_BOX_TAG_ARR:
+        case PVM_VAL_TAG_ARR:
           free (PVM_VAL_BOX_ARR (box));
           break;
-        case PVM_VAL_BOX_TAG_TUP:
+        case PVM_VAL_TAG_TUP:
           free (PVM_VAL_BOX_TUP (box));
           break;
-        case PVM_VAL_BOX_TAG_LONG:
-        case PVM_VAL_BOX_TAG_ULONG:
+        case PVM_VAL_TAG_LONG:
+        case PVM_VAL_TAG_ULONG:
         default:
           break;
         }
@@ -134,7 +135,7 @@ pvm_make_long (int64_t value)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_BOX_TAG_LONG;
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_LONG;
   PVM_VAL_BOX_LONG (box) = value;
 
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
@@ -145,7 +146,7 @@ pvm_make_ulong (uint64_t value)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_BOX_TAG_ULONG;
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_ULONG;
   PVM_VAL_BOX_ULONG (box) = value;
 
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
@@ -156,8 +157,25 @@ pvm_make_string (const char *str)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_BOX_TAG_STR;
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_STR;
   PVM_VAL_BOX_STR (box) = xstrdup (str);
+
+  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+}
+
+pvm_val
+pvm_make_array (int type, size_t nelem)
+{
+  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_array arr = xmalloc (sizeof (struct pvm_array));
+
+  arr->nelem = nelem;
+  arr->type = type;
+  arr->elems = xmalloc (sizeof (pvm_val) * nelem);
+  memset (arr->elems, 0, sizeof (pvm_val) * nelem);
+  
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_ARR;
+  PVM_VAL_BOX_ARR (box) = arr;
 
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }

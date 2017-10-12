@@ -275,19 +275,20 @@ check_array_type (struct pkl_parser *parser,
       
       /* First check the type of the element.  */
       if (*type == NULL)
-        *type = PKL_AST_TYPE (elem);
-      else if (PKL_AST_TYPE (elem) != *type)
+        *type = pkl_ast_type_dup (PKL_AST_TYPE (elem));
+      else if (!pkl_ast_type_equal (PKL_AST_TYPE (elem), *type))
         {
           pkl_tab_error (llocp, parser,
                          "array element is of the wrong type.");
           return 0;
-        }
-
+        }        
+      
       /* Adjust the size of the array.
          XXX: support indexes in array literals.  */
       *nelem += 1;
     }
 
+  PKL_AST_TYPE_ARRAYOF (*type) += 1;
   return 1;
 }
  

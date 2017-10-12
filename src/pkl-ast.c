@@ -268,6 +268,36 @@ pkl_ast_make_type (enum pkl_ast_type_code code, int signed_p,
   return type;
 }
 
+/* Allocate and return a duplicated type AST node.  */
+
+pkl_ast_node
+pkl_ast_type_dup (pkl_ast_node type)
+{
+  pkl_ast_node new
+    = pkl_ast_make_type (PKL_AST_TYPE_CODE (type),
+                         PKL_AST_TYPE_SIGNED (type),
+                         PKL_AST_TYPE_SIZE (type),
+                         PKL_AST_TYPE_ENUMERATION (type),
+                         PKL_AST_TYPE_STRUCT (type));
+  
+  PKL_AST_TYPE_NAME (new) = xstrdup (PKL_AST_TYPE_NAME (type));
+  PKL_AST_TYPE_ARRAYOF (new) = PKL_AST_TYPE_ARRAYOF (type);
+  return new;
+}
+
+/* Return whether two given type AST nodes are equal, i.e. they are
+   the same type.  */
+
+int
+pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2)
+{
+  return (PKL_AST_TYPE_SIGNED (t1) == PKL_AST_TYPE_SIGNED (t2)
+          && PKL_AST_TYPE_SIZE (t1) == PKL_AST_TYPE_SIZE (t2)
+          && PKL_AST_TYPE_ENUMERATION (t1) == PKL_AST_TYPE_ENUMERATION (t2)
+          && PKL_AST_TYPE_STRUCT (t1) == PKL_AST_TYPE_STRUCT (t2)
+          && PKL_AST_TYPE_ARRAYOF (t1) == PKL_AST_TYPE_ARRAYOF (t2));
+}
+
 /* Build and return an AST node for a struct.  */
 
 pkl_ast_node
@@ -384,12 +414,12 @@ pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
-pkl_ast_make_array (pkl_ast_node etype, size_t nelem,
+pkl_ast_make_array (pkl_ast_node type, size_t nelem,
                     pkl_ast_node elems)
 {
   pkl_ast_node array = pkl_ast_make_node (PKL_AST_ARRAY);
 
-  PKL_AST_TYPE (array) = ASTREF (etype);
+  PKL_AST_TYPE (array) = ASTREF (type);
   PKL_AST_ARRAY_NELEM (array) = nelem;
   PKL_AST_ARRAY_ELEMS (array) = ASTREF (elems);
 
@@ -1026,7 +1056,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("ARRAY::\n");
 
       PRINT_AST_IMM (nelem, ARRAY_NELEM, "%lu");
-      PRINT_AST_SUBAST (etype, TYPE);
+      PRINT_AST_SUBAST (type, TYPE);
       IPRINTF ("elems:\n");
       PRINT_AST_SUBAST_CHAIN (ARRAY_ELEMS);
       break;
@@ -1106,6 +1136,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
+      PRINT_AST_IMM (arrayof, TYPE_ARRAYOF, "%d");
       IPRINTF ("code:\n");
       {
 #define PKL_DEF_TYPE(CODE,NAME,WIDTH,SIZE) NAME,
@@ -1118,8 +1149,12 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
             "struct",
           };
 #undef PKL_DEF_TYPE
-
-        IPRINTF ("  %s\n", pkl_type_names[PKL_AST_TYPE_CODE (ast)]);
+        size_t i;
+        
+        IPRINTF ("  %s", pkl_type_names[PKL_AST_TYPE_CODE (ast)]);
+        for (i = 0; i < PKL_AST_TYPE_ARRAYOF (ast); i++)
+          printf ("[]");
+        printf ("\n");
       }
       
       PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
