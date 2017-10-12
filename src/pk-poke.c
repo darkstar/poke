@@ -23,16 +23,80 @@
 #include "pk-io.h"
 
 static int
-pk_cmd_poke_byte (pk_io_off address, uint8_t byte)
+poke_byte (pk_io_off *address, uint8_t byte)
 {
   if (pk_io_putc ((int) byte) == PK_EOF)
     {
       printf ("Error writing byte 0x%x to 0x%08jx\n",
-              byte, address);
+              byte, *address);
       return 0;
     }
 
-  printf ("0x%08jx <- 0x%x\n", address, byte);
+  printf ("0x%08jx <- 0x%x\n", *address, byte);
+  *address += 1;
+  return 1;
+}
+
+static int
+poke_val (pk_io_off *address, pvm_val val)
+{
+  if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
+    {
+      uint8_t pval = PVM_VAL_BYTE (val);
+      poke_byte (address, pval);
+    }
+  else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
+    {
+      uint16_t pval = PVM_VAL_HALF (val);
+      
+      poke_byte (address, (pval >> 8) & 0xff);
+      poke_byte (address, pval & 0xff);
+    }
+  else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
+    {
+      uint32_t pval = PVM_VAL_NUMBER (val);
+      
+      poke_byte (address, (pval >> 24) & 0xff);
+      poke_byte (address, (pval >> 16) & 0xff);
+      poke_byte (address, (pval >> 8) & 0xff);
+      poke_byte (address, pval & 0xff);
+    }
+  else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
+    {
+      uint64_t pval = PVM_VAL_NUMBER (val);
+      
+      poke_byte (address, (pval >> 56) & 0xff);
+      poke_byte (address, (pval >> 48) & 0xff);
+      poke_byte (address, (pval >> 40) & 0xff);
+      poke_byte (address, (pval >> 32) & 0xff);
+      poke_byte (address, (pval >> 24) & 0xff);
+      poke_byte (address, (pval >> 16) & 0xff);
+      poke_byte (address, (pval >> 8) & 0xff);
+      poke_byte (address, pval & 0xff);
+    }
+  else if (PVM_IS_ARR (val))
+    {
+      size_t nelem;
+      size_t idx;
+
+      nelem = PVM_VAL_ARR_NELEM (val);
+      for (idx = 0; idx < nelem; idx++)
+        {
+          poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
+        }
+    }
+  else if (PVM_IS_STRING (val))
+    {
+      size_t i;
+      const char *pval = PVM_VAL_STR (val);
+      size_t slen = strlen (pval);
+      
+      for (i = 0; i < slen; i++)
+        poke_byte (address, pval[i]);
+    }
+  else
+    assert (0); /* XXX support more types.  */
+
   return 1;
 }
 
@@ -44,7 +108,6 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   pk_io_off address;
   pvm_program prog;
   pvm_val val;
-  size_t i;
   int pvm_ret;
 
   assert (argc == 2);
@@ -65,7 +128,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
   address = PVM_VAL_NUMBER (val);
 
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
-    pk_cmd_poke_byte (address, 0);
+    poke_byte (&address, 0);
   else
     {
       assert (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_EXP);
@@ -77,56 +140,15 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 
       pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
-      if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
-        {
-          uint8_t pval = PVM_VAL_BYTE (val);
-          pk_cmd_poke_byte (address, pval);
-        }
-      else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
-        {
-          uint16_t pval = PVM_VAL_HALF (val);
-
-          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
-          pk_cmd_poke_byte (address, pval & 0xff);
-        }
-      else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
-        {
-          uint32_t pval = PVM_VAL_NUMBER (val);
-
-          pk_cmd_poke_byte (address, (pval >> 24) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 16) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
-          pk_cmd_poke_byte (address, pval & 0xff);
-        }
-      else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
-        {
-          uint64_t pval = PVM_VAL_NUMBER (val);
-
-          pk_cmd_poke_byte (address, (pval >> 56) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 48) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 40) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 32) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 24) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 16) & 0xff);
-          pk_cmd_poke_byte (address, (pval >> 8) & 0xff);
-          pk_cmd_poke_byte (address, pval & 0xff);
-        }
-      else if (PVM_IS_STRING (val))
-        {
-          const char *pval = PVM_VAL_STR (val);
-          size_t slen = strlen (pval);
-
-          for (i = 0; i < slen; i++)
-            pk_cmd_poke_byte (address, pval[i]);
-        }
-      else
-        assert (0); /* XXX support more types.  */
+      if (!poke_val (&address, val))
+        goto error;
     }
 
   return 1;
 
  rterror:
   printf ("run-time error: %s\n", pvm_error (pvm_ret));
+ error:
   return 0;
 }
 

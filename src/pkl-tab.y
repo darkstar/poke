@@ -265,11 +265,12 @@ check_array_type (struct pkl_parser *parser,
                   size_t *nelem)
 {
   pkl_ast_node t;
+  size_t index;
 
   *type = NULL;
   *nelem = 0;
 
-  for (t = elems; t; t = PKL_AST_CHAIN (t))
+  for (index = 0, t = elems; t; index++, t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (t);
       
@@ -285,6 +286,7 @@ check_array_type (struct pkl_parser *parser,
       
       /* Adjust the size of the array.
          XXX: support indexes in array literals.  */
+      PKL_AST_ARRAY_ELEM_INDEX (t) = index;
       *nelem += 1;
     }
 

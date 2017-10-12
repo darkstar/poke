@@ -675,6 +675,67 @@ pkl_gen_cast (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_array (pkl_ast_node ast,
+               pvm_program program,
+               size_t *label)
+{
+  pkl_ast_node array_type, e;
+  pvm_val nelem;
+  pvm_val arrayof;
+
+  array_type = PKL_AST_TYPE (ast);
+  nelem = pvm_make_ulong (PKL_AST_ARRAY_NELEM (ast));
+  arrayof = pvm_make_int (PKL_AST_TYPE_ARRAYOF (array_type));
+  
+  if (PKL_AST_TYPE_INTEGRAL (array_type))
+    {
+      switch (PKL_AST_TYPE_SIZE (array_type))
+        {
+        case 32:
+          /* Create the array.  */
+
+          PVM_APPEND_INSTRUCTION (program, push);
+          pvm_append_val_parameter (program, nelem);
+          
+          PVM_APPEND_INSTRUCTION (program, push);
+          pvm_append_val_parameter (program, arrayof);
+          
+          PVM_APPEND_INSTRUCTION (program, mkai);
+
+          /* Insert the elements.  */
+          for (e = PKL_AST_ARRAY_ELEMS (ast);
+               e;
+               e = PKL_AST_CHAIN (e))
+            {
+              pvm_val idx = pvm_make_ulong (PKL_AST_ARRAY_ELEM_INDEX (e));
+              
+              PVM_APPEND_INSTRUCTION (program, push);
+              pvm_append_val_parameter (program, idx);
+
+              pkl_gen_1 (PKL_AST_ARRAY_ELEM_EXP (e), program, label);
+
+              PVM_APPEND_INSTRUCTION (program, aiset);
+            }
+          
+          break;
+        case 8:
+        case 16:
+        case 64:
+        default:    
+          assert (0);
+          break;
+        }
+    }
+  else if (PKL_AST_TYPE_CODE (array_type) == PKL_AST_STRING)
+    {
+      assert (0);
+    }
+
+  
+  return 1;
+}
+
+static int
 pkl_gen_1 (pkl_ast_node ast,
            pvm_program program,
            size_t *label)
@@ -708,6 +769,11 @@ pkl_gen_1 (pkl_ast_node ast,
 
     case PKL_AST_CAST:
       if (!pkl_gen_cast (ast, program, label))
+        goto error;
+      break;
+
+    case PKL_AST_ARRAY:
+      if (!pkl_gen_array (ast, program, label))
         goto error;
       break;
 

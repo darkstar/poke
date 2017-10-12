@@ -1993,20 +1993,19 @@ instruction mkai () # ULONG INT -> ARRI[N]
   end
 end
 
-# Array composition.
+# Array setting and composition.
 
-instruction aiset () # ARRI ULONG INT -> ARRB
+instruction aiset () # ARRI ULONG (INT|ARRI) -> ARRI
   code
     uint64_t idx;
-    int32_t value;
+    pvm_val val;
 
-    value = PVM_VAL_INT (JITTER_TOP_STACK ());
+    val= JITTER_TOP_STACK ();
     idx = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
-    
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
 
-    PVM_VAL_ARR_ELEM (JITTER_TOP_STACK (), idx) = value;
+    PVM_VAL_ARR_ELEM (JITTER_TOP_STACK (), idx) = val;
   end
 end
 

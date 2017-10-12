@@ -22,6 +22,36 @@
 
 #include "pk-cmd.h"
 
+static void
+print_val (pvm_val val)
+{
+  if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val)
+      || PVM_IS_LONG (val))
+    printf ("%ld", PVM_VAL_NUMBER (val));
+  else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val)
+           || PVM_IS_ULONG (val))
+      printf ("%lu", PVM_VAL_NUMBER (val));
+  else if (PVM_IS_STRING (val))
+    printf ("\"%s\"", PVM_VAL_STR (val));
+  else if (PVM_IS_ARR (val))
+    {
+      size_t nelem;
+      size_t idx;
+      
+      nelem = PVM_VAL_ARR_NELEM (val);
+      printf ("[");
+      for (idx = 0; idx < nelem; idx++)
+        {
+          if (idx != 0)
+            printf (",");
+          print_val (PVM_VAL_ARR_ELEM (val, idx));
+        }
+      printf ("]");
+    }
+  else
+    assert (0); /* XXX support more types.  */
+}
+
 static int
 pk_cmd_print (int argc, struct pk_cmd_arg argv[])
 {
@@ -40,19 +70,9 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   pvm_ret = pvm_run (prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
-  
-  /* Get the result value and print it out.  */
-  if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val)
-      || PVM_IS_LONG (val))
-    printf ("%ld\n", PVM_VAL_NUMBER (val));
-  else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val)
-           || PVM_IS_ULONG (val))
-      printf ("%lu\n", PVM_VAL_NUMBER (val));
-  else if (PVM_IS_STRING (val))
-    printf ("\"%s\"\n", PVM_VAL_STR (val));
-  else
-    assert (0); /* XXX support more types.  */
 
+  print_val (val);
+  printf ("\n");
   return 1;
 
  rterror:
