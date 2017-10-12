@@ -1984,18 +1984,25 @@ end
 
 # Array creation.
 
-instruction mkai () # ULONG INT -> ARRI[N]
+instruction mka () # ULONG INT INT -> ARRB[N]
   code
-#define F(res, a, b) \
-  { res = pvm_make_array (PVM_VAL_TAG_INT, PVM_VAL_INT (b), PVM_VAL_ULONG (a)); }
-    JITTER_BINARY_STACK(F);
-#undef F  
+    int type;
+    int arrayof;
+    uint64_t nelems;
+
+    type = PVM_VAL_INT (JITTER_UNDER_TOP_STACK ());
+    arrayof = PVM_VAL_INT (JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
+    JITTER_DROP_STACK ();
+    nelems = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+    
+    JITTER_TOP_STACK () = pvm_make_array (type, arrayof, nelems);
   end
 end
 
 # Array setting and composition.
 
-instruction aiset () # ARRI ULONG (INT|ARRI) -> ARRI
+instruction aset () # ARR ULONG (INT|ARR) -> ARRI
   code
     uint64_t idx;
     pvm_val val;
@@ -2005,13 +2012,15 @@ instruction aiset () # ARRI ULONG (INT|ARRI) -> ARRI
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
 
+    /* XXX: Jump to Eabounds if index out of range.  */
+
     PVM_VAL_ARR_ELEM (JITTER_TOP_STACK (), idx) = val;
   end
 end
 
 # Array indexing.
 
-instruction airef () # ARRI ULONG -> (INT|ARRI)
+instruction aref () # ARR ULONG -> (INT|ARR)
   code
 #define F(res, a, b) \
   { res = PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b)); }

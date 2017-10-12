@@ -134,6 +134,9 @@ check_operand_unary (pkl_ast ast,
   return 1;
 }
 
+/* XXX: combine promote_to_bool and promote_to_long and change them to
+   not use type codes from pkl-ops.def!  */
+ 
 static int
 promote_to_bool (pkl_ast ast,
                  pkl_ast_node *a)
@@ -155,6 +158,29 @@ promote_to_bool (pkl_ast ast,
 
   return 0;
 }
+
+static int
+promote_to_ulong (pkl_ast ast,
+                  pkl_ast_node *a)
+{
+  if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
+    {
+      if (!(PKL_AST_TYPE_SIZE (*a) == 64
+            && !PKL_AST_TYPE_SIGNED (*a)))
+        {
+          pkl_ast_node longtype
+            = pkl_ast_get_std_type (ast, PKL_TYPE_UINT64);
+          
+          assert (longtype);
+          *a = pkl_ast_make_cast (longtype, *a);
+        }
+
+      return 1;
+    }
+
+  return 0;
+}
+
  
 static int
 promote_operands_binary (pkl_ast ast,
@@ -783,6 +809,11 @@ expression_primary:
                       pkl_tab_error (&@1, pkl_parser,
                                      "operator to [] must be an array.");
                       YYERROR;
+                    }
+                  if (!promote_to_ulong (pkl_parser->ast, &$3))
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "invalid index in array reference.");
                     }
                   $$ = pkl_ast_make_array_ref ($1, $3);
                 }
