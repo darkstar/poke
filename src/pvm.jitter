@@ -2011,10 +2011,10 @@ end
 
 # Array indexing.
 
-instruction airef () # ARRI ULONG -> INT
+instruction airef () # ARRI ULONG -> (INT|ARRI)
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b))); }
+  { res = PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
