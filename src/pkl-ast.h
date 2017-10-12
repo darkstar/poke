@@ -604,27 +604,24 @@ pkl_ast_node pkl_ast_make_loop (pkl_ast_node pre,
                                 pkl_ast_node post,
                                 pkl_ast_node body);
 
-/* PKL_AST_ARRAY_REF nodes represent references to elements stored in
-   fields.
+/* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
-   BASE must point to either a PKL_AST_IDENTIFIER node, which
-   identifies a variable, or to a PKL_AST_STRUCT_REF, which identifies
-   a field in a mem layout.
+   BASE must point to a PKL_AST_ARRAY node.
 
    INDEX must point to an expression whose evaluation is the offset of
    the element into the field, in units of the field's SIZE.  */
 
-#define PKL_AST_ARRAY_REF_BASE(AST) ((AST)->aref.base)
+#define PKL_AST_ARRAY_REF_ARRAY(AST) ((AST)->aref.array)
 #define PKL_AST_ARRAY_REF_INDEX(AST) ((AST)->aref.index)
 
 struct pkl_ast_array_ref
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *base;
+  union pkl_ast_node *array;
   union pkl_ast_node *index;
 };
 
-pkl_ast_node pkl_ast_make_array_ref (pkl_ast_node base,
+pkl_ast_node pkl_ast_make_array_ref (pkl_ast_node array,
                                      pkl_ast_node index);
 
 /* PKL_AST_STRUCT_REF nodes represent references to fields within a

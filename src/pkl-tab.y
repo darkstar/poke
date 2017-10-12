@@ -776,6 +776,16 @@ expression_primary:
                                                PKL_AST_TYPE ($1),
                                                $1);
                 }
+        | expression_primary '[' expression ']' %prec '.'
+        	{
+                  if (PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE ($1)) < 1)
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "operator to [] must be an array.");
+                      YYERROR;
+                    }
+                  $$ = pkl_ast_make_array_ref ($1, $3);
+                }
         | '[' array_elem_list ']'
         	{
                   pkl_ast_node type;

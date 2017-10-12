@@ -221,13 +221,17 @@ pkl_ast_make_unary_exp (enum pkl_ast_op code,
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
-pkl_ast_make_array_ref (pkl_ast_node base, pkl_ast_node index)
+pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
 {
   pkl_ast_node aref = pkl_ast_make_node (PKL_AST_ARRAY_REF);
 
-  assert (base && index);
+  assert (array && index);
 
-  PKL_AST_ARRAY_REF_BASE (aref) = ASTREF (base);
+  PKL_AST_TYPE (aref) = pkl_ast_type_dup (PKL_AST_TYPE (array));
+  assert (PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE (aref)) > 0);
+  PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE (aref)) -= 1;
+  
+  PKL_AST_ARRAY_REF_ARRAY (aref) = ASTREF (array);
   PKL_AST_ARRAY_REF_INDEX (aref) = ASTREF (index);
   PKL_AST_LITERAL_P (aref) = 0;
 
@@ -279,7 +283,7 @@ pkl_ast_type_dup (pkl_ast_node type)
                          PKL_AST_TYPE_SIZE (type),
                          PKL_AST_TYPE_ENUMERATION (type),
                          PKL_AST_TYPE_STRUCT (type));
-  
+
   PKL_AST_TYPE_NAME (new) = xstrdup (PKL_AST_TYPE_NAME (type));
   PKL_AST_TYPE_ARRAYOF (new) = PKL_AST_TYPE_ARRAYOF (type);
   return new;
@@ -584,7 +588,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       
     case PKL_AST_ARRAY_REF:
 
-      pkl_ast_node_free (PKL_AST_ARRAY_REF_BASE (ast));
+      pkl_ast_node_free (PKL_AST_ARRAY_REF_ARRAY (ast));
       pkl_ast_node_free (PKL_AST_ARRAY_REF_INDEX (ast));
       break;
       
@@ -1200,7 +1204,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ARRAY_REF:
       IPRINTF ("ARRAY_REF::\n");
 
-      PRINT_AST_SUBAST (base, ARRAY_REF_BASE);
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (array, ARRAY_REF_ARRAY);
       PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
       break;
 
