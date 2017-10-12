@@ -24,10 +24,6 @@
 #include <stdint.h>
 #include <xalloc.h>
 
-#ifndef PVM_VM_H_
-# include "pvm-vm.h"
-#endif
-
 /* The pvm_val opaque type implements values that are native to the
    poke virtual machine:
 
@@ -156,25 +152,31 @@ void pvm_val_free (pvm_val val);
    : PVM_IS_ULONG ((V)) ? PVM_VAL_ULONG ((V))   \
    : 0)
 
-/* A PVM program can be executed in the virtual machine at any time.
-   The struct pvm_program is provided by Jitter, but we provide here
-   an opaque type to the PVM users.  */
-
-typedef struct pvm_program *pvm_program;
-
 /* The following enumeration contains every possible exit code
    resulting from the execution of a program in the PVM.  */
 
 enum pvm_exit_code
   {
     PVM_EXIT_OK,
-    PVM_EXIT_ERROR
+    PVM_EXIT_ERROR,
+    PVM_EXIT_EDIVZ
   };
+
+/* Note that the jitter-generated header should be included this late
+   in the file because it uses some stuff defined above.  */
+#include "pvm-vm.h"
+
+/* A PVM program can be executed in the virtual machine at any time.
+   The struct pvm_program is provided by Jitter, but we provide here
+   an opaque type to the PVM users.  */
+
+typedef struct pvm_program *pvm_program;
 
 /* Public functions.  */
 
 void pvm_init (void);
 void pvm_shutdown (void);
 enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
+const char *pvm_error (enum pvm_exit_code code);
 
 #endif /* ! PVM_H */

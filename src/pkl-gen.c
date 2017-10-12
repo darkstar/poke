@@ -23,7 +23,6 @@
 #include "pvm.h"
 #include "pkl-gen.h"
 
-
 /* The following macro is used in the functions below in order to
    append PVM values to a program.  */
 
@@ -97,7 +96,14 @@ pkl_gen_op (pkl_ast_node ast,
   pvm_val maski16 = pvm_make_int (0xffff);
 
 #define PVM_APPEND_ARITH_INSTRUCTION(what,suffix)       \
-  /* Handle division by zero for div and mod. */        \
+                                                        \
+  if (what == PKL_AST_OP_DIV || what == PKL_AST_OP_MOD) \
+    {                                                   \
+      PVM_APPEND_INSTRUCTION (program, bz);             \
+      pvm_append_symbolic_label_parameter (program,     \
+                                           "Ldivzero"); \
+    }                                                   \
+                                                        \
   switch ((what))                                       \
     {                                                   \
     case PKL_AST_OP_NEG:                                \
@@ -568,14 +574,22 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lstart");
+
+    pvm_append_symbolic_label (program, "Ldivzero");
+
+    val = pvm_make_int (PVM_EXIT_EDIVZ);
+    PVM_APPEND_INSTRUCTION (program, push);
+    pvm_append_val_parameter (program, val);
+
+    PVM_APPEND_INSTRUCTION (program, ba);
+    pvm_append_symbolic_label_parameter (program, "Lexit");
     
     pvm_append_symbolic_label (program, "Lerror");
     
-    /* The exit status is ERROR.  */
     val = pvm_make_int (PVM_EXIT_ERROR);
     PVM_APPEND_INSTRUCTION (program, push);
     pvm_append_val_parameter (program, val);
-    
+        
     pvm_append_symbolic_label (program, "Lexit");
     PVM_APPEND_INSTRUCTION (program, exit);
 

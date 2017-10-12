@@ -110,3 +110,12 @@ pvm_make_string (const char *str)
   memcpy (p, str, strlen (str) + 1);
   return (PVM_VAL_TAG_STR << 61) | ((uint64_t)p >> 3);
 }
+
+const char *
+pvm_error (enum pvm_exit_code code)
+{
+  static char *pvm_error_strings[]
+    = { "ok", "error", "division by zero" };
+  
+  return pvm_error_strings[code];
+}

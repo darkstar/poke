@@ -63,9 +63,9 @@ end
 state-struct-backing-c
   code
       /* XXX enum pvm_exit_code exit_code;  */
-      int exit_code;
+      enum pvm_exit_code exit_code;
       /* pvm_val result_value */
-      uint64_t result_value;
+      pvm_val result_value;
   end
 end
 

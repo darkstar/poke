@@ -29,6 +29,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
 
   pvm_program prog;
   pvm_val val;
+  int pvm_ret;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
@@ -36,7 +37,8 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   prog = PK_CMD_ARG_EXP (argv[0]);
 
   /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
-  if (pvm_run (prog, &val) != PVM_EXIT_OK)
+  pvm_ret = pvm_run (prog, &val);
+  if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
   
   /* Get the result value and print it out.  */
@@ -57,7 +59,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   return 1;
 
  rterror:
-  printf ("run-time error.\n");
+  printf ("run-time error: %s\n", pvm_error (pvm_ret));
   return 0;
 }
 
