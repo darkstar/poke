@@ -1527,6 +1527,14 @@ instruction bz (?f) # Branch if zero top.
   end
 end
 
+instruction bzut (?f) # Branch if zero under-top.
+  code
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_UNDER_TOP_STACK()),
+                                JITTER_ARGF0);
+  end
+end
+
+
 instruction bnt (?n,?f) # Branch if not type top
   code
      JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_TOP_STACK())
