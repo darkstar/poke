@@ -110,79 +110,77 @@ pkl_gen_op (pkl_ast_node ast,
             size_t *label,
             enum pkl_ast_op what)
 {
-  pvm_val masku8 = pvm_make_uint (0xff);
-  pvm_val maski8 = pvm_make_int (0xff);
-  pvm_val masku16 = pvm_make_uint (0xffff);
-  pvm_val maski16 = pvm_make_int (0xffff);
 
-#define PVM_APPEND_ARITH_INSTRUCTION(what,suffix)       \
-                                                        \
-  if (what == PKL_AST_OP_DIV || what == PKL_AST_OP_MOD) \
-    {                                                   \
-      PVM_APPEND_INSTRUCTION (program, bz);             \
-      pvm_append_symbolic_label_parameter (program,     \
-                                           "Ldivzero"); \
-    }                                                   \
-                                                        \
-  switch ((what))                                       \
-    {                                                   \
-    case PKL_AST_OP_NEG:                                \
-      PVM_APPEND_INSTRUCTION (program, neg##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_ADD:                                \
-      PVM_APPEND_INSTRUCTION (program, add##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_SUB:                                \
-      PVM_APPEND_INSTRUCTION (program, sub##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_MUL:                                \
-      PVM_APPEND_INSTRUCTION (program, mul##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_DIV:                                \
-      PVM_APPEND_INSTRUCTION (program, div##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_MOD:                                \
-      PVM_APPEND_INSTRUCTION (program, mod##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_BAND:                               \
-      PVM_APPEND_INSTRUCTION (program, band##suffix);   \
-      break;                                            \
-    case PKL_AST_OP_IOR:                                \
-      PVM_APPEND_INSTRUCTION (program, bor##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_XOR:                                \
-      PVM_APPEND_INSTRUCTION (program, bxor##suffix);   \
-      break;                                            \
-    case PKL_AST_OP_BNOT:                               \
-      PVM_APPEND_INSTRUCTION (program, bnot##suffix);   \
-      break;                                            \
-    case PKL_AST_OP_SL:                                 \
-      PVM_APPEND_INSTRUCTION (program, bsl##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_SR:                                 \
-      PVM_APPEND_INSTRUCTION (program, bsr##suffix);    \
-      break;                                            \
-    case PKL_AST_OP_EQ:                                 \
-      PVM_APPEND_INSTRUCTION (program, eq##suffix);     \
-      break;                                            \
-    case PKL_AST_OP_NE:                                 \
-      PVM_APPEND_INSTRUCTION (program, ne##suffix);     \
-      break;                                            \
-    case PKL_AST_OP_LT:                                 \
-      PVM_APPEND_INSTRUCTION (program, lt##suffix);     \
-      break;                                            \
-    case PKL_AST_OP_LE:                                 \
-      PVM_APPEND_INSTRUCTION (program, le##suffix);     \
-      break;                                            \
-    case PKL_AST_OP_GT:                                 \
-      PVM_APPEND_INSTRUCTION (program, gt##suffix);     \
-      break;                                            \
-    case PKL_AST_OP_GE:                                 \
-      PVM_APPEND_INSTRUCTION (program, ge##suffix);     \
-      break;                                            \
-    default:                                            \
-      break;                                            \
-     }
+#define PVM_APPEND_ARITH_INSTRUCTION(what,suffix)               \
+  do                                                            \
+    {                                                           \
+      if (what == PKL_AST_OP_DIV || what == PKL_AST_OP_MOD)     \
+        {                                                       \
+          PVM_APPEND_INSTRUCTION (program, bz);                 \
+          pvm_append_symbolic_label_parameter (program,         \
+                                               "Ldivzero");     \
+        }                                                       \
+                                                                \
+      switch ((what))                                           \
+        {                                                       \
+        case PKL_AST_OP_NEG:                                    \
+          PVM_APPEND_INSTRUCTION (program, neg##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_ADD:                                    \
+          PVM_APPEND_INSTRUCTION (program, add##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_SUB:                                    \
+          PVM_APPEND_INSTRUCTION (program, sub##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_MUL:                                    \
+          PVM_APPEND_INSTRUCTION (program, mul##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_DIV:                                    \
+          PVM_APPEND_INSTRUCTION (program, div##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_MOD:                                    \
+          PVM_APPEND_INSTRUCTION (program, mod##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_BAND:                                   \
+          PVM_APPEND_INSTRUCTION (program, band##suffix);       \
+          break;                                                \
+        case PKL_AST_OP_IOR:                                    \
+          PVM_APPEND_INSTRUCTION (program, bor##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_XOR:                                    \
+          PVM_APPEND_INSTRUCTION (program, bxor##suffix);       \
+          break;                                                \
+        case PKL_AST_OP_BNOT:                                   \
+          PVM_APPEND_INSTRUCTION (program, bnot##suffix);       \
+          break;                                                \
+        case PKL_AST_OP_SL:                                     \
+          PVM_APPEND_INSTRUCTION (program, bsl##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_SR:                                     \
+          PVM_APPEND_INSTRUCTION (program, bsr##suffix);        \
+          break;                                                \
+        case PKL_AST_OP_EQ:                                     \
+          PVM_APPEND_INSTRUCTION (program, eq##suffix);         \
+          break;                                                \
+        case PKL_AST_OP_NE:                                     \
+          PVM_APPEND_INSTRUCTION (program, ne##suffix);         \
+          break;                                                \
+        case PKL_AST_OP_LT:                                     \
+          PVM_APPEND_INSTRUCTION (program, lt##suffix);         \
+          break;                                                \
+        case PKL_AST_OP_LE:                                     \
+          PVM_APPEND_INSTRUCTION (program, le##suffix);         \
+          break;                                                \
+        case PKL_AST_OP_GT:                                     \
+          PVM_APPEND_INSTRUCTION (program, gt##suffix);         \
+          break;                                                \
+        case PKL_AST_OP_GE:                                     \
+          PVM_APPEND_INSTRUCTION (program, ge##suffix);         \
+          break;                                                \
+        default:                                                \
+          break;                                                \
+        }                                                       \
+    } while (0)
 
   pkl_ast_node type = PKL_AST_TYPE (ast);
   
@@ -192,62 +190,30 @@ pkl_gen_op (pkl_ast_node ast,
         {
         case 8:
           if (PKL_AST_TYPE_SIGNED (type))
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, i);
-              
-              PVM_APPEND_INSTRUCTION (program, push);
-              pvm_append_val_parameter (program, maski8);
-              PVM_APPEND_INSTRUCTION (program, bandiu);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, b);
           else
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
-              
-              PVM_APPEND_INSTRUCTION (program, push);
-              pvm_append_val_parameter (program, masku8);
-              PVM_APPEND_INSTRUCTION (program, bandiu);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, bu);
           break;
 
         case 16:
           if (PKL_AST_TYPE_SIGNED (type))
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, i);
-              
-              PVM_APPEND_INSTRUCTION (program, push);
-              pvm_append_val_parameter (program, maski16);
-              PVM_APPEND_INSTRUCTION (program, bandiu);
-            }
+              PVM_APPEND_ARITH_INSTRUCTION (what, h);
           else
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
-              
-              PVM_APPEND_INSTRUCTION (program, push);
-              pvm_append_val_parameter (program, masku16);
-              PVM_APPEND_INSTRUCTION (program, bandiu);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, hu);
           break;
 
         case 32:
           if (PKL_AST_TYPE_SIGNED (type))
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, i);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, i);
           else
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, iu);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, iu);
           break;
 
         case 64:
           if (PKL_AST_TYPE_SIGNED (type))
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, l);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, l);
           else
-            {
-              PVM_APPEND_ARITH_INSTRUCTION (what, lu);
-            }
+            PVM_APPEND_ARITH_INSTRUCTION (what, lu);
           break;
 
         default:

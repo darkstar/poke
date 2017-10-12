@@ -213,7 +213,7 @@ D [0-9]
 
   width = 0;
   if (*end == 'l' || *end == 'L'
-      || (*end != '\0') && (*(end + 1) == 'l' || *(end + 1) == 'L'))
+      || ((*end != '\0') && ((*(end + 1) == 'l' || *(end + 1) == 'L'))))
     width = 64;
 
   /* If not specified with the 'l' or 'L' suffix, the type of the
