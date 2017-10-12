@@ -2022,6 +2022,7 @@ end
 
 instruction aref () # ARR ULONG -> (INT|ARR)
   code
+    /* XXX: Jump to Eabounds if index out of range.  */
 #define F(res, a, b) \
   { res = PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b)); }
     JITTER_BINARY_STACK(F);
