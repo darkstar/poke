@@ -134,53 +134,45 @@ check_operand_unary (pkl_ast ast,
   return 1;
 }
 
-/* XXX: combine promote_to_bool and promote_to_long and change them to
-   not use type codes from pkl-ops.def!  */
- 
 static int
-promote_to_bool (pkl_ast ast,
-                 pkl_ast_node *a)
+promote_to_integral (size_t size, int sign,
+                     pkl_ast ast, pkl_ast_node *a)
 {
   if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
     {
-      if (!(PKL_AST_TYPE_SIZE (*a) == 32
-            && PKL_AST_TYPE_SIGNED (*a)))
+      if (!(PKL_AST_TYPE_SIZE (*a) == size
+            && PKL_AST_TYPE_SIGNED (*a) == sign))
         {
-          pkl_ast_node booltype
-            = pkl_ast_get_std_type (ast, PKL_TYPE_INT);
-          
-          assert (booltype);
-          *a = pkl_ast_make_cast (booltype, *a);
+          pkl_ast_node desired_type
+            = pkl_ast_search_std_type (ast, size, sign);
+
+          if (!desired_type)
+            desired_type = pkl_ast_make_type (0, sign, size,
+                                              NULL /* enum */,
+                                              NULL /* struct */);
+
+          assert (desired_type);
+          *a = pkl_ast_make_cast (desired_type, *a);
         }
 
       return 1;
     }
 
   return 0;
+
 }
 
 static int
-promote_to_ulong (pkl_ast ast,
-                  pkl_ast_node *a)
+promote_to_bool (pkl_ast ast, pkl_ast_node *a)
 {
-  if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
-    {
-      if (!(PKL_AST_TYPE_SIZE (*a) == 64
-            && !PKL_AST_TYPE_SIGNED (*a)))
-        {
-          pkl_ast_node longtype
-            = pkl_ast_get_std_type (ast, PKL_TYPE_UINT64);
-          
-          assert (longtype);
-          *a = pkl_ast_make_cast (longtype, *a);
-        }
-
-      return 1;
-    }
-
-  return 0;
+  return promote_to_integral (32, 1, ast, a);
 }
 
+static int
+promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
+{
+  return promote_to_integral (64, 0, ast, a);
+}
  
 static int
 promote_operands_binary (pkl_ast ast,
