@@ -42,14 +42,12 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
     goto rterror;
   
   /* Get the result value and print it out.  */
-  if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val))
-    printf ("%d\n", PVM_VAL_INT (val));
-  else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val))
-      printf ("%u\n", PVM_VAL_UINT (val));
-  else if (PVM_IS_LONG (val))
-    printf ("%ld\n", PVM_VAL_LONG (val));
-  else if (PVM_IS_ULONG (val))
-    printf ("%lu\n", PVM_VAL_ULONG (val));
+  if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val)
+      || PVM_IS_LONG (val))
+    printf ("%ld\n", PVM_VAL_NUMBER (val));
+  else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val)
+           || PVM_IS_ULONG (val))
+      printf ("%lu\n", PVM_VAL_NUMBER (val));
   else if (PVM_IS_STRING (val))
     printf ("\"%s\"\n", PVM_VAL_STR (val));
   else

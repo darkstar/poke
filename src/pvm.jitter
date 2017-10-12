@@ -1580,13 +1580,6 @@ instruction itol () # INT -> LONG
   end
 end
 
-instruction itolu () # INT -> ULONG
-  code
-    JITTER_TOP_STACK()
-      = pvm_make_ulong ((uint64_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
-  end
-end
-
 instruction iutol () # UINT -> LONG
   code
     JITTER_TOP_STACK()
@@ -1626,5 +1619,355 @@ instruction itoiu () # INT -> UINT
   code
     JITTER_TOP_STACK()
       = pvm_make_uint ((uint32_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btobu () # BYTE -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltob () # LONG -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltobu () # LONG -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutob () # ULONG -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutobu () # ULONG -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltoh () # LONG -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ltohu () # LONG -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_LONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutoh () # ULONG -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction lutohu () # ULONG -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_ULONG (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itob () # INT -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itobu () # INT -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutob () # UINT -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutobu () # UINT -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itoh () # INT -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itohu () # INT -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutoh () # UINT -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction iutohu () # UINT -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_UINT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htoi () # HALF -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutoi () # UHALF -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htoiu () # HALF -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutoiu () # UHALF -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htob () # HALF -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htobu () # HALF -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutob () # UHALF -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutobu () # UHALF -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htoh () # HALF -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htohu () # HALF -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutoh () # UHALF -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutohu () # UHALF -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btob () # BYTE -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butob () # UBYTE -> BYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_byte ((int8_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butobu () # UBYTE -> UBYTE
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ubyte ((uint8_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btoh () # BYTE -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btohu () # BYTE -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butoh () # UBYTE -> HALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_half ((int16_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butohu () # UBYTE -> UHALF
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uhalf ((uint16_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btoi () # BYTE -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btoiu () # BYTE -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butoi () # UBYTE -> INT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_int ((int32_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butoiu () # UBYTE -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itoui () # INT -> UINT
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_uint ((uint32_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction itolu () # INT -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_INT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htol () # HALF -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction htolu () # HALF -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((int64_t) PVM_VAL_HALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutol () # UHALF -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction hutolu () # UHALF -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_UHALF (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btol () # BYTE -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction btolu () # BYTE -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_BYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butol () # UBYTE -> LONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_long ((int64_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction butolu () # UBYTE -> ULONG
+  code
+    JITTER_TOP_STACK()
+      = pvm_make_ulong ((uint64_t) PVM_VAL_UBYTE (JITTER_TOP_STACK ()));
   end
 end
