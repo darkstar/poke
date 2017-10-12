@@ -252,6 +252,44 @@ promote_operands_binary (pkl_ast ast,
 
   return 1;
 }
+
+/* Inspect a list of array elements ELEMS and return the size of the
+   array and the type of its element in *NELEM and *TYPE respectively.
+   Print out diagnostic errors if appropriate.  */
+
+static int
+check_array_type (struct pkl_parser *parser,
+                  YYLTYPE *llocp,
+                  pkl_ast_node elems,
+                  pkl_ast_node *type,
+                  size_t *nelem)
+{
+  pkl_ast_node t;
+
+  *type = NULL;
+  *nelem = 0;
+
+  for (t = elems; t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (t);
+      
+      /* First check the type of the element.  */
+      if (*type == NULL)
+        *type = PKL_AST_TYPE (elem);
+      else if (PKL_AST_TYPE (elem) != *type)
+        {
+          pkl_tab_error (llocp, parser,
+                         "array element is of the wrong type.");
+          return 0;
+        }
+
+      /* Adjust the size of the array.
+         XXX: support indexes in array literals.  */
+      *nelem += 1;
+    }
+
+  return 1;
+}
  
 %}
 
@@ -322,6 +360,7 @@ promote_operands_binary (pkl_ast ast,
 
 %type <ast> program program_elem_list program_elem
 %type <ast> expression expression_primary
+%type <ast> array_elem_list array_elem
 %type <ast> type_specifier
 
 %start program
@@ -367,6 +406,16 @@ program_elem:
                        in full poke programs.  */
                     YYERROR;
                   $$ = $1;
+                }
+	| expression ','
+        	{
+                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
+                    /* Expressions are not valid top-level structures
+                       in full poke programs.  */
+                    YYERROR;
+                  $$ = pkl_ast_make_program ($1);
+                  pkl_parser->ast->ast = ASTREF ($$);
+                  YYACCEPT;
                 }
 /*	  declaration
           	{
@@ -724,9 +773,38 @@ expression_primary:
                                                PKL_AST_TYPE ($1),
                                                $1);
                 }
-        /* XXX: add foo.bar here.  */
-	/* XXX: add tuple and array literals here.  */
+        | '[' array_elem_list ']'
+        	{
+                  pkl_ast_node type;
+                  size_t nelem;
+
+                  if (!check_array_type (pkl_parser,
+                                         &@2, $2,
+                                         &type, &nelem))
+                    YYERROR;
+                  
+                  $$ = pkl_ast_make_array (type, nelem, $2);
+                }
 	;
+
+array_elem_list:
+	  array_elem
+        | array_elem_list ',' array_elem
+          	{
+                  $$ = pkl_ast_chainon ($1, $3);
+                }
+        ;
+
+array_elem:
+	  expression
+          	{
+                  $$ = pkl_ast_make_array_elem (0, $1);
+                }
+/*        | '.' '[' expression ']' expression
+        	{
+                  $$ = pkl_ast_make_array_elem ($3, $5);
+                  }*/
+        ;
 
 /*
  * Declarations.

@@ -127,7 +127,7 @@ D [0-9]
 ")"		{ return ')'; }
 "{"		{ return '{'; }
 "}"		{ return '}'; }
-","		{ return (yyextra->what == PKL_PARSE_EXPRESSION) ? EOF : ','; }
+","		{ return ','; }
 "="		{ return '='; }
 "?"		{ return '?'; }
 ":"		{ return ':'; }

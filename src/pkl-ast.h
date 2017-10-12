@@ -55,6 +55,7 @@ enum pkl_ast_code
   PKL_AST_LOC,
   PKL_AST_CAST,
   PKL_AST_ARRAY,
+  PKL_AST_ARRAY_ELEM,
   PKL_AST_TUPLE
 };
 
@@ -106,6 +107,7 @@ enum pkl_ast_type_code
 #include "pkl-types.def"
   PKL_TYPE_STRING,
   PKL_TYPE_ENUM,
+  PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,
   PKL_TYPE_NOTYPE,
 };
@@ -274,6 +276,46 @@ struct pkl_ast_cast
 
 pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
                                 pkl_ast_node exp);
+
+
+/* PKL_AST_ARRAY nodes represent array literals.  Each array holds a
+   sequence of elements, all of them having the same type.  There must
+   be at least one element in the array, i.e. emtpy arrays are not
+   allowed.  */
+
+#define PKL_AST_ARRAY_NELEM(AST) ((AST)->array.nelem)
+#define PKL_AST_ARRAY_ELEMS(AST) ((AST)->array.elems)
+
+struct pkl_ast_array
+{
+  struct pkl_ast_common common;
+
+  size_t nelem;
+  union pkl_ast_node *elems;
+};
+
+pkl_ast_node pkl_ast_make_array (pkl_ast_node etype,
+                                 size_t nelems,
+                                 pkl_ast_node elems);
+
+
+/* PKL_AST_ARRAY_ELEM nodes represent nodes in array literals.  They
+   are characterized by an index into the array and a contained
+   expression.  */
+
+#define PKL_AST_ARRAY_ELEM_INDEX(AST) ((AST)->array_elem.index)
+#define PKL_AST_ARRAY_ELEM_EXP(AST) ((AST)->array_elem.exp)
+
+struct pkl_ast_array_elem
+{
+  struct pkl_ast_common common;
+
+  size_t index;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_array_elem (size_t index,
+                                      pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.
@@ -703,6 +745,8 @@ union pkl_ast_node
   struct pkl_ast_assertion assertion;
   struct pkl_ast_loc loc;
   struct pkl_ast_cast cast;
+  struct pkl_ast_array array;
+  struct pkl_ast_array_elem array_elem;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

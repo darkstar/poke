@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function qsort (array, left = 0, right = sizeof (array))
+function qsort (int[] array, int left = 0, int right = sizeof (array))
   <doc="Sort an array using QuickSort.",
    typecheck=0>
 {
-  function partition (left, right)
+  function partition (int left, int right)
   {
-    let pivot, i, j, t;
+    let int pivot, i, j, t;
 
     pivot = a[left];
     i = left;
@@ -49,7 +49,7 @@ function qsort (array, left = 0, right = sizeof (array))
 
   if (left < right)
     {
-      let j = partition (left, right);
+      let int j = partition (left, right);
 
       qsort (array, left, right - 1);
       qsort (array, left, right);

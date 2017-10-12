@@ -381,6 +381,35 @@ pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
   return cast;
 }
 
+/* Build and return an AST node for an array.  */
+
+pkl_ast_node
+pkl_ast_make_array (pkl_ast_node etype, size_t nelem,
+                    pkl_ast_node elems)
+{
+  pkl_ast_node array = pkl_ast_make_node (PKL_AST_ARRAY);
+
+  PKL_AST_TYPE (array) = ASTREF (etype);
+  PKL_AST_ARRAY_NELEM (array) = nelem;
+  PKL_AST_ARRAY_ELEMS (array) = ASTREF (elems);
+
+  return array;
+}
+
+/* Build and return an AST node for an array element.  */
+
+pkl_ast_node
+pkl_ast_make_array_elem (size_t index, pkl_ast_node exp)
+{
+  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_ARRAY_ELEM);
+
+  PKL_AST_ARRAY_ELEM_INDEX (elem) = index;
+  PKL_AST_ARRAY_ELEM_EXP (elem) = ASTREF (exp);
+
+  return elem;
+}
+                         
+
 /* Build and return an AST node for an assert.  */
 
 pkl_ast_node
@@ -553,6 +582,22 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_DOC_STRING:
 
       free (PKL_AST_DOC_STRING_POINTER (ast));
+      break;
+
+    case PKL_AST_ARRAY_ELEM:
+
+      pkl_ast_node_free (PKL_AST_ARRAY_ELEM_EXP (ast));
+      break;
+
+    case PKL_AST_ARRAY:
+
+      for (t = PKL_AST_ARRAY_ELEMS (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
+      
+      pkl_ast_node_free (PKL_AST_TYPE (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -970,6 +1015,22 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_OPT_SUBAST (elseexp, COND_EXP_ELSEEXP);
       break;
 
+    case PKL_AST_ARRAY_ELEM:
+      IPRINTF ("ARRAY_ELEM::\n");
+
+      PRINT_AST_IMM (index, ARRAY_ELEM_INDEX, "%lu");
+      PRINT_AST_SUBAST (exp, ARRAY_ELEM_EXP);
+      break;
+
+    case PKL_AST_ARRAY:
+      IPRINTF ("ARRAY::\n");
+
+      PRINT_AST_IMM (nelem, ARRAY_NELEM, "%lu");
+      PRINT_AST_SUBAST (etype, TYPE);
+      IPRINTF ("elems:\n");
+      PRINT_AST_SUBAST_CHAIN (ARRAY_ELEMS);
+      break;
+
     case PKL_AST_ENUMERATOR:
       IPRINTF ("ENUMERATOR::\n");
 
@@ -1051,6 +1112,10 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         static char *pkl_type_names[] =
           {
 # include "pkl-types.def"
+            "string",
+            "enum",
+            "array",
+            "struct",
           };
 #undef PKL_DEF_TYPE
 
