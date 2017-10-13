@@ -238,6 +238,21 @@ pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
   return aref;
 }
 
+/* Build and return an AST node for a tuple reference.  */
+
+pkl_ast_node
+pkl_ast_make_tuple_ref (pkl_ast_node tuple, pkl_ast_node identifier)
+{
+  pkl_ast_node tref = pkl_ast_make_node (PKL_AST_TUPLE_REF);
+
+  assert (tuple && identifier);
+
+  PKL_AST_TUPLE_REF_TUPLE (tref) = ASTREF (tuple);
+  PKL_AST_TUPLE_REF_IDENTIFIER (tref) = ASTREF (identifier);
+  
+  return tref;
+}
+
 /* Build and return an AST node for a struct reference.  */
 
 pkl_ast_node
@@ -646,6 +661,12 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_DOC_STRING_POINTER (ast));
       break;
 
+    case PKL_AST_TUPLE_REF:
+
+      pkl_ast_node_free (PKL_AST_TUPLE_REF_TUPLE (ast));
+      pkl_ast_node_free (PKL_AST_TUPLE_REF_IDENTIFIER (ast));
+      break;
+      
     case PKL_AST_TUPLE_ELEM:
 
       pkl_ast_node_free (PKL_AST_TUPLE_ELEM_NAME (ast));
@@ -1267,6 +1288,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (array, ARRAY_REF_ARRAY);
       PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
+      break;
+
+    case PKL_AST_TUPLE_REF:
+      IPRINTF ("TUPLE_REF::\n");
+
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (tuple, TUPLE_REF_TUPLE);
+      PRINT_AST_SUBAST (identifier, TUPLE_REF_IDENTIFIER);
       break;
 
     case PKL_AST_CAST:

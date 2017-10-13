@@ -46,7 +46,6 @@ enum pkl_ast_code
   PKL_AST_LOOP,
   PKL_AST_ASSERTION,
   PKL_AST_TYPE,
-  PKL_AST_ARRAY_REF,
   PKL_AST_STRUCT_REF,
   PKL_AST_INTEGER,
   PKL_AST_STRING,
@@ -56,8 +55,10 @@ enum pkl_ast_code
   PKL_AST_CAST,
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_ELEM,
+  PKL_AST_ARRAY_REF,
   PKL_AST_TUPLE,
-  PKL_AST_TUPLE_ELEM
+  PKL_AST_TUPLE_ELEM,
+  PKL_AST_TUPLE_REF
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -657,6 +658,23 @@ struct pkl_ast_array_ref
 pkl_ast_node pkl_ast_make_array_ref (pkl_ast_node array,
                                      pkl_ast_node index);
 
+/* PKL_AST_TUPLE_REF nodes represent references to a tuple
+   element.  */
+
+#define PKL_AST_TUPLE_REF_TUPLE(AST) ((AST)->tref.tuple)
+#define PKL_AST_TUPLE_REF_IDENTIFIER(AST) ((AST)->tref.identifier)
+
+struct pkl_ast_tuple_ref
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *tuple;
+  union pkl_ast_node *identifier;
+};
+
+pkl_ast_node pkl_ast_make_tuple_ref (pkl_ast_node tuple,
+                                     pkl_ast_node identifier);
+
 /* PKL_AST_STRUCT_REF nodes represent references to fields within a
    struct.
 
@@ -773,7 +791,6 @@ union pkl_ast_node
   struct pkl_ast_doc_string doc_string;
   struct pkl_ast_exp exp;
   struct pkl_ast_cond_exp cond_exp;
-  struct pkl_ast_array_ref aref;
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_enumerator enumerator;
   struct pkl_ast_enum enumeration;
@@ -783,8 +800,10 @@ union pkl_ast_node
   struct pkl_ast_cast cast;
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
+  struct pkl_ast_array_ref aref;
   struct pkl_ast_tuple tuple;
   struct pkl_ast_tuple_elem tuple_elem;
+  struct pkl_ast_tuple_ref tref;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

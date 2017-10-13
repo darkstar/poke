@@ -313,6 +313,41 @@ check_tuple (struct pkl_parser *parser,
 }
 
 static int
+check_tuple_ref (struct pkl_parser *parser,
+                 YYLTYPE *llocp,
+                 pkl_ast_node tuple,
+                 pkl_ast_node identifier,
+                 pkl_ast_node *type)
+{
+  pkl_ast_node t;
+
+  assert (PKL_AST_CODE (tuple) == PKL_AST_TUPLE);
+
+  *type = NULL;
+  for (t = PKL_AST_TUPLE_ELEMS (tuple);
+       t;
+       t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node name = PKL_AST_TUPLE_ELEM_NAME (t);
+
+      if (name != NULL
+          && strcmp (PKL_AST_IDENTIFIER_POINTER (name),
+                     PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
+        *type = PKL_AST_TYPE (t);
+    }
+
+  if (*type == NULL)
+    {
+      pkl_tab_error (llocp, parser,
+                     "invalid tuple member");
+      return 0;
+    }
+  
+  return 1;
+}
+
+
+static int
 check_array (struct pkl_parser *parser,
              YYLTYPE *llocp,
              pkl_ast_node elems,
@@ -889,6 +924,25 @@ primary:
                   PKL_AST_TYPE ($$)
                     = ASTREF (pkl_ast_get_std_type (pkl_parser->ast,
                                                     PKL_TYPE_TUPLE));
+                }
+        | primary '.' IDENTIFIER
+        	{
+                  pkl_ast_node type;
+                  
+                  if (PKL_AST_CODE ($1) != PKL_AST_TUPLE)
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "operator to . must be a tuple.");
+                      YYERROR;
+                    }
+
+                  if (!check_tuple_ref (pkl_parser,
+                                        &@3, $1, $3,
+                                        &type))
+                      YYERROR;
+                  
+                  $$ = pkl_ast_make_tuple_ref ($1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (type);
                 }
 	;
 
