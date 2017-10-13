@@ -94,6 +94,7 @@ D [0-9]
 "while"		{ return WHILE; }
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
+"elemsof"	{ return ELEMSOF; }
 "assert"	{ return ASSERT; }
 
 "lsb"		{ return LSB; }

@@ -267,4 +267,11 @@ void pvm_shutdown (void);
 enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
 const char *pvm_error (enum pvm_exit_code code);
 
+/* Return the size of VAL in bytes.  */
+size_t pvm_sizeof (pvm_val val);
+
+/* For arrays and tuples, return the number of elements stored.
+   Return 1 otherwise.  */
+size_t pvm_elemsof (pvm_val val);
+
 #endif /* ! PVM_H */

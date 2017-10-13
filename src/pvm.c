@@ -219,6 +219,59 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
   return PVM_NULL;
 }
 
+pvm_val
+pvm_elemsof (pvm_val val)
+{
+  if (PVM_IS_ARR (val))
+    return PVM_VAL_ARR_NELEM (val);
+  else if (PVM_IS_TUP (val))
+    return PVM_VAL_TUP_NELEM (val);
+  else
+    return 1;
+}
+
+pvm_val
+pvm_sizeof (pvm_val val)
+{
+  if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
+    return 1;
+  else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
+    return 2;
+  else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
+    return 4;
+  else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
+    return 8;
+  else if (PVM_IS_STRING (val))
+    return strlen (PVM_VAL_STR (val)) + 1;
+  else if (PVM_IS_ARR (val))
+    {
+      size_t nelem, i, size;
+
+      nelem = PVM_VAL_ARR_NELEM (val);
+
+      size = 0;
+      for (i = 0; i < nelem; ++i)
+        size += pvm_sizeof (PVM_VAL_ARR_ELEM (val, i));
+
+      return size;
+    }
+  else if (PVM_IS_TUP (val))
+    {
+      size_t nelem, i, size;
+
+      nelem = PVM_VAL_TUP_NELEM (val);
+
+      size = 0;
+      for (i = 0; i < nelem; ++i)
+        size += pvm_sizeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+
+      return size;
+    }
+
+  assert (0);
+  return 0;
+}
+
 void
 pvm_reverse_tuple (pvm_val tuple)
 {

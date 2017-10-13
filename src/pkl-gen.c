@@ -356,7 +356,14 @@ pkl_gen_exp (pkl_ast_node ast,
       return pkl_gen_op (ast, program, label, PKL_AST_OP_GT);
     case PKL_AST_OP_GE:
       return pkl_gen_op (ast, program, label, PKL_AST_OP_GE);
-      
+
+    case PKL_AST_OP_SIZEOF:
+      PVM_APPEND_INSTRUCTION (program, siz);
+      break;
+    case PKL_AST_OP_ELEMSOF:
+      PVM_APPEND_INSTRUCTION (program, sel);
+      break;
+
     default:
       fprintf (stderr, "gen: unhandled expression code %d\n",
                PKL_AST_EXP_CODE (ast));

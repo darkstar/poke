@@ -138,6 +138,18 @@ instruction setr (!R)
   end
 end
 
+instruction siz () # VAL -> ULONG
+  code
+    JITTER_TOP_STACK () = pvm_make_ulong (pvm_sizeof (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction sel () # VAL -> ULON
+  code
+    JITTER_TOP_STACK () = pvm_make_ulong (pvm_elemsof (JITTER_TOP_STACK ()));
+  end
+end
+
 ## Operators instructions.
 
 # Integer arithmetic.
@@ -2071,10 +2083,5 @@ instruction tref () # TUP STR -> VAL
 #define F(res, a, b) { res = pvm_ref_tuple (a, b); }
     JITTER_BINARY_STACK (F);  
 #undef F
-  end
-end
-
-instruction tlen () # TUP -> ULONG
-  code
   end
 end

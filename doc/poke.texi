@@ -722,7 +722,7 @@ Left-associative unary operators:
 Right-associative unary operators:
 
 @itemize
-@item @code{sizeof}, @code{startof} and @code{typeof}
+@item @code{sizeof}, @code{elemsof}, @code{startof} and @code{typeof}
 @end itemize
 
 @node Operators Precedence

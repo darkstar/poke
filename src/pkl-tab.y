@@ -432,6 +432,7 @@ check_array (struct pkl_parser *parser,
 %token WHILE
 %token IF
 %token SIZEOF
+%token ELEMSOF
 %token ASSERT
 %token ERR
 
@@ -569,6 +570,16 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
                                                PKL_AST_TYPE ($3),
                                                $3);
+                }
+        | ELEMSOF expression %prec UNARY
+        	{
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
+                                               PKL_AST_TYPE ($2), $2);
+                }
+        | ELEMSOF '(' type_specifier ')' %prec HYPERUNARY
+        	{
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
+                                               PKL_AST_TYPE ($3), $3);
                 }
         | expression '+' expression
         	{

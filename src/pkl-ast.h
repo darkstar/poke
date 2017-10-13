@@ -103,7 +103,7 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
 
    The definitions of the supported types are in pdl-types.def.  */
 
-#define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) CODE,
+#define PKL_DEF_TYPE(CODE,ID,SIZE_MAX,SIGNED) CODE,
 enum pkl_ast_type_code
 {
 #include "pkl-types.def"
