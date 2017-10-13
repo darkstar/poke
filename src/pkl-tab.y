@@ -288,9 +288,11 @@ check_array_type (struct pkl_parser *parser,
   *type = NULL;
   *nelem = 0;
 
-  for (index = 0, t = elems; t; index++, t = PKL_AST_CHAIN (t))
+  for (index = 0, t = elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (t);
+      size_t elem_index = PKL_AST_ARRAY_ELEM_INDEX (t);
+      size_t elems_appended, effective_index;
       
       /* First check the type of the element.  */
       assert (PKL_AST_TYPE (elem));
@@ -303,10 +305,24 @@ check_array_type (struct pkl_parser *parser,
           return 0;
         }        
       
-      /* Adjust the size of the array.
-         XXX: support indexes in array literals.  */
-      PKL_AST_ARRAY_ELEM_INDEX (t) = index;
-      *nelem += 1;
+      /* Then set the index of the element.  */
+      if (elem_index == PKL_AST_ARRAY_NOINDEX)
+        {
+          effective_index = index;
+          elems_appended = 1;
+        }
+      else
+        {
+          if (elem_index < index)
+            elems_appended = 0;
+          else
+            elems_appended = elem_index - index + 1;
+          effective_index = elem_index;
+        }
+      
+      PKL_AST_ARRAY_ELEM_INDEX (t) = effective_index;
+      index += elems_appended;
+      *nelem += elems_appended;
     }
 
   PKL_AST_TYPE_ARRAYOF (*type) += 1;
@@ -835,12 +851,14 @@ array_elem_list:
 array_elem:
 	  expression
           	{
-                  $$ = pkl_ast_make_array_elem (0, $1);
+                  $$ = pkl_ast_make_array_elem (PKL_AST_ARRAY_NOINDEX,
+                                                $1);
                 }
-/*        | '.' '[' expression ']' expression
+        | '.' '[' INTEGER ']' '=' expression
         	{
-                  $$ = pkl_ast_make_array_elem ($3, $5);
-                  }*/
+                  $$ = pkl_ast_make_array_elem (PKL_AST_INTEGER_VALUE ($3),
+                                                $6);
+                }
         ;
 
 /*
