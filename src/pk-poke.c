@@ -40,6 +40,8 @@ poke_byte (pk_io_off *address, uint8_t byte)
 static int
 poke_val (pk_io_off *address, pvm_val val)
 {
+  /* XXX: endianness.  */
+  
   if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
     {
       uint8_t pval = PVM_VAL_BYTE (val);
@@ -81,9 +83,16 @@ poke_val (pk_io_off *address, pvm_val val)
 
       nelem = PVM_VAL_ARR_NELEM (val);
       for (idx = 0; idx < nelem; idx++)
-        {
-          poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
-        }
+        poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
+    }
+  else if (PVM_IS_TUP (val))
+    {
+      size_t nelem;
+      size_t idx;
+
+      nelem = PVM_VAL_TUP_NELEM (val);
+      for (idx = 0; idx < nelem; idx++)
+        poke_val (address, PVM_VAL_TUP_ELEM_VALUE (val, idx));
     }
   else if (PVM_IS_STRING (val))
     {

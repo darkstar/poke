@@ -721,6 +721,8 @@ pkl_gen_array (pkl_ast_node ast,
     }
   else if (PKL_AST_TYPE_CODE (array_type) == PKL_TYPE_STRING)
     type = PVM_VAL_TAG_STR;
+  else if (PKL_AST_TYPE_CODE (array_type) == PKL_TYPE_TUPLE)
+    type = PVM_VAL_TAG_TUP;
   else
     assert (0);
 
