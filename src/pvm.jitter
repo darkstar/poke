@@ -1982,8 +1982,6 @@ end
 
 ## Array instructions.
 
-# Array creation.
-
 instruction mka () # ULONG INT INT -> ARRB[N]
   code
     int type;
@@ -1999,8 +1997,6 @@ instruction mka () # ULONG INT INT -> ARRB[N]
     JITTER_TOP_STACK () = pvm_make_array (type, arrayof, nelems);
   end
 end
-
-# Array setting and composition.
 
 instruction aset () # ARR ULONG VAL -> ARR
   code
@@ -2018,8 +2014,6 @@ instruction aset () # ARR ULONG VAL -> ARR
   end
 end
 
-# Array indexing.
-
 instruction aref () # ARR ULONG -> VAL
   code
     /* XXX: Jump to Eabounds if index out of range.  */
@@ -2030,8 +2024,6 @@ instruction aref () # ARR ULONG -> VAL
   end
 end
 
-# Other array instructions.
-
 instruction alen () # ARR -> ULONG
   code
     JITTER_TOP_STACK ()
@@ -2039,4 +2031,24 @@ instruction alen () # ARR -> ULONG
   end
 end
 
-## 
+## Tuple instructions.
+
+instruction mkt () # [VAL...] ULONG -> TUP
+  code
+  end
+end
+
+instruction tset () # TUP VAL STR TSET -> TUP
+  code
+  end
+end
+
+instruction tref () # TUP STR -> VAL
+  code
+  end
+end
+
+instruction tlen () # TUP -> ULONG
+  code
+  end
+end
