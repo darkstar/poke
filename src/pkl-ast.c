@@ -442,7 +442,36 @@ pkl_ast_make_array_elem (size_t index, pkl_ast_node exp)
 
   return elem;
 }
-                         
+
+/* Build and return an AST node for a tuple.  */
+
+pkl_ast_node
+pkl_ast_make_tuple (size_t nelem,
+                    pkl_ast_node elems)
+{
+  pkl_ast_node tuple = pkl_ast_make_node (PKL_AST_TUPLE);
+
+  PKL_AST_TUPLE_NELEM (tuple) = nelem;
+  PKL_AST_TUPLE_ELEMS (tuple) = ASTREF (elems);
+
+  return tuple;
+}
+
+/* Build and return an AST node for a tuple element.  */
+
+pkl_ast_node
+pkl_ast_make_tuple_elem (const char *name,
+                         pkl_ast_node offset,
+                         pkl_ast_node exp)
+{
+  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_TUPLE_ELEM);
+
+  PKL_AST_TUPLE_ELEM_NAME (elem) = xstrdup (name);
+  PKL_AST_TUPLE_ELEM_OFFSET (elem) = ASTREF (offset);
+  PKL_AST_TUPLE_ELEM_EXP (elem) = ASTREF (exp);
+
+  return elem;
+}
 
 /* Build and return an AST node for an assert.  */
 
@@ -618,6 +647,22 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_DOC_STRING_POINTER (ast));
       break;
 
+    case PKL_AST_TUPLE_ELEM:
+
+      free (PKL_AST_TUPLE_ELEM_NAME (ast));
+      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_OFFSET (ast));
+      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_EXP (ast));
+      break;
+
+    case PKL_AST_TUPLE:
+
+      for (t = PKL_AST_TUPLE_ELEMS (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
+      break;
+      
     case PKL_AST_ARRAY_ELEM:
 
       pkl_ast_node_free (PKL_AST_ARRAY_ELEM_EXP (ast));
@@ -1049,6 +1094,22 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_OPT_SUBAST (elseexp, COND_EXP_ELSEEXP);
       break;
 
+    case PKL_AST_TUPLE_ELEM:
+      IPRINTF ("TUPLE_ELEM::\n");
+
+      PRINT_AST_IMM (name, TUPLE_ELEM_NAME, "'%s'");
+      PRINT_AST_SUBAST (offset, TUPLE_ELEM_OFFSET);
+      PRINT_AST_SUBAST (exp, TUPLE_ELEM_EXP);
+      break;
+
+    case PKL_AST_TUPLE:
+      IPRINTF ("TUPLE::\n");
+
+      PRINT_AST_IMM (nelem, TUPLE_NELEM, "%lu");
+      IPRINTF ("elems:\n");
+      PRINT_AST_SUBAST_CHAIN (TUPLE_ELEMS);
+      break;
+      
     case PKL_AST_ARRAY_ELEM:
       IPRINTF ("ARRAY_ELEM::\n");
 

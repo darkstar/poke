@@ -56,7 +56,8 @@ enum pkl_ast_code
   PKL_AST_CAST,
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_ELEM,
-  PKL_AST_TUPLE
+  PKL_AST_TUPLE,
+  PKL_AST_TUPLE_ELEM
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -106,8 +107,8 @@ enum pkl_ast_type_code
 {
 #include "pkl-types.def"
   PKL_TYPE_STRING,
+  PKL_TYPE_TUPLE,
   PKL_TYPE_ENUM,
-  PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,
   PKL_TYPE_NOTYPE,
 };
@@ -295,7 +296,7 @@ struct pkl_ast_array
 };
 
 pkl_ast_node pkl_ast_make_array (pkl_ast_node etype,
-                                 size_t nelems,
+                                 size_t nelem,
                                  pkl_ast_node elems);
 
 
@@ -316,6 +317,42 @@ struct pkl_ast_array_elem
 };
 
 pkl_ast_node pkl_ast_make_array_elem (size_t index,
+                                      pkl_ast_node exp);
+
+
+/* PKL_AST_TUPLE nodes represent tuples.  */
+
+#define PKL_AST_TUPLE_NELEM(AST) ((AST)->tuple.nelem)
+#define PKL_AST_TUPLE_ELEMS(AST) ((AST)->tuple.elems)
+
+struct pkl_ast_tuple
+{
+  struct pkl_ast_common common;
+
+  size_t nelem;
+  union pkl_ast_node *elems;
+};
+
+pkl_ast_node pkl_ast_make_tuple (size_t nelem,
+                                 pkl_ast_node elems);
+
+/* PKL_AST_TUPLE_ELEM nodes represent elements in tuples.  */
+
+#define PKL_AST_TUPLE_ELEM_NAME(AST) ((AST)->tuple_elem.name)
+#define PKL_AST_TUPLE_ELEM_OFFSET(AST) ((AST)->tuple_elem.offset)
+#define PKL_AST_TUPLE_ELEM_EXP(AST) ((AST)->tuple_elem.exp)
+
+struct pkl_ast_tuple_elem
+{
+  struct pkl_ast_common common;
+
+  char *name;
+  union pkl_ast_node *offset;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_tuple_elem (const char *name,
+                                      pkl_ast_node offset,
                                       pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
@@ -751,6 +788,8 @@ union pkl_ast_node
   struct pkl_ast_cast cast;
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
+  struct pkl_ast_tuple tuple;
+  struct pkl_ast_tuple_elem tuple_elem;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.
