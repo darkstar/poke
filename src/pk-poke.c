@@ -32,7 +32,7 @@ poke_byte (pk_io_off *address, uint8_t byte)
       return 0;
     }
 
-  printf ("0x%08jx <- 0x%x\n", *address, byte);
+  printf ("0x%08jx <- 0x%02x\n", *address, byte);
   *address += 1;
   return 1;
 }
