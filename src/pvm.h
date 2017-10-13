@@ -185,6 +185,7 @@ typedef struct pvm_tuple *pvm_tuple;
 
 pvm_val pvm_make_tuple (size_t nelems);
 void pvm_reverse_tuple (pvm_val tuple);
+pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

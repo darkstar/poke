@@ -197,6 +197,28 @@ pvm_make_tuple (size_t nelem)
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
+pvm_val
+pvm_ref_tuple (pvm_val tuple, pvm_val name)
+{
+  size_t nelem, i;
+  struct pvm_tuple_elem *elems;
+
+  assert (PVM_IS_TUP (tuple) && PVM_IS_STRING (name));
+  
+  nelem = PVM_VAL_TUP_NELEM (tuple);
+  elems = PVM_VAL_TUP (tuple)->elems;
+  
+  for (i = 0; i < nelem; ++i)
+    {
+      if (elems[i].name != PVM_NULL
+          && strcmp (PVM_VAL_STR (elems[i].name),
+                     PVM_VAL_STR (name)) == 0)
+        return elems[i].value;
+    }
+          
+  return PVM_NULL;
+}
+
 void
 pvm_reverse_tuple (pvm_val tuple)
 {

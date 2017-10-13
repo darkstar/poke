@@ -2068,6 +2068,9 @@ end
 
 instruction tref () # TUP STR -> VAL
   code
+#define F(res, a, b) { res = pvm_ref_tuple (a, b); }
+    JITTER_BINARY_STACK (F);  
+#undef F
   end
 end
 
