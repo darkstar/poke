@@ -163,18 +163,27 @@ pvm_val pvm_make_array (int type, int arrayof, size_t nelem);
 /* Tuples are also boxed.  */
 
 #define PVM_VAL_TUP(V) (PVM_VAL_BOX_TUP (PVM_VAL_BOX ((V))))
-#define PVM_VAL_TUP_NELEMS(V) (PVM_VAL_TUP(V)->nelems)
-#define PVM_VAL_TUP_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
+#define PVM_VAL_TUP_NELEM(V) (PVM_VAL_TUP(V)->nelem)
+#define PVM_VAL_TUP_ELEM(V,I) (PVM_VAL_TUP(V)->elems[(I)])
 
 struct pvm_tuple
 {
-  size_t nelems;
-  pvm_val *elems;
+  size_t nelem;
+  struct pvm_tuple_elem *elems;
+};
+
+#define PVM_VAL_TUP_ELEM_NAME(V,I) (PVM_VAL_TUP_ELEM((V),(I)).name)
+#define PVM_VAL_TUP_ELEM_VALUE(V,I) (PVM_VAL_TUP_ELEM((V),(I)).value)
+
+struct pvm_tuple_elem
+{
+  pvm_val name;
+  pvm_val value;
 };
 
 typedef struct pvm_tuple *pvm_tuple;
 
-pvm_val pvm_make_tuple (size_t nelems, int types[]);
+pvm_val pvm_make_tuple (size_t nelems);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

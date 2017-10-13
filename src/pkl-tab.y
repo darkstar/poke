@@ -399,6 +399,7 @@ check_array_type (struct pkl_parser *parser,
 %type <ast> program program_elem_list program_elem
 %type <ast> expression primary
 %type <ast> array_elem_list array_elem
+%type <ast> tuple_elem_list tuple_elem
 %type <ast> type_specifier
 
 %start program
@@ -838,7 +839,38 @@ primary:
                   
                   $$ = pkl_ast_make_array (type, nelem, $2);
                 }
+	| '{' tuple_elem_list '}'
+        	{
+                  $$ = pkl_ast_make_tuple (0 /*XXX*/,
+                                           $2);
+                  PKL_AST_TYPE ($$)
+                    = ASTREF (pkl_ast_get_std_type (pkl_parser->ast,
+                                                    PKL_TYPE_TUPLE));
+                }
 	;
+
+tuple_elem_list:
+	  %empty
+		{ $$ = NULL; }
+        | tuple_elem
+        | tuple_elem_list ',' tuple_elem
+		{                  
+                  $$ = pkl_ast_chainon ($1, $3);
+                }
+        ;
+
+tuple_elem:
+	  expression
+          	{
+                  $$ = pkl_ast_make_tuple_elem (NULL, $1);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                }
+        | '.' IDENTIFIER '=' expression
+	        {
+                  $$ = pkl_ast_make_tuple_elem ($2, $4);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($4));
+                }
+        ;
 
 array_elem_list:
 	  array_elem

@@ -460,14 +460,13 @@ pkl_ast_make_tuple (size_t nelem,
 /* Build and return an AST node for a tuple element.  */
 
 pkl_ast_node
-pkl_ast_make_tuple_elem (const char *name,
-                         pkl_ast_node offset,
+pkl_ast_make_tuple_elem (pkl_ast_node name,
                          pkl_ast_node exp)
 {
   pkl_ast_node elem = pkl_ast_make_node (PKL_AST_TUPLE_ELEM);
 
-  PKL_AST_TUPLE_ELEM_NAME (elem) = xstrdup (name);
-  PKL_AST_TUPLE_ELEM_OFFSET (elem) = ASTREF (offset);
+  if (name != NULL)
+    PKL_AST_TUPLE_ELEM_NAME (elem) = ASTREF (name);
   PKL_AST_TUPLE_ELEM_EXP (elem) = ASTREF (exp);
 
   return elem;
@@ -649,8 +648,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_TUPLE_ELEM:
 
-      free (PKL_AST_TUPLE_ELEM_NAME (ast));
-      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_OFFSET (ast));
+      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_NAME (ast));
       pkl_ast_node_free (PKL_AST_TUPLE_ELEM_EXP (ast));
       break;
 
@@ -709,6 +707,7 @@ pkl_ast_init (void)
 # include "pkl-types.def"
 #undef PKL_DEF_TYPE
           { PKL_TYPE_STRING, "string", 0, 0 },
+          { PKL_TYPE_TUPLE, "tuple", 0, 0},
           { PKL_TYPE_NOTYPE, NULL, 0 }
         };
   struct pkl_ast *ast;
@@ -1097,14 +1096,15 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_TUPLE_ELEM:
       IPRINTF ("TUPLE_ELEM::\n");
 
-      PRINT_AST_IMM (name, TUPLE_ELEM_NAME, "'%s'");
-      PRINT_AST_SUBAST (offset, TUPLE_ELEM_OFFSET);
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (name, TUPLE_ELEM_NAME);
       PRINT_AST_SUBAST (exp, TUPLE_ELEM_EXP);
       break;
 
     case PKL_AST_TUPLE:
       IPRINTF ("TUPLE::\n");
 
+      PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (nelem, TUPLE_NELEM, "%lu");
       IPRINTF ("elems:\n");
       PRINT_AST_SUBAST_CHAIN (TUPLE_ELEMS);
@@ -1209,9 +1209,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           {
 # include "pkl-types.def"
             "string",
-            "enum",
-            "array",
-            "struct",
+            "tuple",
+            ""
           };
 #undef PKL_DEF_TYPE
         size_t i;

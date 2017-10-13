@@ -2033,8 +2033,25 @@ end
 
 ## Tuple instructions.
 
-instruction mkt () # [VAL...] ULONG -> TUP
+instruction mkt () # [STR VAL]... ULONG -> TUP
   code
+    size_t e, nelems;
+    pvm_val tuple;
+
+    nelems = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
+
+    tuple = pvm_make_tuple (nelems);
+
+    for (e = 0; e < nelems; ++e)
+    {
+      PVM_VAL_TUP_ELEM_NAME (tuple, e) = JITTER_TOP_STACK ();
+      PVM_VAL_TUP_ELEM_VALUE (tuple, e) = JITTER_UNDER_TOP_STACK ();
+      JITTER_DROP_STACK ();
+      JITTER_DROP_STACK ();
+    }
+
+    JITTER_PUSH_STACK (tuple);
   end
 end
 

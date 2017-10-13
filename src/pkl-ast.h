@@ -108,8 +108,6 @@ enum pkl_ast_type_code
 #include "pkl-types.def"
   PKL_TYPE_STRING,
   PKL_TYPE_TUPLE,
-  PKL_TYPE_ENUM,
-  PKL_TYPE_STRUCT,
   PKL_TYPE_NOTYPE,
 };
 #undef PKL_DEF_TYPE
@@ -339,20 +337,17 @@ pkl_ast_node pkl_ast_make_tuple (size_t nelem,
 /* PKL_AST_TUPLE_ELEM nodes represent elements in tuples.  */
 
 #define PKL_AST_TUPLE_ELEM_NAME(AST) ((AST)->tuple_elem.name)
-#define PKL_AST_TUPLE_ELEM_OFFSET(AST) ((AST)->tuple_elem.offset)
 #define PKL_AST_TUPLE_ELEM_EXP(AST) ((AST)->tuple_elem.exp)
 
 struct pkl_ast_tuple_elem
 {
   struct pkl_ast_common common;
 
-  char *name;
-  union pkl_ast_node *offset;
+  union pkl_ast_node *name;
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_tuple_elem (const char *name,
-                                      pkl_ast_node offset,
+pkl_ast_node pkl_ast_make_tuple_elem (pkl_ast_node name,
                                       pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,

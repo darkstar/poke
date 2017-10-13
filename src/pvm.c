@@ -181,6 +181,22 @@ pvm_make_array (int type, int arrayof, size_t nelem)
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
+pvm_val
+pvm_make_tuple (size_t nelem)
+{
+  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_tuple tuple = xmalloc (sizeof (struct pvm_tuple));
+
+  tuple->nelem = nelem;
+  tuple->elems = xmalloc (sizeof (struct pvm_tuple_elem) * nelem);
+  memset (tuple->elems, 0, sizeof (struct pvm_tuple_elem) * nelem);
+
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_TUP;
+  PVM_VAL_BOX_TUP (box) = tuple;
+
+  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+}
+
 const char *
 pvm_error (enum pvm_exit_code code)
 {

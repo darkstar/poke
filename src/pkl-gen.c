@@ -764,6 +764,14 @@ pkl_gen_array_ref (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_tuple (pkl_ast_node ast,
+               pvm_program program,
+               size_t *label)
+{
+  
+}
+
+static int
 pkl_gen_1 (pkl_ast_node ast,
            pvm_program program,
            size_t *label)
