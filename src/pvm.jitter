@@ -2029,3 +2029,14 @@ instruction aref () # ARR ULONG -> VAL
 #undef F
   end
 end
+
+# Other array instructions.
+
+instruction alen () # ARR -> ULONG
+  code
+    JITTER_TOP_STACK ()
+      = pvm_make_ulong (PVM_VAL_ARR_NELEM (JITTER_TOP_STACK()));
+  end
+end
+
+## 
