@@ -448,6 +448,11 @@ XXX: no, dont like this.
 
 XXX: automatic type conversions?
 
+- Arguments to boolean operators are promoted to signed 32-bit
+  integers.
+
+- Array subscripts are promoted to unsigned 64-bit integers.
+
 @node Expressions
 @chapter Expressions
 

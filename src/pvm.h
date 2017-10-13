@@ -56,10 +56,10 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_UHALF 0x4UL
 #define PVM_VAL_TAG_UINT  0x5UL
 #define PVM_VAL_TAG_BOX   0x6UL
-/* Note that there is no tab 0x7.  It is used to implement PVM_NULL
+/* Note that there is no tag 0x7.  It is used to implement PVM_NULL
    below.  */
-/* Note also that the tags below are stored in the box, not in the
-   val.  See below in this file.  */
+/* Note also that the tags below are stored in the box, not in
+   PVM_VAL_TAG.  See below in this file.  */
 #define PVM_VAL_TAG_LONG  0x8
 #define PVM_VAL_TAG_ULONG 0x9
 #define PVM_VAL_TAG_STR   0xa
@@ -245,7 +245,7 @@ enum pvm_exit_code
 
 /* A PVM program can be executed in the virtual machine at any time.
    The struct pvm_program is provided by Jitter, but we provide here
-   an opaque type to the PVM users.  */
+   an opaque type to be used by the PVM users.  */
 
 typedef struct pvm_program *pvm_program;
 
