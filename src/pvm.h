@@ -184,6 +184,7 @@ struct pvm_tuple_elem
 typedef struct pvm_tuple *pvm_tuple;
 
 pvm_val pvm_make_tuple (size_t nelems);
+void pvm_reverse_tuple (pvm_val tuple);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
@@ -219,7 +220,7 @@ void pvm_val_free (pvm_val val);
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ARR)
 #define PVM_IS_TUP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ARR)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_TUP)
 
 #define PVM_IS_NUMBER(V)                                        \
   (PVM_IS_BYTE(V) || PVM_IS_UBYTE(V)                            \

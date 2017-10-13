@@ -271,16 +271,53 @@ promote_operands_binary (pkl_ast ast,
   return 1;
 }
 
-/* Inspect a list of array elements ELEMS and return the size of the
-   array and the type of its element in *NELEM and *TYPE respectively.
-   Print out diagnostic errors if appropriate.  */
+static int
+check_tuple (struct pkl_parser *parser,
+             YYLTYPE *llocp,
+             pkl_ast_node elems,
+             size_t *nelem)
+{
+  pkl_ast_node t, u;
+
+  *nelem = 0;
+  for (t = elems; t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node name;
+
+      name = PKL_AST_TUPLE_ELEM_NAME (t);
+      if (name)
+        {
+          assert (PKL_AST_CODE (name) == PKL_AST_IDENTIFIER);
+          for (u = elems; u != t; u = PKL_AST_CHAIN (u))
+            {
+              pkl_ast_node uname
+                = PKL_AST_TUPLE_ELEM_NAME (u);
+
+              if (uname == NULL)
+                continue;
+              
+              if (strcmp (PKL_AST_IDENTIFIER_POINTER (name),
+                          PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
+                {
+                  pkl_tab_error (llocp, parser,
+                                 "duplicated element name in tuple.");
+                  return 0;
+                }
+            }
+        }
+
+      *nelem += 1;
+    }
+
+  return 1;
+}
 
 static int
-check_array_type (struct pkl_parser *parser,
-                  YYLTYPE *llocp,
-                  pkl_ast_node elems,
-                  pkl_ast_node *type,
-                  size_t *nelem)
+check_array (struct pkl_parser *parser,
+             YYLTYPE *llocp,
+             pkl_ast_node elems,
+             pkl_ast_node *type,
+             size_t *nelem)
 {
   pkl_ast_node t;
   size_t index;
@@ -832,17 +869,23 @@ primary:
                   pkl_ast_node type;
                   size_t nelem;
 
-                  if (!check_array_type (pkl_parser,
-                                         &@2, $2,
-                                         &type, &nelem))
+                  if (!check_array (pkl_parser,
+                                    &@2, $2,
+                                    &type, &nelem))
                     YYERROR;
                   
                   $$ = pkl_ast_make_array (type, nelem, $2);
                 }
 	| '{' tuple_elem_list '}'
         	{
-                  $$ = pkl_ast_make_tuple (0 /*XXX*/,
-                                           $2);
+                  size_t nelem;
+
+                  if (!check_tuple (pkl_parser,
+                                    &@2, $2,
+                                    &nelem))
+                    YYERROR;
+
+                  $$ = pkl_ast_make_tuple (nelem, $2);
                   PKL_AST_TYPE ($$)
                     = ASTREF (pkl_ast_get_std_type (pkl_parser->ast,
                                                     PKL_TYPE_TUPLE));

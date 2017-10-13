@@ -768,7 +768,32 @@ pkl_gen_tuple (pkl_ast_node ast,
                pvm_program program,
                size_t *label)
 {
-  
+  pkl_ast_node e;
+
+  for (e = PKL_AST_TUPLE_ELEMS (ast);
+       e;
+       e = PKL_AST_CHAIN (e))
+    {
+      pvm_val name;
+
+      if (PKL_AST_TUPLE_ELEM_NAME (e) == NULL)
+        name = PVM_NULL;
+      else
+        name
+          = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_ELEM_NAME (e)));
+      
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program, name);
+      pkl_gen_1 (PKL_AST_TUPLE_ELEM_EXP (e), program, label);
+    }
+
+  PVM_APPEND_INSTRUCTION (program, push);
+  pvm_append_val_parameter (program,
+                            pvm_make_ulong (PKL_AST_TUPLE_NELEM (ast)));
+
+  PVM_APPEND_INSTRUCTION (program, mkt);
+  PVM_APPEND_INSTRUCTION (program, revt);
+  return 1;
 }
 
 static int
@@ -815,6 +840,11 @@ pkl_gen_1 (pkl_ast_node ast,
 
     case PKL_AST_ARRAY_REF:
       if (!pkl_gen_array_ref (ast, program, label))
+        goto error;
+      break;
+
+    case PKL_AST_TUPLE:
+      if (!pkl_gen_tuple (ast, program, label))
         goto error;
       break;
 

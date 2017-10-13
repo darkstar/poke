@@ -197,6 +197,30 @@ pvm_make_tuple (size_t nelem)
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
+void
+pvm_reverse_tuple (pvm_val tuple)
+{
+  size_t i, end, nelem;
+  struct pvm_tuple_elem *elems;
+
+  nelem = PVM_VAL_TUP_NELEM (tuple);
+  elems = PVM_VAL_TUP (tuple)->elems;
+
+  end = nelem - 1;
+  for (i = 0; i < nelem / 2; ++i)
+    {
+      pvm_val tmp_value = elems[i].value;
+      pvm_val tmp_name = elems[i].name;
+
+      elems[i].name = elems[end].name;
+      elems[i].value = elems[end].value;
+
+      elems[end].name = tmp_name;      
+      elems[end].value = tmp_value;
+      --end;
+    }
+}
+
 const char *
 pvm_error (enum pvm_exit_code code)
 {

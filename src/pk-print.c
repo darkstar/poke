@@ -35,8 +35,7 @@ print_val (pvm_val val)
     printf ("\"%s\"", PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))
     {
-      size_t nelem;
-      size_t idx;
+      size_t nelem, idx;
       
       nelem = PVM_VAL_ARR_NELEM (val);
       printf ("[");
@@ -47,6 +46,25 @@ print_val (pvm_val val)
           print_val (PVM_VAL_ARR_ELEM (val, idx));
         }
       printf ("]");
+    }
+  else if (PVM_IS_TUP (val))
+    {
+      size_t nelem, idx;
+
+      nelem = PVM_VAL_TUP_NELEM (val);
+      printf ("{");
+      for (idx = 0; idx < nelem; ++idx)
+        {
+          pvm_val name = PVM_VAL_TUP_ELEM_NAME(val, idx);
+          pvm_val value = PVM_VAL_TUP_ELEM_VALUE(val, idx);
+
+          if (idx != 0)
+            printf (",");
+          if (name != PVM_NULL)
+            printf ("%s=", PVM_VAL_STR (name));
+          print_val (value);
+        }
+      printf ("}");
     }
   else
     assert (0); /* XXX support more types.  */
