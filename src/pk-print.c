@@ -31,7 +31,7 @@ print_val (pvm_val val)
   else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val)
            || PVM_IS_ULONG (val))
       printf ("%lu", PVM_VAL_NUMBER (val));
-  else if (PVM_IS_STRING (val))
+  else if (PVM_IS_STR (val))
     printf ("\"%s\"", PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))
     {

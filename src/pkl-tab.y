@@ -940,13 +940,15 @@ primary:
         	{
                   pkl_ast_node type;
                   
-                  if (PKL_AST_CODE ($1) != PKL_AST_TUPLE)
+                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1)) != PKL_TYPE_TUPLE)
                     {
                       pkl_tab_error (&@1, pkl_parser,
                                      "operator to . must be a tuple.");
                       YYERROR;
                     }
 
+                  /* XXX we need the tuple's types and names in the
+                     PKL_AST_TYPE node associated with the expression.  */
                   if (!check_tuple_ref (pkl_parser,
                                         &@3, $1, $3,
                                         &type))

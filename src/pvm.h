@@ -213,7 +213,7 @@ void pvm_val_free (pvm_val val);
 #define PVM_IS_ULONG(V)                                                 \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ULONG)
-#define PVM_IS_STRING(V)                                                 \
+#define PVM_IS_STR(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_STR)
 #define PVM_IS_ARR(V)                                                   \

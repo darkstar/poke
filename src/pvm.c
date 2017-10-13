@@ -203,7 +203,7 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
   size_t nelem, i;
   struct pvm_tuple_elem *elems;
 
-  assert (PVM_IS_TUP (tuple) && PVM_IS_STRING (name));
+  assert (PVM_IS_TUP (tuple) && PVM_IS_STR (name));
   
   nelem = PVM_VAL_TUP_NELEM (tuple);
   elems = PVM_VAL_TUP (tuple)->elems;
@@ -241,7 +241,7 @@ pvm_sizeof (pvm_val val)
     return 4;
   else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
     return 8;
-  else if (PVM_IS_STRING (val))
+  else if (PVM_IS_STR (val))
     return strlen (PVM_VAL_STR (val)) + 1;
   else if (PVM_IS_ARR (val))
     {

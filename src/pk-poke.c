@@ -94,7 +94,7 @@ poke_val (pk_io_off *address, pvm_val val)
       for (idx = 0; idx < nelem; idx++)
         poke_val (address, PVM_VAL_TUP_ELEM_VALUE (val, idx));
     }
-  else if (PVM_IS_STRING (val))
+  else if (PVM_IS_STR (val))
     {
       size_t i;
       const char *pval = PVM_VAL_STR (val);
