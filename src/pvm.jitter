@@ -2002,7 +2002,7 @@ end
 
 # Array setting and composition.
 
-instruction aset () # ARR ULONG (INT|ARR) -> ARRI
+instruction aset () # ARR ULONG VAL -> ARR
   code
     uint64_t idx;
     pvm_val val;
@@ -2020,7 +2020,7 @@ end
 
 # Array indexing.
 
-instruction aref () # ARR ULONG -> (INT|ARR)
+instruction aref () # ARR ULONG -> VAL
   code
     /* XXX: Jump to Eabounds if index out of range.  */
 #define F(res, a, b) \
