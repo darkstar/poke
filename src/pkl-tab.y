@@ -475,6 +475,7 @@ check_array (struct pkl_parser *parser,
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
+%left '@'
 %right UNARY INC DEC
 %left HYPERUNARY
 %left '.'
@@ -889,6 +890,23 @@ expression:
                                                 PKL_AST_TYPE ($1),
                                                 $1, $3);
                 }
+        | expression '@' expression
+        	{
+                  if (PKL_AST_CODE ($1) != PKL_AST_TYPE)
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "expected type in mapping.");
+                      YYERROR;
+                    }
+                  if (!promote_to_ulong (pkl_parser->ast, &$3))
+                    {
+                      pkl_tab_error (&@3, pkl_parser,
+                                     "invalid IO offset in mapping.");
+                      YYERROR;
+                    }
+		  $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MAP,
+                                                $1, $1, $3);
+                }
         | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
         ;
@@ -906,6 +924,7 @@ primary:
 	  INTEGER
         | CHAR
         | STR
+        | type_specifier
           /*        | IDENTIFIER */
         | '(' expression ')'
 		{ $$ = $2; }
