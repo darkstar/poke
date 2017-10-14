@@ -320,12 +320,14 @@ pkl_ast_type_dup (pkl_ast_node type)
   return new;
 }
 
-/* Return whether two given type AST nodes are equal, i.e. they are
+/* Return whether two given type AST nodes are equal, i.e. they denote
    the same type.  */
 
 int
 pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2)
 {
+  /* XXX: check tuple types too.  */
+  
   return (PKL_AST_TYPE_SIGNED (t1) == PKL_AST_TYPE_SIGNED (t2)
           && PKL_AST_TYPE_SIZE (t1) == PKL_AST_TYPE_SIZE (t2)
           && PKL_AST_TYPE_ENUMERATION (t1) == PKL_AST_TYPE_ENUMERATION (t2)
