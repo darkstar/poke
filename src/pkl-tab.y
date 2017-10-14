@@ -128,7 +128,7 @@ check_operand_unary (pkl_ast ast,
                      pkl_ast_node *a)
 {
   /* All unary operators require an integer as an argument.  */
-  if (!PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) != PKL_TYPE_INTEGRAL)
     return 0;
 
   return 1;
@@ -138,20 +138,13 @@ static int
 promote_to_integral (size_t size, int sign,
                      pkl_ast ast, pkl_ast_node *a)
 {
-  if (PKL_AST_TYPE_INTEGRAL (PKL_AST_TYPE (*a)))
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) == PKL_TYPE_INTEGRAL)
     {
-      if (!(PKL_AST_TYPE_SIZE (*a) == size
-            && PKL_AST_TYPE_SIGNED (*a) == sign))
+      if (!(PKL_AST_TYPE_I_SIZE (*a) == size
+            && PKL_AST_TYPE_I_SIGNED (*a) == sign))
         {
           pkl_ast_node desired_type
-            = pkl_ast_search_std_type (ast, size, sign);
-
-          if (!desired_type)
-            desired_type = pkl_ast_make_type (0, sign, size,
-                                              NULL /* enum */,
-                                              NULL /* struct */);
-
-          assert (desired_type);
+            = pkl_ast_get_integral_type (ast, size, sign);
           *a = pkl_ast_make_cast (desired_type, *a);
         }
 
@@ -186,45 +179,39 @@ promote_operands_binary (pkl_ast ast,
   pkl_ast_node *to_promote_b = NULL;
   pkl_ast_node ta = PKL_AST_TYPE (*a);
   pkl_ast_node tb = PKL_AST_TYPE (*b);
-  size_t size_a = PKL_AST_TYPE_SIZE (ta);
-  size_t size_b = PKL_AST_TYPE_SIZE (tb);
-  int sign_a = PKL_AST_TYPE_SIGNED (ta);
-  int sign_b = PKL_AST_TYPE_SIGNED (tb);
+  size_t size_a;
+  size_t size_b;
+  int sign_a;
+  int sign_b;
 
   /* Both arguments should be either integrals, strings, arrays or
      tuples.  */
 
-  if (PKL_AST_TYPE_INTEGRAL (ta) + PKL_AST_TYPE_INTEGRAL (tb) == 1)
+  if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
     return 0;
 
-  if ((!allow_tuples && ((PKL_AST_CODE (*a) == PKL_AST_TUPLE)
-                         + (PKL_AST_CODE (*b) == PKL_AST_TUPLE) > 0))
-      || (allow_tuples && ((PKL_AST_CODE (*a) == PKL_AST_TUPLE)
-                           + (PKL_AST_CODE (*b) == PKL_AST_TUPLE) == 1)))
+  if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
+      || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
+      || (!allow_tuples && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_TUPLE))
     return 0;
 
-  if ((!allow_arrays && ((PKL_AST_CODE (*a) == PKL_AST_ARRAY)
-                         + (PKL_AST_CODE (*b) == PKL_AST_ARRAY) > 0))
-      || (allow_arrays && ((PKL_AST_CODE (*a) == PKL_AST_ARRAY)
-                           + (PKL_AST_CODE (*b) == PKL_AST_ARRAY) == 1)))
-    return 0;
 
-  if ((!allow_strings && ((PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
-                          + (PKL_AST_TYPE_CODE (tb) == PKL_TYPE_STRING) > 0))
-      || (allow_strings && ((PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
-                            + (PKL_AST_TYPE_CODE (tb) == PKL_TYPE_STRING) == 1)))
-    return 0;
-
-  if (!PKL_AST_TYPE_INTEGRAL (ta))
+  if (!PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL)
+    /* No need to promote non-integral types.  */
     return 1;
 
-  /* Handle promotion of integer operands.  The rules are:
+  /* Handle promotion of integral operands.  The rules are:
 
      - If one operand is narrower than the other, it is promoted to
        have the same width.  
 
      - If one operand is unsigned and the other signed, the signed
        operand is promoted to unsigned.  */
+
+  size_a = PKL_AST_TYPE_I_SIZE (ta);
+  size_b = PKL_AST_TYPE_I_SIZE (tb);
+  sign_a = PKL_AST_TYPE_I_SIGNED (ta);
+  sign_b = PKL_AST_TYPE_I_SIGNED (tb);
 
   if (size_a > size_b)
     {
@@ -251,20 +238,14 @@ promote_operands_binary (pkl_ast ast,
   if (to_promote_a != NULL)
     {
       pkl_ast_node t
-        = pkl_ast_search_std_type (ast, size_a, sign_a);
-
-      assert (t != NULL);
-
+        = pkl_ast_get_integral_type (ast, size_a, sign_a);
       *a = pkl_ast_make_cast (t, *a);
     }
 
   if (to_promote_b != NULL)
     {
       pkl_ast_node t
-        = pkl_ast_search_std_type (ast, size_b, sign_b);
-
-      assert (t != NULL);
-
+        = pkl_ast_get_integral_type (ast, size_b, sign_b);
       *b = pkl_ast_make_cast (t, *b);
     }
 
@@ -279,13 +260,18 @@ check_tuple (struct pkl_parser *parser,
              pkl_ast_node *type)
 {
   pkl_ast_node t, u;
-  size_t i;
-  
+  pkl_ast_node enames, etypes;
+
+  enames = NULL;
+  etypes = NULL;
   *nelem = 0;
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node name;
-      
+      pkl_ast_node ename;
+      pkl_ast_node type;
+
+      /* Add the name for this tuple element.  */
       name = PKL_AST_TUPLE_ELEM_NAME (t);
       if (name)
         {
@@ -306,33 +292,26 @@ check_tuple (struct pkl_parser *parser,
                   return 0;
                 }
             }
+
+          ename = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (name));
         }
+      else
+        ename = pkl_ast_make_identifier ("");
+
+      enames = pkl_ast_chainon (enames, ASTREF (ename));
+
+      /* Add the type for this tuple element.  */
+      type = PKL_AST_TYPE (PKL_AST_TUPLE_ELEM_EXP (t));
+      etypes = pkl_ast_chainon (etypes,
+                                ASTREF (pkl_ast_dup_type (type)));
 
       *nelem += 1;
     }
 
   /* Now build the type for the tuple.  */
 
-  *type
-    = pkl_ast_type_dup (pkl_ast_get_std_type (parser->ast, PKL_TYPE_TUPLE));
-  assert (type != NULL);
-
-  PKL_AST_TYPE_NELEM (*type) = *nelem;
-  PKL_AST_TYPE_TNAMES (*type)
-    = xmalloc (sizeof (char *) * *nelem);
-  PKL_AST_TYPE_TTYPES (*type)
-    = xmalloc (sizeof (pkl_ast_node) * *nelem);
-
-  for (i = 0, t = elems; t; i++, t = PKL_AST_CHAIN (t))
-    {
-      pkl_ast_node id = PKL_AST_TUPLE_ELEM_NAME (t);
-
-      if (id)
-        PKL_AST_TYPE_TENAME (*type,i)
-          = xstrdup (PKL_AST_IDENTIFIER_POINTER (id));
-      PKL_AST_TYPE_TETYPE (*type,i)
-        = ASTREF (PKL_AST_TYPE (t));
-    }
+  *type = pkl_ast_make_tuple_type (*nelem,
+                                   enames, etypes);
 
   return 1;
 }
@@ -344,22 +323,21 @@ check_tuple_ref (struct pkl_parser *parser,
                  pkl_ast_node identifier,
                  pkl_ast_node *type)
 {
-  size_t i, nelem;
+  pkl_ast_node n, t;
 
   assert (PKL_AST_TYPE_CODE (ttype) == PKL_TYPE_TUPLE);
 
   *type = NULL;
-  nelem = PKL_AST_TYPE_NELEM (ttype);
-
-  for (i = 0; i < nelem; i++)
+  for (t = PKL_AST_TYPE_T_ETYPES (ttype), n = PKL_AST_TYPE_T_ENAMES (ttype);
+       t && n;
+       t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
     {
-      char *tename = PKL_AST_TYPE_TENAME (ttype, i);
-      pkl_ast_node tetype = PKL_AST_TYPE_TETYPE (ttype, i);
-      
-      if (tename != NULL
-          && strcmp (tename,
-                     PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
-        *type = tetype;
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (n),
+                  PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
+        {
+          *type = t;
+          break;
+        }
     }
 
   if (*type == NULL)
@@ -395,7 +373,7 @@ check_array (struct pkl_parser *parser,
       /* First check the type of the element.  */
       assert (PKL_AST_TYPE (elem));
       if (*type == NULL)
-        *type = pkl_ast_type_dup (PKL_AST_TYPE (elem));
+        *type = PKL_AST_TYPE (elem);
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (elem), *type))
         {
           pkl_tab_error (llocp, parser,
@@ -423,7 +401,7 @@ check_array (struct pkl_parser *parser,
       *nelem += elems_appended;
     }
 
-  PKL_AST_TYPE_ARRAYOF (*type) += 1;
+  *type = pkl_ast_make_array_type (*type);
   return 1;
 }
  
@@ -609,25 +587,29 @@ expression:
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               pkl_ast_get_integral_type (pkl_parser->ast,
+                                                                          64, 0),
                                                $2);
                 }
         | SIZEOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               pkl_ast_get_integral_type (pkl_parser->ast,
+                                                                          64, 0),
                                                $3);
                 }
         | ELEMSOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               pkl_ast_get_integral_type (pkl_parser->ast,
+                                                                          64, 0),
                                                $2);
                 }
         | ELEMSOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               pkl_ast_get_integral_type (pkl_parser->ast,
+                                                                          64, 0),
                                                $3);
                 }
         | expression '+' expression

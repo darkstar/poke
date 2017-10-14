@@ -227,10 +227,9 @@ pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
 
   assert (array && index);
 
-  PKL_AST_TYPE (aref) = pkl_ast_type_dup (PKL_AST_TYPE (array));
-  assert (PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE (aref)) > 0);
-  PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE (aref)) -= 1;
-  
+  PKL_AST_TYPE (aref) =
+    ASTREF (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (array)));
+
   PKL_AST_ARRAY_REF_ARRAY (aref) = ASTREF (array);
   PKL_AST_ARRAY_REF_INDEX (aref) = ASTREF (index);
   PKL_AST_LITERAL_P (aref) = 0;
@@ -269,25 +268,63 @@ pkl_ast_make_struct_ref (pkl_ast_node base, pkl_ast_node identifier)
   return sref;
 }
 
-/* Build and return an AST node for a type.  */
+/* Build and return type AST nodes.  */
 
-pkl_ast_node
-pkl_ast_make_type (enum pkl_ast_type_code code, int signed_p,
-                   size_t size, pkl_ast_node enumeration, pkl_ast_node strct)
+static pkl_ast_node
+pkl_ast_make_type (void)
 {
   pkl_ast_node type = pkl_ast_make_node (PKL_AST_TYPE);
 
   PKL_AST_TYPE_NAME (type) = NULL;
-  PKL_AST_TYPE_CODE (type) = code;
-  PKL_AST_TYPE_SIGNED (type) = signed_p;
-  PKL_AST_TYPE_SIZE (type) = size;
-  PKL_AST_TYPE_ENUMERATION (type) = ASTREF (enumeration);
-  PKL_AST_TYPE_STRUCT (type) = ASTREF (strct);
+  PKL_AST_TYPE_TYPEOF (type) = 0;
 
   return type;
 }
 
-/* Build a metatype for the given TYPE and return it.  */
+pkl_ast_node
+pkl_ast_make_integral_type (int signed_p, size_t size)
+{
+  pkl_ast_node type = pkl_ast_make_type ();
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_INTEGRAL;
+  PKL_AST_TYPE_I_SIGNED (type) = signed_p;
+  PKL_AST_TYPE_I_SIZE (type) = size;
+  return type;
+}
+
+pkl_ast_node
+pkl_ast_make_array_type (pkl_ast_node etype)
+{
+  pkl_ast_node type = pkl_ast_make_type ();
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_ARRAY;
+  PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
+  return type;
+}
+
+pkl_ast_node
+pkl_ast_make_string_type (void)
+{
+  pkl_ast_node type = pkl_ast_make_type ();
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRING;
+  return type;
+}
+
+pkl_ast_node
+pkl_ast_make_tuple_type (size_t nelem,
+                         pkl_ast_node enames,
+                         pkl_ast_node etypes)
+{
+  pkl_ast_node type = pkl_ast_make_type ();
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_TUPLE;
+  PKL_AST_TYPE_T_NELEM (type) = nelem;
+  PKL_AST_TYPE_T_ENAMES (type) = ASTREF (enames);
+  PKL_AST_TYPE_T_ETYPES (type) = ASTREF (etypes);
+  
+  return type;
+}
 
 pkl_ast_node
 pkl_ast_make_metatype (pkl_ast_node type)
@@ -297,7 +334,7 @@ pkl_ast_make_metatype (pkl_ast_node type)
   assert (PKL_AST_CODE (type) == PKL_AST_TYPE
           && PKL_AST_TYPE_TYPEOF (type) == 0);
 
-  metatype = pkl_ast_type_dup (type);
+  metatype = pkl_ast_dup_type (type);
   PKL_AST_TYPE_TYPEOF (metatype) = 1;
 
   return metatype;
@@ -306,17 +343,45 @@ pkl_ast_make_metatype (pkl_ast_node type)
 /* Allocate and return a duplicated type AST node.  */
 
 pkl_ast_node
-pkl_ast_type_dup (pkl_ast_node type)
+pkl_ast_dup_type (pkl_ast_node type)
 {
-  pkl_ast_node new
-    = pkl_ast_make_type (PKL_AST_TYPE_CODE (type),
-                         PKL_AST_TYPE_SIGNED (type),
-                         PKL_AST_TYPE_SIZE (type),
-                         PKL_AST_TYPE_ENUMERATION (type),
-                         PKL_AST_TYPE_STRUCT (type));
+  pkl_ast_node t, new = pkl_ast_make_type ();
+  
+  PKL_AST_TYPE_CODE (new) = PKL_AST_TYPE_CODE (type);
+  PKL_AST_TYPE_TYPEOF (new) = PKL_AST_TYPE_TYPEOF (type);
+  
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      PKL_AST_TYPE_I_SIZE (new) = PKL_AST_TYPE_I_SIZE (type);
+      PKL_AST_TYPE_I_SIGNED (new) = PKL_AST_TYPE_I_SIGNED (type);
+      break;
+    case PKL_TYPE_ARRAY:
+      PKL_AST_TYPE_A_ETYPE (new)
+        = ASTREF (pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type)));
+      break;
+    case PKL_TYPE_TUPLE:
+      PKL_AST_TYPE_T_NELEM (new) = PKL_AST_TYPE_T_NELEM (type);
+      for (t = PKL_AST_TYPE_T_ENAMES (type); t; t = PKL_AST_CHAIN (t))
+        {
+          pkl_ast_node ename
+            = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (t));
+          PKL_AST_TYPE_T_ENAMES (new)
+            = pkl_ast_chainon (PKL_AST_TYPE_T_ENAMES (new), ename);
+        }
+      for (t = PKL_AST_TYPE_T_ETYPES (type); t; t = PKL_AST_CHAIN (t))
+        {
+          pkl_ast_node etype = pkl_ast_dup_type (t);
+          PKL_AST_TYPE_T_ETYPES (new)
+            = pkl_ast_chainon (PKL_AST_TYPE_T_ETYPES (new), etype);
+        }
+      break;
+    case PKL_TYPE_STRING:
+      /* Fallthrough.  */
+    default:
+      break;
+    }
 
-  PKL_AST_TYPE_NAME (new) = xstrdup (PKL_AST_TYPE_NAME (type));
-  PKL_AST_TYPE_ARRAYOF (new) = PKL_AST_TYPE_ARRAYOF (type);
   return new;
 }
 
@@ -324,15 +389,51 @@ pkl_ast_type_dup (pkl_ast_node type)
    the same type.  */
 
 int
-pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2)
+pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 {
-  /* XXX: check tuple types too.  */
+  pkl_ast_node ta, tb;
   
-  return (PKL_AST_TYPE_SIGNED (t1) == PKL_AST_TYPE_SIGNED (t2)
-          && PKL_AST_TYPE_SIZE (t1) == PKL_AST_TYPE_SIZE (t2)
-          && PKL_AST_TYPE_ENUMERATION (t1) == PKL_AST_TYPE_ENUMERATION (t2)
-          && PKL_AST_TYPE_STRUCT (t1) == PKL_AST_TYPE_STRUCT (t2)
-          && PKL_AST_TYPE_ARRAYOF (t1) == PKL_AST_TYPE_ARRAYOF (t2));
+  if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b))
+    return 0;
+
+  switch (PKL_AST_TYPE_CODE (a))
+    {
+    case PKL_TYPE_INTEGRAL:
+      if (PKL_AST_TYPE_I_SIZE (a) != PKL_AST_TYPE_I_SIZE (b)
+          || PKL_AST_TYPE_I_SIGNED (a) != PKL_AST_TYPE_I_SIGNED (a))
+        return 0;
+      break;
+    case PKL_TYPE_ARRAY:
+      if (!pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
+                               PKL_AST_TYPE_A_ETYPE (a)))
+        return 0;
+      break;
+    case PKL_TYPE_TUPLE:
+      if (PKL_AST_TYPE_T_NELEM (a) != PKL_AST_TYPE_T_NELEM (b))
+        return 0;
+      for (ta = PKL_AST_TYPE_T_ENAMES (a), tb = PKL_AST_TYPE_T_ENAMES (b);
+           ta && tb;
+           ta = PKL_AST_CHAIN (ta), tb = PKL_AST_CHAIN (tb))
+        {
+          if (strcmp (PKL_AST_IDENTIFIER_POINTER (ta),
+                      PKL_AST_IDENTIFIER_POINTER (tb)) != 0)
+            return 0;
+        }
+      for (ta = PKL_AST_TYPE_T_ETYPES (a), tb = PKL_AST_TYPE_T_ETYPES (b);
+           ta && tb;
+           ta = PKL_AST_CHAIN (ta), tb = PKL_AST_CHAIN (tb))
+        {
+          if (!pkl_ast_type_equal (ta, tb))
+            return 0;
+        }
+      break;
+    case PKL_TYPE_STRING:
+      /* Fallthrough.  */
+    default:
+      break;
+    }
+
+  return 1;
 }
 
 /* Build and return an AST node for a struct.  */
@@ -642,17 +743,28 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_TYPE:
 
       free (PKL_AST_TYPE_NAME (ast));
-      pkl_ast_node_free (PKL_AST_TYPE_ENUMERATION (ast));
-      pkl_ast_node_free (PKL_AST_TYPE_STRUCT (ast));
-
-      for (i = 0; i < PKL_AST_TYPE_NELEM (ast); ++i)
+      switch (PKL_AST_TYPE_CODE (ast))
         {
-          free (PKL_AST_TYPE_TENAME (ast,i));
-          pkl_ast_node_free (PKL_AST_TYPE_TETYPE (ast,i));
+        case PKL_TYPE_ARRAY:
+          pkl_ast_node_free (PKL_AST_TYPE_A_ETYPE (ast));
+          break;
+        case PKL_TYPE_TUPLE:
+          for (t = PKL_AST_TYPE_T_ENAMES (ast); t; t = n)
+            {
+              n = PKL_AST_CHAIN (t);
+              pkl_ast_node_free (t);
+            }
+          for (t = PKL_AST_TYPE_T_ETYPES (ast); t; t = n)
+            {
+              n = PKL_AST_CHAIN (t);
+              pkl_ast_node_free (t);
+            }
+          break;
+        case PKL_TYPE_INTEGRAL:
+        case PKL_TYPE_STRING:
+        default:
+          break;
         }
-
-      free (PKL_AST_TYPE_TNAMES (ast));
-      free (PKL_AST_TYPE_TTYPES (ast));
       
       break;
       
@@ -749,13 +861,12 @@ pkl_ast_init (void)
       char *id;
       size_t size;
       int signed_p;
-    } *type, stdtypes[] =
+    } *type, stditypes[] =
         {
 #define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) {CODE, ID, SIZE, SIGNED},
 # include "pkl-types.def"
 #undef PKL_DEF_TYPE
-          { PKL_TYPE_STRING, "string", 0, 0 },
-          { PKL_TYPE_TUPLE, "tuple", 0, 0},
+          /*          { PKL_TYPE_STRING, "string", 0, 0 }, */
           { PKL_TYPE_NOTYPE, NULL, 0 }
         };
   struct pkl_ast *ast;
@@ -769,18 +880,21 @@ pkl_ast_init (void)
   /* Create and register standard types in the types hash and also in
      the stdtypes array for easy access by type code.  */
 
-  nentries = sizeof (stdtypes) / sizeof (stdtypes[0]);
+  nentries
+    = (sizeof (stditypes) / sizeof (stditypes[0])) + 2;
   ast->stdtypes = xmalloc (nentries * sizeof (pkl_ast_node *));
-  for (type = stdtypes; type->code != PKL_TYPE_NOTYPE; type++)
+
+  /* Integral types.  */
+  for (type = stditypes; type->code != PKL_TYPE_NOTYPE; type++)
     {
-      pkl_ast_node t = pkl_ast_make_type (type->code,
-                                          type->signed_p,
-                                          type->size,
-                                          NULL /* enumeration */,
-                                          NULL /* strct */);
+      pkl_ast_node t
+        = pkl_ast_make_integral_type (type->signed_p, type->size);
       pkl_ast_register (ast, type->id, t);
       ast->stdtypes[type->code] = ASTREF (t);
     }
+
+  /* String type.  */
+  ast->stdtypes[nentries - 2] = pkl_ast_make_string_type ();
   ast->stdtypes[nentries - 1] = NULL;
 
   return ast;
@@ -892,24 +1006,26 @@ pkl_ast_get_std_type (pkl_ast ast, enum pkl_ast_type_code code)
   return ast->stdtypes[code];
 }
 
-/* Return the node corresponding to the type having size SIZE and
-   signedness SIGNED_P, or NULL if no such node exists.  */
+/* Return an integral type with the given attribute SIZE and SIGNED_P.
+   If the type exists in the stdtypes array, return it.  Otherwise
+   create a new one.  */
 
 pkl_ast_node
-pkl_ast_search_std_type (pkl_ast ast, size_t size, int signed_p)
+pkl_ast_get_integral_type (pkl_ast ast, size_t size, int signed_p)
 {
   size_t i;
 
-  for (i = 0; ast->stdtypes[i]; i++)
+  i = 0;
+  while (ast->stdtypes[i] != NULL)
     {
       pkl_ast_node stdtype = ast->stdtypes[i];
 
-      if (PKL_AST_TYPE_SIZE (stdtype) == size
-          && PKL_AST_TYPE_SIGNED (stdtype) == signed_p)
+      if (PKL_AST_TYPE_I_SIZE (stdtype) == size
+          && PKL_AST_TYPE_I_SIGNED (stdtype) == signed_p)
         return stdtype;
     }
 
-  return NULL;
+  return pkl_ast_make_integral_type (size, signed_p);
 }
 
 /* Register an AST node under the given NAME in the corresponding hash
@@ -1251,59 +1367,27 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("TYPE::\n");
 
       PRINT_AST_SUBAST (metatype, TYPE);
-      PRINT_AST_IMM (typeof, TYPE_TYPEOF, "%d");
-      PRINT_AST_IMM (arrayof, TYPE_ARRAYOF, "%d");
-      IPRINTF ("code:\n");
-      {
-#define PKL_DEF_TYPE(CODE,NAME,WIDTH,SIZE) NAME,
-        static char *pkl_type_names[] =
-          {
-# include "pkl-types.def"
-            "string",
-            "tuple",
-            ""
-          };
-#undef PKL_DEF_TYPE
-        size_t i;
-        
-        IPRINTF ("  %s", pkl_type_names[PKL_AST_TYPE_CODE (ast)]);
-        for (i = 0; i < PKL_AST_TYPE_ARRAYOF (ast); i++)
-          printf ("[]");
-        printf ("\n");
-      }
-      
-      PRINT_AST_IMM (signed_p, TYPE_SIGNED, "%d");
-      PRINT_AST_IMM (size, TYPE_SIZE, "%lu");
 
-      if (PKL_AST_TYPE_ENUMERATION (ast))
+      PRINT_AST_IMM (code, TYPE_CODE, "%d");
+      switch (PKL_AST_TYPE_CODE (ast))
         {
-          pkl_ast_node enumeration = PKL_AST_TYPE_ENUMERATION (ast);
-          const char *tag
-            = PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (enumeration));
-
-          IPRINTF ("enumeration:\n");
-          IPRINTF ("  'enum %s'\n", tag);
+        case PKL_TYPE_INTEGRAL:
+          PRINT_AST_IMM (signed_p, TYPE_I_SIGNED, "%d");
+          PRINT_AST_IMM (size, TYPE_I_SIZE, "%lu");
+          break;
+        case PKL_TYPE_ARRAY:
+          PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
+          break;
+        case PKL_TYPE_TUPLE:
+          PRINT_AST_IMM (nelem, TYPE_T_NELEM, "%lu");
+          PRINT_AST_SUBAST_CHAIN (TYPE_T_ENAMES);
+          PRINT_AST_SUBAST_CHAIN (TYPE_T_ETYPES);
+          break;
+        case PKL_TYPE_STRING:
+          /* Fallthrough.  */
+        default:
+          break;
         }
-
-      if (PKL_AST_TYPE_STRUCT (ast))
-        {
-          pkl_ast_node strct = PKL_AST_TYPE_STRUCT (ast);
-          const char *tag
-            = PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TAG (strct));
-          IPRINTF ("struct:\n");
-          IPRINTF ("  'struct %s'\n", tag);
-        }
-
-      PRINT_AST_IMM (nelem, TYPE_NELEM, "%lu");
-      IPRINTF ("tnames: ");
-      for (i = 0; i < PKL_AST_TYPE_NELEM (ast); ++i)
-        {
-          if (i != 0)
-            printf (",");
-          printf ("%s", PKL_AST_TYPE_TENAME (ast, i));
-        }
-      printf ("\n");
-      
       break;
 
     case PKL_AST_ASSERTION:

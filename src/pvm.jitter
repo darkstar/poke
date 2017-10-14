@@ -2101,6 +2101,11 @@ instruction mkty () # ULONG UINT UINT -> TYP
   end
 end
 
+instruction mkaty () # TYPE -> TYPE
+  code
+  end
+end
+
 instruction mktty () # [STRING TYP]... ULONG -> TYP
   code
   end

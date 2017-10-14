@@ -234,7 +234,7 @@ D [0-9]
       width = 32;
   }
 
-  type = pkl_ast_search_std_type (yyextra->ast, width, signed_p);
+  type = pkl_ast_get_integral_type (yyextra->ast, width, signed_p);
   assert (type);
 
   yylval->ast = pkl_ast_make_integer (value);

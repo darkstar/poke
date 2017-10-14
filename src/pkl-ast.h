@@ -101,17 +101,24 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
    (see below in this file for more details on this.)  The following
    enumeration defines the type codes.
 
-   The definitions of the supported types are in pdl-types.def.  */
+   The definitions of the supported integral types are in
+   pdl-types.def.  */
 
-#define PKL_DEF_TYPE(CODE,ID,SIZE_MAX,SIGNED) CODE,
+#define PKL_DEF_TYPE(CODE,NAME,SIZE,SIGNED) CODE,
+enum pkl_ast_integral_type_code
+{
+# include "pkl-types.def"
+};
+#undef PKL_DEF_TYPE
+
 enum pkl_ast_type_code
 {
-#include "pkl-types.def"
+  PKL_TYPE_INTEGRAL,
   PKL_TYPE_STRING,
+  PKL_TYPE_ARRAY,
   PKL_TYPE_TUPLE,
   PKL_TYPE_NOTYPE,
 };
-#undef PKL_DEF_TYPE
 
 /* Next we define the several supported types of nodes in the abstract
    syntax tree, which are discriminated using the codes defined in the
@@ -703,77 +710,73 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
 
-   SIGNED is 1 if the type denotes a signed numeric type.  In
-   non-integral types SIGNED is 0.
-
-   SIZE is the witdh in bits of type, for integral types.  In
-   non-integral types SIZE is 0.
-
-   If ARRAYOF > 0 then this type is an array type.  If it is 1 then it
-   is an array of the the type described by the other fields of the
-   struct.  If it is 2 then it is an array of arrays of the same type.
-   And so on...
-
    If TYPEOF > 0 then this type is a meta-type, i.e. it is the type of
    a value that itself denotes a type described by the other fields of
    the struct.
 
-   NELEM and TNAMES are used to store information about tuple types.
-   NELEM contains the number of elements in the tuple type, while
-   TNAMES contains their names.  Note that tuple element names may be
-   NULL.
+   In integral types, SIGNED is 1 if the type denotes a signed numeric
+   type.  In non-integral types SIGNED is 0.  SIZE is the size in bits
+   of type.
 
-   ENUMERATION must point to a PKL_AST_ENUM node if the type code is
-   PKL_TYPE_ENUM.
+   In array types, ETYPE is a PKL_AST_TYPE node.
 
-   STRUCT must point to a PKL_AST_STRUCT node if the type code is
-   PKL_TYPE_STRUCT.  */
+   In tuple types, NELEM is the number of elements in the tuple type.
+   ENAMES is a chain of PKL_AST_IDENTIFIER nodes.  ETYPES is a chain
+   of PKL_AST_TYPE nodes.  */
 
-#define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
-#define PKL_AST_TYPE_SIGNED(AST) ((AST)->type.signed_p)
-#define PKL_AST_TYPE_ARRAYOF(AST) ((AST)->type.arrayof)
+#define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PKL_AST_TYPE_TYPEOF(AST) ((AST)->type.type_of)
-#define PKL_AST_TYPE_SIZE(AST) ((AST)->type.size)
-#define PKL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
-#define PKL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
-#define PKL_AST_TYPE_NELEM(AST) ((AST)->type.nelem)
-#define PKL_AST_TYPE_TNAMES(AST) ((AST)->type.tnames)
-#define PKL_AST_TYPE_TTYPES(AST) ((AST)->type.ttypes)
-#define PKL_AST_TYPE_TETYPE(AST,I) ((AST)->type.ttypes[(I)])
-#define PKL_AST_TYPE_TENAME(AST,I) ((AST)->type.tnames[(I)])
-#define PKL_AST_TYPE_TETYPE(AST,I) ((AST)->type.ttypes[(I)])
+#define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
+#define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
+#define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
+#define PKL_AST_TYPE_T_NELEM(AST) ((AST)->type.val.tuple.nelem)
+#define PKL_AST_TYPE_T_ENAMES(AST) ((AST)->type.val.tuple.enames)
+#define PKL_AST_TYPE_T_ETYPES(AST) ((AST)->type.val.tuple.etypes)
 
 struct pkl_ast_type
 {
   struct pkl_ast_common common;
-  char *name;
 
   enum pkl_ast_type_code code;
-  int signed_p;
-  int arrayof;
+  char *name;
   int type_of;
-  size_t size;
-  size_t nelem;
-
-  char **tnames;
-  union pkl_ast_node **ttypes;
   
+  union
+  {
+    struct
+    {
+      size_t size;
+      int signed_p;
+    } integral;
+
+    struct
+    {
+      union pkl_ast_node *etype;
+    } array;
+
+    struct
+    {
+      size_t nelem;
+      union pkl_ast_node *enames;
+      union pkl_ast_node *etypes;
+    } tuple;
+  } val;
+
+  /* XXX */  
   union pkl_ast_node *enumeration;
   union pkl_ast_node *strt;
 };
 
-#define PKL_AST_TYPE_INTEGRAL(AST) ((AST)->type.size > 0)
-
-pkl_ast_node pkl_ast_make_type (enum pkl_ast_type_code code,
-                                int signed_p,
-                                size_t size,
-                                pkl_ast_node enumeration,
-                                pkl_ast_node strct);
+pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
+pkl_ast_node pkl_ast_make_string_type (void);
+pkl_ast_node pkl_ast_make_array_type (pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_tuple_type (size_t nelem,
+                                      pkl_ast_node enames, pkl_ast_node etypes);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 
-pkl_ast_node pkl_ast_type_dup (pkl_ast_node type);
+pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 
 /* PKL_AST_LOC nodes represent the current struct's location
@@ -894,8 +897,8 @@ pkl_ast_node pkl_ast_register (pkl_ast ast,
 pkl_ast_node pkl_ast_get_std_type (pkl_ast ast,
                                    enum pkl_ast_type_code code);
 
-pkl_ast_node pkl_ast_search_std_type (pkl_ast ast,
-                                      size_t size, int signed_p);
+pkl_ast_node pkl_ast_get_integral_type (pkl_ast ast,
+                                        size_t size, int signed_p);
 
 #ifdef PKL_DEBUG
 
