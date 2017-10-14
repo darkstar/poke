@@ -287,6 +287,22 @@ pkl_ast_make_type (enum pkl_ast_type_code code, int signed_p,
   return type;
 }
 
+/* Build a metatype for the given TYPE and return it.  */
+
+pkl_ast_node
+pkl_ast_make_metatype (pkl_ast_node type)
+{
+  pkl_ast_node metatype;
+
+  assert (PKL_AST_CODE (type) == PKL_AST_TYPE
+          && PKL_AST_TYPE_TYPEOF (type) == 0);
+
+  metatype = pkl_ast_type_dup (type);
+  PKL_AST_TYPE_TYPEOF (metatype) = 1;
+
+  return metatype;
+}
+
 /* Allocate and return a duplicated type AST node.  */
 
 pkl_ast_node
@@ -1107,6 +1123,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         IPRINTF ("EXPRESSION::\n");
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
+        PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
         IPRINTF ("operands:\n");
         for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); i++)
@@ -1231,6 +1248,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
+      PRINT_AST_SUBAST (metatype, TYPE);
+      PRINT_AST_IMM (typeof, TYPE_TYPEOF, "%d");
       PRINT_AST_IMM (arrayof, TYPE_ARRAYOF, "%d");
       IPRINTF ("code:\n");
       {

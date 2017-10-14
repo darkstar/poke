@@ -458,6 +458,7 @@ check_array (struct pkl_parser *parser,
 %token WHILE
 %token IF
 %token SIZEOF
+%token TYPEOF
 %token ELEMSOF
 %token ASSERT
 %token ERR
@@ -593,26 +594,41 @@ expression:
                   $$ = pkl_ast_make_cast ($2, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
+        | TYPEOF expression %prec UNARY
+        	{
+                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
+                    {
+                      pkl_tab_error (&@2, pkl_parser,
+                                     "operand to typeof can't be a type.");
+                      YYERROR;
+                    }
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF,
+                                               pkl_ast_make_metatype (PKL_AST_TYPE ($2)),
+                                               $2);
+                }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               PKL_AST_TYPE ($2), $2);
+                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               $2);
                 }
         | SIZEOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               PKL_AST_TYPE ($3),
+                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
                                                $3);
                 }
         | ELEMSOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               PKL_AST_TYPE ($2), $2);
+                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               $2);
                 }
         | ELEMSOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               PKL_AST_TYPE ($3), $3);
+                                               pkl_ast_search_std_type (pkl_parser->ast, 64, 0),
+                                               $3);
                 }
         | expression '+' expression
         	{
@@ -931,6 +947,10 @@ primary:
         | CHAR
         | STR
         | type_specifier
+          {
+            $$ = $1;
+            PKL_AST_TYPE ($$) = ASTREF (pkl_ast_make_metatype ($1));
+          }
           /*        | IDENTIFIER */
         | '(' expression ')'
 		{ $$ = $2; }
