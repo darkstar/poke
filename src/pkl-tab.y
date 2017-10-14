@@ -582,8 +582,14 @@ expression:
                     }
                   $$ = pkl_ast_make_unary_exp ($1, PKL_AST_TYPE ($2), $2);
                 }
-        | '(' type_specifier ')' expression %prec UNARY
+        | '(' expression ')' expression %prec UNARY
         	{
+                  if (PKL_AST_CODE ($2) != PKL_AST_TYPE)
+                    {
+                      pkl_tab_error (&@2, pkl_parser,
+                                     "expected type in cast.");
+                      YYERROR;
+                    }
                   $$ = pkl_ast_make_cast ($2, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
@@ -592,7 +598,7 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
                                                PKL_AST_TYPE ($2), $2);
                 }
-        | SIZEOF '(' type_specifier ')' %prec HYPERUNARY
+        | SIZEOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
                                                PKL_AST_TYPE ($3),
@@ -603,7 +609,7 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
                                                PKL_AST_TYPE ($2), $2);
                 }
-        | ELEMSOF '(' type_specifier ')' %prec HYPERUNARY
+        | ELEMSOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
                                                PKL_AST_TYPE ($3), $3);
