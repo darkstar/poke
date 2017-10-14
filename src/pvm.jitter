@@ -2106,7 +2106,15 @@ instruction mktty () # [STRING TYP]... ULONG -> TYP
   end
 end
 
+# Instructions to access the IO space.
+
 instruction map () # TYP ULONG -> VAL
+  code
+
+  end
+end
+
+instruction poke () # VAL ULONG -> _
   code
 
   end
