@@ -309,7 +309,6 @@ check_tuple (struct pkl_parser *parser,
     }
 
   /* Now build the type for the tuple.  */
-
   *type = pkl_ast_make_tuple_type (*nelem,
                                    enames, etypes);
 
@@ -401,7 +400,9 @@ check_array (struct pkl_parser *parser,
       *nelem += elems_appended;
     }
 
+  /* Finally, set the type of the array itself.  */
   *type = pkl_ast_make_array_type (*type);
+
   return 1;
 }
  
@@ -559,7 +560,8 @@ expression:
                                      "invalid operand to unary operator.");
                         YYERROR;
                     }
-                  $$ = pkl_ast_make_unary_exp ($1, PKL_AST_TYPE ($2), $2);
+                  $$ = pkl_ast_make_unary_exp ($1, $2);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
                 }
         | '(' expression ')' expression %prec UNARY
         	{
@@ -580,37 +582,37 @@ expression:
                                      "operand to typeof can't be a type.");
                       YYERROR;
                     }
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF,
-                                               pkl_ast_make_metatype (PKL_AST_TYPE ($2)),
-                                               $2);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF, $2);
+                  PKL_AST_TYPE ($$)
+                    = ASTREF (pkl_ast_make_metatype (PKL_AST_TYPE ($2)));
                 }
         | SIZEOF expression %prec UNARY
         	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               pkl_ast_get_integral_type (pkl_parser->ast,
-                                                                          64, 0),
-                                               $2);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
+                  PKL_AST_TYPE ($$)
+                    = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                 64, 0);
                 }
         | SIZEOF '(' expression ')' %prec HYPERUNARY
         	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF,
-                                               pkl_ast_get_integral_type (pkl_parser->ast,
-                                                                          64, 0),
-                                               $3);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
+                  PKL_AST_TYPE ($$)
+                    = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                 64, 0);
                 }
         | ELEMSOF expression %prec UNARY
         	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               pkl_ast_get_integral_type (pkl_parser->ast,
-                                                                          64, 0),
-                                               $2);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $2);
+                  PKL_AST_TYPE ($$)
+                    = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                 64, 0);
                 }
         | ELEMSOF '(' expression ')' %prec HYPERUNARY
         	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF,
-                                               pkl_ast_get_integral_type (pkl_parser->ast,
-                                                                          64, 0),
-                                               $3);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $3);
+                  PKL_AST_TYPE ($$)
+                    = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                 64, 0);
                 }
         | expression '+' expression
         	{
@@ -625,8 +627,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '-' expression
         	{
@@ -641,8 +643,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '*' expression
         	{
@@ -657,8 +659,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '/' expression
         	{
@@ -673,8 +675,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '%' expression
         	{
@@ -689,8 +691,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SL expression
         	{
@@ -705,8 +707,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SR expression
         	{
@@ -721,8 +723,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression EQ expression
         	{
@@ -737,8 +739,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression NE expression
         	{
@@ -753,8 +755,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '<' expression
         	{
@@ -769,8 +771,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '>' expression
         	{
@@ -785,8 +787,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression LE expression
         	{
@@ -801,8 +803,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression GE expression
         	{
@@ -817,8 +819,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '|' expression
         	{
@@ -833,8 +835,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '^' expression
         	{
@@ -849,8 +851,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression '&' expression
         	{
@@ -865,8 +867,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression AND expression
         	{
@@ -878,8 +880,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression OR expression
         	{
@@ -891,8 +893,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
-                                                PKL_AST_TYPE ($1),
                                                 $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '@' expression
         	{
@@ -909,7 +911,8 @@ expression:
                       YYERROR;
                     }
 		  $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MAP,
-                                                $1, $1, $3);
+                                                $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF ($1);
                 }
         | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
@@ -939,14 +942,14 @@ primary:
 	| primary INC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC,
-                                               PKL_AST_TYPE ($1),
                                                $1);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | primary DEC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTDEC,
-                                               PKL_AST_TYPE ($1),
                                                $1);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | primary '[' expression ']' %prec '.'
         	{
@@ -963,6 +966,8 @@ primary:
                                      "invalid index in array reference.");
                     }
                   $$ = pkl_ast_make_array_ref ($1, $3);
+                  PKL_AST_TYPE ($$) =
+                    ASTREF (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE ($1)));
                 }
         | '[' array_elem_list ']'
         	{
@@ -974,7 +979,8 @@ primary:
                                     &type, &nelem))
                     YYERROR;
                   
-                  $$ = pkl_ast_make_array (type, nelem, $2);
+                  $$ = pkl_ast_make_array (nelem, $2);
+                  PKL_AST_TYPE ($$) = ASTREF (type);
                 }
 	| '{' tuple_elem_list '}'
         	{
@@ -1000,8 +1006,6 @@ primary:
                       YYERROR;
                     }
 
-                  /* XXX we need the tuple's types and names in the
-                     PKL_AST_TYPE node associated with the expression.  */
                   if (!check_tuple_ref (pkl_parser, &@3,
                                         PKL_AST_TYPE ($1), $3,
                                         &type))
@@ -1048,11 +1052,15 @@ array_elem:
           	{
                   $$ = pkl_ast_make_array_elem (PKL_AST_ARRAY_NOINDEX,
                                                 $1);
+                  /* Note how xarray elems do not have a type.  See
+                     `check_array' above.  */
                 }
         | '.' '[' INTEGER ']' '=' expression
         	{
                   $$ = pkl_ast_make_array_elem (PKL_AST_INTEGER_VALUE ($3),
                                                 $6);
+                  /* Note how array elems do not have a type.  See
+                     `check_array' above.  */
                 }
         ;
 

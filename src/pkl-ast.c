@@ -180,15 +180,13 @@ pkl_ast_make_cond_exp (pkl_ast_node cond,
 
 pkl_ast_node
 pkl_ast_make_binary_exp (enum pkl_ast_op code,
-                         pkl_ast_node type,
                          pkl_ast_node op1,
                          pkl_ast_node op2)
 {
   pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
 
-  assert (type && op1 && op2);
+  assert (op1 && op2);
 
-  PKL_AST_TYPE (exp) = ASTREF (type);
   PKL_AST_EXP_CODE (exp) = code;
   PKL_AST_EXP_NUMOPS (exp) = 2;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op1);
@@ -204,12 +202,10 @@ pkl_ast_make_binary_exp (enum pkl_ast_op code,
 
 pkl_ast_node
 pkl_ast_make_unary_exp (enum pkl_ast_op code,
-                        pkl_ast_node type,
                         pkl_ast_node op)
 {
   pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
 
-  PKL_AST_TYPE (exp) = ASTREF (type);
   PKL_AST_EXP_CODE (exp) = code;
   PKL_AST_EXP_NUMOPS (exp) = 1;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op);
@@ -226,9 +222,6 @@ pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
   pkl_ast_node aref = pkl_ast_make_node (PKL_AST_ARRAY_REF);
 
   assert (array && index);
-
-  PKL_AST_TYPE (aref) =
-    ASTREF (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (array)));
 
   PKL_AST_ARRAY_REF_ARRAY (aref) = ASTREF (array);
   PKL_AST_ARRAY_REF_INDEX (aref) = ASTREF (index);
@@ -552,12 +545,10 @@ pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
-pkl_ast_make_array (pkl_ast_node type, size_t nelem,
-                    pkl_ast_node elems)
+pkl_ast_make_array (size_t nelem, pkl_ast_node elems)
 {
   pkl_ast_node array = pkl_ast_make_node (PKL_AST_ARRAY);
 
-  PKL_AST_TYPE (array) = ASTREF (type);
   PKL_AST_ARRAY_NELEM (array) = nelem;
   PKL_AST_ARRAY_ELEMS (array) = ASTREF (elems);
 

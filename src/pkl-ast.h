@@ -301,8 +301,7 @@ struct pkl_ast_array
   union pkl_ast_node *elems;
 };
 
-pkl_ast_node pkl_ast_make_array (pkl_ast_node etype,
-                                 size_t nelem,
+pkl_ast_node pkl_ast_make_array (size_t nelem,
                                  pkl_ast_node elems);
 
 
@@ -379,10 +378,8 @@ struct pkl_ast_exp
 };
 
 pkl_ast_node pkl_ast_make_unary_exp (enum pkl_ast_op code,
-                                     pkl_ast_node type,
                                      pkl_ast_node op);
 pkl_ast_node pkl_ast_make_binary_exp (enum pkl_ast_op code,
-                                      pkl_ast_node type,
                                       pkl_ast_node op1,
                                       pkl_ast_node op2);
 
