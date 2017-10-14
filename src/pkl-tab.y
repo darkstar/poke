@@ -914,7 +914,7 @@ expression:
                 }
         | expression '@' expression
         	{
-                  if (PKL_AST_CODE ($1) != PKL_AST_TYPE)
+                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($1)) == 0)
                     {
                       pkl_tab_error (&@1, pkl_parser,
                                      "expected type in mapping.");

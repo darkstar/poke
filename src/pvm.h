@@ -65,6 +65,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_STR   0xa
 #define PVM_VAL_TAG_ARR   0xb
 #define PVM_VAL_TAG_TUP   0xc
+#define PVM_VAL_TAG_TYPE  0xd
 
 
 /* 8-bit integers (both signed and unsigned) are encoded in the
@@ -110,6 +111,7 @@ pvm_val pvm_make_uint (uint32_t value);
 #define PVM_VAL_BOX_STR(B) ((B)->v.string)
 #define PVM_VAL_BOX_ARR(B) ((B)->v.array)
 #define PVM_VAL_BOX_TUP(B) ((B)->v.tuple)
+#define PVM_VAL_BOX_TYPE(B) ((B)->v.type)
 
 struct pvm_val_box
 {
@@ -121,6 +123,7 @@ struct pvm_val_box
     char *string;
     struct pvm_array *array;
     struct pvm_tuple *tuple;
+    struct pvm_type *type;
   } v;
 };
 
@@ -186,6 +189,19 @@ typedef struct pvm_tuple *pvm_tuple;
 pvm_val pvm_make_tuple (size_t nelems);
 void pvm_reverse_tuple (pvm_val tuple);
 pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
+
+/* Types are also boxed.  */
+
+#define PVM_VAL_TYPE(V) (PVM_VAL_BOX_TYPE (PVM_VAL_BOX ((V))))
+
+struct pvm_type
+{
+  
+};
+
+typedef struct pvm_type *pvm_type;
+
+pvm_val pvm_make_type (void);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

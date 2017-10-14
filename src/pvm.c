@@ -220,6 +220,17 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
 }
 
 pvm_val
+pvm_make_type (void)
+{
+  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_type type = xmalloc (sizeof (struct pvm_type));
+
+  /* XXX: */
+  
+  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+}
+
+pvm_val
 pvm_elemsof (pvm_val val)
 {
   if (PVM_IS_ARR (val))
