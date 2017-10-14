@@ -950,7 +950,8 @@ primary:
                 }
         | primary '[' expression ']' %prec '.'
         	{
-                  if (PKL_AST_TYPE_ARRAYOF (PKL_AST_TYPE ($1)) < 1)
+                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1))
+                      != PKL_TYPE_ARRAY)
                     {
                       pkl_tab_error (&@1, pkl_parser,
                                      "operator to [] must be an array.");

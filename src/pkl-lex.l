@@ -269,7 +269,7 @@ D [0-9]
    else
      value = yytext[1];
 
-   type = pkl_ast_get_std_type (yyextra->ast, PKL_TYPE_CHAR);
+   type = pkl_ast_get_integral_type (yyextra->ast, 8, 0);
    assert (type);
 
    yylval->ast = pkl_ast_make_integer (value);
@@ -286,7 +286,7 @@ D [0-9]
 
    /* XXX: handle escape characters.  */
 
-   type = pkl_ast_get_std_type (yyextra->ast, PKL_TYPE_STRING);
+   type = pkl_ast_get_string_type (yyextra->ast);
    assert (type);
 
    yylval->ast = pkl_ast_make_string (yytext + 1);

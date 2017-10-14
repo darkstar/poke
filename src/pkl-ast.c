@@ -892,10 +892,10 @@ pkl_ast_init (void)
       pkl_ast_register (ast, type->id, t);
       ast->stdtypes[type->code] = ASTREF (t);
     }
-
-  /* String type.  */
-  ast->stdtypes[nentries - 2] = pkl_ast_make_string_type ();
   ast->stdtypes[nentries - 1] = NULL;
+  
+  /* String type.  */
+  ast->stringtype = pkl_ast_make_string_type ();
 
   return ast;
 }
@@ -935,6 +935,7 @@ pkl_ast_free (pkl_ast ast)
 
   for (i = 0; ast->stdtypes[i]; i++)
     pkl_ast_node_free (ast->stdtypes[i]);
+  pkl_ast_node_free (ast->stringtype);
   
   free (ast);
 }
@@ -997,13 +998,12 @@ pkl_ast_get_identifier (struct pkl_ast *ast,
 
 }
 
-/* Return the node corresponding to the type code CODE, or NULL if no
-   such node exists.  */
+/* Return the standard type string.  */
 
 pkl_ast_node
-pkl_ast_get_std_type (pkl_ast ast, enum pkl_ast_type_code code)
+pkl_ast_get_string_type (pkl_ast ast)
 {
-  return ast->stdtypes[code];
+  return ast->stringtype;
 }
 
 /* Return an integral type with the given attribute SIZE and SIGNED_P.

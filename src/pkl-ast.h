@@ -872,6 +872,7 @@ struct pkl_ast
   pkl_hash structs_hash_table;
 
   pkl_ast_node *stdtypes;
+  pkl_ast_node stringtype;
 };
 
 typedef struct pkl_ast *pkl_ast;
@@ -894,9 +895,7 @@ pkl_ast_node pkl_ast_register (pkl_ast ast,
                                const char *name,
                                pkl_ast_node ast_node);
 
-pkl_ast_node pkl_ast_get_std_type (pkl_ast ast,
-                                   enum pkl_ast_type_code code);
-
+pkl_ast_node pkl_ast_get_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_get_integral_type (pkl_ast ast,
                                         size_t size, int signed_p);
 
