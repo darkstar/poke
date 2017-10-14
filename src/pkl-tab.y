@@ -275,15 +275,17 @@ static int
 check_tuple (struct pkl_parser *parser,
              YYLTYPE *llocp,
              pkl_ast_node elems,
-             size_t *nelem)
+             size_t *nelem,
+             pkl_ast_node *type)
 {
   pkl_ast_node t, u;
-
+  size_t i;
+  
   *nelem = 0;
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node name;
-
+      
       name = PKL_AST_TUPLE_ELEM_NAME (t);
       if (name)
         {
@@ -309,31 +311,55 @@ check_tuple (struct pkl_parser *parser,
       *nelem += 1;
     }
 
+  /* Now build the type for the tuple.  */
+
+  *type
+    = pkl_ast_type_dup (pkl_ast_get_std_type (parser->ast, PKL_TYPE_TUPLE));
+  assert (type != NULL);
+
+  PKL_AST_TYPE_NELEM (*type) = *nelem;
+  PKL_AST_TYPE_TNAMES (*type)
+    = xmalloc (sizeof (char *) * *nelem);
+  PKL_AST_TYPE_TTYPES (*type)
+    = xmalloc (sizeof (pkl_ast_node) * *nelem);
+
+  for (i = 0, t = elems; t; i++, t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node id = PKL_AST_TUPLE_ELEM_NAME (t);
+
+      if (id)
+        PKL_AST_TYPE_TENAME (*type,i)
+          = xstrdup (PKL_AST_IDENTIFIER_POINTER (id));
+      PKL_AST_TYPE_TETYPE (*type,i)
+        = ASTREF (PKL_AST_TYPE (t));
+    }
+
   return 1;
 }
 
 static int
 check_tuple_ref (struct pkl_parser *parser,
                  YYLTYPE *llocp,
-                 pkl_ast_node tuple,
+                 pkl_ast_node ttype,
                  pkl_ast_node identifier,
                  pkl_ast_node *type)
 {
-  pkl_ast_node t;
+  size_t i, nelem;
 
-  assert (PKL_AST_CODE (tuple) == PKL_AST_TUPLE);
+  assert (PKL_AST_TYPE_CODE (ttype) == PKL_TYPE_TUPLE);
 
   *type = NULL;
-  for (t = PKL_AST_TUPLE_ELEMS (tuple);
-       t;
-       t = PKL_AST_CHAIN (t))
-    {
-      pkl_ast_node name = PKL_AST_TUPLE_ELEM_NAME (t);
+  nelem = PKL_AST_TYPE_NELEM (ttype);
 
-      if (name != NULL
-          && strcmp (PKL_AST_IDENTIFIER_POINTER (name),
+  for (i = 0; i < nelem; i++)
+    {
+      char *tename = PKL_AST_TYPE_TENAME (ttype, i);
+      pkl_ast_node tetype = PKL_AST_TYPE_TETYPE (ttype, i);
+      
+      if (tename != NULL
+          && strcmp (tename,
                      PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
-        *type = PKL_AST_TYPE (t);
+        *type = tetype;
     }
 
   if (*type == NULL)
@@ -925,16 +951,15 @@ primary:
 	| '{' tuple_elem_list '}'
         	{
                   size_t nelem;
+                  pkl_ast_node type;
 
                   if (!check_tuple (pkl_parser,
                                     &@2, $2,
-                                    &nelem))
+                                    &nelem, &type))
                     YYERROR;
 
                   $$ = pkl_ast_make_tuple (nelem, $2);
-                  PKL_AST_TYPE ($$)
-                    = ASTREF (pkl_ast_get_std_type (pkl_parser->ast,
-                                                    PKL_TYPE_TUPLE));
+                  PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         | primary '.' IDENTIFIER
         	{
@@ -949,8 +974,8 @@ primary:
 
                   /* XXX we need the tuple's types and names in the
                      PKL_AST_TYPE node associated with the expression.  */
-                  if (!check_tuple_ref (pkl_parser,
-                                        &@3, $1, $3,
+                  if (!check_tuple_ref (pkl_parser, &@3,
+                                        PKL_AST_TYPE ($1), $3,
                                         &type))
                       YYERROR;
                   

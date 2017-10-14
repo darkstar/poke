@@ -703,9 +703,21 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
 
-   SIGNED is 1 if the type denotes a signed numeric type.
+   SIGNED is 1 if the type denotes a signed numeric type.  In
+   non-integral types SIGNED is 0.
 
-   SIZE is the witdh in bits of type.
+   SIZE is the witdh in bits of type, for integral types.  In
+   non-integral types SIZE is 0.
+
+   If ARRAYOF > 0 then this type is an array type.  If it is 1 then it
+   is an array of the the type described by the other fields of the
+   struct.  If it is 2 then it is an array of arrays of the same type.
+   And so on...
+
+   NELEM and TNAMES are used to store information about tuple types.
+   NELEM contains the number of elements in the tuple type, while
+   TNAMES contains their names.  Note that tuple element names may be
+   NULL.
 
    ENUMERATION must point to a PKL_AST_ENUM node if the type code is
    PKL_TYPE_ENUM.
@@ -720,7 +732,12 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
 #define PKL_AST_TYPE_SIZE(AST) ((AST)->type.size)
 #define PKL_AST_TYPE_ENUMERATION(AST) ((AST)->type.enumeration)
 #define PKL_AST_TYPE_STRUCT(AST) ((AST)->type.strt)
-#define PKL_AST_TYPE_INTEGRAL(AST) ((AST)->type.size > 0)
+#define PKL_AST_TYPE_NELEM(AST) ((AST)->type.nelem)
+#define PKL_AST_TYPE_TNAMES(AST) ((AST)->type.tnames)
+#define PKL_AST_TYPE_TTYPES(AST) ((AST)->type.ttypes)
+#define PKL_AST_TYPE_TETYPE(AST,I) ((AST)->type.ttypes[(I)])
+#define PKL_AST_TYPE_TENAME(AST,I) ((AST)->type.tnames[(I)])
+#define PKL_AST_TYPE_TETYPE(AST,I) ((AST)->type.ttypes[(I)])
 
 struct pkl_ast_type
 {
@@ -731,9 +748,16 @@ struct pkl_ast_type
   int signed_p;
   int arrayof;
   size_t size;
+  size_t nelem;
+
+  char **tnames;
+  union pkl_ast_node **ttypes;
+  
   union pkl_ast_node *enumeration;
   union pkl_ast_node *strt;
 };
+
+#define PKL_AST_TYPE_INTEGRAL(AST) ((AST)->type.size > 0)
 
 pkl_ast_node pkl_ast_make_type (enum pkl_ast_type_code code,
                                 int signed_p,

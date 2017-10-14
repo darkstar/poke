@@ -516,7 +516,7 @@ void
 pkl_ast_node_free (pkl_ast_node ast)
 {
   pkl_ast_node t, n;
-  int i;
+  size_t i;
   
   if (ast == NULL)
     return;
@@ -626,6 +626,15 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_TYPE_NAME (ast));
       pkl_ast_node_free (PKL_AST_TYPE_ENUMERATION (ast));
       pkl_ast_node_free (PKL_AST_TYPE_STRUCT (ast));
+
+      for (i = 0; i < PKL_AST_TYPE_NELEM (ast); ++i)
+        {
+          free (PKL_AST_TYPE_TENAME (ast,i));
+          pkl_ast_node_free (PKL_AST_TYPE_TETYPE (ast,i));
+        }
+
+      free (PKL_AST_TYPE_TNAMES (ast));
+      free (PKL_AST_TYPE_TTYPES (ast));
       
       break;
       
@@ -1037,7 +1046,7 @@ static void
 pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 {
   pkl_ast_node child;
-  int i;
+  size_t i;
  
   if (ast == NULL)
     {
@@ -1263,6 +1272,17 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           IPRINTF ("struct:\n");
           IPRINTF ("  'struct %s'\n", tag);
         }
+
+      PRINT_AST_IMM (nelem, TYPE_NELEM, "%lu");
+      IPRINTF ("tnames: ");
+      for (i = 0; i < PKL_AST_TYPE_NELEM (ast); ++i)
+        {
+          if (i != 0)
+            printf (",");
+          printf ("%s", PKL_AST_TYPE_TENAME (ast, i));
+        }
+      printf ("\n");
+      
       break;
 
     case PKL_AST_ASSERTION:
