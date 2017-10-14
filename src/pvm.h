@@ -210,7 +210,10 @@ struct pvm_type
 
 typedef struct pvm_type *pvm_type;
 
-pvm_val pvm_make_type (size_t size, uint32_t signed_p, uint32_t arrayof);
+pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
+pvm_val pvm_make_string_type (void);
+pvm_val pvm_make_array_type (pvm_val type);
+pvm_val pvm_make_tuple_type (pvm_val enames, pvm_val etypes);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

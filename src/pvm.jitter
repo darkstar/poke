@@ -1994,19 +1994,11 @@ end
 
 ## Array instructions.
 
-instruction mka () # ULONG INT INT -> ARRB[N]
+instruction mka () # TYP ULONG -> ARR
   code
-    int type;
-    int arrayof;
-    uint64_t nelems;
-
-    type = PVM_VAL_INT (JITTER_UNDER_TOP_STACK ());
-    arrayof = PVM_VAL_INT (JITTER_TOP_STACK ());
-    JITTER_DROP_STACK ();
-    JITTER_DROP_STACK ();
-    nelems = PVM_VAL_ULONG (JITTER_TOP_STACK ());
-    
-    JITTER_TOP_STACK () = pvm_make_array (type, arrayof, nelems);
+#define F(res, a, b) \
+  { res = pvm_make_array (a, b); }
+#undef F
   end
 end
 
@@ -2090,8 +2082,8 @@ end
 
 instruction mktypi () # ULONG UINT -> TYP
   code
-    pvm_ulong size = PVM_ULONG (JITTER_UNDER_TOP_STACK ());
-    pvm_val signed_p = PVM_UINT (JITTER_TOP_STACK ());
+    pvm_val size = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
+    pvm_val signed_p = PVM_VAL_UINT (JITTER_TOP_STACK ());
 
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
@@ -2113,7 +2105,7 @@ instruction mktypa () # TYPE -> TYPE
   end
 end
 
-instruction mktypt () # [STRING TYP]... ULONG -> TYP
+instruction mktypt () # [STRING TYP]... -> TYP
   code
   end
 end
