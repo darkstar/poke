@@ -60,7 +60,7 @@ The Poke Language
 * Variables::			Variables and scopes.
 * Statements::			Basic execution units.
 * Functions::			Defining and calling routines.
-* Mapped Variables::            Accessing the IO stream from poke programs.
+* Mapping::                     Accessing the IO stream from poke programs.
 * Enumerations::		Integers with a restricted domain.
 * Bitmasks::                    Integers composed of OR-ed values.
 * Structs and Unions::		Structures of heterogeneous data.
@@ -713,6 +713,12 @@ and bitmask values, as it is explained later in this manual. @c XXX:
 Other operators, whose meaning and purpose is explained in full later
 in this manual, are summarized here.
 
+Left-associative binary operators:
+
+@itemize
+@item The map operator @code{@@}.
+@end itemize
+
 Left-associative unary operators:
 
 @itemize
@@ -1136,11 +1142,15 @@ no memory allocated in each iteration.  This is important, since it
 allows writing recursive functions operating on large structures in IO
 space.
 
-@node Mapped Variables
-@chapter Mapped Variables
+@node Mapping
+@chapter Mapping
 
 The idea is that the same poke code will execute on mapped and
 non-mapped variables, with no changes.
+
+@section The Map Operator
+
+
 
 @section Endianness and Negative Encoding
 

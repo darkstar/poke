@@ -2085,3 +2085,11 @@ instruction tref () # TUP STR -> VAL
 #undef F
   end
 end
+
+## Mapping instructions.
+
+instruction map () # TYP ULONG -> VAL
+  code
+
+  end
+end
