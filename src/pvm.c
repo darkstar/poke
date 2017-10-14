@@ -219,22 +219,56 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
   return PVM_NULL;
 }
 
-pvm_val
-pvm_make_type (size_t size, uint32_t signed_p, uint32_t arrayof)
+static pvm_val
+pvm_make_type (enum pvm_type_code code)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
   pvm_type type = xmalloc (sizeof (struct pvm_type));
 
-  type->size = size;
-  type->signed_p = signed_p;
-  type->arrayof = arrayof;
-  type->nelem = 0;
-  type->tnames = NULL;
+  memset (type, 0, sizeof (struct pvm_type));
+  type->code = code;
 
   PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_TYP;
   PVM_VAL_BOX_TYP (box) = type;
 
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+}
+
+pvm_val
+pvm_make_integral_type (pvm_val size, pvm_val signed_p)
+{
+  pvm_val itype = pvm_make_type (PVM_TYPE_INTEGRAL);
+
+  PVM_VAL_TYP_I_SIZE (itype) = size;
+  PVM_VAL_TYP_I_SIGNED (itype) = signed_p;
+  return itype;
+}
+
+pvm_val
+pvm_make_string_type (void)
+{
+  return pvm_make_type (PVM_TYPE_STRING);
+}
+
+pvm_val
+pvm_make_array_type (pvm_val type)
+{
+  pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
+
+  PVM_VAL_TYP_A_ETYPE (type) = pvm_dup_type (type);
+  return atype;
+}
+
+pvm_val
+pvm_make_tuple_type (pvm_val enames, pvm_val etypes)
+{
+  pvm_val t, n;
+  pvm_val ttype = pvm_make_type (PVM_TYPE_TUPLE);
+  
+  PVM_VAL_TYP_T_ENAMES (ttype) = enames;
+  PVM_VAL_TYP_T_ETYPES (ttype) = etypes;
+
+  return ttype;
 }
 
 pvm_val

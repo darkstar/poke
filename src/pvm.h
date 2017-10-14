@@ -193,19 +193,46 @@ pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 /* Types are also boxed.  */
 
 #define PVM_VAL_TYP(V) (PVM_VAL_BOX_TYP (PVM_VAL_BOX ((V))))
-#define PVM_VAL_TYP_SIZE(V) (PVM_VAL_TYP((V))->size)
-#define PVM_VAL_TYP_SIGNED(V) (PVM_VAL_TYP((V))->signed_p)
-#define PVM_VAL_TYP_ARRAYOF(V) (PVM_VAL_TYP((V))->arrayof)
-#define PVM_VAL_TYP_NELEM(V) (PVM_VAL_TYP((V))->nelem)
-#define PVM_VAL_TYP_TNAME(V,I) (PVM_VAL_TYP((V))->tnames[(I)])
+
+#define PVM_VAL_TYP_CODE(V) (PVM_VAL_TYP((V))->code)
+#define PVM_VAL_TYP_I_SIZE(V) (PVM_VAL_TYP((V))->val.integral.size)
+#define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
+#define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
+#define PVM_VAL_TYP_T_ENAMES(V) (PVM_VAL_TYP((V))->val.tuple.enames)
+#define PVM_VAL_TYP_T_ETYPES(V) (PVM_VAL_TYP((V))->val.tuple.etypes)
+
+enum pvm_type_code
+{
+  PVM_TYPE_INTEGRAL,
+  PVM_TYPE_STRING,
+  PVM_TYPE_ARRAY,
+  PVM_TYPE_TUPLE
+};
 
 struct pvm_type
 {
-  size_t size;
-  uint32_t signed_p;
-  uint32_t arrayof;
-  size_t nelem;
-  char **tnames;
+  enum pvm_type_code code;
+
+  union
+  {
+    struct
+    {
+      pvm_val size;
+      pvm_val signed_p;
+    } integral;
+
+    struct
+    {
+      pvm_val etype;
+    } array;
+
+    struct
+    {
+      size_t nelem;
+      pvm_val enames;
+      pvm_val etypes;
+    } tuple;
+  } val;
 };
 
 typedef struct pvm_type *pvm_type;
@@ -214,6 +241,9 @@ pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_tuple_type (pvm_val enames, pvm_val etypes);
+
+pvm_val pvm_dup_type (pvm_val type);
+pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
