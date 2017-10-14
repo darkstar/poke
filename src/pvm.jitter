@@ -2088,25 +2088,32 @@ end
 
 ## Type related instructions.
 
-instruction mkty () # ULONG UINT UINT -> TYP
+instruction mktypi () # ULONG UINT -> TYP
   code
-    uint32_t signed_p = JITTER_UNDER_TOP_STACK ();
-    uint32_t arrayof = JITTER_TOP_STACK ();
+    pvm_ulong size = PVM_ULONG (JITTER_UNDER_TOP_STACK ());
+    pvm_val signed_p = PVM_UINT (JITTER_TOP_STACK ());
 
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
 
-    JITTER_TOP_STACK () = pvm_make_type (PVM_VAL_ULONG (JITTER_TOP_STACK ()),
-                                         signed_p, arrayof);
+    JITTER_TOP_STACK () = pvm_make_integral_type (size, signed_p);
   end
 end
 
-instruction mkaty () # TYPE -> TYPE
+instruction mktyps () # _ -> TYP
   code
+    JITTER_PUSH_STACK (pvm_make_string_type ());
   end
 end
 
-instruction mktty () # [STRING TYP]... ULONG -> TYP
+instruction mktypa () # TYPE -> TYPE
+  code
+    JITTER_TOP_STACK () =
+      pvm_make_array_type (JITTER_TOP_STACK ());
+  end
+end
+
+instruction mktypt () # [STRING TYP]... ULONG -> TYP
   code
   end
 end

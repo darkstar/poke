@@ -46,33 +46,34 @@ pkl_gen_integer (pkl_ast_node ast,
   pvm_val val;
 
   type = PKL_AST_TYPE (ast);
-  assert (type != NULL && PKL_AST_TYPE_INTEGRAL (type));
+  assert (type != NULL
+          && PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL);
 
-  switch (PKL_AST_TYPE_SIZE (type))
+  switch (PKL_AST_TYPE_I_SIZE (type))
     {
     case 64:
-      if (PKL_AST_TYPE_SIGNED (type))
+      if (PKL_AST_TYPE_I_SIGNED (type))
         val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
       else
         val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
       break;
 
     case 32:
-      if (PKL_AST_TYPE_SIGNED (type))
+      if (PKL_AST_TYPE_I_SIGNED (type))
         val = pvm_make_int (PKL_AST_INTEGER_VALUE (ast));
       else
         val = pvm_make_uint (PKL_AST_INTEGER_VALUE (ast));
       break;
 
     case 16:
-      if (PKL_AST_TYPE_SIGNED (type))
+      if (PKL_AST_TYPE_I_SIGNED (type))
         val = pvm_make_half (PKL_AST_INTEGER_VALUE (ast));
       else
         val = pvm_make_uhalf (PKL_AST_INTEGER_VALUE (ast));
       break;
 
     case 8:
-      if (PKL_AST_TYPE_SIGNED (type))
+      if (PKL_AST_TYPE_I_SIGNED (type))
         val = pvm_make_byte (PKL_AST_INTEGER_VALUE (ast));
       else
         val = pvm_make_ubyte (PKL_AST_INTEGER_VALUE (ast));
@@ -183,34 +184,39 @@ pkl_gen_op (pkl_ast_node ast,
     } while (0)
 
   pkl_ast_node type = PKL_AST_TYPE (ast);
-  
-  if (PKL_AST_TYPE_INTEGRAL (type))
+
+  switch (PKL_AST_TYPE_CODE (type))
     {
-      switch (PKL_AST_TYPE_SIZE (type))
+    case PKL_TYPE_INTEGRAL:
+      {
+        uint64_t size = PKL_AST_TYPE_I_SIZE (type);
+        int signed_p = PKL_AST_TYPE_I_SIGNED (type);
+        
+        switch (size)
         {
         case 8:
-          if (PKL_AST_TYPE_SIGNED (type))
+          if (signed_p)
             PVM_APPEND_ARITH_INSTRUCTION (what, b);
           else
             PVM_APPEND_ARITH_INSTRUCTION (what, bu);
           break;
 
         case 16:
-          if (PKL_AST_TYPE_SIGNED (type))
+          if (signed_p)
               PVM_APPEND_ARITH_INSTRUCTION (what, h);
           else
             PVM_APPEND_ARITH_INSTRUCTION (what, hu);
           break;
 
         case 32:
-          if (PKL_AST_TYPE_SIGNED (type))
+          if (signed_p)
             PVM_APPEND_ARITH_INSTRUCTION (what, i);
           else
             PVM_APPEND_ARITH_INSTRUCTION (what, iu);
           break;
 
         case 64:
-          if (PKL_AST_TYPE_SIGNED (type))
+          if (signed_p)
             PVM_APPEND_ARITH_INSTRUCTION (what, l);
           else
             PVM_APPEND_ARITH_INSTRUCTION (what, lu);
@@ -220,36 +226,46 @@ pkl_gen_op (pkl_ast_node ast,
           assert (0);
           break;
         }
-    }
-  else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING)
-    {
-      switch (what)
-        {
-        case PKL_AST_OP_ADD:
-          PVM_APPEND_INSTRUCTION (program, sconc);
-          break;
-        case PKL_AST_OP_EQ:
-          PVM_APPEND_INSTRUCTION (program, eqs);
-          break;
-        case PKL_AST_OP_NE:
-          PVM_APPEND_INSTRUCTION (program, nes);
-          break;
-        case PKL_AST_OP_LT:
-          PVM_APPEND_INSTRUCTION (program, lts);
-          break;
-        case PKL_AST_OP_LE:
-          PVM_APPEND_INSTRUCTION (program, les);
-          break;
-        case PKL_AST_OP_GT:
-          PVM_APPEND_INSTRUCTION (program, gts);
-          break;
-        case PKL_AST_OP_GE:
-          PVM_APPEND_INSTRUCTION (program, ges);
-          break;
-        default:
-          assert (0);
-          break;
-        }
+
+        break;
+      }
+    case PKL_TYPE_STRING:
+      {
+        switch (what)
+          {
+          case PKL_AST_OP_ADD:
+            PVM_APPEND_INSTRUCTION (program, sconc);
+            break;
+          case PKL_AST_OP_EQ:
+            PVM_APPEND_INSTRUCTION (program, eqs);
+            break;
+          case PKL_AST_OP_NE:
+            PVM_APPEND_INSTRUCTION (program, nes);
+            break;
+          case PKL_AST_OP_LT:
+            PVM_APPEND_INSTRUCTION (program, lts);
+            break;
+          case PKL_AST_OP_LE:
+            PVM_APPEND_INSTRUCTION (program, les);
+            break;
+          case PKL_AST_OP_GT:
+            PVM_APPEND_INSTRUCTION (program, gts);
+            break;
+          case PKL_AST_OP_GE:
+            PVM_APPEND_INSTRUCTION (program, ges);
+            break;
+          default:
+            assert (0);
+            break;
+          }
+      }
+    case PKL_TYPE_ARRAY:
+      /* Fallthrough.  */
+    case PKL_TYPE_TUPLE:
+      /* Fallthrough.  */
+    default:
+      assert (0);
+      break;
     }
 
   return 1;
@@ -263,8 +279,8 @@ pkl_gen_op_int (pkl_ast_node ast,
 {
   pkl_ast_node type = PKL_AST_TYPE (ast);
 
-  if (PKL_AST_TYPE_INTEGRAL (type)
-      && PKL_AST_TYPE_SIZE (type) == 32)
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_I_SIZE (type) == 32)
     {
       if (what == PKL_AST_OP_AND)
         PVM_APPEND_INSTRUCTION (program, and);
@@ -388,14 +404,14 @@ pkl_gen_cast (pkl_ast_node ast,
   to_type = PKL_AST_TYPE (ast);
   from_type = PKL_AST_TYPE (PKL_AST_CAST_EXP (ast));
   
-  if (PKL_AST_TYPE_INTEGRAL (from_type)
-      && PKL_AST_TYPE_INTEGRAL (to_type))
+  if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
     {
-      size_t from_type_size = PKL_AST_TYPE_SIZE (from_type);
-      int from_type_sign = PKL_AST_TYPE_SIGNED (from_type);
+      size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
+      int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
       
-      size_t to_type_size = PKL_AST_TYPE_SIZE (to_type);
-      int to_type_sign = PKL_AST_TYPE_SIGNED (to_type);
+      size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
+      int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
 
       if (from_type_size == to_type_size)
         {
@@ -689,10 +705,11 @@ pkl_gen_array (pkl_ast_node ast,
   pkl_ast_node array_type, e;
   pvm_val nelem;
   pvm_val arrayof;
-  int type_signed, type;
+  int type;
 
-  array_type = PKL_AST_TYPE (ast);
-  type_signed = PKL_AST_TYPE_SIGNED (array_type);
+  assert (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY);
+  
+  array_type = PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (ast));
   nelem = pvm_make_ulong (PKL_AST_ARRAY_NELEM (ast));
   arrayof = pvm_make_int (PKL_AST_TYPE_ARRAYOF (array_type));
 
@@ -705,9 +722,12 @@ pkl_gen_array (pkl_ast_node ast,
   /* Type tag.  */
 
   PVM_APPEND_INSTRUCTION (program, push);
-  if (PKL_AST_TYPE_INTEGRAL (array_type))
+  if (PKL_AST_TYPE_CODE (array_type) == PKL_TYPE_INTEGRAL)
     {
-      switch (PKL_AST_TYPE_SIZE (array_type))
+      int type_size = PKL_AST_TYPE_I_SIZE (array_type);
+      int type_signed = PKL_AST_TYPE_I_SIGNED (array_type);
+      
+      switch (type_size)
         {
         case 8:
           type = type_signed ? PVM_VAL_TAG_BYTE : PVM_VAL_TAG_UBYTE;
@@ -827,29 +847,58 @@ pkl_gen_type (pkl_ast_node ast,
               pvm_program program,
               size_t *label)
 {
-  if (PKL_AST_TYPE_NELEM (ast) > 0)
+  if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_INTEGRAL)
     {
-      /* Tuple.  */
-      return 0;
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, mktypi);
+    }
+  if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRING)
+    {
+      PVM_APPEND_INSTRUCTION (program, mktyps);
+    }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
+    {
+      if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (ast),
+                         program, label))
+        return 0;
+      
+      PVM_APPEND_INSTRUCTION (program, mktypa);
+    }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
+    {
+      pkl_ast_node t, n;
+
+      for (t = PKL_AST_TYPE_T_ENAMES (ast), n = PKL_AST_TYPE_T_ETYPES (ast);
+           t && n;
+           t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
+        {
+          char *ename = PKL_AST_IDENTIFIER_POINTER (n);
+
+          /* Push the tuple element name.  */
+          PVM_APPEND_INSTRUCTION (program, push);         
+          if (strcmp (ename, "") == 0)
+            pvm_append_val_parameter (program, PVM_NULL);
+          else
+            pvm_append_val_parameter (program,
+                                      pvm_make_string (ename));
+
+          /* Push the tuple element type.  */
+          if (!pkl_gentype (t))
+            return 0;                    
+        }
+
+      PVM_APPEND_INSTRUCTION (program, mktypt);
     }
   else
-    {
-      /* Integral or array.  */
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_SIZE (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_uint (PKL_AST_TYPE_SIGNED (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_uint (PKL_AST_TYPE_ARRAYOF (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, mkty);
-    }
-  
+    assert (0);
+    
   return 1;
 }
 
