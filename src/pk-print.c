@@ -66,6 +66,38 @@ print_val (pvm_val val)
         }
       printf ("}");
     }
+  else if (PVM_IS_TYP (val))
+    {
+      if (PVM_VAL_TYP_NELEM (val) > 0)
+        {
+          /* Tuple type.  */
+          assert (0);
+        }
+      else
+        {
+          uint32_t i;
+          uint32_t arrayof = PVM_VAL_TYP_ARRAYOF (val);
+          
+          /* Integral type or array.  */
+          if (!PVM_VAL_TYP_SIGNED (val))
+            printf ("u");
+
+          switch (PVM_VAL_TYP_SIZE (val))
+            {
+            case 8: printf ("int8"); break;
+            case 16: printf ("int16"); break;
+            case 32: printf ("int32"); break;
+            case 64: printf ("int64"); break;
+            default: assert (0); break;
+            }
+
+          for (i = 0; i < arrayof; ++i)
+            printf ("[");
+          for (i = 0; i < arrayof; ++i)
+            printf ("]");
+        }
+      /* XXX: What about strings?? */
+    }
   else
     assert (0); /* XXX support more types.  */
 }

@@ -823,6 +823,38 @@ pkl_gen_tuple_ref (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_type (pkl_ast_node ast,
+              pvm_program program,
+              size_t *label)
+{
+  if (PKL_AST_TYPE_NELEM (ast) > 0)
+    {
+      /* Tuple.  */
+      return 0;
+    }
+  else
+    {
+      /* Integral or array.  */
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_SIZE (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_uint (PKL_AST_TYPE_SIGNED (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_uint (PKL_AST_TYPE_ARRAYOF (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, mkty);
+    }
+  
+  return 1;
+}
+
+
+static int
 pkl_gen_1 (pkl_ast_node ast,
            pvm_program program,
            size_t *label)
@@ -876,6 +908,11 @@ pkl_gen_1 (pkl_ast_node ast,
 
     case PKL_AST_TUPLE:
       if (!pkl_gen_tuple (ast, program, label))
+        goto error;
+      break;
+
+    case PKL_AST_TYPE:
+      if (!pkl_gen_type (ast, program, label))
         goto error;
       break;
 

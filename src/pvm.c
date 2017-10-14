@@ -220,13 +220,20 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
 }
 
 pvm_val
-pvm_make_type (void)
+pvm_make_type (size_t size, uint32_t signed_p, uint32_t arrayof)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
   pvm_type type = xmalloc (sizeof (struct pvm_type));
 
-  /* XXX: */
-  
+  type->size = size;
+  type->signed_p = signed_p;
+  type->arrayof = arrayof;
+  type->nelem = 0;
+  type->tnames = NULL;
+
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_TYP;
+  PVM_VAL_BOX_TYP (box) = type;
+
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 

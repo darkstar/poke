@@ -2086,7 +2086,25 @@ instruction tref () # TUP STR -> VAL
   end
 end
 
-## Mapping instructions.
+## Type related instructions.
+
+instruction mkty () # ULONG UINT UINT -> TYP
+  code
+    uint32_t signed_p = JITTER_UNDER_TOP_STACK ();
+    uint32_t arrayof = JITTER_TOP_STACK ();
+
+    JITTER_DROP_STACK ();
+    JITTER_DROP_STACK ();
+
+    JITTER_TOP_STACK () = pvm_make_type (PVM_VAL_ULONG (JITTER_TOP_STACK ()),
+                                         signed_p, arrayof);
+  end
+end
+
+instruction mktty () # [STRING TYP]... ULONG -> TYP
+  code
+  end
+end
 
 instruction map () # TYP ULONG -> VAL
   code
