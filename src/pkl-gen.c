@@ -771,7 +771,7 @@ pkl_gen_array (pkl_ast_node ast,
 {
   pkl_ast_node e;
 
-  assert (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY);
+  assert (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)) == PKL_TYPE_ARRAY);
 
   /* Create the array.  */
 

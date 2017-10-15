@@ -1052,7 +1052,7 @@ array_elem:
           	{
                   $$ = pkl_ast_make_array_elem (PKL_AST_ARRAY_NOINDEX,
                                                 $1);
-                  /* Note how xarray elems do not have a type.  See
+                  /* Note how array elems do not have a type.  See
                      `check_array' above.  */
                 }
         | '.' '[' INTEGER ']' '=' expression

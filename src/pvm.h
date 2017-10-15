@@ -67,7 +67,6 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_TUP   0xc
 #define PVM_VAL_TAG_TYP   0xd
 
-
 /* 8-bit integers (both signed and unsigned) are encoded in the
    least-significative 8 bits of pvm_val.  */
 
@@ -153,15 +152,14 @@ pvm_val pvm_make_string (const char *value);
 
 struct pvm_array
 {
-  int type;
-  int arrayof;
-  size_t nelem;
+  pvm_val type;
+  pvm_val nelem;
   pvm_val *elems;
 };
 
 typedef struct pvm_array *pvm_array;
 
-pvm_val pvm_make_array (int type, int arrayof, size_t nelem);
+pvm_val pvm_make_array (pvm_val type, pvm_val nelem);
 
 /* Tuples are also boxed.  */
 

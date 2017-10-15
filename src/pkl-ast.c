@@ -862,7 +862,7 @@ pkl_ast_init (void)
   struct pkl_ast *ast;
   size_t nentries;
 
-  /* Initialize a new AST and initialize it to 0.  */
+  /* Allocate a new AST and initialize it to 0.  */
   
   ast = xmalloc (sizeof (struct pkl_ast));
   memset (ast, 0, sizeof (struct pkl_ast));
@@ -871,7 +871,7 @@ pkl_ast_init (void)
      the stdtypes array for easy access by type code.  */
 
   nentries
-    = (sizeof (stditypes) / sizeof (stditypes[0])) + 2;
+    = (sizeof (stditypes) / sizeof (stditypes[0]));
   ast->stdtypes = xmalloc (nentries * sizeof (pkl_ast_node *));
 
   /* Integral types.  */
@@ -924,7 +924,7 @@ pkl_ast_free (pkl_ast ast)
   free_hash_table (&ast->enums_hash_table);
   free_hash_table (&ast->structs_hash_table);
 
-  for (i = 0; ast->stdtypes[i]; i++)
+  for (i = 0; ast->stdtypes[i] != NULL; i++)
     pkl_ast_node_free (ast->stdtypes[i]);
   pkl_ast_node_free (ast->stringtype);
   
@@ -1361,6 +1361,17 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_AST_SUBAST (metatype, TYPE);
 
+      IPRINTF ("code:\n");
+      switch (PKL_AST_TYPE_CODE (ast))
+        {
+        case PKL_TYPE_INTEGRAL: IPRINTF ("  integral\n"); break;
+        case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
+        case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
+        case PKL_TYPE_TUPLE: IPRINTF ("  tuple\n"); break;
+        default:
+          IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
+          break;
+        }
       PRINT_AST_IMM (code, TYPE_CODE, "%d");
       switch (PKL_AST_TYPE_CODE (ast))
         {

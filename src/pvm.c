@@ -164,14 +164,14 @@ pvm_make_string (const char *str)
 }
 
 pvm_val
-pvm_make_array (int type, int arrayof, size_t nelem)
+pvm_make_array (pvm_val type, pvm_val nelem)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
   pvm_array arr = xmalloc (sizeof (struct pvm_array));
 
   arr->nelem = nelem;
+  printf ("NELEM: %lu\n", PVM_VAL_ULONG (nelem));
   arr->type = type;
-  arr->arrayof = arrayof;
   arr->elems = xmalloc (sizeof (pvm_val) * nelem);
   memset (arr->elems, 0, sizeof (pvm_val) * nelem);
   
@@ -310,7 +310,7 @@ pvm_sizeof (pvm_val val)
     {
       size_t nelem, i, size;
 
-      nelem = PVM_VAL_ARR_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
 
       size = 0;
       for (i = 0; i < nelem; ++i)
@@ -384,20 +384,21 @@ pvm_print_val (FILE *out, pvm_val val)
   else if (PVM_IS_BYTE (val))
     fprintf (out, "%dB", PVM_VAL_BYTE (val));
   else if (PVM_IS_ULONG (val))
-    fprintf (out, "%luLU", PVM_VAL_ULONG (val));
+    fprintf (out, "%luUL", PVM_VAL_ULONG (val));
   else if (PVM_IS_UINT (val))
     fprintf (out, "%uU", PVM_VAL_UINT (val));
   else if (PVM_IS_UHALF (val))
-    fprintf (out, "%uH", PVM_VAL_UHALF (val));
+    fprintf (out, "%uUH", PVM_VAL_UHALF (val));
   else if (PVM_IS_UBYTE (val))
-    fprintf (out, "%uU", PVM_VAL_UBYTE (val));
+    fprintf (out, "%uUB", PVM_VAL_UBYTE (val));
   else if (PVM_IS_STR (val))
     fprintf (out, "\"%s\"", PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, idx;
       
-      nelem = PVM_VAL_ARR_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
+      
       fprintf (out, "[");
       for (idx = 0; idx < nelem; idx++)
         {
