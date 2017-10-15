@@ -198,6 +198,7 @@ pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 #define PVM_VAL_TYP_I_SIZE(V) (PVM_VAL_TYP((V))->val.integral.size)
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
+#define PVM_VAL_TYP_T_NELEM(V) (PVM_VAL_TYP((V))->val.tuple.nelem)
 #define PVM_VAL_TYP_T_ENAMES(V) (PVM_VAL_TYP((V))->val.tuple.enames)
 #define PVM_VAL_TYP_T_ETYPES(V) (PVM_VAL_TYP((V))->val.tuple.etypes)
 #define PVM_VAL_TYP_T_ENAME(V,I) (PVM_VAL_TYP_T_ENAMES((V))[(I)])
@@ -243,6 +244,8 @@ pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_tuple_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
+
+void pvm_allocate_tuple_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
 
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);

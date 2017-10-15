@@ -263,7 +263,6 @@ pvm_val
 pvm_make_tuple_type (pvm_val nelem,
                      pvm_val *enames, pvm_val *etypes)
 {
-  pvm_val t, n;
   pvm_val ttype = pvm_make_type (PVM_TYPE_TUPLE);
 
   PVM_VAL_TYP_T_NELEM (ttype) = nelem;
@@ -271,6 +270,16 @@ pvm_make_tuple_type (pvm_val nelem,
   PVM_VAL_TYP_T_ETYPES (ttype) = etypes;
 
   return ttype;
+}
+
+void
+pvm_allocate_tuple_attrs (pvm_val nelem,
+                          pvm_val **enames, pvm_val **etypes)
+{
+  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
+  pvm_val *bytes = xmalloc (nbytes);
+  *enames = bytes;
+  *etypes = bytes + nelem;
 }
 
 pvm_val

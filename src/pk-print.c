@@ -25,6 +25,10 @@
 static void
 print_val (pvm_val val)
 {
+  if (val == PVM_NULL)
+    {
+      printf ("null");
+    }
   if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val)
       || PVM_IS_LONG (val))
     printf ("%ld", PVM_VAL_NUMBER (val));
@@ -68,38 +72,61 @@ print_val (pvm_val val)
     }
   else if (PVM_IS_TYP (val))
     {
-      if (PVM_VAL_TYP_NELEM (val) > 0)
+      switch (PVM_VAL_TYP_CODE (val))
         {
-          /* Tuple type.  */
+        case PVM_TYPE_INTEGRAL:
+          {
+            /* Integral type or array.  */
+            if (!PVM_VAL_TYP_I_SIGNED (val))
+              printf ("u");
+            
+            switch (PVM_VAL_TYP_I_SIZE (val))
+              {
+              case 8: printf ("int8"); break;
+              case 16: printf ("int16"); break;
+              case 32: printf ("int32"); break;
+              case 64: printf ("int64"); break;
+              default: assert (0); break;
+              }
+          }
+          break;
+        case PVM_TYPE_STRING:
+          printf ("string");
+          break;
+        case PVM_TYPE_ARRAY:
+          print_val (PVM_VAL_TYP_A_ETYPE (val));
+          printf ("[]");
+          break;
+        case PVM_TYPE_TUPLE:
+          {
+            size_t i;
+
+            printf ("(");
+            for (i = 0; i < PVM_VAL_TYP_T_NELEM (val); ++i)
+              {
+                pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
+                pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
+                
+                if (i != 0)
+                  printf (",");
+
+                if (ename != PVM_NULL)
+                  {
+                    print_val (ename);
+                    printf (" ");
+                  }
+
+                print_val (etype);
+              }
+            printf (")");
+          break;
+          }
+        default:
           assert (0);
         }
-      else
-        {
-          uint32_t i;
-          uint32_t arrayof = PVM_VAL_TYP_ARRAYOF (val);
-          
-          /* Integral type or array.  */
-          if (!PVM_VAL_TYP_SIGNED (val))
-            printf ("u");
-
-          switch (PVM_VAL_TYP_SIZE (val))
-            {
-            case 8: printf ("int8"); break;
-            case 16: printf ("int16"); break;
-            case 32: printf ("int32"); break;
-            case 64: printf ("int64"); break;
-            default: assert (0); break;
-            }
-
-          for (i = 0; i < arrayof; ++i)
-            printf ("[");
-          for (i = 0; i < arrayof; ++i)
-            printf ("]");
-        }
-      /* XXX: What about strings?? */
     }
   else
-    assert (0); /* XXX support more types.  */
+    assert (0);
 }
 
 static int

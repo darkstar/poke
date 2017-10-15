@@ -2113,18 +2113,14 @@ instruction mktypt () # [STRING TYP]... NLONG -> TYP
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    etypes = xmalloc (sizeof (struct pvm_val) * nelem);
-    enames = xmalloc (sizeof (struct pvm_val) * nelem);
+    pvm_allocate_tuple_attrs (nelem, &etypes, &enames);
 
     for (i = 0; i < nelem; ++i)
     {
-      pvm_val name = JITTER_TOP_STACK ();
-      pvm_val type = JITTER_UNDER_TOP_STACK ();
-
       /* XXX: check pvm_val types?  */
 
-      enames[i] = pvm_make_string (PVM_VAL_STRING (name));
-      etypes[i] = pvm_dup_type (type);
+      enames[i] = JITTER_TOP_STACK ();
+      etypes[i] = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
@@ -2135,16 +2131,19 @@ instruction mktypt () # [STRING TYP]... NLONG -> TYP
   end
 end
 
-# Instructions to access the IO space.
+# Instructions to access the IO space: mapping.
 
-instruction map () # TYP ULONG -> VAL
+instruction map () # TYP ULONG -> MAP
   code
-
   end
 end
 
-instruction poke () # VAL ULONG -> _
+instruction peek () # MAP -> VAL
   code
+  end
+end
 
+instruction poke () # MAP VAL -> _
+  code
   end
 end
