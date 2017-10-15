@@ -39,7 +39,7 @@ end
 #  pvm_printf_format_string
 #end
 
-## Prologue and epilogue for the generated code.
+## Embedded C code.
 
 early-header-c
   code
@@ -55,6 +55,16 @@ end
 
 late-c
   code
+  end
+end
+
+printer-c
+  code
+    void
+    pvm_literal_printer (FILE *out, pvm_val val)
+    {
+      pvm_print_val (out, val);
+    }
   end
 end
 
@@ -117,7 +127,7 @@ instruction drop ()
   end
 end
 
-instruction push (?Rnl)
+instruction push (?Rnl pvm_print_val)
   code
     jitter_uint k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
@@ -2128,6 +2138,11 @@ instruction mktypt () # [STRING TYP]... NLONG -> TYP
 
     JITTER_PUSH_STACK (pvm_make_tuple_type (nelem,
                                             enames, etypes));
+  end
+end
+
+instruction typof () # VAL -> TYP
+  code
   end
 end
 

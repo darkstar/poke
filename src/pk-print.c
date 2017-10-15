@@ -22,113 +22,6 @@
 
 #include "pk-cmd.h"
 
-static void
-print_val (pvm_val val)
-{
-  if (val == PVM_NULL)
-    {
-      printf ("null");
-    }
-  if (PVM_IS_INT (val) || PVM_IS_HALF (val) || PVM_IS_BYTE (val)
-      || PVM_IS_LONG (val))
-    printf ("%ld", PVM_VAL_NUMBER (val));
-  else if (PVM_IS_UINT (val) || PVM_IS_UHALF (val) || PVM_IS_UBYTE (val)
-           || PVM_IS_ULONG (val))
-      printf ("%lu", PVM_VAL_NUMBER (val));
-  else if (PVM_IS_STR (val))
-    printf ("\"%s\"", PVM_VAL_STR (val));
-  else if (PVM_IS_ARR (val))
-    {
-      size_t nelem, idx;
-      
-      nelem = PVM_VAL_ARR_NELEM (val);
-      printf ("[");
-      for (idx = 0; idx < nelem; idx++)
-        {
-          if (idx != 0)
-            printf (",");
-          print_val (PVM_VAL_ARR_ELEM (val, idx));
-        }
-      printf ("]");
-    }
-  else if (PVM_IS_TUP (val))
-    {
-      size_t nelem, idx;
-
-      nelem = PVM_VAL_TUP_NELEM (val);
-      printf ("{");
-      for (idx = 0; idx < nelem; ++idx)
-        {
-          pvm_val name = PVM_VAL_TUP_ELEM_NAME(val, idx);
-          pvm_val value = PVM_VAL_TUP_ELEM_VALUE(val, idx);
-
-          if (idx != 0)
-            printf (",");
-          if (name != PVM_NULL)
-            printf ("%s=", PVM_VAL_STR (name));
-          print_val (value);
-        }
-      printf ("}");
-    }
-  else if (PVM_IS_TYP (val))
-    {
-      switch (PVM_VAL_TYP_CODE (val))
-        {
-        case PVM_TYPE_INTEGRAL:
-          {
-            /* Integral type or array.  */
-            if (!PVM_VAL_TYP_I_SIGNED (val))
-              printf ("u");
-            
-            switch (PVM_VAL_TYP_I_SIZE (val))
-              {
-              case 8: printf ("int8"); break;
-              case 16: printf ("int16"); break;
-              case 32: printf ("int32"); break;
-              case 64: printf ("int64"); break;
-              default: assert (0); break;
-              }
-          }
-          break;
-        case PVM_TYPE_STRING:
-          printf ("string");
-          break;
-        case PVM_TYPE_ARRAY:
-          print_val (PVM_VAL_TYP_A_ETYPE (val));
-          printf ("[]");
-          break;
-        case PVM_TYPE_TUPLE:
-          {
-            size_t i;
-
-            printf ("(");
-            for (i = 0; i < PVM_VAL_TYP_T_NELEM (val); ++i)
-              {
-                pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
-                pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
-                
-                if (i != 0)
-                  printf (",");
-
-                if (ename != PVM_NULL)
-                  {
-                    print_val (ename);
-                    printf (" ");
-                  }
-
-                print_val (etype);
-              }
-            printf (")");
-          break;
-          }
-        default:
-          assert (0);
-        }
-    }
-  else
-    assert (0);
-}
-
 static int
 pk_cmd_print (int argc, struct pk_cmd_arg argv[])
 {
@@ -148,7 +41,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 
-  print_val (val);
+  pvm_print_val (stdout, val);
   printf ("\n");
   return 1;
 

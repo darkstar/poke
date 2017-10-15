@@ -296,6 +296,70 @@ pkl_gen_op_int (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_type (pkl_ast_node ast,
+              pvm_program program,
+              size_t *label)
+{
+  if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_INTEGRAL)
+    {
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, mktypi);
+    }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRING)
+    {
+      PVM_APPEND_INSTRUCTION (program, mktyps);
+    }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
+    {
+      if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (ast),
+                         program, label))
+        return 0;
+      
+      PVM_APPEND_INSTRUCTION (program, mktypa);
+    }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
+    {
+      pkl_ast_node t, n;
+
+      for (t = PKL_AST_TYPE_T_ETYPES (ast), n = PKL_AST_TYPE_T_ENAMES (ast);
+           t && n;
+           t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
+        {
+          char *ename = PKL_AST_IDENTIFIER_POINTER (n);
+
+          /* Push the tuple element name.  */
+          PVM_APPEND_INSTRUCTION (program, push);         
+          if (strcmp (ename, "") == 0)
+            pvm_append_val_parameter (program, PVM_NULL);
+          else
+            pvm_append_val_parameter (program,
+                                      pvm_make_string (ename));
+
+          /* Push the tuple element type.  */
+          if (!pkl_gen_type (t, program, label))
+            return 0;                    
+        }
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_T_NELEM (ast)));
+
+      PVM_APPEND_INSTRUCTION (program, mktypt);
+    }
+  else
+    assert (0);
+    
+  return 1;
+}
+
+static int
 pkl_gen_exp (pkl_ast_node ast,
              pvm_program program,
              size_t *label)
@@ -378,6 +442,9 @@ pkl_gen_exp (pkl_ast_node ast,
       break;
     case PKL_AST_OP_ELEMSOF:
       PVM_APPEND_INSTRUCTION (program, sel);
+      break;
+    case PKL_AST_OP_TYPEOF:
+      PVM_APPEND_INSTRUCTION (program, typof);
       break;
 
     default:
@@ -694,70 +761,6 @@ pkl_gen_cast (pkl_ast_node ast,
         }
     }
 
-  return 1;
-}
-
-static int
-pkl_gen_type (pkl_ast_node ast,
-              pvm_program program,
-              size_t *label)
-{
-  if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_INTEGRAL)
-    {
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, mktypi);
-    }
-  if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRING)
-    {
-      PVM_APPEND_INSTRUCTION (program, mktyps);
-    }
-  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
-    {
-      if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (ast),
-                         program, label))
-        return 0;
-      
-      PVM_APPEND_INSTRUCTION (program, mktypa);
-    }
-  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
-    {
-      pkl_ast_node t, n;
-
-      for (t = PKL_AST_TYPE_T_ENAMES (ast), n = PKL_AST_TYPE_T_ETYPES (ast);
-           t && n;
-           t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
-        {
-          char *ename = PKL_AST_IDENTIFIER_POINTER (n);
-
-          /* Push the tuple element name.  */
-          PVM_APPEND_INSTRUCTION (program, push);         
-          if (strcmp (ename, "") == 0)
-            pvm_append_val_parameter (program, PVM_NULL);
-          else
-            pvm_append_val_parameter (program,
-                                      pvm_make_string (ename));
-
-          /* Push the tuple element type.  */
-          if (!pkl_gen_type (t, program, label))
-            return 0;                    
-        }
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_T_NELEM (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, mktypt);
-    }
-  else
-    assert (0);
-    
   return 1;
 }
 

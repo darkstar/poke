@@ -857,7 +857,6 @@ pkl_ast_init (void)
 #define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) {CODE, ID, SIZE, SIGNED},
 # include "pkl-types.def"
 #undef PKL_DEF_TYPE
-          /*          { PKL_TYPE_STRING, "string", 0, 0 }, */
           { PKL_TYPE_NOTYPE, NULL, 0 }
         };
   struct pkl_ast *ast;
@@ -886,7 +885,8 @@ pkl_ast_init (void)
   ast->stdtypes[nentries - 1] = NULL;
   
   /* String type.  */
-  ast->stringtype = pkl_ast_make_string_type ();
+  ast->stringtype = ASTREF (pkl_ast_make_string_type ());
+  pkl_ast_register (ast, "string", ast->stringtype);
 
   return ast;
 }
@@ -1014,6 +1014,8 @@ pkl_ast_get_integral_type (pkl_ast ast, size_t size, int signed_p)
       if (PKL_AST_TYPE_I_SIZE (stdtype) == size
           && PKL_AST_TYPE_I_SIGNED (stdtype) == signed_p)
         return stdtype;
+
+      ++i;
     }
 
   return pkl_ast_make_integral_type (size, signed_p);

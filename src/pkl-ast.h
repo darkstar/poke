@@ -108,12 +108,13 @@ enum pkl_ast_endian pkl_ast_default_endian (void);
 enum pkl_ast_integral_type_code
 {
 # include "pkl-types.def"
+  PKL_TYPE_LAST_INTEGRAL
 };
 #undef PKL_DEF_TYPE
 
 enum pkl_ast_type_code
 {
-  PKL_TYPE_INTEGRAL,
+  PKL_TYPE_INTEGRAL = PKL_TYPE_LAST_INTEGRAL,
   PKL_TYPE_STRING,
   PKL_TYPE_ARRAY,
   PKL_TYPE_TUPLE,

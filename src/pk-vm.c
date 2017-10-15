@@ -34,7 +34,7 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[])
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
   prog = PK_CMD_ARG_EXP (argv[0]);
-  pvm_print_program (prog);
+  pvm_print_program (stdout, prog);
   pvm_destroy_program (prog);
   
   return 1;

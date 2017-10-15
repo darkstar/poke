@@ -196,7 +196,7 @@ promote_operands_binary (pkl_ast ast,
     return 0;
 
 
-  if (!PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL)
+  if (!(PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL))
     /* No need to promote non-integral types.  */
     return 1;
 

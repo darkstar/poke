@@ -255,7 +255,7 @@ pvm_make_array_type (pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
 
-  PVM_VAL_TYP_A_ETYPE (type) = pvm_dup_type (type);
+  PVM_VAL_TYP_A_ETYPE (type) = type;
   return atype;
 }
 
@@ -366,4 +366,121 @@ pvm_error (enum pvm_exit_code code)
     = { "ok", "error", "division by zero" };
   
   return pvm_error_strings[code];
+}
+
+void
+pvm_print_val (FILE *out, pvm_val val)
+{
+  if (val == PVM_NULL)
+    {
+      fprintf (out, "null");
+    }
+  else if (PVM_IS_LONG (val))
+    fprintf (out, "%ldL", PVM_VAL_LONG (val));
+  else if (PVM_IS_INT (val))
+    fprintf (out, "%d", PVM_VAL_INT (val));
+  else if (PVM_IS_HALF (val))
+    fprintf (out, "%dH", PVM_VAL_HALF (val));
+  else if (PVM_IS_BYTE (val))
+    fprintf (out, "%dB", PVM_VAL_BYTE (val));
+  else if (PVM_IS_ULONG (val))
+    fprintf (out, "%luLU", PVM_VAL_ULONG (val));
+  else if (PVM_IS_UINT (val))
+    fprintf (out, "%uU", PVM_VAL_UINT (val));
+  else if (PVM_IS_UHALF (val))
+    fprintf (out, "%uH", PVM_VAL_UHALF (val));
+  else if (PVM_IS_UBYTE (val))
+    fprintf (out, "%uU", PVM_VAL_UBYTE (val));
+  else if (PVM_IS_STR (val))
+    fprintf (out, "\"%s\"", PVM_VAL_STR (val));
+  else if (PVM_IS_ARR (val))
+    {
+      size_t nelem, idx;
+      
+      nelem = PVM_VAL_ARR_NELEM (val);
+      fprintf (out, "[");
+      for (idx = 0; idx < nelem; idx++)
+        {
+          if (idx != 0)
+            fprintf (out, ",");
+          pvm_print_val (out, PVM_VAL_ARR_ELEM (val, idx));
+        }
+      fprintf (out, "]");
+    }
+  else if (PVM_IS_TUP (val))
+    {
+      size_t nelem, idx;
+
+      nelem = PVM_VAL_TUP_NELEM (val);
+      fprintf (out, "{");
+      for (idx = 0; idx < nelem; ++idx)
+        {
+          pvm_val name = PVM_VAL_TUP_ELEM_NAME(val, idx);
+          pvm_val value = PVM_VAL_TUP_ELEM_VALUE(val, idx);
+
+          if (idx != 0)
+            fprintf (out, ",");
+          if (name != PVM_NULL)
+            fprintf (out, "%s=", PVM_VAL_STR (name));
+          pvm_print_val (out, value);
+        }
+      fprintf (out, "}");
+    }
+  else if (PVM_IS_TYP (val))
+    {
+      switch (PVM_VAL_TYP_CODE (val))
+        {
+        case PVM_TYPE_INTEGRAL:
+          {
+            /* Integral type or array.  */
+            if (!PVM_VAL_TYP_I_SIGNED (val))
+              fprintf (out, "u");
+            
+            switch (PVM_VAL_TYP_I_SIZE (val))
+              {
+              case 8: fprintf (out, "int8"); break;
+              case 16: fprintf (out, "int16"); break;
+              case 32: fprintf (out, "int32"); break;
+              case 64: fprintf (out, "int64"); break;
+              default: assert (0); break;
+              }
+          }
+          break;
+        case PVM_TYPE_STRING:
+          fprintf (out, "string");
+          break;
+        case PVM_TYPE_ARRAY:
+          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val));
+          fprintf (out, "[]");
+          break;
+        case PVM_TYPE_TUPLE:
+          {
+            size_t i;
+
+            fprintf (out, "(");
+            for (i = 0; i < PVM_VAL_TYP_T_NELEM (val); ++i)
+              {
+                pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
+                pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
+                
+                if (i != 0)
+                  fprintf (out, ",");
+
+                if (ename != PVM_NULL)
+                  {
+                    pvm_print_val (out, ename);
+                    fprintf (out, " ");
+                  }
+
+                pvm_print_val (out, etype);
+              }
+            fprintf (out, ")");
+          break;
+          }
+        default:
+          assert (0);
+        }
+    }
+  else
+    assert (0);
 }

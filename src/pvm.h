@@ -340,4 +340,7 @@ size_t pvm_sizeof (pvm_val val);
    Return 1 otherwise.  */
 size_t pvm_elemsof (pvm_val val);
 
+/* Print a pvm_val to the given file descriptor. */
+void pvm_print_val (FILE *out, pvm_val val);
+
 #endif /* ! PVM_H */
