@@ -371,9 +371,7 @@ void
 pvm_print_val (FILE *out, pvm_val val)
 {
   if (val == PVM_NULL)
-    {
-      fprintf (out, "null");
-    }
+    fprintf (out, "null");
   else if (PVM_IS_LONG (val))
     fprintf (out, "%ldL", PVM_VAL_LONG (val));
   else if (PVM_IS_INT (val))
