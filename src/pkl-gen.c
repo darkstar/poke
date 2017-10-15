@@ -448,6 +448,10 @@ pkl_gen_exp (pkl_ast_node ast,
       PVM_APPEND_INSTRUCTION (program, typof);
       break;
 
+    case PKL_AST_OP_MAP:
+      PVM_APPEND_INSTRUCTION (program, mkm);
+      break;
+
     default:
       fprintf (stderr, "gen: unhandled expression code %d\n",
                PKL_AST_EXP_CODE (ast));

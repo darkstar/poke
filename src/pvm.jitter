@@ -2107,6 +2107,12 @@ instruction mktyps () # _ -> TYP
   end
 end
 
+instruction mktypm () # _ -> TYP
+  code
+    JITTER_PUSH_STACK (pvm_make_map_type ());
+  end
+end
+
 instruction mktypa () # TYPE -> TYPE
   code
     JITTER_TOP_STACK () =
@@ -2148,8 +2154,11 @@ end
 
 # Instructions to access the IO space: mapping.
 
-instruction map () # TYP ULONG -> MAP
+instruction mkm () # TYP ULONG -> MAP
   code
+#define F(res, a, b) { res = pvm_make_map (a, b); }
+    JITTER_BINARY_STACK (F);  
+#undef F
   end
 end
 

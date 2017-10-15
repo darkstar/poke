@@ -66,6 +66,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_ARR   0xb
 #define PVM_VAL_TAG_TUP   0xc
 #define PVM_VAL_TAG_TYP   0xd
+#define PVM_VAL_TAG_MAP   0xe
 
 /* 8-bit integers (both signed and unsigned) are encoded in the
    least-significative 8 bits of pvm_val.  */
@@ -111,6 +112,7 @@ pvm_val pvm_make_uint (uint32_t value);
 #define PVM_VAL_BOX_ARR(B) ((B)->v.array)
 #define PVM_VAL_BOX_TUP(B) ((B)->v.tuple)
 #define PVM_VAL_BOX_TYP(B) ((B)->v.type)
+#define PVM_VAL_BOX_MAP(B) ((B)->v.map)
 
 struct pvm_val_box
 {
@@ -123,6 +125,7 @@ struct pvm_val_box
     struct pvm_array *array;
     struct pvm_tuple *tuple;
     struct pvm_type *type;
+    struct pvm_map *map;
   } v;
 };
 
@@ -207,7 +210,8 @@ enum pvm_type_code
   PVM_TYPE_INTEGRAL,
   PVM_TYPE_STRING,
   PVM_TYPE_ARRAY,
-  PVM_TYPE_TUPLE
+  PVM_TYPE_TUPLE,
+  PVM_TYPE_MAP
 };
 
 struct pvm_type
@@ -240,6 +244,7 @@ typedef struct pvm_type *pvm_type;
 
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
+pvm_val pvm_make_map_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_tuple_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 
@@ -248,6 +253,23 @@ void pvm_allocate_tuple_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
 pvm_val pvm_typeof (pvm_val val);
+
+/* Mappings are also boxed.  */
+
+#define PVM_VAL_MAP(V) (PVM_VAL_BOX_MAP (PVM_VAL_BOX ((V))))
+
+#define PVM_VAL_MAP_TYPE(V) (PVM_VAL_MAP((V))->type)
+#define PVM_VAL_MAP_OFFSET(V) (PVM_VAL_MAP((V))->offset)
+
+struct pvm_map
+{
+  pvm_val type;
+  pvm_val offset;
+};
+
+typedef struct pvm_map *pvm_map;
+
+pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
@@ -287,6 +309,10 @@ void pvm_val_free (pvm_val val);
 #define PVM_IS_TYP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_TYP)
+#define PVM_IS_MAP(V)                                                   \
+  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_MAP)
+
 
 #define PVM_IS_NUMBER(V)                                        \
   (PVM_IS_BYTE(V) || PVM_IS_UBYTE(V)                            \

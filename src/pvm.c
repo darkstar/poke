@@ -250,6 +250,12 @@ pvm_make_string_type (void)
 }
 
 pvm_val
+pvm_make_map_type (void)
+{
+  return pvm_make_type (PVM_TYPE_MAP);
+}
+
+pvm_val
 pvm_make_array_type (pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
@@ -446,6 +452,9 @@ pvm_print_val (FILE *out, pvm_val val)
         case PVM_TYPE_STRING:
           fprintf (out, "string");
           break;
+        case PVM_TYPE_MAP:
+          fprintf (out, "map");
+          break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val));
           fprintf (out, "[]");
@@ -475,6 +484,12 @@ pvm_print_val (FILE *out, pvm_val val)
         default:
           assert (0);
         }
+    }
+  else if (PVM_IS_MAP (val))
+    {
+      pvm_print_val (out, PVM_VAL_MAP_TYPE (val));
+      fprintf (out, " @ ");
+      pvm_print_val (out, PVM_VAL_MAP_OFFSET (val));
     }
   else
     assert (0);
@@ -529,4 +544,19 @@ pvm_typeof (pvm_val val)
     assert (0);
 
   return type;
+}
+
+pvm_val
+pvm_make_map (pvm_val type, pvm_val offset)
+{
+  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_map map = xmalloc (sizeof (struct pvm_map));
+
+  map->type = type;
+  map->offset = offset;
+
+  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_MAP;
+  PVM_VAL_BOX_MAP (box) = map;
+
+  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
