@@ -254,7 +254,7 @@ pvm_make_array_type (pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
 
-  PVM_VAL_TYP_A_ETYPE (type) = type;
+  PVM_VAL_TYP_A_ETYPE (atype) = type;
   return atype;
 }
 
@@ -276,9 +276,8 @@ pvm_allocate_tuple_attrs (pvm_val nelem,
                           pvm_val **enames, pvm_val **etypes)
 {
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
-  pvm_val *bytes = xmalloc (nbytes);
-  *enames = bytes;
-  *etypes = bytes + nelem;
+  *enames = xmalloc (nbytes);
+  *etypes = xmalloc (nbytes);
 }
 
 pvm_val
@@ -419,7 +418,7 @@ pvm_print_val (FILE *out, pvm_val val)
           if (idx != 0)
             fprintf (out, ",");
           if (name != PVM_NULL)
-            fprintf (out, "%s=", PVM_VAL_STR (name));
+            fprintf (out, ".%s=", PVM_VAL_STR (name));
           pvm_print_val (out, value);
         }
       fprintf (out, "}");
@@ -453,10 +452,12 @@ pvm_print_val (FILE *out, pvm_val val)
           break;
         case PVM_TYPE_TUPLE:
           {
-            size_t i;
+            size_t i, nelem;
+
+            nelem = PVM_VAL_ULONG (PVM_VAL_TYP_T_NELEM (val));
 
             fprintf (out, "(");
-            for (i = 0; i < PVM_VAL_TYP_T_NELEM (val); ++i)
+            for (i = 0; i < nelem; ++i)
               {
                 pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
                 pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
@@ -464,13 +465,9 @@ pvm_print_val (FILE *out, pvm_val val)
                 if (i != 0)
                   fprintf (out, ",");
 
-                if (ename != PVM_NULL)
-                  {
-                    pvm_print_val (out, ename);
-                    fprintf (out, " ");
-                  }
-
                 pvm_print_val (out, etype);
+                if (ename != PVM_NULL)
+                  fprintf (out, " %s", PVM_VAL_STR (ename));
               }
             fprintf (out, ")");
           break;
@@ -511,16 +508,19 @@ pvm_typeof (pvm_val val)
   else if (PVM_IS_TUP (val))
     {
       size_t i;
-      pvm_val *enames, *etypes;
+      pvm_val *enames = NULL, *etypes = NULL;
       pvm_val nelem = pvm_make_ulong (PVM_VAL_TUP_NELEM (val));
 
-      enames = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-      etypes = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-      
-      for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
+      if (PVM_VAL_ULONG (nelem) > 0)
         {
-          enames[i] = PVM_VAL_TUP_ELEM_NAME (val, i);
-          etypes[i] = pvm_typeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+          enames = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+          etypes = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+      
+          for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
+            {
+              enames[i] = PVM_VAL_TUP_ELEM_NAME (val, i);
+              etypes[i] = pvm_typeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+            }
         }
       
       type = pvm_make_tuple_type (nelem, enames, etypes);

@@ -229,7 +229,7 @@ struct pvm_type
 
     struct
     {
-      size_t nelem;
+      pvm_val nelem;
       pvm_val *enames;
       pvm_val *etypes;
     } tuple;

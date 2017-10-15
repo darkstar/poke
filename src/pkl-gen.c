@@ -263,6 +263,7 @@ pkl_gen_op (pkl_ast_node ast,
       /* Fallthrough.  */
     case PKL_TYPE_TUPLE:
       /* Fallthrough.  */
+      break;
     default:
       assert (0);
       break;
