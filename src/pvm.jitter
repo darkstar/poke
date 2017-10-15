@@ -2007,7 +2007,7 @@ end
 instruction mka () # TYP ULONG -> ARR
   code
 #define F(res, a, b) \
-  { res = pvm_make_array (a, b); }
+  { res = pvm_make_array (a, PVM_VAL_ULONG (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -2144,6 +2144,7 @@ end
 
 instruction typof () # VAL -> TYP
   code
+    JITTER_TOP_STACK () = pvm_typeof (JITTER_TOP_STACK ());
   end
 end
 

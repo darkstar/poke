@@ -393,12 +393,12 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
     {
     case PKL_TYPE_INTEGRAL:
       if (PKL_AST_TYPE_I_SIZE (a) != PKL_AST_TYPE_I_SIZE (b)
-          || PKL_AST_TYPE_I_SIGNED (a) != PKL_AST_TYPE_I_SIGNED (a))
+          || PKL_AST_TYPE_I_SIGNED (a) != PKL_AST_TYPE_I_SIGNED (b))
         return 0;
       break;
     case PKL_TYPE_ARRAY:
       if (!pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
-                               PKL_AST_TYPE_A_ETYPE (a)))
+                               PKL_AST_TYPE_A_ETYPE (b)))
         return 0;
       break;
     case PKL_TYPE_TUPLE:

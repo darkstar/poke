@@ -153,13 +153,13 @@ pvm_val pvm_make_string (const char *value);
 struct pvm_array
 {
   pvm_val type;
-  pvm_val nelem;
+  size_t nelem;
   pvm_val *elems;
 };
 
 typedef struct pvm_array *pvm_array;
 
-pvm_val pvm_make_array (pvm_val type, pvm_val nelem);
+pvm_val pvm_make_array (pvm_val type, size_t nelem);
 
 /* Tuples are also boxed.  */
 
@@ -247,6 +247,7 @@ void pvm_allocate_tuple_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes
 
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
+pvm_val pvm_typeof (pvm_val val);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

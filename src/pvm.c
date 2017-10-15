@@ -164,13 +164,12 @@ pvm_make_string (const char *str)
 }
 
 pvm_val
-pvm_make_array (pvm_val type, pvm_val nelem)
+pvm_make_array (pvm_val type, size_t nelem)
 {
   pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
   pvm_array arr = xmalloc (sizeof (struct pvm_array));
 
   arr->nelem = nelem;
-  printf ("NELEM: %lu\n", PVM_VAL_ULONG (nelem));
   arr->type = type;
   arr->elems = xmalloc (sizeof (pvm_val) * nelem);
   memset (arr->elems, 0, sizeof (pvm_val) * nelem);
@@ -286,11 +285,11 @@ pvm_val
 pvm_elemsof (pvm_val val)
 {
   if (PVM_IS_ARR (val))
-    return PVM_VAL_ARR_NELEM (val);
+    return pvm_make_ulong (PVM_VAL_ARR_NELEM (val));
   else if (PVM_IS_TUP (val))
-    return PVM_VAL_TUP_NELEM (val);
+    return pvm_make_ulong (PVM_VAL_TUP_NELEM (val));
   else
-    return 1;
+    return pvm_make_ulong (1);
 }
 
 pvm_val
@@ -310,7 +309,7 @@ pvm_sizeof (pvm_val val)
     {
       size_t nelem, i, size;
 
-      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
+      nelem = PVM_VAL_ARR_NELEM (val);
 
       size = 0;
       for (i = 0; i < nelem; ++i)
@@ -397,7 +396,7 @@ pvm_print_val (FILE *out, pvm_val val)
     {
       size_t nelem, idx;
       
-      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
+      nelem = PVM_VAL_ARR_NELEM (val);
       
       fprintf (out, "[");
       for (idx = 0; idx < nelem; idx++)
@@ -484,4 +483,52 @@ pvm_print_val (FILE *out, pvm_val val)
     }
   else
     assert (0);
+}
+
+pvm_val
+pvm_typeof (pvm_val val)
+{
+  pvm_val type;
+  
+  if (PVM_IS_BYTE (val))
+    type = pvm_make_integral_type (8, 1);
+  else if (PVM_IS_UBYTE (val))
+    type = pvm_make_integral_type (8, 0);
+  else if (PVM_IS_HALF (val))
+    type = pvm_make_integral_type (16, 1);
+  else if (PVM_IS_UHALF (val))
+    type = pvm_make_integral_type (16, 0);
+  else if (PVM_IS_INT (val))
+    type = pvm_make_integral_type (32, 1);
+  else if (PVM_IS_UINT (val))
+    type = pvm_make_integral_type (32, 0);
+  else if (PVM_IS_LONG (val))
+    type = pvm_make_integral_type (64, 1);
+  else if (PVM_IS_ULONG (val))
+    type = pvm_make_integral_type (64, 0);
+  else if (PVM_IS_STR (val))
+    type = pvm_make_string_type ();
+  else if (PVM_IS_ARR (val))
+    type = pvm_make_array_type (PVM_VAL_ARR_TYPE (val));
+  else if (PVM_IS_TUP (val))
+    {
+      size_t i;
+      pvm_val *enames, *etypes;
+      pvm_val nelem = pvm_make_ulong (PVM_VAL_TUP_NELEM (val));
+
+      enames = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+      etypes = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+      
+      for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
+        {
+          enames[i] = PVM_VAL_TUP_ELEM_NAME (val, i);
+          etypes[i] = pvm_typeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+        }
+      
+      type = pvm_make_tuple_type (nelem, enames, etypes);
+    }
+  else
+    assert (0);
+
+  return type;
 }
