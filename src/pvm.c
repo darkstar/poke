@@ -260,11 +260,13 @@ pvm_make_array_type (pvm_val type)
 }
 
 pvm_val
-pvm_make_tuple_type (pvm_val enames, pvm_val etypes)
+pvm_make_tuple_type (pvm_val nelem,
+                     pvm_val *enames, pvm_val *etypes)
 {
   pvm_val t, n;
   pvm_val ttype = pvm_make_type (PVM_TYPE_TUPLE);
-  
+
+  PVM_VAL_TYP_T_NELEM (ttype) = nelem;
   PVM_VAL_TYP_T_ENAMES (ttype) = enames;
   PVM_VAL_TYP_T_ETYPES (ttype) = etypes;
 

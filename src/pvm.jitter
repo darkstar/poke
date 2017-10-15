@@ -2105,8 +2105,33 @@ instruction mktypa () # TYPE -> TYPE
   end
 end
 
-instruction mktypt () # [STRING TYP]... -> TYP
+instruction mktypt () # [STRING TYP]... NLONG -> TYP
   code
+    size_t i;
+    pvm_val nelem, *etypes, *enames;
+
+    nelem = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+
+    etypes = xmalloc (sizeof (struct pvm_val) * nelem);
+    enames = xmalloc (sizeof (struct pvm_val) * nelem);
+
+    for (i = 0; i < nelem; ++i)
+    {
+      pvm_val name = JITTER_TOP_STACK ();
+      pvm_val type = JITTER_UNDER_TOP_STACK ();
+
+      /* XXX: check pvm_val types?  */
+
+      enames[i] = pvm_make_string (PVM_VAL_STRING (name));
+      etypes[i] = pvm_dup_type (type);
+
+      JITTER_DROP_STACK ();
+      JITTER_DROP_STACK ();
+    }
+
+    JITTER_PUSH_STACK (pvm_make_tuple_type (nelem,
+                                            enames, etypes));
   end
 end
 

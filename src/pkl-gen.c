@@ -749,6 +749,10 @@ pkl_gen_type (pkl_ast_node ast,
             return 0;                    
         }
 
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AT_TYPE_T_NELEM (ast)));
+
       PVM_APPEND_INSTRUCTION (program, mktypt);
     }
   else
