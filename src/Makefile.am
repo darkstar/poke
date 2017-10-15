@@ -31,7 +31,7 @@ poke_SOURCES = poke.c poke.h \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c
-AM_YFLAGS = -d
+AM_YFLAGS = -d --report=state
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG

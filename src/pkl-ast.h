@@ -58,7 +58,8 @@ enum pkl_ast_code
   PKL_AST_ARRAY_REF,
   PKL_AST_TUPLE,
   PKL_AST_TUPLE_ELEM,
-  PKL_AST_TUPLE_REF
+  PKL_AST_TUPLE_REF,
+  PKL_AST_TUPLE_TYPE_ELEM
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -703,6 +704,29 @@ struct pkl_ast_struct_ref
 pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
                                       pkl_ast_node identifier);
 
+
+/* PKL_AST_TUPLE_TYPE_ELEM nodes represent the element part of a tuple
+   type.
+
+   NAME is a PKL_AST_IDENTIFIER node, or NULL if the tuple type
+   element has no name.
+
+   TYPE is a PKL_AST_TYPE node.  */
+
+#define PKL_AST_TUPLE_TYPE_ELEM_NAME(AST) ((AST)->tuple_type_elem.name)
+#define PKL_AST_TUPLE_TYPE_ELEM_TYPE(AST) ((AST)->tuple_type_elem.type)
+
+struct pkl_ast_tuple_type_elem
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *name;
+  union pkl_ast_node *type;
+};
+
+pkl_ast_node pkl_ast_make_tuple_type_elem (pkl_ast_node name,
+                                           pkl_ast_node type);
+
 /* PKL_AST_TYPE nodes represent field types.
    
    CODE contains the kind of type, as defined in the pkl_ast_type_code
@@ -719,8 +743,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
    In array types, ETYPE is a PKL_AST_TYPE node.
 
    In tuple types, NELEM is the number of elements in the tuple type.
-   ENAMES is a chain of PKL_AST_IDENTIFIER nodes.  ETYPES is a chain
-   of PKL_AST_TYPE nodes.  */
+   ELEMS is a chain of PKL_AST_TUPLE_TYPE_ELEM nodes.  */
 
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
@@ -729,8 +752,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
 #define PKL_AST_TYPE_T_NELEM(AST) ((AST)->type.val.tuple.nelem)
-#define PKL_AST_TYPE_T_ENAMES(AST) ((AST)->type.val.tuple.enames)
-#define PKL_AST_TYPE_T_ETYPES(AST) ((AST)->type.val.tuple.etypes)
+#define PKL_AST_TYPE_T_ELEMS(AST) ((AST)->type.val.tuple.elems)
 
 struct pkl_ast_type
 {
@@ -756,8 +778,7 @@ struct pkl_ast_type
     struct
     {
       size_t nelem;
-      union pkl_ast_node *enames;
-      union pkl_ast_node *etypes;
+      union pkl_ast_node *elems;
     } tuple;
   } val;
 
@@ -769,8 +790,7 @@ struct pkl_ast_type
 pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast_node etype);
-pkl_ast_node pkl_ast_make_tuple_type (size_t nelem,
-                                      pkl_ast_node enames, pkl_ast_node etypes);
+pkl_ast_node pkl_ast_make_tuple_type (size_t nelem, pkl_ast_node elems);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 
@@ -837,6 +857,7 @@ union pkl_ast_node
   struct pkl_ast_tuple tuple;
   struct pkl_ast_tuple_elem tuple_elem;
   struct pkl_ast_tuple_ref tref;
+  struct pkl_ast_tuple_type_elem tuple_type_elem;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

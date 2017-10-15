@@ -260,14 +260,14 @@ check_tuple (struct pkl_parser *parser,
              pkl_ast_node *type)
 {
   pkl_ast_node t, u;
-  pkl_ast_node enames, etypes;
+  pkl_ast_node tuple_type_elems;
 
-  enames = NULL;
-  etypes = NULL;
+  tuple_type_elems = NULL;
   *nelem = 0;
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node name;
+      pkl_ast_node tuple_type_elem;
       pkl_ast_node ename;
       pkl_ast_node type;
 
@@ -298,19 +298,45 @@ check_tuple (struct pkl_parser *parser,
       else
         ename = pkl_ast_make_identifier ("");
 
-      enames = pkl_ast_chainon (enames, ASTREF (ename));
-
-      /* Add the type for this tuple element.  */
       type = PKL_AST_TYPE (PKL_AST_TUPLE_ELEM_EXP (t));
-      etypes = pkl_ast_chainon (etypes,
-                                ASTREF (pkl_ast_dup_type (type)));
 
+      tuple_type_elem = pkl_ast_make_tuple_type_elem (ename, pkl_ast_dup_type (type));
+      tuple_type_elems = pkl_ast_chainon (tuple_type_elems,
+                                          ASTREF (tuple_type_elem));
       *nelem += 1;
     }
 
   /* Now build the type for the tuple.  */
-  *type = pkl_ast_make_tuple_type (*nelem,
-                                   enames, etypes);
+  *type = pkl_ast_make_tuple_type (*nelem, tuple_type_elems);
+
+  return 1;
+}
+
+static int
+check_tuple_type (struct pkl_parser *parser,
+                  YYLTYPE *llocp,
+                  pkl_ast_node tuple_type_elems,
+                  size_t *nelem)
+{
+  pkl_ast_node t, u;
+
+  *nelem = 0;
+  for (t = tuple_type_elems; t; t = PKL_AST_CHAIN (t))
+    {
+      for (u = tuple_type_elems; u != t; u = PKL_AST_CHAIN (u))
+        {
+          if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (u)),
+                      PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (t)))
+              == 0)
+            {
+              pkl_tab_error (llocp, parser,
+                             "duplicated element name in tuple type spec.");
+              return 0;
+            }
+        }
+      
+      *nelem += 1;
+    }
 
   return 1;
 }
@@ -322,19 +348,17 @@ check_tuple_ref (struct pkl_parser *parser,
                  pkl_ast_node identifier,
                  pkl_ast_node *type)
 {
-  pkl_ast_node n, t;
+  pkl_ast_node e;
 
   assert (PKL_AST_TYPE_CODE (ttype) == PKL_TYPE_TUPLE);
 
   *type = NULL;
-  for (t = PKL_AST_TYPE_T_ETYPES (ttype), n = PKL_AST_TYPE_T_ENAMES (ttype);
-       t && n;
-       t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
+  for (e = PKL_AST_TYPE_T_ELEMS (ttype); e; e = PKL_AST_CHAIN (e))
     {
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (n),
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (e)),
                   PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
         {
-          *type = t;
+          *type = PKL_AST_TUPLE_TYPE_ELEM_TYPE (e);
           break;
         }
     }
@@ -405,7 +429,7 @@ check_array (struct pkl_parser *parser,
 
   return 1;
 }
- 
+
 %}
 
 %union {
@@ -481,6 +505,7 @@ check_array (struct pkl_parser *parser,
 %type <ast> array_elem_list array_elem
 %type <ast> tuple_elem_list tuple_elem
 %type <ast> type_specifier
+%type <ast> tuple_elem_type_list tuple_elem_type
 
 %start program
 
@@ -593,13 +618,13 @@ expression:
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
                 }
-        | SIZEOF '(' expression ')' %prec HYPERUNARY
+/*        | SIZEOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
-                }
+                                                 } */
         | ELEMSOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $2);
@@ -607,13 +632,13 @@ expression:
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
                 }
-        | ELEMSOF '(' expression ')' %prec HYPERUNARY
+/*        | ELEMSOF '(' expression ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $3);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
-                }
+                                                 }*/
         | expression '+' expression
         	{
                   if (!promote_operands_binary (pkl_parser->ast,
@@ -1109,6 +1134,35 @@ typedef_specifier:
 
 type_specifier:
 	  TYPENAME
+        | '(' tuple_elem_type_list ')'
+          	{
+                  size_t nelem;
+                  if (!check_tuple_type (pkl_parser, &@2,
+                                         $2, &nelem))
+                    YYERROR;
+                  $$ = pkl_ast_make_tuple_type (nelem, $2);
+                }
+        ;
+
+
+tuple_elem_type_list:
+	  %empty
+		{ $$ = NULL; }
+        | tuple_elem_type_list ',' tuple_elem_type
+        	{ $$ = pkl_ast_chainon ($1, $3); }
+        ;
+
+tuple_elem_type:
+	  type_specifier IDENTIFIER
+          	{
+                  $$ = pkl_ast_make_tuple_type_elem ($2, $1);
+                }
+        | type_specifier
+        	{
+                  $$ = pkl_ast_make_tuple_type_elem (NULL, $1);
+                }
+        ;
+
           /*          	| STRUCT IDENTIFIER
         	{
                   pkl_ast_node strct

@@ -327,13 +327,16 @@ pkl_gen_type (pkl_ast_node ast,
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
     {
-      pkl_ast_node t, n;
+      pkl_ast_node t;
 
-      for (t = PKL_AST_TYPE_T_ETYPES (ast), n = PKL_AST_TYPE_T_ENAMES (ast);
-           t && n;
-           t = PKL_AST_CHAIN (t), n = PKL_AST_CHAIN (n))
+      for (t = PKL_AST_TYPE_T_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
         {
-          char *ename = PKL_AST_IDENTIFIER_POINTER (n);
+          pkl_ast_node tuple_type_elem_name
+            = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
+          pkl_ast_node tuple_type_elem_type
+            = PKL_AST_TUPLE_TYPE_ELEM_TYPE (t);
+          char *ename
+            = PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name);
 
           /* Push the tuple element name.  */
           PVM_APPEND_INSTRUCTION (program, push);         
@@ -344,7 +347,7 @@ pkl_gen_type (pkl_ast_node ast,
                                       pvm_make_string (ename));
 
           /* Push the tuple element type.  */
-          if (!pkl_gen_type (t, program, label))
+          if (!pkl_gen_type (tuple_type_elem_type, program, label))
             return 0;                    
         }
 
