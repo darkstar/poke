@@ -384,6 +384,7 @@ pkl_ast_dup_type (pkl_ast_node type)
           PKL_AST_TYPE_T_ELEMS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_T_ELEMS (new),
                                tuple_type_elem);
+          PKL_AST_TYPE_T_ELEMS (new) = ASTREF (PKL_AST_TYPE_T_ELEMS (new));
         }
       break;
     case PKL_TYPE_STRING:
