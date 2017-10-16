@@ -362,8 +362,11 @@ pkl_ast_dup_type (pkl_ast_node type)
       PKL_AST_TYPE_I_SIGNED (new) = PKL_AST_TYPE_I_SIGNED (type);
       break;
     case PKL_TYPE_ARRAY:
-      PKL_AST_TYPE_A_ETYPE (new)
-        = ASTREF (pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type)));
+      {
+        pkl_ast_node etype
+          = pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type));
+        PKL_AST_TYPE_A_ETYPE (new) = ASTREF (etype);
+      }
       break;
     case PKL_TYPE_TUPLE:
       PKL_AST_TYPE_T_NELEM (new) = PKL_AST_TYPE_T_NELEM (type);
