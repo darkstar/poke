@@ -311,11 +311,11 @@ pkl_gen_type (pkl_ast_node ast,
       pvm_append_val_parameter (program,
                                 pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
 
-      PVM_APPEND_INSTRUCTION (program, mktypi);
+      PVM_APPEND_INSTRUCTION (program, mktyi);
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRING)
     {
-      PVM_APPEND_INSTRUCTION (program, mktyps);
+      PVM_APPEND_INSTRUCTION (program, mktys);
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
     {
@@ -323,7 +323,7 @@ pkl_gen_type (pkl_ast_node ast,
                          program, label))
         return 0;
       
-      PVM_APPEND_INSTRUCTION (program, mktypa);
+      PVM_APPEND_INSTRUCTION (program, mktya);
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
     {
@@ -357,7 +357,7 @@ pkl_gen_type (pkl_ast_node ast,
       pvm_append_val_parameter (program,
                                 pvm_make_ulong (PKL_AST_TYPE_T_NELEM (ast)));
 
-      PVM_APPEND_INSTRUCTION (program, mktypt);
+      PVM_APPEND_INSTRUCTION (program, mktyt);
     }
   else
     assert (0);

@@ -2089,7 +2089,7 @@ end
 
 ## Type related instructions.
 
-instruction mktypi () # ULONG UINT -> TYP
+instruction mktyi () # ULONG UINT -> TYP
   code
     pvm_val size = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
     pvm_val signed_p = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -2099,26 +2099,26 @@ instruction mktypi () # ULONG UINT -> TYP
   end
 end
 
-instruction mktyps () # _ -> TYP
+instruction mktys () # _ -> TYP
   code
     JITTER_PUSH_STACK (pvm_make_string_type ());
   end
 end
 
-instruction mktypm () # _ -> TYP
+instruction mktym () # _ -> TYP
   code
     JITTER_PUSH_STACK (pvm_make_map_type ());
   end
 end
 
-instruction mktypa () # TYPE -> TYPE
+instruction mktya () # TYPE -> TYPE
   code
     JITTER_TOP_STACK () =
       pvm_make_array_type (JITTER_TOP_STACK ());
   end
 end
 
-instruction mktypt () # [STRING TYP]... NLONG -> TYP
+instruction mktyt () # [STRING TYP]... NLONG -> TYP
   code
     size_t i;
     pvm_val nelem, *etypes, *enames;
