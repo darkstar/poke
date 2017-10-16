@@ -443,7 +443,7 @@ check_array (struct pkl_parser *parser,
   int integer;
 }
 
-%destructor { /* pkl_ast_free ($$);*/ } <ast>
+%destructor { $$ = ASTREF ($$); pkl_ast_node_free ($$); } <ast>
 
 /* Primaries.  */
 
@@ -606,6 +606,8 @@ expression:
                 }
         | TYPEOF expression %prec UNARY
         	{
+                  pkl_ast_node metatype;
+                  
                   if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
                     {
                       pkl_tab_error (&@2, pkl_parser,
@@ -613,8 +615,8 @@ expression:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF, $2);
-                  PKL_AST_TYPE ($$)
-                    = ASTREF (pkl_ast_make_metatype (PKL_AST_TYPE ($2)));
+                  metatype = pkl_ast_make_metatype (PKL_AST_TYPE ($2));
+                  PKL_AST_TYPE ($$) = ASTREF (metatype);
                 }
         | SIZEOF expression %prec UNARY
         	{
@@ -961,8 +963,11 @@ primary:
         | STR
         | type_specifier
           {
+            pkl_ast_node metatype;
+            
             $$ = $1;
-            PKL_AST_TYPE ($$) = ASTREF (pkl_ast_make_metatype ($1));
+            metatype = pkl_ast_make_metatype ($1);
+            PKL_AST_TYPE ($$) = ASTREF (metatype);
           }
           /*        | IDENTIFIER */
         | '(' expression ')'

@@ -898,7 +898,8 @@ pkl_ast_init (void)
   ast->stdtypes[nentries - 1] = NULL;
   
   /* String type.  */
-  ast->stringtype = ASTREF (pkl_ast_make_string_type ());
+  ast->stringtype = pkl_ast_make_string_type ();
+  ast->stringtype = ASTREF (ast->stringtype);
   pkl_ast_register (ast, "string", ast->stringtype);
 
   return ast;
@@ -939,6 +940,7 @@ pkl_ast_free (pkl_ast ast)
 
   for (i = 0; ast->stdtypes[i] != NULL; i++)
     pkl_ast_node_free (ast->stdtypes[i]);
+  free (ast->stdtypes);
   pkl_ast_node_free (ast->stringtype);
   
   free (ast);

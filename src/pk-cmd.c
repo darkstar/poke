@@ -483,6 +483,13 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
   /* Call the command handler, passing the arguments.  */
   ret = (*cmd->handler) (argc, argv);
+
+  /* Free arguments occupying memory.  */
+  for (i = 0; i < argc; ++i)
+    {
+      if (argv[i].type == PK_CMD_ARG_EXP)
+        pvm_destroy_program (argv[i].val.exp);
+    }
   
   return ret;
 

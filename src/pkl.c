@@ -44,6 +44,8 @@ pkl_compile_buffer (pvm_program *prog,
     /* Compiler back-end error.  */
     goto error;
 
+  pkl_ast_free (ast);
+
   pvm_specialize_program (p);
   *prog = p;
 
