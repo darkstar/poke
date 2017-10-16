@@ -510,7 +510,7 @@ check_array (struct pkl_parser *parser,
 %type <ast> array_elem_list array_elem
 %type <ast> tuple_elem_list tuple_elem
 %type <ast> type_specifier
-%type <ast> tuple_elem_type_list tuple_elem_type
+%type <ast> tuple_type_specifier tuple_elem_type_list tuple_elem_type
 
 %start program
 
@@ -597,6 +597,11 @@ expression:
                     }
                   $$ = pkl_ast_make_cast ($2, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
+                }
+        | tuple_type_specifier expression %prec UNARY
+        	{
+                  $$ = pkl_ast_make_cast ($1, $2);
+                  PKL_AST_TYPE ($$) = ASTREF ($1);
                 }
         | TYPEOF expression %prec UNARY
         	{
@@ -956,16 +961,16 @@ primary:
         | CHAR
         | STR
         | type_specifier
-          {
-            pkl_ast_node metatype;
-            
-            $$ = $1;
-            metatype = pkl_ast_make_metatype ($1);
-            PKL_AST_TYPE ($$) = ASTREF (metatype);
-          }
+          	{
+                  pkl_ast_node metatype;
+                  
+                  $$ = $1;
+                  metatype = pkl_ast_make_metatype ($1);
+                  PKL_AST_TYPE ($$) = ASTREF (metatype);
+                }
           /*        | IDENTIFIER */
         | '(' expression ')'
-        { printf ("XXX expression\n"); $$ = $2; }
+        	{ $$ = $2; }
 	| primary INC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC,
@@ -1140,7 +1145,12 @@ type_specifier:
           	{
                   $$ = pkl_ast_make_array_type ($1);
                 }
-        | '(' tuple_elem_type ',' ')'
+        | tuple_type_specifier
+        ;
+
+
+tuple_type_specifier:
+	  '(' tuple_elem_type ',' ')'
           	{
                   $$ = pkl_ast_make_tuple_type (1, $2);
                 }
