@@ -335,6 +335,8 @@ pvm_sizeof (pvm_val val)
       return size;
     }
 
+  /* XXX: handle maps.  */
+  
   assert (0);
   return 0;
 }
@@ -478,6 +480,8 @@ pvm_print_val (FILE *out, pvm_val val)
                 if (ename != PVM_NULL)
                   fprintf (out, " %s", PVM_VAL_STR (ename));
               }
+            if (nelem == 1)
+              fprintf (out, ",");
             fprintf (out, ")");
           break;
           }

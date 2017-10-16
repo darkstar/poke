@@ -336,11 +336,13 @@ pkl_gen_type (pkl_ast_node ast,
           pkl_ast_node tuple_type_elem_type
             = PKL_AST_TUPLE_TYPE_ELEM_TYPE (t);
           char *ename
-            = PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name);
+            = (tuple_type_elem_name
+               ? PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name)
+               : NULL);
 
           /* Push the tuple element name.  */
           PVM_APPEND_INSTRUCTION (program, push);         
-          if (strcmp (ename, "") == 0)
+          if (ename == NULL)
             pvm_append_val_parameter (program, PVM_NULL);
           else
             pvm_append_val_parameter (program,
@@ -768,6 +770,10 @@ pkl_gen_cast (pkl_ast_node ast,
             }
         }
     }
+  else
+    /* XXX: handle casts to tuples and arrays.  For tuples, reorder
+       fields.  */
+    assert (0);
 
   return 1;
 }

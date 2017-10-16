@@ -125,9 +125,11 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
 
   yybuffer = pkl_tab__scan_string(buffer, parser->scanner);
 
+  /* XXX */
+  /*  pkl_tab_debug = 1; */
   ret = pkl_tab_parse (parser);
   /* XXX */
-  /* pkl_ast_print (stdout, parser->ast->ast);*/
+  pkl_ast_print (stdout, parser->ast->ast);
 
   *ast = parser->ast;
   if (end != NULL)

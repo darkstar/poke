@@ -370,12 +370,17 @@ pkl_ast_dup_type (pkl_ast_node type)
       for (t = PKL_AST_TYPE_T_ELEMS (type); t; t = PKL_AST_CHAIN (t))
         {
           pkl_ast_node tuple_type_elem_name
-            = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (t)));
+            = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
           pkl_ast_node tuple_type_elem_type
-            = pkl_ast_dup_type (PKL_AST_TUPLE_TYPE_ELEM_TYPE (t));
+            = PKL_AST_TUPLE_TYPE_ELEM_TYPE (t);
+          pkl_ast_node new_tuple_type_elem_name
+            = (tuple_type_elem_name
+               ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name))
+               : NULL);
           pkl_ast_node tuple_type_elem
-            = pkl_ast_make_tuple_type_elem (tuple_type_elem_name,
-                                            tuple_type_elem_type);
+            = pkl_ast_make_tuple_type_elem (new_tuple_type_elem_name,
+                                            pkl_ast_dup_type (tuple_type_elem_type));
+
           PKL_AST_TYPE_T_ELEMS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_T_ELEMS (new),
                                tuple_type_elem);

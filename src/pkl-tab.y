@@ -36,6 +36,7 @@
 
 #include "pkl-ast.h"
 #include "pkl-parser.h" /* For struct pkl_parser.  */
+#define YYDEBUG 1
 #include "pkl-tab.h"
 #include "pkl-lex.h"
 
@@ -325,9 +326,13 @@ check_tuple_type (struct pkl_parser *parser,
     {
       for (u = tuple_type_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (u)),
-                      PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (t)))
-              == 0)
+          pkl_ast_node tname = PKL_AST_TUPLE_TYPE_ELEM_NAME (u);
+          pkl_ast_node uname = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
+
+          if (uname
+              && tname
+              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
+                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
             {
               pkl_tab_error (llocp, parser,
                              "duplicated element name in tuple type spec.");
@@ -479,8 +484,8 @@ check_array (struct pkl_parser *parser,
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
-%left '@'
 %right UNARY INC DEC
+%left '@'
 %left HYPERUNARY
 %left '.'
 
@@ -613,32 +618,30 @@ expression:
                 }
         | SIZEOF expression %prec UNARY
         	{
+                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
+                    {
+                      pkl_tab_error (&@2, pkl_parser,
+                                     "operand to sizeof can't be a type.");
+                      YYERROR;
+                    }
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
                 }
-/*        | SIZEOF '(' expression ')' %prec HYPERUNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
-                  PKL_AST_TYPE ($$)
-                    = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                 64, 0);
-                                                 } */
         | ELEMSOF expression %prec UNARY
         	{
+                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
+                    {
+                      pkl_tab_error (&@2, pkl_parser,
+                                     "operand to elemsof can't be a type.");
+                      YYERROR;
+                    }
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $2);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
                 }
-/*        | ELEMSOF '(' expression ')' %prec HYPERUNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $3);
-                  PKL_AST_TYPE ($$)
-                    = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                 64, 0);
-                                                 }*/
         | expression '+' expression
         	{
                   if (!promote_operands_binary (pkl_parser->ast,
@@ -963,7 +966,7 @@ primary:
           }
           /*        | IDENTIFIER */
         | '(' expression ')'
-		{ $$ = $2; }
+        { printf ("XXX expression\n"); $$ = $2; }
 	| primary INC
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC,
@@ -1134,22 +1137,29 @@ typedef_specifier:
 
 type_specifier:
 	  TYPENAME
-        | '(' tuple_elem_type_list ')'
+        | type_specifier '[' ']'
           	{
+                  $$ = pkl_ast_make_array_type ($1);
+                }
+        | '(' tuple_elem_type ',' ')'
+          	{
+                  $$ = pkl_ast_make_tuple_type (1, $2);
+                }
+        | '(' tuple_elem_type ',' tuple_elem_type_list ')'
+        	{
                   size_t nelem;
+                  pkl_ast_node elem_list = pkl_ast_chainon ($4, $2);
                   if (!check_tuple_type (pkl_parser, &@2,
-                                         $2, &nelem))
+                                         elem_list, &nelem))
                     YYERROR;
-                  $$ = pkl_ast_make_tuple_type (nelem, $2);
+                  $$ = pkl_ast_make_tuple_type (nelem, $4);
                 }
         ;
 
-
 tuple_elem_type_list:
-	  %empty
-		{ $$ = NULL; }
+	  tuple_elem_type
         | tuple_elem_type_list ',' tuple_elem_type
-        	{ $$ = pkl_ast_chainon ($1, $3); }
+        	{ $$ = pkl_ast_chainon ($3, $1); }
         ;
 
 tuple_elem_type:
