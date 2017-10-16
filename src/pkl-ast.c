@@ -838,7 +838,6 @@ pkl_ast_node_free (pkl_ast_node ast)
           pkl_ast_node_free (t);
         }
       
-      pkl_ast_node_free (PKL_AST_TYPE (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -850,6 +849,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       assert (0);
     }
 
+  pkl_ast_node_free (PKL_AST_TYPE (ast));
   free (ast);
 }
 
