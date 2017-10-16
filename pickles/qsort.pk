@@ -16,11 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-function qsort (int[] array, int left = 0, int right = sizeof (array))
-  <doc="Sort an array using QuickSort.",
-   typecheck=0>
+int
+qsort (int[] array, int left = 0, int right = sizeof (array))
+ <doc="Sort an array using QuickSort.", typecheck=0>
 {
-  function partition (int left, int right)
+  proc partition = (int left, int right) : int
   {
     let int pivot, i, j, t;
 
@@ -45,18 +45,19 @@ function qsort (int[] array, int left = 0, int right = sizeof (array))
     array[j] = t;
 
     return j;
-  }
+  };
 
   if (left < right)
     {
-      let int j = partition (left, right);
+      let j = partition (left, right);
 
       qsort (array, left, right - 1);
       qsort (array, left, right);
     }
 }
 
-function test_qsort ()
+void
+test_qsort ()
 {
   /* Sort several arrays in the current IO stream.  */
   byte[2048] bytes @ 0x0;

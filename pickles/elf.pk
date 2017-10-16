@@ -1818,8 +1818,7 @@ struct elf <doc="ELF object file.">
      contents of the two tables defined above.  Note that sections and
      segments usually overlap. */
 
-  let i;
-  for (i = 0; i < ehdr.e_shnum; i++)
+  for (let i = 0; i < ehdr.e_shnum; i++)
     {
       . = shdr[i].sh_offset;
       struct elf_section(ehdr.e_machine,
@@ -1827,7 +1826,7 @@ struct elf <doc="ELF object file.">
                          shdr[i]) section;
     }
 
-  for (i = 0; i < ehdr.e_phnum; i++)
+  for (let i = 0; i < ehdr.e_phnum; i++)
     {
       . = phdr[i].p_offset;
       struct elf_segment (ehdr, phdr[i]) segment;
