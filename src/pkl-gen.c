@@ -350,7 +350,7 @@ pkl_gen_type (pkl_ast_node ast,
 
           /* Push the tuple element type.  */
           if (!pkl_gen_type (tuple_type_elem_type, program, label))
-            return 0;                    
+            return 0;
         }
 
       PVM_APPEND_INSTRUCTION (program, push);
@@ -358,6 +358,7 @@ pkl_gen_type (pkl_ast_node ast,
                                 pvm_make_ulong (PKL_AST_TYPE_T_NELEM (ast)));
 
       PVM_APPEND_INSTRUCTION (program, mktyt);
+      /* XXX: we need to reverse the tuple type!  */
     }
   else
     assert (0);
