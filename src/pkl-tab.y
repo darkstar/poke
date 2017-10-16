@@ -303,7 +303,7 @@ check_tuple (struct pkl_parser *parser,
 
       tuple_type_elem = pkl_ast_make_tuple_type_elem (ename, pkl_ast_dup_type (type));
       tuple_type_elems = pkl_ast_chainon (tuple_type_elems,
-                                          ASTREF (tuple_type_elem));
+                                          tuple_type_elem);
       *nelem += 1;
     }
 
@@ -518,12 +518,6 @@ check_array (struct pkl_parser *parser,
 
 program: program_elem_list
           	{
-                  if (yynerrs > 0)
-                    {
-                      pkl_ast_node_free ($1);
-                      YYERROR;
-                    }
-                  
                   $$ = pkl_ast_make_program ($1);
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
