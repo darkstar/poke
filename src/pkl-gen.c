@@ -97,7 +97,7 @@ pkl_gen_string (pkl_ast_node ast,
 {
   pvm_val val;
 
-  val = pvm_make_string (xstrdup (PKL_AST_STRING_POINTER (ast)));
+  val = pvm_make_string (PKL_AST_STRING_POINTER (ast));
 
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program, val);

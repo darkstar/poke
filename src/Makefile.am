@@ -35,9 +35,10 @@ AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
-poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS) -Wall
+poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS) -Wall \
+              $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
-             $(LTLIBREADLINE)
+             $(LTLIBREADLINE) $(BDW_GC_LIBS)
 
 # Integration with jitter.
 

@@ -54,11 +54,10 @@ dnl i18n with gettext
 AM_GNU_GETTEXT_VERSION([0.18.1])
 AM_GNU_GETTEXT([external])
 
-dnl FUSE and sqlite
+dnl The Boehm-Weiser garbage collector
 
 PKG_PROG_PKG_CONFIG
-PKG_CHECK_MODULES(FUSE,[fuse])
-PKG_CHECK_MODULES(SQLITE3,[sqlite3])
+PKG_CHECK_MODULES(BDW_GC,[bdw-gc])
 
 dnl Generate output files
 AC_CONFIG_FILES(Makefile

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <gc.h>
 
 #include "pvm.h"
 
@@ -28,6 +29,7 @@ static struct pvm_state pvm_state;
 void
 pvm_init (void)
 {
+  GC_INIT ();
   pvm_initialize ();
   pvm_state_initialize (&pvm_state);
 }
@@ -90,7 +92,8 @@ pvm_run (pvm_program prog, pvm_val *res)
 
   if (res != NULL)
     *res = pvm_state.pvm_state_backing.result_value;
-  
+
+  /*XXX  GC_gcollect(); */
   return pvm_state.pvm_state_backing.exit_code;
 }
 
@@ -130,51 +133,53 @@ pvm_make_uint (uint32_t value)
   return (PVM_VAL_TAG_UINT << 61) | value;
 }
 
+static pvm_val_box
+pvm_make_box (uint8_t tag)
+{
+  pvm_val_box box = GC_MALLOC (sizeof (struct pvm_val_box));
+
+  PVM_VAL_BOX_TAG (box) = tag;
+  return box;
+}
+
 pvm_val
 pvm_make_long (int64_t value)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_LONG);
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_LONG;
   PVM_VAL_BOX_LONG (box) = value;
-
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
 pvm_val
 pvm_make_ulong (uint64_t value)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ULONG);
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_ULONG;
   PVM_VAL_BOX_ULONG (box) = value;
-
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
 pvm_val
 pvm_make_string (const char *str)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_STR);
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_STR;
-  PVM_VAL_BOX_STR (box) = xstrdup (str);
-
+  PVM_VAL_BOX_STR (box) = GC_STRDUP (str);
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
 pvm_val
 pvm_make_array (pvm_val type, size_t nelem)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
-  pvm_array arr = xmalloc (sizeof (struct pvm_array));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ARR);
+  pvm_array arr = GC_MALLOC (sizeof (struct pvm_array));
 
   arr->nelem = nelem;
   arr->type = type;
-  arr->elems = xmalloc (sizeof (pvm_val) * nelem);
+  arr->elems = GC_MALLOC (sizeof (pvm_val) * nelem);
   memset (arr->elems, 0, sizeof (pvm_val) * nelem);
   
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_ARR;
   PVM_VAL_BOX_ARR (box) = arr;
 
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
@@ -183,16 +188,14 @@ pvm_make_array (pvm_val type, size_t nelem)
 pvm_val
 pvm_make_tuple (size_t nelem)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
-  pvm_tuple tuple = xmalloc (sizeof (struct pvm_tuple));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_TUP);
+  pvm_tuple tuple = GC_MALLOC (sizeof (struct pvm_tuple));
 
   tuple->nelem = nelem;
-  tuple->elems = xmalloc (sizeof (struct pvm_tuple_elem) * nelem);
+  tuple->elems = GC_MALLOC (sizeof (struct pvm_tuple_elem) * nelem);
   memset (tuple->elems, 0, sizeof (struct pvm_tuple_elem) * nelem);
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_TUP;
   PVM_VAL_BOX_TUP (box) = tuple;
-
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
@@ -221,15 +224,13 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
 static pvm_val
 pvm_make_type (enum pvm_type_code code)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
-  pvm_type type = xmalloc (sizeof (struct pvm_type));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_TYP);
+  pvm_type type = GC_MALLOC (sizeof (struct pvm_type));
 
   memset (type, 0, sizeof (struct pvm_type));
   type->code = code;
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_TYP;
   PVM_VAL_BOX_TYP (box) = type;
-
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
 
@@ -282,8 +283,8 @@ pvm_allocate_tuple_attrs (pvm_val nelem,
                           pvm_val **enames, pvm_val **etypes)
 {
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
-  *enames = xmalloc (nbytes);
-  *etypes = xmalloc (nbytes);
+  *enames = GC_MALLOC (nbytes);
+  *etypes = GC_MALLOC (nbytes);
 }
 
 pvm_val
@@ -532,8 +533,8 @@ pvm_typeof (pvm_val val)
 
       if (PVM_VAL_ULONG (nelem) > 0)
         {
-          enames = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-          etypes = xmalloc (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+          enames = GC_MALLOC (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+          etypes = GC_MALLOC (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
       
           for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
             {
@@ -553,14 +554,12 @@ pvm_typeof (pvm_val val)
 pvm_val
 pvm_make_map (pvm_val type, pvm_val offset)
 {
-  pvm_val_box box = xmalloc (sizeof (struct pvm_val_box));
-  pvm_map map = xmalloc (sizeof (struct pvm_map));
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_MAP);
+  pvm_map map = GC_MALLOC (sizeof (struct pvm_map));
 
   map->type = type;
   map->offset = offset;
 
-  PVM_VAL_BOX_TAG (box) = PVM_VAL_TAG_MAP;
   PVM_VAL_BOX_MAP (box) = map;
-
   return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
 }
