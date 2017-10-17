@@ -71,8 +71,8 @@ typedef uint64_t pvm_val;
 /* 8-bit integers (both signed and unsigned) are encoded in the bits
    10..3 of pvm_val.  */
 
-#define PVM_VAL_BYTE(V) ((int8_t) (((V) >> 3) & 0xff))
-#define PVM_VAL_UBYTE(V) ((uint8_t) (((V) >> 3) & 0xff))
+#define PVM_VAL_BYTE(V) ((int8_t) ((V) >> 3))
+#define PVM_VAL_UBYTE(V) ((uint8_t) ((V) >> 3))
 
 pvm_val pvm_make_byte (int8_t value);
 pvm_val pvm_make_ubyte (uint8_t value);
@@ -80,8 +80,8 @@ pvm_val pvm_make_ubyte (uint8_t value);
 /* 16-bit integers (both signed and unsigned) are encoded in the bits
    18..3 of pvm_val.  */
 
-#define PVM_VAL_HALF(V) ((int16_t) (((V) >> 3) & 0xffff))
-#define PVM_VAL_UHALF(V) ((int16_t) (((V) >> 3) & 0xffff))
+#define PVM_VAL_HALF(V) ((int16_t) ((V) >> 3))
+#define PVM_VAL_UHALF(V) ((int16_t) ((V) >> 3))
 
 pvm_val pvm_make_half (int16_t value);
 pvm_val pvm_make_uhalf (uint16_t value);
@@ -89,8 +89,8 @@ pvm_val pvm_make_uhalf (uint16_t value);
 /* 32-bit integers (both signed and unsigned) are encoded in the bits
    34..3 bits of pvm_val.  */
 
-#define PVM_VAL_INT(V) ((int32_t) (((V) >> 3) & 0xffffffff))
-#define PVM_VAL_UINT(V) ((uint32_t) (((V) >> 3) & 0xffffffff))
+#define PVM_VAL_INT(V) ((int32_t) ((V) >> 3))
+#define PVM_VAL_UINT(V) ((uint32_t) ((V) >> 3))
 
 pvm_val pvm_make_int (int32_t value);
 pvm_val pvm_make_uint (uint32_t value);
