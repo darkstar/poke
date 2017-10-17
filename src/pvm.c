@@ -29,8 +29,8 @@ static struct pvm_state pvm_state;
 void
 pvm_init (void)
 {
-  GC_INIT ();
   pvm_initialize ();
+  GC_INIT ();
   pvm_state_initialize (&pvm_state);
 }
 
@@ -38,6 +38,7 @@ void
 pvm_shutdown (void)
 {
   pvm_state_finalize (&pvm_state);
+  GC_gcollect();
   pvm_finalize ();
 }
 
@@ -93,44 +94,43 @@ pvm_run (pvm_program prog, pvm_val *res)
   if (res != NULL)
     *res = pvm_state.pvm_state_backing.result_value;
 
-  /*XXX  GC_gcollect(); */
   return pvm_state.pvm_state_backing.exit_code;
 }
 
 pvm_val
 pvm_make_byte (int8_t value)
 {
-  return (PVM_VAL_TAG_BYTE << 61) | (value & 0xff);
+  return ((value & 0xff) << 3) | PVM_VAL_TAG_BYTE;
 }
 
 pvm_val
 pvm_make_ubyte (uint8_t value)
 {
-  return (PVM_VAL_TAG_UBYTE << 61) | value;
+  return (value << 3) | PVM_VAL_TAG_UBYTE;
 }
 
 pvm_val
 pvm_make_half (int16_t value)
 {
-  return (PVM_VAL_TAG_HALF << 61) | (value & 0xffff);
+  return ((value & 0xffff) << 3) | PVM_VAL_TAG_HALF;
 }
 
 pvm_val
 pvm_make_uhalf (uint16_t value)
 {
-  return (PVM_VAL_TAG_UHALF << 61) | value;
+  return (value << 3) | PVM_VAL_TAG_UHALF;
 }
 
 pvm_val
 pvm_make_int (int32_t value)
 {
-  return (PVM_VAL_TAG_INT << 61) | (value & 0xffffffff);
+  return ((value & 0xffffffff) << 3) | PVM_VAL_TAG_INT;
 }
 
 pvm_val
 pvm_make_uint (uint32_t value)
 {
-  return (PVM_VAL_TAG_UINT << 61) | value;
+  return (value << 3) | PVM_VAL_TAG_UINT;
 }
 
 static pvm_val_box
@@ -148,7 +148,7 @@ pvm_make_long (int64_t value)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_LONG);
 
   PVM_VAL_BOX_LONG (box) = value;
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -157,7 +157,7 @@ pvm_make_ulong (uint64_t value)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ULONG);
 
   PVM_VAL_BOX_ULONG (box) = value;
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -166,7 +166,7 @@ pvm_make_string (const char *str)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_STR);
 
   PVM_VAL_BOX_STR (box) = GC_STRDUP (str);
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -181,8 +181,7 @@ pvm_make_array (pvm_val type, size_t nelem)
   memset (arr->elems, 0, sizeof (pvm_val) * nelem);
   
   PVM_VAL_BOX_ARR (box) = arr;
-
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -196,7 +195,7 @@ pvm_make_tuple (size_t nelem)
   memset (tuple->elems, 0, sizeof (struct pvm_tuple_elem) * nelem);
 
   PVM_VAL_BOX_TUP (box) = tuple;
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -231,7 +230,7 @@ pvm_make_type (enum pvm_type_code code)
   type->code = code;
 
   PVM_VAL_BOX_TYP (box) = type;
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
@@ -371,7 +370,7 @@ pvm_error (enum pvm_exit_code code)
 {
   static char *pvm_error_strings[]
     = { "ok", "error", "division by zero" };
-  
+
   return pvm_error_strings[code];
 }
 
@@ -561,5 +560,5 @@ pvm_make_map (pvm_val type, pvm_val offset)
   map->offset = offset;
 
   PVM_VAL_BOX_MAP (box) = map;
-  return (PVM_VAL_TAG_BOX << 61) | ((uint64_t)box >> 3);
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
 }

@@ -44,18 +44,18 @@
 
 typedef uint64_t pvm_val;
 
-/* The most-significative bits of pvm_val are reserved for the tag,
+/* The least-significative bits of pvm_val are reserved for the tag,
    which specifies the type of the value.  */
 
-#define PVM_VAL_TAG(V) (((V) >> 61) & 0x7)
+#define PVM_VAL_TAG(V) ((V) & 0x7)
 
-#define PVM_VAL_TAG_INT   0x0UL
-#define PVM_VAL_TAG_BYTE  0x1UL
-#define PVM_VAL_TAG_UBYTE 0x2UL
-#define PVM_VAL_TAG_HALF  0x3UL
-#define PVM_VAL_TAG_UHALF 0x4UL
-#define PVM_VAL_TAG_UINT  0x5UL
-#define PVM_VAL_TAG_BOX   0x6UL
+#define PVM_VAL_TAG_INT   0x0
+#define PVM_VAL_TAG_BYTE  0x1
+#define PVM_VAL_TAG_UBYTE 0x2
+#define PVM_VAL_TAG_HALF  0x3
+#define PVM_VAL_TAG_UHALF 0x4
+#define PVM_VAL_TAG_UINT  0x5
+#define PVM_VAL_TAG_BOX   0x6
 /* Note that there is no tag 0x7.  It is used to implement PVM_NULL
    below.  */
 /* Note also that the tags below are stored in the box, not in
@@ -68,39 +68,39 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_TYP   0xd
 #define PVM_VAL_TAG_MAP   0xe
 
-/* 8-bit integers (both signed and unsigned) are encoded in the
-   least-significative 8 bits of pvm_val.  */
+/* 8-bit integers (both signed and unsigned) are encoded in the bits
+   10..3 of pvm_val.  */
 
-#define PVM_VAL_BYTE(V) ((int8_t) ((V) & 0xff))
-#define PVM_VAL_UBYTE(V) ((uint8_t) ((V) & 0xff))
+#define PVM_VAL_BYTE(V) ((int8_t) (((V) >> 3) & 0xff))
+#define PVM_VAL_UBYTE(V) ((uint8_t) (((V) >> 3) & 0xff))
 
 pvm_val pvm_make_byte (int8_t value);
 pvm_val pvm_make_ubyte (uint8_t value);
 
-/* 16-bit integers (both signed and unsigned) are encoded in the
-   least-significative 16 bits of pvm_val.  */
+/* 16-bit integers (both signed and unsigned) are encoded in the bits
+   18..3 of pvm_val.  */
 
-#define PVM_VAL_HALF(V) ((int16_t) ((V) & 0xffff))
-#define PVM_VAL_UHALF(V) ((int16_t) ((V) & 0xffff))
+#define PVM_VAL_HALF(V) ((int16_t) (((V) >> 3) & 0xffff))
+#define PVM_VAL_UHALF(V) ((int16_t) (((V) >> 3) & 0xffff))
 
 pvm_val pvm_make_half (int16_t value);
 pvm_val pvm_make_uhalf (uint16_t value);
 
-/* 32-bit integers (both signed and unsigned) are encoded in the
-   least-significative 32 bits of pvm_val.  */
+/* 32-bit integers (both signed and unsigned) are encoded in the bits
+   34..3 bits of pvm_val.  */
 
-#define PVM_VAL_INT(V) ((int32_t) ((V) & 0xffffffff))
-#define PVM_VAL_UINT(V) ((uint32_t) ((V) & 0xffffffff))
+#define PVM_VAL_INT(V) ((int32_t) (((V) >> 3) & 0xffffffff))
+#define PVM_VAL_UINT(V) ((uint32_t) (((V) >> 3) & 0xffffffff))
 
 pvm_val pvm_make_int (int32_t value);
 pvm_val pvm_make_uint (uint32_t value);
 
-/* A pointer to a boxed value is encoded in the least significative 61
+/* A pointer to a boxed value is encoded in the most significative 61
    bits of pvm_val.  Note that this assumes all pointers are aligned
    to 8 bytes.  The allocator for the boxed values makes sure this is
    always the case.  */
 
-#define PVM_VAL_BOX(V) ((pvm_val_box) ((V) << 3))
+#define PVM_VAL_BOX(V) ((pvm_val_box) ((V) & ~0x7))
 
 /* A box is a header for a boxed value, plus that value.  It is of
    type `pvm_val_box'.  */
