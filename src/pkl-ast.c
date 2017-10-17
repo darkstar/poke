@@ -286,11 +286,12 @@ pkl_ast_make_integral_type (int signed_p, size_t size)
 }
 
 pkl_ast_node
-pkl_ast_make_array_type (pkl_ast_node etype)
+pkl_ast_make_array_type (size_t nelem, pkl_ast_node etype)
 {
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_ARRAY;
+  PKL_AST_TYPE_A_NELEM (type) = nelem;
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
   return type;
 }
@@ -365,6 +366,7 @@ pkl_ast_dup_type (pkl_ast_node type)
       {
         pkl_ast_node etype
           = pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type));
+        PKL_AST_TYPE_A_NELEM (new) = PKL_AST_TYPE_A_NELEM (type);
         PKL_AST_TYPE_A_ETYPE (new) = ASTREF (etype);
       }
       break;
@@ -418,8 +420,9 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
         return 0;
       break;
     case PKL_TYPE_ARRAY:
-      if (!pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
-                               PKL_AST_TYPE_A_ETYPE (b)))
+      if (PKL_AST_TYPE_A_NELEM (a) != PKL_AST_TYPE_A_NELEM (b)
+          || !pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
+                                  PKL_AST_TYPE_A_ETYPE (b)))
         return 0;
       break;
     case PKL_TYPE_TUPLE:
@@ -1399,6 +1402,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           PRINT_AST_IMM (size, TYPE_I_SIZE, "%lu");
           break;
         case PKL_TYPE_ARRAY:
+          PRINT_AST_IMM (nelem, TYPE_A_NELEM, "%lu");
           PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
           break;
         case PKL_TYPE_TUPLE:

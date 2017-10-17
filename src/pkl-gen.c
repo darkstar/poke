@@ -322,6 +322,10 @@ pkl_gen_type (pkl_ast_node ast,
       if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (ast),
                          program, label))
         return 0;
+
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_A_NELEM (ast)));
       
       PVM_APPEND_INSTRUCTION (program, mktya);
     }

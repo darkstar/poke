@@ -750,6 +750,7 @@ pkl_ast_node pkl_ast_make_tuple_type_elem (pkl_ast_node name,
 #define PKL_AST_TYPE_TYPEOF(AST) ((AST)->type.type_of)
 #define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
+#define PKL_AST_TYPE_A_NELEM(AST) ((AST)->type.val.array.nelem)
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
 #define PKL_AST_TYPE_T_NELEM(AST) ((AST)->type.val.tuple.nelem)
 #define PKL_AST_TYPE_T_ELEMS(AST) ((AST)->type.val.tuple.elems)
@@ -772,6 +773,7 @@ struct pkl_ast_type
 
     struct
     {
+      size_t nelem;
       union pkl_ast_node *etype;
     } array;
 
@@ -789,7 +791,7 @@ struct pkl_ast_type
 
 pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
-pkl_ast_node pkl_ast_make_array_type (pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_array_type (size_t nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_tuple_type (size_t nelem, pkl_ast_node elems);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);

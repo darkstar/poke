@@ -430,7 +430,7 @@ check_array (struct pkl_parser *parser,
     }
 
   /* Finally, set the type of the array itself.  */
-  *type = pkl_ast_make_array_type (*type);
+  *type = pkl_ast_make_array_type (*nelem, *type);
 
   return 1;
 }
@@ -1142,9 +1142,10 @@ typedef_specifier:
 
 type_specifier:
 	  TYPENAME
-        | type_specifier '[' ']'
+        | type_specifier '[' INTEGER ']'
           	{
-                  $$ = pkl_ast_make_array_type ($1);
+                  $$ = pkl_ast_make_array_type (PKL_AST_INTEGER_VALUE ($3),
+                                                $1);
                 }
         | tuple_type_specifier
         ;

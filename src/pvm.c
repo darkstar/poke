@@ -170,29 +170,31 @@ pvm_make_string (const char *str)
 }
 
 pvm_val
-pvm_make_array (pvm_val type, size_t nelem)
+pvm_make_array (pvm_val nelem, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ARR);
   pvm_array arr = GC_MALLOC (sizeof (struct pvm_array));
+  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem);
 
   arr->nelem = nelem;
   arr->type = type;
-  arr->elems = GC_MALLOC (sizeof (pvm_val) * nelem);
-  memset (arr->elems, 0, sizeof (pvm_val) * nelem);
+  arr->elems = GC_MALLOC (nbytes);
+  memset (arr->elems, 0, nbytes);
   
   PVM_VAL_BOX_ARR (box) = arr;
   return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
-pvm_make_tuple (size_t nelem)
+pvm_make_tuple (pvm_val nelem)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_TUP);
   pvm_tuple tuple = GC_MALLOC (sizeof (struct pvm_tuple));
+  size_t nbytes = sizeof (struct pvm_tuple_elem) * PVM_VAL_ULONG (nelem);
 
   tuple->nelem = nelem;
-  tuple->elems = GC_MALLOC (sizeof (struct pvm_tuple_elem) * nelem);
-  memset (tuple->elems, 0, sizeof (struct pvm_tuple_elem) * nelem);
+  tuple->elems = GC_MALLOC (nbytes);
+  memset (tuple->elems, 0, nbytes);
 
   PVM_VAL_BOX_TUP (box) = tuple;
   return (uint64_t)box | PVM_VAL_TAG_BOX;
@@ -206,7 +208,7 @@ pvm_ref_tuple (pvm_val tuple, pvm_val name)
 
   assert (PVM_IS_TUP (tuple) && PVM_IS_STR (name));
   
-  nelem = PVM_VAL_TUP_NELEM (tuple);
+  nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (tuple));
   elems = PVM_VAL_TUP (tuple)->elems;
   
   for (i = 0; i < nelem; ++i)
@@ -256,10 +258,11 @@ pvm_make_map_type (void)
 }
 
 pvm_val
-pvm_make_array_type (pvm_val type)
+pvm_make_array_type (pvm_val nelem, pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
 
+  PVM_VAL_TYP_A_NELEM (atype) = nelem;
   PVM_VAL_TYP_A_ETYPE (atype) = type;
   return atype;
 }
@@ -290,9 +293,9 @@ pvm_val
 pvm_elemsof (pvm_val val)
 {
   if (PVM_IS_ARR (val))
-    return pvm_make_ulong (PVM_VAL_ARR_NELEM (val));
+    return PVM_VAL_ARR_NELEM (val);
   else if (PVM_IS_TUP (val))
-    return pvm_make_ulong (PVM_VAL_TUP_NELEM (val));
+    return PVM_VAL_TUP_NELEM (val);
   else
     return pvm_make_ulong (1);
 }
@@ -314,7 +317,7 @@ pvm_sizeof (pvm_val val)
     {
       size_t nelem, i, size;
 
-      nelem = PVM_VAL_ARR_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
 
       size = 0;
       for (i = 0; i < nelem; ++i)
@@ -326,7 +329,7 @@ pvm_sizeof (pvm_val val)
     {
       size_t nelem, i, size;
 
-      nelem = PVM_VAL_TUP_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (val));
 
       size = 0;
       for (i = 0; i < nelem; ++i)
@@ -347,7 +350,7 @@ pvm_reverse_tuple (pvm_val tuple)
   size_t i, end, nelem;
   struct pvm_tuple_elem *elems;
 
-  nelem = PVM_VAL_TUP_NELEM (tuple);
+  nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (tuple));
   elems = PVM_VAL_TUP (tuple)->elems;
 
   end = nelem - 1;
@@ -401,8 +404,8 @@ pvm_print_val (FILE *out, pvm_val val)
     {
       size_t nelem, idx;
       
-      nelem = PVM_VAL_ARR_NELEM (val);
-      
+      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
+
       fprintf (out, "[");
       for (idx = 0; idx < nelem; idx++)
         {
@@ -416,7 +419,7 @@ pvm_print_val (FILE *out, pvm_val val)
     {
       size_t nelem, idx;
 
-      nelem = PVM_VAL_TUP_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (val));
       fprintf (out, "{");
       for (idx = 0; idx < nelem; ++idx)
         {
@@ -459,7 +462,7 @@ pvm_print_val (FILE *out, pvm_val val)
           break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val));
-          fprintf (out, "[]");
+          fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
         case PVM_TYPE_TUPLE:
           {
@@ -523,12 +526,13 @@ pvm_typeof (pvm_val val)
   else if (PVM_IS_STR (val))
     type = pvm_make_string_type ();
   else if (PVM_IS_ARR (val))
-    type = pvm_make_array_type (PVM_VAL_ARR_TYPE (val));
+    type = pvm_make_array_type (PVM_VAL_ARR_NELEM (val),
+                                PVM_VAL_ARR_TYPE (val));
   else if (PVM_IS_TUP (val))
     {
       size_t i;
       pvm_val *enames = NULL, *etypes = NULL;
-      pvm_val nelem = pvm_make_ulong (PVM_VAL_TUP_NELEM (val));
+      pvm_val nelem = PVM_VAL_TUP_NELEM (val);
 
       if (PVM_VAL_ULONG (nelem) > 0)
         {

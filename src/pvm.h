@@ -156,13 +156,13 @@ pvm_val pvm_make_string (const char *value);
 struct pvm_array
 {
   pvm_val type;
-  size_t nelem;
+  pvm_val nelem;
   pvm_val *elems;
 };
 
 typedef struct pvm_array *pvm_array;
 
-pvm_val pvm_make_array (pvm_val type, size_t nelem);
+pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 
 /* Tuples are also boxed.  */
 
@@ -172,7 +172,7 @@ pvm_val pvm_make_array (pvm_val type, size_t nelem);
 
 struct pvm_tuple
 {
-  size_t nelem;
+  pvm_val nelem;
   struct pvm_tuple_elem *elems;
 };
 
@@ -187,7 +187,7 @@ struct pvm_tuple_elem
 
 typedef struct pvm_tuple *pvm_tuple;
 
-pvm_val pvm_make_tuple (size_t nelems);
+pvm_val pvm_make_tuple (pvm_val nelem);
 void pvm_reverse_tuple (pvm_val tuple);
 pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 
@@ -198,6 +198,7 @@ pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 #define PVM_VAL_TYP_CODE(V) (PVM_VAL_TYP((V))->code)
 #define PVM_VAL_TYP_I_SIZE(V) (PVM_VAL_TYP((V))->val.integral.size)
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
+#define PVM_VAL_TYP_A_NELEM(V) (PVM_VAL_TYP((V))->val.array.nelem)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
 #define PVM_VAL_TYP_T_NELEM(V) (PVM_VAL_TYP((V))->val.tuple.nelem)
 #define PVM_VAL_TYP_T_ENAMES(V) (PVM_VAL_TYP((V))->val.tuple.enames)
@@ -228,6 +229,7 @@ struct pvm_type
 
     struct
     {
+      pvm_val nelem;
       pvm_val etype;
     } array;
 
@@ -245,7 +247,7 @@ typedef struct pvm_type *pvm_type;
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_map_type (void);
-pvm_val pvm_make_array_type (pvm_val type);
+pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
 pvm_val pvm_make_tuple_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 
 void pvm_allocate_tuple_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
