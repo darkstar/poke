@@ -286,12 +286,12 @@ pkl_ast_make_integral_type (int signed_p, size_t size)
 }
 
 pkl_ast_node
-pkl_ast_make_array_type (size_t nelem, pkl_ast_node etype)
+pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype)
 {
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_ARRAY;
-  PKL_AST_TYPE_A_NELEM (type) = nelem;
+  PKL_AST_TYPE_A_NELEM (type) = ASTREF (nelem);
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
   return type;
 }
@@ -548,19 +548,6 @@ pkl_ast_make_loop (pkl_ast_node pre, pkl_ast_node cond, pkl_ast_node post,
   return loop;
 }
 
-/* Build and return an AST node for a cast.  */
-
-pkl_ast_node
-pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
-{
-  pkl_ast_node cast = pkl_ast_make_node (PKL_AST_CAST);
-
-  PKL_AST_TYPE (cast) = ASTREF (type);
-  PKL_AST_CAST_EXP (cast) = ASTREF (exp);
-
-  return cast;
-}
-
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
@@ -791,11 +778,6 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
       break;
 
-    case PKL_AST_CAST:
-
-      pkl_ast_node_free (PKL_AST_CAST_EXP (ast));
-      break;
-      
     case PKL_AST_STRING:
 
       free (PKL_AST_STRING_POINTER (ast));
@@ -1254,9 +1236,9 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 #undef PKL_DEF_OP
 
         IPRINTF ("EXPRESSION::\n");
+        PRINT_AST_SUBAST (type, TYPE);
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
-        PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
         IPRINTF ("operands:\n");
         for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); i++)
@@ -1402,7 +1384,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           PRINT_AST_IMM (size, TYPE_I_SIZE, "%lu");
           break;
         case PKL_TYPE_ARRAY:
-          PRINT_AST_IMM (nelem, TYPE_A_NELEM, "%lu");
+          PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
           PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
           break;
         case PKL_TYPE_TUPLE:
@@ -1454,13 +1436,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (tuple, TUPLE_REF_TUPLE);
       PRINT_AST_SUBAST (identifier, TUPLE_REF_IDENTIFIER);
-      break;
-
-    case PKL_AST_CAST:
-      IPRINTF ("CAST::\n");
-
-      PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_SUBAST (exp, CAST_EXP);
       break;
 
     default:

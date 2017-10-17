@@ -52,7 +52,6 @@ enum pkl_ast_code
   PKL_AST_IDENTIFIER,
   PKL_AST_DOC_STRING,
   PKL_AST_LOC,
-  PKL_AST_CAST,
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_ELEM,
   PKL_AST_ARRAY_REF,
@@ -87,7 +86,7 @@ enum pkl_ast_op
    In both endiannesses the bits inside the bytes are ordered from
    most significative to least significative.
 
-   The function `pkl_ast-default_endian' returns the endianness used
+   The function `pkl_ast_default_endian' returns the endianness used
    in the system running poke.  */
 
 enum pkl_ast_endian
@@ -271,21 +270,6 @@ struct pkl_ast_doc_string
 
 pkl_ast_node pkl_ast_make_doc_string (const char *str,
                                       pkl_ast_node entity);
-
-/* PKL_AST_CAST nodes represent cast constructions, which are
-   applications of types to IO space.  XXX: explain.  */
-
-#define PKL_AST_CAST_EXP(AST) ((AST)->cast.exp)
-
-struct pkl_ast_cast
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *exp;
-};
-
-pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
-                                pkl_ast_node exp);
-
 
 /* PKL_AST_ARRAY nodes represent array literals.  Each array holds a
    sequence of elements, all of them having the same type.  There must
@@ -773,7 +757,7 @@ struct pkl_ast_type
 
     struct
     {
-      size_t nelem;
+      union pkl_ast_node *nelem;
       union pkl_ast_node *etype;
     } array;
 
@@ -791,7 +775,7 @@ struct pkl_ast_type
 
 pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
-pkl_ast_node pkl_ast_make_array_type (size_t nelem, pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_tuple_type (size_t nelem, pkl_ast_node elems);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
@@ -852,7 +836,6 @@ union pkl_ast_node
   struct pkl_ast_type type;
   struct pkl_ast_assertion assertion;
   struct pkl_ast_loc loc;
-  struct pkl_ast_cast cast;
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
   struct pkl_ast_array_ref aref;

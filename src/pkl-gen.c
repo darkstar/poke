@@ -296,6 +296,10 @@ pkl_gen_op_int (pkl_ast_node ast,
   return 1;
 }
 
+static int pkl_gen_exp (pkl_ast_node ast,
+                        pvm_program program,
+                        size_t *label);
+
 static int
 pkl_gen_type (pkl_ast_node ast,
               pvm_program program,
@@ -323,9 +327,9 @@ pkl_gen_type (pkl_ast_node ast,
                          program, label))
         return 0;
 
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_A_NELEM (ast)));
+      if (!pkl_gen_exp (PKL_AST_TYPE_A_NELEM (ast),
+                        program, label))
+        return 0;
       
       PVM_APPEND_INSTRUCTION (program, mktya);
     }
@@ -371,120 +375,15 @@ pkl_gen_type (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_exp (pkl_ast_node ast,
-             pvm_program program,
-             size_t *label)
-{
-  size_t i;
-        
-  /* Generate operators.  */
-  for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); ++i)
-    {
-      if (!pkl_gen_1 (PKL_AST_EXP_OPERAND (ast, i),
-                      program, label))
-        return 0;
-    }
-
-  switch (PKL_AST_EXP_CODE (ast))
-    {
-    case PKL_AST_OP_ADD:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_ADD);
-      break;
-    case PKL_AST_OP_SUB:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_SUB);
-      break;
-    case PKL_AST_OP_MUL:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_MUL);
-      break;
-    case PKL_AST_OP_DIV:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_DIV);
-      break;
-    case PKL_AST_OP_MOD:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_MOD);
-      break;
-    case PKL_AST_OP_NEG:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_NEG);
-      break;
-
-    case PKL_AST_OP_AND:
-      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_AND);
-      break;
-    case PKL_AST_OP_OR:
-      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_OR);
-      break;
-    case PKL_AST_OP_NOT:
-      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_NOT);
-      break;
-
-    case PKL_AST_OP_BAND:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_BAND);
-      break;
-    case PKL_AST_OP_IOR:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_IOR);
-      break;
-    case PKL_AST_OP_XOR:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_XOR);
-      break;
-    case PKL_AST_OP_BNOT:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_BNOT);
-      break;
-    case PKL_AST_OP_SL:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_SL);
-      break;
-    case PKL_AST_OP_SR:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_SR);
-      break;
-
-    case PKL_AST_OP_EQ:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_EQ);
-    case PKL_AST_OP_NE:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_NE);
-    case PKL_AST_OP_LT:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_LT);
-    case PKL_AST_OP_LE:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_LE);
-    case PKL_AST_OP_GT:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_GT);
-    case PKL_AST_OP_GE:
-      return pkl_gen_op (ast, program, label, PKL_AST_OP_GE);
-
-    case PKL_AST_OP_SIZEOF:
-      PVM_APPEND_INSTRUCTION (program, siz);
-      break;
-    case PKL_AST_OP_ELEMSOF:
-      PVM_APPEND_INSTRUCTION (program, sel);
-      break;
-    case PKL_AST_OP_TYPEOF:
-      PVM_APPEND_INSTRUCTION (program, typof);
-      break;
-
-    case PKL_AST_OP_MAP:
-      PVM_APPEND_INSTRUCTION (program, mkm);
-      break;
-
-    default:
-      fprintf (stderr, "gen: unhandled expression code %d\n",
-               PKL_AST_EXP_CODE (ast));
-      return 0;
-    }
-
-  return 1;
-}
-
-static int
-pkl_gen_cast (pkl_ast_node ast,
-              pvm_program program,
-              size_t *label)
+pkl_gen_exp_cast (pkl_ast_node ast,
+                  pvm_program program,
+                  size_t *label)
 {
   pkl_ast_node to_type;
   pkl_ast_node from_type;
 
-  pkl_gen_1 (PKL_AST_CAST_EXP (ast),
-             program,
-             label);
-  
   to_type = PKL_AST_TYPE (ast);
-  from_type = PKL_AST_TYPE (PKL_AST_CAST_EXP (ast));
+  from_type = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (ast, 0));
   
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
@@ -784,6 +683,111 @@ pkl_gen_cast (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_exp (pkl_ast_node ast,
+             pvm_program program,
+             size_t *label)
+{
+  size_t i;
+        
+  /* Generate operators.  */
+  for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); ++i)
+    {
+      if (!pkl_gen_1 (PKL_AST_EXP_OPERAND (ast, i),
+                      program, label))
+        return 0;
+    }
+
+  switch (PKL_AST_EXP_CODE (ast))
+    {
+    case PKL_AST_OP_ADD:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_ADD);
+      break;
+    case PKL_AST_OP_SUB:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_SUB);
+      break;
+    case PKL_AST_OP_MUL:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_MUL);
+      break;
+    case PKL_AST_OP_DIV:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_DIV);
+      break;
+    case PKL_AST_OP_MOD:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_MOD);
+      break;
+    case PKL_AST_OP_NEG:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_NEG);
+      break;
+
+    case PKL_AST_OP_AND:
+      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_AND);
+      break;
+    case PKL_AST_OP_OR:
+      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_OR);
+      break;
+    case PKL_AST_OP_NOT:
+      return pkl_gen_op_int (ast, program, label, PKL_AST_OP_NOT);
+      break;
+
+    case PKL_AST_OP_BAND:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_BAND);
+      break;
+    case PKL_AST_OP_IOR:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_IOR);
+      break;
+    case PKL_AST_OP_XOR:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_XOR);
+      break;
+    case PKL_AST_OP_BNOT:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_BNOT);
+      break;
+    case PKL_AST_OP_SL:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_SL);
+      break;
+    case PKL_AST_OP_SR:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_SR);
+      break;
+
+    case PKL_AST_OP_EQ:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_EQ);
+    case PKL_AST_OP_NE:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_NE);
+    case PKL_AST_OP_LT:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_LT);
+    case PKL_AST_OP_LE:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_LE);
+    case PKL_AST_OP_GT:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_GT);
+    case PKL_AST_OP_GE:
+      return pkl_gen_op (ast, program, label, PKL_AST_OP_GE);
+
+    case PKL_AST_OP_SIZEOF:
+      PVM_APPEND_INSTRUCTION (program, siz);
+      break;
+    case PKL_AST_OP_ELEMSOF:
+      PVM_APPEND_INSTRUCTION (program, sel);
+      break;
+    case PKL_AST_OP_TYPEOF:
+      PVM_APPEND_INSTRUCTION (program, typof);
+      break;
+
+    case PKL_AST_OP_MAP:
+      PVM_APPEND_INSTRUCTION (program, mkm);
+      break;
+
+    case PKL_AST_OP_CAST:
+      return pkl_gen_exp_cast (ast, program, label);
+      break;
+
+    default:
+      fprintf (stderr, "gen: unhandled expression code %d\n",
+               PKL_AST_EXP_CODE (ast));
+      return 0;
+    }
+
+  return 1;
+}
+
+static int
 pkl_gen_array (pkl_ast_node ast,
                pvm_program program,
                size_t *label)
@@ -913,11 +917,6 @@ pkl_gen_1 (pkl_ast_node ast,
 
     case PKL_AST_EXP:
       if (!pkl_gen_exp (ast, program, label))
-        goto error;
-      break;
-
-    case PKL_AST_CAST:
-      if (!pkl_gen_cast (ast, program, label))
         goto error;
       break;
 

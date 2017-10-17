@@ -146,7 +146,8 @@ promote_to_integral (size_t size, int sign,
         {
           pkl_ast_node desired_type
             = pkl_ast_get_integral_type (ast, size, sign);
-          *a = pkl_ast_make_cast (desired_type, *a);
+          *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
+          PKL_AST_TYPE (*a) = ASTREF (desired_type);
         }
 
       return 1;
@@ -240,14 +241,16 @@ promote_operands_binary (pkl_ast ast,
     {
       pkl_ast_node t
         = pkl_ast_get_integral_type (ast, size_a, sign_a);
-      *a = pkl_ast_make_cast (t, *a);
+      *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
+      PKL_AST_TYPE (*a) = ASTREF (t);
     }
 
   if (to_promote_b != NULL)
     {
       pkl_ast_node t
         = pkl_ast_get_integral_type (ast, size_b, sign_b);
-      *b = pkl_ast_make_cast (t, *b);
+      *b = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *b);
+      PKL_AST_TYPE (*b) = ASTREF (t);
     }
 
   return 1;
@@ -386,7 +389,7 @@ check_array (struct pkl_parser *parser,
              pkl_ast_node *type,
              size_t *nelem)
 {
-  pkl_ast_node t;
+  pkl_ast_node t, array_nelem;
   size_t index;
 
   *type = NULL;
@@ -430,7 +433,10 @@ check_array (struct pkl_parser *parser,
     }
 
   /* Finally, set the type of the array itself.  */
-  *type = pkl_ast_make_array_type (*nelem, *type);
+  array_nelem = pkl_ast_make_integer (*nelem);
+  PKL_AST_TYPE (array_nelem) = pkl_ast_get_integral_type (parser->ast,
+                                                          64, 0);
+  *type = pkl_ast_make_array_type (array_nelem, *type);
 
   return 1;
 }
@@ -595,12 +601,12 @@ expression:
                                      "expected type in cast.");
                       YYERROR;
                     }
-                  $$ = pkl_ast_make_cast ($2, $4);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
         | tuple_type_specifier expression %prec UNARY
         	{
-                  $$ = pkl_ast_make_cast ($1, $2);
+                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $2);
                   PKL_AST_TYPE ($$) = ASTREF ($1);
                 }
         | TYPEOF expression %prec UNARY
@@ -1142,10 +1148,15 @@ typedef_specifier:
 
 type_specifier:
 	  TYPENAME
-        | type_specifier '[' INTEGER ']'
+        | type_specifier '[' expression ']'
           	{
-                  $$ = pkl_ast_make_array_type (PKL_AST_INTEGER_VALUE ($3),
-                                                $1);
+                  if (!promote_to_ulong (pkl_parser->ast, &$3))
+                    {
+                      pkl_tab_error (&@3, pkl_parser,
+                                     "invalid size in array type literal.");
+                      YYERROR;
+                    }
+                  $$ = pkl_ast_make_array_type ($3, $1);
                 }
         | tuple_type_specifier
         ;
