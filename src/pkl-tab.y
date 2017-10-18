@@ -1094,10 +1094,10 @@ array_elem:
                   /* Note how array elems do not have a type.  See
                      `check_array' above.  */
                 }
-        | '.' '[' INTEGER ']' '=' expression
+        | '[' INTEGER ']' '=' expression
         	{
-                  $$ = pkl_ast_make_array_elem (PKL_AST_INTEGER_VALUE ($3),
-                                                $6);
+                  $$ = pkl_ast_make_array_elem (PKL_AST_INTEGER_VALUE ($2),
+                                                $5);
                   /* Note how array elems do not have a type.  See
                      `check_array' above.  */
                 }
