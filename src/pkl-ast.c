@@ -420,11 +420,23 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
         return 0;
       break;
     case PKL_TYPE_ARRAY:
-      if (PKL_AST_TYPE_A_NELEM (a) != PKL_AST_TYPE_A_NELEM (b)
-          || !pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
-                                  PKL_AST_TYPE_A_ETYPE (b)))
-        return 0;
-      break;
+      {
+        pkl_ast_node a_nelem = PKL_AST_TYPE_A_NELEM (a);
+        pkl_ast_node b_nelem = PKL_AST_TYPE_A_NELEM (b);
+
+        /* Incomplete array types (i.e. array types with no known size
+           at compile time can't be equal.  */
+        if (PKL_AST_CODE (a_nelem) != PKL_AST_INTEGER
+            || PKL_AST_CODE (b_nelem) != PKL_AST_INTEGER)
+          return 0;
+        
+        if ((PKL_AST_INTEGER_VALUE (a_nelem)
+             != PKL_AST_INTEGER_VALUE (b_nelem))
+            || !pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
+                                    PKL_AST_TYPE_A_ETYPE (b)))
+          return 0;
+        break;
+      }
     case PKL_TYPE_TUPLE:
       if (PKL_AST_TYPE_T_NELEM (a) != PKL_AST_TYPE_T_NELEM (b))
         return 0;

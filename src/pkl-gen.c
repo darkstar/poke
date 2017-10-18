@@ -323,13 +323,29 @@ pkl_gen_type (pkl_ast_node ast,
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
     {
+      pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (ast);
+      
       if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (ast),
                          program, label))
         return 0;
 
-      if (!pkl_gen_exp (PKL_AST_TYPE_A_NELEM (ast),
-                        program, label))
-        return 0;
+      /* The number of elements of the array type can be either an
+         INTEGER or an EXPRESSION.  */
+      switch (PKL_AST_CODE (nelem))
+        {
+        case PKL_AST_INTEGER:
+          if (!pkl_gen_integer (nelem, program, label))
+            return 0;
+          break;
+        case PKL_AST_EXP:
+          if (!pkl_gen_exp (PKL_AST_TYPE_A_NELEM (ast),
+                            program, label))
+            return 0;
+          break;
+        default:
+          assert (0);
+          break;
+        }
       
       PVM_APPEND_INSTRUCTION (program, mktya);
     }
