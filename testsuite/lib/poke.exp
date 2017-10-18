@@ -1,0 +1,82 @@
+# poke.exp - Utilities to be used in poke tests.
+
+# Copyright (c) 2017 Jose E. Marchesi
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Generic poke subroutines.
+
+if {$tool == ""} {
+    send_error "`site.exp' not found, run `make site.exp'!\n"
+}
+
+# Load other libraries here:
+load_lib standard.exp
+load_lib dejagnu.exp
+
+# POKE is the tool to test.  This can be set by the user on the
+# command line:
+# $ make check RUNTESTFLAGS=POKE=poke
+
+global POKE
+if ![info exists POKE] {
+    set POKE ${objdir}/../src/poke
+}
+
+# poke_run -- run poke with the given options and return its output.
+
+proc poke_run {options} {
+
+
+    return $output
+}
+
+# poke_test OPTIONS PATTERN [MESSAGE] -- run GNU poke with the given
+# options, and try to match its standard output with the given regexp.
+# If it does not match then the test is failed and a proper diagnostic
+# message is printed to the standard output.
+#
+# Returns:
+#    1 if the test failed,
+#    0 if the test passes,
+#   -1 if there was an internal error.
+
+proc poke_test {args} {
+    global POKE
+    global test
+
+    # Get the arguments.  MESSAGE is optional.  If it is not specified
+    # then we use the options as the message.
+    if [llength $args]>2 then {
+	set message [lindex $args 2]
+    } else {
+	set message "poke [lindex $args 0]"
+    }
+    set options [lindex $args 0]
+    set pattern [lindex $args 1]
+
+    # Run poke with the given options and test the result.
+    eval spawn $POKE $options
+    expect {
+        -re "^$pattern\(\r?\n\)?$" {
+            pass $message
+        } 
+        default {
+            fail $message
+        }
+    }
+    catch close
+
+    return 0
+}
