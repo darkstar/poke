@@ -42,47 +42,6 @@ pvm_shutdown (void)
   pvm_finalize ();
 }
 
-void
-pvm_val_free (pvm_val val)
-{
-  switch (PVM_VAL_TAG (val))
-    {
-    case PVM_VAL_TAG_BOX:
-      {
-        pvm_val_box box = PVM_VAL_BOX (val);
-
-        switch (PVM_VAL_BOX_TAG (box))
-        {
-        case PVM_VAL_TAG_STR:
-          free (PVM_VAL_BOX_STR (box));
-          break;
-        case PVM_VAL_TAG_ARR:
-          free (PVM_VAL_BOX_ARR (box));
-          break;
-        case PVM_VAL_TAG_TUP:
-          free (PVM_VAL_BOX_TUP (box));
-          break;
-        case PVM_VAL_TAG_LONG:
-        case PVM_VAL_TAG_ULONG:
-        default:
-          break;
-        }
-
-        free (box);
-      }
-      break;
-
-    case PVM_VAL_TAG_BYTE:
-    case PVM_VAL_TAG_UBYTE:
-    case PVM_VAL_TAG_HALF:
-    case PVM_VAL_TAG_UHALF:
-    case PVM_VAL_TAG_INT:
-    case PVM_VAL_TAG_UINT:
-    default:
-      break;
-    }
-}
-
 enum pvm_exit_code
 pvm_run (pvm_program prog, pvm_val *res)
 {

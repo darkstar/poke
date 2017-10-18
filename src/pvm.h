@@ -277,11 +277,6 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
 #define PVM_NULL (0x7UL << 61)
 
-/* Clients must call `pvm_val_free' in a PVM value when it stops
-   working with it.  */
-
-void pvm_val_free (pvm_val val);
-
 /* Public interface.  */
 
 #define PVM_IS_BYTE(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_BYTE)
