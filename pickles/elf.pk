@@ -31,51 +31,53 @@
 
 /* First of all, define some types.  */
 
-typedef uint32 elf_word;
-typedef int32 elf_sword;
-typedef uint16 elf_half;
+type elf_word = uint32;
+type elf_sword = int32;
+type elf_half = uint16;
 
-typedef uint32 elf32_addr;
-typedef uint32 elf32_off;
-typedef uint32 elf32_sword;
+type elf32_addr = uint32;
+type elf32_off = uint32;
+type elf32_sword = uint32;
 
-typedef uint64 elf64_addr;
-typedef uint64 elf64_off;
-typedef uint64 elf64_xword;
-typedef int32 elf64_sword;
-typedef int64 elf64_sxword;
+type elf64_addr = uint64;
+type elf64_off = uint64;
+type elf64_xword = uint64;
+type elf64_sword = int32;
+type elf64_sxword = int64;
 
-bitmask elf_word elf_e_flags (enum elf_e_machine mach)
-{
-  if (mach == EM_SPARC
-      || mach == EM_SPARCV9
-      || mach == EM_SPARC32PLUS)
+type elf_e_flags =
+  bitmask elf_word (enum elf_e_machine mach)
+  {
+    if (mach == EM_SPARC
+        || mach == EM_SPARCV9
+        || mach == EM_SPARC32PLUS)
+      {
+        EF_SPARC_TSO = 0,
+        EF_SPARCV9_PSO = 1,
+        EF_SPARCV9_RMO = 2,
+        EF_SPARCV9_MM = 3,
+        EF_SPARC_LEDATA = 0x80_0000
+          <doc="Little-endian data.">,
+        EF_SPARC_EX_MASK = 0xff_ff00
+          <doc="Generic V8+ features.">,
+        EF_SPARC_32PLUS = 0x00_0100
+          <doc="Generic V8+ features.">,
+        EF_SPARC_SUN_US1 = 0x00_0200
+          <doc="Sun UltraSPARC1 extensions.">,
+        EF_SPARC_HAL_R1 = 0x00_0400
+          <doc="HAL R1 extensions.">,
+        EF_SPARC_SUN_US3 = 0x00_0800
+          <doc="Sun UltraSPARCIII extensions.">
+      }
+  };
+
+type elf_ei_class
+  = enum byte
     {
-      EF_SPARC_TSO = 0,
-      EF_SPARCV9_PSO = 1,
-      EF_SPARCV9_RMO = 2,
-      EF_SPARCV9_MM = 3,
-      EF_SPARC_LEDATA = 0x80_0000
-        <doc="Little-endian data.">,
-      EF_SPARC_EX_MASK = 0xff_ff00
-        <doc="Generic V8+ features.">,
-      EF_SPARC_32PLUS = 0x00_0100
-        <doc="Generic V8+ features.">,
-      EF_SPARC_SUN_US1 = 0x00_0200
-        <doc="Sun UltraSPARC1 extensions.">,
-      EF_SPARC_HAL_R1 = 0x00_0400
-        <doc="HAL R1 extensions.">,
-      EF_SPARC_SUN_US3 = 0x00_0800
-        <doc="Sun UltraSPARCIII extensions.">
-    }
-};
-
-enum byte elf_ei_class
-{
-  ELFCLASSNONE = 0x0 <doc="Invalid class.">,
-  ELFCLASS32 = 0x1 <doc="32-bit object.">,
-  ELFCLASS64 = 0x2 <doc="64-bit object.">
-};
+      ELFCLASSNONE = 0x0 <doc="Invalid class.">,
+      ELFCLASS32 = 0x1 <doc="32-bit object.">,
+      ELFCLASS64 = 0x2 <doc="64-bit object.">
+    };
 
 enum byte elf_ei_data
 {
@@ -1124,8 +1126,8 @@ enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
   DT_HIPROC = 0x7fff_ffff
 };
 
-struct elf_rel (enum elf_e_machine mach,
-                enum elf_ei_class class)
+struct elf_rel (elf_e_machine mach,
+                elf_ei_class class)
   <doc="ELF relocation.">
 {
   let r_offset_doc = "Relocation offset.";
@@ -1153,8 +1155,8 @@ struct elf_rel (enum elf_e_machine mach,
   assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
 };
 
-struct elf_rela (enum elf_e_machine mach,
-                 enum elf_ei_class class)
+struct elf_rela (elf_e_machine mach,
+                 elf_ei_class class)
   <doc="ELF relocation with addend.">
 {
   let r_offset_doc = "Relocation offset.";
@@ -1189,11 +1191,11 @@ struct elf_rela (enum elf_e_machine mach,
 struct elf_ident
   <doc="ELF identification.">
 {
-  byte ei_mag[4];
+  byte[4] ei_mag;
 
   assert (ei_mag == {0x7f, 'E', 'L', 'F'});
 
-  enum elf_ei_class ei_class <doc="File class.">;
+  elf_ei_class ei_class : 8 <doc="File class.">;
   byte ei_data <doc="Data encoding.">;
   byte ei_version <doc="File version.">;
   byte ei_osabi <doc="Operating system/ABI identification.">;

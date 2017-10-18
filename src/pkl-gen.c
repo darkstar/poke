@@ -53,9 +53,9 @@ pkl_gen_integer (pkl_ast_node ast,
     {
     case 64:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
-      else
         val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
+      else
+        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
       break;
 
     case 32:
