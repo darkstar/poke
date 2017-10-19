@@ -10,7 +10,7 @@ struct packet
 }
 
 let packet p;  /* { 0UB, 0UL, [] } */
-let p = packet {1, 2, [1,2,3]};
+let p = (packet) {1, 2, [1,2,3]};
 let p = packet @ .; /* At current IO offset */
 packet p; /* At current IO offset */
 let p = packet @ 0x0;  /* At IO offset 0x0 */
