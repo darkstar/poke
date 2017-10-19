@@ -444,8 +444,6 @@ pvm_print_val (FILE *out, pvm_val val)
                   fprintf (out, " %s", PVM_VAL_STR (ename));
                 fprintf (out, ";");
               }
-            if (nelem == 1)
-              fprintf (out, ",");
             fprintf (out, "}");
           break;
           }

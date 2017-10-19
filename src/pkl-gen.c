@@ -300,6 +300,99 @@ static int pkl_gen_exp (pkl_ast_node ast,
                         pvm_program program,
                         size_t *label);
 
+static int pkl_gen_type (pkl_ast_node ast,
+                         pvm_program program,
+                         size_t *label);
+
+static int
+pkl_gen_type_struct (pkl_ast_node ast,
+                     pvm_program program,
+                     size_t *label)
+{
+  pkl_ast_node t;
+  
+  /* Basic case: all the struct elements are completely defined at
+     compilation time.  This means:
+
+     - All the struct elements are field definitions.  No
+       statements, no declarations.
+
+     - The struct type has no arguments.
+
+     - There are no array sizes depending on other fields.  */
+
+  if (1)
+    {
+      for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
+        {
+          pkl_ast_node struct_type_elem_name
+            = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+          pkl_ast_node struct_type_elem_type
+            = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
+          char *ename
+            = (struct_type_elem_name
+               ? PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name)
+               : NULL);
+          
+          /* Push the struct element name.  */
+          PVM_APPEND_INSTRUCTION (program, push);         
+          if (ename == NULL)
+            pvm_append_val_parameter (program, PVM_NULL);
+          else
+            pvm_append_val_parameter (program,
+                                      pvm_make_string (ename));
+          
+          /* Push the struct element type.  */
+          if (!pkl_gen_type (struct_type_elem_type, program, label))
+            return 0;
+        }
+      
+      PVM_APPEND_INSTRUCTION (program, push);
+      pvm_append_val_parameter (program,
+                                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
+      
+      PVM_APPEND_INSTRUCTION (program, mktysct);
+    }
+  else
+    {
+      assert (0);
+      
+      /* Complex case: this must create a _program_ containing three
+         functions setting things up, creating a struct type and
+         returning it.
+         
+         The struct functions are invoked by:
+         
+         - Initialized to zero:
+           let packet p;
+         
+         - Casts to structs:
+           (packet) {1,2,3}
+           (struct { int i; long j;}) {10}
+ 
+         - Mappings:
+           packet @ 0x0
+
+         So we need several functions defined here:
+            - A function that creates the struct type from 0.
+            - A function that creates the struct type from
+              another struct value.
+            - A function that creates the struct type from
+              an IO space.
+      */
+
+      /* XXX: BA to skip the function definition.  */
+      /* XXX: label and function prologue  */
+      /* XXX: begin lexical scope.  */
+      
+      /* XXX: end lexical scope.  */
+      /* XXX: function epilogue.  */
+      /* XXX: label after function.  */
+    }
+
+  return 1;
+}
+
 static int
 pkl_gen_type (pkl_ast_node ast,
               pvm_program program,
@@ -350,70 +443,7 @@ pkl_gen_type (pkl_ast_node ast,
       PVM_APPEND_INSTRUCTION (program, mktya);
     }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRUCT)
-    {
-      pkl_ast_node t;
-
-      /* XXX: this must create a _program_ similar to a function that
-         sets things up and calls mktys and returns it.
-
-         The struct functions are invoked by:
-
-         - Initialized to zero:
-             let packet p;
-
-         - Casts to structs:
-             (packet) {1,2,3}
-             (struct { int i; long j;}) {10}
- 
-         - Mappings:
-             packet @ 0x0
-
-         So we need several functions defined here:
-         - A function that creates the struct type from 0.
-         - A function that creates the struct type from
-           a struct value.
-         - A function that creates teh struct type from
-           an IO space.
-       */
-
-      /* XXX: BA to skip the function definition.  */
-      /* XXX: label and function prologue  */
-      /* XXX: begin lexical scope.  */
-      
-      for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
-        {
-          pkl_ast_node struct_type_elem_name
-            = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
-          pkl_ast_node struct_type_elem_type
-            = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
-          char *ename
-            = (struct_type_elem_name
-               ? PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name)
-               : NULL);
-
-          /* Push the struct element name.  */
-          PVM_APPEND_INSTRUCTION (program, push);         
-          if (ename == NULL)
-            pvm_append_val_parameter (program, PVM_NULL);
-          else
-            pvm_append_val_parameter (program,
-                                      pvm_make_string (ename));
-
-          /* Push the struct element type.  */
-          if (!pkl_gen_type (struct_type_elem_type, program, label))
-            return 0;
-        }
-
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
-
-      PVM_APPEND_INSTRUCTION (program, mktysct);
-
-      /* XXX: end lexical scope.  */
-      /* XXX: function epilogue.  */
-      /* XXX: label after function.  */
-    }
+    return pkl_gen_type_struct (ast, program, label);
   else
     assert (0);
     
