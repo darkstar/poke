@@ -382,7 +382,6 @@ pkl_gen_type (pkl_ast_node ast,
                                 pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
 
       PVM_APPEND_INSTRUCTION (program, mktyt);
-      /* XXX: we need to reverse the struct type!  */
     }
   else
     assert (0);

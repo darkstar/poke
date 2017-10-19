@@ -1122,33 +1122,32 @@ type_specifier:
 
 
 struct_type_specifier:
-	  '(' struct_elem_type ',' ')'
+	  STRUCT '{' '}'
           	{
-                  $$ = pkl_ast_make_struct_type (1, $2);
+                  $$ = pkl_ast_make_struct_type (0, NULL);
                 }
-        | '(' struct_elem_type ',' struct_elem_type_list ')'
+        | STRUCT '{' struct_elem_type_list '}'
         	{
                   size_t nelem;
-                  pkl_ast_node elem_list = pkl_ast_chainon ($4, $2);
-                  if (!check_struct_type (pkl_parser, &@2,
-                                          elem_list, &nelem))
+                  if (!check_struct_type (pkl_parser, &@3,
+                                          $3, &nelem))
                     YYERROR;
-                  $$ = pkl_ast_make_struct_type (nelem, $4);
+                  $$ = pkl_ast_make_struct_type (nelem, $3);
                 }
         ;
 
 struct_elem_type_list:
 	  struct_elem_type
-        | struct_elem_type_list ',' struct_elem_type
-        	{ $$ = pkl_ast_chainon ($3, $1); }
+        | struct_elem_type_list struct_elem_type
+        	{ $$ = pkl_ast_chainon ($2, $1); }
         ;
 
 struct_elem_type:
-	  type_specifier IDENTIFIER
+	  type_specifier IDENTIFIER ';'
           	{
                   $$ = pkl_ast_make_struct_type_elem ($2, $1);
                 }
-        | type_specifier
+        | type_specifier ';'
         	{
                   $$ = pkl_ast_make_struct_type_elem (NULL, $1);
                 }

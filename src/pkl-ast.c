@@ -279,7 +279,8 @@ pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRUCT;
   PKL_AST_TYPE_S_NELEM (type) = nelem;
-  PKL_AST_TYPE_S_ELEMS (type) = ASTREF (struct_type_elems);
+  if (struct_type_elems)
+    PKL_AST_TYPE_S_ELEMS (type) = ASTREF (struct_type_elems);
   
   return type;
 }

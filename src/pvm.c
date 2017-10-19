@@ -430,22 +430,20 @@ pvm_print_val (FILE *out, pvm_val val)
 
             nelem = PVM_VAL_ULONG (PVM_VAL_TYP_T_NELEM (val));
 
-            fprintf (out, "(");
+            fprintf (out, "struct {");
             for (i = 0; i < nelem; ++i)
               {
                 pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
                 pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
                 
-                if (i != 0)
-                  fprintf (out, ",");
-
                 pvm_print_val (out, etype);
                 if (ename != PVM_NULL)
                   fprintf (out, " %s", PVM_VAL_STR (ename));
+                fprintf (out, ";");
               }
             if (nelem == 1)
               fprintf (out, ",");
-            fprintf (out, ")");
+            fprintf (out, "}");
           break;
           }
         default:
