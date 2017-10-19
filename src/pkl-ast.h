@@ -44,12 +44,12 @@ enum pkl_ast_code
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_ELEM,
   PKL_AST_ARRAY_REF,
-  PKL_AST_TUPLE,
-  PKL_AST_TUPLE_ELEM,
-  PKL_AST_TUPLE_REF,
+  PKL_AST_STRUCT,
+  PKL_AST_STRUCT_ELEM,
+  PKL_AST_STRUCT_REF,
   /* Types.  */
   PKL_AST_TYPE,
-  PKL_AST_TUPLE_TYPE_ELEM,
+  PKL_AST_STRUCT_TYPE_ELEM,
   /* Declarations.  */
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
@@ -116,7 +116,7 @@ enum pkl_ast_type_code
   PKL_TYPE_INTEGRAL = PKL_TYPE_LAST_INTEGRAL,
   PKL_TYPE_STRING,
   PKL_TYPE_ARRAY,
-  PKL_TYPE_TUPLE,
+  PKL_TYPE_STRUCT,
   PKL_TYPE_NOTYPE,
 };
 
@@ -291,12 +291,12 @@ pkl_ast_node pkl_ast_make_array_elem (size_t index,
                                       pkl_ast_node exp);
 
 
-/* PKL_AST_TUPLE nodes represent tuples.  */
+/* PKL_AST_STRUCT nodes represent struct literals.  */
 
-#define PKL_AST_TUPLE_NELEM(AST) ((AST)->tuple.nelem)
-#define PKL_AST_TUPLE_ELEMS(AST) ((AST)->tuple.elems)
+#define PKL_AST_STRUCT_NELEM(AST) ((AST)->sct.nelem)
+#define PKL_AST_STRUCT_ELEMS(AST) ((AST)->sct.elems)
 
-struct pkl_ast_tuple
+struct pkl_ast_struct
 {
   struct pkl_ast_common common;
 
@@ -304,15 +304,16 @@ struct pkl_ast_tuple
   union pkl_ast_node *elems;
 };
 
-pkl_ast_node pkl_ast_make_tuple (size_t nelem,
-                                 pkl_ast_node elems);
+pkl_ast_node pkl_ast_make_struct (size_t nelem,
+                                  pkl_ast_node elems);
 
-/* PKL_AST_TUPLE_ELEM nodes represent elements in tuples.  */
+/* PKL_AST_STRUCT_ELEM nodes represent elements in struct
+   literals.  */
 
-#define PKL_AST_TUPLE_ELEM_NAME(AST) ((AST)->tuple_elem.name)
-#define PKL_AST_TUPLE_ELEM_EXP(AST) ((AST)->tuple_elem.exp)
+#define PKL_AST_STRUCT_ELEM_NAME(AST) ((AST)->sct_elem.name)
+#define PKL_AST_STRUCT_ELEM_EXP(AST) ((AST)->sct_elem.exp)
 
-struct pkl_ast_tuple_elem
+struct pkl_ast_struct_elem
 {
   struct pkl_ast_common common;
 
@@ -320,8 +321,8 @@ struct pkl_ast_tuple_elem
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_tuple_elem (pkl_ast_node name,
-                                      pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_struct_elem (pkl_ast_node name,
+                                       pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.
@@ -515,35 +516,35 @@ struct pkl_ast_array_ref
 pkl_ast_node pkl_ast_make_array_ref (pkl_ast_node array,
                                      pkl_ast_node index);
 
-/* PKL_AST_TUPLE_REF nodes represent references to a tuple
+/* PKL_AST_STRUCT_REF nodes represent references to a struct
    element.  */
 
-#define PKL_AST_TUPLE_REF_TUPLE(AST) ((AST)->tref.tuple)
-#define PKL_AST_TUPLE_REF_IDENTIFIER(AST) ((AST)->tref.identifier)
+#define PKL_AST_STRUCT_REF_STRUCT(AST) ((AST)->sref.sct)
+#define PKL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST)->sref.identifier)
 
-struct pkl_ast_tuple_ref
+struct pkl_ast_struct_ref
 {
   struct pkl_ast_common common;
 
-  union pkl_ast_node *tuple;
+  union pkl_ast_node *sct;
   union pkl_ast_node *identifier;
 };
 
-pkl_ast_node pkl_ast_make_tuple_ref (pkl_ast_node tuple,
-                                     pkl_ast_node identifier);
+pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node sct,
+                                      pkl_ast_node identifier);
 
-/* PKL_AST_TUPLE_TYPE_ELEM nodes represent the element part of a tuple
-   type.
+/* PKL_AST_STRUCT_TYPE_ELEM nodes represent the element part of a
+   struct type.
 
-   NAME is a PKL_AST_IDENTIFIER node, or NULL if the tuple type
+   NAME is a PKL_AST_IDENTIFIER node, or NULL if the struct type
    element has no name.
 
    TYPE is a PKL_AST_TYPE node.  */
 
-#define PKL_AST_TUPLE_TYPE_ELEM_NAME(AST) ((AST)->tuple_type_elem.name)
-#define PKL_AST_TUPLE_TYPE_ELEM_TYPE(AST) ((AST)->tuple_type_elem.type)
+#define PKL_AST_STRUCT_TYPE_ELEM_NAME(AST) ((AST)->sct_type_elem.name)
+#define PKL_AST_STRUCT_TYPE_ELEM_TYPE(AST) ((AST)->sct_type_elem.type)
 
-struct pkl_ast_tuple_type_elem
+struct pkl_ast_struct_type_elem
 {
   struct pkl_ast_common common;
 
@@ -551,8 +552,8 @@ struct pkl_ast_tuple_type_elem
   union pkl_ast_node *type;
 };
 
-pkl_ast_node pkl_ast_make_tuple_type_elem (pkl_ast_node name,
-                                           pkl_ast_node type);
+pkl_ast_node pkl_ast_make_struct_type_elem (pkl_ast_node name,
+                                            pkl_ast_node type);
 
 /* PKL_AST_TYPE nodes represent field types.
    
@@ -569,8 +570,8 @@ pkl_ast_node pkl_ast_make_tuple_type_elem (pkl_ast_node name,
 
    In array types, ETYPE is a PKL_AST_TYPE node.
 
-   In tuple types, NELEM is the number of elements in the tuple type.
-   ELEMS is a chain of PKL_AST_TUPLE_TYPE_ELEM nodes.  */
+   In struct types, NELEM is the number of elements in the struct type.
+   ELEMS is a chain of PKL_AST_STRUCT_TYPE_ELEM nodes.  */
 
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
@@ -579,8 +580,8 @@ pkl_ast_node pkl_ast_make_tuple_type_elem (pkl_ast_node name,
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_NELEM(AST) ((AST)->type.val.array.nelem)
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
-#define PKL_AST_TYPE_T_NELEM(AST) ((AST)->type.val.tuple.nelem)
-#define PKL_AST_TYPE_T_ELEMS(AST) ((AST)->type.val.tuple.elems)
+#define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
+#define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
 
 struct pkl_ast_type
 {
@@ -608,7 +609,7 @@ struct pkl_ast_type
     {
       size_t nelem;
       union pkl_ast_node *elems;
-    } tuple;
+    } sct;
   } val;
 
   /* XXX */  
@@ -619,7 +620,7 @@ struct pkl_ast_type
 pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
-pkl_ast_node pkl_ast_make_tuple_type (size_t nelem, pkl_ast_node elems);
+pkl_ast_node pkl_ast_make_struct_type (size_t nelem, pkl_ast_node elems);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 
@@ -677,10 +678,10 @@ union pkl_ast_node
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
   struct pkl_ast_array_ref aref;
-  struct pkl_ast_tuple tuple;
-  struct pkl_ast_tuple_elem tuple_elem;
-  struct pkl_ast_tuple_ref tref;
-  struct pkl_ast_tuple_type_elem tuple_type_elem;
+  struct pkl_ast_struct sct;
+  struct pkl_ast_struct_elem sct_elem;
+  struct pkl_ast_struct_ref sref;
+  struct pkl_ast_struct_type_elem sct_type_elem;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

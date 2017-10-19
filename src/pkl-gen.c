@@ -261,7 +261,7 @@ pkl_gen_op (pkl_ast_node ast,
       }
     case PKL_TYPE_ARRAY:
       /* Fallthrough.  */
-    case PKL_TYPE_TUPLE:
+    case PKL_TYPE_STRUCT:
       /* Fallthrough.  */
       break;
     default:
@@ -349,22 +349,22 @@ pkl_gen_type (pkl_ast_node ast,
       
       PVM_APPEND_INSTRUCTION (program, mktya);
     }
-  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_TUPLE)
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_STRUCT)
     {
       pkl_ast_node t;
 
-      for (t = PKL_AST_TYPE_T_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
+      for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
         {
-          pkl_ast_node tuple_type_elem_name
-            = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
-          pkl_ast_node tuple_type_elem_type
-            = PKL_AST_TUPLE_TYPE_ELEM_TYPE (t);
+          pkl_ast_node struct_type_elem_name
+            = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+          pkl_ast_node struct_type_elem_type
+            = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
           char *ename
-            = (tuple_type_elem_name
-               ? PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name)
+            = (struct_type_elem_name
+               ? PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name)
                : NULL);
 
-          /* Push the tuple element name.  */
+          /* Push the struct element name.  */
           PVM_APPEND_INSTRUCTION (program, push);         
           if (ename == NULL)
             pvm_append_val_parameter (program, PVM_NULL);
@@ -372,17 +372,17 @@ pkl_gen_type (pkl_ast_node ast,
             pvm_append_val_parameter (program,
                                       pvm_make_string (ename));
 
-          /* Push the tuple element type.  */
-          if (!pkl_gen_type (tuple_type_elem_type, program, label))
+          /* Push the struct element type.  */
+          if (!pkl_gen_type (struct_type_elem_type, program, label))
             return 0;
         }
 
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_T_NELEM (ast)));
+                                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
 
       PVM_APPEND_INSTRUCTION (program, mktyt);
-      /* XXX: we need to reverse the tuple type!  */
+      /* XXX: we need to reverse the struct type!  */
     }
   else
     assert (0);
@@ -691,7 +691,7 @@ pkl_gen_exp_cast (pkl_ast_node ast,
         }
     }
   else
-    /* XXX: handle casts to tuples and arrays.  For tuples, reorder
+    /* XXX: handle casts to structs and arrays.  For structs, reorder
        fields.  */
     assert (0);
 
@@ -855,32 +855,32 @@ pkl_gen_array_ref (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_tuple (pkl_ast_node ast,
-               pvm_program program,
-               size_t *label)
+pkl_gen_struct (pkl_ast_node ast,
+                pvm_program program,
+                size_t *label)
 {
   pkl_ast_node e;
 
-  for (e = PKL_AST_TUPLE_ELEMS (ast);
+  for (e = PKL_AST_STRUCT_ELEMS (ast);
        e;
        e = PKL_AST_CHAIN (e))
     {
       pvm_val name;
 
-      if (PKL_AST_TUPLE_ELEM_NAME (e) == NULL)
+      if (PKL_AST_STRUCT_ELEM_NAME (e) == NULL)
         name = PVM_NULL;
       else
         name
-          = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_ELEM_NAME (e)));
+          = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_NAME (e)));
       
       PVM_APPEND_INSTRUCTION (program, push);
       pvm_append_val_parameter (program, name);
-      pkl_gen_1 (PKL_AST_TUPLE_ELEM_EXP (e), program, label);
+      pkl_gen_1 (PKL_AST_STRUCT_ELEM_EXP (e), program, label);
     }
 
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program,
-                            pvm_make_ulong (PKL_AST_TUPLE_NELEM (ast)));
+                            pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
 
   PVM_APPEND_INSTRUCTION (program, mkt);
   PVM_APPEND_INSTRUCTION (program, revt);
@@ -888,14 +888,14 @@ pkl_gen_tuple (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_tuple_ref (pkl_ast_node ast,
-                   pvm_program program,
-                   size_t *label)
+pkl_gen_struct_ref (pkl_ast_node ast,
+                    pvm_program program,
+                    size_t *label)
 {
   char *name
-    = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_REF_IDENTIFIER (ast));
+    = PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
   
-  pkl_gen_1 (PKL_AST_TUPLE_REF_TUPLE (ast), program, label);
+  pkl_gen_1 (PKL_AST_STRUCT_REF_STRUCT (ast), program, label);
 
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program, pvm_make_string (name));
@@ -946,13 +946,13 @@ pkl_gen_1 (pkl_ast_node ast,
         goto error;
       break;
 
-    case PKL_AST_TUPLE_REF:
-      if (!pkl_gen_tuple_ref (ast, program, label))
+    case PKL_AST_STRUCT_REF:
+      if (!pkl_gen_struct_ref (ast, program, label))
         goto error;
       break;
 
-    case PKL_AST_TUPLE:
-      if (!pkl_gen_tuple (ast, program, label))
+    case PKL_AST_STRUCT:
+      if (!pkl_gen_struct (ast, program, label))
         goto error;
       break;
 

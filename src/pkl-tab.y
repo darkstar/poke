@@ -175,7 +175,7 @@ promote_operands_binary (pkl_ast ast,
                          pkl_ast_node *b,
                          int allow_strings,
                          int allow_arrays,
-                         int allow_tuples)
+                         int allow_structs)
 {
   pkl_ast_node *to_promote_a = NULL;
   pkl_ast_node *to_promote_b = NULL;
@@ -187,14 +187,14 @@ promote_operands_binary (pkl_ast ast,
   int sign_b;
 
   /* Both arguments should be either integrals, strings, arrays or
-     tuples.  */
+     structs.  */
 
   if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
     return 0;
 
   if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
       || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
-      || (!allow_tuples && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_TUPLE))
+      || (!allow_structs && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRUCT))
     return 0;
 
 
@@ -257,33 +257,33 @@ promote_operands_binary (pkl_ast ast,
 }
 
 static int
-check_tuple (struct pkl_parser *parser,
-             YYLTYPE *llocp,
-             pkl_ast_node elems,
-             size_t *nelem,
-             pkl_ast_node *type)
+check_struct (struct pkl_parser *parser,
+              YYLTYPE *llocp,
+              pkl_ast_node elems,
+              size_t *nelem,
+              pkl_ast_node *type)
 {
   pkl_ast_node t, u;
-  pkl_ast_node tuple_type_elems;
+  pkl_ast_node struct_type_elems;
 
-  tuple_type_elems = NULL;
+  struct_type_elems = NULL;
   *nelem = 0;
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node name;
-      pkl_ast_node tuple_type_elem;
+      pkl_ast_node struct_type_elem;
       pkl_ast_node ename;
       pkl_ast_node type;
 
-      /* Add the name for this tuple element.  */
-      name = PKL_AST_TUPLE_ELEM_NAME (t);
+      /* Add the name for this struct element.  */
+      name = PKL_AST_STRUCT_ELEM_NAME (t);
       if (name)
         {
           assert (PKL_AST_CODE (name) == PKL_AST_IDENTIFIER);
           for (u = elems; u != t; u = PKL_AST_CHAIN (u))
             {
               pkl_ast_node uname
-                = PKL_AST_TUPLE_ELEM_NAME (u);
+                = PKL_AST_STRUCT_ELEM_NAME (u);
 
               if (uname == NULL)
                 continue;
@@ -292,7 +292,7 @@ check_tuple (struct pkl_parser *parser,
                           PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
                 {
                   pkl_tab_error (llocp, parser,
-                                 "duplicated element name in tuple.");
+                                 "duplicated element name in struct.");
                   return 0;
                 }
             }
@@ -302,35 +302,36 @@ check_tuple (struct pkl_parser *parser,
       else
         ename = pkl_ast_make_identifier ("");
 
-      type = PKL_AST_TYPE (PKL_AST_TUPLE_ELEM_EXP (t));
+      type = PKL_AST_TYPE (PKL_AST_STRUCT_ELEM_EXP (t));
 
-      tuple_type_elem = pkl_ast_make_tuple_type_elem (ename, pkl_ast_dup_type (type));
-      tuple_type_elems = pkl_ast_chainon (tuple_type_elems,
-                                          tuple_type_elem);
+      struct_type_elem = pkl_ast_make_struct_type_elem (ename,
+                                                        pkl_ast_dup_type (type));
+      struct_type_elems = pkl_ast_chainon (struct_type_elems,
+                                           struct_type_elem);
       *nelem += 1;
     }
 
-  /* Now build the type for the tuple.  */
-  *type = pkl_ast_make_tuple_type (*nelem, tuple_type_elems);
+  /* Now build the type for the struct.  */
+  *type = pkl_ast_make_struct_type (*nelem, struct_type_elems);
 
   return 1;
 }
 
 static int
-check_tuple_type (struct pkl_parser *parser,
-                  YYLTYPE *llocp,
-                  pkl_ast_node tuple_type_elems,
-                  size_t *nelem)
+check_struct_type (struct pkl_parser *parser,
+                   YYLTYPE *llocp,
+                   pkl_ast_node struct_type_elems,
+                   size_t *nelem)
 {
   pkl_ast_node t, u;
 
   *nelem = 0;
-  for (t = tuple_type_elems; t; t = PKL_AST_CHAIN (t))
+  for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
     {
-      for (u = tuple_type_elems; u != t; u = PKL_AST_CHAIN (u))
+      for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node tname = PKL_AST_TUPLE_TYPE_ELEM_NAME (u);
-          pkl_ast_node uname = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
+          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_ELEM_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
 
           if (uname
               && tname
@@ -338,7 +339,7 @@ check_tuple_type (struct pkl_parser *parser,
                          PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
             {
               pkl_tab_error (llocp, parser,
-                             "duplicated element name in tuple type spec.");
+                             "duplicated element name in struct type spec.");
               return 0;
             }
         }
@@ -350,23 +351,23 @@ check_tuple_type (struct pkl_parser *parser,
 }
 
 static int
-check_tuple_ref (struct pkl_parser *parser,
-                 YYLTYPE *llocp,
-                 pkl_ast_node ttype,
-                 pkl_ast_node identifier,
-                 pkl_ast_node *type)
+check_struct_ref (struct pkl_parser *parser,
+                  YYLTYPE *llocp,
+                  pkl_ast_node stype,
+                  pkl_ast_node identifier,
+                  pkl_ast_node *type)
 {
   pkl_ast_node e;
 
-  assert (PKL_AST_TYPE_CODE (ttype) == PKL_TYPE_TUPLE);
+  assert (PKL_AST_TYPE_CODE (stype) == PKL_TYPE_STRUCT);
 
   *type = NULL;
-  for (e = PKL_AST_TYPE_T_ELEMS (ttype); e; e = PKL_AST_CHAIN (e))
+  for (e = PKL_AST_TYPE_S_ELEMS (stype); e; e = PKL_AST_CHAIN (e))
     {
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (e)),
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (e)),
                   PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
         {
-          *type = PKL_AST_TUPLE_TYPE_ELEM_TYPE (e);
+          *type = PKL_AST_STRUCT_TYPE_ELEM_TYPE (e);
           break;
         }
     }
@@ -374,7 +375,7 @@ check_tuple_ref (struct pkl_parser *parser,
   if (*type == NULL)
     {
       pkl_tab_error (llocp, parser,
-                     "invalid tuple member");
+                     "invalid struct member");
       return 0;
     }
   
@@ -514,9 +515,9 @@ check_array (struct pkl_parser *parser,
 %type <ast> program program_elem_list program_elem
 %type <ast> expression primary
 %type <ast> array_elem_list array_elem
-%type <ast> tuple_elem_list tuple_elem
+%type <ast> struct_elem_list struct_elem
 %type <ast> type_specifier
-%type <ast> tuple_type_specifier tuple_elem_type_list tuple_elem_type
+%type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 
 %start program
 
@@ -604,7 +605,7 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
-        | tuple_type_specifier expression %prec UNARY
+        | struct_type_specifier expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $2);
                   PKL_AST_TYPE ($$) = ASTREF ($1);
@@ -656,7 +657,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to '+'.");
@@ -672,7 +673,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to '-'.");
@@ -688,7 +689,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to '*'.");
@@ -704,7 +705,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to '/'.");
@@ -720,7 +721,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to '%'.");
@@ -736,7 +737,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to <<");
@@ -752,7 +753,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to >>");
@@ -768,7 +769,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to ==");
@@ -784,7 +785,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to !=");
@@ -800,7 +801,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to <");
@@ -816,7 +817,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to >");
@@ -832,7 +833,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to <=");
@@ -848,7 +849,7 @@ expression:
                                                 &$1, &$3,
                                                 1 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to >=");
@@ -864,7 +865,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to |");
@@ -880,7 +881,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to ^");
@@ -896,7 +897,7 @@ expression:
                                                 &$1, &$3,
                                                 0 /* allow_strings */,
                                                 0 /* allow_arrays */,
-                                                0 /* allow_tuples */))
+                                                0 /* allow_structs */))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operators to &");
@@ -1021,59 +1022,59 @@ primary:
                   $$ = pkl_ast_make_array (nelem, $2);
                   PKL_AST_TYPE ($$) = ASTREF (type);
                 }
-	| '{' tuple_elem_list '}'
+	| '{' struct_elem_list '}'
         	{
                   size_t nelem;
                   pkl_ast_node type;
 
-                  if (!check_tuple (pkl_parser,
-                                    &@2, $2,
-                                    &nelem, &type))
+                  if (!check_struct (pkl_parser,
+                                     &@2, $2,
+                                     &nelem, &type))
                     YYERROR;
 
-                  $$ = pkl_ast_make_tuple (nelem, $2);
+                  $$ = pkl_ast_make_struct (nelem, $2);
                   PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         | primary '.' IDENTIFIER
         	{
                   pkl_ast_node type;
                   
-                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1)) != PKL_TYPE_TUPLE)
+                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1)) != PKL_TYPE_STRUCT)
                     {
                       pkl_tab_error (&@1, pkl_parser,
-                                     "operator to . must be a tuple.");
+                                     "operator to . must be a struct.");
                       YYERROR;
                     }
 
-                  if (!check_tuple_ref (pkl_parser, &@3,
-                                        PKL_AST_TYPE ($1), $3,
-                                        &type))
+                  if (!check_struct_ref (pkl_parser, &@3,
+                                         PKL_AST_TYPE ($1), $3,
+                                         &type))
                       YYERROR;
                   
-                  $$ = pkl_ast_make_tuple_ref ($1, $3);
+                  $$ = pkl_ast_make_struct_ref ($1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (type);
                 }
 	;
 
-tuple_elem_list:
+struct_elem_list:
 	  %empty
 		{ $$ = NULL; }
-        | tuple_elem
-        | tuple_elem_list ',' tuple_elem
+        | struct_elem
+        | struct_elem_list ',' struct_elem
 		{                  
                   $$ = pkl_ast_chainon ($1, $3);
                 }
         ;
 
-tuple_elem:
+struct_elem:
 	  expression
           	{
-                  $$ = pkl_ast_make_tuple_elem (NULL, $1);
+                  $$ = pkl_ast_make_struct_elem (NULL, $1);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | '.' IDENTIFIER '=' expression
 	        {
-                  $$ = pkl_ast_make_tuple_elem ($2, $4);
+                  $$ = pkl_ast_make_struct_elem ($2, $4);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($4));
                 }
         ;
@@ -1116,40 +1117,40 @@ type_specifier:
                     }
                   $$ = pkl_ast_make_array_type ($3, $1);
                 }
-        | tuple_type_specifier
+        | struct_type_specifier
         ;
 
 
-tuple_type_specifier:
-	  '(' tuple_elem_type ',' ')'
+struct_type_specifier:
+	  '(' struct_elem_type ',' ')'
           	{
-                  $$ = pkl_ast_make_tuple_type (1, $2);
+                  $$ = pkl_ast_make_struct_type (1, $2);
                 }
-        | '(' tuple_elem_type ',' tuple_elem_type_list ')'
+        | '(' struct_elem_type ',' struct_elem_type_list ')'
         	{
                   size_t nelem;
                   pkl_ast_node elem_list = pkl_ast_chainon ($4, $2);
-                  if (!check_tuple_type (pkl_parser, &@2,
-                                         elem_list, &nelem))
+                  if (!check_struct_type (pkl_parser, &@2,
+                                          elem_list, &nelem))
                     YYERROR;
-                  $$ = pkl_ast_make_tuple_type (nelem, $4);
+                  $$ = pkl_ast_make_struct_type (nelem, $4);
                 }
         ;
 
-tuple_elem_type_list:
-	  tuple_elem_type
-        | tuple_elem_type_list ',' tuple_elem_type
+struct_elem_type_list:
+	  struct_elem_type
+        | struct_elem_type_list ',' struct_elem_type
         	{ $$ = pkl_ast_chainon ($3, $1); }
         ;
 
-tuple_elem_type:
+struct_elem_type:
 	  type_specifier IDENTIFIER
           	{
-                  $$ = pkl_ast_make_tuple_type_elem ($2, $1);
+                  $$ = pkl_ast_make_struct_type_elem ($2, $1);
                 }
         | type_specifier
         	{
-                  $$ = pkl_ast_make_tuple_type_elem (NULL, $1);
+                  $$ = pkl_ast_make_struct_type_elem (NULL, $1);
                 }
         ;
 

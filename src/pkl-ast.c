@@ -213,19 +213,19 @@ pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
   return aref;
 }
 
-/* Build and return an AST node for a tuple reference.  */
+/* Build and return an AST node for a struct reference.  */
 
 pkl_ast_node
-pkl_ast_make_tuple_ref (pkl_ast_node tuple, pkl_ast_node identifier)
+pkl_ast_make_struct_ref (pkl_ast_node sct, pkl_ast_node identifier)
 {
-  pkl_ast_node tref = pkl_ast_make_node (PKL_AST_TUPLE_REF);
+  pkl_ast_node sref = pkl_ast_make_node (PKL_AST_STRUCT_REF);
 
-  assert (tuple && identifier);
+  assert (sct && identifier);
 
-  PKL_AST_TUPLE_REF_TUPLE (tref) = ASTREF (tuple);
-  PKL_AST_TUPLE_REF_IDENTIFIER (tref) = ASTREF (identifier);
+  PKL_AST_STRUCT_REF_STRUCT (sref) = ASTREF (sct);
+  PKL_AST_STRUCT_REF_IDENTIFIER (sref) = ASTREF (identifier);
   
-  return tref;
+  return sref;
 }
 
 /* Build and return type AST nodes.  */
@@ -273,13 +273,13 @@ pkl_ast_make_string_type (void)
 }
 
 pkl_ast_node
-pkl_ast_make_tuple_type (size_t nelem, pkl_ast_node tuple_type_elems)
+pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
 {
   pkl_ast_node type = pkl_ast_make_type ();
 
-  PKL_AST_TYPE_CODE (type) = PKL_TYPE_TUPLE;
-  PKL_AST_TYPE_T_NELEM (type) = nelem;
-  PKL_AST_TYPE_T_ELEMS (type) = ASTREF (tuple_type_elems);
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRUCT;
+  PKL_AST_TYPE_S_NELEM (type) = nelem;
+  PKL_AST_TYPE_S_ELEMS (type) = ASTREF (struct_type_elems);
   
   return type;
 }
@@ -299,18 +299,18 @@ pkl_ast_make_metatype (pkl_ast_node type)
 }
 
 pkl_ast_node
-pkl_ast_make_tuple_type_elem (pkl_ast_node name,
-                              pkl_ast_node type)
+pkl_ast_make_struct_type_elem (pkl_ast_node name,
+                               pkl_ast_node type)
 {
-  pkl_ast_node tuple_type_elem
-    = pkl_ast_make_node (PKL_AST_TUPLE_TYPE_ELEM);
+  pkl_ast_node struct_type_elem
+    = pkl_ast_make_node (PKL_AST_STRUCT_TYPE_ELEM);
 
-  PKL_AST_TUPLE_TYPE_ELEM_NAME (tuple_type_elem)
+  PKL_AST_STRUCT_TYPE_ELEM_NAME (struct_type_elem)
     = ASTREF (name);
-  PKL_AST_TUPLE_TYPE_ELEM_TYPE (tuple_type_elem)
+  PKL_AST_STRUCT_TYPE_ELEM_TYPE (struct_type_elem)
     = ASTREF (type);
 
-  return tuple_type_elem;
+  return struct_type_elem;
 }
 
 /* Allocate and return a duplicated type AST node.  */
@@ -337,26 +337,26 @@ pkl_ast_dup_type (pkl_ast_node type)
         PKL_AST_TYPE_A_ETYPE (new) = ASTREF (etype);
       }
       break;
-    case PKL_TYPE_TUPLE:
-      PKL_AST_TYPE_T_NELEM (new) = PKL_AST_TYPE_T_NELEM (type);
-      for (t = PKL_AST_TYPE_T_ELEMS (type); t; t = PKL_AST_CHAIN (t))
+    case PKL_TYPE_STRUCT:
+      PKL_AST_TYPE_S_NELEM (new) = PKL_AST_TYPE_S_NELEM (type);
+      for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
         {
-          pkl_ast_node tuple_type_elem_name
-            = PKL_AST_TUPLE_TYPE_ELEM_NAME (t);
-          pkl_ast_node tuple_type_elem_type
-            = PKL_AST_TUPLE_TYPE_ELEM_TYPE (t);
-          pkl_ast_node new_tuple_type_elem_name
-            = (tuple_type_elem_name
-               ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (tuple_type_elem_name))
+          pkl_ast_node struct_type_elem_name
+            = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+          pkl_ast_node struct_type_elem_type
+            = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
+          pkl_ast_node new_struct_type_elem_name
+            = (struct_type_elem_name
+               ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
                : NULL);
-          pkl_ast_node tuple_type_elem
-            = pkl_ast_make_tuple_type_elem (new_tuple_type_elem_name,
-                                            pkl_ast_dup_type (tuple_type_elem_type));
+          pkl_ast_node struct_type_elem
+            = pkl_ast_make_struct_type_elem (new_struct_type_elem_name,
+                                             pkl_ast_dup_type (struct_type_elem_type));
 
-          PKL_AST_TYPE_T_ELEMS (new)
-            = pkl_ast_chainon (PKL_AST_TYPE_T_ELEMS (new),
-                               tuple_type_elem);
-          PKL_AST_TYPE_T_ELEMS (new) = ASTREF (PKL_AST_TYPE_T_ELEMS (new));
+          PKL_AST_TYPE_S_ELEMS (new)
+            = pkl_ast_chainon (PKL_AST_TYPE_S_ELEMS (new),
+                               struct_type_elem);
+          PKL_AST_TYPE_S_ELEMS (new) = ASTREF (PKL_AST_TYPE_S_ELEMS (new));
         }
       break;
     case PKL_TYPE_STRING:
@@ -374,8 +374,6 @@ pkl_ast_dup_type (pkl_ast_node type)
 int
 pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 {
-  pkl_ast_node ta, tb;
-  
   if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b))
     return 0;
 
@@ -404,20 +402,24 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
           return 0;
         break;
       }
-    case PKL_TYPE_TUPLE:
-      if (PKL_AST_TYPE_T_NELEM (a) != PKL_AST_TYPE_T_NELEM (b))
-        return 0;
-      for (ta = PKL_AST_TYPE_T_ELEMS (a), tb = PKL_AST_TYPE_T_ELEMS (b);
-           ta && tb;
-           ta = PKL_AST_CHAIN (ta), tb = PKL_AST_CHAIN (tb))
-        {
-          if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (ta)),
-                      PKL_AST_IDENTIFIER_POINTER (PKL_AST_TUPLE_TYPE_ELEM_NAME (tb)))
-              || !pkl_ast_type_equal (PKL_AST_TUPLE_TYPE_ELEM_TYPE (ta),
-                                      PKL_AST_TUPLE_TYPE_ELEM_TYPE (tb)))
-            return 0;
-        }
-      break;
+    case PKL_TYPE_STRUCT:
+      {
+        pkl_ast_node sa, sb;
+  
+        if (PKL_AST_TYPE_S_NELEM (a) != PKL_AST_TYPE_S_NELEM (b))
+          return 0;
+        for (sa = PKL_AST_TYPE_S_ELEMS (a), sb = PKL_AST_TYPE_S_ELEMS (b);
+             sa && sb;
+             sa = PKL_AST_CHAIN (sa), sb = PKL_AST_CHAIN (sb))
+          {
+            if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (sa)),
+                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (sb)))
+                || !pkl_ast_type_equal (PKL_AST_STRUCT_TYPE_ELEM_TYPE (sa),
+                                        PKL_AST_STRUCT_TYPE_ELEM_TYPE (sb)))
+              return 0;
+          }
+        break;
+      }
     case PKL_TYPE_STRING:
       /* Fallthrough.  */
     default:
@@ -500,31 +502,31 @@ pkl_ast_make_array_elem (size_t index, pkl_ast_node exp)
   return elem;
 }
 
-/* Build and return an AST node for a tuple.  */
+/* Build and return an AST node for a struct.  */
 
 pkl_ast_node
-pkl_ast_make_tuple (size_t nelem,
-                    pkl_ast_node elems)
+pkl_ast_make_struct (size_t nelem,
+                     pkl_ast_node elems)
 {
-  pkl_ast_node tuple = pkl_ast_make_node (PKL_AST_TUPLE);
+  pkl_ast_node sct = pkl_ast_make_node (PKL_AST_STRUCT);
 
-  PKL_AST_TUPLE_NELEM (tuple) = nelem;
-  PKL_AST_TUPLE_ELEMS (tuple) = ASTREF (elems);
+  PKL_AST_STRUCT_NELEM (sct) = nelem;
+  PKL_AST_STRUCT_ELEMS (sct) = ASTREF (elems);
 
-  return tuple;
+  return sct;
 }
 
-/* Build and return an AST node for a tuple element.  */
+/* Build and return an AST node for a struct element.  */
 
 pkl_ast_node
-pkl_ast_make_tuple_elem (pkl_ast_node name,
-                         pkl_ast_node exp)
+pkl_ast_make_struct_elem (pkl_ast_node name,
+                          pkl_ast_node exp)
 {
-  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_TUPLE_ELEM);
+  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_STRUCT_ELEM);
 
   if (name != NULL)
-    PKL_AST_TUPLE_ELEM_NAME (elem) = ASTREF (name);
-  PKL_AST_TUPLE_ELEM_EXP (elem) = ASTREF (exp);
+    PKL_AST_STRUCT_ELEM_NAME (elem) = ASTREF (name);
+  PKL_AST_STRUCT_ELEM_EXP (elem) = ASTREF (exp);
 
   return elem;
 }
@@ -643,8 +645,8 @@ pkl_ast_node_free (pkl_ast_node ast)
         case PKL_TYPE_ARRAY:
           pkl_ast_node_free (PKL_AST_TYPE_A_ETYPE (ast));
           break;
-        case PKL_TYPE_TUPLE:
-          for (t = PKL_AST_TYPE_T_ELEMS (ast); t; t = n)
+        case PKL_TYPE_STRUCT:
+          for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = n)
             {
               n = PKL_AST_CHAIN (t);
               pkl_ast_node_free (t);
@@ -658,10 +660,10 @@ pkl_ast_node_free (pkl_ast_node ast)
       
       break;
 
-    case PKL_AST_TUPLE_TYPE_ELEM:
+    case PKL_AST_STRUCT_TYPE_ELEM:
 
-      pkl_ast_node_free (PKL_AST_TUPLE_TYPE_ELEM_NAME (ast));
-      pkl_ast_node_free (PKL_AST_TUPLE_TYPE_ELEM_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_ELEM_NAME (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast));
       break;
       
     case PKL_AST_ARRAY_REF:
@@ -680,21 +682,21 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_IDENTIFIER_POINTER (ast));
       break;
       
-    case PKL_AST_TUPLE_REF:
+    case PKL_AST_STRUCT_REF:
 
-      pkl_ast_node_free (PKL_AST_TUPLE_REF_TUPLE (ast));
-      pkl_ast_node_free (PKL_AST_TUPLE_REF_IDENTIFIER (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_REF_STRUCT (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
       break;
       
-    case PKL_AST_TUPLE_ELEM:
+    case PKL_AST_STRUCT_ELEM:
 
-      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_NAME (ast));
-      pkl_ast_node_free (PKL_AST_TUPLE_ELEM_EXP (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_NAME (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_EXP (ast));
       break;
 
-    case PKL_AST_TUPLE:
+    case PKL_AST_STRUCT:
 
-      for (t = PKL_AST_TUPLE_ELEMS (ast); t; t = n)
+      for (t = PKL_AST_STRUCT_ELEMS (ast); t; t = n)
         {
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
@@ -1119,21 +1121,21 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_OPT_SUBAST (elseexp, COND_EXP_ELSEEXP);
       break;
 
-    case PKL_AST_TUPLE_ELEM:
-      IPRINTF ("TUPLE_ELEM::\n");
+    case PKL_AST_STRUCT_ELEM:
+      IPRINTF ("STRUCT_ELEM::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_SUBAST (name, TUPLE_ELEM_NAME);
-      PRINT_AST_SUBAST (exp, TUPLE_ELEM_EXP);
+      PRINT_AST_SUBAST (name, STRUCT_ELEM_NAME);
+      PRINT_AST_SUBAST (exp, STRUCT_ELEM_EXP);
       break;
 
-    case PKL_AST_TUPLE:
-      IPRINTF ("TUPLE::\n");
+    case PKL_AST_STRUCT:
+      IPRINTF ("STRUCT::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_IMM (nelem, TUPLE_NELEM, "%lu");
+      PRINT_AST_IMM (nelem, STRUCT_NELEM, "%lu");
       IPRINTF ("elems:\n");
-      PRINT_AST_SUBAST_CHAIN (TUPLE_ELEMS);
+      PRINT_AST_SUBAST_CHAIN (STRUCT_ELEMS);
       break;
       
     case PKL_AST_ARRAY_ELEM:
@@ -1197,7 +1199,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         case PKL_TYPE_INTEGRAL: IPRINTF ("  integral\n"); break;
         case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
         case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
-        case PKL_TYPE_TUPLE: IPRINTF ("  tuple\n"); break;
+        case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
         default:
           IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
           break;
@@ -1213,9 +1215,9 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
           PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
           break;
-        case PKL_TYPE_TUPLE:
-          PRINT_AST_IMM (nelem, TYPE_T_NELEM, "%lu");
-          PRINT_AST_SUBAST_CHAIN (TYPE_T_ELEMS);
+        case PKL_TYPE_STRUCT:
+          PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%lu");
+          PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
           break;
         case PKL_TYPE_STRING:
           /* Fallthrough.  */
@@ -1224,11 +1226,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         }
       break;
 
-    case PKL_AST_TUPLE_TYPE_ELEM:
-      IPRINTF ("TUPLE_TYPE_ELEM::\n");
+    case PKL_AST_STRUCT_TYPE_ELEM:
+      IPRINTF ("STRUCT_TYPE_ELEM::\n");
       
-      PRINT_AST_SUBAST (name, TUPLE_TYPE_ELEM_NAME);
-      PRINT_AST_SUBAST (type, TUPLE_TYPE_ELEM_TYPE);
+      PRINT_AST_SUBAST (name, STRUCT_TYPE_ELEM_NAME);
+      PRINT_AST_SUBAST (type, STRUCT_TYPE_ELEM_TYPE);
       break;
       
     case PKL_AST_ASSERTION:
@@ -1249,12 +1251,12 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
       break;
 
-    case PKL_AST_TUPLE_REF:
-      IPRINTF ("TUPLE_REF::\n");
+    case PKL_AST_STRUCT_REF:
+      IPRINTF ("STRUCT_REF::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_SUBAST (tuple, TUPLE_REF_TUPLE);
-      PRINT_AST_SUBAST (identifier, TUPLE_REF_IDENTIFIER);
+      PRINT_AST_SUBAST (struct, STRUCT_REF_STRUCT);
+      PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
       break;
 
     default:
