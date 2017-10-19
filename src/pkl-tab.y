@@ -518,6 +518,7 @@ check_array (struct pkl_parser *parser,
 %type <ast> struct_elem_list struct_elem
 %type <ast> type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
+%type <ast> stmt_list stmt pushlevel compstmt
 
 %start program
 
@@ -1149,6 +1150,42 @@ struct_elem_type:
                 }
         ;
 
+/*
+ * Statements.
+ */
+
+stmt_list:
+	  stmt
+        | stmt_list stmt
+          	{ $$ = pkl_ast_chainon ($1, $2); }
+	;
+
+stmt:
+	  compstmt
+        | IDENTIFIER '=' expression ';'
+          	{ $$ = pkl_ast_make_assign ($1, $3); }
+        ;
+
+pushlevel:
+	  %empty
+		{
+                  push_level ();
+                  $$ = pkl_parser->current_block;
+                  pkl_parser->current_block = pkl_ast_make_let ($$);
+                }
+	;
+
+compstmt:
+	  '{' '}'
+          	{ $$ = pkl_ast_make_compound (NULL); }
+        | '{' pushlevel stmt_list '}'
+        	{
+                  $$ = finish_compound_stmt (pkl_parser->current_block,
+                                             /* stmt_list */ $3,
+                                             /* outer_block */ $2);
+                }
+        ;
+          
 /*
  * Declarations.
  */

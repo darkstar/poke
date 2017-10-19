@@ -53,11 +53,8 @@ enum pkl_ast_code
   /* Declarations.  */
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
-  PKL_AST_LOC,
   /* Statements.  */
-  PKL_AST_COND,
-  PKL_AST_LOOP,
-  PKL_AST_ASSERTION,
+  PKL_AST_LET,
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -425,76 +422,20 @@ struct pkl_ast_enum
 pkl_ast_node pkl_ast_make_enum (pkl_ast_node tag,
                                 pkl_ast_node values);
 
-/* PKL_AST_COND nodes represent conditionals.
+/* PKL_AST_LET nodes represent { } blocks that may contain
+   declarations.
 
-   A conditional allows to conditionally define memory layouts, in a
-   very similar way the if-then-else statements determine the control
-   flow in conventional programming languages.
+   BODY is a list of statements (*_STMT nodes) and declarations
+   (*_DECL nodes).
 
-   EXP must point to an expression whose result is interpreted as a
-   boolean in a C-style, 0 meaning false and any other value meaning
-   true.
+   SUPERCONTEXT points to the containing declaration scope.  */
 
-   THENPART must point to a PKL_AST_MEM node, which is the memory
-   layout that gets defined should EXP evaluate to true.
-
-   ELSEPART optionally points to a PKL_AST_MEM node, which is the
-   memory layout that gets defined should EXP evaluate to false.  */
-
-#define PKL_AST_COND_EXP(AST) ((AST)->cond.exp)
-#define PKL_AST_COND_THENPART(AST) ((AST)->cond.thenpart)
-#define PKL_AST_COND_ELSEPART(AST) ((AST)->cond.elsepart)
-
-struct pkl_ast_cond
+struct pkl_ast_let
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *exp;
-  union pkl_ast_node *thenpart;
-  union pkl_ast_node *elsepart;
-};
-
-pkl_ast_node pkl_ast_make_cond (pkl_ast_node exp,
-                                pkl_ast_node thenpart,
-                                pkl_ast_node elsepart);
-
-/* PKL_AST_LOOP nodes represent loops.
-
-   A loop allows to define multiple memory layouts, in a very similar
-   way iterative statements work in conventional programming
-   languages.
-
-   PRE optionally points to an expression which is evaluated before
-   entering the loop.
-
-   COND optionally points to a condition that determines whether the
-   loop is entered initially, and afer each iteration.
-
-   BODY must point to a PKL_AST_MEM node, which is the memory layout
-   that is defined in each loop iteration.
-   
-   POST optionally points to an expression which is evaluated after
-   defining the memory layout in each iteration.
-
-   Note that if COND is not defined, the effect is an infinite loop.  */
-
-#define PKL_AST_LOOP_PRE(AST) ((AST)->loop.pre)
-#define PKL_AST_LOOP_COND(AST) ((AST)->loop.cond)
-#define PKL_AST_LOOP_POST(AST) ((AST)->loop.post)
-#define PKL_AST_LOOP_BODY(AST) ((AST)->loop.body)
-
-struct pkl_ast_loop
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *pre;
-  union pkl_ast_node *cond;
-  union pkl_ast_node *post;
   union pkl_ast_node *body;
+  union pkl_ast_node *supercontext;
 };
-
-pkl_ast_node pkl_ast_make_loop (pkl_ast_node pre,
-                                pkl_ast_node cond,
-                                pkl_ast_node post,
-                                pkl_ast_node body);
 
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
@@ -627,35 +568,6 @@ pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 
-/* PKL_AST_LOC nodes represent the current struct's location
-   counter.
-
-   This node can occur anywhere in an expression, inluding both sides
-   of assignment operators.  */
-
-struct pkl_ast_loc
-{
-  struct pkl_ast_common common;
-};
-
-pkl_ast_node pkl_ast_make_loc (void);
-
-/* PKL_AST_ASSERTION nodes represent checks that can occur anywhere
-   within a memory layout.
-
-   EXP must point to an expression.  If the expression evaluates to 1
-   a fatal error is raised at execution time.  */
-
-#define PKL_AST_ASSERTION_EXP(AST) ((AST)->assertion.exp)
-
-struct pkl_ast_assertion
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *exp;
-};
-
-pkl_ast_node pkl_ast_make_assertion (pkl_ast_node exp);
-
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -663,8 +575,6 @@ union pkl_ast_node
 {
   struct pkl_ast_common common; /* This field _must_ appear first.  */
   struct pkl_ast_program program;
-  struct pkl_ast_cond cond;
-  struct pkl_ast_loop loop;
   struct pkl_ast_identifier identifier;
   struct pkl_ast_integer integer;
   struct pkl_ast_string string;
@@ -673,8 +583,6 @@ union pkl_ast_node
   struct pkl_ast_enumerator enumerator;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_type type;
-  struct pkl_ast_assertion assertion;
-  struct pkl_ast_loc loc;
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
   struct pkl_ast_array_ref aref;
@@ -682,6 +590,7 @@ union pkl_ast_node
   struct pkl_ast_struct_elem sct_elem;
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_struct_type_elem sct_type_elem;
+  struct pkl_ast_let let;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

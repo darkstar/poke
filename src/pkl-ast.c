@@ -72,14 +72,6 @@ pkl_ast_chainon (pkl_ast_node ast1, pkl_ast_node ast2)
   return ast2;
 }
 
-/* Build and return an AST node for the location counter.  */
-
-pkl_ast_node
-pkl_ast_make_loc (void)
-{
-  return pkl_ast_make_node (PKL_AST_LOC);
-}
-
 /* Build and return an AST node for an integer constant.  */
 
 pkl_ast_node 
@@ -445,38 +437,6 @@ pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values)
   return enumeration;
 }
 
-/* Build and return an AST node for a struct conditional.  */
-
-pkl_ast_node
-pkl_ast_make_cond (pkl_ast_node exp, pkl_ast_node thenpart, pkl_ast_node elsepart)
-{
-  pkl_ast_node cond = pkl_ast_make_node (PKL_AST_COND);
-
-  assert (exp);
-
-  PKL_AST_COND_EXP (cond) = ASTREF (exp);
-  PKL_AST_COND_THENPART (cond) = ASTREF (thenpart);
-  PKL_AST_COND_ELSEPART (cond) = ASTREF (elsepart);
-
-  return cond;
-}
-
-/* Build and return an AST node for a struct loop.  */
-
-pkl_ast_node
-pkl_ast_make_loop (pkl_ast_node pre, pkl_ast_node cond, pkl_ast_node post,
-                   pkl_ast_node body)
-{
-  pkl_ast_node loop = pkl_ast_make_node (PKL_AST_LOOP);
-
-  PKL_AST_LOOP_PRE (loop) = ASTREF (pre);
-  PKL_AST_LOOP_COND (loop) = ASTREF (cond);
-  PKL_AST_LOOP_POST (loop) = ASTREF (post);
-  PKL_AST_LOOP_BODY (loop) = ASTREF (body);
-
-  return loop;
-}
-
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
@@ -530,17 +490,6 @@ pkl_ast_make_struct_elem (pkl_ast_node name,
   PKL_AST_STRUCT_ELEM_EXP (elem) = ASTREF (exp);
 
   return elem;
-}
-
-/* Build and return an AST node for an assert.  */
-
-pkl_ast_node
-pkl_ast_make_assertion (pkl_ast_node exp)
-{
-  pkl_ast_node assertion = pkl_ast_make_node (PKL_AST_ASSERTION);
-
-  PKL_AST_ASSERTION_EXP (assertion) = ASTREF (exp);
-  return assertion;
 }
 
 /* Build and return an AST node for a PKL program.  */
@@ -616,26 +565,6 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_ENUMERATOR_IDENTIFIER (ast));
       pkl_ast_node_free (PKL_AST_ENUMERATOR_VALUE (ast));
-      break;
-      
-    case PKL_AST_COND:
-
-      pkl_ast_node_free (PKL_AST_COND_EXP (ast));
-      pkl_ast_node_free (PKL_AST_COND_THENPART (ast));
-      pkl_ast_node_free (PKL_AST_COND_ELSEPART (ast));
-      break;
-      
-    case PKL_AST_LOOP:
-
-      pkl_ast_node_free (PKL_AST_LOOP_PRE (ast));
-      pkl_ast_node_free (PKL_AST_LOOP_COND (ast));
-      pkl_ast_node_free (PKL_AST_LOOP_POST (ast));
-      pkl_ast_node_free (PKL_AST_LOOP_BODY (ast));
-      break;
-      
-    case PKL_AST_ASSERTION:
-
-      pkl_ast_node_free (PKL_AST_ASSERTION_EXP (ast));
       break;
       
     case PKL_AST_TYPE:
@@ -721,7 +650,6 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_INTEGER:
       /* Fallthrough.  */
-    case PKL_AST_LOC:
       break;
       
     default:
@@ -1170,25 +1098,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST_CHAIN (ENUM_VALUES);
       break;
 
-    case PKL_AST_COND:
-      IPRINTF ("COND::\n");
-
-      PRINT_AST_SUBAST (exp, COND_EXP);
-      PRINT_AST_SUBAST (thenpart, COND_THENPART);
-      PRINT_AST_OPT_SUBAST (elsepart, COND_ELSEPART);
-
-      break;
-
-    case PKL_AST_LOOP:
-      IPRINTF ("LOOP::\n");
-
-      PRINT_AST_SUBAST (pre, LOOP_PRE);
-      PRINT_AST_SUBAST (cond, LOOP_COND);
-      PRINT_AST_SUBAST (post, LOOP_POST);
-      PRINT_AST_SUBAST (body, LOOP_BODY);
-
-      break;
-
     case PKL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
@@ -1234,16 +1143,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, STRUCT_TYPE_ELEM_TYPE);
       break;
       
-    case PKL_AST_ASSERTION:
-      IPRINTF ("ASSERTION::\n");
-
-      PRINT_AST_SUBAST (exp, ASSERTION_EXP);
-      break;
-
-    case PKL_AST_LOC:
-      IPRINTF ("LOC::\n");
-      break;
-
     case PKL_AST_ARRAY_REF:
       IPRINTF ("ARRAY_REF::\n");
 
