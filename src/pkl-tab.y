@@ -605,11 +605,6 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
-        | struct_type_specifier expression %prec UNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $2);
-                  PKL_AST_TYPE ($$) = ASTREF ($1);
-                }
         | TYPEOF expression %prec UNARY
         	{
                   pkl_ast_node metatype;

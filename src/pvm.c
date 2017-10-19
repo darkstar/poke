@@ -435,6 +435,9 @@ pvm_print_val (FILE *out, pvm_val val)
               {
                 pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
                 pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
+
+                if (i != 0)
+                  fprintf (out, " ");
                 
                 pvm_print_val (out, etype);
                 if (ename != PVM_NULL)
