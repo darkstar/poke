@@ -548,7 +548,7 @@ end
 instruction negh () # HALF -> HALF
   code
     JITTER_TOP_STACK()
-      = pvm_make_byte (- PVM_VAL_HALF (JITTER_TOP_STACK()));
+      = pvm_make_half (- PVM_VAL_HALF (JITTER_TOP_STACK()));
   end
 end
 
