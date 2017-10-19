@@ -354,7 +354,27 @@ pkl_gen_type (pkl_ast_node ast,
       pkl_ast_node t;
 
       /* XXX: this must create a _program_ similar to a function that
-         sets things up and calls mktys and returns it. */
+         sets things up and calls mktys and returns it.
+
+         The struct functions are invoked by:
+
+         - Initialized to zero:
+             let packet p;
+
+         - Casts to structs:
+             (packet) {1,2,3}
+             (struct { int i; long j;}) {10}
+ 
+         - Mappings:
+             packet @ 0x0
+
+         So we need several functions defined here:
+         - A function that creates the struct type from 0.
+         - A function that creates the struct type from
+           a struct value.
+         - A function that creates teh struct type from
+           an IO space.
+       */
 
       /* XXX: BA to skip the function definition.  */
       /* XXX: label and function prologue  */
@@ -893,7 +913,6 @@ pkl_gen_struct (pkl_ast_node ast,
                             pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
 
   PVM_APPEND_INSTRUCTION (program, mksct);
-  PVM_APPEND_INSTRUCTION (program, revsct);
   return 1;
 }
 
@@ -1019,6 +1038,11 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
         
     pvm_append_symbolic_label (program, "Lexit");
     PVM_APPEND_INSTRUCTION (program, exit);
+
+    /* XXX: insert here programs defined in the global scope:
+       - Functions.
+       - Structs.
+     */
 
     pvm_append_symbolic_label (program, "Lstart");
   }

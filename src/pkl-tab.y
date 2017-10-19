@@ -965,13 +965,14 @@ primary:
         | STR
         | type_specifier
           	{
+                  /* XXX: remove at some point.  for testing.  */
                   pkl_ast_node metatype;
                   
                   $$ = $1;
                   metatype = pkl_ast_make_metatype ($1);
                   PKL_AST_TYPE ($$) = ASTREF (metatype);
-                }
-          /*        | IDENTIFIER */
+                  }
+          /* | IDENTIFIER */
         | '(' expression ')'
         	{ $$ = $2; }
 	| primary INC
@@ -1057,7 +1058,7 @@ struct_elem_list:
         | struct_elem
         | struct_elem_list ',' struct_elem
 		{                  
-                  $$ = pkl_ast_chainon ($1, $3);
+                  $$ = pkl_ast_chainon ($3, $1);
                 }
         ;
 
