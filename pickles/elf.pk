@@ -1235,13 +1235,13 @@ struct elf_ehdr
       break;
     case ELFDATA2MSB:
       .endian = msb;
-      .nencoding = 1;
+      .nencoding = 2;
       break;
     }
   
-  enum elf_e_type e_type <doc="File type.">;
-  enum elf_e_machine e_machine <doc="Required architecture.">;
-  enum elf_e_version e_version <doc="Object file version.">;
+  elf_e_type e_type <doc="File type.">;
+  elf_e_machine e_machine <doc="Required architecture.">;
+  elf_e_version e_version <doc="Object file version.">;
 
   if (ehdr.e_ident.ei_class == ELFCLASS32)
     {
@@ -1256,7 +1256,7 @@ struct elf_ehdr
       elf64_off e_shoff <doc=e_shoff_doc>;
     }
 
-  bitmask elf_e_flags (e_machine) e_flags;
+  elf_e_flags (e_machine) e_flags;
   elf_half e_ehsize <doc="ELF header size in bytes.">;
 
   elf_half e_phentsize
@@ -1285,7 +1285,7 @@ struct elf_ehdr
           && e_type == ET_EXEC => e_phnum > 0);
 };
 
-struct elf_phdr (enum elf_ei_class class)
+struct elf_phdr (elf_ei_class class)
   <doc="ELF program header.">
 {
   let p_offset_doc
@@ -1318,7 +1318,7 @@ struct elf_phdr (enum elf_ei_class class)
        positive, integral power of 2, and p_vaddr should equal\n\
        p_offset, modulo p_align.";
 
-  enum elf_p_type p_type;
+  elf_p_type p_type;
   
   if (class == ELFCLASS32)
     {
@@ -1331,7 +1331,7 @@ struct elf_phdr (enum elf_ei_class class)
     }
   else
     {
-      bitmask elf_p_flags p_flags;
+      elf_p_flags p_flags;
       elf64_off p_offset <doc=p_offset_doc>;
       elf64_addr p_vaddr <doc=p_vaddr_doc>;
       elf64_addr p_paddr <doc=p_vaddr_doc>;
@@ -1368,9 +1368,9 @@ struct elf_shdr (enum elf_ei_class class)
       doc="Index of the section's name into the section header\n\
            string table section.">;
     
-  enum elf_sh_type sh_type;
+  elf_sh_type sh_type;
 
-  bitmask elf_sh_flags sh_flags : class == ELFCLASS32 ? 32 : 64;
+  elf_sh_flags sh_flags : class == ELFCLASS32 ? 32 : 64;
 
   if (class == ELFCLASS32)
     {

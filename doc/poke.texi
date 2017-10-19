@@ -54,7 +54,7 @@ Basic Editing
 @c* Commands::
 
 The Poke Language
-* Data Types::			Numbers, arrays and tuples.
+* Data Types::			Numbers, arrays and structs.
 * Expressions::			Operators and values.
 * Constants::			Named constant values.
 * Variables::			Variables and scopes.
@@ -94,7 +94,7 @@ and what are the types available for constructing numbers and arrays.
 * Null::			One value to bind them all.
 * Integers::			Integer numbers.
 * Arrays::			Sequences of elements of the same type.
-* Tuples::                      Collections of elements of arbitrary types.
+* Structs::                     Collections of elements of arbitrary types.
 * Type Conversions::		Automatic conversions between types.
 @end menu
 
@@ -330,54 +330,55 @@ Denotes a new line character.
 Denotes an horizontal tab.
 @end table
 
-@node Tuples
-@section Tuples
+@node Structs
+@section Structs
 
-Tuples are collections of heterogeneous values.
+Structs are collections of heterogeneous values.
 
-@subsection Tuple Types
+@subsection Struct Types
 
 A tuple type is
 denoted using the following syntax:
 
 @example
-(<type> [<name>][,<type> [<name>]]...)
+struct @{<type> [<name>];[<type> [<name>];]...@}
 @end example
 
 Where @code{<type>} is any type or @code{<null>}.
 
-The type of a tuple containing three 32-bit signed integers is
-@code{(int64, int64, int64)}.  Similarly, the type of a tuple
+The type of a struct containing three 32-bit signed integers is
+@code{struct @{int64; int64; int64;@}}.  Similarly, the type of a struct
 containing a string, an unsigned 8-bit number, and a character is
-@code{(string, byte, char)}.
+@code{struct @{string; byte; char@}}.
 
-The order of the tuple elements is significant.  For example, the
-tuple type @code{(int,long)} is different than the tuple type
-@code{(long,int)}.
+The order of the tuple elements is significant.  For example, the type
+@code{struct @{int; long;@}} is different than the type
+@code{struct @{long; int;@}}.
 
 The type of an empty tuple, i.e. a tuple with no elements, is
-@code{(null)}.
+@code{struct @{@}}.
 
-It is possible to name some (or all) of the tuple constituents.  For
-example, if we wanted to define a tuple to store information about a
-person, we could do it like @code{(int age, string name)}.  The
-element names are significant, i.e. the tuple type @code{(int foo, int
-bar)} denotes a different type than @code{(int baz, int quux)}.
+It is possible to name some (or all) of the struct constituents.  For
+example, if we wanted to define a struct to store information about a
+person, we could do it like @code{struct @{int age; string name;@}}.
+The element names are significant, i.e. the type @code{struct @{int
+foo; int bar;@}} denotes a different type than @code{struct @{int baz;
+int quux;@}}.
 
-@subsection Tuple Literals
+@subsection Struct Literals
 
-Tuple literals are constructed using the following syntax:
+Struct literals are constructed using the following syntax:
 
 @example
 @{[[[.<name> =] <exp>][,[.<name> = ] <exp>]...]@}
 @end example
 
-Where @code{<exp>} are arbitrary expressions.  For example, a tuple
+Where @code{<exp>} are arbitrary expressions.  For example, a strct
 containing three signed 32-bit integers can be constructed as
-@code{@{10, 20, 30@}} and it is of type @code{(int,int,int)}.
-Similarly, @code{@{age, name@}} would construct a type
-@code{int,string)} provided @code{age} and @code{string} are variable
-holding values of the appropriate type.
+@code{@{10, 20, 30@}} and it is of type @code{struct @{int; int;
+int;@}}.  Similarly, @code{@{age, name@}} would construct a type
+@code{struct @{int;string;@}} provided @code{age} and @code{string}
+are variable holding values of the appropriate type.
 
 For example:
 
@@ -385,19 +386,14 @@ For example:
 @{10, "foo", 'x'@}
 @end example
 
-An empty tuple literal is denoted by @code{@{@}}.
+An empty struct is denoted by @code{@{@}}.
 
-Casts can be used to change the type of a tuple.  The tuple
-@code{@{10, 20@}} is of type @code{(int32,int32)}, but
-@code{(int32,int64) @{10, 20@}} turns the second element into a 64-bit
-signed integer.
+It is possible to specify named elements in a struct literal, like in
+@code{@{.age = 37, .name = "Jose"@}}.  The struct constructed this way
+has type @code{struct @{int age; string name@}}, i.e. the ordering of
+the named members follows their appearance in the literal.
 
-It is possible to specify named elements in a tuple literal, like in
-@code{@{.age = 37, .name = "Jose"@}}.  The tuple constructed this way
-has type @code{(int age, string name)}, i.e. the ordering of the named
-members follows their appearance in the literal.
-
-@subsection Casting Tuples
+@subsection Casting Structs
 
 Casts to tuples use the usual syntax @code{(<type>) <exp>} and can be
 applied to tuple values.
@@ -415,33 +411,8 @@ Casts can be used to ``augment'' a tuple.  For example
 
 Casts can be used to ``reorder'' the named elements in a tuple
 literal.  For example, @code{(string name, int age) @{.age = 30, .name
-= "Jose"@}} generates the tuple @code{@{"Jose", 30@}} of type
+= "Jose"@}} generates the struct @code{@{"Jose", 30@}} of type
 @code{(string name, int age)}.
-
-@subsection Accessing Tuples
-
-Tuple elements can be accessed using subscripts, pretty much like
-they are used in arrays. @code{@{10, "foo", 'x'@}[0]} evaluates to
-@code{10}, @code{@{10, "foo", 'x'@}[2]} evaluates to @code{'x'} and
-@code{@{10, "foo", 'x'@}[3]} evaluates to @code{null}.
-
-The number of elements of a tuple are obtained with the @code{sizeof}
-operator.
-
-@subsection Building Tuples
-
-@c structuring operator.
-@c destructuring operator.
-
-@subsection Destructuring Tuples
-
-Tuples can be destructured using @code{let}:
-
-@example
-let (number, name, character) = @{10, "foo", 'x'@}
-@end example
-
-XXX: no, dont like this.
 
 @node Type Conversions
 @section Type Conversions

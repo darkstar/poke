@@ -12,14 +12,30 @@ struct packet
 let packet p;  /* { 0UB, 0UL, [] } */
 let p = packet {1, 2, [1,2,3]};
 let p = packet @ .; /* At current IO offset */
+packet p; /* At current IO offset */
 let p = packet @ 0x0;  /* At IO offset 0x0 */
+
+(poke) for (let i in p.data) print (i + "\n")
+1B
+2B
+3B
+(poke) for (let i = 0; i < elemsof p.data; ++i) print (p.data[i] + "\n");
+1B
+2B
+3B
+(poke) peek packet @ 0x0
+...
+(poke) poke 0x0, packet {1,1024}
+0x00 <--- ...
+...
+(poke)
 
 /* Simple struct literals must also be allowed, for patterns, switch
    statements, etc.  */
 
 (poke) let s = {1, 2, [1,2,3]};
 (poke) print typeof s
-struct {int32; int32; int32[3]}
+struct {int32; int32; int32[3];}
 
 /* Struct constructors can get arguments */
 
@@ -32,12 +48,16 @@ let f = foo(10) {[1,2,3,4,5,6,7,8,9,10]};
 let foo(10) f;
 
 let int i; /* 0 */
+int i;     /* At current IO offset */
 let i = 10;
 let i = int @ 0x0;
+
 
 let int32[5] a; /* [0,0,0,0,0] */
 let a = [1,2,3,4,5];
 let a = int32[5] @ 0x0;
+let a = int32[5] @ .;  /* At current IO offset */
+int32[5] a;            /* Likewise.  */
 
 void incr_int (int i)
 {
