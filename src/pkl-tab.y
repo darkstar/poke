@@ -1103,48 +1103,6 @@ array_elem:
                 }
         ;
 
-/*
- * Declarations.
- */
-
-/*
-declaration:
-	  declaration_specifiers ';'
-        ;
-
-declaration_specifiers:
-          typedef_specifier
-          	| struct_specifier
-                | enum_specifier 
-        ;
-
-*/
-
-/*
- * Typedefs
- */
-
-/*
-typedef_specifier:
-	  TYPEDEF type_specifier IDENTIFIER
-          	{
-                  const char *id = PKL_AST_IDENTIFIER_POINTER ($3);
-                  pkl_ast_node type = pkl_ast_make_type (PKL_AST_TYPE_CODE ($2),
-                                                         PKL_AST_TYPE_SIGNED ($2),
-                                                         PKL_AST_TYPE_SIZE ($2),
-                                                         PKL_AST_TYPE_ENUMERATION ($2),
-                                                         PKL_AST_TYPE_STRUCT ($2));
-
-                  if (pkl_ast_register (pkl_parser->ast, id, type) == NULL)
-                    {
-                      pkl_tab_error (&@2, pkl_parser, "type already defined");
-                      YYERROR;
-                    }
-
-                  $$ = NULL;
-                }
-        ;
-*/
 
 type_specifier:
 	  TYPENAME
@@ -1194,6 +1152,49 @@ tuple_elem_type:
                   $$ = pkl_ast_make_tuple_type_elem (NULL, $1);
                 }
         ;
+
+/*
+ * Declarations.
+ */
+
+/*
+declaration:
+	  declaration_specifiers ';'
+        ;
+
+declaration_specifiers:
+          typedef_specifier
+          	| struct_specifier
+                | enum_specifier 
+        ;
+
+*/
+
+/*
+ * Typedefs
+ */
+
+/*
+typedef_specifier:
+	  TYPEDEF type_specifier IDENTIFIER
+          	{
+                  const char *id = PKL_AST_IDENTIFIER_POINTER ($3);
+                  pkl_ast_node type = pkl_ast_make_type (PKL_AST_TYPE_CODE ($2),
+                                                         PKL_AST_TYPE_SIGNED ($2),
+                                                         PKL_AST_TYPE_SIZE ($2),
+                                                         PKL_AST_TYPE_ENUMERATION ($2),
+                                                         PKL_AST_TYPE_STRUCT ($2));
+
+                  if (pkl_ast_register (pkl_parser->ast, id, type) == NULL)
+                    {
+                      pkl_tab_error (&@2, pkl_parser, "type already defined");
+                      YYERROR;
+                    }
+
+                  $$ = NULL;
+                }
+        ;
+*/
 
           /*          	| STRUCT IDENTIFIER
         	{
