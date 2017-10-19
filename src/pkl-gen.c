@@ -353,6 +353,8 @@ pkl_gen_type (pkl_ast_node ast,
     {
       pkl_ast_node t;
 
+      /* XXX: begin lexical scope.  */
+      
       for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = PKL_AST_CHAIN (t))
         {
           pkl_ast_node struct_type_elem_name
@@ -382,6 +384,8 @@ pkl_gen_type (pkl_ast_node ast,
                                 pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
 
       PVM_APPEND_INSTRUCTION (program, mktyt);
+
+      /* XXX: end lexical scope.  */
     }
   else
     assert (0);
