@@ -1170,8 +1170,6 @@ pushlevel:
 	  %empty
 		{
                   push_level ();
-                  $$ = pkl_parser->current_block;
-                  pkl_parser->current_block = pkl_ast_make_let ($$);
                 }
 	;
 
@@ -1180,9 +1178,9 @@ compstmt:
           	{ $$ = pkl_ast_make_compound (NULL); }
         | '{' pushlevel stmt_list '}'
         	{
-                  $$ = finish_compound_stmt (pkl_parser->current_block,
-                                             /* stmt_list */ $3,
-                                             /* outer_block */ $2);
+                  $$ = pkl_ast_make_let ($$);
+                  PKL_AST_LET_BODY (pkl_parser->current_block, $3);
+                  pop_level ();
                 }
         ;
           
