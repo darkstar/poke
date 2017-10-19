@@ -575,21 +575,25 @@ union pkl_ast_node
 {
   struct pkl_ast_common common; /* This field _must_ appear first.  */
   struct pkl_ast_program program;
-  struct pkl_ast_identifier identifier;
-  struct pkl_ast_integer integer;
-  struct pkl_ast_string string;
+  /* Expressions.  */
   struct pkl_ast_exp exp;
   struct pkl_ast_cond_exp cond_exp;
-  struct pkl_ast_enumerator enumerator;
-  struct pkl_ast_enum enumeration;
-  struct pkl_ast_type type;
+  struct pkl_ast_integer integer;
+  struct pkl_ast_string string;
+  struct pkl_ast_identifier identifier;
   struct pkl_ast_array array;
   struct pkl_ast_array_elem array_elem;
   struct pkl_ast_array_ref aref;
   struct pkl_ast_struct sct;
   struct pkl_ast_struct_elem sct_elem;
   struct pkl_ast_struct_ref sref;
+  /* Types.  */
+  struct pkl_ast_type type;
   struct pkl_ast_struct_type_elem sct_type_elem;
+  /* Declarations.  */
+  struct pkl_ast_enum enumeration;
+  struct pkl_ast_enumerator enumerator;
+  /* Statements.  */
   struct pkl_ast_let let;
 };
 
