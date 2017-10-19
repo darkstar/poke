@@ -28,6 +28,7 @@ poke_SOURCES = poke.c poke.h \
                pkl-gen.h pkl-gen.c \
                pkl-parser.h pkl-parser.c \
                pvm.h pvm.c \
+               pvm-bind.h pvm-bind.c \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c
