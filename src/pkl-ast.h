@@ -35,30 +35,29 @@
 enum pkl_ast_code
 {
   PKL_AST_PROGRAM,
+  /* Expressions.  */
   PKL_AST_EXP,
   PKL_AST_COND_EXP,
-  PKL_AST_ENUM,
-  PKL_AST_ENUMERATOR,
-  PKL_AST_STRUCT,
-  PKL_AST_MEM,
-  PKL_AST_FIELD,
-  PKL_AST_COND,
-  PKL_AST_LOOP,
-  PKL_AST_ASSERTION,
-  PKL_AST_TYPE,
-  PKL_AST_STRUCT_REF,
   PKL_AST_INTEGER,
   PKL_AST_STRING,
   PKL_AST_IDENTIFIER,
-  PKL_AST_DOC_STRING,
-  PKL_AST_LOC,
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_ELEM,
   PKL_AST_ARRAY_REF,
   PKL_AST_TUPLE,
   PKL_AST_TUPLE_ELEM,
   PKL_AST_TUPLE_REF,
-  PKL_AST_TUPLE_TYPE_ELEM
+  /* Types.  */
+  PKL_AST_TYPE,
+  PKL_AST_TUPLE_TYPE_ELEM,
+  /* Declarations.  */
+  PKL_AST_ENUM,
+  PKL_AST_ENUMERATOR,
+  PKL_AST_LOC,
+  /* Statements.  */
+  PKL_AST_COND,
+  PKL_AST_LOOP,
+  PKL_AST_ASSERTION,
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -252,25 +251,6 @@ struct pkl_ast_string
 
 pkl_ast_node pkl_ast_make_string (const char *str);
 
-/* PKL_AST_DOC_STRING nodes represent text that explains the meaning
-   or the contents of other nodes/entities.
-
-   POINTER must point to a NULL-terminated string.
-   LENGTH contains the size in bytes of the doc string.  */
-
-#define PKL_AST_DOC_STRING_LENGTH(AST) ((AST)->doc_string.length)
-#define PKL_AST_DOC_STRING_POINTER(AST) ((AST)->doc_string.pointer)
-
-struct pkl_ast_doc_string
-{
-  struct pkl_ast_common common;
-  size_t length;
-  char *pointer;
-};
-
-pkl_ast_node pkl_ast_make_doc_string (const char *str,
-                                      pkl_ast_node entity);
-
 /* PKL_AST_ARRAY nodes represent array literals.  Each array holds a
    sequence of elements, all of them having the same type.  There must
    be at least one element in the array, i.e. emtpy arrays are not
@@ -410,19 +390,16 @@ pkl_ast_node pkl_ast_make_cond_exp (pkl_ast_node cond,
 
 #define PKL_AST_ENUMERATOR_IDENTIFIER(AST) ((AST)->enumerator.identifier)
 #define PKL_AST_ENUMERATOR_VALUE(AST) ((AST)->enumerator.value)
-#define PKL_AST_ENUMERATOR_DOCSTR(AST) ((AST)->enumerator.docstr)
 
 struct pkl_ast_enumerator
 {
   struct pkl_ast_common common;
   union pkl_ast_node *identifier;
   union pkl_ast_node *value;
-  union pkl_ast_node *docstr;
 };
 
 pkl_ast_node pkl_ast_make_enumerator (pkl_ast_node identifier,
-                                      pkl_ast_node value,
-                                      pkl_ast_node docstr);
+                                      pkl_ast_node value);
 
 /* PKL_AST_ENUM nodes represent enumerations, having semantics much
    like the C enums.
@@ -432,130 +409,20 @@ pkl_ast_node pkl_ast_make_enumerator (pkl_ast_node identifier,
    namespace.
 
    VALUES must point to a chain of PKL_AST_ENUMERATOR nodes containing
-   at least one node.  This means empty enumerations are not allowed.
-
-   DOCSTR optionally points to a PKL_AST_DOCSTR.  If it exists, it
-   contains text explaining the meaning of the collection of constants
-   defined in the enumeration.  */
+   at least one node.  This means empty enumerations are not allowed.  */
 
 #define PKL_AST_ENUM_TAG(AST) ((AST)->enumeration.tag)
 #define PKL_AST_ENUM_VALUES(AST) ((AST)->enumeration.values)
-#define PKL_AST_ENUM_DOCSTR(AST) ((AST)->enumeration.docstr)
 
 struct pkl_ast_enum
 {
   struct pkl_ast_common common;
   union pkl_ast_node *tag;
   union pkl_ast_node *values;
-  union pkl_ast_node *docstr;
 };
 
 pkl_ast_node pkl_ast_make_enum (pkl_ast_node tag,
-                                pkl_ast_node values,
-                                pkl_ast_node docstr);
-
-
-/* PKL_AST_STRUCT nodes represent PKL structs, which are similar to C
-   structs... but not quite the same thing!
-
-   In PKL a struct is basically the declaration of a named memory
-   layout (see below for more info on memory layouts.)  Structs can
-   only be declared at the top-level.
-   
-   TAG must point to a node of type PKL_AST_IDENTIFIER, and globally
-   identifies the struct in the strucs namespace.
-
-   MEM must point to a node of type PKL_AST_MEM, that contains the
-   memory layout named in this struct.
-
-   DOCSTR optionally points to a docstring that documents the
-   meaning/contents of the struct.  */
-
-
-#define PKL_AST_STRUCT_TAG(AST) ((AST)->strct.tag)
-#define PKL_AST_STRUCT_DOCSTR(AST) ((AST)->strct.docstr)
-#define PKL_AST_STRUCT_MEM(AST) ((AST)->strct.mem)
-
-struct pkl_ast_struct
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *tag;
-  union pkl_ast_node *docstr;
-  union pkl_ast_node *mem;
-};
-
-pkl_ast_node pkl_ast_make_struct (pkl_ast_node tag,
-                                  pkl_ast_node docstr,
-                                  pkl_ast_node mem);
-
-/* PKL_AST_MEM nodes represent memory layouts.  The layouts are
-   described by a program that, once executed, describes a collection
-   of subareas over a possibly non-contiguous memory area.
-
-   ENDIAN is the endianness used by the components (filds) of the
-   memory layout.
-
-   COMPONENTS points to a possibly empty list of other layouts,
-   fields, conditionals, loops and assertions, i.e. of nodes of types
-   PKL_AST_MEM, PKL_AST_FIELD, PKL_AST_COND, PKL_AST_LOOP and
-   PKL_AST_ASSERTION respectively.  */
-
-#define PKL_AST_MEM_ENDIAN(AST) ((AST)->mem.endian)
-#define PKL_AST_MEM_COMPONENTS(AST) ((AST)->mem.components)
-
-struct pkl_ast_mem
-{
-  struct pkl_ast_common common;
-  enum pkl_ast_endian endian;
-  union pkl_ast_node *components;
-};
-
-pkl_ast_node pkl_ast_make_mem (enum pkl_ast_endian endian,
-                               pkl_ast_node components);
-
-/* PKL_AST_FIELD nodes represent fields in memory layouts.
-
-   ENDIAN is the endianness in which the data in the field is stored.
-
-   NAME must point to an identifier which should be unique within the
-   containing struct (i.e. within the containing top-level memory
-   layout.)
-   
-   TYPE must point to a PKL_AST_TYPE node that describes the value
-   stored in the field.
-
-   NUM_ENTS must point to an expression specifiying how many entities
-   of size SIZE are stored in the field.
-
-   SIZE is the size in bits of each element stored in the field.
-
-   DOCSTR optionally points to a PKL_AST_DOC_STRING node that
-   documents the purpose/meaning of the field contents.  */
-
-#define PKL_AST_FIELD_NAME(AST) ((AST)->field.name)
-#define PKL_AST_FIELD_ENDIAN(AST) ((AST)->field.endian)
-#define PKL_AST_FIELD_TYPE(AST) ((AST)->field.type)
-#define PKL_AST_FIELD_DOCSTR(AST) ((AST)->field.docstr)
-#define PKL_AST_FIELD_NUM_ENTS(AST) ((AST)->field.num_ents)
-#define PKL_AST_FIELD_SIZE(AST) ((AST)->field.size)
-
-struct pkl_ast_field
-{
-  struct pkl_ast_common common;
-  enum pkl_ast_endian endian;
-  union pkl_ast_node *name;
-  union pkl_ast_node *type;
-  union pkl_ast_node *docstr;
-  union pkl_ast_node *num_ents;
-  union pkl_ast_node *size;
-};
-
-pkl_ast_node pkl_ast_make_field (pkl_ast_node name,
-                                 pkl_ast_node type,
-                                 pkl_ast_node docstr,
-                                 enum pkl_ast_endian endian,
-                                 pkl_ast_node num_ents,
-                                 pkl_ast_node size);
+                                pkl_ast_node values);
 
 /* PKL_AST_COND nodes represent conditionals.
 
@@ -664,30 +531,6 @@ struct pkl_ast_tuple_ref
 
 pkl_ast_node pkl_ast_make_tuple_ref (pkl_ast_node tuple,
                                      pkl_ast_node identifier);
-
-/* PKL_AST_STRUCT_REF nodes represent references to fields within a
-   struct.
-
-   BASE must point to a PKL_AST_IDENTIFIER node, which in turn should
-   identify a field whose type is a struct.
-
-   IDENTIFIER must point to a PKL_AST_IDENTIFIER node, which in turn
-   should identify a field defined in the struct characterized by
-   BASE.  */
-
-#define PKL_AST_STRUCT_REF_BASE(AST) ((AST)->sref.base)
-#define PKL_AST_STRUCT_REF_IDENTIFIER(AST) ((AST)->sref.identifier)
-
-struct pkl_ast_struct_ref
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *base;
-  union pkl_ast_node *identifier;
-};
-
-pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node base,
-                                      pkl_ast_node identifier);
-
 
 /* PKL_AST_TUPLE_TYPE_ELEM nodes represent the element part of a tuple
    type.
@@ -819,18 +662,13 @@ union pkl_ast_node
 {
   struct pkl_ast_common common; /* This field _must_ appear first.  */
   struct pkl_ast_program program;
-  struct pkl_ast_struct strct;
-  struct pkl_ast_mem mem;
-  struct pkl_ast_field field;
   struct pkl_ast_cond cond;
   struct pkl_ast_loop loop;
   struct pkl_ast_identifier identifier;
   struct pkl_ast_integer integer;
   struct pkl_ast_string string;
-  struct pkl_ast_doc_string doc_string;
   struct pkl_ast_exp exp;
   struct pkl_ast_cond_exp cond_exp;
-  struct pkl_ast_struct_ref sref;
   struct pkl_ast_enumerator enumerator;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_type type;

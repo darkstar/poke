@@ -122,27 +122,11 @@ pkl_ast_make_identifier (const char *str)
   return id;
 }
 
-/* Build and return an AST node for a doc string.  */
-
-pkl_ast_node
-pkl_ast_make_doc_string (const char *str, pkl_ast_node entity)
-{
-  pkl_ast_node doc_string = pkl_ast_make_node (PKL_AST_DOC_STRING);
-
-  assert (str);
-
-  PKL_AST_DOC_STRING_POINTER (doc_string) = xstrdup (str);
-  PKL_AST_DOC_STRING_LENGTH (doc_string) = strlen (str);
-
-  return doc_string;
-}
-
 /* Build and return an AST node for an enumerator.  */
 
 pkl_ast_node 
 pkl_ast_make_enumerator (pkl_ast_node identifier,
-                         pkl_ast_node value,
-                         pkl_ast_node docstr)
+                         pkl_ast_node value)
 {
   pkl_ast_node enumerator = pkl_ast_make_node (PKL_AST_ENUMERATOR);
 
@@ -150,7 +134,6 @@ pkl_ast_make_enumerator (pkl_ast_node identifier,
 
   PKL_AST_ENUMERATOR_IDENTIFIER (enumerator) = ASTREF (identifier);
   PKL_AST_ENUMERATOR_VALUE (enumerator) = ASTREF (value);
-  PKL_AST_ENUMERATOR_DOCSTR (enumerator) = ASTREF (docstr);
 
   return enumerator;
 }
@@ -243,22 +226,6 @@ pkl_ast_make_tuple_ref (pkl_ast_node tuple, pkl_ast_node identifier)
   PKL_AST_TUPLE_REF_IDENTIFIER (tref) = ASTREF (identifier);
   
   return tref;
-}
-
-/* Build and return an AST node for a struct reference.  */
-
-pkl_ast_node
-pkl_ast_make_struct_ref (pkl_ast_node base, pkl_ast_node identifier)
-{
-  pkl_ast_node sref = pkl_ast_make_node (PKL_AST_STRUCT_REF);
-
-  assert (base && identifier
-          && PKL_AST_CODE (identifier) == PKL_AST_IDENTIFIER);
-
-  PKL_AST_STRUCT_REF_BASE (sref) = ASTREF (base);
-  PKL_AST_STRUCT_REF_IDENTIFIER (sref) = ASTREF (identifier);
-
-  return sref;
 }
 
 /* Build and return type AST nodes.  */
@@ -460,41 +427,10 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
   return 1;
 }
 
-/* Build and return an AST node for a struct.  */
-
-pkl_ast_node
-pkl_ast_make_struct (pkl_ast_node tag, pkl_ast_node docstr,
-                     pkl_ast_node mem)
-{
-  pkl_ast_node strct = pkl_ast_make_node (PKL_AST_STRUCT);
-
-  assert (tag);
-
-  PKL_AST_STRUCT_TAG (strct) = ASTREF (tag);
-  PKL_AST_STRUCT_DOCSTR (strct) = ASTREF (docstr);
-  PKL_AST_STRUCT_MEM (strct) = ASTREF (mem);
-
-  return strct;
-}
-
-/* Build and return an AST node for a memory layout.  */
-
-pkl_ast_node
-pkl_ast_make_mem (enum pkl_ast_endian endian,
-                  pkl_ast_node components)
-{
-  pkl_ast_node mem = pkl_ast_make_node (PKL_AST_MEM);
-
-  PKL_AST_MEM_ENDIAN (mem) = endian;
-  PKL_AST_MEM_COMPONENTS (mem) = ASTREF (components);
-
-  return mem;
-}
-
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node
-pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values, pkl_ast_node docstr)
+pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values)
 {
   pkl_ast_node enumeration = pkl_ast_make_node (PKL_AST_ENUM);
 
@@ -502,30 +438,8 @@ pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values, pkl_ast_node docstr)
 
   PKL_AST_ENUM_TAG (enumeration) = ASTREF (tag);
   PKL_AST_ENUM_VALUES (enumeration) = ASTREF (values);
-  PKL_AST_ENUM_DOCSTR (enumeration) = ASTREF (docstr);
 
   return enumeration;
-}
-
-/* Build and return an AST node for a struct field.  */
-
-pkl_ast_node
-pkl_ast_make_field (pkl_ast_node name, pkl_ast_node type, pkl_ast_node docstr,
-                    enum pkl_ast_endian endian, pkl_ast_node num_ents,
-                    pkl_ast_node size)
-{
-  pkl_ast_node field = pkl_ast_make_node (PKL_AST_FIELD);
-
-  assert (name);
-
-  PKL_AST_FIELD_NAME (field) = ASTREF (name);
-  PKL_AST_FIELD_TYPE (field) = ASTREF (type);
-  PKL_AST_FIELD_DOCSTR (field) = ASTREF (docstr);
-  PKL_AST_FIELD_ENDIAN (field) = endian;
-  PKL_AST_FIELD_NUM_ENTS (field) = ASTREF (num_ents);
-  PKL_AST_FIELD_SIZE (field) = ASTREF (size);
-
-  return field;
 }
 
 /* Build and return an AST node for a struct conditional.  */
@@ -686,7 +600,6 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_ENUM:
 
       pkl_ast_node_free (PKL_AST_ENUM_TAG (ast));
-      pkl_ast_node_free (PKL_AST_ENUM_DOCSTR (ast));
       
       for (t = PKL_AST_ENUM_VALUES (ast); t; t = n)
         {
@@ -700,33 +613,6 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_ENUMERATOR_IDENTIFIER (ast));
       pkl_ast_node_free (PKL_AST_ENUMERATOR_VALUE (ast));
-      pkl_ast_node_free (PKL_AST_ENUMERATOR_DOCSTR (ast));
-      break;
-      
-    case PKL_AST_STRUCT:
-
-      pkl_ast_node_free (PKL_AST_STRUCT_TAG (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_DOCSTR (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_MEM (ast));
-      break;
-      
-    case PKL_AST_MEM:
-
-      for (t = PKL_AST_MEM_COMPONENTS (ast); t; t = n)
-        {
-          n = PKL_AST_CHAIN (t);
-          pkl_ast_node_free (t);
-        }
-
-      break;
-      
-    case PKL_AST_FIELD:
-
-      pkl_ast_node_free (PKL_AST_FIELD_NAME (ast));
-      pkl_ast_node_free (PKL_AST_FIELD_TYPE (ast));
-      pkl_ast_node_free (PKL_AST_FIELD_DOCSTR (ast));
-      pkl_ast_node_free (PKL_AST_FIELD_NUM_ENTS (ast));
-      pkl_ast_node_free (PKL_AST_FIELD_SIZE (ast));
       break;
       
     case PKL_AST_COND:
@@ -784,12 +670,6 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_ARRAY_REF_INDEX (ast));
       break;
       
-    case PKL_AST_STRUCT_REF:
-
-      pkl_ast_node_free (PKL_AST_STRUCT_REF_BASE (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
-      break;
-
     case PKL_AST_STRING:
 
       free (PKL_AST_STRING_POINTER (ast));
@@ -800,11 +680,6 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_IDENTIFIER_POINTER (ast));
       break;
       
-    case PKL_AST_DOC_STRING:
-
-      free (PKL_AST_DOC_STRING_POINTER (ast));
-      break;
-
     case PKL_AST_TUPLE_REF:
 
       pkl_ast_node_free (PKL_AST_TUPLE_REF_TUPLE (ast));
@@ -937,7 +812,6 @@ pkl_ast_free (pkl_ast ast)
   free_hash_table (&ast->ids_hash_table);
   free_hash_table (&ast->types_hash_table);
   free_hash_table (&ast->enums_hash_table);
-  free_hash_table (&ast->structs_hash_table);
 
   for (i = 0; ast->stdtypes[i] != NULL; i++)
     pkl_ast_node_free (ast->stdtypes[i]);
@@ -1051,13 +925,10 @@ pkl_ast_register (struct pkl_ast *ast,
   pkl_ast_node t;
 
   code = PKL_AST_CODE (ast_node);
-  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM
-          || code == PKL_AST_STRUCT);
+  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM);
 
   if (code == PKL_AST_ENUM)
     hash_table = &ast->enums_hash_table;
-  else if (code == PKL_AST_STRUCT)
-    hash_table = &ast->structs_hash_table;
   else
     hash_table = &ast->types_hash_table;
 
@@ -1070,11 +941,7 @@ pkl_ast_register (struct pkl_ast *ast,
         || (code == PKL_AST_ENUM
             && PKL_AST_ENUM_TAG (t)
             && PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name))
-        || (code == PKL_AST_STRUCT
-            && PKL_AST_STRUCT_TAG (t)
-            && PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TAG (t)), name)))
+            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name)))
       return NULL;
 
   if (code == PKL_AST_TYPE)
@@ -1099,13 +966,10 @@ pkl_ast_get_registered (pkl_ast ast,
   pkl_ast_node t;
   pkl_hash *hash_table;
 
-  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM
-          || code == PKL_AST_STRUCT);
+  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM);
 
   if (code == PKL_AST_ENUM)
     hash_table = &ast->enums_hash_table;
-  else if (code == PKL_AST_STRUCT)
-    hash_table = &ast->structs_hash_table;
   else
     hash_table = &ast->types_hash_table;
     
@@ -1119,11 +983,7 @@ pkl_ast_get_registered (pkl_ast ast,
         || (code == PKL_AST_ENUM
             && PKL_AST_ENUM_TAG (t)
             && PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name))
-        || (code == PKL_AST_STRUCT
-            && PKL_AST_STRUCT_TAG (t)
-            && PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TAG (t)), name)))
+            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name)))
       return t;
 
   return NULL;
@@ -1229,14 +1089,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_OPT_IMM (*pointer, STRING_POINTER, "'%s'");
       break;
 
-    case PKL_AST_DOC_STRING:
-      IPRINTF ("DOCSTR::\n");
-
-      PRINT_AST_IMM (length, DOC_STRING_LENGTH, "%lu");
-      PRINT_AST_IMM (pointer, DOC_STRING_POINTER, "%p");
-      PRINT_AST_OPT_IMM (*pointer, DOC_STRING_POINTER, "'%s'");
-      break;
-
     case PKL_AST_EXP:
       {
 
@@ -1305,52 +1157,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_AST_SUBAST (identifier, ENUMERATOR_IDENTIFIER);
       PRINT_AST_SUBAST (value, ENUMERATOR_VALUE);
-      PRINT_AST_OPT_SUBAST (docstr, ENUMERATOR_DOCSTR);
       break;
 
     case PKL_AST_ENUM:
       IPRINTF ("ENUM::\n");
 
       PRINT_AST_SUBAST (tag, ENUM_TAG);
-      PRINT_AST_OPT_SUBAST (docstr, ENUM_DOCSTR);
       IPRINTF ("values:\n");
       PRINT_AST_SUBAST_CHAIN (ENUM_VALUES);
-      break;
-
-    case PKL_AST_STRUCT:
-      IPRINTF ("STRUCT::\n");
-
-      PRINT_AST_SUBAST (tag, STRUCT_TAG);
-      PRINT_AST_OPT_SUBAST (docstr, STRUCT_DOCSTR);
-      PRINT_AST_SUBAST (mem, STRUCT_MEM);
-
-      break;
-
-    case PKL_AST_MEM:
-      IPRINTF ("MEM::\n");
-      
-      IPRINTF ("endian:\n");
-      IPRINTF ("  %s\n",
-               PKL_AST_MEM_ENDIAN (ast)
-               == PKL_AST_MSB ? "msb" : "lsb");
-      IPRINTF ("components:\n");
-      PRINT_AST_SUBAST_CHAIN (MEM_COMPONENTS);
-
-      break;
-      
-    case PKL_AST_FIELD:
-      IPRINTF ("FIELD::\n");
-
-      IPRINTF ("endian:\n");
-      IPRINTF ("  %s\n",
-               PKL_AST_FIELD_ENDIAN (ast) == PKL_AST_MSB
-               ? "msb" : "lsb");
-      PRINT_AST_SUBAST (name, FIELD_NAME);
-      PRINT_AST_SUBAST (type, FIELD_TYPE);
-      PRINT_AST_OPT_SUBAST (num_ents, FIELD_NUM_ENTS);
-      PRINT_AST_OPT_SUBAST (size, FIELD_SIZE);
-      PRINT_AST_OPT_SUBAST (docstr, FIELD_DOCSTR);
-      
       break;
 
     case PKL_AST_COND:
@@ -1425,13 +1239,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
     case PKL_AST_LOC:
       IPRINTF ("LOC::\n");
-      break;
-
-    case PKL_AST_STRUCT_REF:
-      IPRINTF ("STRUCT_REF::\n");
-
-      PRINT_AST_SUBAST (base, STRUCT_REF_BASE);
-      PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
       break;
 
     case PKL_AST_ARRAY_REF:
