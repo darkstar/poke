@@ -1,0 +1,75 @@
+struct packet
+{
+  uint8 version;
+  uint64 size;
+  if (size > 0)
+    byte[size] data;
+
+  if (version >= 2)
+    uint64 flags;
+}
+
+let packet p;  /* { 0UB, 0UL, [] } */
+let p = packet {1, 2, [1,2,3]};
+let p = packet @ .; /* At current IO offset */
+let p = packet @ 0x0;  /* At IO offset 0x0 */
+
+/* Simple struct literals must also be allowed, for patterns, switch
+   statements, etc.  */
+
+(poke) let s = {1, 2, [1,2,3]};
+(poke) print typeof s
+struct {int32; int32; int32[3]}
+
+/* Struct constructors can get arguments */
+
+struct foo (uint64 size)
+{
+  byte[size] bytes;
+}
+
+let f = foo(10) {[1,2,3,4,5,6,7,8,9,10]};
+let foo(10) f;
+
+let int i; /* 0 */
+let i = 10;
+let i = int @ 0x0;
+
+let int32[5] a; /* [0,0,0,0,0] */
+let a = [1,2,3,4,5];
+let a = int32[5] @ 0x0;
+
+void incr_int (int i)
+{
+  i += 1;  /* This will have a side-effect if I is mapped.  */
+}
+
+void print_packet (packet p)
+{
+
+}
+
+void sort_array (int32[] a)
+{
+
+}
+
+
+(poke) let packet p;
+(poke) print p
+{0UB, 0UL}
+(poke) print typeof p
+packet {uint8 version; uint64 size;}
+
+(poke) let p = packet {2, 4}
+(poke) print p
+{2UB, 4UL, [0B,0B,0B,0B]}
+(poke) print typeof p
+packet {uint8 version; uint64 size; byte[4] data; uint64 flags;}
+
+(poke) print typeof {1, 2, [1,2,3]}
+struct {int32; int32; int32[3];}
+(poke) print typeof {.foo=1, .bar=2, .baz=[1,2,3]}
+struct {int32 foo; int32 bar; int32[3] baz;}
+(poke) print packet {1, 2, [1,2,3]}
+error: invalid size in array `data'.  /* Constructor fails! */

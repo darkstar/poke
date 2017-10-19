@@ -20,9 +20,11 @@ int
 qsort (int[] array, int left = 0, int right = sizeof (array))
  <doc="Sort an array using QuickSort.", typecheck=0>
 {
-  proc partition = (int left, int right) : int
+  int partition (int left, int right)
   {
-    let int pivot, i, j, t;
+    let pivot = a[left];
+    let i = left;
+    let j = right + 1;
 
     pivot = a[left];
     i = left;
@@ -34,7 +36,7 @@ qsort (int[] array, int left = 0, int right = sizeof (array))
         do --j; while (array[j] > pivot);
         if (i >= j) break;
 
-        t = array[i];
+        let t = array[i];
         array[i] = array[j];
         array[j] = t;
       }
@@ -60,9 +62,9 @@ void
 test_qsort ()
 {
   /* Sort several arrays in the current IO stream.  */
-  byte[2048] bytes @ 0x0;
-  int[512] integers;
-  long[256] longs;
+  let bytes = byte[2048] @ 0x0;
+  let integers = int[512] @ .;
+  let longs = long[256] @ .;
 
   qsort (bytes);
   qsort (integers);

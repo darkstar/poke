@@ -31,22 +31,21 @@
 
 /* First of all, define some types.  */
 
-type elf_word = uint32;
-type elf_sword = int32;
-type elf_half = uint16;
+typedef uint32 elf_word;
+typedef int32 elf_sword;
+typedef uint16 elf_half;
 
-type elf32_addr = uint32;
-type elf32_off = uint32;
-type elf32_sword = uint32;
+typedef uint32 elf32_addr;
+typedef uint32 elf32_off;
+typedef uint32 elf32_sword;
 
-type elf64_addr = uint64;
-type elf64_off = uint64;
-type elf64_xword = uint64;
-type elf64_sword = int32;
-type elf64_sxword = int64;
+typedef uint64 elf64_addr;
+typedef uint64 elf64_off;
+typedef uint64 elf64_xword;
+typedef int32 elf64_sword;
+typedef int64 elf64_sxword;
 
-type elf_e_flags =
-  bitmask elf_word (enum elf_e_machine mach)
+bitmask elf_word elf_e_flags (elf_e_machine mach)
   {
     if (mach == EM_SPARC
         || mach == EM_SPARCV9
@@ -1807,14 +1806,14 @@ struct elf <doc="ELF object file.">
       . = ehdr.e_shoff;
       struct elf_shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr
         <doc="ELF section header table.">;
-    };
+    }
 
   if (ehdr.e_phnum > 0)
     {
       . = ehdr.e_phoff;
       struct elf_phdr(ehdr.e_ident.ei_class)[ehdr.e_phnum] phdr
         <doc="ELF program header table.">;
-    };
+    }
 
   /* The sections and segments themselves are defined in terms of the
      contents of the two tables defined above.  Note that sections and
@@ -1823,15 +1822,15 @@ struct elf <doc="ELF object file.">
   for (let i = 0; i < ehdr.e_shnum; i++)
     {
       . = shdr[i].sh_offset;
-      struct elf_section(ehdr.e_machine,
-                         ehdr.e_ident.ei_class,
-                         shdr[i]) section;
+      elf_section (ehdr.e_machine,
+                   ehdr.e_ident.ei_class,
+                   shdr[i]) section;
     }
 
   for (let i = 0; i < ehdr.e_phnum; i++)
     {
       . = phdr[i].p_offset;
-      struct elf_segment (ehdr, phdr[i]) segment;
+      elf_segment (ehdr, phdr[i]) segment;
     }
 };
 
