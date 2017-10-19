@@ -77,4 +77,14 @@ pvm_scope pvm_push_scope (pvm_scope scope);
    If SCOPE is NULL then do nothing and return NULL.  */
 pvm_scope pvm_pop_scope (pvm_scope scope);
 
+/* Get the register bound to a given symbol in SCOPE.  The register is
+   set in REG, and the frame in FRAME.  If no such binding exist in
+   either SCOPE or its parents, return 0.  Otherwise return 1. */
+int pvm_get_bind (pvm_scope scope, const char *symbol,
+                  pvm_reg *reg, size_t *frame);
+
+/* Add a new binding to SCOPE.  Return the register bound to SYMBOL.
+   If symbol is already bound in SCOPE then replace it.  */
+pvm_reg pvm_bind_symbol (pvm_scope scope, const char *symbol);
+
 #endif /* !PVM_BINDING_H */

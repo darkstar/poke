@@ -20,6 +20,26 @@
 #include <xalloc.h>
 #include "pvm-bind.h"
 
+static int
+hash_string (const char *name)
+{
+  size_t len;
+  int hash;
+  int i;
+
+  len = strlen (name);
+  hash = len;
+  for (i = 0; i < len; i++)
+    hash = ((hash * 613) + (unsigned)(name[i]));
+
+#define HASHBITS 30
+  hash &= (1 << HASHBITS) - 1;
+  hash %= HASH_TABLE_SIZE;
+#undef HASHBITS
+
+  return hash;
+}
+
 pvm_scope
 pvm_push_scope (pvm_scope scope)
 {
@@ -54,4 +74,12 @@ pvm_pop_scope (pvm_scope scope)
   free (scope);
 
   return parent;
+}
+
+int
+pvm_get_bind (pvm_scope scope, const char *symbol,
+              pvm_reg *reg, size_t *frame)
+{
+
+  return 0;
 }
