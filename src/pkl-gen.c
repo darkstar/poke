@@ -388,7 +388,7 @@ pkl_gen_type (pkl_ast_node ast,
       pvm_append_val_parameter (program,
                                 pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
 
-      PVM_APPEND_INSTRUCTION (program, mktyt);
+      PVM_APPEND_INSTRUCTION (program, mktysct);
 
       /* XXX: end lexical scope.  */
       /* XXX: function epilogue.  */
@@ -892,8 +892,8 @@ pkl_gen_struct (pkl_ast_node ast,
   pvm_append_val_parameter (program,
                             pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
 
-  PVM_APPEND_INSTRUCTION (program, mkt);
-  PVM_APPEND_INSTRUCTION (program, revt);
+  PVM_APPEND_INSTRUCTION (program, mksct);
+  PVM_APPEND_INSTRUCTION (program, revsct);
   return 1;
 }
 
@@ -909,7 +909,7 @@ pkl_gen_struct_ref (pkl_ast_node ast,
 
   PVM_APPEND_INSTRUCTION (program, push);
   pvm_append_val_parameter (program, pvm_make_string (name));
-  PVM_APPEND_INSTRUCTION (program, tref);
+  PVM_APPEND_INSTRUCTION (program, sctref);
 
   return 1;
 }

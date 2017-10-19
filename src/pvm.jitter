@@ -2043,45 +2043,45 @@ instruction alen () # ARR -> ULONG
   end
 end
 
-## Tuple instructions.
+## Struct instructions.
 
-instruction mkt () # [STR VAL]... ULONG -> TUP
+instruction mksct () # [STR VAL]... ULONG -> SCT
   code
     size_t e;
-    pvm_val nelem, tuple;
+    pvm_val nelem, sct;
 
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    tuple = pvm_make_tuple (nelem);
+    sct = pvm_make_struct (nelem);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
-      PVM_VAL_TUP_ELEM_VALUE (tuple, e) = JITTER_TOP_STACK ();
-      PVM_VAL_TUP_ELEM_NAME (tuple, e) = JITTER_UNDER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_VALUE (sct, e) = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_NAME (sct, e) = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
     }
 
-    JITTER_PUSH_STACK (tuple);
+    JITTER_PUSH_STACK (sct);
   end
 end
 
-instruction revt () # TUP -> TUP
+instruction revsct () # SCT -> SCT
   code
-    pvm_reverse_tuple (JITTER_TOP_STACK ());
+    pvm_reverse_struct (JITTER_TOP_STACK ());
   end
 end
 
-instruction tset () # TUP VAL STR TSET -> TUP
+instruction sctset () # SCT VAL STR -> SCT
   code
   end
 end
 
-instruction tref () # TUP STR -> VAL
+instruction sctref () # SCT STR -> VAL
   code
-#define F(res, a, b) { res = pvm_ref_tuple (a, b); }
+#define F(res, a, b) { res = pvm_ref_struct (a, b); }
     JITTER_BINARY_STACK (F);  
 #undef F
   end
@@ -2119,7 +2119,7 @@ instruction mktya () # TYPE ULONG -> TYPE
   end
 end
 
-instruction mktyt () # [STRING TYP]... NLONG -> TYP
+instruction mktysct () # [STRING TYP]... NLONG -> TYP
   code
     size_t i;
     pvm_val nelem, *etypes, *enames;
@@ -2127,7 +2127,7 @@ instruction mktyt () # [STRING TYP]... NLONG -> TYP
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    pvm_allocate_tuple_attrs (nelem, &etypes, &enames);
+    pvm_allocate_struct_attrs (nelem, &etypes, &enames);
 
     for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
     {
@@ -2140,8 +2140,8 @@ instruction mktyt () # [STRING TYP]... NLONG -> TYP
       JITTER_DROP_STACK ();
     }
 
-    JITTER_PUSH_STACK (pvm_make_tuple_type (nelem,
-                                            enames, etypes));
+    JITTER_PUSH_STACK (pvm_make_struct_type (nelem,
+                                             enames, etypes));
   end
 end
 

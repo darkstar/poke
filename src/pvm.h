@@ -33,12 +33,12 @@
    - Signed ("longs") and unsigned ("ulongs") 64-bit integers.
    - Strings.
    - Arrays.
-   - Tuples.
+   - Structs.
 
    It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
    the virtual machine.  The 32-bit integers are unboxed.  64-bit
-   integers, strings, arrays and tuples are boxed.  Both boxed and
+   integers, strings, arrays and structs are boxed.  Both boxed and
    unboxed values are manipulated by the PVM users using the same API,
    defined below in this header file.  */
 
@@ -64,7 +64,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_ULONG 0x9
 #define PVM_VAL_TAG_STR   0xa
 #define PVM_VAL_TAG_ARR   0xb
-#define PVM_VAL_TAG_TUP   0xc
+#define PVM_VAL_TAG_SCT   0xc
 #define PVM_VAL_TAG_TYP   0xd
 #define PVM_VAL_TAG_MAP   0xe
 
@@ -110,7 +110,7 @@ pvm_val pvm_make_uint (uint32_t value);
 #define PVM_VAL_BOX_ULONG(B) ((B)->v.ul)
 #define PVM_VAL_BOX_STR(B) ((B)->v.string)
 #define PVM_VAL_BOX_ARR(B) ((B)->v.array)
-#define PVM_VAL_BOX_TUP(B) ((B)->v.tuple)
+#define PVM_VAL_BOX_SCT(B) ((B)->v.sct)
 #define PVM_VAL_BOX_TYP(B) ((B)->v.type)
 #define PVM_VAL_BOX_MAP(B) ((B)->v.map)
 
@@ -123,7 +123,7 @@ struct pvm_val_box
     uint64_t ul;
     char *string;
     struct pvm_array *array;
-    struct pvm_tuple *tuple;
+    struct pvm_struct *sct;
     struct pvm_type *type;
     struct pvm_map *map;
   } v;
@@ -164,32 +164,32 @@ typedef struct pvm_array *pvm_array;
 
 pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 
-/* Tuples are also boxed.  */
+/* Structs are also boxed.  */
 
-#define PVM_VAL_TUP(V) (PVM_VAL_BOX_TUP (PVM_VAL_BOX ((V))))
-#define PVM_VAL_TUP_NELEM(V) (PVM_VAL_TUP((V))->nelem)
-#define PVM_VAL_TUP_ELEM(V,I) (PVM_VAL_TUP((V))->elems[(I)])
+#define PVM_VAL_SCT(V) (PVM_VAL_BOX_SCT (PVM_VAL_BOX ((V))))
+#define PVM_VAL_SCT_NELEM(V) (PVM_VAL_SCT((V))->nelem)
+#define PVM_VAL_SCT_ELEM(V,I) (PVM_VAL_SCT((V))->elems[(I)])
 
-struct pvm_tuple
+struct pvm_struct
 {
   pvm_val nelem;
-  struct pvm_tuple_elem *elems;
+  struct pvm_struct_elem *elems;
 };
 
-#define PVM_VAL_TUP_ELEM_NAME(V,I) (PVM_VAL_TUP_ELEM((V),(I)).name)
-#define PVM_VAL_TUP_ELEM_VALUE(V,I) (PVM_VAL_TUP_ELEM((V),(I)).value)
+#define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
+#define PVM_VAL_SCT_ELEM_VALUE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).value)
 
-struct pvm_tuple_elem
+struct pvm_struct_elem
 {
   pvm_val name;
   pvm_val value;
 };
 
-typedef struct pvm_tuple *pvm_tuple;
+typedef struct pvm_struct *pvm_struct;
 
-pvm_val pvm_make_tuple (pvm_val nelem);
-void pvm_reverse_tuple (pvm_val tuple);
-pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
+pvm_val pvm_make_struct (pvm_val nelem);
+void pvm_reverse_struct (pvm_val sct);
+pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 
 /* Types are also boxed.  */
 
@@ -200,18 +200,18 @@ pvm_val pvm_ref_tuple (pvm_val tuple, pvm_val name);
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
 #define PVM_VAL_TYP_A_NELEM(V) (PVM_VAL_TYP((V))->val.array.nelem)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
-#define PVM_VAL_TYP_T_NELEM(V) (PVM_VAL_TYP((V))->val.tuple.nelem)
-#define PVM_VAL_TYP_T_ENAMES(V) (PVM_VAL_TYP((V))->val.tuple.enames)
-#define PVM_VAL_TYP_T_ETYPES(V) (PVM_VAL_TYP((V))->val.tuple.etypes)
-#define PVM_VAL_TYP_T_ENAME(V,I) (PVM_VAL_TYP_T_ENAMES((V))[(I)])
-#define PVM_VAL_TYP_T_ETYPE(V,I) (PVM_VAL_TYP_T_ETYPES((V))[(I)])
+#define PVM_VAL_TYP_S_NELEM(V) (PVM_VAL_TYP((V))->val.sct.nelem)
+#define PVM_VAL_TYP_S_ENAMES(V) (PVM_VAL_TYP((V))->val.sct.enames)
+#define PVM_VAL_TYP_S_ETYPES(V) (PVM_VAL_TYP((V))->val.sct.etypes)
+#define PVM_VAL_TYP_S_ENAME(V,I) (PVM_VAL_TYP_S_ENAMES((V))[(I)])
+#define PVM_VAL_TYP_S_ETYPE(V,I) (PVM_VAL_TYP_S_ETYPES((V))[(I)])
 
 enum pvm_type_code
 {
   PVM_TYPE_INTEGRAL,
   PVM_TYPE_STRING,
   PVM_TYPE_ARRAY,
-  PVM_TYPE_TUPLE,
+  PVM_TYPE_STRUCT,
   PVM_TYPE_MAP
 };
 
@@ -238,7 +238,7 @@ struct pvm_type
       pvm_val nelem;
       pvm_val *enames;
       pvm_val *etypes;
-    } tuple;
+    } sct;
   } val;
 };
 
@@ -248,9 +248,9 @@ pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_map_type (void);
 pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
-pvm_val pvm_make_tuple_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
+pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 
-void pvm_allocate_tuple_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
+void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
 
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
@@ -300,9 +300,9 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 #define PVM_IS_ARR(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ARR)
-#define PVM_IS_TUP(V)                                                   \
+#define PVM_IS_SCT(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_TUP)
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_SCT)
 #define PVM_IS_TYP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_TYP)
@@ -358,7 +358,7 @@ const char *pvm_error (enum pvm_exit_code code);
 /* Return the size of VAL in bytes.  */
 size_t pvm_sizeof (pvm_val val);
 
-/* For arrays and tuples, return the number of elements stored.
+/* For arrays and structs, return the number of elements stored.
    Return 1 otherwise.  */
 size_t pvm_elemsof (pvm_val val);
 

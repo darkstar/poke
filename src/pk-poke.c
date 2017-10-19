@@ -85,14 +85,14 @@ poke_val (pk_io_off *address, pvm_val val)
       for (idx = 0; idx < nelem; idx++)
         poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
     }
-  else if (PVM_IS_TUP (val))
+  else if (PVM_IS_SCT (val))
     {
       size_t nelem;
       size_t idx;
 
-      nelem = PVM_VAL_TUP_NELEM (val);
+      nelem = PVM_VAL_SCT_NELEM (val);
       for (idx = 0; idx < nelem; idx++)
-        poke_val (address, PVM_VAL_TUP_ELEM_VALUE (val, idx));
+        poke_val (address, PVM_VAL_SCT_ELEM_VALUE (val, idx));
     }
   else if (PVM_IS_STR (val))
     {

@@ -145,30 +145,30 @@ pvm_make_array (pvm_val nelem, pvm_val type)
 }
 
 pvm_val
-pvm_make_tuple (pvm_val nelem)
+pvm_make_struct (pvm_val nelem)
 {
-  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_TUP);
-  pvm_tuple tuple = GC_MALLOC (sizeof (struct pvm_tuple));
-  size_t nbytes = sizeof (struct pvm_tuple_elem) * PVM_VAL_ULONG (nelem);
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
+  pvm_struct sct = GC_MALLOC (sizeof (struct pvm_struct));
+  size_t nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
 
-  tuple->nelem = nelem;
-  tuple->elems = GC_MALLOC (nbytes);
-  memset (tuple->elems, 0, nbytes);
+  sct->nelem = nelem;
+  sct->elems = GC_MALLOC (nbytes);
+  memset (sct->elems, 0, nbytes);
 
-  PVM_VAL_BOX_TUP (box) = tuple;
+  PVM_VAL_BOX_SCT (box) = sct;
   return (uint64_t)box | PVM_VAL_TAG_BOX;
 }
 
 pvm_val
-pvm_ref_tuple (pvm_val tuple, pvm_val name)
+pvm_ref_struct (pvm_val sct, pvm_val name)
 {
   size_t nelem, i;
-  struct pvm_tuple_elem *elems;
+  struct pvm_struct_elem *elems;
 
-  assert (PVM_IS_TUP (tuple) && PVM_IS_STR (name));
+  assert (PVM_IS_SCT (sct) && PVM_IS_STR (name));
   
-  nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (tuple));
-  elems = PVM_VAL_TUP (tuple)->elems;
+  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
+  elems = PVM_VAL_SCT (sct)->elems;
   
   for (i = 0; i < nelem; ++i)
     {
@@ -227,21 +227,21 @@ pvm_make_array_type (pvm_val nelem, pvm_val type)
 }
 
 pvm_val
-pvm_make_tuple_type (pvm_val nelem,
-                     pvm_val *enames, pvm_val *etypes)
+pvm_make_struct_type (pvm_val nelem,
+                      pvm_val *enames, pvm_val *etypes)
 {
-  pvm_val ttype = pvm_make_type (PVM_TYPE_TUPLE);
+  pvm_val stype = pvm_make_type (PVM_TYPE_STRUCT);
 
-  PVM_VAL_TYP_T_NELEM (ttype) = nelem;
-  PVM_VAL_TYP_T_ENAMES (ttype) = enames;
-  PVM_VAL_TYP_T_ETYPES (ttype) = etypes;
+  PVM_VAL_TYP_S_NELEM (stype) = nelem;
+  PVM_VAL_TYP_S_ENAMES (stype) = enames;
+  PVM_VAL_TYP_S_ETYPES (stype) = etypes;
 
-  return ttype;
+  return stype;
 }
 
 void
-pvm_allocate_tuple_attrs (pvm_val nelem,
-                          pvm_val **enames, pvm_val **etypes)
+pvm_allocate_struct_attrs (pvm_val nelem,
+                           pvm_val **enames, pvm_val **etypes)
 {
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
   *enames = GC_MALLOC (nbytes);
@@ -253,8 +253,8 @@ pvm_elemsof (pvm_val val)
 {
   if (PVM_IS_ARR (val))
     return PVM_VAL_ARR_NELEM (val);
-  else if (PVM_IS_TUP (val))
-    return PVM_VAL_TUP_NELEM (val);
+  else if (PVM_IS_SCT (val))
+    return PVM_VAL_SCT_NELEM (val);
   else
     return pvm_make_ulong (1);
 }
@@ -284,15 +284,15 @@ pvm_sizeof (pvm_val val)
 
       return size;
     }
-  else if (PVM_IS_TUP (val))
+  else if (PVM_IS_SCT (val))
     {
       size_t nelem, i, size;
 
-      nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (val));
+      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
 
       size = 0;
       for (i = 0; i < nelem; ++i)
-        size += pvm_sizeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+        size += pvm_sizeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
 
       return size;
     }
@@ -305,13 +305,13 @@ pvm_sizeof (pvm_val val)
 }
 
 void
-pvm_reverse_tuple (pvm_val tuple)
+pvm_reverse_struct (pvm_val sct)
 {
   size_t i, end, nelem;
-  struct pvm_tuple_elem *elems;
+  struct pvm_struct_elem *elems;
 
-  nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (tuple));
-  elems = PVM_VAL_TUP (tuple)->elems;
+  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
+  elems = PVM_VAL_SCT (sct)->elems;
 
   end = nelem - 1;
   for (i = 0; i < nelem / 2; ++i)
@@ -375,16 +375,16 @@ pvm_print_val (FILE *out, pvm_val val)
         }
       fprintf (out, "]");
     }
-  else if (PVM_IS_TUP (val))
+  else if (PVM_IS_SCT (val))
     {
       size_t nelem, idx;
 
-      nelem = PVM_VAL_ULONG (PVM_VAL_TUP_NELEM (val));
+      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
       fprintf (out, "{");
       for (idx = 0; idx < nelem; ++idx)
         {
-          pvm_val name = PVM_VAL_TUP_ELEM_NAME(val, idx);
-          pvm_val value = PVM_VAL_TUP_ELEM_VALUE(val, idx);
+          pvm_val name = PVM_VAL_SCT_ELEM_NAME(val, idx);
+          pvm_val value = PVM_VAL_SCT_ELEM_VALUE(val, idx);
 
           if (idx != 0)
             fprintf (out, ",");
@@ -424,17 +424,17 @@ pvm_print_val (FILE *out, pvm_val val)
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val));
           fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
-        case PVM_TYPE_TUPLE:
+        case PVM_TYPE_STRUCT:
           {
             size_t i, nelem;
 
-            nelem = PVM_VAL_ULONG (PVM_VAL_TYP_T_NELEM (val));
+            nelem = PVM_VAL_ULONG (PVM_VAL_TYP_S_NELEM (val));
 
             fprintf (out, "struct {");
             for (i = 0; i < nelem; ++i)
               {
-                pvm_val ename = PVM_VAL_TYP_T_ENAME(val, i);
-                pvm_val etype = PVM_VAL_TYP_T_ETYPE(val, i);
+                pvm_val ename = PVM_VAL_TYP_S_ENAME(val, i);
+                pvm_val etype = PVM_VAL_TYP_S_ETYPE(val, i);
 
                 if (i != 0)
                   fprintf (out, " ");
@@ -489,11 +489,11 @@ pvm_typeof (pvm_val val)
   else if (PVM_IS_ARR (val))
     type = pvm_make_array_type (PVM_VAL_ARR_NELEM (val),
                                 PVM_VAL_ARR_TYPE (val));
-  else if (PVM_IS_TUP (val))
+  else if (PVM_IS_SCT (val))
     {
       size_t i;
       pvm_val *enames = NULL, *etypes = NULL;
-      pvm_val nelem = PVM_VAL_TUP_NELEM (val);
+      pvm_val nelem = PVM_VAL_SCT_NELEM (val);
 
       if (PVM_VAL_ULONG (nelem) > 0)
         {
@@ -502,12 +502,12 @@ pvm_typeof (pvm_val val)
       
           for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
             {
-              enames[i] = PVM_VAL_TUP_ELEM_NAME (val, i);
-              etypes[i] = pvm_typeof (PVM_VAL_TUP_ELEM_VALUE (val, i));
+              enames[i] = PVM_VAL_SCT_ELEM_NAME (val, i);
+              etypes[i] = pvm_typeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
             }
         }
       
-      type = pvm_make_tuple_type (nelem, enames, etypes);
+      type = pvm_make_struct_type (nelem, enames, etypes);
     }
   else
     assert (0);
