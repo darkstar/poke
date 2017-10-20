@@ -256,41 +256,9 @@ promote_operands_binary (pkl_ast ast,
   return 1;
 }
 
-static int
-check_struct_type (struct pkl_parser *parser,
-                   YYLTYPE *llocp,
-                   pkl_ast_node struct_type_elems,
-                   size_t *nelem)
-{
-  pkl_ast_node t, u;
-
-  *nelem = 0;
-  for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
-    {
-      for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
-        {
-          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_ELEM_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
-
-          if (uname
-              && tname
-              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
-                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
-            {
-              pkl_tab_error (llocp, parser,
-                             "duplicated element name in struct type spec.");
-              return 0;
-            }
-        }
-      
-      *nelem += 1;
-    }
-
-  return 1;
-}
-
 /* Forward declarations for functions defined below in this file,
-   after the rules section.  */
+   after the rules section.  See the comments before the definition of
+   the functions for information about what they do.  */
 
 static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
@@ -305,6 +273,10 @@ static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
                                        YYLTYPE *loc_identifier,
                                        pkl_ast_node sct,
                                        pkl_ast_node identifier);
+
+static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
+                                        YYLTYPE *llocp,
+                                        pkl_ast_node stype_elems);
 
 %}
 
@@ -964,11 +936,9 @@ struct_type_specifier:
                 }
         | STRUCT '{' struct_elem_type_list '}'
         	{
-                  size_t nelem;
-                  if (!check_struct_type (pkl_parser, &@3,
-                                          $3, &nelem))
+                  $$ = finish_struct_type (pkl_parser, &@3, $3);
+                  if ($$ == NULL)
                     YYERROR;
-                  $$ = pkl_ast_make_struct_type (nelem, $3);
                 }
         ;
 
@@ -1145,6 +1115,13 @@ enumerator:
 
 %%
 
+/* Finish an array and return it.  Check that the types of all the
+   array elements are the same, and derive the type of the array from
+   them.  Also compute and set the indexes of all the elements and set
+   the size of the array consequently.
+
+   In case of a syntax error, return NULL.  */
+
 static pkl_ast_node
 finish_array (struct pkl_parser *parser,
               YYLTYPE *llocp,
@@ -1203,6 +1180,12 @@ finish_array (struct pkl_parser *parser,
   
   return array;
 }
+
+/* Finish a struct and return it.  Check that there are not struct
+   elements defined with the same name.  Derive the type of the struct
+   after the types of its elements.
+
+   In case of a syntax error, return NULL.  */
 
 static pkl_ast_node
 finish_struct (struct pkl_parser *parser,
@@ -1267,9 +1250,17 @@ finish_struct (struct pkl_parser *parser,
   return sct;
 }
 
+/* Finish a reference to a struct and return it.  Check whether SCT is
+   indeed a struct, and also that it contains an element named after
+   IDENTIFIER.  Also set the type of the struct ref after the type of
+   the referred element.
+
+   In case of a syntax error, return NULL.  */
+
 static pkl_ast_node
 finish_struct_ref (struct pkl_parser *parser,
-                   YYLTYPE *loc_sct, YYLTYPE *loc_identifier,
+                   YYLTYPE *loc_sct,
+                   YYLTYPE *loc_identifier,
                    pkl_ast_node sct,
                    pkl_ast_node identifier)
 {
@@ -1305,4 +1296,43 @@ finish_struct_ref (struct pkl_parser *parser,
   PKL_AST_TYPE (sref) = ASTREF (type);
   
   return sref;
+}
+
+/* Finish a struct type and return it.  Check that no duplicated named
+   elements are declared in the type.
+
+   In case of a syntax error, return NULL.  */
+
+static pkl_ast_node
+finish_struct_type (struct pkl_parser *parser,
+                    YYLTYPE *llocp,
+                    pkl_ast_node stype_elems)
+{
+  pkl_ast_node t, u, stype;
+  size_t nelem;
+
+  nelem = 0;
+  for (t = stype_elems; t; t = PKL_AST_CHAIN (t))
+    {
+      for (u = stype_elems; u != t; u = PKL_AST_CHAIN (u))
+        {
+          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_ELEM_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+
+          if (uname
+              && tname
+              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
+                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
+            {
+              pkl_tab_error (llocp, parser,
+                             "duplicated element name in struct type spec.");
+              return NULL;
+            }
+        }
+      
+      nelem += 1;
+    }
+
+  stype = pkl_ast_make_struct_type (nelem, stype_elems);
+  return stype;
 }
