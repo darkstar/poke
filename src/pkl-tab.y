@@ -50,215 +50,38 @@
   
 #define PKL_AST_CHILDREN_STEP 12
 
-/* Error reporting function for pkl_tab_parse.
-
-   When this function returns, the parser tries to recover the error.
-   If it is unable to recover, then it returns with 1 (syntax error)
-   immediately.  */
+/* Error reporting function.  When this function returns, the parser
+   may try to recover the error.  If it is unable to recover, then it
+   returns with 1 (syntax error) immediately.  */
   
 void
 pkl_tab_error (YYLTYPE *llocp,
                struct pkl_parser *pkl_parser,
                char const *err)
 {
-  // XXX
-  //  if (YYRECOVERING ())
-  //    return;
-  // XXX: store the line read and other info for pretty
-  //      error printing in EXTRA.
-  //  if (!pkl_parser->interactive)
-    fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
-             llocp->first_line, err);
-}
-
-#if 0
-
-/* The following functions are used in the actions in several grammar
-   rules below.  This is to avoid replicating code in situations where
-   the difference between rules are just a different permutation of
-   its elements.
-
-   All these functions return 1 if the action is executed
-   successfully, or 0 if a syntax error should be raised at the
-   grammar rule invoking the function.  */
-
-static int
-enum_specifier_action (struct pkl_parser *pkl_parser,
-                       pkl_ast_node *enumeration,
-                       pkl_ast_node tag, YYLTYPE *loc_tag,
-                       pkl_ast_node enumerators, YYLTYPE *loc_enumerators,
-                       pkl_ast_node docstr, YYLTYPE *loc_docstr)
-{
-  *enumeration = pkl_ast_make_enum (tag, enumerators, docstr);
-
-  if (pkl_ast_register (pkl_parser->ast,
-                        PKL_AST_IDENTIFIER_POINTER (tag),
-                        *enumeration) == NULL)
-    {
-      pkl_tab_error (loc_tag, pkl_parser, "enum already defined");
-      return 0;
-    }
-
-  return 1;
-}
-
-static int
-struct_specifier_action (struct pkl_parser *pkl_parser,
-                         pkl_ast_node *strct,
-                         pkl_ast_node tag, YYLTYPE *loc_tag,
-                         pkl_ast_node docstr, YYLTYPE *loc_docstr,
-                         pkl_ast_node mem, YYLTYPE *loc_mem)
-{
-  *strct = pkl_ast_make_struct (tag, docstr, mem);
-
-  if (pkl_ast_register (pkl_parser->ast,
-                        PKL_AST_IDENTIFIER_POINTER (tag),
-                        *strct) == NULL)
-    {
-      pkl_tab_error (loc_tag, pkl_parser, "struct already defined");
-      return 0;
-    }
-
-  return 1;
-}
-#endif
-
-static int
-check_operand_unary (pkl_ast ast,
-                     enum pkl_ast_op opcode,
-                     pkl_ast_node *a)
-{
-  /* All unary operators require an integer as an argument.  */
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) != PKL_TYPE_INTEGRAL)
-    return 0;
-
-  return 1;
-}
-
-static int
-promote_to_integral (size_t size, int sign,
-                     pkl_ast ast, pkl_ast_node *a)
-{
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) == PKL_TYPE_INTEGRAL)
-    {
-      if (!(PKL_AST_TYPE_I_SIZE (*a) == size
-            && PKL_AST_TYPE_I_SIGNED (*a) == sign))
-        {
-          pkl_ast_node desired_type
-            = pkl_ast_get_integral_type (ast, size, sign);
-          *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
-          PKL_AST_TYPE (*a) = ASTREF (desired_type);
-        }
-
-      return 1;
-    }
-
-  return 0;
-
-}
-
-static int
-promote_to_bool (pkl_ast ast, pkl_ast_node *a)
-{
-  return promote_to_integral (32, 1, ast, a);
-}
-
-static int
-promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
-{
-  return promote_to_integral (64, 0, ast, a);
-}
- 
-static int
-promote_operands_binary (pkl_ast ast,
-                         pkl_ast_node *a,
-                         pkl_ast_node *b,
-                         int allow_strings,
-                         int allow_arrays,
-                         int allow_structs)
-{
-  pkl_ast_node *to_promote_a = NULL;
-  pkl_ast_node *to_promote_b = NULL;
-  pkl_ast_node ta = PKL_AST_TYPE (*a);
-  pkl_ast_node tb = PKL_AST_TYPE (*b);
-  size_t size_a;
-  size_t size_b;
-  int sign_a;
-  int sign_b;
-
-  /* Both arguments should be either integrals, strings, arrays or
-     structs.  */
-
-  if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
-    return 0;
-
-  if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
-      || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
-      || (!allow_structs && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRUCT))
-    return 0;
-
-
-  if (!(PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL))
-    /* No need to promote non-integral types.  */
-    return 1;
-
-  /* Handle promotion of integral operands.  The rules are:
-
-     - If one operand is narrower than the other, it is promoted to
-       have the same width.  
-
-     - If one operand is unsigned and the other signed, the signed
-       operand is promoted to unsigned.  */
-
-  size_a = PKL_AST_TYPE_I_SIZE (ta);
-  size_b = PKL_AST_TYPE_I_SIZE (tb);
-  sign_a = PKL_AST_TYPE_I_SIGNED (ta);
-  sign_b = PKL_AST_TYPE_I_SIGNED (tb);
-
-  if (size_a > size_b)
-    {
-      size_b = size_a;
-      to_promote_b = b;
-    }
-  else if (size_a < size_b)
-    {
-      size_a = size_b;
-      to_promote_a = a;
-    }
-
-  if (sign_a == 0 && sign_b == 1)
-    {
-      sign_b = 0;
-      to_promote_b = b;
-    }
-  else if (sign_a == 1 && sign_b == 0)
-    {
-      sign_a = 0;
-      to_promote_a = b;
-    }
-
-  if (to_promote_a != NULL)
-    {
-      pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_a, sign_a);
-      *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
-      PKL_AST_TYPE (*a) = ASTREF (t);
-    }
-
-  if (to_promote_b != NULL)
-    {
-      pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_b, sign_b);
-      *b = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *b);
-      PKL_AST_TYPE (*b) = ASTREF (t);
-    }
-
-  return 1;
+  /* XXX if (!pkl_parser->interactive) */
+  fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
+           llocp->first_line, err);
 }
 
 /* Forward declarations for functions defined below in this file,
-   after the rules section.  See the comments before the definition of
-   the functions for information about what they do.  */
+   after the rules section.  See the comments at the definition of the
+   functions for information about what they do.  */
+
+
+static int promote_to_integral (size_t size, int sign, pkl_ast ast,
+                                pkl_ast_node *a);
+
+static int promote_to_bool (pkl_ast ast, pkl_ast_node *a);
+
+static int promote_to_ulong (pkl_ast ast, pkl_ast_node *a);
+
+static int promote_operands_binary (pkl_ast ast,
+                                    pkl_ast_node *a,
+                                    pkl_ast_node *b,
+                                    int allow_strings,
+                                    int allow_arrays,
+                                    int allow_structs);
 
 static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
@@ -277,7 +100,6 @@ static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
 static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
                                         YYLTYPE *llocp,
                                         pkl_ast_node stype_elems);
-
 %}
 
 %union {
@@ -422,7 +244,7 @@ expression:
           	{
                   if (($1 == PKL_AST_OP_NOT
                        && !promote_to_bool (pkl_parser->ast, &$2))
-                      || (!check_operand_unary (pkl_parser->ast, $1, &$2)))
+                      || (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($2)) != PKL_TYPE_INTEGRAL))
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "invalid operand to unary operator.");
@@ -1115,6 +937,142 @@ enumerator:
 
 %%
 
+/* Promote a given node AST to an integral type of width SIZE and sign
+   SIGN, if possible.  Put the resulting node in A.  Return 1 if the
+   promotion was successful, 0 otherwise.  */
+
+static int
+promote_to_integral (size_t size, int sign,
+                     pkl_ast ast, pkl_ast_node *a)
+{
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) == PKL_TYPE_INTEGRAL)
+    {
+      if (!(PKL_AST_TYPE_I_SIZE (*a) == size
+            && PKL_AST_TYPE_I_SIGNED (*a) == sign))
+        {
+          pkl_ast_node desired_type
+            = pkl_ast_get_integral_type (ast, size, sign);
+          *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
+          PKL_AST_TYPE (*a) = ASTREF (desired_type);
+        }
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Promote a given node AST to a bool type, if possible.  Put the
+   resulting node in A.  Return 1 if the promotion was successful, 0
+   otherwise.  */
+
+static int
+promote_to_bool (pkl_ast ast, pkl_ast_node *a)
+{
+  return promote_to_integral (32, 1, ast, a);
+}
+
+/* Promote a given node AST to an unsigned long type, if possible.
+   Put the resulting node in A.  Return 1 if the promotion was
+   successful, 0 otherwise.  */
+
+static int
+promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
+{
+  return promote_to_integral (64, 0, ast, a);
+}
+
+/* Promote the arguments to a binary operand to satisfy the language
+   restrictions.  Put the resulting nodes in A and B.  Return 1 if the
+   promotions were successful, 0 otherwise.  */
+
+static int
+promote_operands_binary (pkl_ast ast,
+                         pkl_ast_node *a,
+                         pkl_ast_node *b,
+                         int allow_strings,
+                         int allow_arrays,
+                         int allow_structs)
+{
+  pkl_ast_node *to_promote_a = NULL;
+  pkl_ast_node *to_promote_b = NULL;
+  pkl_ast_node ta = PKL_AST_TYPE (*a);
+  pkl_ast_node tb = PKL_AST_TYPE (*b);
+  size_t size_a;
+  size_t size_b;
+  int sign_a;
+  int sign_b;
+
+  /* Both arguments should be either integrals, strings, arrays or
+     structs.  */
+
+  if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
+    return 0;
+
+  if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
+      || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
+      || (!allow_structs && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRUCT))
+    return 0;
+
+
+  if (!(PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL))
+    /* No need to promote non-integral types.  */
+    return 1;
+
+  /* Handle promotion of integral operands.  The rules are:
+
+     - If one operand is narrower than the other, it is promoted to
+       have the same width.  
+
+     - If one operand is unsigned and the other signed, the signed
+       operand is promoted to unsigned.  */
+
+  size_a = PKL_AST_TYPE_I_SIZE (ta);
+  size_b = PKL_AST_TYPE_I_SIZE (tb);
+  sign_a = PKL_AST_TYPE_I_SIGNED (ta);
+  sign_b = PKL_AST_TYPE_I_SIGNED (tb);
+
+  if (size_a > size_b)
+    {
+      size_b = size_a;
+      to_promote_b = b;
+    }
+  else if (size_a < size_b)
+    {
+      size_a = size_b;
+      to_promote_a = a;
+    }
+
+  if (sign_a == 0 && sign_b == 1)
+    {
+      sign_b = 0;
+      to_promote_b = b;
+    }
+  else if (sign_a == 1 && sign_b == 0)
+    {
+      sign_a = 0;
+      to_promote_a = b;
+    }
+
+  if (to_promote_a != NULL)
+    {
+      pkl_ast_node t
+        = pkl_ast_get_integral_type (ast, size_a, sign_a);
+      *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
+      PKL_AST_TYPE (*a) = ASTREF (t);
+    }
+
+  if (to_promote_b != NULL)
+    {
+      pkl_ast_node t
+        = pkl_ast_get_integral_type (ast, size_b, sign_b);
+      *b = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *b);
+      PKL_AST_TYPE (*b) = ASTREF (t);
+    }
+
+  return 1;
+}
+
 /* Finish an array and return it.  Check that the types of all the
    array elements are the same, and derive the type of the array from
    them.  Also compute and set the indexes of all the elements and set
@@ -1336,3 +1294,4 @@ finish_struct_type (struct pkl_parser *parser,
   stype = pkl_ast_make_struct_type (nelem, stype_elems);
   return stype;
 }
+
