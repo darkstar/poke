@@ -257,67 +257,6 @@ promote_operands_binary (pkl_ast ast,
 }
 
 static int
-check_struct (struct pkl_parser *parser,
-              YYLTYPE *llocp,
-              pkl_ast_node elems,
-              size_t *nelem,
-              pkl_ast_node *type)
-{
-  pkl_ast_node t, u;
-  pkl_ast_node struct_type_elems;
-
-  struct_type_elems = NULL;
-  *nelem = 0;
-  for (t = elems; t; t = PKL_AST_CHAIN (t))
-    {
-      pkl_ast_node name;
-      pkl_ast_node struct_type_elem;
-      pkl_ast_node ename;
-      pkl_ast_node type;
-
-      /* Add the name for this struct element.  */
-      name = PKL_AST_STRUCT_ELEM_NAME (t);
-      if (name)
-        {
-          assert (PKL_AST_CODE (name) == PKL_AST_IDENTIFIER);
-          for (u = elems; u != t; u = PKL_AST_CHAIN (u))
-            {
-              pkl_ast_node uname
-                = PKL_AST_STRUCT_ELEM_NAME (u);
-
-              if (uname == NULL)
-                continue;
-              
-              if (strcmp (PKL_AST_IDENTIFIER_POINTER (name),
-                          PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
-                {
-                  pkl_tab_error (llocp, parser,
-                                 "duplicated element name in struct.");
-                  return 0;
-                }
-            }
-
-          ename = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (name));
-        }
-      else
-        ename = pkl_ast_make_identifier ("");
-
-      type = PKL_AST_TYPE (PKL_AST_STRUCT_ELEM_EXP (t));
-
-      struct_type_elem = pkl_ast_make_struct_type_elem (ename,
-                                                        pkl_ast_dup_type (type));
-      struct_type_elems = pkl_ast_chainon (struct_type_elems,
-                                           struct_type_elem);
-      *nelem += 1;
-    }
-
-  /* Now build the type for the struct.  */
-  *type = pkl_ast_make_struct_type (*nelem, struct_type_elems);
-
-  return 1;
-}
-
-static int
 check_struct_type (struct pkl_parser *parser,
                    YYLTYPE *llocp,
                    pkl_ast_node struct_type_elems,
@@ -350,97 +289,22 @@ check_struct_type (struct pkl_parser *parser,
   return 1;
 }
 
-static int
-check_struct_ref (struct pkl_parser *parser,
-                  YYLTYPE *llocp,
-                  pkl_ast_node stype,
-                  pkl_ast_node identifier,
-                  pkl_ast_node *type)
-{
-  pkl_ast_node e;
+/* Forward declarations for functions defined below in this file,
+   after the rules section.  */
 
-  assert (PKL_AST_TYPE_CODE (stype) == PKL_TYPE_STRUCT);
+static pkl_ast_node finish_array (struct pkl_parser *parser,
+                                  YYLTYPE *llocp,
+                                  pkl_ast_node elems);
 
-  *type = NULL;
-  for (e = PKL_AST_TYPE_S_ELEMS (stype); e; e = PKL_AST_CHAIN (e))
-    {
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (e)),
-                  PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
-        {
-          *type = PKL_AST_STRUCT_TYPE_ELEM_TYPE (e);
-          break;
-        }
-    }
+static pkl_ast_node finish_struct (struct pkl_parser *parser,
+                                   YYLTYPE *llocp,
+                                   pkl_ast_node elems);
 
-  if (*type == NULL)
-    {
-      pkl_tab_error (llocp, parser,
-                     "invalid struct member");
-      return 0;
-    }
-  
-  return 1;
-}
-
-
-static int
-check_array (struct pkl_parser *parser,
-             YYLTYPE *llocp,
-             pkl_ast_node elems,
-             pkl_ast_node *type,
-             size_t *nelem)
-{
-  pkl_ast_node t, array_nelem;
-  size_t index;
-
-  *type = NULL;
-  *nelem = 0;
-
-  for (index = 0, t = elems; t; t = PKL_AST_CHAIN (t))
-    {
-      pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (t);
-      size_t elem_index = PKL_AST_ARRAY_ELEM_INDEX (t);
-      size_t elems_appended, effective_index;
-      
-      /* First check the type of the element.  */
-      assert (PKL_AST_TYPE (elem));
-      if (*type == NULL)
-        *type = PKL_AST_TYPE (elem);
-      else if (!pkl_ast_type_equal (PKL_AST_TYPE (elem), *type))
-        {
-          pkl_tab_error (llocp, parser,
-                         "array element is of the wrong type.");
-          return 0;
-        }        
-      
-      /* Then set the index of the element.  */
-      if (elem_index == PKL_AST_ARRAY_NOINDEX)
-        {
-          effective_index = index;
-          elems_appended = 1;
-        }
-      else
-        {
-          if (elem_index < index)
-            elems_appended = 0;
-          else
-            elems_appended = elem_index - index + 1;
-          effective_index = elem_index;
-        }
-      
-      PKL_AST_ARRAY_ELEM_INDEX (t) = effective_index;
-      index += elems_appended;
-      *nelem += elems_appended;
-    }
-
-  /* Finally, set the type of the array itself.  */
-  array_nelem = pkl_ast_make_integer (*nelem);
-  PKL_AST_TYPE (array_nelem) = pkl_ast_get_integral_type (parser->ast,
-                                                          64, 0);
-  *type = pkl_ast_make_array_type (array_nelem, *type);
-
-  return 1;
-}
+static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
+                                       YYLTYPE *loc_sct,
+                                       YYLTYPE *loc_identifier,
+                                       pkl_ast_node sct,
+                                       pkl_ast_node identifier);
 
 %}
 
@@ -1008,48 +872,23 @@ primary:
                 }
         | '[' array_elem_list ']'
         	{
-                  pkl_ast_node type;
-                  size_t nelem;
-
-                  if (!check_array (pkl_parser,
-                                    &@2, $2,
-                                    &type, &nelem))
+                  $$ = finish_array (pkl_parser, &@2, $2);
+                  if ($$ == NULL)
                     YYERROR;
-                  
-                  $$ = pkl_ast_make_array (nelem, $2);
-                  PKL_AST_TYPE ($$) = ASTREF (type);
                 }
 	| '{' struct_elem_list '}'
         	{
-                  size_t nelem;
-                  pkl_ast_node type;
-
-                  if (!check_struct (pkl_parser,
-                                     &@2, $2,
-                                     &nelem, &type))
+                  $$ = finish_struct (pkl_parser, &@2, $2);
+                  if ($$ == NULL)
                     YYERROR;
-
-                  $$ = pkl_ast_make_struct (nelem, $2);
-                  PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         | primary '.' IDENTIFIER
         	{
-                  pkl_ast_node type;
-                  
-                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1)) != PKL_TYPE_STRUCT)
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "operator to . must be a struct.");
-                      YYERROR;
-                    }
-
-                  if (!check_struct_ref (pkl_parser, &@3,
-                                         PKL_AST_TYPE ($1), $3,
-                                         &type))
-                      YYERROR;
-                  
-                  $$ = pkl_ast_make_struct_ref ($1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF (type);
+                  $$ = finish_struct_ref (pkl_parser,
+                                          &@1, &@3,
+                                          $1, $3);
+                  if ($$ == NULL)
+                    YYERROR;
                 }
 	;
 
@@ -1154,6 +993,32 @@ struct_elem_type:
  * Statements.
  */
 
+pushlevel:
+         /* This rule is used below in order to set a new current
+            binding level that will be in effect for subsequent
+            reductions of declarations.  */
+	  %empty
+		{
+                  push_level ();
+                  $$ = pkl_parser->current_block;
+                  pkl_parser->current_block
+                    = pkl_ast_make_let (/* supercontext */ $$, /* body */ NULL);
+                }
+	;
+
+compstmt:
+	  '{' '}'
+          	{ $$ = pkl_ast_make_compound_stmt (NULL); }
+        | '{' pushlevel stmt_list '}'
+        	{
+                  $$ = pkl_parser->current_block; 
+                  PKL_AST_LET_BODY ($$, $3);
+                  pop_level ();
+                  /* XXX: build a compound instead of a let if
+                     stmt_list doesn't contain any declaration.  */
+                }
+        ;
+
 stmt_list:
 	  stmt
         | stmt_list stmt
@@ -1163,30 +1028,16 @@ stmt_list:
 stmt:
 	  compstmt
         | IDENTIFIER '=' expression ';'
-          	{ $$ = pkl_ast_make_assign ($1, $3); }
-        ;
-
-pushlevel:
-	  %empty
-		{
-                  push_level ();
-                }
-	;
-
-compstmt:
-	  '{' '}'
-          	{ $$ = pkl_ast_make_compound (NULL); }
-        | '{' pushlevel stmt_list '}'
-        	{
-                  $$ = pkl_ast_make_let ($$);
-                  PKL_AST_LET_BODY (pkl_parser->current_block, $3);
-                  pop_level ();
-                }
+          	{ $$ = pkl_ast_make_assign_stmt ($1, $3); }
         ;
           
 /*
  * Declarations.
  */
+
+/* decl.c:  start_decl, finish_decl
+  
+   Identifiers have a local value and a global value.  */
 
 /*
 declaration:
@@ -1195,8 +1046,8 @@ declaration:
 
 declaration_specifiers:
           typedef_specifier
-          	| struct_specifier
-                | enum_specifier 
+       	| struct_specifier
+        | enum_specifier 
         ;
 
 */
@@ -1276,42 +1127,6 @@ enum_specifier:
                                                NULL, NULL))
                     YYERROR;
                 }
-	| ENUM IDENTIFIER DOCSTR '{' enumerator_list '}'
-          	{
-                  if (! enum_specifier_action (pkl_parser,
-                                               &$$,
-                                               $IDENTIFIER, &@IDENTIFIER,
-                                               $enumerator_list, &@enumerator_list,
-                                               $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        | ENUM DOCSTR IDENTIFIER '{' enumerator_list '}'
-          	{
-                  if (! enum_specifier_action (pkl_parser,
-                                               &$$,
-                                               $IDENTIFIER, &@IDENTIFIER,
-                                               $enumerator_list, &@enumerator_list,
-                                               $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        | ENUM IDENTIFIER '{' enumerator_list '}' DOCSTR
-          	{
-                  if (! enum_specifier_action (pkl_parser,
-                                               &$$,
-                                               $IDENTIFIER, &@IDENTIFIER,
-                                               $enumerator_list, &@enumerator_list,
-                                               $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
-        | DOCSTR ENUM IDENTIFIER '{' enumerator_list '}'
-          	{
-                  if (! enum_specifier_action (pkl_parser,
-                                               &$$,
-                                               $IDENTIFIER, &@IDENTIFIER,
-                                               $enumerator_list, &@enumerator_list,
-                                               $DOCSTR, &@DOCSTR))
-                    YYERROR;
-                }
         ;
 
 enumerator_list:
@@ -1323,202 +1138,171 @@ enumerator_list:
 enumerator:
 	  IDENTIFIER
                 { $$ = pkl_ast_make_enumerator ($1, NULL, NULL); }
-	| IDENTIFIER DOCSTR
-                {
-                  $$ = pkl_ast_make_enumerator ($1, NULL, $2);
-                }
         | IDENTIFIER '=' constant_expression
                 { $$ = pkl_ast_make_enumerator ($1, $3, NULL); }
-        | IDENTIFIER '=' DOCSTR constant_expression
-        	{
-                  $$ = pkl_ast_make_enumerator ($1, $4, $3);
-                }
-        | IDENTIFIER '=' constant_expression DOCSTR
-	        {
-                  $$ = pkl_ast_make_enumerator ($1, $3, $4);
-                }
-        | DOCSTR IDENTIFIER '=' constant_expression
-        	{
-                  $$ = pkl_ast_make_enumerator ($2, $4, $1);
-                }
-	;
-
-constant_expression:
-	  conditional_expression
-          	{
-                  if (!PKL_AST_LITERAL_P ($1))
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "expected constant expression");
-                      YYERROR;
-                    }
-
-                  $$ = $1;
-                }
-        ;
-*/
-/*
- * Structs.
- */
-
-/*
-struct_specifier:
-	  STRUCT IDENTIFIER mem_layout
-			{
-                          if (!struct_specifier_action (pkl_parser,
-                                                        &$$,
-                                                        $IDENTIFIER, &@IDENTIFIER,
-                                                        NULL, NULL,
-                                                        $mem_layout, &@mem_layout))
-                            YYERROR;
-                        }
-	| DOCSTR STRUCT IDENTIFIER mem_layout
-			{
-                          if (!struct_specifier_action (pkl_parser,
-                                                        &$$,
-                                                        $IDENTIFIER, &@IDENTIFIER,
-                                                        $DOCSTR, &@DOCSTR,
-                                                        $mem_layout, &@mem_layout))
-                            YYERROR;
-                        }
-        | STRUCT IDENTIFIER DOCSTR mem_layout
-        	{
-                  if (!struct_specifier_action (pkl_parser,
-                                                &$$,
-                                                $IDENTIFIER, &@IDENTIFIER,
-                                                $DOCSTR, &@DOCSTR,
-                                                $mem_layout, &@mem_layout))
-                    YYERROR;
-                }
-        | STRUCT IDENTIFIER mem_layout DOCSTR
-        		{
-                          if (!struct_specifier_action (pkl_parser,
-                                                        &$$,
-                                                        $IDENTIFIER, &@IDENTIFIER,
-                                                        $DOCSTR, &@DOCSTR,
-                                                        $mem_layout, &@mem_layout))
-                            YYERROR;
-                        }
-	;
-*/
-/*
- * Memory layouts.
- */
-
-/*
-mem_layout:
-	  mem_endianness '{' mem_declarator_list '}'
-          			{ $$ = pkl_ast_make_mem ($1, $3); }
-	| '{' mem_declarator_list '}'
-        			{ $$ = pkl_ast_make_mem (pkl_ast_default_endian (),
-                                                         $2); }
-        ;
-
-mem_endianness:
-	  MSB		{ $$ = PKL_AST_MSB; }
-	| LSB		{ $$ = PKL_AST_LSB; }
-	;
-
-mem_declarator_list:
-	  %empty
-			{ $$ = NULL; }
-	| mem_declarator ';'
-        | mem_declarator_list  mem_declarator ';'
-		        { $$ = pkl_ast_chainon ($1, $2); }
-	;
-
-mem_declarator:
-	  mem_layout
-        | mem_field_with_docstr
-        | mem_cond
-        | mem_loop
-        | assignment_expression
-        | assert
-        ;
-
-mem_field_with_docstr:
-	  mem_field_with_endian
-	| DOCSTR mem_field_with_endian
-          		{
-                          PKL_AST_FIELD_DOCSTR ($2) = ASTREF ($1);
-                          $$ = $2;
-                        }
-        | mem_field_with_endian DOCSTR
-		        {
-                          PKL_AST_FIELD_DOCSTR ($1) = ASTREF ($2);
-                          $$ = $1;
-                        }
-        ;
-
-mem_field_with_endian:
-	  mem_endianness mem_field_with_size
-          		{
-                          PKL_AST_FIELD_ENDIAN ($2) = $1;
-                          $$ = $2;
-                        }
-        | mem_field_with_size
-	;
-
-mem_field_with_size:
-	  mem_field
-        | mem_field ':' expression
-          		{
-                          if (PKL_AST_TYPE_CODE (PKL_AST_FIELD_TYPE ($1))
-                              == PKL_TYPE_STRUCT)
-                            {
-                              pkl_tab_error (&@1, pkl_parser,
-                                             "fields of type struct can't have an\
- explicit size");
-                              YYERROR;
-                            }
-
-                          * Discard the size inferred from the field
-                             type and replace it with the
-                             field width expression.  *
-                          pkl_ast_node_free (PKL_AST_FIELD_SIZE ($1));
-                          PKL_AST_FIELD_SIZE ($1) = ASTREF ($3);
-                          $$ = $1;
-                        }
-        ;
-
-mem_field:
-	  type_specifier IDENTIFIER
-          		{
-                          pkl_ast_node one = pkl_ast_make_integer (1);
-                          pkl_ast_node size = pkl_ast_make_integer (PKL_AST_TYPE_SIZE ($1));
-
-                          $$ = pkl_ast_make_field ($2, $1, NULL,
-                                                   pkl_ast_default_endian (),
-                                                   one, size);
-                        }
-        | type_specifier IDENTIFIER '[' assignment_expression ']'
-		        {
-                          pkl_ast_node size = pkl_ast_make_integer (PKL_AST_TYPE_SIZE ($1));
-
-                          $$ = pkl_ast_make_field ($2, $1, NULL,
-                                                   pkl_ast_default_endian (),
-                                                   $4, size);
-                        }
-	;
-
-mem_cond:
-	  IF '(' expression ')' mem_layout
-          		{ $$ = pkl_ast_make_cond ($3, $5, NULL); }
-        | IF '(' expression ')' mem_layout ELSE mem_layout
-        		{ $$ = pkl_ast_make_cond ($3, $5, $7); }
-        ;
-
-mem_loop:
-	  FOR '(' expression ';' expression ';' expression ')' mem_layout
-          		{ $$ = pkl_ast_make_loop ($3, $5, $7, $9); }
-        | WHILE '(' expression ')' mem_layout
-        		{ $$ = pkl_ast_make_loop (NULL, $3, NULL, $5); }
-	;
-
-assert:
-	  ASSERT expression
-          		{ $$ = pkl_ast_make_assertion ($2); }
 	;
 */
 
 %%
+
+static pkl_ast_node
+finish_array (struct pkl_parser *parser,
+              YYLTYPE *llocp,
+              pkl_ast_node elems)
+{
+  pkl_ast_node array, tmp, array_nelem, type;
+  size_t index, nelem;
+
+  type = NULL;
+  nelem = 0;
+  for (index = 0, tmp = elems; tmp; tmp = PKL_AST_CHAIN (tmp))
+    {
+      pkl_ast_node elem = PKL_AST_ARRAY_ELEM_EXP (tmp);
+      size_t elem_index = PKL_AST_ARRAY_ELEM_INDEX (tmp);
+      size_t elems_appended, effective_index;
+      
+      /* First check the type of the element.  */
+      assert (PKL_AST_TYPE (elem));
+      if (type == NULL)
+        type = PKL_AST_TYPE (elem);
+      else if (!pkl_ast_type_equal (PKL_AST_TYPE (elem), type))
+        {
+          pkl_tab_error (llocp, parser,
+                         "array element is of the wrong type.");
+          return NULL;
+        }        
+      
+      /* Then set the index of the element.  */
+      if (elem_index == PKL_AST_ARRAY_NOINDEX)
+        {
+          effective_index = index;
+          elems_appended = 1;
+        }
+      else
+        {
+          if (elem_index < index)
+            elems_appended = 0;
+          else
+            elems_appended = elem_index - index + 1;
+          effective_index = elem_index;
+        }
+      
+      PKL_AST_ARRAY_ELEM_INDEX (tmp) = effective_index;
+      index += elems_appended;
+      nelem += elems_appended;
+    }
+
+  /* Finally, set the type of the array itself.  */
+  array_nelem = pkl_ast_make_integer (nelem);
+  PKL_AST_TYPE (array_nelem) = pkl_ast_get_integral_type (parser->ast,
+                                                          64, 0);
+  type = pkl_ast_make_array_type (array_nelem, type);
+  
+  array = pkl_ast_make_array (nelem, elems);
+  PKL_AST_TYPE (array) = ASTREF (type);
+  
+  return array;
+}
+
+static pkl_ast_node
+finish_struct (struct pkl_parser *parser,
+               YYLTYPE *llocp,
+               pkl_ast_node elems)
+{
+  pkl_ast_node t, u;
+  pkl_ast_node struct_type_elems, type, sct;
+  size_t nelem;
+
+  struct_type_elems = NULL;
+  nelem = 0;
+  for (t = elems; t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node name;
+      pkl_ast_node struct_type_elem;
+      pkl_ast_node ename;
+      pkl_ast_node type;
+
+      /* Add the name for this struct element.  */
+      name = PKL_AST_STRUCT_ELEM_NAME (t);
+      if (name)
+        {
+          assert (PKL_AST_CODE (name) == PKL_AST_IDENTIFIER);
+          for (u = elems; u != t; u = PKL_AST_CHAIN (u))
+            {
+              pkl_ast_node uname
+                = PKL_AST_STRUCT_ELEM_NAME (u);
+
+              if (uname == NULL)
+                continue;
+              
+              if (strcmp (PKL_AST_IDENTIFIER_POINTER (name),
+                          PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
+                {
+                  pkl_tab_error (llocp, parser,
+                                 "duplicated element name in struct.");
+                  return NULL;
+                }
+            }
+
+          ename = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (name));
+        }
+      else
+        ename = pkl_ast_make_identifier ("");
+
+      type = PKL_AST_TYPE (PKL_AST_STRUCT_ELEM_EXP (t));
+
+      struct_type_elem = pkl_ast_make_struct_type_elem (ename,
+                                                        pkl_ast_dup_type (type));
+      struct_type_elems = pkl_ast_chainon (struct_type_elems,
+                                           struct_type_elem);
+      nelem += 1;
+    }
+
+  /* Now build the type for the struct.  */
+  type = pkl_ast_make_struct_type (nelem, struct_type_elems);
+
+  sct = pkl_ast_make_struct (nelem, elems);
+  PKL_AST_TYPE (sct) = ASTREF (type);
+  
+  return sct;
+}
+
+static pkl_ast_node
+finish_struct_ref (struct pkl_parser *parser,
+                   YYLTYPE *loc_sct, YYLTYPE *loc_identifier,
+                   pkl_ast_node sct,
+                   pkl_ast_node identifier)
+{
+  pkl_ast_node e, type, sref, stype;
+
+  stype = PKL_AST_TYPE (sct);
+  if (PKL_AST_TYPE_CODE (stype) != PKL_TYPE_STRUCT)
+    {
+      pkl_tab_error (loc_sct, parser,
+                     "expected struct.");
+      return NULL;
+    }
+
+  type = NULL;
+  for (e = PKL_AST_TYPE_S_ELEMS (stype); e; e = PKL_AST_CHAIN (e))
+    {
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (e)),
+                  PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
+        {
+          type = PKL_AST_STRUCT_TYPE_ELEM_TYPE (e);
+          break;
+        }
+    }
+
+  if (type == NULL)
+    {
+      pkl_tab_error (loc_identifier, parser,
+                     "invalid struct member");
+      return NULL;
+    }
+
+  sref = pkl_ast_make_struct_ref (sct, identifier);
+  PKL_AST_TYPE (sref) = ASTREF (type);
+  
+  return sref;
+}

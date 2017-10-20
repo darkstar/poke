@@ -207,12 +207,16 @@ pkl_ast_node pkl_ast_make_program (pkl_ast_node declarations);
 
 #define PKL_AST_IDENTIFIER_LENGTH(AST) ((AST)->identifier.length)
 #define PKL_AST_IDENTIFIER_POINTER(AST) ((AST)->identifier.pointer)
+#define PKL_AST_IDENTIFIER_GLOBAL_VALUE(AST) ((AST)->identifier.global_value)
+#define PKL_AST_IDENTIFIER_LOCAL_VALUE(AST) ((AST)->identifier.local_value)
 
 struct pkl_ast_identifier
 {
   struct pkl_ast_common common;
   size_t length;
   char *pointer;
+  union pkl_ast_node *global_value;
+  union pkl_ast_node *local_value;
 };
 
 pkl_ast_node pkl_ast_make_identifier (const char *str);
