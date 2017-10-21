@@ -51,6 +51,7 @@ enum pkl_ast_code
   PKL_AST_TYPE,
   PKL_AST_STRUCT_TYPE_ELEM,
   /* Declarations.  */
+  PKL_AST_DECL,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
   /* Statements.  */
@@ -572,6 +573,36 @@ pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 
+/* PKL_AST_DECL nodes represent the declaration of a named entity:
+   function, type, variable....
+
+   NAME is PKL_AST_IDENTIFIER node containing the name in the
+   association.
+
+   TYPE is the type of the entity referred by the name.
+
+   INITIAL is the initial value of the entity, if any.  The initial
+   value is optional for variables and constants if an explicit type
+   was used in the declaration.  Initial values are mandatory for
+   functions and type declarations.
+
+   CONTEXT points to XXX.  */
+
+#define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
+#define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
+#define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
+#define PKL_AST_DECL_CONTEXT(AST) ((AST)->decl.context)
+
+struct pkl_ast_decl
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *name;
+  union pkl_ast_node *type;
+  union pkl_ast_node *initial;
+  union pkl_ast_node *context;
+};
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -595,6 +626,7 @@ union pkl_ast_node
   struct pkl_ast_type type;
   struct pkl_ast_struct_type_elem sct_type_elem;
   /* Declarations.  */
+  struct pkl_ast_decl decl;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
   /* Statements.  */
