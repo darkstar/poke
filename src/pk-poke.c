@@ -81,7 +81,7 @@ poke_val (pk_io_off *address, pvm_val val)
       size_t nelem;
       size_t idx;
 
-      nelem = PVM_VAL_ARR_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
       for (idx = 0; idx < nelem; idx++)
         poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
     }
@@ -90,7 +90,7 @@ poke_val (pk_io_off *address, pvm_val val)
       size_t nelem;
       size_t idx;
 
-      nelem = PVM_VAL_SCT_NELEM (val);
+      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
       for (idx = 0; idx < nelem; idx++)
         poke_val (address, PVM_VAL_SCT_ELEM_VALUE (val, idx));
     }
