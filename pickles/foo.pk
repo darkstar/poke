@@ -1,3 +1,98 @@
+/* Struct with anonymous components:
+
+   Used for padding.
+   Anonymous structs and unions also used
+   to compose other structs unions without introducing
+   useless intermediate names.  */
+
+struct foo
+{
+  int;
+  long;
+  struct
+  {
+    byte;
+  };
+}
+
+/* value: {1, 2L, {'a'}} */
+
+/* This is NOT valid:  {.foo=1, {.foo=2}}
+   because it is ambiguous.
+
+   Should be detected at run-time.  */
+
+/* Constraints also valid in struct literals.  */
+
+  {.foo = 1 : foo != 1}  /* This fails!  */
+
+struct packet (int version)
+{
+  struct
+  {
+    byte magic;
+
+    union
+    {
+      uint32 resv : version > 1;
+      {
+        byte flags;
+        byte attrs;
+        uint16 resv;
+      } : version == 2;
+      {} null;
+    };
+  } header;
+
+  byte[header.size] data;
+}
+
+/* if EXPR is syntactic sugar for an anonymous union with a value and
+   an empty alternative. */
+
+struct foo
+{
+  int one;
+  int opt if one > 0;
+}
+
+/* Is equivalent to:  */
+
+struct foo
+{
+  int one;
+  union
+  {
+    int opt : one > 0;
+    {} null;
+  };
+}
+
+/* Can also be used in anonymous structs.  And of course named
+   structs.  */
+
+struct foo
+{
+  int one;
+  struct
+  {
+    int i;
+    long l;
+  } if one > 0;
+}
+
+/* Bit fields are made with bit-types:
+
+   typedef bit:4 bitfield_type;
+
+   instead of : BITS like in C.  */
+
+struct foo
+{
+  bit:4 nibble;
+};
+
+
 struct packet
 {
   uint8 version;

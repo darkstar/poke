@@ -50,7 +50,7 @@ poke_LDADD += -L$(JITTER)/lib -ljitter--no-threading
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter
-	$(JITTER)/bin/jitterc $< \
+	$(JITTER)/bin/jitter $< \
                    --output $(builddir) \
 	           --max-fast-register-no=5 \
 	           --max-nonresidual-no=-1 \
