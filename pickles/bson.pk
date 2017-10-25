@@ -1,0 +1,220 @@
+/* bson.pk - Binary JSON support for GNU poke.  */
+
+/* Copyright (C) 2017 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The specification implemented here is in
+   http://bsonspec.org/spec.html  */
+
+/* Note that doubles are handled like 64-bit integers, since poke
+   doesn't support FP types yet.  */
+
+struct bson_doc; /* Forward declaration.  */
+
+union bson_binary
+{
+  int32 size;
+  enum byte
+    {
+      BSON_STYPE_GENERIC = 0x00,
+      BSON_STYPE_FUNCTION = 0x01,
+      BSON_STYPE_BINARY = 0x02,
+      BSON_STYPE_UUID_OLD = 0x03,
+      BSON_STYPE_UUID = 0x04,
+      BSON_STYPE_MD5 = 0x05,
+      BSON_STYPE_USER = 0x80
+    } subtype;
+  byte[size] data;
+};
+
+enum byte bson_bool
+{
+  BSON_FALSE = 0x00,
+  BSON_TRUE = 0x01
+};
+
+struct bson_string
+{
+  int32 size; /* Doesn't include the ending '\0'. */
+  char[size + 1] chars; /* last byte must be \0' */
+};
+
+struct bson_regexp
+{
+  string patterns;
+  string opts;
+};
+
+struct bson_code_scope
+{
+  int32 size;
+  bson_string code;
+  bson_doc doc;
+};
+
+union bson_elem
+{
+  struct
+  {
+    byte tag = 0x02;
+    string name;
+    string value;
+  } str;
+
+  struct
+  {
+    byte tag = 0x03;
+    string name;
+    bson_doc value;
+  } doc;
+
+  struct
+  {
+    byte tag = 0x04;
+    string name;
+    bson_doc value;
+  } array;
+
+  struct
+  {
+    byte tag = 0x05;
+    string name;
+    bson_binary value;
+  } binary;
+
+  struct
+  {
+    byte tag = 0x06;
+    string name;
+  } undefined;
+
+  struct
+  {
+    byte tag = 0x07;
+    string name;
+    byte[12] value;
+  } obj_id;
+
+  struct
+  {
+    byte tag = 0x08;
+    string name;
+    bson_bool value;
+  } boolean;
+
+  struct
+  {
+    byte tag = 0x09;
+    string name;
+    int64 value;
+  } datetime;
+
+  struct
+  {
+    byte tag = 0x0a;
+    string name;
+  } null_elem;
+
+  struct
+  {
+    byte tag = 0x0b;
+    string name;
+    bson_regexp value;
+  } regexp;
+
+  deprecated struct
+  {
+    byte tag = 0x0c;
+    string name;
+    bson_string;
+    byte[12];
+  } js_w_s;
+
+  struct
+  {
+    byte tag = 0x0d;
+    string name;
+    bson_string value;
+  } js;
+
+  deprecated struct
+  {
+    byte tag = 0x0e;
+    string name;
+    bson_string value;
+  } symbol;
+
+  struct
+  {
+    byte tag = 0x0f;
+    string name;
+    bson_code_scope value;
+  } js_scope;
+
+  struct
+  {
+    byte tag = 0x10;
+    string name;
+    int32 value;
+  } integer32;
+
+  struct
+  {
+    byte tag = 0x11;
+    string name;
+    uint64 value;
+  } timestamp;
+
+  struct
+  {
+    byte tag = 0x12;
+    string name;
+    int64 value;
+  } integer64;
+
+  struct
+  {
+    byte tag = 0x13;
+    string name;
+    byte[16] value;
+  } decimal128;
+
+  struct
+  {
+    byte tag = 0xff;
+    string name;
+  } min_key;
+
+  struct
+  {
+    byte tag = 0x7f;
+    string name;
+  } max_key;
+};
+
+struct bson_doc
+{
+  /* Total number of bytes comprising the document.  */
+  int32 size;
+  bson_elem[] elements;
+  byte endmark = 0x0;
+};
+
+/*
+Local variables:
+mode:c
+End:
+*/

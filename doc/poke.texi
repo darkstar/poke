@@ -433,6 +433,15 @@ struct file
 record @{....@}
 @end example
 
+XXX: discuss the deprecated type qualifier.
+
+XXX: discuss about the two idioms for union tags: tag outside of the
+union leading to names like foo.contents.date or tag inside of the
+union (relying on recursive propagation of constraint failures)
+leading to names like foo.date.value.  What idiom works best probably
+depends on the context. Show examples for both cases (bson elemens
+works better with the second idiom, for example.)
+
 XXX: discuss using offsets to make chains of structs
 
 @example
@@ -454,7 +463,16 @@ void zero_inodes (inode i)
 @}
 @end example
 
-XXX: discuss unions.
+@subsection Unions
+
+XXX: discuss unions.  Tags, arguments, lexical scope, etc.  Provide
+some examples on how to model some real-life situations in binary
+formats, like the BSON elements.
+
+XXX: mention how it is better to define struct types at the toplevel
+instead of using in-situ structs, because that allows the user to map
+them wherever she wants in IO space, and to use constructors for
+matching etc.
 
 @subsection Casting Structs
 
