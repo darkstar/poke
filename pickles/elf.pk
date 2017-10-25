@@ -1408,27 +1408,32 @@ struct elf_shdr (enum elf_ei_class class)
 
 /* structs for the contents of certain ELF sections.  */
 
-struct elf_chdr (enum elf_ei_class class)
+union elf_chdr (enum elf_ei_class class)
   <doc="ELF compressed section header.\n\
          Used in sections with SHF_COMPRESSED.">
 {
-  enum elf_ch_type ch_type <doc="Compression algorithm.">;
-
-  if (class == ELFCLASS32)
+  struct
     {
-      elf_xword ch_size
+      enum elf_ch_type ch_type
+        <doc="Compression algorithm.">;
+      elf_word ch_size
         <doc="Size in bytes of the uncompressed data.">;
       elf_word ch_addralign
         <doc="Required alignment of the uncompressed data.">;
-    }
-  else
+    } : class == ELFCLASS32;
+
+  struct
     {
+      enum elf_ch_type ch_type
+        <doc="Compression algorithm.">;
       elf64_word ch_reserved;
       elf64_xword ch_size
         <doc="Size in bytes of the uncompressed data.">;
       elf64_xword ch_addralign
         <doc="Required alignment of the uncompressed data">;
-    }
+    } : class == ELFCLASS64;
+
+  struct {};
 };
 
 struct elf_sym (enum elf_e_machine mach,

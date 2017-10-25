@@ -1,3 +1,46 @@
+/* The arguments to structs and unions should be preserved, because
+   they can be part of the tag of contained unions.
+
+   They can be accessed using foo'attr, and are read_only.
+
+   Attributes are inheritable in structs/unions lexical scopes.
+
+   Support for initial values for default arguments.  */
+
+union elf_chdr (enum elf_ei_class class = ELFCLASS64)
+{
+  struct
+  {
+    enum elf_ch_type ch_type;
+    elf_word ch_size;
+    elf_word ch_addralign;
+    
+  } : class == ELFCLASS32;
+
+  struct
+  {
+    enum elf_ch_type ch_type;
+    elf64_word ch_reserved;
+    elf64_xword ch_size;
+    elf64_xword ch_addralign;
+    
+  } : class == ELFCLASS64;
+
+  struct {};
+}
+
+(poke) let c = elf_chdr(ELFCLASS64) @ 0xff;
+(poke) print c'class
+ELFCLASS64
+(poke) set c'class = ELFCLASS32
+error: struct attributes are not mutable
+
+(poke) let c = elf_chdr(ELFCLASS64) {ELFCOMPRESS_ZLIB, .ch_addralign=8}
+(poke) print c
+{.ch_type=ELFCOMPRESS_ZLIB, .ch_type=0, .ch_reserved=0, .ch_addralign=8}
+(poke) print c'class
+ELFCLASS64
+
 /* Struct with anonymous components:
 
    Used for padding.
@@ -35,12 +78,13 @@ struct packet (int version)
     union
     {
       uint32 resv : version > 1;
+      struct
       {
         byte flags;
         byte attrs;
         uint16 resv;
       } : version == 2;
-      {} null;
+      struct {};
     };
   } header;
 
@@ -64,7 +108,7 @@ struct foo
   union
   {
     int opt : one > 0;
-    {} null;
+    struct {};
   };
 }
 
@@ -188,3 +232,5 @@ struct {int32; int32; int32[3];}
 struct {int32 foo; int32 bar; int32[3] baz;}
 (poke) print packet {1, 2, [1,2,3]}
 error: invalid size in array `data'.  /* Constructor fails! */
+
+

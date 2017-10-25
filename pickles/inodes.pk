@@ -1,0 +1,16 @@
+struct inode
+{
+  uint32 perms;
+  uint32 size;
+  byte[size] data;
+  uint32 next;
+};
+
+void print_inodes (inode in)
+{
+  print ("Perms: " + in.perms);
+  print_inode_data (in.data);
+
+  if (next != 0)
+    print_inodes (inode @ in.next);
+}

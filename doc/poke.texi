@@ -202,6 +202,8 @@ It is possible to construct unsigned numerical literals using the
 suffix @code{u} or @code{U}.  So, for example @code{0xffff_ffffU} has
 type @code{uint32} and @code{0u} has type @code{int32}.
 
+XXX: discuss other suffixes: L, H, B and combinations.
+
 @node Arrays
 @section Arrays
 
@@ -365,7 +367,7 @@ The element names are significant, i.e. the type @code{struct @{int
 foo; int bar;@}} denotes a different type than @code{struct @{int baz;
 int quux;@}}.
 
-@subsection Struct Literals
+@subsection Struct Constructors
 
 Struct literals are constructed using the following syntax:
 
@@ -392,6 +394,67 @@ It is possible to specify named elements in a struct literal, like in
 @code{@{.age = 37, .name = "Jose"@}}.  The struct constructed this way
 has type @code{struct @{int age; string name@}}, i.e. the ordering of
 the named members follows their appearance in the literal.
+
+Constructing a named struct type is done with:
+
+@example
+packet @{...@}
+@end example
+
+XXX: discuss anonymous fields.
+XXX: discuss labels and offsets.
+XXX: discuss struct parameters and struct attributes.
+
+   The arguments to structs and unions should be preserved, because
+   they can be part of the tag of contained unions.
+
+   They can be accessed using foo'attr, and are read_only.
+
+   Attributes are inheritable in structs/unions lexical scopes.
+
+   Support for initial values for default arguments.
+
+XXX: discuss component constraints.
+XXX: discuss lazy projection in structs.
+
+@example
+struct file
+@{
+   uint64 size;
+   struct record[size] records;
+@}
+@end example
+
+@example
+(poke) let f = file @ 0x0      <- this reads nothing.
+(poke) print f.size            <- this reads size.
+1000000000
+(poke) print f.records[10000]  <- this reads a record.
+record @{....@}
+@end example
+
+XXX: discuss using offsets to make chains of structs
+
+@example
+struct inode
+@{
+  uint32 perms;
+  uint32 size;
+  byte[size] data;
+  uint32 next;
+@};
+
+void zero_inodes (inode i)
+@{
+  if (i.perms & INODE_WRITE)
+    i.data[0:i.size] = 0x0;
+
+  if (i.next != 0)
+    print_inodes (inode @ i.next);
+@}
+@end example
+
+XXX: discuss unions.
 
 @subsection Casting Structs
 
@@ -630,6 +693,12 @@ elements.  Instead, both the operand array and the array resulting
 from the operation refer to the same instance of the elements.  The
 importance of this will become apparent when we talk about variables
 later in this manual.
+
+XXX it should be supported to assign a value to ranges:
+
+@example
+  data[0:size] = 0x0;
+@end example
 
 @node Conditional Operator
 @section Conditional Operator
