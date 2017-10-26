@@ -24,26 +24,28 @@
 
 struct bson_doc; /* Forward declaration.  */
 
-union bson_binary
-{
-  int32 size;
-  enum byte
-    {
-      BSON_STYPE_GENERIC = 0x00,
-      BSON_STYPE_FUNCTION = 0x01,
-      BSON_STYPE_BINARY = 0x02,
-      BSON_STYPE_UUID_OLD = 0x03,
-      BSON_STYPE_UUID = 0x04,
-      BSON_STYPE_MD5 = 0x05,
-      BSON_STYPE_USER = 0x80
-    } subtype;
-  byte[size] data;
-};
-
 enum byte bson_bool
 {
   BSON_FALSE = 0x00,
   BSON_TRUE = 0x01
+};
+
+enum byte bson_subtype
+{
+  BSON_SUBTYPE_GENERIC = 0x00,
+  BSON_SUBTYPE_FUNCTION = 0x01,
+  BSON_SUBTYPE_BINARY = 0x02,
+  BSON_SUBTYPE_UUID_OLD = 0x03,
+  BSON_SUBTYPE_UUID = 0x04,
+  BSON_SUBTYPE_MD5 = 0x05,
+  BSON_SUBTYPE_USER = 0x80
+};
+
+union bson_binary
+{
+  int32 size;
+  bson_subtype subtype;
+  byte[size] data;
 };
 
 struct bson_string
@@ -71,7 +73,7 @@ union bson_elem
   {
     byte tag = 0x02;
     string name;
-    string value;
+    bson_string value;
   } str;
 
   struct
@@ -141,7 +143,7 @@ union bson_elem
     string name;
     bson_string;
     byte[12];
-  } js_w_s;
+  } dbpointer;
 
   struct
   {
@@ -207,9 +209,8 @@ union bson_elem
 
 struct bson_doc
 {
-  /* Total number of bytes comprising the document.  */
-  int32 size;
-  bson_elem[] elements;
+  int32 size; /* Total number of bytes comprising the document.  */
+  bson_elem[] elements : sizeof (elements) + sizeof (byte) == size;
   byte endmark = 0x0;
 };
 
