@@ -215,6 +215,30 @@ struct bson_doc
   byte endmark = 0x0;
 };
 
+
+void
+print_bson_elems (bson_doc doc)
+{
+   print ("size: " + doc.size);
+
+   for (elem in doc.elements)
+     if (elem is str)
+       {
+        print (elem.value);...
+       }
+     else if (elem is doc)
+       {
+        ...
+       }
+}
+
+let bson_doc bdoc_a;
+let bdoc_b = bson_doc {2, [{0xff,"foo"}, {0x7f, "bar"}],0x0UB};
+let bdoc_c = bson_doc @ 0x00;
+
+print_bson_elements (bdoc_b);
+print_bson_elements (bdoc_c);
+
 /*
 Local variables:
 mode:c

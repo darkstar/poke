@@ -709,6 +709,8 @@ used.
 @c store information before pointers, like ghostscript's memory
 @c allocators do.
 
+XXX: elemsof returns the number of elements of an array.
+
 The indexing operator can also be used to refer to a region of the
 array, using a range of indexes @code{[@var{idx1}:@var{idx2}]}.  The
 denoted range is @code{[@var{idx1},@var{idx2}]}, i.e. the elements in
@@ -726,7 +728,8 @@ indexation of an array with a range always evaluates to an array.
 
 If the range includes indexes past the end of the array, @code{null}
 values are used accordingly.  For example, the operation @code{@{1, 2,
-3@}[1:3]} evaluates to @code{@{2, 3, null@}}.
+3@}[1:3]} evaluates to @code{[2, 3, null]}, which in turn is
+@code{[2, 32]}.
 
 Note that indexing an array range does not create a copy of the
 elements.  Instead, both the operand array and the array resulting
@@ -739,6 +742,34 @@ XXX it should be supported to assign a value to ranges:
 @example
   data[0:size] = 0x0;
 @end example
+
+@subsection Inserting and removing elements
+
+Poke supports language operators to insert and remove elements in an
+array without having to involve loops and explicit copy operations.
+
+XXX: problem.  With CBVS, are assignments to the array itself visible
+outside??  Nope.  Also, can you pass an array range as an array?
+
+For example:
+
+@example
+let array = [1,2,3,4];
+array[1] := 0;  /* array is now [1,0,2,3,4]  */
+@end example
+
+Appending past the end of the array: fills with zeroes.
+
+XXX: explain elsewhere how any poke type (basic or composite) can be
+zeroed.  This is also used in variable initialization.
+
+As we saw before, @code{null} is a special value that denotes the
+absence of a value.  It is possible to remove elements from an array
+by assigning @code{null} to them.  For example, @code{array[2] = null}
+will remove the third element from @code{array}.  Ranges are accepted:
+@code{array[0:elemsof array - 1] = null} will empty an array.
+
+XXX: what syntax doesn't sucks ass??
 
 @node Conditional Operator
 @section Conditional Operator
@@ -1228,9 +1259,62 @@ space.
 The idea is that the same poke code will execute on mapped and
 non-mapped variables, with no changes.
 
+@section The IO Space
+
+We already discussed the @dfn{IO Space} in the chapters dedicated to
+basic editing: it basically corresponds to the file, stream or memory
+image being edited at the current time.  As we saw, all these entities
+are uniformly handled as a single abstraction, called ``the current IO
+space''.
+
+From the point of view of a poke program, the IO Space is infinite: it
+starts at offset @code{0} and extends to infinity.  However, at some
+point it starts containing @code{eof}s.  @code{eof} is a special value
+which is of any type, and is not equal to any other other value.
+
+The following example:
+
+@example
+let a = byte[] @ 0x0;
+@end example
+
+defines an array that covers the entire IO space.  Remember that empty
+arrays extends until it reads @code{eof} or a constraint in its
+constituent fails.  In this case the constituents of the array are
+bytes, which can't be associated with constraints.
+
+In theory this is an infinite loop:
+
+@example
+struct elem_type
+@{
+  byte b : b == eof;
+@};
+
+let a = elem_type[] @ 0x00;
+@end example
+
+but in practice it is detected by the run-time and reported as a
+run-time error, because reading @code{eof} does not advance the IO
+space location counter.
+
 @section The Map Operator
 
 
+@section Peeking and poking thru maps
+
+XXX Explain handling of EOF: There is _never_ EOF poking to IO space:
+    the file gets expanded as needed, with same semantics than a fseek
+    in the underlying system.  When committing to the file, there
+    could be an error if the file doesn't admit appending, or disk
+    full, or whatever.  But that is another level.
+
+@example
+     let i = int @ 0xffff;
+     i = 25;
+@end example
+
+    Peeking can return EOF... or 0?
 
 @section Endianness and Negative Encoding
 
