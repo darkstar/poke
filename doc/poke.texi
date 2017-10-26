@@ -417,6 +417,28 @@ XXX: discuss struct parameters and struct attributes.
 XXX: discuss component constraints.
 XXX: discuss lazy projection in structs.
 
+XXX: document the operator 'is' for united values.
+
+@example
+     if (doc.elements[20] is timestamp)
+        bleh;
+
+     for (section in elf.sections)
+        if (section is progbits)
+         ...
+        else if (section is symtab)
+         ...
+
+     Support also a switch statement for is?
+
+     for (elf_section section in elf.sections)
+       switch (tagof (section))
+         @{ 
+          case progbits: bleh;
+          case symtab: bleh;
+         @}
+@end example
+
 @example
 struct file
 @{
