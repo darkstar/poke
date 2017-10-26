@@ -209,8 +209,9 @@ union bson_elem
 
 struct bson_doc
 {
-  int32 size; /* Total number of bytes comprising the document.  */
-  bson_elem[] elements : sizeof (elements) + sizeof (byte) == size;
+  int32 size;
+  bson_elem[] elements : (sizeof (elements)
+                          + sizeof (byte) == size);
   byte endmark = 0x0;
 };
 
