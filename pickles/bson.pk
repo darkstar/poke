@@ -50,8 +50,8 @@ union bson_binary
 
 struct bson_string
 {
-  int32 size; /* Doesn't include the ending '\0'. */
-  char[size + 1] chars; /* last byte must be \0' */
+  int32 size;
+  char[size + 1] chars : chars[size] == '\0';
 };
 
 struct bson_regexp
