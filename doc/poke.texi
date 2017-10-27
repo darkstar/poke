@@ -2,12 +2,12 @@
 @comment %**start of header
 @setfilename poke.info
 @include version.texi
-@settitle GNU poke
+@settitle The Poke Book
 @afourpaper
 @comment %**end of header
 
 @copying
-This manual is for GNU poke (version @value{VERSION},
+This book describes GNU poke (version @value{VERSION},
 @value{UPDATED}).
 
 Copyright @copyright{} 2017 Jose E. Marchesi
@@ -28,7 +28,7 @@ Documentation License''.
 @end direntry
 
 @titlepage
-@title GNU poke
+@title The Poke Book
 @subtitle for version @value{VERSION}, @value{UPDATED}
 @author by Jose E. Marchesi
 @page
@@ -40,9 +40,7 @@ Documentation License''.
 
 @ifnottex
 @node Top
-@top GNU poke
-
-This manual documents version @value{VERSION} of GNU poke.
+@top The Poke Book
 
 @insertcopying
 @end ifnottex
@@ -54,6 +52,7 @@ Basic Editing
 @c* Commands::
 
 The Poke Language
+* Why Pickle::                  Why yet another language?
 * Data Types::			Numbers, arrays and structs.
 * Expressions::			Operators and values.
 * Constants::			Named constant values.
@@ -66,6 +65,8 @@ The Poke Language
 * Structs and Unions::		Structures of heterogeneous data.
 
 Advanced Editing
+
+Reverse Engineering
 
 Extending Poke
 @c * Writing commands in C::
@@ -80,12 +81,18 @@ Indexes
 * Concept Index::
 @end menu
 
+@node Why Pickle
+@chapter Why Pickle
+
+XXX: explain why poke features a domain-specific languages.
+
 @node Data Types
 @chapter Data Types
 
-The poke language is a strongly typed programming language.  It is
-(almost) always possible to infer the type of a value, and it is
-always possible to infer the storage properties and needs of any type.
+The poke language is a statically typed programming language, with
+explicit typing.  It is (almost) always possible to infer the type of
+a value, and it is always possible to infer the storage properties and
+needs of any type.
 
 The following sections document how these typed values are constructed
 and what are the types available for constructing numbers and arrays.
@@ -103,9 +110,9 @@ and what are the types available for constructing numbers and arrays.
 
 @code{null} is a special value in poke that can be of any type.  And
 not much more can be said about it at this point, even if it is
-actually used for many purposes in the language.  Patience... for now,
-just remember that it can also mimic the semantics of the number
-@code{0} in every context where a number is expected.
+actually used for many purposes in the language.  For now, just
+remember that it can also mimic the semantics of the number @code{0}
+in every context where a number is expected.
 
 @node Integers
 @section Integers
@@ -1500,19 +1507,19 @@ PKL stands for ``Poke Language''.  It is pronounced ``pickle''.
 @verbatim
 
       +----------+
-      | compiler |
+      | compiler |      
+      +----------+      +------+
+           |            |      |
+           v            |      |
+      +----------+      |      |
+      |   PVM    | <--->|  IO  |
+      +----------+      |      |
+           ^            |      |
+           |            |      |
+           v            +------+
       +----------+
-           |
-           v
-      +----------+      +-------+
-      |   PVM    | <--->|       |
-      +----------+      |       |
-           ^            |       |
-           |            | data  |
-           v            |       |
-      +----------+      |       |
-      | command  | <--->|       |
-      +----------+      +-------+
+      | command  |
+      +----------+
 
 @end verbatim
 
