@@ -16,11 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-int
-qsort (int[] array, int left = 0, int right = sizeof (array))
+defproc qsort (int[] array, int left = 0, int right = sizeof (array)) : int
  <doc="Sort an array using QuickSort.", typecheck=0>
 {
-  int partition (int left, int right)
+  defproc partition (int left, int right) : int
   {
     let pivot = a[left];
     let i = left;
@@ -58,20 +57,19 @@ qsort (int[] array, int left = 0, int right = sizeof (array))
     }
 }
 
-void
-test_qsort ()
+defproc test_qsort ()
 {
   /* Sort several arrays in the current IO stream.  */
-  let bytes = byte[2048] @ 0x0;
-  let integers = int[512] @ .;
-  let longs = long[256] @ .;
+  def bytes = byte[2048] @ 0x0;
+  def integers = int[512] @ .;
+  def longs = long[256] @ .;
 
   qsort (bytes);
   qsort (integers);
   qsort (longs);
 
   /* Now sort an unmapped array variable.  */
-  let array = [3, 2, 1, 0];
+  def array = [3, 2, 1, 0];
   qsort (array);
 }
 

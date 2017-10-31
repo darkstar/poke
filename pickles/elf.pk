@@ -29,21 +29,21 @@
  * with these names.
  */
 
-type elf_word = uint32;
-type elf_sword = int32;
-type elf_half = uint16;
+deftype elf_word = uint32;
+deftype elf_sword = int32;
+deftype elf_half = uint16;
 
-type elf32_addr = uint32;
-type elf32_off = uint32;
-type elf32_sword = uint32;
+deftype elf32_addr = uint32;
+deftype elf32_off = uint32;
+deftype elf32_sword = uint32;
 
-type elf64_addr = uint64;
-type elf64_off = uint64;
-type elf64_xword = uint64;
-type elf64_sword = int32;
-type elf64_sxword = int64;
+deftype elf64_addr = uint64;
+deftype elf64_off = uint64;
+deftype elf64_xword = uint64;
+deftype elf64_sword = int32;
+deftype elf64_sxword = int64;
 
-type elf_e_flags =
+deftype elf_e_flags =
   bitmask elf_word (elf_e_machine mach)
   {
     if (mach == EM_SPARC
@@ -69,7 +69,7 @@ type elf_e_flags =
       }
   };
 
-type elf_ei_class =
+deftype elf_ei_class =
   enum byte
     {
       ELFCLASSNONE = 0x0 <doc="Invalid class.">,
@@ -77,7 +77,7 @@ type elf_ei_class =
       ELFCLASS64 = 0x2 <doc="64-bit object.">
     };
 
-type elf_ei_data =
+deftype elf_ei_data =
   enum byte
     {
       ELFDATANONE = 0
@@ -92,7 +92,7 @@ type elf_ei_data =
               byte occupying the lowest address.">;
     };
 
-type elf_e_type =
+deftype elf_e_type =
   enum elf_half
     {
       ET_NONE = 0x0000 <doc="No file type.">,
@@ -107,163 +107,165 @@ type elf_e_type =
       ET_HIPROC = 0xFFFF
     };
 
-enum elf_word elf_r_type (enum elf_e_machine mach)
-  <doc="ELF relocation type.">
+deftype elf_r_type =
+  enum elf_word (enum elf_e_machine mach)
+    <doc="ELF relocation type.">
 {
-  if (mach == EM_SPARC || mach == EM_SPARCV9
-      || mach == EM_SPARC32PLUS)
-    {
-      R_SPARC_NONE = 0
+  enum
+  {
+    R_SPARC_NONE = 0
         <doc="No reloc.">,
-      R_SPARC_8 = 1
+    R_SPARC_8 = 1
         <doc="Direct 8 bit.">,
-      R_SPARC_16 = 2
+    R_SPARC_16 = 2
         <doc="Direct 16 bit.">,
-      R_SPARC_32 = 3
+    R_SPARC_32 = 3
         <doc="Direct 32 bit.">,
-      R_SPARC_DISP8 = 4
+    R_SPARC_DISP8 = 4
         <doc="PC relative 8 bit.">,
-      R_SPARC_DISP16 = 5
+    R_SPARC_DISP16 = 5
         <doc="PC relative 16 bit.">,
-      R_SPARC_DISP32 = 6
+    R_SPARC_DISP32 = 6
         <doc="PC relative 32 bit.">,
-      R_SPARC_WDISP30 = 7
+    R_SPARC_WDISP30 = 7
         <doc="PC relative 30 bit shifted.">,
-      R_SPARC_WDISP22 = 8
+    R_SPARC_WDISP22 = 8
         <doc="PC relative 22 bit shifted.">,
-      R_SPARC_HI22 = 9
+    R_SPARC_HI22 = 9
         <doc="High 22 bit.">,
-      R_SPARC_22 = 10
+    R_SPARC_22 = 10
         <doc="Direct 22 bit.">,
-      R_SPARC_13 = 11
+    R_SPARC_13 = 11
         <doc="Direct 13 bit.">,
-      R_SPARC_LO10 = 12
+    R_SPARC_LO10 = 12
         <doc="Truncated 10 bit.">,
-      R_SPARC_GOT10 = 13
+    R_SPARC_GOT10 = 13
         <doc="Truncated 10 bit GOT entry.">,
-      R_SPARC_GOT13 = 14
+    R_SPARC_GOT13 = 14
         <doc="13 bit GOT entry.">,
-      R_SPARC_GOT22 = 15
+    R_SPARC_GOT22 = 15
         <doc="22 bit GOT entry shifted.">,
-      R_SPARC_PC10 = 16
+    R_SPARC_PC10 = 16
         <doc="PC relative 10 bit truncated.">,
-      R_SPARC_PC22 = 17
+    R_SPARC_PC22 = 17
         <doc="PC relative 22 bit shifted.">,
-      R_SPARC_WPLT30 = 18
+    R_SPARC_WPLT30 = 18
         <doc="30 bit PC relative PLT address.">,
-      R_SPARC_COPY = 19
+    R_SPARC_COPY = 19
         <doc="Copy symbol at runtime.">,
-      R_SPARC_GLOB_DAT = 20
+    R_SPARC_GLOB_DAT = 20
         <doc="Create GOT entry.">,
-      R_SPARC_JMP_SLOT = 21
+    R_SPARC_JMP_SLOT = 21
         <doc="Create PLT entry.">,
-      R_SPARC_RELATIVE = 22
+    R_SPARC_RELATIVE = 22
         <doc="Adjust by program base.">,
-      R_SPARC_UA32 = 23
+    R_SPARC_UA32 = 23
         <doc="Direct 32 bit unaligned.">,
-      R_SPARC_PLT32 = 24
+    R_SPARC_PLT32 = 24
         <doc="Direct 32 bit ref to PLT entry.">,
-      R_SPARC_HIPLT22 = 25
+    R_SPARC_HIPLT22 = 25
         <doc="High 22 bit PLT entry.">,
-      R_SPARC_LOPLT10 = 26
+    R_SPARC_LOPLT10 = 26
         <doc="Truncated 10 bit PLT entry.">,
-      R_SPARC_PCPLT32 = 27
+    R_SPARC_PCPLT32 = 27
         <doc="PC rel 32 bit ref to PLT entry.">,
-      R_SPARC_PCPLT22 = 28
+    R_SPARC_PCPLT22 = 28
         <doc="PC rel high 22 bit PLT entry.">,
-      R_SPARC_PCPLT10 = 29
+    R_SPARC_PCPLT10 = 29
         <doc="PC rel trunc 10 bit PLT entry.">,
-      R_SPARC_10 = 30
+    R_SPARC_10 = 30
         <doc="Direct 10 bit.">,
-      R_SPARC_11 = 31
+    R_SPARC_11 = 31
         <doc="Direct 11 bit.">,
-      R_SPARC_64 = 32
+    R_SPARC_64 = 32
         <doc="Direct 64 bit.">,
-      R_SPARC_OLO10 = 33
+    R_SPARC_OLO10 = 33
         <doc="10bit with secondary 13bit addend.">,
-      R_SPARC_HH22 = 34
+    R_SPARC_HH22 = 34
         <doc="Top 22 bits of direct 64 bit.">,
-      R_SPARC_HM10 = 35
+    R_SPARC_HM10 = 35
         <doc="High middle 10 bits of ....">,
-      R_SPARC_LM22 = 36
+    R_SPARC_LM22 = 36
         <doc="Low middle 22 bits of ....">,
-      R_SPARC_PC_HH22 = 37
+    R_SPARC_PC_HH22 = 37
         <doc="Top 22 bits of pc rel 64 bit.">,
-      R_SPARC_PC_HM10 = 38
+    R_SPARC_PC_HM10 = 38
         <doc="High middle 10 bit of ....">,
-      R_SPARC_PC_LM22 = 39
+    R_SPARC_PC_LM22 = 39
         <doc="Low miggle 22 bits of ....">,
-      R_SPARC_WDISP16 = 40
+    R_SPARC_WDISP16 = 40
         <doc="PC relative 16 bit shifted.">,
-      R_SPARC_WDISP19 = 41
+    R_SPARC_WDISP19 = 41
         <doc="PC relative 19 bit shifted.">,
-      R_SPARC_GLOB_JM = 42
+    R_SPARC_GLOB_JM = 42
         <doc="was part of v9 ABI but was removed.">,
-      R_SPARC_7 = 43
+    R_SPARC_7 = 43
         <doc="Direct 7 bit.">,
-      R_SPARC_5 = 44
+    R_SPARC_5 = 44
         <doc="Direct 5 bit.">,
-      R_SPARC_6 = 45
+    R_SPARC_6 = 45
         <doc="Direct 6 bit.">,
-      R_SPARC_DISP64 = 46
+    R_SPARC_DISP64 = 46
         <doc="PC relative 64 bit.">,
-      R_SPARC_PLT64 = 47
+    R_SPARC_PLT64 = 47
         <doc="Direct 64 bit ref to PLT entry.">,
-      R_SPARC_HIX22 = 48
+    R_SPARC_HIX22 = 48
         <doc="High 22 bit complemented.">,
-      R_SPARC_LOX10 = 49
+    R_SPARC_LOX10 = 49
         <doc="Truncated 11 bit complemented.">,
-      R_SPARC_H44 = 50
+    R_SPARC_H44 = 50
         <doc="Direct high 12 of 44 bit.">,
-      R_SPARC_M44 = 51
+    R_SPARC_M44 = 51
         <doc="Direct mid 22 of 44 bit.">,
-      R_SPARC_L44 = 52
+    R_SPARC_L44 = 52
         <doc="Direct low 10 of 44 bit.">,
-      R_SPARC_REGISTE = 53
+    R_SPARC_REGISTE = 53
         <doc="Global register usage.">,
-      R_SPARC_UA64 = 54
+    R_SPARC_UA64 = 54
         <doc="Direct 64 bit unaligned.">,
-      R_SPARC_UA16 = 55
+    R_SPARC_UA16 = 55
         <doc="Direct 16 bit unaligned.">,
-      R_SPARC_TLS_GD_HI2 = 56,
-      R_SPARC_TLS_GD_LO1 = 57,
-      R_SPARC_TLS_GD_AD = 58,
-      R_SPARC_TLS_GD_CAL = 59,
-      R_SPARC_TLS_LDM_HI2 = 60,
-      R_SPARC_TLS_LDM_LO1 = 61,
-      R_SPARC_TLS_LDM_AD = 62,
-      R_SPARC_TLS_LDM_CAL = 63,
-      R_SPARC_TLS_LDO_HIX2 = 64,
-      R_SPARC_TLS_LDO_LOX1 = 65,
-      R_SPARC_TLS_LDO_AD = 66,
-      R_SPARC_TLS_IE_HI2 = 67,
-      R_SPARC_TLS_IE_LO1 = 68,
-      R_SPARC_TLS_IE_L = 69,
-      R_SPARC_TLS_IE_LD = 70,
-      R_SPARC_TLS_IE_AD = 71,
-      R_SPARC_TLS_LE_HIX2 = 72,
-      R_SPARC_TLS_LE_LOX1 = 73,
-      R_SPARC_TLS_DTPMOD3 = 74,
-      R_SPARC_TLS_DTPMOD6 = 75,
-      R_SPARC_TLS_DTPOFF3 = 76,
-      R_SPARC_TLS_DTPOFF6 = 77,
-      R_SPARC_TLS_TPOFF3 = 78,
-      R_SPARC_TLS_TPOFF6 = 79,
-      R_SPARC_GOTDATA_HIX2 = 80,
-      R_SPARC_GOTDATA_LOX1 = 81,
-      R_SPARC_GOTDATA_OP_HIX2 = 82,
-      R_SPARC_GOTDATA_OP_LOX1 = 83,
-      R_SPARC_GOTDATA_O = 84,
-      R_SPARC_H34 = 85,
-      R_SPARC_SIZE32 = 86,
-      R_SPARC_SIZE64 = 87,
-      R_SPARC_WDISP10 = 88,
-      R_SPARC_JMP_IRE = 248,
-      R_SPARC_IRELATIV = 249,
-      R_SPARC_GNU_VTINHERI = 250,
-      R_SPARC_GNU_VTENTR = 251,
-      R_SPARC_REV32 = 252,
-    }
+    R_SPARC_TLS_GD_HI2 = 56,
+    R_SPARC_TLS_GD_LO1 = 57,
+    R_SPARC_TLS_GD_AD = 58,
+    R_SPARC_TLS_GD_CAL = 59,
+    R_SPARC_TLS_LDM_HI2 = 60,
+    R_SPARC_TLS_LDM_LO1 = 61,
+    R_SPARC_TLS_LDM_AD = 62,
+    R_SPARC_TLS_LDM_CAL = 63,
+    R_SPARC_TLS_LDO_HIX2 = 64,
+    R_SPARC_TLS_LDO_LOX1 = 65,
+    R_SPARC_TLS_LDO_AD = 66,
+    R_SPARC_TLS_IE_HI2 = 67,
+    R_SPARC_TLS_IE_LO1 = 68,
+    R_SPARC_TLS_IE_L = 69,
+    R_SPARC_TLS_IE_LD = 70,
+    R_SPARC_TLS_IE_AD = 71,
+    R_SPARC_TLS_LE_HIX2 = 72,
+    R_SPARC_TLS_LE_LOX1 = 73,
+    R_SPARC_TLS_DTPMOD3 = 74,
+    R_SPARC_TLS_DTPMOD6 = 75,
+    R_SPARC_TLS_DTPOFF3 = 76,
+    R_SPARC_TLS_DTPOFF6 = 77,
+    R_SPARC_TLS_TPOFF3 = 78,
+    R_SPARC_TLS_TPOFF6 = 79,
+    R_SPARC_GOTDATA_HIX2 = 80,
+    R_SPARC_GOTDATA_LOX1 = 81,
+    R_SPARC_GOTDATA_OP_HIX2 = 82,
+    R_SPARC_GOTDATA_OP_LOX1 = 83,
+    R_SPARC_GOTDATA_O = 84,
+    R_SPARC_H34 = 85,
+    R_SPARC_SIZE32 = 86,
+    R_SPARC_SIZE64 = 87,
+    R_SPARC_WDISP10 = 88,
+    R_SPARC_JMP_IRE = 248,
+    R_SPARC_IRELATIV = 249,
+    R_SPARC_GNU_VTINHERI = 250,
+    R_SPARC_GNU_VTENTR = 251,
+    R_SPARC_REV32 = 252,
+  } : (mach == EM_SPARC || mach == EM_SPARCV9
+       || mach == EM_SPARC32PLUS);
+
 };
 
 enum elf_half elf_e_machine
@@ -1140,7 +1142,7 @@ enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
   DT_HIPROC = 0x7fff_ffff
 };
 
-type elf_rel =
+deftype elf_rel =
   struct (elf_e_machine mach, elf_ei_class class)
     <doc="ELF relocation.">
   {
