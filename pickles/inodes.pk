@@ -1,10 +1,11 @@
-struct inode
-{
-  uint32 perms;
-  uint32 size;
-  byte[size] data;
-  uint32 next;
-};
+type inode =
+  struct
+  {
+    uint32 perms;
+    uint32 size;
+    byte[size] data;
+    uint32 next;
+  };
 
 void print_inodes (inode in)
 {

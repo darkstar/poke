@@ -29,23 +29,22 @@
  * with these names.
  */
 
-/* First of all, define some types.  */
+type elf_word = uint32;
+type elf_sword = int32;
+type elf_half = uint16;
 
-typedef uint32 elf_word;
-typedef int32 elf_sword;
-typedef uint16 elf_half;
+type elf32_addr = uint32;
+type elf32_off = uint32;
+type elf32_sword = uint32;
 
-typedef uint32 elf32_addr;
-typedef uint32 elf32_off;
-typedef uint32 elf32_sword;
+type elf64_addr = uint64;
+type elf64_off = uint64;
+type elf64_xword = uint64;
+type elf64_sword = int32;
+type elf64_sxword = int64;
 
-typedef uint64 elf64_addr;
-typedef uint64 elf64_off;
-typedef uint64 elf64_xword;
-typedef int32 elf64_sword;
-typedef int64 elf64_sxword;
-
-bitmask elf_word elf_e_flags (elf_e_machine mach)
+type elf_e_flags =
+  bitmask elf_word (elf_e_machine mach)
   {
     if (mach == EM_SPARC
         || mach == EM_SPARCV9
@@ -70,41 +69,43 @@ bitmask elf_word elf_e_flags (elf_e_machine mach)
       }
   };
 
-type elf_ei_class
-  = enum byte
+type elf_ei_class =
+  enum byte
     {
       ELFCLASSNONE = 0x0 <doc="Invalid class.">,
       ELFCLASS32 = 0x1 <doc="32-bit object.">,
       ELFCLASS64 = 0x2 <doc="64-bit object.">
     };
 
-enum byte elf_ei_data
-{
-  ELFDATANONE = 0
-    <doc="Invalid data encoding.">,
+type elf_ei_data =
+  enum byte
+    {
+      ELFDATANONE = 0
+        <doc="Invalid data encoding.">,
+      
+      ELFDATA2LSB = 1
+        <doc="2's complement values, with the least significant\n\
+              byte occupying the lowest address.">,
+      
+      ELFDATA2MSB = 2
+        <doc="2's complement values, with the most significant\n\
+              byte occupying the lowest address.">;
+    };
 
-  ELFDATA2LSB = 1
-    <doc="2's complement values, with the least significant\n\
-           byte occupying the lowest address.">,
-
-  ELFDATA2MSB = 2
-    <doc="2's complement values, with the most significant\n\
-           byte occupying the lowest address.">;
-};
-
-enum elf_half elf_e_type
-{
-  ET_NONE = 0x0000 <doc="No file type.">,
-  ET_REL  = 0x0001 <doc="Relocatable file.">,
-  ET_EXEC = 0x0002 <doc="Executable file.">,
-  ET_DYN  = 0x0003 <doc="Shared object file.">,
-  ET_CORE = 0x0004 <doc="Core file.">,
-
-  ET_LOOS = 0xFE00,
-  ET_HIOS = 0xFEFF,
-  ET_LOPROC = 0xFF00,
-  ET_HIPROC = 0xFFFF
-};
+type elf_e_type =
+  enum elf_half
+    {
+      ET_NONE = 0x0000 <doc="No file type.">,
+      ET_REL  = 0x0001 <doc="Relocatable file.">,
+      ET_EXEC = 0x0002 <doc="Executable file.">,
+      ET_DYN  = 0x0003 <doc="Shared object file.">,
+      ET_CORE = 0x0004 <doc="Core file.">,
+      
+      ET_LOOS = 0xFE00,
+      ET_HIOS = 0xFEFF,
+      ET_LOPROC = 0xFF00,
+      ET_HIPROC = 0xFFFF
+    };
 
 enum elf_word elf_r_type (enum elf_e_machine mach)
   <doc="ELF relocation type.">
@@ -643,8 +644,22 @@ enum elf_half elf_e_machine
   EM_AMDGPU = 224
     <doc="AMD GPU architecture.">,
   /* 225 - 242 are reserved.  */
-  EM_RISCV = 24
-    <doc="RISC-V.">3
+  EM_RISCV = 243
+    <doc="RISC-V.">,
+  EM_LANAI = 244
+    <doc="Lanai processor.">,
+  EM_CEVA = 245
+    <doc="CEVA Processor Architecture Family.">,
+  EM_CEVA_X2 = 246
+    <doc="CEVA X2 Processor Family.">,
+  EM_BPF = 247
+    <doc="Linux BPF – in-kernel virtual machine.">,
+  EM_GRAPHCORE_IPU = 248
+    <doc="Graphcore Intelligent Processing Unit.">,
+  EM_IMG1 = 249
+    <doc="Imagination Technologies.">,
+  EM_NFP = 250
+    <doc="Netronome Flow Processor (NFP).">
 };
 
 enum elf_word elf_e_version
@@ -1125,34 +1140,34 @@ enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
   DT_HIPROC = 0x7fff_ffff
 };
 
-struct elf_rel (elf_e_machine mach,
-                elf_ei_class class)
-  <doc="ELF relocation.">
-{
-  let r_offset_doc = "Relocation offset.";
-  let r_info_doc = "Relocation symbol + type.";
-  let r_sym_doc = "Relocation symbol.";
-  let r_type_doc = "Relocation type.";
+type elf_rel =
+  struct (elf_e_machine mach, elf_ei_class class)
+    <doc="ELF relocation.">
+  {
+    let r_offset_doc = "Relocation offset.";
+    let r_info_doc = "Relocation symbol + type.";
+    let r_sym_doc = "Relocation symbol.";
+    let r_type_doc = "Relocation type.";
   
-  if (class == ELFCLASS32)
-    {
-      elf32_addr r_offset <doc=r_offset_doc>;
-      elf_word r_info <doc=r_info_doc>;
-      . = @r_info;
-      int r_sym : 24 <doc=r_sym_doc>;
-      enum elf_r_type (mach) r_type : 8 <doc=r_type_doc>;
-    }
-  else
-    {
-      elf64_addr r_offset <doc=r_offset_doc>;
-      elf64_xword r_info <doc=r_info_doc>;
-      . = @r_info;
-      int r_sym : 32 <doc=r_sym_doc>;
-      enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
-    }
+    if (class == ELFCLASS32)
+      {
+        elf32_addr r_offset <doc=r_offset_doc>;
+        elf_word r_info <doc=r_info_doc>;
+        . = @r_info;
+        int r_sym : 24 <doc=r_sym_doc>;
+        enum elf_r_type (mach) r_type : 8 <doc=r_type_doc>;
+      }
+    else
+      {
+        elf64_addr r_offset <doc=r_offset_doc>;
+        elf64_xword r_info <doc=r_info_doc>;
+        . = @r_info;
+        int r_sym : 32 <doc=r_sym_doc>;
+        enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
+      }
 
-  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
-};
+    assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+  };
 
 struct elf_rela (elf_e_machine mach,
                  elf_ei_class class)
@@ -1408,13 +1423,13 @@ struct elf_shdr (enum elf_ei_class class)
 
 /* structs for the contents of certain ELF sections.  */
 
-union elf_chdr (enum elf_ei_class class)
+union elf_chdr (elf_ei_class class)
   <doc="ELF compressed section header.\n\
          Used in sections with SHF_COMPRESSED.">
 {
   struct
     {
-      enum elf_ch_type ch_type
+      elf_ch_type ch_type
         <doc="Compression algorithm.">;
       elf_word ch_size
         <doc="Size in bytes of the uncompressed data.">;
@@ -1424,7 +1439,7 @@ union elf_chdr (enum elf_ei_class class)
 
   struct
     {
-      enum elf_ch_type ch_type
+      elf_ch_type ch_type
         <doc="Compression algorithm.">;
       elf64_word ch_reserved;
       elf64_xword ch_size
@@ -1432,12 +1447,10 @@ union elf_chdr (enum elf_ei_class class)
       elf64_xword ch_addralign
         <doc="Required alignment of the uncompressed data">;
     } : class == ELFCLASS64;
-
-  struct {};
 };
 
-struct elf_sym (enum elf_e_machine mach,
-                enum elf_ei_class class)
+struct elf_sym (elf_e_machine mach,
+                elf_ei_class class)
   <doc ("ELF symbol table entry.")>
 {
   let st_name_doc
@@ -1456,15 +1469,15 @@ struct elf_sym (enum elf_e_machine mach,
 
       byte st_info;
       . = @st_info;
-      enum elf_sym_binding st_bind : 28;
-      enum elf_st_type (mach) st_type : 4;
+      elf_sym_binding st_bind : 28;
+      elf_st_type (mach) st_type : 4;
 
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
 
       byte st_other;
       . = @st_other;
-      enum elf_sym_visibility st_visibility : 3;
+      elf_sym_visibility st_visibility : 3;
       . += 5;
 
       /* Section header table index of the section related to this
@@ -1477,8 +1490,8 @@ struct elf_sym (enum elf_e_machine mach,
       byte st_info;
 
       . = @st_info;
-      enum elf_sym_binding st_bind : 60;
-      enum elf_st_type (mach) st_type : 4;
+      elf_sym_binding st_bind : 60;
+      elf_st_type (mach) st_type : 4;
 
       assert (sizeof (st_info) ==
               sizeof (st_bind) + sizeof (st_type));
@@ -1486,7 +1499,7 @@ struct elf_sym (enum elf_e_machine mach,
       byte st_other;
 
       . = @st_other;
-      enum elf_sym_visibility st_visibility : 3;
+      elf_sym_visibility st_visibility : 3;
       . += 5;
 
       elf64_half st_shndx
@@ -1517,14 +1530,14 @@ struct elf_hash <doc ("ELF hash table.")>
   elf_word [nchain] chain;
 };
 
-struct elf_dyn (enum elf_e_machine mach,
-                enum elf_ei_class class)
+struct elf_dyn (elf_e_machine mach,
+                elf_ei_class class)
   <doc ("ELF dynamic section.")>
 {
   if (class == ELFCLASS32)
-    enum elf_d_tag (mach) d_tag : bsizeof (elf_word);
+    elf_d_tag (mach) d_tag : bsizeof (elf_word);
   else
-    enum elf_d_tag (mach) d_tag : bsizeof (elf64_xword);
+    elf_d_tag (mach) d_tag : bsizeof (elf64_xword);
 
   switch (d_tag)
     {
@@ -1672,57 +1685,57 @@ union elf_section (enum elf_e_machine mach,
     ? shdr.sh_size / shdr.sh_entsize : 0;
   
   struct {}
-     : shdr.sh_type == SHT_NULL;
+    : shdr.sh_type == SHT_NULL;
 
   byte[shdr.sh_size] progbits
-     : shdr.sh_type == SHT_PROGBITS;
+    : shdr.sh_type == SHT_PROGBITS;
 
   elf_sym(mach, class)[nents] symtab
-     : shdr.sh_type == SHT_SYMTAB;
+    : shdr.sh_type == SHT_SYMTAB;
 
   byte[shdr.sh_size] strtab
-     : shdr.sh_size > 0 && shdr.sh_type == SHT_STRTAB
-       && warn_nofail_if (strtab[0] == '\0' && strtab[shdr.sh_size - 1] == '\0');
+    : (shdr.sh_size > 0 && shdr.sh_type == SHT_STRTAB
+       && warn_nofail_if (strtab[0] == '\0' && strtab[shdr.sh_size - 1] == '\0'));
 
   elf_rel(mach, class)[nents] rel
-     : shdr.sh_type == SHT_REL;
+    : shdr.sh_type == SHT_REL;
 
   elf_rela(mach, class)[nents] rela
-     : shdr.sh_type == SHT_RELA;
+    : shdr.sh_type == SHT_RELA;
 
   elf_hash hash
-     : shdr.sh_type == SHT_HASH;
+    : shdr.sh_type == SHT_HASH;
 
   elf_dyn(mach, class)[nents] dynamic
-     : shdr.sh_type == SHT_DYNAMIC
-       && warn_nofail_if (elf_dyn_section_constraints (dynamic));
+    : (shdr.sh_type == SHT_DYNAMIC
+       && warn_nofail_if (elf_dyn_section_constraints (dynamic)));
   
   elf_note(class)[nents] note
-     : shdr.sh_type == SHT_NOTE;
+    : shdr.sh_type == SHT_NOTE;
   
   struct {}
-     : shdr.sh_type == SHT_NOBITS;
+    : shdr.sh_type == SHT_NOBITS;
   
   byte[shdr.sh_size] shlib
-     : shdr.sh_type == SHT_SHLIB;
+    : shdr.sh_type == SHT_SHLIB;
   
   elf_sym(mach, class)[nents] dynsym
-     : shdr.sh_type == SHT_DYNSYM;
+    : shdr.sh_type == SHT_DYNSYM;
   
   elf_addr[nents] preinit_array
-     : shdr.sh_type == SHT_PREINIT_ARRAY; /* XXX: and the 32bit? */
+    : shdr.sh_type == SHT_PREINIT_ARRAY; /* XXX: and the 32bit? */
   
   elf_addr[nents] init_array
-     : shdr.sh_type == SHT_INIT_ARRAY;
+    : shdr.sh_type == SHT_INIT_ARRAY;
   
   elf_addr[nents] fini_array
-     : shdr.sh_type == SHT_FINI_ARRAY;
+    : shdr.sh_type == SHT_FINI_ARRAY;
   
   elf_group[nents] group
-     : shdr.sh_type == SHT_GROUP;
+    : shdr.sh_type == SHT_GROUP;
   
   elf32_word[nents] symtab_shndx
-     : shdr.sh_type == SHT_SYMTAB_SHNDX;
+    : shdr.sh_type == SHT_SYMTAB_SHNDX;
 };
 
 union elf_segment (enum elf_ei_class class,

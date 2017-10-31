@@ -52,19 +52,22 @@ Basic Editing
 @c* Commands::
 
 The Poke Language
-* Why Pickle::                  Why yet another language?
-* Data Types::			Numbers, arrays and structs.
-* Expressions::			Operators and values.
-* Constants::			Named constant values.
-* Variables::			Variables and scopes.
-* Statements::			Basic execution units.
-* Functions::			Defining and calling routines.
-* Mapping::                     Accessing the IO stream from poke programs.
-* Enumerations::		Integers with a restricted domain.
-* Bitmasks::                    Integers composed of OR-ed values.
-* Structs and Unions::		Structures of heterogeneous data.
+* Why Pickle::                  	Why yet another language?
+* Numbers, Strings and Expressions::	Fundamentals.
+* Variables and Constants::		Naming stuff.
+* Arrays::				Sequences of values.
+* Enumerations and Bitmasks::		Constants in a restricted domain.
+* Structs::				Manipulating products of heterogeneous data.
+* Unions::				A or B.
+* Mapping::                     	Accessing the IO stream from poke programs.
+* Expressions::				Operators and values.
+* Statements::				Basic execution units.
+* Functions::				Defining and calling routines.
 
 Advanced Editing
+@c Searching
+@c Marks
+@c Useful Idioms
 
 Reverse Engineering
 
@@ -88,6 +91,8 @@ XXX: explain why poke features a domain-specific languages.
 
 @node Data Types
 @chapter Data Types
+
+XXX: use footnotes for the rationale.
 
 The poke language is a statically typed programming language, with
 explicit typing.  It is (almost) always possible to infer the type of
@@ -117,6 +122,9 @@ in every context where a number is expected.
 @node Integers
 @section Integers
 
+Whole numbers, also known as integers, are ubiquitous in binary
+formats.
+
 Poke supports the following primitive types for integers:
 
 @table @code
@@ -143,6 +151,23 @@ Signed 64-bit integer.
 @item uint64
 Unsigned 64-bit integer.
 @end table
+
+XXX: discuss bit-field types: signed and unsigned bit:N.  But then,
+     what about the VM?  Bit-fields are better supported in struct
+     fields... but using what syntax?  The usual ': BITS' is already
+     used by constraints.  Using Ada's `at N range N .. M'?
+
+     Also, since IO offsets are bit-oriented, and since poke variables
+     do not have addresses, bit fields can be used like any other
+     variable, mapped or not: no alignment issues.
+
+     Making offsetof to work on bits?  Or having both offsetof and
+     boffsetof.  But then what about labels?
+
+     Also, support variable bit field types, like bit<EXPR> in
+     datascript.  Maybe even bit<EXPR>? :D But then types are not
+     static.  Unless bitfield type sizes are _not_ part of the type =>
+     bitfield VM instructions should check size.
 
 Integers literals can be expressed in several numeration bases.
 
@@ -187,7 +212,7 @@ The type of a character literal is always @code{char}.
 @subsection The digits separator @code{_}
 
 The character @code{_} can appear anywhere in a numeric literal other
-than leading them.  It is ignored, and it's purpose is to make it
+than leading them.  It is ignored, and its purpose is to make it
 easier for programmers to read them:
 
 @example
@@ -199,17 +224,61 @@ easier for programmers to read them:
 
 The type of a numeric literal is the smallest signed integer capable
 of holding it, starting with 32 bits, in steps of powers of two and up
-to 64 bits.
+to 64 bits.@footnote{Rationale: the width of a C ``int'' is 32 bits in
+most currently used architectures, and binary data formats are usually
+modeled after C.}
 
 So, for example, the value @code{2} has type @code{int32}, but the
 value @code{0xffff_ffff} has type @code{int64}, because it is out of
 the range of signed 32-bit numbers.
 
-It is possible to construct unsigned numerical literals using the
-suffix @code{u} or @code{U}.  So, for example @code{0xffff_ffffU} has
-type @code{uint32} and @code{0u} has type @code{int32}.
+A set of suffixes can be used to construct integer literals of certain
+types explicitly.  @code{L} or @code{l} is for 64-bit integers.
+@code{H} or @code{h} is for 16-bit integers (also known as
+@dfn{halves}) and @code{B} or @code{b} is for 8-bit integers (also
+known as @dfn{bytes}).  @code{10L} is a 64-bit integer with value
+@code{0x0000_0000_0000_000A}, @code{10H} is a 16-bit integer with
+value @code{0x000A} and @code{10b} is a 8-bit integer with value
+@code{0x0A}.
 
-XXX: discuss other suffixes: L, H, B and combinations.
+Similarly, the signed or unsigned attribute of an integer can be
+explicitly specified using the suffix @code{u} or @code{U} (the
+default are signed types).  For example @code{0xffff_ffffU} has type
+@code{uint32} and @code{0ub} has type @code{uint8}.
+
+The above rules guarantee that it is always possible to determine the
+width and signedness of an integer constant just by looking at it,
+with no ambiguity.  This is important, because very often numbers are
+used in commands like @code{poke} and @code{peek} where these
+attributes determine the number of bytes written/read to/from the IO
+space, and their encoding.
+
+For example, the following command writes four byte in IO offset 0x0:
+
+@example
+(poke) poke 0x0, 10
+0x00000000 <- 0x00
+0x00000001 <- 0x00
+0x00000002 <- 0x00
+0x00000003 <- 0x0a
+@end example
+
+But the following command writes just one byte:
+
+@example
+(poke) poke 0x0, 10b
+0x00000000 <- 0x0a
+@end example
+
+Note that the operation above can also be achieved by using a cast
+(XXX: xref to casts), like in:
+
+@example
+(poke) poke 0x0, (int8) 10
+0x00000000 <- 0x0a
+@end example
+
+However using suffixes requires less keystrokes.
 
 @node Arrays
 @section Arrays
@@ -374,6 +443,11 @@ The element names are significant, i.e. the type @code{struct @{int
 foo; int bar;@}} denotes a different type than @code{struct @{int baz;
 int quux;@}}.
 
+@subsection Struct injection
+
+XXX explain struct/union injection, and how it is a shortcut for
+avoiding semantically superfluous fields.
+
 @subsection Struct Constructors
 
 Struct literals are constructed using the following syntax:
@@ -424,6 +498,8 @@ XXX: discuss struct parameters and struct attributes.
 XXX: discuss component constraints.
 XXX: discuss lazy projection in structs.
 
+XXX: discuss recursive structs and forward declarations.
+
 XXX: document the operator 'is' for united values.
 
 @example
@@ -462,7 +538,9 @@ struct file
 record @{....@}
 @end example
 
-XXX: discuss the deprecated type qualifier.
+XXX: discuss the deprecated field qualifier.
+
+XXX: discuss the `reserved' field qualifier.
 
 XXX: discuss about the two idioms for union tags: tag outside of the
 union leading to names like foo.contents.date or tag inside of the
@@ -582,6 +660,8 @@ error.
 
 The following left-associative, short-circuited binary logical
 operators are supported, in descending precedence order:
+
+XXX: Add the ``implies'' operator => which is useful in constraints.
 
 @itemize
 @item Logical AND @code{&&}.
@@ -1436,21 +1516,8 @@ bitmask elf_xword elf_sh_flags
 @}
 @end example
 
-@node Structs and Unions
-@chapter Structs and Unions
-
-Structs are programs whose execution generate tuple types.
-
-   - Structs and unions: programs that generate tuple types with sophisticated
-     physical layouts that can't be expressed using tuple notation.
-
-
-A tuple can be casted into a tuple type generated by a struct, using
-the rules documented above in Tuples, using the following syntax:
-
-@example
-(struct foo) @{10, "name"@}
-@end example
+@node Structs
+@chapter Structs
 
 A struct defines the layout of an area in IO space.  They are defined
 as follows:
@@ -1498,6 +1565,11 @@ The contents of the field are stored in big-endian.
 
 @var{type} is the type of the field.  @var{field} is the name of the
 field, which must be unique in the containing struct.
+
+@node Unions
+@chapter Unions
+
+
 
 @node Poke Architecture
 @chapter Poke Architecture

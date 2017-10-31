@@ -34,7 +34,7 @@ struct sparc_insn_sethi_branch
       bit:5 rd;
       . += 3;
       bit:22 imm22;
-    } xxx : op2 == XXX;
+    } xxx { op2 == XXX };
 
     struct
     {
@@ -42,7 +42,7 @@ struct sparc_insn_sethi_branch
       bit:4 cond;
       . += 3;
       bit:22 disp22;
-    } yyy : op2 == YYY;
+    } yyy { op2 == YYY };
 
     struct
     {
@@ -53,7 +53,7 @@ struct sparc_insn_sethi_branch
       bit:1 cc0;
       bit:1 p;
       bit:19 disp19;    
-    } zzz : op2 == ZZZ;
+    } zzz { op2 == ZZZ };
 
     struct
     {
@@ -65,7 +65,7 @@ struct sparc_insn_sethi_branch
       bit:1 p;
       bit:5 rs1;
       bit:14 d16lo;      
-    } vvv : op2 == VVV;
+    } vvv { op2 == VVV };
 
   } insn;
 };
@@ -76,9 +76,9 @@ struct sparc_insn
 
   union
   {
-     struct sparc_insn_sethi_branch sethi_branch : op = 0x0;
-     struct sparc_insn_call call : op == 0x1;
-     struct sparc_insn_other other;
+    struct sparc_insn_sethi_branch sethi_branch { op = 0x0 };
+    struct sparc_insn_call call { op == 0x1 };
+    struct sparc_insn_other other;
   } insn;
 };
 

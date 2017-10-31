@@ -1,0 +1,140 @@
+/* Useful idiom: a struct containing common fields can be defined and
+   used as an injection inside the union alternatives.  The types
+   `packet_prologue' and `packet_epilogue' are not visible from
+   outside the union.  */
+
+deftype packet =
+  union
+  {
+    deftype packet_prologue = struct { uint32 packet_type; };
+    deftype packet_epilogue = struct { uint32 quux; };
+
+    struct
+    {
+      packet_prologue : packet_type == 0x0;
+      byte[1024] data;
+      packet_epilogue;
+    } audio;
+
+    struct
+    {
+      packet_prologue : packet_type == 0x1;
+      byte[2048] data;
+      packet_epilogue;
+    } video;
+  };
+
+/* The desugared version of a conditional struct field is an injected
+   union with an empty alternative.  */
+
+deftype foo =
+  struct
+  {
+    int f1;
+    int f2 if f1 > 0;
+  };
+
+/* is equivalent to  */
+
+deftype foo =
+  struct
+  {
+    int f1;
+    union
+    {
+      int f2 : f1 > 0;
+      struct {};
+    };
+  };
+
+/* Injected structs can also be conditional:  */
+
+deftype foo =
+  struct
+  {
+    int f1;
+    struct
+    {
+      int f2;
+      int f3;
+    } if f1 > 0;
+  };
+
+/* is equivalent to */
+
+deftype foo =
+  struct
+  {
+    int f1;
+    union
+    {
+      struct { int f2; int f3; } : f1 > 0;
+      struct {};
+    };
+  };
+
+/* Video file example.  */
+
+deftype vfile = tag [];
+
+deftype tag =
+  union
+  {
+    deftype tag_common =
+      struct
+      {
+        int tag_type;
+        int flags;
+        int reserved;
+      };
+    
+    struct
+    {
+      tag_common : tag_type == TAG_VIDEO;
+      uint64 time;
+      byte[1024] data;
+    } video;
+
+    struct
+    {
+      tag_common : tag_type == TAG_SCRIPT;
+      string code;
+    } script;
+
+    struct
+    {
+    tag_common : tag_type == TAG_NULL;
+    } null;
+  };
+
+/* Compare the above with the following version, that doesn't use
+   injection at all.  It involves changing the type `tag' from an
+   union to a struct, very C-like.  */
+
+deftype tag =
+  struct
+  {
+    int tag_type;
+    int flags;
+    int reserved;
+
+    union
+    {
+      struct
+      {
+        uint64 time;
+        byte[1024] data;
+      } video : tag_type == TAG_VIDEO;
+
+      struct
+      {
+        string code;
+      } script : tag_type == TAG_SCRIPT;
+    } data;
+  };
+
+/*
+Local variables:
+mode:c
+End:
+*/

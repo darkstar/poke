@@ -125,15 +125,12 @@ struct foo
   } if one > 0;
 }
 
-/* Bit fields are made with bit-types:
-
-   typedef bit:4 bitfield_type;
-
-   instead of : BITS like in C.  */
+/* Bit fields are made using the usual C syntax.  But with all-defined
+semantics.  */
 
 struct foo
 {
-  bit:4 nibble;
+  uitn8 nibble : 4;
 };
 
 
