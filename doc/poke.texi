@@ -52,17 +52,21 @@ Basic Editing
 @c* Commands::
 
 The Poke Language
-* Why Pickle::                  	Why yet another language?
-* Numbers, Strings and Expressions::	Fundamentals.
-* Variables and Constants::		Naming stuff.
-* Arrays::				Sequences of values.
-* Enumerations and Bitmasks::		Constants in a restricted domain.
-* Structs::				Manipulating products of heterogeneous data.
-* Unions::				A or B.
+* Hello Poke::
+* Numbers::
+* Arrays::
+* Strings::
+* Structs::
+* Unions::
+* Enumerations::
+* Bitmasks::
+* Bitmaps::
+* Expressions::
+* Constants::
+* Variables::
+* Statements::
+* Procedures::
 * Mapping::                     	Accessing the IO stream from poke programs.
-* Expressions::				Operators and values.
-* Statements::				Basic execution units.
-* Functions::				Defining and calling routines.
 
 Advanced Editing
 @c Searching
@@ -84,40 +88,17 @@ Indexes
 * Concept Index::
 @end menu
 
-@node Why Pickle
-@chapter Why Pickle
+@node Hello Poke
+@chapter Hello Poke!
 
 XXX: explain why poke features a domain-specific languages.
 
-@node Data Types
-@chapter Data Types
-
-XXX: use footnotes for the rationale.
-
-The poke language is a statically typed programming language, with
-explicit typing.  It is (almost) always possible to infer the type of
-a value, and it is always possible to infer the storage properties and
-needs of any type.
-
-The following sections document how these typed values are constructed
-and what are the types available for constructing numbers and arrays.
+@node Numbers
+@chapter Numbers
 
 @menu
-* Null::			One value to bind them all.
 * Integers::			Integer numbers.
-* Arrays::			Sequences of elements of the same type.
-* Structs::                     Collections of elements of arbitrary types.
-* Type Conversions::		Automatic conversions between types.
 @end menu
-
-@node Null
-@section Null
-
-@code{null} is a special value in poke that can be of any type.  And
-not much more can be said about it at this point, even if it is
-actually used for many purposes in the language.  For now, just
-remember that it can also mimic the semantics of the number @code{0}
-in every context where a number is expected.
 
 @node Integers
 @section Integers
@@ -281,7 +262,7 @@ Note that the operation above can also be achieved by using a cast
 However using suffixes requires less keystrokes.
 
 @node Arrays
-@section Arrays
+@chapter Arrays
 
 Arrays types are denoted using the following syntax:
 
@@ -361,7 +342,10 @@ null, 20]}.
 Note that an array element should only be referred once.  Accordingly,
 @code{[1, 2, 3, .[1] = 10]} is not a valid array literal.
 
-@subsection Strings
+XXX: Array subscripts are promoted to unsigned 64-bit integers.
+
+@node Strings
+@chapter Strings
 
 Arrays of ASCII codes can be denoted using an alternative literal
 notation that is useful when working with ASCII null-terminated
@@ -409,11 +393,58 @@ Denotes an horizontal tab.
 @end table
 
 @node Structs
-@section Structs
+@chapter Structs
 
 Structs are collections of heterogeneous values.
 
-@subsection Struct Types
+A struct defines the layout of an area in IO space.  They are defined
+as follows:
+
+@example
+struct @var{tag} [@var{qualifiers}]
+@{
+  @var{field1};
+  @var{field2};
+  ...
+  @var{fieldN};
+@};
+@end example
+
+where @var{field1}..@var{fieldN} are the definitions of fields.  It is
+legal to have an empty struct, i.e. with no field defined.
+
+@var{qualifiers} is a list of optional qualifiers for the struct
+contents:
+
+@table @code
+@item lsb
+The default endianness of the struct contents is little-endian.
+@item msb
+The default endianness of the struct contents is big-endian.
+@end table
+
+Each field is defined as follows:
+
+@example
+[@var{label}:] [@var{qualifiers}] @var{type} @var{field}[: @var{constraint}];
+@end example
+
+where @var{label} is an optional offset relative to the beginning of
+the struct.  The field is located @var{label} bytes in the struct.
+
+@var{qualifiers} is a list of optional qualifiers for the field:
+
+@table @code
+@item lsb
+The contents of the field are stored in little-endian.
+@item msb
+The contents of the field are stored in big-endian.
+@end table
+
+@var{type} is the type of the field.  @var{field} is the name of the
+field, which must be unique in the containing struct.
+
+@section Struct Types
 
 A tuple type is
 denoted using the following syntax:
@@ -443,12 +474,12 @@ The element names are significant, i.e. the type @code{struct @{int
 foo; int bar;@}} denotes a different type than @code{struct @{int baz;
 int quux;@}}.
 
-@subsection Struct injection
+@section Struct injection
 
 XXX explain struct/union injection, and how it is a shortcut for
 avoiding semantically superfluous fields.
 
-@subsection Struct Constructors
+@section Struct Constructors
 
 Struct literals are constructed using the following syntax:
 
@@ -570,17 +601,6 @@ void zero_inodes (inode i)
 @}
 @end example
 
-@subsection Unions
-
-XXX: discuss unions.  Tags, arguments, lexical scope, etc.  Provide
-some examples on how to model some real-life situations in binary
-formats, like the BSON elements.
-
-XXX: mention how it is better to define struct types at the toplevel
-instead of using in-situ structs, because that allows the user to map
-them wherever she wants in IO space, and to use constructors for
-matching etc.
-
 @subsection Casting Structs
 
 Casts to tuples use the usual syntax @code{(<type>) <exp>} and can be
@@ -602,15 +622,109 @@ literal.  For example, @code{(string name, int age) @{.age = 30, .name
 = "Jose"@}} generates the struct @code{@{"Jose", 30@}} of type
 @code{(string name, int age)}.
 
-@node Type Conversions
-@section Type Conversions
+@node Unions
+@chapter Unions
 
-XXX: automatic type conversions?
+XXX: discuss unions.  Tags, arguments, lexical scope, etc.  Provide
+some examples on how to model some real-life situations in binary
+formats, like the BSON elements.
+
+XXX: mention how it is better to define struct types at the toplevel
+instead of using in-situ structs, because that allows the user to map
+them wherever she wants in IO space, and to use constructors for
+matching etc.
 
 - Arguments to boolean operators are promoted to signed 32-bit
   integers.
 
-- Array subscripts are promoted to unsigned 64-bit integers.
+@node Enumerations
+@chapter Enumerations
+
+Enumerations are collections of related constants.  They use the
+following syntax:
+
+@example
+enum @var{type} @var{tag}
+@{
+   @var{enumerator1} [= @var{value1}],
+   @var{enumerator2} [= @var{value2}],
+   ...
+   @var{enumeratorN} [= @var{valueN}][,]
+@}
+@end example
+
+Where:
+
+@table @var
+@item type
+Is the base type of the enumeration.  It should be an integer type.
+@item tag
+Is the name of the enumeration.  It should be unique in the global
+scope.
+@item enumeratorN
+Are the names of the enumerators.
+@item valueN
+Are initialization values.  They should be expressions evaluating to
+constant values valid for @var{type}.
+
+If an explicit initialization value is not specified for an
+enumerator, an implicit value is used.  The implicit value is
+initially @code{0}, and increased by one every time it is used.
+@end table
+
+An enumeration  must contain at least one enumerator.
+
+Enumerations do not provide its own lexical scope.  The enumerators
+should be unique in the global scope.  It is highly recommended to use
+prefixes to avoid conflicts.
+
+@node Bitmasks
+@chapter Bitmasks
+
+@example
+bitmask elf_xword elf_sh_flags
+@{
+  /** Section contains data that should be writable during process
+      execution.  */
+  SHF_WRITE = 0x1,
+
+  /** Section occupies memory during process execution.  */
+  SHF_ALLOC = 0x2,
+
+  /** Section contains executable machine instructions.  */
+  SHF_EXECINSTR = 0x4,
+@}
+@end example
+
+@node Bitmaps
+@chapter Bitmaps
+
+XXX discuss bitmaps
+
+ Bitmaps contain bit fields.
+ If named, a bitmap can always be used like its base type, i.e. like
+ an integral field.
+ Bit endianness: msbit, lsbit.
+ Byte endianness: msb, lsb.
+ Labels are not allowed in bitmaps.
+ Projection works with bitmaps.
+
+ Writing bit fields involves doing bit-wise logical operations (or to
+ set, and to clear, and shifts) on the containing type:
+
+ (poke) poke a.bitfield, 0xf
+ 0xfeeffeef <- 0xdeadbeef | 0xf << 3
+
+@example
+typedef audio_props =
+  bitmap uint8
+  @{
+     bit:4 flv_sound_format format = FLV_AAC;
+     bit:2 flv_sound_rate rate = FLV_RATE_44K;
+     bit:1 flv_sound_size size;
+     bit:1 flv_sound_type type = FLV_SND_STEREO;
+  @};
+@end example
 
 @node Expressions
 @chapter Expressions
@@ -625,7 +739,6 @@ languages.
 * Bitwise Operators::		Working with bits.
 * Operators on Arrays::		Operating on arrays.
 * Conditional Operator::	if-then-else.
-* The Comma Operator::	        Sequencing expressions.
 * The Cast Operator::		Changing the type of a value.
 * Other Operators::		Stuff that is explained elsewhere.
 * Operators Precedence::	What gets executed first.
@@ -871,13 +984,6 @@ supported:
 
 The conditional operator can be applied to integer and character
 values.
-
-@node The Comma Operator
-@section The Comma Operator
-
-The comma operator @code{,} is a left-associative operator that
-evaluates its operands and returns the value of the rightmost
-operand.  It is used to separate expressions.
 
 @node The Cast Operator
 @section The Cast Operator
@@ -1261,13 +1367,13 @@ It is possible to name specific function arguments in a function call:
 printf (fmt = "this is %d", number);
 @end example
 
-@node Functions
-@chapter Functions
+@node Procedures
+@chapter Procedures
 
-Functions are defined using the following syntax:
+Procedures are defined using the following syntax:
 
 @example
-function <name> ((<arg> [,<arg>]*)*) [<return_type>]
+defproc <name> ((<arg> [,<arg>]*)*) [<return_type>]
 @{
   <function_body>
 @}
@@ -1457,151 +1563,6 @@ Integer values are de/encoded as follows:
       @code{0x0000}, @code{0x0000_0000} and
       @code{0x0000_0000_0000_0000} respectively.
 @end itemize
-
-@node Enumerations
-@chapter Enumerations
-
-Enumerations are collections of related constants.  They use the
-following syntax:
-
-@example
-enum @var{type} @var{tag}
-@{
-   @var{enumerator1} [= @var{value1}],
-   @var{enumerator2} [= @var{value2}],
-   ...
-   @var{enumeratorN} [= @var{valueN}][,]
-@}
-@end example
-
-Where:
-
-@table @var
-@item type
-Is the base type of the enumeration.  It should be an integer type.
-@item tag
-Is the name of the enumeration.  It should be unique in the global
-scope.
-@item enumeratorN
-Are the names of the enumerators.
-@item valueN
-Are initialization values.  They should be expressions evaluating to
-constant values valid for @var{type}.
-
-If an explicit initialization value is not specified for an
-enumerator, an implicit value is used.  The implicit value is
-initially @code{0}, and increased by one every time it is used.
-@end table
-
-An enumeration  must contain at least one enumerator.
-
-Enumerations do not provide its own lexical scope.  The enumerators
-should be unique in the global scope.  It is highly recommended to use
-prefixes to avoid conflicts.
-
-@node Bitmasks
-@chapter Bitmasks
-
-@example
-bitmask elf_xword elf_sh_flags
-@{
-  /** Section contains data that should be writable during process
-      execution.  */
-  SHF_WRITE = 0x1,
-
-  /** Section occupies memory during process execution.  */
-  SHF_ALLOC = 0x2,
-
-  /** Section contains executable machine instructions.  */
-  SHF_EXECINSTR = 0x4,
-@}
-@end example
-
-@node Bitmaps
-@chapter Bitmaps
-
-XXX discuss bitmaps
-
- Bitmaps contain bit fields.
- If named, a bitmap can always be used like its base type, i.e. like
- an integral field.
- Bit endianness: msbit, lsbit.
- Byte endianness: msb, lsb.
- Labels are not allowed in bitmaps.
- Projection works with bitmaps.
-
- Writing bit fields involves doing bit-wise logical operations (or to
- set, and to clear, and shifts) on the containing type:
-
- (poke) poke a.bitfield, 0xf
- 0xfeeffeef <- 0xdeadbeef | 0xf << 3
-
-@example
-typedef audio_props =
-  bitmap uint8
-  @{
-     bit:4 flv_sound_format format = FLV_AAC;
-     bit:2 flv_sound_rate rate = FLV_RATE_44K;
-     bit:1 flv_sound_size size;
-     bit:1 flv_sound_type type = FLV_SND_STEREO;
-  @};
-@end example
-
-
-@node Structs
-@chapter Structs
-
-A struct defines the layout of an area in IO space.  They are defined
-as follows:
-
-@example
-struct @var{tag} [@var{qualifiers}]
-@{
-  @var{field1};
-  @var{field2};
-  ...
-  @var{fieldN};
-@};
-@end example
-
-where @var{field1}..@var{fieldN} are the definitions of fields.  It is
-legal to have an empty struct, i.e. with no field defined.
-
-@var{qualifiers} is a list of optional qualifiers for the struct
-contents:
-
-@table @code
-@item lsb
-The default endianness of the struct contents is little-endian.
-@item msb
-The default endianness of the struct contents is big-endian.
-@end table
-
-Each field is defined as follows:
-
-@example
-[@var{label}:] [@var{qualifiers}] @var{type} @var{field}[: @var{constraint}];
-@end example
-
-where @var{label} is an optional offset relative to the beginning of
-the struct.  The field is located @var{label} bytes in the struct.
-
-@var{qualifiers} is a list of optional qualifiers for the field:
-
-@table @code
-@item lsb
-The contents of the field are stored in little-endian.
-@item msb
-The contents of the field are stored in big-endian.
-@end table
-
-@var{type} is the type of the field.  @var{field} is the name of the
-field, which must be unique in the containing struct.
-
-@node Unions
-@chapter Unions
-
-
 
 @node Poke Architecture
 @chapter Poke Architecture
