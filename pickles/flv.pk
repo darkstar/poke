@@ -94,7 +94,7 @@ deftype flv_audio =
   union (uint32 data_size)
   {
     deftype sound_props =
-      bitmap
+      bitmap uint8
       {
         bit:4 flv_sound_format format;
         bit:2 flv_sound_rate rate;
