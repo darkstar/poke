@@ -61,12 +61,13 @@ The Poke Language
 * Enumerations::
 * Bitmasks::
 * Bitmaps::
+* Flattening::
 * Expressions::
 * Constants::
 * Variables::
 * Statements::
 * Procedures::
-* Mapping::                     	Accessing the IO stream from poke programs.
+* Mapping::			Accessing the IO stream from poke programs.
 
 Advanced Editing
 @c Searching
@@ -401,7 +402,7 @@ A struct defines the layout of an area in IO space.  They are defined
 as follows:
 
 @example
-struct @var{tag} [@var{qualifiers}]
+struct
 @{
   @var{field1};
   @var{field2};
@@ -473,11 +474,6 @@ person, we could do it like @code{struct @{int age; string name;@}}.
 The element names are significant, i.e. the type @code{struct @{int
 foo; int bar;@}} denotes a different type than @code{struct @{int baz;
 int quux;@}}.
-
-@section Struct injection
-
-XXX explain struct/union injection, and how it is a shortcut for
-avoiding semantically superfluous fields.
 
 @section Struct Constructors
 
@@ -601,7 +597,7 @@ void zero_inodes (inode i)
 @}
 @end example
 
-@subsection Casting Structs
+@section Casting Structs
 
 Casts to tuples use the usual syntax @code{(<type>) <exp>} and can be
 applied to tuple values.
@@ -716,7 +712,7 @@ XXX discuss bitmaps
  0xfeeffeef <- 0xdeadbeef | 0xf << 3
 
 @example
-typedef audio_props =
+deftype audio_props =
   bitmap uint8
   @{
      bit:4 flv_sound_format format = FLV_AAC;
@@ -725,6 +721,157 @@ typedef audio_props =
      bit:1 flv_sound_type type = FLV_SND_STEREO;
   @};
 @end example
+
+@node Flattening
+@chapter Flattening
+
+We have already discussed how it is possible to omit the name of
+fields when defining structs.  When this is done, an anonymous field
+is defined.  Generally speaking, this means the field cannot be
+accessed in a poke program, since struct components can only be
+referred by name.
+
+However, the picture changes when the anonymous field is of a type
+having named components itself.  In this case, it is still possible to
+access to the named sub-components like if they were components of the
+entity containing the anonymous field.  This is easy to see using an
+example.
+
+@example
+deftype astruct =
+  struct
+  @{
+     int f1;
+
+     struct
+     @{
+        int f2;
+        int f3;
+     @};
+  @}
+
+defvar astruct s;
+@end example
+
+The struct above has two fields: an integer @code{f1} and a struct.
+The struct field has no name (it is anonymous) so it is not possible
+to refer to it explicitly.  However, its components (the fields
+@code{f2} and @code{f3}) can be accessed using @code{s.f2} and
+@code{s.f3} respectively.  This is called @dfn{flattening} in poke
+parlance, and it is an important concept that makes it possible to
+implement many useful idioms.
+
+It is very important to note that flattening doesn't change the
+structures it involves: @code{astruct} still contains an anonymous
+struct field that in turn contains two fields.  In other words: the
+fields @code{f2} and @code{f3} do not become fields of the outer
+struct.
+
+The compiler or the run-time will complain if flattening an anonymous
+field would result in ambiguity, and will consider that an error in
+the program.  This happens in the following example, where the field
+@code{f1} introduces an ambiguity.
+
+@example
+struct
+@{
+   int f1;
+
+   struct
+   @{
+      int f1;
+      int f2;
+   @};
+@}
+@end example
+
+Injection is transitive.  In the following example:
+
+@example
+deftype astruct =
+  struct
+  @{
+     int f1;
+     struct
+     @{
+        int f2;
+        struct
+        @{
+          int f3;
+        @};
+     @};
+  @}
+
+defvar astruct s;
+@end example
+
+The three fields can be referred as @code{s.f1}, @code{s.f2} and
+@code{s.f3} respectively.
+
+@section Injecting Unions
+
+Until now we have focused on structs when talking about injection.
+However, injection can be used with any type featuring named
+subcomponents.  This includes unions.
+
+Consider the following example:
+
+@example
+deftype astruct =
+  struct
+  @{
+     int f1;
+ 
+     union
+     @{
+        int f2 : f1 == 0;
+        int f3;
+     @};
+  @}
+
+defvar astruct s;
+@end example
+
+In this case, the alternative active in the union can be accessed like
+if it was a component of the outermost struct: either @code{s.f2} or
+@code{s.f3}.
+
+Transitive injection also works with unions.  In the example below
+both @code{f3} and @code{f4} are accessible as @code{s.f3} and
+@code{s.f4} provided @code{s.f1} is not zero.
+
+@example
+deftype astruct =
+  struct
+  @{
+     int f1;
+ 
+     union
+     @{
+        int f2 : f1 == 0;
+        struct
+        @{
+          int f3;
+          int f4;
+        @};
+     @};
+  @}
+
+defvar astruct s;
+@end example
+
+Note that injecting unions can be tricky and should be used carefully:
+since there is no way to refer to the union itself (it has no name)
+the user must know what alternative of the union is active when the
+injected field is accessed.
+
+XXX: we need full type reflection, to know what fields a struct has.
+Maybe a field iterator?
+
+@section Injecting Bitmaps
+
+Bit-fields defined in a bitmap can be injected in exactly the same way
+than struct fields.
 
 @node Expressions
 @chapter Expressions
@@ -1112,11 +1259,11 @@ const x = 'x', y = 'y';
 @chapter Variables
 
 Variables are the association between a symbol and a value.  They are
-declared using the @code{let} construction:
+declared using the @code{def} construction:
 
 @example
-let [<type>] <name> [= <exp>]
-    (,[<type>] <name> [= <exp>)*;
+defvar [<type>] <name> [= <exp>]
+      (,[<type>] <name> [= <exp>)*;
 @end example
 
 Where @code{<name>} is a literal with the form
@@ -1158,7 +1305,7 @@ For example, this is an error:
 
 @example
 @{
-  let i;
+  defvar int i;
 @}
 
 i = 30;
@@ -1168,7 +1315,7 @@ But this is not:
 
 @example
 @{
-  let i;
+  defvar int i;
 
   @{
     i = 30;
@@ -1430,7 +1577,7 @@ then it will contain any extra argument.
 @example
 function printf (string fmt, args = @{@})
 @{
-   let i;
+   defvar int i;
    for (i = 0; i < sizeof (args); i++)
    @{
       /* Process argument.  */
@@ -1481,7 +1628,7 @@ which is of any type, and is not equal to any other other value.
 The following example:
 
 @example
-let a = byte[] @ 0x0;
+defvar a = byte[] @ 0x0;
 @end example
 
 defines an array that covers the entire IO space.  Remember that empty
@@ -1492,12 +1639,12 @@ bytes, which can't be associated with constraints.
 In theory this is an infinite loop:
 
 @example
-struct elem_type
+struct
 @{
   byte b : b == eof;
 @};
 
-let a = elem_type[] @ 0x00;
+defvar a = elem_type[] @ 0x00;
 @end example
 
 but in practice it is detected by the run-time and reported as a
@@ -1516,7 +1663,7 @@ XXX Explain handling of EOF: There is _never_ EOF poking to IO space:
     full, or whatever.  But that is another level.
 
 @example
-     let i = int @ 0xffff;
+     defvar i = int @ 0xffff;
      i = 25;
 @end example
 

@@ -108,14 +108,14 @@ deftype flv_audio =
                      && rate == FLV_RATE_44K
                      && type == FLV_SND_STEREO);
       flv_aac_packet_type packet_type;
-      uint8 [data_size - 8] packet;
+      uint8[data_size - 8] packet;
     } aac;
     
     struct
     {
       sound_props;
       flv_sound_type packet_type;
-      uint8 [data_size] data;
+      uint8[data_size] data;
     } other;
   };
 

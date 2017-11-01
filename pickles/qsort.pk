@@ -21,9 +21,9 @@ defproc qsort (int[] array, int left = 0, int right = sizeof (array)) : int
 {
   defproc partition (int left, int right) : int
   {
-    let pivot = a[left];
-    let i = left;
-    let j = right + 1;
+    defvar pivot = a[left];
+    defvar i = left;
+    defvar j = right + 1;
 
     pivot = a[left];
     i = left;
@@ -35,7 +35,7 @@ defproc qsort (int[] array, int left = 0, int right = sizeof (array)) : int
         do --j; while (array[j] > pivot);
         if (i >= j) break;
 
-        let t = array[i];
+        defvar t = array[i];
         array[i] = array[j];
         array[j] = t;
       }
@@ -50,7 +50,7 @@ defproc qsort (int[] array, int left = 0, int right = sizeof (array)) : int
 
   if (left < right)
     {
-      let j = partition (left, right);
+      defvar j = partition (left, right);
 
       qsort (array, left, right - 1);
       qsort (array, left, right);
@@ -60,16 +60,16 @@ defproc qsort (int[] array, int left = 0, int right = sizeof (array)) : int
 defproc test_qsort ()
 {
   /* Sort several arrays in the current IO stream.  */
-  def bytes = byte[2048] @ 0x0;
-  def integers = int[512] @ .;
-  def longs = long[256] @ .;
+  defvar bytes = byte[2048] @ 0x0;
+  defvar integers = int[512] @ .;
+  defvar longs = long[256] @ .;
 
   qsort (bytes);
   qsort (integers);
   qsort (longs);
 
   /* Now sort an unmapped array variable.  */
-  def array = [3, 2, 1, 0];
+  defvar array = [3, 2, 1, 0];
   qsort (array);
 }
 

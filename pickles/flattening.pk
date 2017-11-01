@@ -1,5 +1,5 @@
 /* Useful idiom: a struct containing common fields can be defined and
-   used as an injection inside the union alternatives.  The type
+   used as a flattening inside the union alternatives.  The type
    `packet_epilogue' is not visible from outside the union.  */
 
 deftype packet =
@@ -22,7 +22,7 @@ deftype packet =
     } video;
   };
 
-/* The desugared version of a conditional struct field is an injected
+/* The desugared version of a conditional struct field is a flattened
    union with an empty alternative.  */
 
 deftype foo =
@@ -45,7 +45,7 @@ deftype foo =
     };
   };
 
-/* Injected structs can also be conditional:  */
+/* Flattened structs can also be conditional:  */
 
 deftype foo =
   struct
@@ -107,7 +107,7 @@ deftype tag =
     } null;
   };
 
-/* Compare the above with the following version where injection is not
+/* Compare the above with the following version where flattening is not
    used at all.  The type `tag' is changed to a struct and an
    additional union is nested, very C-like.  */
 
@@ -138,7 +138,7 @@ deftype tag =
     } data;
   };
 
-/* Injection also works with enums.  */
+/* Flattening also works with enums.  */
 
 deftype relocs =
   enum (int mach)

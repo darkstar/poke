@@ -1146,10 +1146,10 @@ deftype elf_rel =
   struct (elf_e_machine mach, elf_ei_class class)
     <doc="ELF relocation.">
   {
-    let r_offset_doc = "Relocation offset.";
-    let r_info_doc = "Relocation symbol + type.";
-    let r_sym_doc = "Relocation symbol.";
-    let r_type_doc = "Relocation type.";
+    defvar r_offset_doc = "Relocation offset.";
+    defvar r_info_doc = "Relocation symbol + type.";
+    defvar r_sym_doc = "Relocation symbol.";
+    defvar r_type_doc = "Relocation type.";
   
     if (class == ELFCLASS32)
       {
