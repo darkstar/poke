@@ -43,7 +43,7 @@ deftype flv_header =
   };
 
 deftype flv_sound_format =
-  enum bit:4
+  enum uint8
   {
     FLV_PCM_PE = 0,
     FLV_ADPCM = 1,
@@ -61,7 +61,7 @@ deftype flv_sound_format =
   };
 
 deftype flv_sound_rate =
-  enum bit:2
+  enum uint8
   {
     FLV_RATE_5_5K = 0,
     FLV_RATE_11K = 1,
@@ -70,14 +70,14 @@ deftype flv_sound_rate =
   };
 
 deftype flv_sound_size =
-  enum bit:1
+  enum uint8
   {
     FLV_SND_8BIT = 0,
     FLV_SND_16BIT = 1
   };
 
 deftype flv_sound_type =
-  enum bit:1
+  enum uint8
   {
     FLV_SND_MONO = 0,
     FLV_SND_STEREO = 1
@@ -91,24 +91,30 @@ deftype flv_aac_packet_type =
     };
 
 deftype flv_audio =
-  union (bit:24 data_size)
+  union (uint32 data_size)
   {
+    deftype sound_props =
+      bitmap
+      {
+        bit:4 flv_sound_format format;
+        bit:2 flv_sound_rate rate;
+        bit:1 flv_sound_size size;
+        bit:1 flv_sound_type type;
+      };
+    
     struct
     {
-      flv_sound_format format = FLV_AAC;
-      flv_sound_rate rate = FLV_RATE_44K;
-      flv_sound_size size;
-      flv_sound_type type = FLV_SND_STEREO;
+      sound_props : (format == FLV_AAC
+                     && rate == FLV_RATE_44K
+                     && type == FLV_SND_STEREO);
       flv_aac_packet_type packet_type;
       uint8 [data_size - 8] packet;
     } aac;
     
     struct
     {
-      flv_sound_format format;
-      flv_sound_rate rate;
-      flv_sound_size size;
-      flv_sound_type type;
+      sound_props;
+      flv_sound_type packet_type;
       uint8 [data_size] data;
     } other;
   };
@@ -122,7 +128,11 @@ deftype flv_video =
     struct
     {
       uint8 pkttype;
-      bit:24 compotime;
+      struct
+      {
+        uint8 hi8;
+        uint16 low16;
+      } compotime;
     } if codec_id == 4;
   };
 
@@ -139,23 +149,34 @@ deftype flv_tag =
     uint8 type;
   
     /* Length of `data' below.  */
-    bit:24 data_size;
+    struct
+    {
+      int8 hi8;
+      uint16 lo16;
+    } data_size;
 
     /* The tag timestamp contains the time in milliseconds at which
        the data in this tag applies.  This value is relative to the
-       first tag in the FLV file.  The information is splitted in two
-       fields: one with the lowest 24 bits and another with the upper
-       8 bits.  */
-    bit:24 time_stamp;
-    uint8 time_stamp_hi;
+       first tag in the FLV file.  The information is splitted in
+       several fields.  */
+    struct
+    {
+      uint16 lo16;
+      uint8 med8;
+      uint8 hi8;
+    } time_stamp;
 
-    /* This field is not used, and it is always 0.  */
-    bit:24 stream_id = 0;
+    /* These fields are not used, and are always 0.  */
+    struct
+    {
+      uint8 hi8;
+      uint16 lo16;
+    } stream_id = {0UB, 0UH};
 
     union
     {
-      flv_audio (data_size) audio : type == 8;
-      flv_video (data_size) video : type == 10;
+      flv_audio (data_size.hi8::data_size.lo16) audio : type == 8;
+      flv_video (data_size.hi8::data_size.lo16) video : type == 10;
       flv_script script { type == 18 };
     } data;
     
