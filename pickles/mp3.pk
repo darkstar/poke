@@ -1,0 +1,244 @@
+/* elf.pk - MP3 implementation for GNU poke.  */
+
+/* Copyright (C) 2017 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* References:
+
+   "The private life of MP3 frames"
+   http://www.id3.org/mp3frame.html
+
+   "ID3 made easy (ID3v1 & ID3v1.1)"
+   http://id3.org/id3v1.html
+
+   "ID3 tag version 2.3.0 (Informal standard)"
+   http://id3.org/id3v2.3.0
+*/
+
+deftype id3v1_genre =
+  enum uint8
+  {
+    ID3V1_GENRE_BLUES, ID3V1_GENRE_CLASSIC_ROCK, ID3V1_GENRE_COUNTRY, ID3V1_GENRE_DANCE,
+    ID3V1_GENRE_DISCO, ID3V1_GENRE_FUNK, ID3V1_GENRE_GRUNGE, ID3V1_GENRE_HIP_HOP,
+    ID3V1_GENRE_JAZZ, ID3V1_GENRE_METAL, ID3V1_GENRE_NEW_AGE, ID3V1_GENRE_OLDIES,
+    ID3V1_GENRE_OTHER, ID3V1_GENRE_POP, ID3V1_GENRE_R_AND_B, ID3V1_GENRE_RAP,
+    ID3V1_GENRE_REGGAE, ID3V1_GENRE_ROCK, ID3V1_GENRE_TECHNO, ID3V1_GENRE_INDUSTRIAL,
+    ID3V1_GENRE_ALTERNATIVE, ID3V1_GENRE_SKA, ID3V1_GENRE_DEATH_METAL, ID3V1_GENRE_PRANKS,
+    ID3V1_GENRE_SOUNDTRACK, ID3V1_GENRE_EURO_TECHNO, ID3V1_GENRE_AMBIENT, ID3V1_GENRE_TRIP_HOP,
+    ID3V1_GENRE_VOCAL, ID3V1_GENRE_JAZZ_FUNK, ID3V1_GENRE_FUSION, ID3V1_GENRE_TRANCE,
+    ID3V1_GENRE_LASSICAL, ID3V1_GENRE_INSTRUMENTAL, ID3V1_GENRE_ACID, ID3V1_GENRE_HOUSE,
+    ID3V1_GENRE_GAME, ID3V1_GENRE_SOUND_CLIP, ID3V1_GENRE_GOSPEL, ID3V1_GENRE_NOISE,
+    ID3V1_GENRE_ALTERNROCK, ID3V1_GENRE_BASS, ID3V1_GENRE_SOUL, ID3V1_GENRE_PUNK,
+    ID3V1_GENRE_SPACE, ID3V1_GENRE_MEDITATIVE, ID3V1_GENRE_INSTRUMENTAL_POP,
+    ID3V1_GENRE_INSTRUMENTAL_ROCK, ID3V1_GENRE_ETHNIC, ID3V1_GENRE_GOTHIC,
+    ID3V1_GENRE_DARKWAVE, ID3V1_GENRE_TECHNO_INDUSTRIAL, ID3V1_GENRE_ELECTRONIC,
+    ID3V1_GENRE_POP_FOLK, ID3V1_GENRE_EURODANCE, ID3V1_GENRE_DREAM, ID3V1_GENRE_SOUTHERN_ROCK,
+    ID3V1_GENRE_COMEDY, ID3V1_GENRE_CULT, ID3V1_GENRE_GANGSTA, ID3V1_GENRE_TOP_40,
+    ID3V1_GENRE_CHRISTIAN_RAP, ID3V1_GENRE_POP_FUNK, ID3V1_GENRE_JUNGLE,
+    ID3V1_GENRE_NATIVE_AMERICAN, ID3V1_GENRE_CABARET, ID3V1_GENRE_NEW_WAVE,
+    ID3V1_GENRE_PSYCHADELIC, ID3V1_GENRE_RAVE, ID3V1_GENRE_SHOWTUNES, ID3V1_GENRE_TRAILER,
+    ID3V1_GENRE_LO_FI, ID3V1_GENRE_TRIBAL, ID3V1_GENRE_ACID_PUNK, ID3V1_GENRE_ACID_JAZZ,
+    ID3V1_GENRE_POLKA, ID3V1_GENRE_RETRO, ID3V1_GENRE_MUSICAL, ID3V1_GENRE_ROCK_N_ROLL,
+    ID3V1_GENRE_HARD_ROCK, ID3V1_GENRE_FOLK, ID3V1_GENRE_FOLK_ROCK, ID3V1_GENRE_NATIONAL_FOLK,
+    ID3V1_GENRE_SWING, ID3V1_GENRE_FAST_FUSION, ID3V1_GENRE_BEBOB, ID3V1_GENRE_LATIN,
+    ID3V1_GENRE_REVIVAL, ID3V1_GENRE_CELTIC, ID3V1_GENRE_BLUEGRASS, ID3V1_GENRE_AVANTGARDE,
+    ID3V1_GENRE_GOTHIC_ROCK, ID3V1_GENRE_PROGRESSIVE_ROCK, ID3V1_GENRE_PSYCHEDELIC_ROCK,
+    ID3V1_GENRE_SYMPHONIC_ROCK, ID3V1_GENRE_SLOW_ROCK, ID3V1_GENRE_BIG_BAND, ID3V1_GENRE_CHORUS,
+    ID3V1_GENRE_EASY_LISTENING, ID3V1_GENRE_ACOUSTIC, ID3V1_GENRE_HUMOUR, ID3V1_GENRE_SPEECH,
+    ID3V1_GENRE_CHANSON, ID3V1_GENRE_OPERA, ID3V1_GENRE_CHAMBER_MUSIC, ID3V1_GENRE_SONATA,
+    ID3V1_GENRE_SYMPHONY, ID3V1_GENRE_BOOTY_BASS, ID3V1_GENRE_PRIMUS, ID3V1_GENRE_PORN_GROOVE,
+    ID3V1_GENRE_SATIRE, ID3V1_GENRE_SLOW_JAM, ID3V1_GENRE_CLUB, ID3V1_GENRE_TANGO,
+    ID3V1_GENRE_SAMBA, ID3V1_GENRE_FOLKLORE, ID3V1_GENRE_BALLAD, ID3V1_GENRE_POWER_BALLAD,
+    ID3V1_GENRE_RHYTHMIC_SOUL, ID3V1_GENRE_FREESTYLE, ID3V1_GENRE_DUET,
+    ID3V1_GENRE_PUNK_ROCK, ID3V1_GENRE_DRUM_SOLO, ID3V1_GENRE_A_CAPELLA, ID3V1_GENRE_EURO_HOUSE,
+    ID3V1_GENRE_DANCE_HALL, ID3V1_GENRE_GOA, ID3V1_GENRE_DRUM_AND_BASS, ID3V1_GENRE_CLUB_HOUSE,
+    ID3V1_GENRE_HARDCORE, ID3V1_GENRE_TERROR, ID3V1_GENRE_INDIE, ID3V1_GENRE_BRITPOP,
+    ID3V1_GENRE_NEGERPUNK, ID3V1_GENRE_POLSK_PUNK, ID3V1_GENRE_BEAT, ID3V1_GENRE_CHRISTIAN,
+    ID3V1_GENRE_HEAVY_METAL, ID3V1_GENRE_BLACK_METAL, ID3V1_GENRE_CROSSOVER, ID3V1_GENRE_CONTEMPORARY,
+    ID3V1_GENRE_CHRISTIAN_ROCK, ID3V1_GENRE_MERENGUE, ID3V1_GENRE_SALSA, ID3V1_GENRE_THRASH_METAL,
+    ID3V1_GENRE_ANIME, ID3V1_GENRE_JPOP, ID3V1_GENRE_SYNTHPOP
+  };
+
+deftype id3v1_tag =
+  struct
+  {
+    char id[3] = ['T', 'A', 'G'];
+    char title[30];
+    char artist[30];
+    char album[30];
+    char year[4];
+
+    union
+    {
+      /* ID3v1.1  */
+      struct
+      {
+        char comment[28];
+        byte = 0;
+        byte track: track != 0;
+      };
+      /* ID3v1  */
+      char comment[30];
+    };
+
+    id3v1_genre genre;
+  };
+
+deftype id3v2_hdr =
+  struct
+  {
+    char head[3] = ['I','D','3'];
+
+    byte ver_major : ver_major != 0xff;
+    byte ver_revision : ver_revision != 0xff;
+
+    bitmap byte
+    {
+      bit:1 unsynchronisation_used;
+      bit:1 extended_hdr_present;
+      bit:1 experimental_tag;
+      bit:5;
+    } flags;
+
+    uint8 size[4] : (size[0] < 0x80
+                     && size[1] < 0x80
+                     && size[2] < 0x80
+                     && size[3] < 0x80);
+  };
+
+defytpe id3v2_ext_hdr =
+  struct
+  {
+    /* Size of this header, excluding this field.  */
+    uint32 size;
+
+    bitmap uint16
+    {
+      bit:1 flag_crc_present;
+      bit:15;
+    };
+
+    uint32 padding_sz;
+    uint32 crc if flag_crc_present;
+  };
+
+deftype id3v2_frame =
+  struct
+  {
+    char id[4] : id[0] != 0;
+
+    /* Frame size without frame header.  */
+    uint32 size;
+
+    bitmap uint16
+    {
+      bit:1 tag_alter_preserv;
+      bit:1 file_alter_preserv;
+      bit:1 read_only_frame;
+      bit:5;
+      bit:1 compressed_frame;
+      bit:1 encrypted_frame;
+      bit:1 group_member_frame;
+      bit:5;
+    } flags;
+
+    union
+    {
+      /* Frame contains text related data.  */
+      union
+      {
+        struct
+        {
+          char id_asciiz_str = 0;
+          char[size - 1] frame_data;
+        } : size > 1;
+
+        char[size] frame_data;
+      } : id[0] == 'T';
+
+      /* Frame contains other data.  */
+      char[size] frame_data;
+    };
+  };
+
+deftype id3v2_tag =
+  struct
+  {
+    id3v2_hdr hdr;
+    id3v2_ext_hdr ext_hdr if hdr.extended_hdr_present;
+
+    /* Calculate the real size of the tag.  */
+    defvar uint32 tag_size = (hdr.size[0] << 21
+                              | hdr.size[1] << 14
+                              | hdr.size[2] << 7
+                              | hdr.size[3]);
+
+    id3v2_frame frames[] : . < tag_size + sizeof (hdr);
+
+    /* Padding.  */
+    byte[tag_size + sizeof (hdr) - .];
+  };
+
+deftype mpeg_hdr =
+  {
+    bitmap uint32
+    {
+      bit:12 frame_sync;
+      bit:1 mpeg_id;
+      bit:1 layer_id;
+      bit:1 protection_bit;
+      bit:4 bitrate_index;
+      bit:2 frequency_index;
+      bit:1 padding_bit;
+      bit:1 private_bit;
+      bit:2 channel_mode;
+      bit:2 mode_extension;
+      bit:1 copyright;
+      bit:1 original;
+      bit:2 emphasis;
+    } : (frame_sync >= 0xffe /* Note this distinguishes frames from
+                                id3v1 tags.  */
+         && layer_id != 0
+         && bitrate_index != 0
+         && bitrate-index != 15
+         && frequency_index != 3);
+
+    uint16 checksum if protection_bit == 0;
+  };
+
+deftype mpeg_frame =
+  struct
+  {
+    mpeg_hdr hdr;
+
+    defvar uint32 bitrate;
+
+    byte[frame_size] frame_data;
+  };
+
+deftype mp3 =
+  struct
+  {
+    id3v2_tag id3v2_tag optional;
+    mpeg_frame[] mpeg_frames;
+    id3v1_tag id3v1_tag optional;
+  };
+
+/*
+Local variables:
+mode:c
+End:
+*/

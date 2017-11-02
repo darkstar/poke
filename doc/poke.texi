@@ -633,6 +633,25 @@ matching etc.
 - Arguments to boolean operators are promoted to signed 32-bit
   integers.
 
+XXX: optional fields.
+
+@example
+     int f optional;
+@end example
+
+     is equivalent to:
+
+@example
+    union
+     @{
+       int f;
+       struct @{@};
+     @};
+@end example     
+
+     Note that if f does not have constraints associated with it, then
+     it will be always present.
+
 @node Enumerations
 @chapter Enumerations
 
@@ -721,6 +740,10 @@ deftype audio_props =
      bit:1 flv_sound_type type = FLV_SND_STEREO;
   @};
 @end example
+
+By default the type of each bit field is interpreted as having the
+same width than the width of the bitmap, and the sign is determined by
+either @code{bit:N} or @code{sbit:N}.
 
 @node Flattening
 @chapter Flattening

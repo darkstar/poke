@@ -128,8 +128,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"), "2017");
 
   puts (_("\
 \n\
-Written by Jose E. Marchesi."));
-
+Perpetrated by Jose E. Marchesi."));
 }
 
 static void
