@@ -44,7 +44,7 @@ deftype bson_subtype =
     };
 
 deftype bson_binary =
-  union
+  struct
   {
     int32 size;
     bson_subtype subtype;

@@ -729,7 +729,9 @@ We have already discussed how it is possible to omit the name of
 fields when defining structs.  When this is done, an anonymous field
 is defined.  Generally speaking, this means the field cannot be
 accessed in a poke program, since struct components can only be
-referred by name.
+referred by name.  Due to this limitation, anonymous fields are
+typically used for padding or other applications where the data stored
+in the field doesn't need to be referenced.
 
 However, the picture changes when the anonymous field is of a type
 having named components itself.  In this case, it is still possible to
