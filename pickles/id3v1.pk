@@ -65,23 +65,23 @@ deftype id3v1_genre =
 deftype id3v1_tag =
   struct
   {
-    char id[3] = ['T', 'A', 'G'];
-    char title[30];
-    char artist[30];
-    char album[30];
-    char year[4];
+    char[3] id = ['T', 'A', 'G'];
+    char[30] title;
+    char[30] artist;
+    char[30] album;
+    char[4] year;
 
     union
     {
       /* ID3v1.1  */
       struct
       {
-        char comment[28];
+        char[28] comment;
         byte = 0;
         byte track: track != 0;
       };
       /* ID3v1  */
-      char comment[30];
+      char[30] comment;
     };
 
     id3v1_genre genre;
