@@ -1,0 +1,120 @@
+/* id3v2.pk - ID3v2 implementation for GNU poke */
+
+/* Copyright (C) 2017 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Implemented as specified in http://id3.org/id3v2.3.0  */
+
+deftype id3v2_hdr =
+  struct
+  {
+    char head[3] = ['I','D','3'];
+
+    byte ver_major : ver_major != 0xff;
+    byte ver_revision : ver_revision != 0xff;
+
+    bitmap byte
+    {
+      bit:1 unsynchronisation_used;
+      bit:1 extended_hdr_present;
+      bit:1 experimental_tag;
+      bit:5;
+    } flags;
+
+    uint8 size[4] : (size[0] < 0x80
+                     && size[1] < 0x80
+                     && size[2] < 0x80
+                     && size[3] < 0x80);
+  };
+
+defytpe id3v2_ext_hdr =
+  struct
+  {
+    /* Size of this header, excluding this field.  */
+    uint32 size;
+
+    bitmap uint16
+    {
+      bit:1 flag_crc_present;
+      bit:15;
+    };
+
+    uint32 padding_sz;
+    uint32 crc if flag_crc_present;
+  };
+
+deftype id3v2_frame =
+  struct
+  {
+    char id[4] : id[0] != 0;
+
+    /* Frame size without frame header.  */
+    uint32 size;
+
+    bitmap uint16
+    {
+      bit:1 tag_alter_preserv;
+      bit:1 file_alter_preserv;
+      bit:1 read_only_frame;
+      bit:5;
+      bit:1 compressed_frame;
+      bit:1 encrypted_frame;
+      bit:1 group_member_frame;
+      bit:5;
+    } flags;
+
+    union
+    {
+      /* Frame contains text related data.  */
+      union
+      {
+        struct
+        {
+          char id_asciiz_str = 0;
+          char[size - 1] frame_data;
+        } : size > 1;
+
+        char[size] frame_data;
+      } : id[0] == 'T';
+
+      /* Frame contains other data.  */
+      char[size] frame_data;
+    };
+  };
+
+deftype id3v2_tag =
+  struct
+  {
+    id3v2_hdr hdr;
+    id3v2_ext_hdr ext_hdr if hdr.extended_hdr_present;
+
+    /* Calculate the real size of the tag.  */
+    defvar uint32 tag_size = (hdr.size[0] << 21
+                              | hdr.size[1] << 14
+                              | hdr.size[2] << 7
+                              | hdr.size[3]);
+
+    id3v2_frame frames[] : . < tag_size + sizeof (hdr);
+
+    /* Padding.  */
+    byte[tag_size + sizeof (hdr) - .];
+  };
+
+/*
+Local variables:
+mode:c
+End:
+*/

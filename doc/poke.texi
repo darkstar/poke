@@ -636,7 +636,7 @@ matching etc.
 XXX: optional fields.
 
 @example
-     int f optional;
+     optional int f;
 @end example
 
      is equivalent to:
