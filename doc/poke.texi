@@ -787,7 +787,7 @@ struct
 @}
 @end example
 
-Injection is transitive.  In the following example:
+Flattening is transitive.  In the following example:
 
 @example
 deftype astruct =
@@ -810,10 +810,10 @@ defvar astruct s;
 The three fields can be referred as @code{s.f1}, @code{s.f2} and
 @code{s.f3} respectively.
 
-@section Injecting Unions
+@section Flattening Unions
 
-Until now we have focused on structs when talking about injection.
-However, injection can be used with any type featuring named
+Until now we have focused on structs when talking about flattening.
+However, flattening can be used with any type featuring named
 subcomponents.  This includes unions.
 
 Consider the following example:
@@ -838,7 +838,7 @@ In this case, the alternative active in the union can be accessed like
 if it was a component of the outermost struct: either @code{s.f2} or
 @code{s.f3}.
 
-Transitive injection also works with unions.  In the example below
+Transitive flattening also works with unions.  In the example below
 both @code{f3} and @code{f4} are accessible as @code{s.f3} and
 @code{s.f4} provided @code{s.f1} is not zero.
 
@@ -862,18 +862,47 @@ deftype astruct =
 defvar astruct s;
 @end example
 
-Note that injecting unions can be tricky and should be used carefully:
+Note that flattening unions can be tricky and should be used carefully:
 since there is no way to refer to the union itself (it has no name)
 the user must know what alternative of the union is active when the
-injected field is accessed.
+flattened field is accessed.
 
 XXX: we need full type reflection, to know what fields a struct has.
 Maybe a field iterator?
 
-@section Injecting Bitmaps
+Note that generally speaking flattening is a process that should be
+done at run-time.  However, if unions are not involved, it happens at
+compile-time instead for performance purposes.  For example, the
+following struct:
 
-Bit-fields defined in a bitmap can be injected in exactly the same way
-than struct fields.
+@example
+struct
+@{
+   int f1;
+
+   struct
+   @{
+      int f2;
+      int f3;
+   @};
+@}
+@end example
+
+is transformed at compile time to:
+
+@example
+struct
+@{
+   int f1;
+   int f2;
+   int f3;
+@}
+@end example
+
+@section Flattening Bitmaps
+
+Bit-fields defined in a bitmap can be flattened in exactly the same
+way than struct fields.
 
 @node Expressions
 @chapter Expressions
