@@ -1171,38 +1171,39 @@ deftype elf_rel =
     assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
   };
 
-struct elf_rela (elf_e_machine mach,
-                 elf_ei_class class)
-  <doc="ELF relocation with addend.">
-{
-  let r_offset_doc = "Relocation offset.";
-  let r_info_doc = "Relocation symbol + type.";
-  let r_sym_doc = "Relocation symbol.";
-  let r_type_doc = "Relocation type.";
+deftype elf_rela =
+  struct (elf_e_machine mach,
+          elf_ei_class class)
+    <doc="ELF relocation with addend.">
+  {
+    defvar r_offset_doc = "Relocation offset.";
+    defvar r_info_doc = "Relocation symbol + type.";
+    defvar r_sym_doc = "Relocation symbol.";
+    defvar r_type_doc = "Relocation type.";
   
-  if (class == ELFCLASS32)
-    {
-      elf32_addr r_offset <doc=r_offset_doc>;
-      elf_word r_info <doc=r_info_doc>;
-      . = @r_info;
-      int r_sym : 24 <doc=r_sym_doc>;
-      enum elf_r_type (mach) r_type : 8 <doc=r_sym_type>;
-    }
-  else
-    {
-      elf64_addr r_offset <doc=r_offset_doc>;
-      elf64_xword r_info <doc=r_info_doc>;
-      . = @r_info;
-      int r_sym : 32 <doc=r_sym_doc>;
-      enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
-    }
-
-  elf_sword r_addend
+    if (class == ELFCLASS32)
+      {
+        elf32_addr r_offset <doc=r_offset_doc>;
+        elf_word r_info <doc=r_info_doc>;
+        . = @r_info;
+        int r_sym : 24 <doc=r_sym_doc>;
+        enum elf_r_type (mach) r_type : 8 <doc=r_sym_type>;
+      }
+    else
+      {
+        elf64_addr r_offset <doc=r_offset_doc>;
+        elf64_xword r_info <doc=r_info_doc>;
+        . = @r_info;
+        int r_sym : 32 <doc=r_sym_doc>;
+        enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
+      }
+    
+    elf_sword r_addend
     <doc="Constant addend used to compute the value to be stored\n\
            into the relocatable field.">;
-
-  assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
-};
+    
+    assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+  };
 
 struct elf_ident
   <doc="ELF identification.">

@@ -44,7 +44,7 @@ defytpe id3v2_ext_hdr =
   struct
   {
     /* Size of this header, excluding this field.  */
-    uint32 size;
+    uint32 size = 10;
 
     bitmap uint16
     {
