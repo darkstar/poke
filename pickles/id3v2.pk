@@ -21,7 +21,7 @@
 deftype id3v2_hdr =
   struct
   {
-    char head[3] = ['I','D','3'];
+    char[3] head = ['I','D','3'];
 
     byte ver_major : ver_major != 0xff;
     byte ver_revision : ver_revision != 0xff;
@@ -34,7 +34,7 @@ deftype id3v2_hdr =
       bit:5;
     } flags;
 
-    uint8 size[4] : (size[0] < 0x80
+    uint8[4] size : (size[0] < 0x80
                      && size[1] < 0x80
                      && size[2] < 0x80
                      && size[3] < 0x80);
@@ -107,10 +107,10 @@ deftype id3v2_tag =
                               | hdr.size[2] << 7
                               | hdr.size[3]);
 
-    id3v2_frame frames[] : . < tag_size + sizeof (hdr);
+    id3v2_frame[] frames : . <= tag_size;
 
     /* Padding.  */
-    byte[tag_size + sizeof (hdr) - .];
+    byte[tag_size - .];
   };
 
 /*

@@ -345,6 +345,39 @@ Note that an array element should only be referred once.  Accordingly,
 
 XXX: Array subscripts are promoted to unsigned 64-bit integers.
 
+@section Declaring the size of an array in bytes
+
+XXX: We need to be able to specify that an unbounded array is of some given
+     size (sizeof) i.e. the array elem type is applied until: a constraint
+     fails or the byte size of the array is achieved or EOF is found.  Very
+     interesting :)  Sometimes you don't know the number of elements, but you
+     know the total size of the array.
+
+     This is because array elements, despite all being of the same
+     type, can have different sizes if they are structs or unions.
+
+@example
+defvar int[32] a;  /* Array of 100 integers.  */
+defvar int[#128] a; /* Array of 128 bytes, i.e. 100 integers.  */
+@end example
+
+     Example: dwarf CFA expression:
+
+@example
+deftype dwarf_cfa_expression =
+  struct
+  @{
+    uint128 reg;
+    uint128 len;
+    dwarf_op[#len] expr; /* An error is raised if the elements
+                            of EXPR do not sum exactly LEN bytes.  */
+  @};
+@end example
+
+    Note that if LEN is not achieved because of an union constraint
+    failure, this will catch the error (the union constraint failure
+    won't.)  Put an example.
+
 @node Strings
 @chapter Strings
 
@@ -511,12 +544,20 @@ packet @{...@}
 
 XXX: discuss anonymous fields.
 XXX: discuss labels and offsets.
+
+     Note that if the label of an array contains a *$index construct,
+     it is interpreted as the offset within the current structure of
+     _each_ element, _not_ of the array itself.  This syntax works
+     because it doesn't make sense to define both simultaneously.
+
 XXX: discuss struct parameters and struct attributes.
 
    The arguments to structs and unions should be preserved, because
    they can be part of the tag of contained unions.
 
-   They can be accessed using foo'attr, and are read_only.
+   They can be accessed using foo.attr, like local variables, and are
+   read_only.  By default they are visible, but this can be changed
+   using the `hidden' qualifier, like variables and procedures.
 
    Attributes are inheritable in structs/unions lexical scopes.
 
@@ -654,6 +695,10 @@ XXX: optional fields.
 
 @node Enumerations
 @chapter Enumerations
+
+XXX: enumerations and bitmasks are set types.  They should be
+discussed in the same chapter.  In contrast, struct an bitmaps are
+product types.  unions are sum types.
 
 Enumerations are collections of related constants.  They use the
 following syntax:
@@ -1704,6 +1749,11 @@ defvar a = elem_type[] @ 0x00;
 but in practice it is detected by the run-time and reported as a
 run-time error, because reading @code{eof} does not advance the IO
 space location counter.
+
+XXX: the location counter (which is read-only) is not really
+     necessary, but it avoids having to replicate logic all the way in
+     structs, in order to determine which fields have been defined or
+     not.
 
 @section The Map Operator
 

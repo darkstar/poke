@@ -26,7 +26,7 @@
   JPEG-LS	http://www.itu.int/rec/T-REC-T.87-199806-I/en
 */
 
-deftype jpg_file =
+deftype jpg =
   struct
   {
     

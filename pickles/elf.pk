@@ -1535,7 +1535,7 @@ struct elf_hash <doc ("ELF hash table.")>
 
 struct elf_dyn (elf_e_machine mach,
                 elf_ei_class class)
-  <doc ("ELF dynamic section.")>
+  <doc="ELF dynamic section.">
 {
   if (class == ELFCLASS32)
     elf_d_tag (mach) d_tag : bsizeof (elf_word);
@@ -1627,50 +1627,51 @@ struct elf_dyn (elf_e_machine mach,
   /* Support for elf32_addr/elf64_addr to have different size than
      elf_word/elf64_xword.  */
 
-  let pad_size
-    = sizeof (d_tag) + max (sizeof (d_val), sizeof (d_ptr)) - .;
+  defvar pad_size
+    = sizeof (d_tag) + max (sizeof (d_val), sizeof (d_ptr)) - .
+    <hidden>;
 
-  if (pad_size > 0)
-    byte[pad_size] pad;
+  byte[pad_size] pad if pad_size > 0;
 };
 
-struct elf_note (enum elf_ei_class class)
-  <doc="ELF note section.">
-{
-  let namesz_doc
-    = "The first namesz bytes in name contain a null-terminated\n\
-       character representation of the entry's owner or originator.";
-  
-  let descz_doc
-    = "The first descsz bytes in desc hold the note descriptor. The\n\
-       ABI places no constraints on a descriptor's contents.";
-
-  let type_doc
-    = "Unsigned word giving the interpretation of the descriptor.";
-
-  function padding (int nchars, int width)
-    <hidden=1>
+deftype elf_note =
+  struct (enum elf_ei_class class) <doc="ELF note section.">
   {
-    let m = nchars % width;
-    return nchars + (m == 0 ? m : width - m);
-  }
+    defvar namesz_doc
+      = "The first namesz bytes in name contain a null-terminated\n\
+         character representation of the entry's owner or originator.";
   
-  if (class == ELFCLASS32)
+    defvar descz_doc
+      = "The first descsz bytes in desc hold the note descriptor. The\n\
+         ABI places no constraints on a descriptor's contents.";
+
+    defvar type_doc
+      = "Unsigned word giving the interpretation of the descriptor.";
+
+    union
     {
-      elf_word namesz <doc=namesz_doc>;
-      elf_word descsz <doc=descz_doc>;
-      elf_word type <doc=type_doc>;
-      byte name[ndsize (namesz, 4)];
-      byte desc[ndsize (descsz, 4)];
-    }
-  else
-    {
-      elf64_xword namesz <doc=namesz_doc>;
-      elf64_xword descsz <doc=descsz_doc>;
-      elf64_xword type <doc=type_doc>;
-      byte[ndsize (namesz, 8)] name;
-      byte[ndsize (descsz, 8)] desc;
-    }
+      struct
+      {
+        elf_word namesz <doc=namesz_doc>;
+        elf_word descsz <doc=descz_doc>;
+        elf_word type <doc=type_doc>;
+        byte[namesz] name;
+        byte[alignto(., 4)];
+        byte[descsz] desc;
+        byte[alignto(., 4)];
+      } : class == ELFCLASS32;
+
+      struct
+      {
+        elf64_xword namesz <doc=namesz_doc>;
+        elf64_xword descsz <doc=descsz_doc>;
+        elf64_xword type <doc=type_doc>;
+        byte[namesz] name;
+        byte[alignto(., 8)];
+        byte[descsz] desc;
+        byte[alignto(., 8)];
+      } : class == ELFCLASS64;
+    };
 };
 
 struct elf_group (elf_off num_idxs)
@@ -1680,125 +1681,113 @@ struct elf_group (elf_off num_idxs)
   elf32_word[num_idxs] shidx;
 };
 
-union elf_section (enum elf_e_machine mach,
-                   enum elf_ei_class class,                    
-                   struct elf_shdr shdr)
-{
-  let nents = (shdr.sh_entsize != 0)
-    ? shdr.sh_size / shdr.sh_entsize : 0;
-  
-  struct {}
-    : shdr.sh_type == SHT_NULL;
+typedef elf_section =
+  union (enum elf_e_machine mach,
+         enum elf_ei_class class,                    
+         struct elf_shdr shdr)
+  {
+    defvar nents = ((shdr.sh_entsize != 0)
+                    ? shdr.sh_size / shdr.sh_entsize : 0);
 
-  byte[shdr.sh_size] progbits
-    : shdr.sh_type == SHT_PROGBITS;
+    struct {}
+      : shdr.sh_type == SHT_NULL;
 
-  elf_sym(mach, class)[nents] symtab
-    : shdr.sh_type == SHT_SYMTAB;
+    byte[shdr.sh_size] progbits
+      : shdr.sh_type == SHT_PROGBITS;
 
-  byte[shdr.sh_size] strtab
-    : (shdr.sh_size > 0 && shdr.sh_type == SHT_STRTAB
-       && warn_nofail_if (strtab[0] == '\0' && strtab[shdr.sh_size - 1] == '\0'));
+    elf_sym(mach, class)[nents] symtab
+      : shdr.sh_type == SHT_SYMTAB;
 
-  elf_rel(mach, class)[nents] rel
-    : shdr.sh_type == SHT_REL;
+    byte[shdr.sh_size] strtab
+      : (shdr.sh_size > 0 && shdr.sh_type == SHT_STRTAB
+         && warn_nofail_if (strtab[0] == '\0' && strtab[shdr.sh_size - 1] == '\0'));
 
-  elf_rela(mach, class)[nents] rela
-    : shdr.sh_type == SHT_RELA;
+    elf_rel(mach, class)[nents] rel
+      : shdr.sh_type == SHT_REL;
 
-  elf_hash hash
-    : shdr.sh_type == SHT_HASH;
+    elf_rela(mach, class)[nents] rela
+      : shdr.sh_type == SHT_RELA;
 
-  elf_dyn(mach, class)[nents] dynamic
-    : (shdr.sh_type == SHT_DYNAMIC
-       && warn_nofail_if (elf_dyn_section_constraints (dynamic)));
-  
-  elf_note(class)[nents] note
-    : shdr.sh_type == SHT_NOTE;
-  
-  struct {}
-    : shdr.sh_type == SHT_NOBITS;
-  
-  byte[shdr.sh_size] shlib
-    : shdr.sh_type == SHT_SHLIB;
-  
-  elf_sym(mach, class)[nents] dynsym
-    : shdr.sh_type == SHT_DYNSYM;
-  
-  elf_addr[nents] preinit_array
-    : shdr.sh_type == SHT_PREINIT_ARRAY; /* XXX: and the 32bit? */
-  
-  elf_addr[nents] init_array
-    : shdr.sh_type == SHT_INIT_ARRAY;
-  
-  elf_addr[nents] fini_array
-    : shdr.sh_type == SHT_FINI_ARRAY;
-  
-  elf_group[nents] group
-    : shdr.sh_type == SHT_GROUP;
-  
-  elf32_word[nents] symtab_shndx
-    : shdr.sh_type == SHT_SYMTAB_SHNDX;
-};
+    elf_hash hash
+      : shdr.sh_type == SHT_HASH;
 
-union elf_segment (enum elf_ei_class class,
-                    struct elf_phdr phdr)
+    elf_dyn(mach, class)[nents] dynamic
+      : (shdr.sh_type == SHT_DYNAMIC
+         && warn_nofail_if (elf_dyn_section_constraints (dynamic)));
+  
+    elf_note(class)[nents] note
+      : shdr.sh_type == SHT_NOTE;
+  
+    struct {}
+      : shdr.sh_type == SHT_NOBITS;
+  
+    byte[shdr.sh_size] shlib
+      : shdr.sh_type == SHT_SHLIB;
+  
+    elf_sym(mach, class)[nents] dynsym
+      : shdr.sh_type == SHT_DYNSYM;
+  
+    elf_addr[nents] preinit_array
+      : shdr.sh_type == SHT_PREINIT_ARRAY; /* XXX: and the 32bit? */
+  
+    elf_addr[nents] init_array
+      : shdr.sh_type == SHT_INIT_ARRAY;
+  
+    elf_addr[nents] fini_array
+      : shdr.sh_type == SHT_FINI_ARRAY;
+  
+    elf_group[nents] group
+      : shdr.sh_type == SHT_GROUP;
+  
+    elf32_word[nents] symtab_shndx
+      : shdr.sh_type == SHT_SYMTAB_SHNDX;
+  };
+
+deftype elf_segment =
+  union (enum elf_ei_class class,
+         struct elf_phdr phdr)
   <doc="ELF segment.">
-{
-  struct {} : phdr.p_type == PT_NULL;
-  struct {} : phdr.p_type == PT_LOAD;
-  struct {} : phdr.p_type == PT_DYNAMIC;
-  struct {} : phdr.p_type == PT_INTERP;
-  struct {} : phdr.p_type == PT_NOTE;
-  struct {} : phdr.p_type == PT_SHLIB;
-  struct {} : phdr.p_type == PT_PHDR;
-  struct {} : phdr.p_type == PT_TLS;
-};
+  {
+    struct {} : phdr.p_type == PT_NULL;
+    struct {} : phdr.p_type == PT_LOAD;
+    struct {} : phdr.p_type == PT_DYNAMIC;
+    struct {} : phdr.p_type == PT_INTERP;
+    struct {} : phdr.p_type == PT_NOTE;
+    struct {} : phdr.p_type == PT_SHLIB;
+    struct {} : phdr.p_type == PT_PHDR;
+    struct {} : phdr.p_type == PT_TLS;
+  };
 
 /* Finally, the ELF object file itself.  */
 
-struct elf <doc="ELF object file.">
-{
-  struct elf_ehdr ehdr <doc="ELF header.">;
+deftype elf =
+  struct
+  {
+    elf_ehdr ehdr;
+    
+    /* Both the section header table and the program header table are
+       optional.  */
 
-  assert (sizeof (ehdr.e_ident) == ehdr.e_ident.ei_nident
-          && sizeof (ehdr) == ehdr.e_ehsize);
+  ehdr.e_shoff:
+    elf_shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr if ehdr.e_shnum > 0;
 
-  /* Both the section header table and the program header table are
-     optional.  */
+  ehdr.e_phoff:
+    elf_phdr(ehdr.e_ident.ei_class)[ehdr.e_phnum] phdr if ehdr.e_phnum > 0;
 
-  if (ehdr.e_shnum > 0)
-    {
-      . = ehdr.e_shoff;
-      struct elf_shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr
-        <doc="ELF section header table.">;
-    }
+    /* The sections and segments themselves are defined in terms of the
+       contents of the two tables defined above.  Note that sections and
+       segments usually overlap. */
 
-  if (ehdr.e_phnum > 0)
-    {
-      . = ehdr.e_phoff;
-      struct elf_phdr(ehdr.e_ident.ei_class)[ehdr.e_phnum] phdr
-        <doc="ELF program header table.">;
-    }
+  shdr[sections$index].sh_offset:
+    elf_section (ehdr.e_machine,
+                 ehdr.e_ident.ei_class,
+                 shdr[sections$index]) [ehdr.e_shnum] sections;
 
-  /* The sections and segments themselves are defined in terms of the
-     contents of the two tables defined above.  Note that sections and
-     segments usually overlap. */
-
-  for (let i = 0; i < ehdr.e_shnum; i++)
-    {
-      . = shdr[i].sh_offset;
-      elf_section (ehdr.e_machine,
-                   ehdr.e_ident.ei_class,
-                   shdr[i]) section;
-    }
-
-  for (let i = 0; i < ehdr.e_phnum; i++)
-    {
-      . = phdr[i].p_offset;
-      elf_segment (ehdr, phdr[i]) segment;
-    }
-};
+  phdr[segments$index].p_offset:    
+    elf_segment (ehdr.e_machine,
+                 edhr.e_ident.ei_class,
+                 phdr[segments$index]) [ehdr.e_phnum] segments;
+  };
 
 /* Integrity for struct elf:
 
