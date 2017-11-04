@@ -108,7 +108,7 @@ deftype elf_e_type =
     };
 
 deftype elf_r_type =
-  enum elf_word (enum elf_e_machine mach)
+  enum (enum elf_e_machine mach)
     <doc="ELF relocation type.">
 {
   enum
@@ -1142,519 +1142,479 @@ enum elf64_sxword elf_d_tag (enum elf_e_machine mach)
   DT_HIPROC = 0x7fff_ffff
 };
 
+/* ELF relocation.  */
+
 deftype elf_rel =
   struct (elf_e_machine mach, elf_ei_class class)
-    <doc="ELF relocation.">
   {
-    defvar r_offset_doc = "Relocation offset.";
-    defvar r_info_doc = "Relocation symbol + type.";
-    defvar r_sym_doc = "Relocation symbol.";
-    defvar r_type_doc = "Relocation type.";
-  
-    if (class == ELFCLASS32)
+    union
+    {
+      struct
       {
-        elf32_addr r_offset <doc=r_offset_doc>;
-        elf_word r_info <doc=r_info_doc>;
-        . = @r_info;
-        int r_sym : 24 <doc=r_sym_doc>;
-        enum elf_r_type (mach) r_type : 8 <doc=r_type_doc>;
-      }
-    else
-      {
-        elf64_addr r_offset <doc=r_offset_doc>;
-        elf64_xword r_info <doc=r_info_doc>;
-        . = @r_info;
-        int r_sym : 32 <doc=r_sym_doc>;
-        enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
-      }
+        elf32_addr r_offset;
+        pinned elf_word r_info;
+        bitmap uint32
+        {
+          bit:24 r_sym;
+          bit:8 enum elf_r_type (mach) r_type;
+        };
+      } : class == ELFCLASS32;
 
-    assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+      struct
+      {
+        elf64_addr r_offset;
+        pinned elf64_xword r_info;
+        bitmap uint64
+        {
+          bit:32 r_sym;
+          bit:32 enum elf_r_type (mach) r_type;
+        };
+      } : class == ELFCLASS64;
+    }
   };
+
+/* ELF relocation with addend.  */
 
 deftype elf_rela =
-  struct (elf_e_machine mach,
-          elf_ei_class class)
-    <doc="ELF relocation with addend.">
+  struct (elf_e_machine mach, elf_ei_class class)
   {
-    defvar r_offset_doc = "Relocation offset.";
-    defvar r_info_doc = "Relocation symbol + type.";
-    defvar r_sym_doc = "Relocation symbol.";
-    defvar r_type_doc = "Relocation type.";
-  
-    if (class == ELFCLASS32)
+    union
+    {
+      struct
       {
-        elf32_addr r_offset <doc=r_offset_doc>;
-        elf_word r_info <doc=r_info_doc>;
-        . = @r_info;
-        int r_sym : 24 <doc=r_sym_doc>;
-        enum elf_r_type (mach) r_type : 8 <doc=r_sym_type>;
-      }
-    else
+        elf32_addr r_offset;
+        pinned elf_word r_info;
+        bitmap uint32
+        {
+          bit:24 r_sym;
+          bit:8 enum elf_r_type (mach) r_type;
+        };
+      } : class == ELFCLASS32;
+
+      struct
       {
-        elf64_addr r_offset <doc=r_offset_doc>;
-        elf64_xword r_info <doc=r_info_doc>;
-        . = @r_info;
-        int r_sym : 32 <doc=r_sym_doc>;
-        enum elf_r_type (mach) r_type : 32 <doc=r_type_doc>;
-      }
-    
-    elf_sword r_addend
-    <doc="Constant addend used to compute the value to be stored\n\
-           into the relocatable field.">;
-    
-    assert (sizeof (r_sym) + sizeof (r_type) == sizeof (r_info));
+        elf64_addr r_offset;
+        pinned elf64_xword r_info;
+        bitmap uint64
+        {
+          bit:32 int r_sym;
+          bit:32 enum elf_r_type (mach) r_type;
+        };
+      } : class == ELFCLASS64;
+    }
+
+    /* Constant addend used to compute the value to be stored into the
+       relocatable field.  */
+    elf_sword r_addend;
   };
 
-struct elf_ident
-  <doc="ELF identification.">
-{
-  byte[4] ei_mag;
-
-  assert (ei_mag == {0x7f, 'E', 'L', 'F'});
-
-  elf_ei_class ei_class : 8 <doc="File class.">;
-  byte ei_data <doc="Data encoding.">;
-  byte ei_version <doc="File version.">;
-  byte ei_osabi <doc="Operating system/ABI identification.">;
-  byte ei_abiversion <doc="ABI version.">;
-  byte ei_pad <doc="Start of padding bytes.">;
-  . = 16;
-  byte ei_nident <doc="Size of e_ident, in bytes.">;
-};
-
-struct elf_ehdr
-  <doc="ELF header.">
-{
-  let e_entry_doc
-    = "Virtual address of entry point.  If the file has no\n\
-       associated entry point, holds zero.";
-
-  let e_phoff_doc
-    = "Program header table's file offset in bytes.  If the file\n\
-       has no program header table, holds zero.";
-
-  let e_shoff_doc
-    = "Section header table's file offset in bytes.  If the file\n\
-       has no section header table, holds zero.";
-  
-  struct elf_ident e_ident;
-
-  /* Set the endianness for the data stored in the ELF file using the
-     data encoding information in the header.  This applies to every
-     field defined from this point on.  */
-  switch (e_ident.ei_data)
-    {
-    case ELFDATANONE:
-      assert (1);
-      break;
-    case ELFDATA2LSB:
-      .endian = lsb;
-      .nencoding = 2;
-      break;
-    case ELFDATA2MSB:
-      .endian = msb;
-      .nencoding = 2;
-      break;
-    }
-  
-  elf_e_type e_type <doc="File type.">;
-  elf_e_machine e_machine <doc="Required architecture.">;
-  elf_e_version e_version <doc="Object file version.">;
-
-  if (ehdr.e_ident.ei_class == ELFCLASS32)
-    {
-      elf32_addr e_entry <doc=e_entry_doc>;
-      elf32_off e_phoff <doc=e_phoff_doc>;
-      elf32_off e_shoff <doc=e_shoff_doc>;
-    }
-  else
-    {
-      elf64_addr e_entry <doc=e_entry_doc>;
-      elf64_off e_phoff <doc=e_phoff_doc>;
-      elf64_off e_shoff <doc=e_shoff_doc>;
-    }
-
-  elf_e_flags (e_machine) e_flags;
-  elf_half e_ehsize <doc="ELF header size in bytes.">;
-
-  elf_half e_phentsize
-    <doc="Size in bytes of one entry in the file's program header\n\
-           table.">;
-
-  elf_half e_phnum
-    <doc="Number of entries in the program header table.  If the file\n\
-           has no program header table, holds zero.">;
-
-  elf_half e_shentsize
-    <doc="Size in bytes of one entry in the file's section header\n\
-           table.">;
-
-  elf_half e_shnum
-    <doc="Number of entries in the section header table.  If the file\n\
-           has no section header table, holds zero.">;
-
-  elf_half e_shstrndx
-    <doc="Section header table index of the entry associated with the\n\
-           section name string table, or SHN_UNDEF.">;
-
-  /* Relocatable files require a section header table.  */
-  /* Executable files require a program header table.  */
-  assert (e_type == ET_REL => e_shnum > 0
-          && e_type == ET_EXEC => e_phnum > 0);
-};
-
-struct elf_phdr (elf_ei_class class)
-  <doc="ELF program header.">
-{
-  let p_offset_doc
-    = "Offset into the beginning of the file at which the first\n\
-       byte of the segment resides.";
-
-  let p_vaddr_doc
-    = "Virtual address at which the first byte of the segment\n\
-       resides in memory.";
-
-  let p_paddr_doc
-    = "On systems for which physical addressing is relevant, this\n\
-       member is reserved for the segment's physical address.\n\
-       Becase System V ignores physical addressing for application\n\
-       programs, this member has unspecified contents for\n\
-       executable files and shared objects.";
-
-  let p_filesz_doc
-    = "Number of bytes in the file image of the segment; it may\n\
-       be zero.";
-
-  let p_memsz_doc
-    = "Number of bytes in the memory image of the segment; it may\n\
-       be zero.";
-
-  let p_align_doc
-    = "This member gives the value to which the segments are\n\
-       aligned in memory and in the file.  VAlues 0 and 1 mean no\n\
-       alignment is required.  Otherwise, p_align should be a\n\
-       positive, integral power of 2, and p_vaddr should equal\n\
-       p_offset, modulo p_align.";
-
-  elf_p_type p_type;
-  
-  if (class == ELFCLASS32)
-    {
-      elf32_off p_offset <doc=p_offset_doc>;
-      elf32_addr p_vaddr <doc=p_vaddr_doc>;
-      elf32_addr p_paddr <doc=p_paddr_doc>;
-      elf_word p_filesz <doc=p_filesz_doc>;
-      elf_word p_memsz <doc=p_memsz_doc>;
-      elf_word p_align <doc=p_align_doc>;
-    }
-  else
-    {
-      elf_p_flags p_flags;
-      elf64_off p_offset <doc=p_offset_doc>;
-      elf64_addr p_vaddr <doc=p_vaddr_doc>;
-      elf64_addr p_paddr <doc=p_vaddr_doc>;
-      elf64_xword p_filesz <doc=p_filesz_doc>;
-      elf64_xword p_memsz <doc=p_memsz_doc>;
-      elf64_xword p_align <doc=p_align_doc>;
-    }
-};
-
-struct elf_shdr (enum elf_ei_class class)
-  <doc="ELF section header.">
-{
-  let sh_addr_doc
-    = "If the section will appear in the memory image of a process,\n\
-       this member gives the address at which the section's first\n\
-       byte should reside.  Otherwise the member contains 0.";
-
-  let sh_offset_doc
-    = "Byte offset from the beginning of the file to the first\n\
-       byte in the section.  For SHT_NOBITS sections, this is the\n\
-       conceptual placement on the file.";
-
-  let sh_size_doc = "Section size in bytes.";
-
-  let sh_addralign_doc = "Alignment constraint for the section.";
-
-  let sh_entsize_doc
-    = "If the section holds a table of fixed-size entries, this\n\
-       holds the size of each entry in bits.  Holds 0 if the\n\
-       section does not hold a table of fixed-size entries.";
-  
-  elf_word sh_name
-    <read=elf_str_table,
-      doc="Index of the section's name into the section header\n\
-           string table section.">;
-    
-  elf_sh_type sh_type;
-
-  elf_sh_flags sh_flags : class == ELFCLASS32 ? 32 : 64;
-
-  if (class == ELFCLASS32)
-    {
-      elf32_addr sh_addr <doc=sh_addr_doc>;
-      elf32_off sh_offset <doc=sh_offset_doc>;
-      elf_word sh_size <doc=sh_size_doc>;
-    }
-  else if (class == ELFCLASS64)
-    {
-      elf64_addr sh_addr <doc=sh_addr_doc>;
-      elf64_off sh_offset <doc=sh_offset_doc>;
-      elf64_xword sh_size <doc=sh_size_doc>;
-    }
-  
-  elf_word sh_link
-    <doc="Section header table index link.">;
-
-  elf_word sh_info
-    <doc="Extra information, whose interpretation depends on the\n\
-           section type.">;
-
-  if (class == ELFCLASS32)
-    {
-      elf_word sh_addralign <doc=sh_addralign_doc>;
-      elf_word sh_entsize <doc=sh_entsize_doc>;
-    }
-  else
-    {
-      elf64_xword sh_addralign <doc=sh_addralign_doc>;
-      elf64_xword sh_entsize <doc=sh_entsize_doc>;
-    }
-
-  assert (sh_size % sh_entsize == 0);
-};
-
-/* structs for the contents of certain ELF sections.  */
-
-union elf_chdr (elf_ei_class class)
-  <doc="ELF compressed section header.\n\
-         Used in sections with SHF_COMPRESSED.">
-{
+deftype elf_ident =
   struct
-    {
-      elf_ch_type ch_type
-        <doc="Compression algorithm.">;
-      elf_word ch_size
-        <doc="Size in bytes of the uncompressed data.">;
-      elf_word ch_addralign
-        <doc="Required alignment of the uncompressed data.">;
-    } : class == ELFCLASS32;
-
-  struct
-    {
-      elf_ch_type ch_type
-        <doc="Compression algorithm.">;
-      elf64_word ch_reserved;
-      elf64_xword ch_size
-        <doc="Size in bytes of the uncompressed data.">;
-      elf64_xword ch_addralign
-        <doc="Required alignment of the uncompressed data">;
-    } : class == ELFCLASS64;
-};
-
-struct elf_sym (elf_e_machine mach,
-                elf_ei_class class)
-  <doc ("ELF symbol table entry.")>
-{
-  let st_name_doc
-    = "Index into the object file's symbol string table,\n\
-       which holds the character representations of the\n\
-       symbol names.";
-
-  let st_value_doc = "Value of the associated symbol.";
-  let st_size_doc = "Size associated with this symbol.";
-
-  if (class == ELFCLASS32)
-    {
-      elf32_word st_name <doc=st_name_doc>;
-      elf32_addr st_value <doc=st_value_doc>;
-      elf32_word st_size <doc=st_size_doc>;
-
-      byte st_info;
-      . = @st_info;
-      elf_sym_binding st_bind : 28;
-      elf_st_type (mach) st_type : 4;
-
-      assert (sizeof (st_info) ==
-              sizeof (st_bind) + sizeof (st_type));
-
-      byte st_other;
-      . = @st_other;
-      elf_sym_visibility st_visibility : 3;
-      . += 5;
-
-      /* Section header table index of the section related to this
-         symbol.  */
-      elf32_half st_shndx;
-    }
-  else
-    {
-      elf64_word st_name <doc=st_name_doc>;
-      byte st_info;
-
-      . = @st_info;
-      elf_sym_binding st_bind : 60;
-      elf_st_type (mach) st_type : 4;
-
-      assert (sizeof (st_info) ==
-              sizeof (st_bind) + sizeof (st_type));
-
-      byte st_other;
-
-      . = @st_other;
-      elf_sym_visibility st_visibility : 3;
-      . += 5;
-
-      elf64_half st_shndx
-        <doc="Section header table index of the section related to this\n\
-               symbol.">;
-
-      elf64_addr st_value <doc=st_value_doc>;
-      elf64_xword st_size <doc=st_size_doc>;
-    }
-
-  /* Constraints.  */
-
-  /* A symbol with STB_LOCAL binding may not have STV_PROTECTED
-     visibility.  */
-  assert (st_bind == STV_LOCAL => st_visibility != STV_PROTECTED);
-
-  /* XXX: a STT_FILE symbol has STB_LOCAL binding, its section index
-     is SHN_ABS and it precedes the other STB_LOCAL symbols for the
-     file.  */
-};
-
-struct elf_hash <doc ("ELF hash table.")>
-{
-  elf_word nbucket;
-  elf_word nchain;
-
-  elf_word [nbucket] bucket;
-  elf_word [nchain] chain;
-};
-
-struct elf_dyn (elf_e_machine mach,
-                elf_ei_class class)
-  <doc="ELF dynamic section.">
-{
-  if (class == ELFCLASS32)
-    elf_d_tag (mach) d_tag : bsizeof (elf_word);
-  else
-    elf_d_tag (mach) d_tag : bsizeof (elf64_xword);
-
-  switch (d_tag)
-    {
-    /* Most of the dynamic tag entries use either d_val or d_ptr quite
-       arbitrarily, so we have to discriminate here.  */
-      
-    case DT_NEEDED:
-    case DT_PLTRELSZ:
-    case DT_RELASZ:
-    case DT_RELAENT:
-    case DT_STRSZ:
-    case DT_SYMENT:
-    case DT_SONAME:
-    case DT_RPATH:
-    case DT_SYMBOLIC:
-    case DT_RELSZ:
-    case DT_RELENT:
-    case DT_PLTREL:
-    case DT_TEXTREL:
-    case DT_BIND_NOW:
-    case DT_INIT_ARRAYSZ:
-    case DT_FINI_ARRAYSZ:
-    case DT_RUNPATH:
-
-      if (class == ELFCLASS32)
-        elf_word d_val;
-      else
-        elf64_xword d_val;
-      break;
-
-    case DT_PLTGOT:
-    case DT_HASH:
-    case DT_STRTAB:
-    case DT_SYMTAB:
-    case DT_RELA:
-    case DT_INIT:
-    case DT_FINI:
-    case DT_REL:
-    case DT_DEBUG:
-    case DT_JMPREL:
-    case DT_INIT_ARRAY:
-    case DT_FINI_ARRAY:
-
-      if (class == ELFCLASS32)
-        elf_word d_val;
-      else
-        elf64_xword d_val;
-      break;
-
-    /* DT_FLAGS uses d_val, but is also a bitmask.  Handle it
-       accordingly.  */
-
-    case DT_FLAGS:
-
-      if (class == ELFCLASS32)
-        bitmask elf_d_tag_flag d_val : bsizeof (elf_word);
-      else
-        bitmask elf_d_tag_flag d_val : bsizeof (elf64_xword);
-      break;
-      
-    case DT_ENCODING:
-    default:
-
-      /* Entries in the dynamic tags in a position >= DT_ENCODING
-         follow an uniform rule regarding what field is used for the
-         data: even entries use d_ptr while odd entries use d_val.  */
-      
-      if (d_tag % 2 == 0)
-        {
-          if (class == ELFCLASS32)
-            elf32_addr d_ptr;
-          else
-            elf64_addr d_ptr;
-        }
-      else
-        {
-          if (class == ELFCLASS32)
-            elf_word d_val;
-          else
-            elf64_xword d_val;
-        }
-    }
-
-  /* Support for elf32_addr/elf64_addr to have different size than
-     elf_word/elf64_xword.  */
-
-  defvar pad_size
-    = sizeof (d_tag) + max (sizeof (d_val), sizeof (d_ptr)) - .
-    <hidden>;
-
-  byte[pad_size] pad if pad_size > 0;
-};
-
-deftype elf_note =
-  struct (enum elf_ei_class class) <doc="ELF note section.">
   {
-    defvar namesz_doc
-      = "The first namesz bytes in name contain a null-terminated\n\
-         character representation of the entry's owner or originator.";
-  
-    defvar descz_doc
-      = "The first descsz bytes in desc hold the note descriptor. The\n\
-         ABI places no constraints on a descriptor's contents.";
+    byte[4] ei_mag = {0x7fUB, 'E', 'L', 'F'};
 
-    defvar type_doc
-      = "Unsigned word giving the interpretation of the descriptor.";
+    elf_ei_class ei_class; /* File class.  */
+    byte ei_data; /* Data encoding.  */
+    byte ei_version; /* File version.  */
+    byte ei_osabi /* Operating system/ABI identification.  */
+    byte ei_abiversion /* ABI version.  */
+    byte ei_pad /* Start of padding bytes.  */
+  16:
+    byte ei_nident /* Size of e_ident, in bytes.  */
+  };
+
+deftype elf_ehdr =
+  struct
+  {
+    elf_ident e_ident;
+
+    /* Set the endianness for the data stored in the ELF file using
+       the data encoding information in the header.  This applies to
+       every field defined from this point on.  */
+    switch (e_ident.ei_data)
+      {
+      case ELFDATANONE:
+        assert (1);
+        break;
+      case ELFDATA2LSB:
+        .endian = lsb;
+        .nencoding = 2;
+        break;
+      case ELFDATA2MSB:
+        .endian = msb;
+        .nencoding = 2;
+        break;
+      };
+  
+    elf_e_type e_type; /* File type.  */
+    elf_e_machine e_machine; /* Required architecture.  */
+    elf_e_version e_version; /* Object file version.  */
 
     union
     {
       struct
       {
-        elf_word namesz <doc=namesz_doc>;
-        elf_word descsz <doc=descz_doc>;
-        elf_word type <doc=type_doc>;
+        elf32_addr e_entry;
+        elf32_off e_phoff;
+        elf32_off e_shoff;
+      } : ehdr.e_ident.ei_class == ELFCLASS32;
+      
+      struct
+      {
+        elf64_addr e_entry;
+        elf64_off e_phoff;
+        elf64_off e_shoff;
+      } : ehdr.e_ident.ei_class == ELFCLASS64;
+    };
+
+    elf_e_flags (e_machine) e_flags;
+    elf_half e_ehsize;  /* ELF header size in bytes.  */
+
+    /* Size in bytes of one entry in the file's program header
+       table.  */
+    elf_half e_phentsize;
+
+    /* Number of entries in the program header table.  If the file has
+       no program header table, holds zero.  */
+    elf_half e_phnum;
+
+    /* Size in bytes of one entry in the file's section header
+       table.  */
+    elf_half e_shentsize;
+
+    /* Number of entries in the section header table.  If the file has
+       no section header table, holds zero.  */
+    elf_half e_shnum;
+
+    /* Section header table index of the entry associated with the
+       section name string table, or SHN_UNDEF.  */
+    elf_half e_shstrndx;
+};
+
+/* ELF program header.  */
+
+deftype elf_phdr =
+  struct (elf_ei_class class)
+  {
+    /* Type of entry in the table.  This determines the nature of the
+       segment described in the entry.  */
+    elf_p_type p_type;
+
+    /* p_offset is the offset into the beginning of the file at which
+       the first byte of the segment resides.
+
+       p_vaddr is the virtual address at which the first byte of the
+       segment resides in memory.
+     
+       On systems for which physical addressing is relevant, p_paddr
+       is reserved for the segment's physical address.  Becase System
+       V ignores physical addressing for application programs, this
+       member has unspecified contents for executable files and shared
+       objects.
+
+       p_filesz is the number of bytes in the file image of the
+       segment; it may be zero.
+
+       p_memsz is the number of bytes in the memory image of the
+       segment; it may be zero.
+
+       p_align gives the value to which the segments are aligned in
+       memory and in the file.  VAlues 0 and 1 mean no alignment is
+       required.  Otherwise, p_align should be a positive, integral
+       power of 2, and p_vaddr should equal p_offset, modulo
+       p_align.  */
+
+    union
+    {
+      struct
+      {
+        elf32_off p_offset;
+        elf32_addr p_vaddr;
+        elf32_addr p_paddr;
+        elf_word p_filesz;
+        elf_word p_memsz;
+        elf_word p_align;
+      } : class == ELFCLASS32;
+
+      struct
+      {
+        elf_p_flags p_flags;
+        elf64_off p_offset;
+        elf64_addr p_vaddr;
+        elf64_addr p_paddr;
+        elf64_xword p_filesz;
+        elf64_xword p_memsz;
+        elf64_xword p_align;
+      } : class == ELFCLASS64;
+    };
+};
+
+/* ELF section header.  */
+
+deftype elf_shdr =
+  struct (enum elf_ei_class class)
+  {
+    /* Index of the section's name into the section header string
+       table section.  */
+    elf_word sh_name;
+
+    /* Type of entry in the table.  This determines the nature of the
+       segment described in this entry.  */
+    elf_sh_type sh_type;
+
+    /* Section flags.  */
+    union
+    {
+      /* XXX: I better find a better way to change the base type of a
+         set type.  */
+      bitmap uint32 { bit:32 elf_sh_flags sh_flags; } : ELFCLASS == 32;
+      bitmap uint64 { bit:64 elf_sh_flags sh_flags; } : ELFCLASS == 64;
+    };
+
+    /* If the section will appear in the memory image of a process,
+       sh_addr gives the address at which the section's first byte
+       should reside.  Otherwise the member contains 0.
+
+       sh_offset is the byte offset from the beginning of the file to
+       the first byte in the section.  For SHT_NOBITS sections, this
+       is the conceptual placement on the file.
+
+       sh_size is the section size in bytes.  */
+  
+    union
+    {
+      struct
+      {
+        elf32_addr sh_addr;
+        elf32_off sh_offset;
+        elf_word sh_size;
+      } : class == ELFCLASS32;
+
+      struct
+      {
+        elf64_addr sh_addr;
+        elf64_off sh_offset;
+        elf64_xword sh_size;
+      } : class == ELFCLASS64;
+    };
+
+    /* Section header table index link.  */
+    elf_word sh_link;
+
+    /* Extra information, whose interpretation depends on the section
+       type.  */
+    elf_word sh_info;
+
+    /* sh_addralign_doc reflects the alignment constraint for the
+       section.
+
+       If the section holds a table of fixed-size entries,
+       sh_entsize_doc holds the size of each entry in bits.  Holds 0
+       if the section does not hold a table of fixed-size entries.  */
+
+    union
+    {
+      struct
+      {
+        elf_word sh_addralign;
+        elf_word sh_entsize;
+      } : class == ELFCLASS32;
+
+      struct
+      {
+        elf64_xword sh_addralign;
+        elf64_xword sh_entsize;
+      } : class == ELFCLASS64;
+    };
+};
+
+/* structs for the contents of certain ELF sections.  */
+
+/* ELF compressed section header.  Used in sections with
+   SHF_COMPRESSED.  */
+
+deftype elf_chdr =
+  union (elf_ei_class class)
+  {
+    /* ch_type is the compression algorithm.
+       ch_size is the size in bytes of the uncompressed data.
+       ch_addralign is the required alignment of the uncompressed
+       data.  */
+    struct
+    {
+      elf_ch_type ch_type;
+      elf_word ch_size;
+      elf_word ch_addralign;
+    } : class == ELFCLASS32;
+
+    struct
+    {
+      elf_ch_type ch_type;
+      elf64_word ch_reserved;
+      elf64_xword ch_size;
+      elf64_xword ch_addralign;
+    } : class == ELFCLASS64;
+  };
+
+/* ELF symbol table entry.  */
+
+deftype elf_sym =
+  struct (elf_e_machine mach, elf_ei_class class)
+{
+  /* st_name_ is the index into the object file's symbol string table,
+     which holds the character representations of the symbol
+     names.
+
+     st_value is the value of the associated symbol.  st_size is the
+     size associated with this symbol.
+
+     st_shndx is the section header table index of the section related
+     to this symbol.  */
+
+  union
+  {
+    struct
+    {
+      elf32_word st_name;
+      elf32_addr st_value;
+      elf32_word st_size;
+
+      pinned uint32 st_info;
+      bitmap uint32
+      {
+        bit:28 elf_sym_binding st_bind;
+        bit:4 elf_st_type (mach) st_type;
+      };
+
+      pinned byte st_other;
+      bitmap byte
+      {
+        bit:3 elf_sym_visibility st_visibility;
+        bit:5;
+      };
+      
+      elf32_half st_shndx;
+    } : class == ELFCLASS32;
+    
+    struct
+    {
+      elf64_word st_name;
+
+      pinned uint64 st_info;
+      bitmap uint64
+      {
+        bit:60 elf_sym_binding st_bind;
+        bit:4 elf_st_type (mach) st_type;
+      };
+
+      pinned byte st_other;
+      bitmap byte
+      {
+        bit:3 elf_sym_visibility st_visibility;
+        bit:5;
+      };
+
+      elf64_half st_shndx;
+      elf64_addr st_value;
+      elf64_xword st_size;
+    } : class == ELFCLASS64;
+  };
+};
+
+/* ELF hash table.  */
+
+deftype elf_hash =
+  struct
+  {
+    elf_word nbucket;
+    elf_word nchain;
+    
+    elf_word[nbucket] bucket;
+    elf_word[nchain] chain;
+  };
+
+/* ELF dynamic section.  */
+
+deftype elf_dyn =
+  struct (elf_e_machine mach, elf_ei_class class)
+  {
+    union
+    {
+      /* XXX  */
+      bitmap uint32 { bit:32 elf_d_tag (mach) d_tag; } : class == ELFCLASS32;
+      bitmap uint64 { bit:64 elf_d_tag (mach) d_tag; } : class == ELFCLASS64;
+    };
+
+    union
+    {
+      union
+      {
+        elf_word d_val : class == ELFCLASS32;
+        elf64_xword d_val : class == ELFCLASS64;
+      } : d_tag in [DT_NEEDED, DT_PLTRELSZ, DT_RELASZ, DT_RELAENT,
+                    DT_STRSZ, DT_SYMENT, DT_SONAME, DT_RPATH,
+                    DT_SYMBOLIC, DT_RELSZ, DT_RELENT, DT_PLTREL,
+                    DT_TEXTREL, DT_BIND_NOW, DT_INIT_ARRAYSZ,
+                    DT_FINI_ARRAYSZ, DT_RUNPATH, DT_PLTGOT,
+                    DT_HASH, DT_STRTAB, DT_SYMTAB, DT_RELA,
+                    DT_INIT, DT_FINI, DT_REL, DT_DEBUG,
+                    DT_JMPREL, DT_INIT_ARRAY, DT_FINI_ARRAY];
+
+      union
+      {
+        bitmap uint32 { bit:32 elf_d_tag_flag d_val; } : class == ELFCLASS32;
+        bitmap uint64 { bit:64 elf_d_tag_flag d_val; } : class == ELFCLASS64;
+      } : d_tag == DT_FLAGS;
+
+      /* Entries in the dynamic tags in a position >= DT_ENCODING
+         follow an uniform rule regarding what field is used for the
+         data: even entries use d_ptr while odd entries use d_val.  */
+
+      union
+      {
+        union
+        {
+          elf32_addr d_ptr : class == ELFCLASS32;
+          elf64_addr d_ptr : class == ELFCLASS64;
+        } : d_tag % 2 == 0;
+
+        union
+        {
+          elf_word d_val : class == ELFCLASS32;
+          elf_xword d_val : class == ELFCLASS64;
+        };
+      };
+    };
+      
+    /* Support for elf32_addr/elf64_addr to have different size than
+       elf_word/elf64_xword.  */
+
+    defvar pad_size
+      = sizeof (d_tag) + max (sizeof (d_val), sizeof (d_ptr)) - .;
+
+    byte[pad_size] pad if pad_size > 0;
+};
+
+/* ELF note section.  */
+
+deftype elf_note =
+  struct (enum elf_ei_class class)
+  {
+    /* The first namesz bytes in name contain a null-terminated
+       character representation of the entry's owner or originator.
+  
+       The first descsz bytes in desc hold the note descriptor. The
+       ABI places no constraints on a descriptor's contents.
+
+       type gives the interpretation of the descriptor.  */
+
+    union
+    {
+      struct
+      {
+        elf_word namesz;
+        elf_word descsz;
+        elf_word type;
         byte[namesz] name;
         byte[alignto(., 4)];
         byte[descsz] desc;
@@ -1663,9 +1623,9 @@ deftype elf_note =
 
       struct
       {
-        elf64_xword namesz <doc=namesz_doc>;
-        elf64_xword descsz <doc=descsz_doc>;
-        elf64_xword type <doc=type_doc>;
+        elf64_xword namesz;
+        elf64_xword descsz;
+        elf64_xword type;
         byte[namesz] name;
         byte[alignto(., 8)];
         byte[descsz] desc;
@@ -1674,14 +1634,14 @@ deftype elf_note =
     };
 };
 
-struct elf_group (elf_off num_idxs)
-  <doc="ELF group.">
+deftype elf_group =
+  struct (elf_off num_idxs)
 {
   bitmask elf_group_flags flags;
   elf32_word[num_idxs] shidx;
 };
 
-typedef elf_section =
+deftype elf_section =
   union (enum elf_e_machine mach,
          enum elf_ei_class class,                    
          struct elf_shdr shdr)
@@ -1746,7 +1706,6 @@ typedef elf_section =
 deftype elf_segment =
   union (enum elf_ei_class class,
          struct elf_phdr phdr)
-  <doc="ELF segment.">
   {
     struct {} : phdr.p_type == PT_NULL;
     struct {} : phdr.p_type == PT_LOAD;
@@ -1788,23 +1747,6 @@ deftype elf =
                  edhr.e_ident.ei_class,
                  phdr[segments$index]) [ehdr.e_phnum] segments;
   };
-
-/* Integrity for struct elf:
-
-     - Only one SHT_DYNAMIC section.
-     - Only one PT_INTERP segment in a file.
-     - Only one PT_PHDR segment in a file.
-
-     - SHT_GROUP sections should only appear in relocatable
-       objects.
-    assert (p_type == SHT_GROUP => ehdr.e_type == ET_REL);
-*/
-
-/* Functions for:
-
-   - Getting a section (array) given a name.
-
-*/
 
 /*
 Local variables:

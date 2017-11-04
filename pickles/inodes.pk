@@ -1,4 +1,4 @@
-type inode =
+deftype inode =
   struct
   {
     uint32 perms;
@@ -7,7 +7,7 @@ type inode =
     uint32 next;
   };
 
-void print_inodes (inode in)
+defproc print_inodes (inode in)
 {
   print ("Perms: " + in.perms);
   print_inode_data (in.data);
@@ -15,3 +15,9 @@ void print_inodes (inode in)
   if (next != 0)
     print_inodes (inode @ in.next);
 }
+
+/*
+Local variables:
+mode:c
+End:
+*/

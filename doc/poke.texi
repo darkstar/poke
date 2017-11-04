@@ -545,10 +545,67 @@ packet @{...@}
 XXX: discuss anonymous fields.
 XXX: discuss labels and offsets.
 
+     Offsets are just numbers associated with members of composite
+     types (structs, bitmaps, unions and arrays).  All members of
+     unions have offset 0.  When a type is constructed (from a
+     literal, or zeroed, or from an IO map) the members get their
+     offsets.
+
+     They are always unsigned 64-bit integers, i.e. they have type
+     uint64.
+
+     When a field or array member is defined, and its size determined,
+     a location counter is increased by the number of bytes that the
+     field occupies.  This new value of the counter is the offset
+     assigned to the next field, unless it features a label.
+
+     Note that the order of fields and array members is not correlated
+     with their offsets.  This means that the element @code{a[10]} may
+     have an offset bigger than @code{a[2]}, for example.  Usually,
+     however, the offset is the one expected, i.e. @code{a[10]} will
+     have offset @code{4 * 10} if it is an array of 32-bit integers.
+
+     Offsets are used to map elements to IO space.  Conceptually, the
+     offset of a non-composite type is always @code{0}, i.e. the IO
+     offset of a @code{int @ 0xff} is @code{0xff + 0}.  Mapping-offset
+     + offset.  (XXX: this is elegant.)
+
+     The operator @@field can be used to get the offset in bytes of a
+     field inside its containing struct.  It doesn't work with bitmap
+     fields.
+
      Note that if the label of an array contains a *$index construct,
      it is interpreted as the offset within the current structure of
      _each_ element, _not_ of the array itself.  This syntax works
      because it doesn't make sense to define both simultaneously.
+
+XXX: pinned fields
+
+@example
+struct
+@{
+  int f1;
+ @@f1:
+  int f2;
+@};
+@end example
+
+   Use use pinned fields:
+
+@example
+struct
+@{
+  pinned int f1;
+  int f2;
+@};
+@end example
+  
+   The location counter is not advanced when a pinned field is
+   defined.  Labels can be used with pinned fields with the usual
+   semantics.  Fields of any type can be pinned, like structs or
+   arrays or whatever.
+
+   It is not possible to pin array elements.
 
 XXX: discuss struct parameters and struct attributes.
 
@@ -789,6 +846,32 @@ deftype audio_props =
 By default the type of each bit field is interpreted as having the
 same width than the width of the bitmap, and the sign is determined by
 either @code{bit:N} or @code{sbit:N}.
+
+Is it possible to operate on bitmaps like if they were integer types?
+This would allow to use:
+
+@example
+struct
+@{
+  bitmap uint32
+  @{
+     bit:28 elf_sym_binding st_bind;
+      bit:4 elf_st_type (mach) st_type;
+  @} st_info;
+@}
+@end example
+
+instead of
+
+struct
+@{
+  pinned uint32 st_info;
+  bitmap uint32
+  @{
+     bit:28 elf_sym_binding st_bind;
+      bit:4 elf_st_type (mach) st_type;
+  @};
+@}
 
 @node Flattening
 @chapter Flattening
