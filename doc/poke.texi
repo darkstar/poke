@@ -480,7 +480,7 @@ field, which must be unique in the containing struct.
 
 @section Struct Types
 
-A tuple type is
+A struct type is
 denoted using the following syntax:
 
 @example
@@ -494,11 +494,11 @@ The type of a struct containing three 32-bit signed integers is
 containing a string, an unsigned 8-bit number, and a character is
 @code{struct @{string; byte; char@}}.
 
-The order of the tuple elements is significant.  For example, the type
+The order of the struct elements is significant.  For example, the type
 @code{struct @{int; long;@}} is different than the type
 @code{struct @{long; int;@}}.
 
-The type of an empty tuple, i.e. a tuple with no elements, is
+The type of an empty struct, i.e. a struct with no elements, is
 @code{struct @{@}}.
 
 It is possible to name some (or all) of the struct constituents.  For
@@ -697,10 +697,10 @@ void zero_inodes (inode i)
 
 @section Casting Structs
 
-Casts to tuples use the usual syntax @code{(<type>) <exp>} and can be
-applied to tuple values.
+Casts to structs use the usual syntax @code{(<type>) <exp>} and can be
+applied to struct values.
 
-However, when casting to tuple types featuring more than one element,
+However, when casting to struct types featuring more than one element,
 an alternative syntax can be used: @code{(int,long) <exp>} is
 equivalent to @code{((int,long)) <exp>}.  This abbreviated form can't
 be used to cast to tuples having one element, because it is
@@ -1872,6 +1872,8 @@ special variable @code{.nencoding}.  If @code{.nencoding == 1} the
 negative quantities in integer values are encoded using one's
 complement.  If @code{.nencoding == 2} then they are encoded using
 two's complement.  The default is @code{2}.
+
+XXX: Globals suck.  How to handle computed endianness like in elf??
 
 @section Encoding
 
