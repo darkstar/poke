@@ -1153,22 +1153,28 @@ deftype elf_rel =
       struct
       {
         elf32_addr r_offset;
-        pinned elf_word r_info;
-        bitmap uint32
+        pinned struct
         {
-          bit:24 r_sym;
-          bit:8 enum elf_r_type (mach) r_type;
+          elf_word r_info;
+          bitmap uint32
+          {
+            bit:24 r_sym;
+            bit:8 enum elf_r_type (mach) r_type;
+          };
         };
       } : class == ELFCLASS32;
 
       struct
       {
         elf64_addr r_offset;
-        pinned elf64_xword r_info;
-        bitmap uint64
+        pinned struct
         {
-          bit:32 r_sym;
-          bit:32 enum elf_r_type (mach) r_type;
+          elf64_xword r_info;
+          bitmap uint64
+          {
+            bit:32 r_sym;
+            bit:32 enum elf_r_type (mach) r_type;
+          };
         };
       } : class == ELFCLASS64;
     }
@@ -1184,22 +1190,28 @@ deftype elf_rela =
       struct
       {
         elf32_addr r_offset;
-        pinned elf_word r_info;
-        bitmap uint32
+        pinned struct
         {
-          bit:24 r_sym;
-          bit:8 enum elf_r_type (mach) r_type;
+          elf_word r_info;
+          bitmap uint32
+          {
+            bit:24 r_sym;
+            bit:8 enum elf_r_type (mach) r_type;
+          };
         };
       } : class == ELFCLASS32;
 
       struct
       {
         elf64_addr r_offset;
-        pinned elf64_xword r_info;
-        bitmap uint64
+        pinned struct
         {
-          bit:32 int r_sym;
-          bit:32 enum elf_r_type (mach) r_type;
+          elf64_xword r_info;
+          bitmap uint64
+          {
+            bit:32 int r_sym;
+            bit:32 enum elf_r_type (mach) r_type;
+          };
         };
       } : class == ELFCLASS64;
     }
@@ -1482,11 +1494,14 @@ deftype elf_sym =
       elf32_addr st_value;
       elf32_word st_size;
 
-      pinned uint32 st_info;
-      bitmap uint32
+      pinned struct
       {
-        bit:28 elf_sym_binding st_bind;
-        bit:4 elf_st_type (mach) st_type;
+        uint32 st_info;
+        bitmap uint32
+        {
+          bit:28 elf_sym_binding st_bind;
+          bit:4 elf_st_type (mach) st_type;
+        };
       };
 
       pinned byte st_other;
@@ -1503,18 +1518,24 @@ deftype elf_sym =
     {
       elf64_word st_name;
 
-      pinned uint64 st_info;
-      bitmap uint64
+      pinned struct
       {
-        bit:60 elf_sym_binding st_bind;
-        bit:4 elf_st_type (mach) st_type;
+        uint64 st_info;
+        bitmap uint64
+        {
+          bit:60 elf_sym_binding st_bind;
+          bit:4 elf_st_type (mach) st_type;
+        };
       };
 
-      pinned byte st_other;
-      bitmap byte
+      pinned struct
       {
-        bit:3 elf_sym_visibility st_visibility;
-        bit:5;
+        byte st_other;
+        bitmap byte
+        {
+          bit:3 elf_sym_visibility st_visibility;
+          bit:5;
+        };
       };
 
       elf64_half st_shndx;
