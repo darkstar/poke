@@ -579,7 +579,7 @@ XXX: discuss labels and offsets.
      _each_ element, _not_ of the array itself.  This syntax works
      because it doesn't make sense to define both simultaneously.
 
-XXX: pinned fields
+XXX: pinned structs
 
 @example
 struct
@@ -590,22 +590,19 @@ struct
 @};
 @end example
 
-   Use use pinned fields:
+   Use use pinned structs:
 
 @example
-struct
+pinned struct
 @{
-  pinned int f1;
+  int f1;
   int f2;
 @};
 @end example
   
-   The location counter is not advanced when a pinned field is
-   defined.  Labels can be used with pinned fields with the usual
-   semantics.  Fields of any type can be pinned, like structs or
-   arrays or whatever.
-
-   It is not possible to pin array elements.
+   The location counter is not advanced when a pinned struct is
+   processed.  Labels can be used with pinned fields with the usual
+   semantics.
 
 XXX: discuss struct parameters and struct attributes.
 
