@@ -360,6 +360,9 @@ defvar int[32] a;  /* Array of 100 integers.  */
 defvar int[#128] a; /* Array of 128 bytes, i.e. 100 integers.  */
 @end example
 
+     XXX How to specify the maximum size in bits?  This may be needed
+     for some bit-oriented formats like deflate.
+
      Example: dwarf CFA expression:
 
 @example
@@ -790,9 +793,6 @@ struct
   @};
 @}
 
-XXX how to support run-time bit lenghts in bitmap fields?  Like using
-    several types?  Or using the s?bit<EXPR> notation like in rds?
-
 XXX alignment checks for structs and fields.  Something like:
 
 @example
@@ -1179,6 +1179,9 @@ in descending precedence order:
 @item Bitwise concatenation @code{::}.
 @end itemize
 
+XXX bitwise concatenation works with any integral type, of any bit
+    length.
+
 The following right-associative unary bitwise operators are supported:
 
 @itemize
@@ -1350,6 +1353,10 @@ XXX quantified ternary expressions
 @example
    int[] a : forall i in a : (i == 0) || (a[i] == a[i-1]+1);
 @end example
+
+XXX ternary inclusion operator (useful with enums):
+
+    A in B : C.
 
 @node The Cast Operator
 @section The Cast Operator
