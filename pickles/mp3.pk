@@ -24,21 +24,21 @@ load id3v2;
 deftype mp3_frame_hdr =
   struct
   {
-    bitmap uint32
+    struct
     {
-      bit:12 frame_sync;
-      bit:1 mpeg_id;
-      bit:1 layer_id;
-      bit:1 protection_bit;
-      bit:4 bitrate_index;
-      bit:2 frequency_index;
-      bit:1 padding_bit;
-      bit:1 private_bit;
-      bit:2 channel_mode;
-      bit:2 mode_extension;
-      bit:1 copyright;
-      bit:1 original;
-      bit:2 emphasis;
+      bit<12> frame_sync;
+      bit<1> mpeg_id;
+      bit<1> layer_id;
+      bit<1> protection_bit;
+      bit<4> bitrate_index;
+      bit<2> frequency_index;
+      bit<1> padding_bit;
+      bit<1> private_bit;
+      bit<2> channel_mode;
+      bit<2> mode_extension;
+      bit<1> copyright;
+      bit<1> original;
+      bit<2> emphasis;
     } : (frame_sync >= 0xffe /* Note this distinguishes frames from
                                 id3v1 tags.  */
          && layer_id != 0

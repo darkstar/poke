@@ -1,4 +1,4 @@
-/* jpg.pk - JPG support for GNU poke.  */
+/* jpeg.pk - JPEG support for GNU poke.  */
 
 /* Copyright (C) 2017 Jose E. Marchesi.  */
 
@@ -26,7 +26,7 @@
   JPEG-LS	http://www.itu.int/rec/T-REC-T.87-199806-I/en
 */
 
-deftype jpg =
+deftype jpeg =
   struct
   {
     

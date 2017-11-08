@@ -60,7 +60,6 @@ The Poke Language
 * Unions::
 * Enumerations::
 * Bitmasks::
-* Bitmaps::
 * Flattening::
 * Expressions::
 * Constants::
@@ -713,6 +712,97 @@ literal.  For example, @code{(string name, int age) @{.age = 30, .name
 = "Jose"@}} generates the struct @code{@{"Jose", 30@}} of type
 @code{(string name, int age)}.
 
+XXX metatypes
+
+@example
+    deftype int32 = sbit<32>;
+    deftype uint32 = ubit<32>;
+
+    defset foo = enum @{ a = 1, b = 2 @};
+    defset bar = bitmask @{ a = 0x1, b = 0x4 @};
+
+    foo<int>
+    bar<bit<32>>
+@end example
+
+    Syntactic sugar to avoid to have to declare an explicit metatype:
+
+@example
+deftype foo = enum<bleh> @{ ... @};
+@end example
+
+XXX Getting attributes of types?  With sizeof and friends...
+
+XXX discuss bitmaps
+
+ Bitmaps contain bit fields.
+ If named, a bitmap can always be used like its base type, i.e. like
+ an integral field.
+ Bit endianness: msbit, lsbit.
+ Byte endianness: msb, lsb.
+ Labels are not allowed in bitmaps.
+ Projection works with bitmaps.
+
+ Writing bit fields involves doing bit-wise logical operations (or to
+ set, and to clear, and shifts) on the containing type:
+
+ (poke) poke a.bitfield, 0xf
+ 0xfeeffeef <- 0xdeadbeef | 0xf << 3
+
+@example
+deftype audio_props =
+  struct
+  @{
+     bit:4 flv_sound_format format = FLV_AAC;
+     bit:2 flv_sound_rate rate = FLV_RATE_44K;
+     bit:1 flv_sound_size size;
+     bit:1 flv_sound_type type = FLV_SND_STEREO;
+  @};
+@end example
+
+By default the type of each bit field is interpreted as having the
+same width than the width of the bitmap, and the sign is determined by
+either @code{bit:N} or @code{sbit:N}.
+
+Is it possible to operate on bitmaps like if they were integer types?
+This would allow to use:
+
+@example
+struct
+@{
+  struct
+  @{
+     bit:28 elf_sym_binding st_bind;
+      bit:4 elf_st_type (mach) st_type;
+  @} st_info;
+@}
+@end example
+
+instead of
+
+struct
+@{
+  pinned uint32 st_info;
+  struct
+  @{
+     bit:28 elf_sym_binding st_bind;
+      bit:4 elf_st_type (mach) st_type;
+  @};
+@}
+
+XXX how to support run-time bit lenghts in bitmap fields?  Like using
+    several types?  Or using the s?bit<EXPR> notation like in rds?
+
+XXX alignment checks for structs and fields.  Something like:
+
+@example
+aligned(32) struct
+@{
+  int i;
+  long l;
+@};
+@end example
+
 @node Unions
 @chapter Unions
 
@@ -809,66 +899,6 @@ bitmask elf_xword elf_sh_flags
   SHF_EXECINSTR = 0x4,
 @}
 @end example
-
-@node Bitmaps
-@chapter Bitmaps
-
-XXX discuss bitmaps
-
- Bitmaps contain bit fields.
- If named, a bitmap can always be used like its base type, i.e. like
- an integral field.
- Bit endianness: msbit, lsbit.
- Byte endianness: msb, lsb.
- Labels are not allowed in bitmaps.
- Projection works with bitmaps.
-
- Writing bit fields involves doing bit-wise logical operations (or to
- set, and to clear, and shifts) on the containing type:
-
- (poke) poke a.bitfield, 0xf
- 0xfeeffeef <- 0xdeadbeef | 0xf << 3
-
-@example
-deftype audio_props =
-  bitmap uint8
-  @{
-     bit:4 flv_sound_format format = FLV_AAC;
-     bit:2 flv_sound_rate rate = FLV_RATE_44K;
-     bit:1 flv_sound_size size;
-     bit:1 flv_sound_type type = FLV_SND_STEREO;
-  @};
-@end example
-
-By default the type of each bit field is interpreted as having the
-same width than the width of the bitmap, and the sign is determined by
-either @code{bit:N} or @code{sbit:N}.
-
-Is it possible to operate on bitmaps like if they were integer types?
-This would allow to use:
-
-@example
-struct
-@{
-  bitmap uint32
-  @{
-     bit:28 elf_sym_binding st_bind;
-      bit:4 elf_st_type (mach) st_type;
-  @} st_info;
-@}
-@end example
-
-instead of
-
-struct
-@{
-  pinned uint32 st_info;
-  bitmap uint32
-  @{
-     bit:28 elf_sym_binding st_bind;
-      bit:4 elf_st_type (mach) st_type;
-  @};
-@}
 
 @node Flattening
 @chapter Flattening
@@ -1311,6 +1341,16 @@ supported:
 The conditional operator can be applied to integer and character
 values.
 
+XXX quantified ternary expressions
+
+    forall ID in ARRAY_EXPR : BOOLEAN_EXPR
+
+    It is true iff BOOLEAN_EXPR is true for all index ID in the array.
+
+@example
+   int[] a : forall i in a : (i == 0) || (a[i] == a[i-1]+1);
+@end example
+
 @node The Cast Operator
 @section The Cast Operator
 
@@ -1359,7 +1399,7 @@ Left-associative unary operators:
 Right-associative unary operators:
 
 @itemize
-@item @code{sizeof}, @code{elemsof}, @code{startof} and @code{typeof}
+@item @code{sizeof}, @code{bitsizeof}, @code{lengthof}, @code{startof} and @code{typeof}
 @end itemize
 
 @node Operators Precedence

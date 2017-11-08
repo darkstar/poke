@@ -24,7 +24,7 @@
    Published by Adobe Systems Incorporated.  */
 
 deftype flv_type_flags =
-  bitmask uint8
+  bitmask<uint8>
   {
     FLV_F_AUDIO = 0x4;
     FLV_F_VIDEO = 0x1;
@@ -42,8 +42,8 @@ deftype flv_header =
     uint64 zero;
   };
 
-deftype flv_sound_format =
-  enum uint8
+defset flv_sound_format =
+  enum
   {
     FLV_PCM_PE = 0,
     FLV_ADPCM = 1,
@@ -61,7 +61,7 @@ deftype flv_sound_format =
   };
 
 deftype flv_sound_rate =
-  enum uint8
+  enum<uint8>
   {
     FLV_RATE_5_5K = 0,
     FLV_RATE_11K = 1,
@@ -70,21 +70,21 @@ deftype flv_sound_rate =
   };
 
 deftype flv_sound_size =
-  enum uint8
+  enum<uint8>
   {
     FLV_SND_8BIT = 0,
     FLV_SND_16BIT = 1
   };
 
 deftype flv_sound_type =
-  enum uint8
+  enum<uint8>
   {
     FLV_SND_MONO = 0,
     FLV_SND_STEREO = 1
   };
 
 deftype flv_aac_packet_type =
-  enum uint8
+  enum<uint8>
     {
       FLV_AAC_SEQ_HDR = 0,
       FLV_AAC_RAW = 1
@@ -94,12 +94,12 @@ deftype flv_audio =
   union (uint32 data_size)
   {
     deftype sound_props =
-      bitmap uint8
+    struct
       {
-        bit:4 flv_sound_format format;
-        bit:2 flv_sound_rate rate;
-        bit:1 flv_sound_size size;
-        bit:1 flv_sound_type type;
+        flv_sound_format<bit<4>> format;
+        flv_sound_rate<bit<2>> rate;
+        flv_sound_size<bit<1>> size;
+        flv_sound_type<bit<1>> type;
       };
     
     struct

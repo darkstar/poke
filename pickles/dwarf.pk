@@ -23,7 +23,7 @@
    expressions.  And possibly an assembler as well?  */
 
 deftype dwarf_opcode =
-  enum ubyte
+  enum<ubyte>
   {
     DW_OP_addr = 0x03,
     DW_OP_deref = 0x06,

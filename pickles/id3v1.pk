@@ -19,7 +19,7 @@
 /* Implemented as specified in http://id3.org/id3v1.html  */
 
 deftype id3v1_genre =
-  enum uint8
+  enum<uint8>
   {
     ID3V1_GENRE_BLUES = 0,
     ID3V1_GENRE_CLASSIC_ROCK,

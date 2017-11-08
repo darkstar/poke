@@ -141,15 +141,15 @@ deftype tag =
 /* Flattening also works with enums.  */
 
 deftype relocs =
-  enum (int mach)
+  enum <int> (int mach)
   {
-    enum
+    enum <int>
     {
       R_SPARC_FOO = 1,
       R_SPARC_BAR = 2
     } if mach == SPARC;
 
-    enum
+    enum <int>
     {
       R_ALPHA_FOO = 1,
       R_ALPHA_BAR = 2

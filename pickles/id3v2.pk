@@ -26,12 +26,12 @@ deftype id3v2_hdr =
     byte ver_major : ver_major != 0xff;
     byte ver_revision : ver_revision != 0xff;
 
-    bitmap byte
+    struct
     {
-      bit:1 unsynchronisation_used;
-      bit:1 extended_hdr_present;
-      bit:1 experimental_tag;
-      bit:5;
+      bit<1> unsynchronisation_used;
+      bit<1> extended_hdr_present;
+      bit<1> experimental_tag;
+      bit<5>;
     } flags;
 
     uint8[4] size : (size[0] < 0x80
@@ -46,10 +46,10 @@ defytpe id3v2_ext_hdr =
     /* Size of this header, excluding this field.  */
     uint32 size = 10;
 
-    bitmap uint16
+    struct
     {
-      bit:1 flag_crc_present;
-      bit:15;
+      bit<1> flag_crc_present;
+      bit<15>;
     };
 
     uint32 padding_sz;
@@ -64,16 +64,16 @@ deftype id3v2_frame =
     /* Frame size without frame header.  */
     uint32 size;
 
-    bitmap uint16
+    struct
     {
-      bit:1 tag_alter_preserv;
-      bit:1 file_alter_preserv;
-      bit:1 read_only_frame;
-      bit:5;
-      bit:1 compressed_frame;
-      bit:1 encrypted_frame;
-      bit:1 group_member_frame;
-      bit:5;
+      bit<1> tag_alter_preserv;
+      bit<1> file_alter_preserv;
+      bit<1> read_only_frame;
+      bit<5>;
+      bit<1> compressed_frame;
+      bit<1> encrypted_frame;
+      bit<1> group_member_frame;
+      bit<5>;
     } flags;
 
     union

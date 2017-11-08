@@ -25,14 +25,14 @@
 struct bson_doc; /* Forward declaration.  */
 
 deftype bson_bool =
-  enum byte
+  enum<byte>
     {
       BSON_FALSE = 0x00,
       BSON_TRUE = 0x01
     };
 
 deftype bson_subtype =
-  enum byte
+  enum<byte>
     {
       BSON_SUBTYPE_GENERIC = 0x00,
       BSON_SUBTYPE_FUNCTION = 0x01,
