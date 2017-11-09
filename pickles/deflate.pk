@@ -38,8 +38,9 @@ deftype deflate_block =
       /* Non-compressed blocks.  */
       struct
       {
-      align(8): uint16 len;
-        uint16 nlen = -len; /* XXX nlen is the one's complement of len.  */
+      align(8):
+        int16 len;
+        onecomp int16 nlen = -len;
         byte[nlen] data;
       } : btype == BTYPE_NO_COMPRESSION;
 
