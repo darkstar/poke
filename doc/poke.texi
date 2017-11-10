@@ -54,6 +54,7 @@ Basic Editing
 The Poke Language
 * Hello Poke::
 * Numbers::
+* Metatypes::
 * Arrays::
 * Strings::
 * Structs::
@@ -92,6 +93,34 @@ Indexes
 @chapter Hello Poke!
 
 XXX: explain why poke features a domain-specific languages.
+
+XXX: aspects to discuss here:
+
+     - Interpreted.
+     - Familiar C-like brace-based syntax.
+     - Oriented for editing physical binary layouts:
+       + Language-level support for endianness.
+       + Padding control (by default, no padding.)
+
+     - Data integrity:
+
+       + Integrity constraints.
+       + Validation.
+       + Automatic fixing when feasible.
+       + Allows altering the data with some level of assurance nothing
+         gets broken.
+
+     - Using C-like structs: easy to reuse definitions from software
+
+     - Writing to the IO may change the layout of some data structure,
+       so the data structures must adapt automatically.  This is a
+       powerful concept in poke.
+
+     - No pointers: variables do not have addresses.
+
+     - poke          => bytes editor
+     - poke + elf.pk => elf editor
+     - poke + foo.pk => foo editor
 
 @node Numbers
 @chapter Numbers
@@ -261,6 +290,25 @@ Note that the operation above can also be achieved by using a cast
 
 However using suffixes requires less keystrokes.
 
+@node Metatypes
+@chapter Metatypes
+
+Bit types and sets.
+
+@example
+deftype int32 = sbit<32>;
+deftype uint32 = ubit<32>;
+
+defset foo = enum @{ a = 1, b = 2 @};
+defset bar = bitmask @{ a = 0x1, b = 0x4 @};
+
+foo<int>
+bar<bit<32>>
+@end example
+
+XXX we need a new boxed value for non 8,16,32,64 integral values.  And
+    to implement the promotion types for operators.
+
 @node Arrays
 @chapter Arrays
 
@@ -295,6 +343,14 @@ the actual size of an array is not part of its type.  This means that,
 for example, an array containing four 32-bit integers has the same
 type than an array containing four hundred 32-bit integers:
 @code{int[]}.
+
+XXX: operator '+' concatenates arrays.
+XXX: operator '~' reverses arrays.
+
+XXX: empty arrays are supported, but not literals of empty arrays.
+
+XXX: explain how unbounded arrays play the declarative role of
+     iteration.
 
 Array literals are constructed using the following syntax:
 
@@ -333,6 +389,8 @@ arrays:
 It is possible to refer to specific elements when constructing array
 literals.  For example, @code{[1, 2, 3, .[3] = 4]} denotes the same
 array than @code{[1, 2, 3, 4]}.
+
+XXX: in GNU C the array size for [[1] = 10, 20, [4] = 40] would be 5.
 
 This allows creating arrays without having to specify all its
 elements.  Unspecified elements have the value @code{null}.  For
@@ -430,6 +488,42 @@ Denotes an horizontal tab.
 
 @node Structs
 @chapter Structs
+
+XXX iterating through struct fields.  In offset order?  Or in field
+    definition order?  Configurable?
+
+XXX evaluation algorithm.  Poke must work on a staging area for the
+    region i tis operating on, working recursively with rollback.  In
+    fact, the struct evaluation algorithm performs backtracking.
+
+XXX Problem: How to raise constraint marks in unions?  Maybe a warning()
+    function that returns true but logs/marks a warning?
+
+XXX how to handle recursive definitions?  With defrectype?  Or with
+    forward references?
+
+XXX versioned types
+
+XXX Explain how it is possible to define procedures inside structs,
+    and how can they be accessed using the dot-notation, very similar
+    fields are accessed.  The same scope and visibility rules are used
+    for procedures.
+
+
+XXX Use the deflate format to show how structs can generally be
+    bit-aligned.  For an example of a bit-oriented format, see
+    deflate.pk.
+
+@example
+deftype elf =
+   versioned("1.0") struct
+   @{
+     ...
+   @}
+@end example
+
+   The version above is not of the ELF format, but of the poke spec.
+   This is an important distinction.  Useful for the binary diffs.
 
 Structs are collections of heterogeneous values.
 
@@ -756,10 +850,10 @@ XXX discuss bitmaps
 deftype audio_props =
   struct
   @{
-     bit:4 flv_sound_format format = FLV_AAC;
-     bit:2 flv_sound_rate rate = FLV_RATE_44K;
-     bit:1 flv_sound_size size;
-     bit:1 flv_sound_type type = FLV_SND_STEREO;
+     bit<4> flv_sound_format format = FLV_AAC;
+     bit<2> flv_sound_rate rate = FLV_RATE_44K;
+     bit<1> flv_sound_size size;
+     bit<1> flv_sound_type type = FLV_SND_STEREO;
   @};
 @end example
 
@@ -836,6 +930,8 @@ XXX: optional fields.
 
      Note that if f does not have constraints associated with it, then
      it will be always present.
+
+XXX Explain how unions play the declarative role of conditionals.
 
 @node Enumerations
 @chapter Enumerations
@@ -1162,6 +1258,8 @@ operators implement a lexicographic ordering.
 Only equality and inequality can be applied to arrays, structs and
 unions.
 
+XXX: equality on structs works as expected.  Ditto to arrays.
+
 These operators resolve in boolean values encoded as 32-bit integers:
 @code{0} meaning false and @code{1} meaning true.
 
@@ -1269,7 +1367,7 @@ used.
 @c store information before pointers, like ghostscript's memory
 @c allocators do.
 
-XXX: elemsof returns the number of elements of an array.
+XXX: lengthof returns the number of elements of an array.
 
 The indexing operator can also be used to refer to a region of the
 array, using a range of indexes @code{[@var{idx1}:@var{idx2}]}.  The
@@ -1327,9 +1425,18 @@ As we saw before, @code{null} is a special value that denotes the
 absence of a value.  It is possible to remove elements from an array
 by assigning @code{null} to them.  For example, @code{array[2] = null}
 will remove the third element from @code{array}.  Ranges are accepted:
-@code{array[0:elemsof array - 1] = null} will empty an array.
+@code{array[0:lengthof array - 1] = null} will empty an array.
 
 XXX: what syntax doesn't sucks ass??
+
+@subsection Array member operator
+
+Very useful in union constraints.
+XXX: show realistic example.
+
+@example
+ELEM in ARRAY
+@end example
 
 @node Conditional Operator
 @section Conditional Operator
@@ -1483,6 +1590,10 @@ const x = 'x', y = 'y';
 
 @node Variables
 @chapter Variables
+
+XXX primitives to get struct's begin and end addresses (and, in
+    general, of any variable).  beginof VAR, endof VAR?  What if the
+    variable is not mapped to IO?
 
 Variables are the association between a symbol and a value.  They are
 declared using the @code{def} construction:
@@ -1783,7 +1894,7 @@ actual parameter:
 @example
 void add_elf_section (elf_section &section)
 @{
-   section[elemsof section] := create_section ();
+   section[lengthof section] := create_section ();
 @}
 @end example
 
@@ -1910,6 +2021,17 @@ variable @code{.endian}.  If @code{.endian == msb} then the encoding is
 big-endian.  If @code{.endian == lsb} then the encoding is
 little-endian.  The default endianness is determined by the endianness
 used by the machine where GNU poke is running.
+
+XXX: use big_endian(), little_endian(), twos_compl(), ones_compl() in
+     constraints, to change the value of these attributes in the
+     implicit evaluation state.
+
+     or, an ``use'' construction?  Like in:
+
+@example
+use lsb if EXP;
+use neg2comp if EXP;
+@end example
 
 The current negative encoding method is determined by the value of the
 special variable @code{.nencoding}.  If @code{.nencoding == 1} the
