@@ -720,6 +720,7 @@ XXX: discuss component constraints.
 
       int foo : foo > 10;      /* Error constraint.  */
       int foo final: foo > 10; /* Final constraint.  */
+      or int foo $: foo > 10;
       int foo warning: foo > 10; /* Warning.  *
 
     These constraints can be combined:

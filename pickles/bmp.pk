@@ -77,7 +77,7 @@ deftype bmp =
       /* Compressed: data is an array of bytes.  */
       byte[(bmih.bi_size_image > 0
             ? bmih.bi_size_image
-            : bmfh.bf_size - XXXftell())] rle_data
+            : bmfh.bf_size - .)] rle_data
         : (bmih.bi_Compression > 0);
 
       /* Not compressed: data is organized in lines.  */
