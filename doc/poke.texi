@@ -714,6 +714,18 @@ XXX: discuss struct parameters and struct attributes.
    Support for initial values for default arguments.
 
 XXX: discuss component constraints.
+
+
+    Named constraints:
+
+      int foo : foo > 10;      /* Error constraint.  */
+      int foo final: foo > 10; /* Final constraint.  */
+      int foo warning: foo > 10; /* Warning.  *
+
+    These constraints can be combined:
+
+      int foo : foo > 10 warning: foo == 8 final: foo == 5;
+
 XXX: discuss lazy projection in structs.
 
 XXX: discuss recursive structs and forward declarations.

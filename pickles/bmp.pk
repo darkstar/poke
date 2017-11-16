@@ -1,0 +1,111 @@
+/* bmp.pk - BMP support for GNU poke.  */
+
+/* Copyright (C) 2017 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+deftype bmp_file_header =
+  struct
+  {
+    char bf_type[2] = "BM";
+    uint64 bf_size;
+    uint32 bf_reserved_1;
+    uint32 bf_reserved_2;
+    uint64 bf_off_bits;
+  };
+
+deftype bmp_info_header =
+  struct
+  {
+    uint64 bi_size;
+    uint64 bi_width;
+    uint64 bi_height;
+    uint32 bi_planes;
+    uint32 bi_bit_count;
+    uint64 bi_compression;
+    uint64 bi_size_image;
+    uint64 bi_x_pels_per_meter;
+    uint64 bi_y_pels_per_meter;
+    uint64 bi_clr_used;
+    uint64 bi_clr_important;
+  };
+
+deftype bmp_rgb_quad =
+  struct
+  {
+    byte blue;
+    byte green;
+    byte red;
+    byte reserved;
+  };
+
+deftype bmp_rgb_triple =
+  struct
+  {
+    byte blue;
+    byte green;
+    byte red;
+  };
+
+deftype bmp =
+  struct
+  {
+    bmp_file_header bmfh;
+    bmp_info_header bmih;
+
+    /* Color table.  */
+    bmp_rgb_quad[(bmih.bi_clr_used > 0
+                  ? bmih.bi_clr_used
+                  : 1 << bmih.bi_bit_count)] a_colors
+      if (!(bmih.bi_bit_count in [24, 32]));
+
+    /* Data.  */
+    union
+    {
+      /* Compressed: data is an array of bytes.  */
+      byte[(bmih.bi_size_image > 0
+            ? bmih.bi_size_image
+            : bmfh.bf_size - XXXftell())] rle_data
+        : (bmih.bi_Compression > 0);
+
+      /* Not compressed: data is organized in lines.  */
+      struct
+      {
+        defvar uint32 bytes_per_line
+          = ceil (bmih.bi_width * bmih.bi_bit_count / 8);
+        defvar uint32 tmp = 4 - (bytes_per_line % 4);
+        defvar uint32 padding = tmp == 4 ? 0 : tmp;
+
+        struct
+        {
+          union
+          {
+            byte[bytes_per_line] image_data : hdr.bi_bit_count < 8;
+            byte[bmih.bi_width] color_index : hdr.bi_bit_count == 8;
+            bmp_rgb_triple[bmih.bi_width] colors : hdr.bi_bit_count == 24;
+            bmp_rgb_quad[bmih.bi_width] colors : hdr.bi_bit_count == 32;
+          };
+          
+          byte[padding] pad_bytes if padding > 0;
+        } [bmih.bi_height] lines;
+      };
+    };
+  };
+
+/*
+Local variables:
+mode:c
+End:
+*/
