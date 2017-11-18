@@ -84,7 +84,7 @@ deftype bmp =
       struct
       {
         defvar uint32 bytes_per_line
-          = ceil (bmih.bi_width * bmih.bi_bit_count / 8);
+          = (bmih.bi_width * bmih.bi_bit_count / 8);
         defvar uint32 tmp = 4 - (bytes_per_line % 4);
         defvar uint32 padding = tmp == 4 ? 0 : tmp;
 
