@@ -796,7 +796,7 @@ deftype elf_group_flags =
     GRP_COMDAT = 0x0000_0001, /* COMDAT group.  */
     GRP_MASKOS = 0x0ff0_0000,
     GRP_MASKPROC = 0xf000_0000
-};
+  };
 
 defset elf_d_tag =
   enum (elf_e_machine mach)

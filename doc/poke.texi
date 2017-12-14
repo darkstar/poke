@@ -62,6 +62,7 @@ The Poke Language
 * Enumerations::
 * Bitmasks::
 * Flattening::
+@c XXX dedicate a chapter to the evaluation algorithm?
 * Expressions::
 * Constants::
 * Variables::
