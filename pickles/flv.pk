@@ -191,7 +191,7 @@ deftype flv =
 
   header.data_offset:
     uint32 always_0 = 0;
-    flv_tag tags[];
+    flv_tag[] tags;
   };
 
 /*
