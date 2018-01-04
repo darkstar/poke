@@ -490,6 +490,9 @@ Denotes an horizontal tab.
 @node Structs
 @chapter Structs
 
+XXX Fields have an order inside the containing struct, and also an
+    offset.  The offset and the order are independent.
+
 XXX iterating through struct fields.  In offset order?  Or in field
     definition order?  Configurable?
 
@@ -509,7 +512,6 @@ XXX Explain how it is possible to define procedures inside structs,
     and how can they be accessed using the dot-notation, very similar
     fields are accessed.  The same scope and visibility rules are used
     for procedures.
-
 
 XXX Use the deflate format to show how structs can generally be
     bit-aligned.  For an example of a bit-oriented format, see
