@@ -31,4 +31,4 @@ struct pk_cmd *info_cmds[] =
 struct pk_trie *info_trie;
 
 struct pk_cmd info_cmd =
-  {"info", "", 0, &info_trie, NULL, "info (files)"};
+  {"info", "", "", 0, &info_trie, NULL, "info (files)"};

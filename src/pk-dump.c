@@ -37,7 +37,7 @@
 #define KNONE (poke_interactive_p ? "\033[0m" : "")
 
 static int
-pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
+pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* dump [ADDR] [,COUNT]  */
 
@@ -112,5 +112,5 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd dump_cmd =
-  {"dump", "?a,?n", PK_CMD_F_REQ_IO, NULL, pk_cmd_dump,
+  {"dump", "?a,?n", "", PK_CMD_F_REQ_IO, NULL, pk_cmd_dump,
    "dump [ADDRESS] [,COUNT]"};

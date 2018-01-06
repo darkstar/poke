@@ -51,7 +51,7 @@ extern struct pk_cmd vm_cmd; /* pk-vm.c  */
 extern struct pk_cmd print_cmd; /* pk-print.c */
 
 struct pk_cmd null_cmd =
-  {NULL, NULL, 0, NULL, NULL};
+  {NULL, NULL, NULL, 0, NULL, NULL};
 
 static struct pk_cmd *cmds[] =
   {
@@ -252,9 +252,9 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   struct pk_cmd *cmd;
   int argc;
   struct pk_cmd_arg argv[8];
+  uint64_t uflags;
   const char *a;
   char filename[NAME_MAX];
-
 
   /* Skip blanks, and return if the command is composed by only blank
      characters.  */
@@ -276,6 +276,31 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
         printf ("%s ", prefix);
       printf ("%s: command not found.\n", cmd_name);
       return 0;      
+    }
+
+  /* Process user flags.  */
+  uflags = 0;
+  if (*p == '/')
+    {
+      p++;
+      while (isalpha (*p))
+        {
+          int fi;
+          for (fi = 0; cmd->uflags[fi]; fi++)
+            if (cmd->uflags[fi] == *p)
+              {
+                uflags |= 1 << fi;
+                break;
+              }
+
+          if (cmd->uflags[fi] == '\0')
+            {
+              printf ("%s: invalid flag `%c'\n", cmd_name, *p);
+              return 0;
+            }
+
+          p++;
+        }
     }
 
   /* If this command has subcommands, process them and be done.  */
@@ -434,7 +459,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
               if (match)
                 break;
               
-              /* Rewind input and investigate next option.  */
+              /* Rewind input and try next option.  */
               p = beg;
               a++;
             }
@@ -482,7 +507,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
     }
 
   /* Call the command handler, passing the arguments.  */
-  ret = (*cmd->handler) (argc, argv);
+  ret = (*cmd->handler) (argc, argv, uflags);
 
   /* Free arguments occupying memory.  */
   for (i = 0; i < argc; ++i)

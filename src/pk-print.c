@@ -22,26 +22,50 @@
 
 #include "pk-cmd.h"
 
+#define PK_PRINT_UFLAGS "xbo"
+#define PK_PRINT_F_HEX 0x1
+#define PK_PRINT_F_BIN 0x2
+#define PK_PRINT_F_OCT 0x4
+
 static int
-pk_cmd_print (int argc, struct pk_cmd_arg argv[])
+pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* print EXP */
 
   pvm_program prog;
   pvm_val val;
   int pvm_ret;
+  int base;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
   prog = PK_CMD_ARG_EXP (argv[0]);
 
+  /* Numeration base to use while printing values.  Default is
+     decimal.  Command flags can be used to change this.  */
+  base = 10;
+  if (!!(uflags & PK_PRINT_F_HEX)
+      + !!(uflags & PK_PRINT_F_BIN)
+      + !!(uflags & PK_PRINT_F_OCT) > 1)
+    {
+      printf ("print: only one of `x', `b' or `o' may be specified.\n");
+      return 0;
+    }
+
+  if (uflags & PK_PRINT_F_HEX)
+    base = 16;
+  else if (uflags & PK_PRINT_F_BIN)
+    base = 2;
+  else if (uflags & PK_PRINT_F_OCT)
+    base = 8;
+  
   /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
   pvm_ret = pvm_run (prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
-
-  pvm_print_val (stdout, val);
+  
+  pvm_print_val (stdout, val, base);
   printf ("\n");
   return 1;
 
@@ -51,4 +75,6 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd print_cmd =
-  {"print", "e", 0, NULL, pk_cmd_print, "print EXP"};
+  {"print", "e", PK_PRINT_UFLAGS, 0, NULL, pk_cmd_print,
+   "print EXP\n\n\
+Flags: x (print numbers in hexadecimal)"};

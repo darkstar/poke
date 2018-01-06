@@ -63,7 +63,7 @@ printer-c
     void
     pvm_literal_printer (FILE *out, pvm_val val)
     {
-      pvm_print_val (out, val);
+      pvm_print_val (out, val, 10);
     }
   end
 end

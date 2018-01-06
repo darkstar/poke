@@ -31,4 +31,4 @@ struct pk_cmd *help_cmds[] =
 struct pk_trie *help_trie;
 
 struct pk_cmd help_cmd =
-  {"help", "", 0, &help_trie, NULL, "help COMMAND"};
+  {"help", "", "", 0, &help_trie, NULL, "help COMMAND"};

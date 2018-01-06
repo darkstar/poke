@@ -24,7 +24,7 @@
 #include "pk-io.h"
 
 static int
-pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
+pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* peek [ADDR]  */
 
@@ -74,7 +74,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[])
 }
 
 static int
-pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[])
+pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* help peek  */
 
@@ -87,7 +87,7 @@ pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd peek_cmd =
-  {"peek", "?e", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
+  {"peek", "?e", "", PK_CMD_F_REQ_IO, NULL, pk_cmd_peek, "peek [ADDRESS]"};
 
 struct pk_cmd help_peek_cmd =
-  {"peek", "", 0, NULL, pk_cmd_help_peek, "help peek"};
+  {"peek", "", "", 0, NULL, pk_cmd_help_peek, "help peek"};

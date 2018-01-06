@@ -338,7 +338,7 @@ pvm_error (enum pvm_exit_code code)
 }
 
 void
-pvm_print_val (FILE *out, pvm_val val)
+pvm_print_val (FILE *out, pvm_val val, int base)
 {
   if (val == PVM_NULL)
     fprintf (out, "null");
@@ -371,7 +371,7 @@ pvm_print_val (FILE *out, pvm_val val)
         {
           if (idx != 0)
             fprintf (out, ",");
-          pvm_print_val (out, PVM_VAL_ARR_ELEM (val, idx));
+          pvm_print_val (out, PVM_VAL_ARR_ELEM (val, idx), base);
         }
       fprintf (out, "]");
     }
@@ -390,7 +390,7 @@ pvm_print_val (FILE *out, pvm_val val)
             fprintf (out, ",");
           if (name != PVM_NULL)
             fprintf (out, ".%s=", PVM_VAL_STR (name));
-          pvm_print_val (out, value);
+          pvm_print_val (out, value, base);
         }
       fprintf (out, "}");
     }
@@ -421,7 +421,7 @@ pvm_print_val (FILE *out, pvm_val val)
           fprintf (out, "map");
           break;
         case PVM_TYPE_ARRAY:
-          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val));
+          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
           fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
         case PVM_TYPE_STRUCT:
@@ -439,7 +439,7 @@ pvm_print_val (FILE *out, pvm_val val)
                 if (i != 0)
                   fprintf (out, " ");
                 
-                pvm_print_val (out, etype);
+                pvm_print_val (out, etype, base);
                 if (ename != PVM_NULL)
                   fprintf (out, " %s", PVM_VAL_STR (ename));
                 fprintf (out, ";");
@@ -453,9 +453,9 @@ pvm_print_val (FILE *out, pvm_val val)
     }
   else if (PVM_IS_MAP (val))
     {
-      pvm_print_val (out, PVM_VAL_MAP_TYPE (val));
+      pvm_print_val (out, PVM_VAL_MAP_TYPE (val), base);
       fprintf (out, " @ ");
-      pvm_print_val (out, PVM_VAL_MAP_OFFSET (val));
+      pvm_print_val (out, PVM_VAL_MAP_OFFSET (val), base);
     }
   else
     assert (0);

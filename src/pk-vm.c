@@ -24,7 +24,7 @@
 #include "pvm.h"
 
 static int
-pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[])
+pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* disassemble expression EXP */
 
@@ -42,7 +42,7 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[])
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd vm_disas_cmd =
-  {"disassemble", "e", 0, NULL, pk_cmd_vm_disas, "vm disassemble EXP"};
+  {"disassemble", "e", "", 0, NULL, pk_cmd_vm_disas, "vm disassemble EXP"};
 
 struct pk_cmd *vm_cmds[] =
   {
@@ -53,5 +53,5 @@ struct pk_cmd *vm_cmds[] =
 struct pk_trie *vm_trie;
 
 struct pk_cmd vm_cmd =
-  {"vm", "", 0, &vm_trie, NULL, "vm (disassemble)"};
+  {"vm", "", "", 0, &vm_trie, NULL, "vm (disassemble)"};
 

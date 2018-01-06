@@ -23,7 +23,7 @@
 #include "pk-cmd.h"
 
 static int
-pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
+pk_cmd_exit (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* exit CODE */
 
@@ -46,7 +46,7 @@ pk_cmd_exit (int argc, struct pk_cmd_arg argv[])
 }
 
 static int
-pk_cmd_version (int argc, struct pk_cmd_arg argv[])
+pk_cmd_version (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* version */
   pk_print_version ();
@@ -54,7 +54,7 @@ pk_cmd_version (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd exit_cmd =
-  {"exit", "?i", 0, NULL, pk_cmd_exit, "exit [CODE]"};
+  {"exit", "?i", "", 0, NULL, pk_cmd_exit, "exit [CODE]"};
 
 struct pk_cmd version_cmd =
-  {"version", "", 0, NULL, pk_cmd_version, "version"};
+  {"version", "", "", 0, NULL, pk_cmd_version, "version"};

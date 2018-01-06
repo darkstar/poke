@@ -110,7 +110,7 @@ poke_val (pk_io_off *address, pvm_val val)
 }
 
 static int
-pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
+pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* poke ADDR, VAL */
 
@@ -162,5 +162,5 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[])
 }
 
 struct pk_cmd poke_cmd =
-  {"poke", "e,?e", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
+  {"poke", "e,?e", "", PK_CMD_F_REQ_IO | PK_CMD_F_REQ_W, NULL,
    pk_cmd_poke, "poke ADDRESS [,VALUE]"};

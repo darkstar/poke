@@ -54,7 +54,7 @@ struct pk_cmd_arg
   } val;
 };
 
-typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg argv[]);
+typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg argv[], uint64_t uflags);
 
 #define PK_CMD_F_REQ_IO 0x1  /* Command requires an IO stream.  */
 #define PK_CMD_F_REQ_W  0x2  /* Command requires a writable IO stream.  */
@@ -66,6 +66,8 @@ struct pk_cmd
   const char *name;
   /* String specifying the arguments accepted by the command.  */
   const char *arg_fmt;
+  /* String specifying the user flags accepted by the command.  */
+  const char *uflags;
   /* A value composed of or-ed PK_CMD_F_* flags.  See above.  */
   int flags;
   /* Subcommands.  */
