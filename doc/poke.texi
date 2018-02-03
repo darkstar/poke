@@ -650,6 +650,8 @@ XXX: discuss labels and offsets.
      literal, or zeroed, or from an IO map) the members get their
      offsets.
 
+     Two types: offset in bytes (:) and offset in bits (::).
+
      They are always unsigned 64-bit integers, i.e. they have type
      uint64.
 
