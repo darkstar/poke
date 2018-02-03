@@ -1369,7 +1369,7 @@ deftype elf_dyn =
     {
       elf_d_tag<uint32> (mach) d_tag : class == ELFCLASS32;
       elf_d_tag<uint64> (mach) d_tag : class == ELFCLASS64;
-    };
+    } final: d_tag == DT_NULL;
 
     union
     {
@@ -1534,8 +1534,11 @@ deftype elf_segment =
          elf_phdr phdr)
   {
     struct {} : phdr.p_type == PT_NULL;
-    struct {} : phdr.p_type == PT_LOAD;
-    struct {} : phdr.p_type == PT_DYNAMIC;
+
+    byte[phdr.p_filesz] load
+      : phdr.p_type == PT_LOAD;
+
+    elf_dyn[] dynamic : phdr.p_type == PT_DYNAMIC;
     struct {} : phdr.p_type == PT_INTERP;
     struct {} : phdr.p_type == PT_NOTE;
     struct {} : phdr.p_type == PT_SHLIB;

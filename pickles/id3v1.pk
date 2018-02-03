@@ -187,7 +187,7 @@ deftype id3v1_tag =
       {
         char[28] comment;
         byte = 0;
-        byte track: track != 0;
+        byte track : track != 0;
       };
       /* ID3v1  */
       char[30] comment;

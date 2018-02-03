@@ -97,7 +97,6 @@ XXX: explain why poke features a domain-specific languages.
 
 XXX: aspects to discuss here:
 
-     - Interpreted.
      - Familiar C-like brace-based syntax.
      - Oriented for editing physical binary layouts:
        + Language-level support for endianness.
@@ -490,6 +489,9 @@ Denotes an horizontal tab.
 @node Structs
 @chapter Structs
 
+Structs, or structures, allow to group several data structures, called
+@dfn{fields}, together.
+
 XXX Fields have an order inside the containing struct, and also an
     offset.  The offset and the order are independent.
 
@@ -738,6 +740,8 @@ XXX: discuss recursive structs and forward declarations.
 
 XXX: document the operator 'is' for united values.
 
+XXX: assignment to structs.
+
 @example
      if (doc.elements[20] is timestamp)
         bleh;
@@ -767,7 +771,7 @@ struct file
 @end example
 
 @example
-(poke) let f = file @ 0x0      <- this reads nothing.
+(poke) defvar file f @ 0x0     <- this reads nothing.
 (poke) print f.size            <- this reads size.
 1000000000
 (poke) print f.records[10000]  <- this reads a record.
@@ -1316,7 +1320,7 @@ The elements of two arrays can be concatenated using the
 left-associative binary operator @code{+}.  For example:
 
 @example
-@{1, 2, 3@} + @{4, 5, 6@}
+[1, 2, 3] :: [4, 5, 6]
 @end example
 
 evaluates to @code{@{1, 2, 3, 4, 5, 6@}}
@@ -1419,6 +1423,10 @@ XXX it should be supported to assign a value to ranges:
   data[0:size] = 0x0;
 @end example
 
+XXX: if either of the range ends are omitted, then the intuitive
+semantics are used: [2:] means an array with the second to the last
+element.  Ditto for [:2].
+
 @subsection Inserting and removing elements
 
 Poke supports language operators to insert and remove elements in an
@@ -1433,6 +1441,14 @@ For example:
 let array = [1,2,3,4];
 array[1] := 0;  /* array is now [1,0,2,3,4]  */
 @end example
+
+or, use functional style:
+
+@example
+v = v[0] :: [{0xb, 0xc}] :: v[2:];
+@end example
+
+But in this case we have to define the assign to array operator.
 
 Appending past the end of the array: fills with zeroes.
 
@@ -2010,6 +2026,30 @@ XXX: the location counter (which is read-only) is not really
      necessary, but it avoids having to replicate logic all the way in
      structs, in order to determine which fields have been defined or
      not.
+
+XXX: the equivalent of
+
+     (poke) poke 0x0, 0xff
+
+     is
+
+     int32 @ 0x0 = 0xff
+
+     i.e. a map as a l-value creates a mapped variable.
+
+     And the equivalent of
+
+     (poke) peek 0x0
+
+     is
+
+     doshit (int32 @ 0x0)
+
+     i.e. a map as a r-value creates a mapped variable and then gets
+     its value.
+
+XXX: variable := type + value
+     mapped variable := type + value + map(address)
 
 @section The Map Operator
 
