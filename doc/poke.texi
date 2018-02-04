@@ -1438,14 +1438,14 @@ outside??  Nope.  Also, can you pass an array range as an array?
 For example:
 
 @example
-let array = [1,2,3,4];
+defvar array = [1,2,3,4];
 array[1] := 0;  /* array is now [1,0,2,3,4]  */
 @end example
 
 or, use functional style:
 
 @example
-v = v[0] :: [{0xb, 0xc}] :: v[2:];
+v = v[0] :: [@{0xb, 0xc@}] :: v[2:];
 @end example
 
 But in this case we have to define the assign to array operator.
