@@ -2051,7 +2051,31 @@ XXX: the equivalent of
 XXX: variable := type + value
      mapped variable := type + value + map(address)
 
+XXX: getting attributes of maps: beginning offset and end offset.
+
 @section The Map Operator
+
+XXX: since we want dynamically typed variables, we can't associate
+     maps with variables.  Instead, the @ operator creates mapped
+     _values:
+
+@example
+/* The @ operator creates mapped _values_:  */
+
+let i = int32 @@ 0x00; /* This evals to a mapped int32 value.  */
+
+      i = 10; /* This replaces the value.  */
+
+let packet = Packet @@ 0x00; /* This evals to a mapped Packet in an rhs.  */
+
+      packet.field = 10;   /* This accesses IO.  */
+      packet = @{0xa, 0xb@}; /* But this replaces the value of the variable.  */
+           
+let packets = Packet[] @@ 0x00; /* This evals to a mapped array value in an rhs.  */
+
+      packets[0] = @{0xa, 0xb@};  /* This accesses IO.  */
+      packets = [];  /* But this replaces the value of the variable.  */
+@end example
 
 
 @section Peeking and poking thru maps

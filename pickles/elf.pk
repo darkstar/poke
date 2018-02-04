@@ -1415,7 +1415,7 @@ deftype elf_dyn =
     /* Support for elf32_addr/elf64_addr to have different size than
        elf_word/elf64_xword.  */
 
-    defvar pad_size
+    let pad_size
       = sizeof (d_tag) + max (sizeof (d_val), sizeof (d_ptr)) - .;
 
     byte[pad_size] pad if pad_size > 0;
@@ -1472,8 +1472,8 @@ deftype elf_section =
          elf_ei_class class,                    
          elf_shdr shdr)
   {
-    defvar nents = ((shdr.sh_entsize != 0)
-                    ? shdr.sh_size / shdr.sh_entsize : 0);
+    let nents = ((shdr.sh_entsize != 0)
+                 ? shdr.sh_size / shdr.sh_entsize : 0);
 
     struct {}
       : shdr.sh_type == SHT_NULL;

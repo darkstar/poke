@@ -1,4 +1,4 @@
-deftype inode =
+deftype Inode =
   struct
   {
     uint32 perms;
@@ -7,14 +7,47 @@ deftype inode =
     uint32 next;
   };
 
-defproc print_inodes (inode in)
+defun print_inodes (inode)
 {
-  print ("Perms: " + in.perms);
-  print_inode_data (in.data);
+  print ("Perms: " + inode.perms);
+  print_inode_data (inode.data);
 
   if (next != 0)
-    print_inodes (inode @ in.next);
+    print_inodes (Inode @ inode.next);
 }
+
+defun delete_second (a)
+{
+  return a[0]::a[2:];
+}
+
+a = delete_second (int[10] @ 0x0);
+
+let i = 10;
+
+i = 20;
+
+let i = int32 @ 0x00
+  
+i = 20;
+
+map = <type, offset>
+
+/* The @ operator creates mapped _values_:  */
+
+let i = int32 @ 0x00; /* This evals to a mapped int32 value.  */
+
+      i = 10; /* This replaces the value.  */
+
+let packet = Packet @ 0x00; /* This evals to a mapped Packet in an rhs.  */
+
+      packet.field = 10;   /* This accesses IO.  */
+      packet = {0xa, 0xb}; /* But this replaces the value of the variable.  */
+           
+let packets = Packet[] @ 0x00; /* This evals to a mapped array value in an rhs.  */
+
+      packets[0] = {0xa, 0xb};  /* This accesses IO.  */
+      packets = [];  /* But this replaces the value of the variable.  */
 
 /*
 Local variables:

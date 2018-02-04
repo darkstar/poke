@@ -83,10 +83,10 @@ deftype bmp =
       /* Not compressed: data is organized in lines.  */
       struct
       {
-        defvar uint32 bytes_per_line
+        let bytes_per_line
           = (bmih.bi_width * bmih.bi_bit_count / 8);
-        defvar uint32 tmp = 4 - (bytes_per_line % 4);
-        defvar uint32 padding = tmp == 4 ? 0 : tmp;
+        let tmp = 4 - (bytes_per_line % 4);
+        let padding = tmp == 4 ? 0U : tmp;
 
         struct
         {
