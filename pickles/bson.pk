@@ -223,7 +223,7 @@ deftype bson_doc =
     byte endmark = 0x0;
   };
 
-defproc print_bson_elements (bson_doc doc)
+defun print_bson_elements (bson_doc doc)
 {
   print ("size: " + doc.size);
   
@@ -238,11 +238,8 @@ defproc print_bson_elements (bson_doc doc)
       }
 };
 
-defconst ten = 10;
-
-defvar bson_doc bdoc_a;
-defvar bdoc_b = bson_doc {2, [{0xff,"foo"}, {0x7f, "bar"}],0x0UB};
-defvar bdoc_c = bson_doc @ 0x00;
+let bdoc_b = bson_doc {2, [{0xff,"foo"}, {0x7f, "bar"}],0x0UB};
+let bdoc_c = bson_doc @ 0x00;
 
 print_bson_elements (bdoc_b);
 print_bson_elements (bdoc_c);

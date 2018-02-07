@@ -48,7 +48,7 @@ deftype mp3_frame_hdr =
 
     uint16 checksum if protection_bit == 0;
 
-    defproc bitrate : uint32
+    defun bitrate : uint32
     {
       /* MPEG-1,2 Layer 1  */
       if (layer_id == 3)
@@ -84,8 +84,8 @@ deftype mp3_frame =
   {
     mp3_frame_hdr hdr;
 
-    defvar uint32 frame_size = (hdr.bitrate () * 14400
-                                / [2205, 2400, 1600] [hdr.frequency_index]);
+    let frame_size = (hdr.bitrate () * 14400
+                      / [2205, 2400, 1600] [hdr.frequency_index]);
     byte[frame_size] frame_data;
   };
 

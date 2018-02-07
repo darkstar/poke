@@ -20,11 +20,11 @@ defun qsort (array, left = 0, right = sizeof (array))
 {
   defun partition (left, right)
   {
-    let pivot = a[left];
+    let pivot = array[left];
     let i = left;
     let j = right + 1;
 
-    pivot = a[left];
+    pivot = array[left];
     i = left;
     j = right + 1;
  

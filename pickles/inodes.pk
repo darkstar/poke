@@ -12,7 +12,7 @@ defun print_inodes (inode)
   print ("Perms: " + inode.perms);
   print_inode_data (inode.data);
 
-  if (next != 0)
+  if (inode.next != 0)
     print_inodes (Inode @ inode.next);
 }
 
@@ -33,11 +33,12 @@ i = 20;
 
 map = <type, offset>
 
-/* The @ operator creates mapped _values_:  */
+/* In rhs the @ operator creates mapped _values_:  */
 
 let i = int32 @ 0x00; /* This evals to a mapped int32 value.  */
 
       i = 10; /* This replaces the value.  */
+              /* So how to write to IO with non-sharable values?? */
 
 let packet = Packet @ 0x00; /* This evals to a mapped Packet in an rhs.  */
 
@@ -48,6 +49,22 @@ let packets = Packet[] @ 0x00; /* This evals to a mapped array value in an rhs. 
 
       packets[0] = {0xa, 0xb};  /* This accesses IO.  */
       packets = [];  /* But this replaces the value of the variable.  */
+
+/* Dump the names of all the sections in an ELF file.  */
+
+let e = Elf @ 0x0;
+
+for (s in e.shdr)
+  print (e.section_name (s));
+
+let points = Point[] @ 0x0;
+
+/* What about supporting two spaces?  IO and virtual IO (memory).  All
+   non-simple values are stored in a space: either IO or VIO.  Copying
+   from IO to VIO should be easy, and also from VIO to IO.  Simple
+   values are stored in memory.  */
+
+let e = int32 @ 0x0;
 
 /*
 Local variables:

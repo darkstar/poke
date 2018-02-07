@@ -102,10 +102,10 @@ deftype id3v2_tag =
     id3v2_ext_hdr ext_hdr if hdr.extended_hdr_present;
 
     /* Calculate the real size of the tag.  */
-    defvar uint32 tag_size = (hdr.size[0] << 21
-                              | hdr.size[1] << 14
-                              | hdr.size[2] << 7
-                              | hdr.size[3]);
+    let tag_size = (hdr.size[0] << 21
+                    | hdr.size[1] << 14
+                    | hdr.size[2] << 7
+                    | hdr.size[3]);
 
     id3v2_frame[] frames : . <= tag_size;
 

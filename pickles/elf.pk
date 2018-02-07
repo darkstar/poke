@@ -1167,7 +1167,7 @@ deftype elf_phdr =
 
 /* ELF section header.  */
 
-deftype elf_shdr =
+deftype Elf_Shdr =
   struct (elf_ei_class class)
   {
     /* Index of the section's name into the section header string
@@ -1467,10 +1467,10 @@ deftype elf_group =
   elf32_word[num_idxs] shidx;
 };
 
-deftype elf_section =
+deftype Elf_Section =
   union (elf_e_machine mach,
          elf_ei_class class,                    
-         elf_shdr shdr)
+         Elf_Shdr shdr)
   {
     let nents = ((shdr.sh_entsize != 0)
                  ? shdr.sh_size / shdr.sh_entsize : 0);
@@ -1548,7 +1548,7 @@ deftype elf_segment =
 
 /* Finally, the ELF object file itself.  */
 
-deftype elf =
+deftype Elf =
   struct
   {
     elf_ehdr ehdr;
@@ -1557,7 +1557,7 @@ deftype elf =
        optional.  */
 
   ehdr.e_shoff:
-    elf_shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr if ehdr.e_shnum > 0;
+    Elf_Shdr(ehdr.e_ident.ei_class)[ehdr.e_shnum] shdr if ehdr.e_shnum > 0;
 
   ehdr.e_phoff:
     elf_phdr(ehdr.e_ident.ei_class)[ehdr.e_phnum] phdr if ehdr.e_phnum > 0;
@@ -1567,7 +1567,7 @@ deftype elf =
        segments usually overlap. */
 
   shdr[sections$index].sh_offset:
-    elf_section (ehdr.e_machine,
+    Elf_Section (ehdr.e_machine,
                  ehdr.e_ident.ei_class,
                  shdr[sections$index]) [ehdr.e_shnum] sections;
 
@@ -1575,6 +1575,18 @@ deftype elf =
     elf_segment (ehdr.e_machine,
                  edhr.e_ident.ei_class,
                  phdr[segments$index]) [ehdr.e_phnum] segments;
+
+    /* Functions.  */
+
+    defun section_name (Elf_Shdr shdr)
+    {
+      /* The name of a section is stored in a string table which is itself
+         stored in a section in the file.  Find it.  */
+      
+      for (s in shdr)
+        if (s is strtab)
+          return (string @ &s.strtab[shdr.sh_name]);
+    };
   };
 
 /*
