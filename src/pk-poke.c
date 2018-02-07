@@ -18,6 +18,8 @@
 
 #include <config.h>
 #include <assert.h>
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "pk-cmd.h"
 #include "pk-io.h"
@@ -27,7 +29,7 @@ poke_byte (pk_io_off *address, uint8_t byte)
 {
   if (pk_io_putc ((int) byte) == PK_EOF)
     {
-      printf ("Error writing byte 0x%x to 0x%08jx\n",
+      printf (_("Error writing byte 0x%x to 0x%08jx\n"),
               byte, *address);
       return 0;
     }
@@ -130,7 +132,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
     {
-      printf ("Bad ADDRESS.\n");
+      printf (_("Bad ADDRESS.\n"));
       return 0;
     }
       

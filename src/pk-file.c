@@ -19,13 +19,15 @@
 #include <config.h>
 #include <assert.h>
 #include <unistd.h>
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
 #include "pk-cmd.h"
 #include "pk-io.h"
 
 static int
-pk_cmd_file (int argc, struct pk_cmd_arg argv[])
+pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* file FILENAME */
 
@@ -42,7 +44,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
       io = pk_io_get (io_id);
       if (io == NULL)
         {
-          printf ("No such file #%d\n", io_id);
+          printf (_("No such file #%d\n"), io_id);
           return 0;
         }
 
@@ -55,13 +57,13 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
       
       if (access (filename, R_OK) != 0)
         {
-          printf ("%s: file cannot be read\n", filename);
+          printf (_("%s: file cannot be read\n"), filename);
           return 0;
         }
       
       if (pk_io_search (filename) != NULL)
         {
-          printf ("File %s already opened.  Use `file #N' to switch.\n",
+          printf (_("File %s already opened.  Use `file #N' to switch.\n"),
                   filename);
           return 0;
         }
@@ -70,13 +72,13 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[])
     }
 
   if (poke_interactive_p)
-    printf ("The current file is now `%s'.\n", PK_IO_FILENAME (pk_io_cur ()));
+    printf (_("The current file is now `%s'.\n"), PK_IO_FILENAME (pk_io_cur ()));
 
   return 1;
 }
 
 static int
-pk_cmd_close (int argc, struct pk_cmd_arg argv[])
+pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* close [#ID]  */
   pk_io io;
@@ -93,7 +95,7 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[])
       io = pk_io_get (io_id);
       if (io == NULL)
         {
-          printf ("No such file #%d\n", io_id);
+          printf (_("No such file #%d\n"), io_id);
           return 0;
         }
     }
@@ -104,9 +106,9 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[])
   if (changed)
     {
       if (pk_io_cur () == NULL)
-        puts ("No more IO streams.");
+        puts (_("No more IO streams."));
       else
-        printf ("The current file is now `%s'.\n",
+        printf (_("The current file is now `%s'.\n"),
                 PK_IO_FILENAME (pk_io_cur ()));
     }
   
@@ -125,14 +127,14 @@ print_info_file (pk_io io, void *data)
 }
 
 static int
-pk_cmd_info_files (int argc, struct pk_cmd_arg argv[])
+pk_cmd_info_files (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   int id;
 
   assert (argc == 0);
 
   id = 0;
-  printf ("  Id\tMode\tPosition\tFilename\n");
+  printf (_("  Id\tMode\tPosition\tFilename\n"));
   pk_io_map (print_info_file, &id);
 
   return 1;

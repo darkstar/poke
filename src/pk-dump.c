@@ -19,6 +19,8 @@
 #include <config.h>
 #include <ctype.h>
 #include <assert.h>
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
 #include "pk-cmd.h"

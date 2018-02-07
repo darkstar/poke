@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <gettext.h>
-#define _(str) gettext (str)
+#define _(str) dgettext (PACKAGE, str)
 #include <unistd.h>
 #include <string.h>
 #include "readline.h"

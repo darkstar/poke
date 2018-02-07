@@ -29,6 +29,8 @@
 #include <wordexp.h> /* For tilde-expansion.  */
 #include <xalloc.h>
 #include <ctype.h>
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
 #include "pkl.h" /* For pkl_compile_buffer  */
@@ -274,7 +276,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
     {
       if (prefix != NULL)
         printf ("%s ", prefix);
-      printf ("%s: command not found.\n", cmd_name);
+      printf (_("%s: command not found.\n"), cmd_name);
       return 0;      
     }
 
@@ -295,7 +297,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
           if (cmd->uflags[fi] == '\0')
             {
-              printf ("%s: invalid flag `%c'\n", cmd_name, *p);
+              printf (_("%s: invalid flag `%c'\n"), cmd_name, *p);
               return 0;
             }
 
@@ -491,7 +493,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   if (cmd->flags & PK_CMD_F_REQ_IO
       && pk_io_cur () == NULL)
     {
-      puts ("This command requires an IO stream.  Use the `file' command.");
+      puts (_("This command requires an IO stream.  Use the `file' command."));
       return 0;
     }
 
@@ -501,7 +503,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
       if (cur_io == NULL
           || !(PK_IO_MODE (cur_io) & O_RDWR))
         {
-          puts ("This command requires a writable IO stream.");
+          puts (_("This command requires a writable IO stream."));
           return 0;
         }
     }
@@ -519,7 +521,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   return ret;
 
  usage:
-  printf ("Usage: %s\n", cmd->usage);
+  printf (_("Usage: %s\n"), cmd->usage);
   return 0;
 }
 

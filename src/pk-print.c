@@ -19,6 +19,8 @@
 #include <config.h>
 #include <assert.h>
 #include <stdio.h> /* For stdout */
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "pk-cmd.h"
 
@@ -49,7 +51,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       + !!(uflags & PK_PRINT_F_BIN)
       + !!(uflags & PK_PRINT_F_OCT) > 1)
     {
-      printf ("print: only one of `x', `b' or `o' may be specified.\n");
+      printf (_("print: only one of `x', `b' or `o' may be specified.\n"));
       return 0;
     }
 
@@ -70,7 +72,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  rterror:
-  printf ("run-time error: %s\n", pvm_error (pvm_ret));
+  printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
   return 0;
 }
 

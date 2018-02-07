@@ -17,6 +17,8 @@
  */
 
 #include <config.h>
+#include <gettext.h>
+#define _(str) gettext (str)
 
 #include "pkl.h"
 #include "pkl-gen.h"
@@ -37,7 +39,7 @@ pkl_compile_buffer (pvm_program *prog,
   else if (ret == 2)
     {
       /* Memory exhaustion.  */
-      printf ("out of memory\n");
+      printf (_("out of memory\n"));
     }
 
   if (!pkl_gen (&p, ast))
@@ -72,7 +74,7 @@ pkl_compile_file (pvm_program *prog,
   else if (ret == 2)
     {
       /* Memory exhaustion.  */
-      printf ("out of memory\n");
+      printf (_("out of memory\n"));
     }
 
   if (!pkl_gen (&p, ast))

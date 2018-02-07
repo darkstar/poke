@@ -19,6 +19,8 @@
 #include <config.h>
 #include <assert.h>
 #include <stdio.h> /* For stdout */
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
 #include "pk-cmd.h"
 #include "pk-io.h"
@@ -51,7 +53,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
       if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
         {
-          printf ("Bad ADDRESS.\n");
+          printf (_("Bad ADDRESS.\n"));
           return 0;
         }
 
@@ -69,7 +71,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  rterror:
-  printf ("run-time error: %s\n", pvm_error (pvm_ret));
+  printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
   return 0;
 }
 
@@ -80,7 +82,7 @@ pk_cmd_help_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   assert (argc == 0);
 
-  puts ("The peek command fetches a value from the current IO");
+  puts (_("The peek command fetches a value from the current IO"));
   puts ("stream.");
   
   return 1;
