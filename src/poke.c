@@ -147,20 +147,15 @@ parse_args (int argc, char *argv[])
       switch (c)
         {
         case HELP_ARG:
-          {
-            print_help ();
-            exit (EXIT_SUCCESS);
-            break;
-          }
+          print_help ();
+          exit (EXIT_SUCCESS);
+          break;
         case VERSION_ARG:
-          {
-            pk_print_version ();
-            exit (EXIT_SUCCESS);
-            break;
-          }
+          pk_print_version ();
+          exit (EXIT_SUCCESS);
+          break;
         default:
           exit (EXIT_FAILURE);
-        }
     }
 
   if (optind < argc)
