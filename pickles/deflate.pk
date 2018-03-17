@@ -30,7 +30,7 @@ defset deflate_btype =
 deftype deflate_block =
   aligned(1) struct
   {
-    bit<1> bfinal final: bfinal != 1;
+    bit<1> bfinal last: bfinal != 1;
     deflate_btype<bit<2>> btype;
 
     union
@@ -58,7 +58,7 @@ deftype deflate_block =
 deftype deflate_blocks =
   aligned(1) struct
   {
-    deflate_block[] blocks : ;
+    deflate_block[] blocks;
   };
 
 /*

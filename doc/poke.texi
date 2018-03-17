@@ -72,6 +72,17 @@ The Poke Language
 
 Advanced Editing
 @c Searching
+
+@c XXX
+@c  deftype foo =
+@c    struct
+@c    {
+@c     byte b1;
+@c     byte b2 = b1 * 4;
+@c   };
+@c
+@c (poke) search foo
+
 @c Marks
 @c Useful Idioms
 

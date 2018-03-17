@@ -156,6 +156,7 @@ parse_args (int argc, char *argv[])
           break;
         default:
           exit (EXIT_FAILURE);
+        }
     }
 
   if (optind < argc)

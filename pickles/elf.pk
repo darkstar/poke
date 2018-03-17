@@ -951,7 +951,7 @@ deftype elf_rel =
     {
       struct
       {
-        elf32_addr r_offset;
+        offset<elf32_addr,B> r_offset;
         pinned struct
         {
           elf_word r_info;
@@ -1200,14 +1200,14 @@ deftype Elf_Shdr =
       struct
       {
         elf32_addr sh_addr;
-        elf32_off sh_offset;
+        offset<elf32_off,B> sh_offset;
         elf_word sh_size;
       } : class == ELFCLASS32;
 
       struct
       {
         elf64_addr sh_addr;
-        elf64_off sh_offset;
+        offset<elf64_off,B> sh_offset;
         elf64_xword sh_size;
       } : class == ELFCLASS64;
     };
