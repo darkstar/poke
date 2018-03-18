@@ -211,6 +211,12 @@ pvm_make_string_type (void)
 }
 
 pvm_val
+pvm_make_offset_type (void)
+{
+  return pvm_make_type (PVM_TYPE_OFFSET);
+}
+
+pvm_val
 pvm_make_map_type (void)
 {
   return pvm_make_type (PVM_TYPE_MAP);
@@ -424,6 +430,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
           fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
+        case PVM_TYPE_OFFSET:
+          fprintf (out, "[offset]");
+          break;
         case PVM_TYPE_STRUCT:
           {
             size_t i, nelem;
@@ -457,6 +466,23 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       fprintf (out, " @ ");
       pvm_print_val (out, PVM_VAL_MAP_OFFSET (val), base);
     }
+  else if (PVM_IS_OFF (val))
+    {
+      fprintf (out, "[");
+      pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base);
+      switch (PVM_VAL_INT (PVM_VAL_OFF_UNIT (val)))
+        {
+        case PVM_VAL_OFF_UNIT_BITS:
+          fprintf (out, " b");
+          break;
+        case PVM_VAL_OFF_UNIT_BYTES:
+          fprintf (out, " B");
+          break;
+        default:
+          assert (0);
+        }
+      fprintf (out, "]");
+    }
   else
     assert (0);
 }
@@ -484,6 +510,8 @@ pvm_typeof (pvm_val val)
     type = pvm_make_integral_type (64, 0);
   else if (PVM_IS_STR (val))
     type = pvm_make_string_type ();
+  else if (PVM_IS_OFF (val))
+    type = pvm_make_offset_type ();
   else if (PVM_IS_ARR (val))
     type = pvm_make_array_type (PVM_VAL_ARR_NELEM (val),
                                 PVM_VAL_ARR_TYPE (val));
@@ -523,5 +551,18 @@ pvm_make_map (pvm_val type, pvm_val offset)
   map->offset = offset;
 
   PVM_VAL_BOX_MAP (box) = map;
+  return (uint64_t)box | PVM_VAL_TAG_BOX;
+}
+
+pvm_val
+pvm_make_offset (pvm_val magnitude, pvm_val unit)
+{
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_OFF);
+  pvm_off off = GC_MALLOC (sizeof (struct pvm_off));
+
+  off->magnitude = magnitude;
+  off->unit = unit;
+
+  PVM_VAL_BOX_OFF (box) = off;
   return (uint64_t)box | PVM_VAL_TAG_BOX;
 }

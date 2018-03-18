@@ -2087,6 +2087,17 @@ instruction sctref () # SCT STR -> VAL
   end
 end
 
+## Offset instructions.
+
+instruction mko () # EXP INT -> OFF
+  code
+#define F(res, a, b) \
+  { res = pvm_make_offset (a, b); }
+    JITTER_BINARY_STACK(F);
+#undef F
+  end
+end
+
 ## Type related instructions.
 
 instruction mktyi () # ULONG UINT -> TYP
@@ -2102,6 +2113,12 @@ end
 instruction mktys () # _ -> TYP
   code
     JITTER_PUSH_STACK (pvm_make_string_type ());
+  end
+end
+
+instruction mktyo () # _ -> TYP
+  code
+    JITTER_PUSH_STACK (pvm_make_offset_type ());
   end
 end
 

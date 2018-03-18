@@ -34,6 +34,7 @@
    - Strings.
    - Arrays.
    - Structs.
+   - Offsets.
 
    It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
@@ -67,6 +68,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_SCT   0xc
 #define PVM_VAL_TAG_TYP   0xd
 #define PVM_VAL_TAG_MAP   0xe
+#define PVM_VAL_TAG_OFF   0xf
 
 /* 8-bit integers (both signed and unsigned) are encoded in the bits
    10..3 of pvm_val.  */
@@ -113,6 +115,7 @@ pvm_val pvm_make_uint (uint32_t value);
 #define PVM_VAL_BOX_SCT(B) ((B)->v.sct)
 #define PVM_VAL_BOX_TYP(B) ((B)->v.type)
 #define PVM_VAL_BOX_MAP(B) ((B)->v.map)
+#define PVM_VAL_BOX_OFF(B) ((B)->v.offset)
 
 struct pvm_val_box
 {
@@ -126,6 +129,7 @@ struct pvm_val_box
     struct pvm_struct *sct;
     struct pvm_type *type;
     struct pvm_map *map;
+    struct pvm_off *offset;
   } v;
 };
 
@@ -212,6 +216,7 @@ enum pvm_type_code
   PVM_TYPE_STRING,
   PVM_TYPE_ARRAY,
   PVM_TYPE_STRUCT,
+  PVM_TYPE_OFFSET,
   PVM_TYPE_MAP
 };
 
@@ -249,6 +254,7 @@ pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_map_type (void);
 pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
+pvm_val pvm_make_offset_type (void);
 
 void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
 
@@ -272,6 +278,26 @@ struct pvm_map
 typedef struct pvm_map *pvm_map;
 
 pvm_val pvm_make_map (pvm_val type, pvm_val offset);
+
+/* Offsets are boxed values.  */
+
+#define PVM_VAL_OFF(V) (PVM_VAL_BOX_OFF (PVM_VAL_BOX ((V))))
+
+#define PVM_VAL_OFF_MAGNITUDE(V) (PVM_VAL_OFF((V))->magnitude)
+#define PVM_VAL_OFF_UNIT(V) (PVM_VAL_OFF((V))->unit)
+
+#define PVM_VAL_OFF_UNIT_BITS 0
+#define PVM_VAL_OFF_UNIT_BYTES 1
+
+struct pvm_off
+{
+  pvm_val magnitude;
+  pvm_val unit;
+};
+
+typedef struct pvm_off *pvm_off;
+
+pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
@@ -309,6 +335,9 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 #define PVM_IS_MAP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_MAP)
+#define PVM_IS_OFF(V)                                                   \
+  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_OFF)
 
 
 #define PVM_IS_NUMBER(V)                                        \

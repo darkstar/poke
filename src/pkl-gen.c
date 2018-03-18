@@ -414,6 +414,10 @@ pkl_gen_type (pkl_ast_node ast,
     {
       PVM_APPEND_INSTRUCTION (program, mktys);
     }
+  else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_OFFSET)
+    {
+      PVM_APPEND_INSTRUCTION (program, mktyo);
+    }
   else if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_ARRAY)
     {
       pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (ast);
@@ -964,6 +968,36 @@ pkl_gen_struct_ref (pkl_ast_node ast,
 }
 
 static int
+pkl_gen_offset (pkl_ast_node ast,
+                pvm_program program,
+                size_t *label)
+{
+  pvm_val val;
+  
+  if (!pkl_gen_1 (PKL_AST_OFFSET_MAGNITUDE (ast),
+                  program, label))
+    return 0;
+
+  PVM_APPEND_INSTRUCTION (program, push);
+  switch (PKL_AST_OFFSET_UNIT (ast))
+    {
+    case PKL_AST_OFFSET_UNIT_BITS:
+      val = pvm_make_int (PVM_VAL_OFF_UNIT_BITS);
+      break;
+    case PKL_AST_OFFSET_UNIT_BYTES:
+      val = pvm_make_int (PVM_VAL_OFF_UNIT_BYTES);
+      break;
+    default:
+      /* Invalid unit. */
+      assert (0);
+    }
+  pvm_append_val_parameter (program, val);
+      
+  PVM_APPEND_INSTRUCTION (program, mko);
+  return 1;
+}
+
+static int
 pkl_gen_1 (pkl_ast_node ast,
            pvm_program program,
            size_t *label)
@@ -1017,6 +1051,11 @@ pkl_gen_1 (pkl_ast_node ast,
 
     case PKL_AST_TYPE:
       if (!pkl_gen_type (ast, program, label))
+        goto error;
+      break;
+
+    case PKL_AST_OFFSET:
+      if (!pkl_gen_offset (ast, program, label))
         goto error;
       break;
 

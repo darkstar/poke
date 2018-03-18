@@ -361,6 +361,8 @@ pkl_ast_dup_type (pkl_ast_node type)
           PKL_AST_TYPE_S_ELEMS (new) = ASTREF (PKL_AST_TYPE_S_ELEMS (new));
         }
       break;
+    case PKL_TYPE_OFFSET:
+      /* Fallthrough.  */
     case PKL_TYPE_STRING:
       /* Fallthrough.  */
     default:
@@ -422,6 +424,8 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
           }
         break;
       }
+    case PKL_TYPE_OFFSET:
+      /* Fallthrough.  */
     case PKL_TYPE_STRING:
       /* Fallthrough.  */
     default:

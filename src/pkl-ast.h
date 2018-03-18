@@ -170,6 +170,7 @@ typedef union pkl_ast_node *pkl_ast_node;
 #define PKL_AST_REGISTERED_P(AST) ((AST)->common.registered_p)
 #define PKL_AST_REFCOUNT(AST) ((AST)->common.refcount)
 
+/* NOTE: ASTREF needs an l-value!  */
 #define ASTREF(AST) ((AST) ? (++((AST)->common.refcount), (AST)) \
                      : NULL)
 
