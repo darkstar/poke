@@ -78,5 +78,6 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
 struct pk_cmd print_cmd =
   {"print", "e", PK_PRINT_UFLAGS, 0, NULL, pk_cmd_print,
-   "print EXP\n\n\
-Flags: x (print numbers in hexadecimal)"};
+   "print EXP.\n\
+Flags:\n\
+  x (print numbers in hexadecimal)"};

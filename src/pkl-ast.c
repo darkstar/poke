@@ -265,11 +265,13 @@ pkl_ast_make_string_type (void)
 }
 
 pkl_ast_node
-pkl_ast_make_offset_type (void)
+pkl_ast_make_offset_type (pkl_ast_node base_type, int unit)
 {
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_OFFSET;
+  PKL_AST_TYPE_O_UNIT (type) = unit;
+  PKL_AST_TYPE_O_BASE_TYPE (type) = base_type;
   return type;
 }
 
@@ -1166,9 +1168,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%lu");
           PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
           break;
-        case PKL_TYPE_STRING:
         case PKL_TYPE_OFFSET:
-          /* Fallthrough.  */
+          PRINT_AST_SUBAST (base_type, TYPE_O_BASE_TYPE);
+          PRINT_AST_IMM (unit, TYPE_O_UNIT, "%d");
+          break;
+        case PKL_TYPE_STRING:
         default:
           break;
         }
@@ -1200,6 +1204,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_OFFSET:
       IPRINTF ("OFFSET::\n");
 
+      PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (magnitude, OFFSET_MAGNITUDE);
       PRINT_AST_IMM (unit, OFFSET_UNIT, "%d");
       break;

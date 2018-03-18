@@ -211,9 +211,13 @@ pvm_make_string_type (void)
 }
 
 pvm_val
-pvm_make_offset_type (void)
+pvm_make_offset_type (pvm_val base_type, pvm_val unit)
 {
-  return pvm_make_type (PVM_TYPE_OFFSET);
+  pvm_val otype = pvm_make_type (PVM_TYPE_OFFSET);
+
+  PVM_VAL_TYP_O_BASE_TYPE (otype) = base_type;
+  PVM_VAL_TYP_O_UNIT (otype) = unit;
+  return otype;
 }
 
 pvm_val
@@ -431,7 +435,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
         case PVM_TYPE_OFFSET:
-          fprintf (out, "[offset]");
+          fprintf (out, "offset");
           break;
         case PVM_TYPE_STRUCT:
           {
@@ -511,7 +515,8 @@ pvm_typeof (pvm_val val)
   else if (PVM_IS_STR (val))
     type = pvm_make_string_type ();
   else if (PVM_IS_OFF (val))
-    type = pvm_make_offset_type ();
+    type = pvm_make_offset_type (PVM_VAL_OFF_BASE_TYPE (val),
+                                 PVM_VAL_OFF_UNIT (val));
   else if (PVM_IS_ARR (val))
     type = pvm_make_array_type (PVM_VAL_ARR_NELEM (val),
                                 PVM_VAL_ARR_TYPE (val));
@@ -555,11 +560,13 @@ pvm_make_map (pvm_val type, pvm_val offset)
 }
 
 pvm_val
-pvm_make_offset (pvm_val magnitude, pvm_val unit)
+pvm_make_offset (pvm_val base_type,
+                 pvm_val magnitude, pvm_val unit)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_OFF);
   pvm_off off = GC_MALLOC (sizeof (struct pvm_off));
 
+  off->base_type = base_type;
   off->magnitude = magnitude;
   off->unit = unit;
 

@@ -209,6 +209,8 @@ pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 #define PVM_VAL_TYP_S_ETYPES(V) (PVM_VAL_TYP((V))->val.sct.etypes)
 #define PVM_VAL_TYP_S_ENAME(V,I) (PVM_VAL_TYP_S_ENAMES((V))[(I)])
 #define PVM_VAL_TYP_S_ETYPE(V,I) (PVM_VAL_TYP_S_ETYPES((V))[(I)])
+#define PVM_VAL_TYP_O_UNIT(V) (PVM_VAL_TYP((V))->val.off.unit)
+#define PVM_VAL_TYP_O_BASE_TYPE(V) (PVM_VAL_TYP((V))->val.off.base_type)
 
 enum pvm_type_code
 {
@@ -244,6 +246,12 @@ struct pvm_type
       pvm_val *enames;
       pvm_val *etypes;
     } sct;
+
+    struct
+    {
+      pvm_val base_type;
+      pvm_val unit;
+    } off;
   } val;
 };
 
@@ -254,7 +262,7 @@ pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_map_type (void);
 pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
-pvm_val pvm_make_offset_type (void);
+pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
 
 void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
 
@@ -285,19 +293,21 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
 #define PVM_VAL_OFF_MAGNITUDE(V) (PVM_VAL_OFF((V))->magnitude)
 #define PVM_VAL_OFF_UNIT(V) (PVM_VAL_OFF((V))->unit)
+#define PVM_VAL_OFF_BASE_TYPE(V) (PVM_VAL_OFF((V))->base_type)
 
 #define PVM_VAL_OFF_UNIT_BITS 0
 #define PVM_VAL_OFF_UNIT_BYTES 1
 
 struct pvm_off
 {
+  pvm_val base_type;
   pvm_val magnitude;
   pvm_val unit;
 };
 
 typedef struct pvm_off *pvm_off;
 
-pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
+pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
 
 /* PVM_NULL is an invalid pvm_val.  */
 

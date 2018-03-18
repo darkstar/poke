@@ -531,6 +531,8 @@ pkl_ast_node pkl_ast_make_struct_type_elem (pkl_ast_node name,
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
 #define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
+#define PKL_AST_TYPE_O_UNIT(AST) ((AST)->type.val.off.unit)
+#define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
 
 struct pkl_ast_type
 {
@@ -559,6 +561,13 @@ struct pkl_ast_type
       size_t nelem;
       union pkl_ast_node *elems;
     } sct;
+
+    struct
+    {
+      int unit;
+      union pkl_ast_node *base_type;
+    } off;
+    
   } val;
 
   /* XXX */  
@@ -570,7 +579,7 @@ pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (size_t nelem, pkl_ast_node elems);
-pkl_ast_node pkl_ast_make_offset_type (void);
+pkl_ast_node pkl_ast_make_offset_type (pkl_ast_node base_type, int unit);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 

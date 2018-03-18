@@ -2089,12 +2089,18 @@ end
 
 ## Offset instructions.
 
-instruction mko () # EXP INT -> OFF
+instruction mko () # TYP EXP INT -> OFF
   code
-#define F(res, a, b) \
-  { res = pvm_make_offset (a, b); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    pvm_val unit, base_type, magnitude;
+
+    unit = JITTER_TOP_STACK ();
+    magnitude = JITTER_UNDER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+    JITTER_DROP_STACK ();
+    base_type = JITTER_TOP_STACK ();
+
+    JITTER_TOP_STACK () =
+      pvm_make_offset (base_type, magnitude, unit);
   end
 end
 
@@ -2116,9 +2122,12 @@ instruction mktys () # _ -> TYP
   end
 end
 
-instruction mktyo () # _ -> TYP
+instruction mktyo () # TYP INT -> TYP
   code
-    JITTER_PUSH_STACK (pvm_make_offset_type ());
+#define F(res, a, b) \
+  { res = pvm_make_offset_type (a, b); }
+    JITTER_BINARY_STACK(F);
+#undef F
   end
 end
 

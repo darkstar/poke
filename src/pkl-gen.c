@@ -972,8 +972,14 @@ pkl_gen_offset (pkl_ast_node ast,
                 pvm_program program,
                 size_t *label)
 {
+  pkl_ast_node type;
   pvm_val val;
-  
+
+  type = PKL_AST_TYPE (ast);
+  if (!pkl_gen_type (PKL_AST_TYPE_O_BASE_TYPE (type),
+                     program, label))
+    return 0;
+
   if (!pkl_gen_1 (PKL_AST_OFFSET_MAGNITUDE (ast),
                   program, label))
     return 0;

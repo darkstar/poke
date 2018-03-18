@@ -625,7 +625,7 @@ primary:
 	| '[' expression IDENTIFIER ']'
         	{
                   int units;
-                  pkl_ast_node type;
+                  pkl_ast_node magnitude_type, type;
                   
                   if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "b") == 0)
                     units = PKL_AST_OFFSET_UNIT_BITS;
@@ -637,9 +637,9 @@ primary:
                                      "expected `b' or `B'");
                       YYERROR;
                     }
-                  
-                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($2))
-                      != PKL_TYPE_INTEGRAL)
+
+                  magnitude_type = PKL_AST_TYPE ($2);
+                  if (PKL_AST_TYPE_CODE (magnitude_type) != PKL_TYPE_INTEGRAL)
                     {
                       pkl_tab_error (&@1, pkl_parser,
                                      "expected integer expression");
@@ -647,7 +647,7 @@ primary:
                     }
 
                   $$ = pkl_ast_make_offset ($2, units);
-                  type = pkl_ast_make_offset_type ();
+                  type = pkl_ast_make_offset_type (magnitude_type, units);
                   PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         | type_specifier
