@@ -492,6 +492,23 @@ pkl_ast_make_struct_elem (pkl_ast_node name,
   return elem;
 }
 
+/* Build and return an AST node for an offset construct.  */
+
+pkl_ast_node
+pkl_ast_make_offset (pkl_ast_node magnitude, int unit)
+{
+  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_OFFSET);
+
+  assert (unit == PKL_AST_OFFSET_UNIT_BITS
+          || unit == PKL_AST_OFFSET_UNIT_BYTES);
+  
+  if (magnitude != NULL)
+    PKL_AST_OFFSET_MAGNITUDE (elem) = ASTREF (magnitude);
+  PKL_AST_OFFSET_UNIT (elem) = unit;
+
+  return elem;
+}
+
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node

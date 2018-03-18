@@ -47,6 +47,7 @@ enum pkl_ast_code
   PKL_AST_STRUCT,
   PKL_AST_STRUCT_ELEM,
   PKL_AST_STRUCT_REF,
+  PKL_AST_OFFSET,
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_TYPE_ELEM,
@@ -603,6 +604,28 @@ struct pkl_ast_decl
   union pkl_ast_node *context;
 };
 
+/* PKL_AST_OFFSET nodes represent poke object constructions.
+
+   MAGNITUDE is an integer expression.
+   UNIT is either PKL_AST_OFFSET_UNIT_BITS or
+   PKL_AST_AST_OFFSET_UNITS_BYTES.  */
+
+#define PKL_AST_OFFSET_MAGNITUDE(AST) ((AST)->offset.magnitude)
+#define PKL_AST_OFFSET_UNIT(AST) ((AST)->offset.unit)
+
+#define PKL_AST_OFFSET_UNIT_BITS 0
+#define PKL_AST_OFFSET_UNIT_BYTES 1
+
+struct pkl_ast_offset
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *magnitude;
+  int unit;
+};
+
+pkl_ast_node pkl_ast_make_offset (pkl_ast_node magnitude, int unit);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -622,6 +645,7 @@ union pkl_ast_node
   struct pkl_ast_struct sct;
   struct pkl_ast_struct_elem sct_elem;
   struct pkl_ast_struct_ref sref;
+  struct pkl_ast_offset offset;
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_type_elem sct_type_elem;
