@@ -96,14 +96,14 @@ instruction exit ()
   code
     /* The element at the top of the stack is the exit
        code to report to the PVM caller.  */
-    original_state->pvm_state_backing.exit_code
+    jitter_original_state->pvm_state_backing.exit_code
       = PVM_VAL_INT (JITTER_TOP_STACK());
     JITTER_DROP_STACK ();
 
     /* Get the result of the execution, if any.  */
     if (1 /* !EOS == expression */)
     {
-      original_state->pvm_state_backing.result_value
+      jitter_original_state->pvm_state_backing.result_value
         = JITTER_TOP_STACK();
       JITTER_DROP_STACK ();
     }

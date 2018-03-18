@@ -59,6 +59,16 @@ dnl The Boehm-Weiser garbage collector
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES(BDW_GC,[bdw-gc])
 
+dnl Jitter
+
+AC_JITTER
+if test "x$JITTER" = "x"; then
+   AC_MSG_WARN([you need Jitter to regenerate C files])
+fi
+if test "x$JITTER_CONFIG" = "x"; then
+   AC_MSG_ERROR([you need jitter-config to compile])
+fi
+
 dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile

@@ -40,20 +40,17 @@ poke_CFLAGS = $(FUSE_CFLAGS) $(SQLITE3_CFLAGS) -Wall \
               $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE) $(BDW_GC_LIBS)
+poke_LDFLAGS =
 
 # Integration with jitter.
 
-JITTER=/home/jemarch/tmp/jitter
-poke_CPPFLAGS += -I$(JITTER)/include
-poke_CFLAGS += -O2 -fomit-frame-pointer -fno-reorder-blocks -fno-crossjumping -fno-thread-jumps -fno-tree-tail-merge -fno-isolate-erroneous-paths-dereference -fno-split-paths -fno-gcse -fPIC -fno-align-loops -fno-align-jumps -fno-align-labels -fno-jump-tables -fno-tree-switch-conversion -flive-range-shrinkage -fno-ipa-icf -fno-ipa-cp -fno-ipa-cp-clone -fno-gcse -mcmodel=large
-poke_LDADD += -L$(JITTER)/lib -ljitter--no-threading
+poke_CPPFLAGS += $(JITTER_CPPFLAGS)
+poke_CFLAGS += $(JITTER_CFLAGS)
+poke_LDADD += $(JITTER_LDADD)
+poke_LDFLAGS += $(JITTER_LDFLAGS)
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter
-	$(JITTER)/bin/jitter $< \
-                   --output $(builddir) \
-	           --max-fast-register-no=5 \
-	           --max-nonresidual-no=-1 \
-	           --template-directory=/home/jemarch/gnu/src/jitter/templates
+	$(JITTER) $< --output $(builddir)
 
 # End of Makefile.am
