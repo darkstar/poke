@@ -265,6 +265,15 @@ pkl_ast_make_string_type (void)
 }
 
 pkl_ast_node
+pkl_ast_make_offset_type (void)
+{
+  pkl_ast_node type = pkl_ast_make_type ();
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_OFFSET;
+  return type;
+}
+
+pkl_ast_node
 pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
 {
   pkl_ast_node type = pkl_ast_make_type ();
@@ -601,6 +610,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           break;
         case PKL_TYPE_INTEGRAL:
         case PKL_TYPE_STRING:
+        case PKL_TYPE_OFFSET:
         default:
           break;
         }
@@ -663,6 +673,11 @@ pkl_ast_node_free (pkl_ast_node ast)
           pkl_ast_node_free (t);
         }
       
+      break;
+
+    case PKL_AST_OFFSET:
+
+      pkl_ast_node_free (PKL_AST_OFFSET_MAGNITUDE (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -1127,6 +1142,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
         case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
         case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
+        case PKL_TYPE_OFFSET: IPRINTF ("  offset\n"); break;
         default:
           IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
           break;
@@ -1147,6 +1163,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
           break;
         case PKL_TYPE_STRING:
+        case PKL_TYPE_OFFSET:
           /* Fallthrough.  */
         default:
           break;
@@ -1174,6 +1191,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (struct, STRUCT_REF_STRUCT);
       PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
+      break;
+
+    case PKL_AST_OFFSET:
+      IPRINTF ("OFFSET::\n");
+
+      PRINT_AST_SUBAST (magnitude, OFFSET_MAGNITUDE);
+      PRINT_AST_IMM (unit, OFFSET_UNIT, "%d");
       break;
 
     default:

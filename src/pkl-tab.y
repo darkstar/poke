@@ -622,6 +622,32 @@ primary:
 	  INTEGER
         | CHAR
         | STR
+	| '[' expression IDENTIFIER ']'
+        	{
+                  int units;
+                  
+                  if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "b") == 0)
+                    units = PKL_AST_OFFSET_UNIT_BITS;
+                  else if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "B") == 0)
+                    units = PKL_AST_OFFSET_UNIT_BYTES;
+                  else
+                    {
+                      pkl_tab_error (&@3, pkl_parser,
+                                     "expected `b' or `B'");
+                      YYERROR;
+                    }
+                  
+                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($2))
+                      != PKL_TYPE_INTEGRAL)
+                    {
+                      pkl_tab_error (&@1, pkl_parser,
+                                     "expected integer expression");
+                      YYERROR;
+                    }
+
+                  $$ = pkl_ast_make_offset ($2, units);
+                  PKL_AST_TYPE ($$) = ASTREF (pkl_ast_make_offset_type ());
+                }
         | type_specifier
           	{
                   /* XXX: remove at some point.  for testing.  */
@@ -630,7 +656,7 @@ primary:
                   $$ = $1;
                   metatype = pkl_ast_make_metatype ($1);
                   PKL_AST_TYPE ($$) = ASTREF (metatype);
-                  }
+                }
           /* | IDENTIFIER */
         | '(' expression ')'
         	{ $$ = $2; }

@@ -116,6 +116,7 @@ enum pkl_ast_type_code
   PKL_TYPE_STRING,
   PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,
+  PKL_TYPE_OFFSET,
   PKL_TYPE_NOTYPE,
 };
 
@@ -568,6 +569,7 @@ pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
 pkl_ast_node pkl_ast_make_string_type (void);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (size_t nelem, pkl_ast_node elems);
+pkl_ast_node pkl_ast_make_offset_type (void);
 
 pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
 
