@@ -273,23 +273,29 @@ pvm_val
 pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
-    return pvm_make_offset (pvm_typeof (val),
-                            1, PVM_VAL_OFF_UNIT_BYTES);
+    return pvm_make_offset (pvm_make_integral_type (32, 1),
+                            pvm_make_int (1),
+                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
-    return pvm_make_offset (pvm_typeof (val),
-                            2, PVM_VAL_OFF_UNIT_BYTES);
+    return pvm_make_offset (pvm_make_integral_type (32, 1),
+                            pvm_make_int (2),
+                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
-    return pvm_make_offset (pvm_typeof (val),
-                            4, PVM_VAL_OFF_UNIT_BYTES);
+    return pvm_make_offset (pvm_make_integral_type (32, 1),
+                            pvm_make_int (4),
+                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
-    return pvm_make_offset (pvm_typeof (val),
-                            8, PVM_VAL_OFF_UNIT_BYTES);
+    return pvm_make_offset (pvm_make_integral_type (32, 1),
+                            pvm_make_int (8),
+                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_STR (val))
     {
       size_t size = strlen (PVM_VAL_STR (val)) + 1;
-      
-      return pvm_make_offset (pvm_make_integral_type (64, 0),
-                              size, PVM_VAL_OFF_UNIT_BYTES);
+
+      /* Calculate the minimum storage needed to store the length.  */
+      return pvm_make_offset (pvm_make_integral_type (64, 1),
+                              pvm_make_long (size),
+                              pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
     }
   else if (PVM_IS_ARR (val))
     {
