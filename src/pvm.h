@@ -98,11 +98,15 @@ pvm_val pvm_make_int (int32_t value);
 pvm_val pvm_make_uint (uint32_t value);
 
 /* A pointer to a boxed value is encoded in the most significative 61
-   bits of pvm_val.  Note that this assumes all pointers are aligned
-   to 8 bytes.  The allocator for the boxed values makes sure this is
-   always the case.  */
+   bits of pvm_val (32 bits for 32-bit hosts).  Note that this assumes
+   all pointers are aligned to 8 bytes.  The allocator for the boxed
+   values makes sure this is always the case.  */
 
-#define PVM_VAL_BOX(V) ((pvm_val_box) ((V) & ~0x7))
+#define PVM_VAL_BOX(V) ((pvm_val_box) ((((uintptr_t) V) & ~0x7)))
+
+/* This constructor should be used in order to build boxes.  */
+
+#define PVM_BOX(PTR) (((uint64_t) (uintptr_t) PTR) | PVM_VAL_TAG_BOX)
 
 /* A box is a header for a boxed value, plus that value.  It is of
    type `pvm_val_box'.  */
@@ -395,11 +399,11 @@ enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
 const char *pvm_error (enum pvm_exit_code code);
 
 /* Return the size of VAL in bytes.  */
-size_t pvm_sizeof (pvm_val val);
+pvm_val pvm_sizeof (pvm_val val);
 
 /* For arrays and structs, return the number of elements stored.
    Return 1 otherwise.  */
-size_t pvm_elemsof (pvm_val val);
+pvm_val pvm_elemsof (pvm_val val);
 
 /* Print a pvm_val to the given file descriptor. */
 void pvm_print_val (FILE *out, pvm_val val, int base);

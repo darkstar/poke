@@ -107,7 +107,7 @@ pvm_make_long (int64_t value)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_LONG);
 
   PVM_VAL_BOX_LONG (box) = value;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -116,7 +116,7 @@ pvm_make_ulong (uint64_t value)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ULONG);
 
   PVM_VAL_BOX_ULONG (box) = value;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -125,7 +125,7 @@ pvm_make_string (const char *str)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_STR);
 
   PVM_VAL_BOX_STR (box) = GC_STRDUP (str);
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -141,7 +141,7 @@ pvm_make_array (pvm_val nelem, pvm_val type)
   memset (arr->elems, 0, nbytes);
   
   PVM_VAL_BOX_ARR (box) = arr;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -156,7 +156,7 @@ pvm_make_struct (pvm_val nelem)
   memset (sct->elems, 0, nbytes);
 
   PVM_VAL_BOX_SCT (box) = sct;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -191,7 +191,7 @@ pvm_make_type (enum pvm_type_code code)
   type->code = code;
 
   PVM_VAL_BOX_TYP (box) = type;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -597,7 +597,7 @@ pvm_make_map (pvm_val type, pvm_val offset)
   map->offset = offset;
 
   PVM_VAL_BOX_MAP (box) = map;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -612,5 +612,5 @@ pvm_make_offset (pvm_val base_type,
   off->unit = unit;
 
   PVM_VAL_BOX_OFF (box) = off;
-  return (uint64_t)box | PVM_VAL_TAG_BOX;
+  return PVM_BOX (box);
 }
