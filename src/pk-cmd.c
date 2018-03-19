@@ -82,7 +82,7 @@ skip_blanks (char *p)
 }
 
 static inline int
-pk_atoi (char **p, long int *number)
+pk_atoi (char **p, long long int *number)
 {
   long int li;
   char *end;

@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "xalloc.h"
 #include "pkl-ast.h"
 
@@ -1037,7 +1038,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_IDENTIFIER:
       IPRINTF ("IDENTIFIER::\n");
 
-      PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%lu");
+      PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%zu");
       PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, IDENTIFIER_POINTER, "'%s'");
       break;
@@ -1046,14 +1047,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("INTEGER::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_IMM (value, INTEGER_VALUE, "%lu");
+      PRINT_AST_IMM (value, INTEGER_VALUE, "%" PRIu64);
       break;
 
     case PKL_AST_STRING:
       IPRINTF ("STRING::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_IMM (length, STRING_LENGTH, "%lu");
+      PRINT_AST_IMM (length, STRING_LENGTH, "%zu");
       PRINT_AST_IMM (pointer, STRING_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, STRING_POINTER, "'%s'");
       break;
@@ -1100,7 +1101,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("STRUCT::\n");
 
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_IMM (nelem, STRUCT_NELEM, "%lu");
+      PRINT_AST_IMM (nelem, STRUCT_NELEM, "%zu");
       IPRINTF ("elems:\n");
       PRINT_AST_SUBAST_CHAIN (STRUCT_ELEMS);
       break;
@@ -1108,14 +1109,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ARRAY_ELEM:
       IPRINTF ("ARRAY_ELEM::\n");
 
-      PRINT_AST_IMM (index, ARRAY_ELEM_INDEX, "%lu");
+      PRINT_AST_IMM (index, ARRAY_ELEM_INDEX, "%zu");
       PRINT_AST_SUBAST (exp, ARRAY_ELEM_EXP);
       break;
 
     case PKL_AST_ARRAY:
       IPRINTF ("ARRAY::\n");
 
-      PRINT_AST_IMM (nelem, ARRAY_NELEM, "%lu");
+      PRINT_AST_IMM (nelem, ARRAY_NELEM, "%zu");
       PRINT_AST_SUBAST (type, TYPE);
       IPRINTF ("elems:\n");
       PRINT_AST_SUBAST_CHAIN (ARRAY_ELEMS);
@@ -1158,14 +1159,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         {
         case PKL_TYPE_INTEGRAL:
           PRINT_AST_IMM (signed_p, TYPE_I_SIGNED, "%d");
-          PRINT_AST_IMM (size, TYPE_I_SIZE, "%lu");
+          PRINT_AST_IMM (size, TYPE_I_SIZE, "%zu");
           break;
         case PKL_TYPE_ARRAY:
           PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
           PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
           break;
         case PKL_TYPE_STRUCT:
-          PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%lu");
+          PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%zu");
           PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
           break;
         case PKL_TYPE_OFFSET:

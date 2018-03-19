@@ -287,7 +287,7 @@ struct pkl_ast_array_elem
 {
   struct pkl_ast_common common;
 
-#define PKL_AST_ARRAY_NOINDEX ((uint64_t)-1)
+#define PKL_AST_ARRAY_NOINDEX ((size_t)-1)
   size_t index;
   union pkl_ast_node *exp;
 };
