@@ -655,7 +655,6 @@ primary:
                 }
         | type_specifier
           	{
-                  /* XXX: remove at some point.  for testing.  */
                   pkl_ast_node metatype;
                   
                   $$ = $1;
