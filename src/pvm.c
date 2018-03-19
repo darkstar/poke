@@ -275,19 +275,19 @@ pvm_sizeof (pvm_val val)
   if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
                             pvm_make_int (1),
-                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
                             pvm_make_int (2),
-                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
                             pvm_make_int (4),
-                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
                             pvm_make_int (8),
-                            pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES));
   else if (PVM_IS_STR (val))
     {
       size_t size = strlen (PVM_VAL_STR (val)) + 1;
@@ -295,7 +295,7 @@ pvm_sizeof (pvm_val val)
       /* Calculate the minimum storage needed to store the length.  */
       return pvm_make_offset (pvm_make_integral_type (64, 1),
                               pvm_make_long (size),
-                              pvm_make_int (PVM_VAL_OFF_UNIT_BYTES));
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES));
     }
   else if (PVM_IS_ARR (val))
     {
@@ -465,7 +465,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, "[");
           pvm_print_val (out, PVM_VAL_TYP_O_BASE_TYPE (val), base);
           fputc (' ', out);
-          switch (PVM_VAL_INT (PVM_VAL_TYP_O_UNIT (val)))
+          switch (PVM_VAL_ULONG (PVM_VAL_TYP_O_UNIT (val)))
             {
             case PVM_VAL_OFF_UNIT_BITS:
               fputc ('b', out);
@@ -515,7 +515,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     {
       fprintf (out, "[");
       pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base);
-      switch (PVM_VAL_INT (PVM_VAL_OFF_UNIT (val)))
+      switch (PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)))
         {
         case PVM_VAL_OFF_UNIT_BITS:
           fprintf (out, " b");

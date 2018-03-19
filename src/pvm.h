@@ -295,8 +295,8 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 #define PVM_VAL_OFF_UNIT(V) (PVM_VAL_OFF((V))->unit)
 #define PVM_VAL_OFF_BASE_TYPE(V) (PVM_VAL_OFF((V))->base_type)
 
-#define PVM_VAL_OFF_UNIT_BITS 0
-#define PVM_VAL_OFF_UNIT_BYTES 1
+#define PVM_VAL_OFF_UNIT_BITS 1
+#define PVM_VAL_OFF_UNIT_BYTES 4
 
 struct pvm_off
 {
@@ -311,7 +311,7 @@ pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
-#define PVM_NULL (0x7UL << 61)
+#define PVM_NULL (0x7ULL << 61)
 
 /* Public interface.  */
 

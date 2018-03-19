@@ -988,10 +988,10 @@ pkl_gen_offset (pkl_ast_node ast,
   switch (PKL_AST_OFFSET_UNIT (ast))
     {
     case PKL_AST_OFFSET_UNIT_BITS:
-      val = pvm_make_int (PVM_VAL_OFF_UNIT_BITS);
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS);
       break;
     case PKL_AST_OFFSET_UNIT_BYTES:
-      val = pvm_make_int (PVM_VAL_OFF_UNIT_BYTES);
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES);
       break;
     default:
       /* Invalid unit. */

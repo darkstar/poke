@@ -30,7 +30,7 @@
 #define PK_SEEK_END SEEK_END
 
 /* Offset into an IO stream.  */
-typedef off_t pk_io_off;
+typedef off64_t pk_io_off;
 
 /* Type representing an IO stream, and accessor macros.  */
 

@@ -18,7 +18,7 @@
 
 vm
   set prefix "pvm"
-  tos-stack "jitter_uint" "stack"
+  tos-stack "pvm_val" "stack"
 end
 
 ## Register classes.
@@ -61,9 +61,9 @@ end
 printer-c
   code
     void
-    pvm_literal_printer (FILE *out, pvm_val val)
+    pvm_literal_printer (FILE *out, jitter_uint val)
     {
-      pvm_print_val (out, val, 10);
+      pvm_print_val (out, (pvm_val) val, 10);
     }
   end
 end
@@ -125,16 +125,16 @@ instruction drop ()
   end
 end
 
-instruction push (?Rnl pvm_print_val)
+instruction push (?Rnl pvm_literal_printer)
   code
-    jitter_uint k = JITTER_ARGN0;
+    pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
   end
 end
 
 instruction pop (!R)
   code
-    jitter_uint top = JITTER_TOP_STACK();
+    pvm_val top = JITTER_TOP_STACK();
     JITTER_DROP_STACK();
     JITTER_ARGN0 = top;
   end
@@ -2089,7 +2089,7 @@ end
 
 ## Offset instructions.
 
-instruction mko () # TYP EXP INT -> OFF
+instruction mko () # TYP EXP ULONG -> OFF
   code
     pvm_val unit, base_type, magnitude;
 
