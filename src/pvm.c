@@ -273,15 +273,24 @@ pvm_val
 pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_BYTE (val) || PVM_IS_UBYTE (val))
-    return 1;
+    return pvm_make_offset (pvm_typeof (val),
+                            1, PVM_VAL_OFF_UNIT_BYTES);
   else if (PVM_IS_HALF (val) || PVM_IS_UHALF (val))
-    return 2;
+    return pvm_make_offset (pvm_typeof (val),
+                            2, PVM_VAL_OFF_UNIT_BYTES);
   else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
-    return 4;
+    return pvm_make_offset (pvm_typeof (val),
+                            4, PVM_VAL_OFF_UNIT_BYTES);
   else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
-    return 8;
+    return pvm_make_offset (pvm_typeof (val),
+                            8, PVM_VAL_OFF_UNIT_BYTES);
   else if (PVM_IS_STR (val))
-    return strlen (PVM_VAL_STR (val)) + 1;
+    {
+      size_t size = strlen (PVM_VAL_STR (val)) + 1;
+      
+      return pvm_make_offset (pvm_make_integral_type (64, 0),
+                              size, PVM_VAL_OFF_UNIT_BYTES);
+    }
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, i, size;
@@ -305,6 +314,19 @@ pvm_sizeof (pvm_val val)
         size += pvm_sizeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
 
       return size;
+    }
+  else if (PVM_IS_OFF (val))
+    return pvm_sizeof (PVM_VAL_OFF_BASE_TYPE (val));
+  else if (PVM_IS_TYP (val))
+    {
+      switch (PVM_VAL_TYP_CODE (val))
+        {
+        case PVM_TYPE_INTEGRAL:
+          return PVM_VAL_TYP_I_SIZE (val) / 8;
+          break;
+        default:
+          assert (0);
+        };
     }
 
   /* XXX: handle types */
@@ -410,7 +432,6 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         {
         case PVM_TYPE_INTEGRAL:
           {
-            /* Integral type or array.  */
             if (!PVM_VAL_TYP_I_SIGNED (val))
               fprintf (out, "u");
             
@@ -435,7 +456,21 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
         case PVM_TYPE_OFFSET:
-          fprintf (out, "offset");
+          fprintf (out, "[");
+          pvm_print_val (out, PVM_VAL_TYP_O_BASE_TYPE (val), base);
+          fputc (' ', out);
+          switch (PVM_VAL_INT (PVM_VAL_TYP_O_UNIT (val)))
+            {
+            case PVM_VAL_OFF_UNIT_BITS:
+              fputc ('b', out);
+              break;
+            case PVM_VAL_OFF_UNIT_BYTES:
+              fputc ('B', out);
+              break;
+            default:
+              assert (0);
+            }
+          fprintf (out, "]");
           break;
         case PVM_TYPE_STRUCT:
           {

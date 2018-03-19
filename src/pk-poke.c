@@ -58,7 +58,7 @@ poke_val (pk_io_off *address, pvm_val val)
     }
   else if (PVM_IS_INT (val) || PVM_IS_UINT (val))
     {
-      uint32_t pval = PVM_VAL_NUMBER (val);
+      uint32_t pval = PVM_VAL_INTEGRAL (val);
       
       poke_byte (address, (pval >> 24) & 0xff);
       poke_byte (address, (pval >> 16) & 0xff);
@@ -67,7 +67,7 @@ poke_val (pk_io_off *address, pvm_val val)
     }
   else if (PVM_IS_LONG (val) || PVM_IS_ULONG (val))
     {
-      uint64_t pval = PVM_VAL_NUMBER (val);
+      uint64_t pval = PVM_VAL_INTEGRAL (val);
       
       poke_byte (address, (pval >> 56) & 0xff);
       poke_byte (address, (pval >> 48) & 0xff);
@@ -130,13 +130,13 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 
-  if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
+  if (!PVM_IS_INTEGRAL (val) || PVM_VAL_INTEGRAL (val) < 0)
     {
       printf (_("Bad ADDRESS.\n"));
       return 0;
     }
       
-  address = PVM_VAL_NUMBER (val);
+  address = PVM_VAL_INTEGRAL (val);
 
   if (PK_CMD_ARG_TYPE (argv[1]) == PK_CMD_ARG_NULL)
     poke_byte (&address, 0);

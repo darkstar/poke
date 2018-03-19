@@ -350,13 +350,13 @@ pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_OFF)
 
 
-#define PVM_IS_NUMBER(V)                                        \
+#define PVM_IS_INTEGRAL(V)                                      \
   (PVM_IS_BYTE(V) || PVM_IS_UBYTE(V)                            \
    || PVM_IS_HALF(V) || PVM_IS_UHALF(V)                         \
    || PVM_IS_INT(V) || PVM_IS_UINT(V)                           \
    || PVM_IS_LONG(V) || PVM_IS_ULONG(V))
 
-#define PVM_VAL_NUMBER(V)                        \
+#define PVM_VAL_INTEGRAL(V)                      \
   (PVM_IS_BYTE ((V)) ? PVM_VAL_BYTE ((V))        \
    : PVM_IS_UBYTE ((V)) ? PVM_VAL_UBYTE ((V))    \
    : PVM_IS_HALF ((V)) ? PVM_VAL_HALF ((V))      \

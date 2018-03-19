@@ -51,13 +51,13 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       if (pvm_ret != PVM_EXIT_OK)
         goto rterror;
 
-      if (!PVM_IS_NUMBER (val) || PVM_VAL_NUMBER (val) < 0)
+      if (!PVM_IS_INTEGRAL (val) || PVM_VAL_INTEGRAL (val) < 0)
         {
           printf (_("Bad ADDRESS.\n"));
           return 0;
         }
 
-      address = PVM_VAL_NUMBER (val);
+      address = PVM_VAL_INTEGRAL (val);
     }
   
   /* XXX: endianness, and what not.  */

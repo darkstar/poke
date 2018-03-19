@@ -60,8 +60,11 @@ pkl_tab_error (YYLTYPE *llocp,
                char const *err)
 {
   /* XXX if (!pkl_parser->interactive) */
-  fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
-           llocp->first_line, err);
+  if (pkl_parser->filename == NULL)
+    fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
+             llocp->first_line, err);
+  else
+    fprintf (stderr, "%d: %s\n", llocp->first_line, err);
 }
 
 /* Forward declarations for functions defined below in this file,
@@ -280,12 +283,12 @@ expression:
                 }
         | SIZEOF expression %prec UNARY
         	{
-                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
+                  /*                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
                     {
                       pkl_tab_error (&@2, pkl_parser,
                                      "operand to sizeof can't be a type.");
                       YYERROR;
-                    }
+                      } */
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,

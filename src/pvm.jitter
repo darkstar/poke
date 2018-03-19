@@ -148,11 +148,11 @@ end
 
 instruction siz () # VAL -> ULONG
   code
-    JITTER_TOP_STACK () = pvm_make_ulong (pvm_sizeof (JITTER_TOP_STACK ()));
+    JITTER_TOP_STACK () = pvm_sizeof (JITTER_TOP_STACK ());
   end
 end
 
-instruction sel () # VAL -> ULON
+instruction sel () # VAL -> ULONG
   code
     JITTER_TOP_STACK () = pvm_elemsof (JITTER_TOP_STACK ());
   end
