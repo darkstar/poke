@@ -627,7 +627,8 @@ expression:
                     }
 
                   magnitude_type = PKL_AST_TYPE ($2);
-                  if (PKL_AST_TYPE_CODE (magnitude_type) != PKL_TYPE_INTEGRAL)
+                  if (PKL_AST_CODE ($2) == PKL_AST_TYPE
+                      || PKL_AST_TYPE_CODE (magnitude_type) != PKL_TYPE_INTEGRAL)
                     {
                       pkl_tab_error (&@1, pkl_parser,
                                      "expected integer expression");
@@ -654,6 +655,7 @@ primary:
         | CHAR
         | STR
         | type_specifier
+          /* For debugging.  */
           	{
                   pkl_ast_node metatype;
                   
