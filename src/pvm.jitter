@@ -1602,22 +1602,25 @@ instruction bzut (?f) # Branch if zero under-top.
   end
 end
 
-
-instruction bnt (?n,?f) # Branch if not type top
-  code
-     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_TOP_STACK())
-                                 == JITTER_ARGN0,
-                                 JITTER_ARGF1);
-  end
-end
-
-instruction bntut (?n,?f) # Branch if not type undertop.
-  code
-     JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_UNDER_TOP_STACK())
-                                   == JITTER_ARGN0,
-                                 JITTER_ARGF1);
-  end
-end
+# The following two instructions generate weird warnings when built
+# with -m32.  Since these are not used at the moment, comment them
+# out - jemarch.
+#
+# instruction bnt (?n,?f) # Branch if not type top
+#   code
+#      JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_TOP_STACK())
+#                                  == JITTER_ARGN0,
+#                                  JITTER_ARGF1);
+#   end
+# end
+#
+# instruction bntut (?n,?f) # Branch if not type undertop.
+#   code
+#      JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_UNDER_TOP_STACK())
+#                                    == JITTER_ARGN0,
+#                                  JITTER_ARGF1);
+#   end
+# end
 
 ## Conversion instructions.
 
