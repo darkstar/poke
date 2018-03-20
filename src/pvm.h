@@ -91,8 +91,8 @@ pvm_val pvm_make_uhalf (uint16_t value);
 /* 32-bit integers (both signed and unsigned) are encoded in the bits
    34..3 bits of pvm_val.  */
 
-#define PVM_VAL_INT(V) (((int32_t) (V)) >> 3)
-#define PVM_VAL_UINT(V) (((uint32_t) (V)) >> 3)
+#define PVM_VAL_INT(V) ((int32_t) ((V) >> 3))
+#define PVM_VAL_UINT(V) ((uint32_t) ((V) >> 3))
 
 pvm_val pvm_make_int (int32_t value);
 pvm_val pvm_make_uint (uint32_t value);

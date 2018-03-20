@@ -38,8 +38,7 @@ pvm_push_val (pvm_program program, pvm_val val)
      limitation of only accepting a jitter_uint value as a literal
      argument, which is 32-bit long in 32-bit hosts.  */
 
-  printf ("VAL: 0x%lx\n", val);
-  if (val & ~0xffffffff)
+  if (val & ~0xffffffffLL)
     {
       PVM_APPEND_INSTRUCTION (program, pushhi);
       pvm_append_unsigned_literal_parameter (program,

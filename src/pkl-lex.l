@@ -207,7 +207,7 @@ D [0-9]
   }
 
   /* Note that strtol can't fail in this context.  */
-  value = strtol (yytext + offset, &end, base);
+  value = strtoll (yytext + offset, &end, base);
 
   signed_p = 1;
   if (*end == 'u' || *end == 'U'

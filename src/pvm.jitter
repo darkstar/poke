@@ -76,7 +76,7 @@ printer-c
     void
     pvm_literal_printer_hi (FILE *out, jitter_uint hi)
     {
-      fprintf (out, "%%hi(0x%lx)", hi);
+      /* fprintf (out, "%%hi(0x%lx)", hi);  */
       printer_hi = hi; /* This sucks */
     }
 

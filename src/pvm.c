@@ -89,8 +89,6 @@ pvm_make_int (int32_t value)
 pvm_val
 pvm_make_uint (uint32_t value)
 {
-  printf ("ZZZ 0x%lx\n", (pvm_val) value);
-  printf ("YYY 0x%lx\n", (pvm_val) value << 3);
   return ((pvm_val) value << 3) | PVM_VAL_TAG_UINT;
 }
 
