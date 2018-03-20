@@ -69,6 +69,19 @@ if test "x$JITTER_CONFIG" = "x"; then
    AC_MSG_ERROR([you need jitter-config to compile])
 fi
 
+dnl --{enable,disable]-debug controls whether building poke in
+dnl debug mode.  In particular, this causes using a more inefficient
+dnl jitter model that keeps the dwarf info of the instruction
+dnl bodies.
+
+AC_ARG_ENABLE([debug],
+              AS_HELP_STRING([--enable-debug],
+                             [Build poke in debug mode (default is NO)]),
+                             [poke_debug=$enableval], [poke_debug=no])
+
+AM_CONDITIONAL([POKE_DEBUG],
+               [test "x$poke_debug" = "xyes"])
+
 dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile
