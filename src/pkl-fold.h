@@ -21,5 +21,8 @@
 
 #include <config.h>
 
+#include <string.h>
+#include "pkl-ast.h"
+
 
 #endif /* PKL_FOLD_H */

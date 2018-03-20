@@ -336,7 +336,7 @@ expression:
                   if (PKL_AST_CODE ($1) == PKL_AST_INTEGER
                       && PKL_AST_CODE ($3) == PKL_AST_INTEGER)
                     {
-                      /* XXX: this is a test.  */
+                      /* XXX: this is a prototype.  */
                       int64_t val1 = PKL_AST_INTEGER_VALUE ($1);
                       int64_t val2 = PKL_AST_INTEGER_VALUE ($3);
 
