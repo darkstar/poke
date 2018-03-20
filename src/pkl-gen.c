@@ -23,15 +23,34 @@
 #include "pvm.h"
 #include "pkl-gen.h"
 
-/* The following macro is used in the functions below in order to
-   append PVM values to a program.  */
+/* The following function is used to push pvm_val values to the PVM
+   stack.  */
 
-#define pvm_append_val_parameter(program,val)                           \
-  do                                                                    \
-    {                                                                   \
-     pvm_append_unsigned_literal_parameter ((program),                  \
-                                            (jitter_uint) (val));       \
-    } while (0)
+static inline void
+pvm_push_val (pvm_program program, pvm_val val)
+{
+#if __WORDSIZE == 64
+  PVM_APPEND_INSTRUCTION (program, push);
+  pvm_append_unsigned_literal_parameter (program,
+                                         (jitter_uint) val);
+#else
+  /* Use the push-hi and push-lo instructions, to overcome jitter's
+     limitation of only accepting a jitter_uint value as a literal
+     argument, which is 32-bit long in 32-bit hosts.  */
+
+  if (val & ~0xffffffff)
+    {
+      PVM_APPEND_INSTRUCTION (program, push_mhi);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val >> 32)));
+    }
+
+  PVM_APPEND_INSTRUCTION (program, push_mlo);
+  pvm_append_unsigned_literal_parameter (program,
+                                         ((jitter_uint) (val & 0xffffffff)));
+
+#endif
+}
 
 /* Forward declaration.  */
 static int pkl_gen_1 (pkl_ast_node ast, pvm_program program,
@@ -83,10 +102,8 @@ pkl_gen_integer (pkl_ast_node ast,
       assert (0);
       break;
     }
-    
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_val_parameter (program, val);
 
+  pvm_push_val (program, val);
   return 1;
 }
 
@@ -99,9 +116,7 @@ pkl_gen_string (pkl_ast_node ast,
 
   val = pvm_make_string (PKL_AST_STRING_POINTER (ast));
 
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_val_parameter (program, val);
-
+  pvm_push_val (program, val);
   return 1;
 }
 
@@ -335,21 +350,19 @@ pkl_gen_type_struct (pkl_ast_node ast,
                : NULL);
           
           /* Push the struct element name.  */
-          PVM_APPEND_INSTRUCTION (program, push);         
           if (ename == NULL)
-            pvm_append_val_parameter (program, PVM_NULL);
+            pvm_push_val (program, PVM_NULL);
           else
-            pvm_append_val_parameter (program,
-                                      pvm_make_string (ename));
+            pvm_push_val (program,
+                          pvm_make_string (ename));
           
           /* Push the struct element type.  */
           if (!pkl_gen_type (struct_type_elem_type, program, label))
             return 0;
         }
-      
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
+
+      pvm_push_val (program,
+                    pvm_make_ulong (PKL_AST_TYPE_S_NELEM (ast)));
       
       PVM_APPEND_INSTRUCTION (program, mktysct);
     }
@@ -400,13 +413,11 @@ pkl_gen_type (pkl_ast_node ast,
 {
   if (PKL_AST_TYPE_CODE (ast) == PKL_TYPE_INTEGRAL)
     {
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (ast)));
+      pvm_push_val (program,
+                    pvm_make_ulong (PKL_AST_TYPE_I_SIZE (ast)));
 
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program,
-                                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
+      pvm_push_val (program,
+                    pvm_make_uint (PKL_AST_TYPE_I_SIGNED (ast)));
 
       PVM_APPEND_INSTRUCTION (program, mktyi);
     }
@@ -882,9 +893,8 @@ pkl_gen_array (pkl_ast_node ast,
                      program, label))
     return 0;
 
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_val_parameter (program,
-                            pvm_make_ulong (PKL_AST_ARRAY_NELEM (ast)));
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_ARRAY_NELEM (ast)));
 
   PVM_APPEND_INSTRUCTION (program, mka);
   
@@ -895,8 +905,7 @@ pkl_gen_array (pkl_ast_node ast,
     {
       pvm_val idx = pvm_make_ulong (PKL_AST_ARRAY_ELEM_INDEX (e));
       
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, idx);
+      pvm_push_val (program, idx);
       
       pkl_gen_1 (PKL_AST_ARRAY_ELEM_EXP (e), program, label);
       
@@ -937,14 +946,12 @@ pkl_gen_struct (pkl_ast_node ast,
         name
           = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_NAME (e)));
       
-      PVM_APPEND_INSTRUCTION (program, push);
-      pvm_append_val_parameter (program, name);
+      pvm_push_val (program, name);
       pkl_gen_1 (PKL_AST_STRUCT_ELEM_EXP (e), program, label);
     }
 
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_val_parameter (program,
-                            pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
 
   PVM_APPEND_INSTRUCTION (program, mksct);
   return 1;
@@ -960,8 +967,7 @@ pkl_gen_struct_ref (pkl_ast_node ast,
   
   pkl_gen_1 (PKL_AST_STRUCT_REF_STRUCT (ast), program, label);
 
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_val_parameter (program, pvm_make_string (name));
+  pvm_push_val (program, pvm_make_string (name));
   PVM_APPEND_INSTRUCTION (program, sctref);
 
   return 1;
@@ -984,7 +990,6 @@ pkl_gen_offset (pkl_ast_node ast,
                   program, label))
     return 0;
 
-  PVM_APPEND_INSTRUCTION (program, push);
   switch (PKL_AST_OFFSET_UNIT (ast))
     {
     case PKL_AST_OFFSET_UNIT_BITS:
@@ -997,7 +1002,7 @@ pkl_gen_offset (pkl_ast_node ast,
       /* Invalid unit. */
       assert (0);
     }
-  pvm_append_val_parameter (program, val);
+  pvm_push_val (program, val);
       
   PVM_APPEND_INSTRUCTION (program, mko);
   return 1;
@@ -1099,8 +1104,7 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     pvm_append_symbolic_label (program, "Ldivzero");
 
     val = pvm_make_int (PVM_EXIT_EDIVZ);
-    PVM_APPEND_INSTRUCTION (program, push);
-    pvm_append_val_parameter (program, val);
+    pvm_push_val (program, val);
 
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lexit");
@@ -1108,8 +1112,7 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
     pvm_append_symbolic_label (program, "Lerror");
     
     val = pvm_make_int (PVM_EXIT_ERROR);
-    PVM_APPEND_INSTRUCTION (program, push);
-    pvm_append_val_parameter (program, val);
+    pvm_push_val (program, val);
         
     pvm_append_symbolic_label (program, "Lexit");
     PVM_APPEND_INSTRUCTION (program, exit);
@@ -1135,8 +1138,7 @@ pkl_gen (pvm_program *prog, pkl_ast ast)
 
     /* The exit status is OK.  */
     val = pvm_make_int (PVM_EXIT_OK);
-    PVM_APPEND_INSTRUCTION (program, push);
-    pvm_append_val_parameter (program, val);
+    pvm_push_val (program, val);
     
     PVM_APPEND_INSTRUCTION (program, ba);
     pvm_append_symbolic_label_parameter (program, "Lexit");

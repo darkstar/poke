@@ -53,8 +53,15 @@ early-c
   end
 end
 
+late-header-c
+  code
+    extern jitter_uint printer_hi;
+  end
+end
+
 late-c
   code
+    jitter_uint printer_hi;
   end
 end
 
@@ -64,6 +71,22 @@ printer-c
     pvm_literal_printer (FILE *out, jitter_uint val)
     {
       pvm_print_val (out, (pvm_val) val, 10);
+    }
+
+    void
+    pvm_literal_printer_hi (FILE *out, jitter_uint hi)
+    {
+      fprintf (out, "%%hi(0x%lx)", hi);
+      printer_hi = hi; /* This sucks */
+    }
+
+    void
+    pvm_literal_printer_lo (FILE *out, jitter_uint lo)
+    {
+      pvm_print_val (out,
+                    ((pvm_val) printer_hi << 32) | lo,
+                    10);
+      printer_hi = 0;
     }
   end
 end
@@ -138,19 +161,20 @@ instruction push (?Rnl pvm_literal_printer)
   end
 end
 
-instruction push-hi (?Rnl pvm_literal_printer)
+instruction push-hi (?Rnl pvm_literal_printer_hi)
   code
      jitter_state_runtime.push_hi
        = JITTER_ARGN0;
   end
 end
 
-instruction push-lo (?Rnl pvm_literal_printer)
+instruction push-lo (?Rnl pvm_literal_printer_lo)
   code
      pvm_val k
-       = (jitter_state_runtime.push_hi << 32)
+       = ((pvm_val) jitter_state_runtime.push_hi << 32)
          | JITTER_ARGN0;
      JITTER_PUSH_STACK (k);
+     jitter_state_runtime.push_hi = 0;
   end
 end
 
@@ -1580,7 +1604,7 @@ end
 instruction bnt (?n,?f) # Branch if not type top
   code
      JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_TAG (JITTER_TOP_STACK())
-                                   == JITTER_ARGN0,
+                                 == JITTER_ARGN0,
                                  JITTER_ARGF1);
   end
 end
