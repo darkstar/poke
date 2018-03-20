@@ -504,27 +504,29 @@ struct pkl_ast_struct_type_elem
 pkl_ast_node pkl_ast_make_struct_type_elem (pkl_ast_node name,
                                             pkl_ast_node type);
 
-/* PKL_AST_TYPE nodes represent field types.
+/* PKL_AST_TYPE nodes represent types.
    
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
 
-   If TYPEOF > 0 then this type is a meta-type, i.e. it is the type of
-   a value that itself denotes a type described by the other fields of
-   the struct.
-
    In integral types, SIGNED is 1 if the type denotes a signed numeric
    type.  In non-integral types SIGNED is 0.  SIZE is the size in bits
-   of type.
+   of type.  Integral types are always complete.
 
-   In array types, ETYPE is a PKL_AST_TYPE node.
+   In array types, ETYPE is a PKL_AST_TYPE node.  If NELEM is present
+   then it is the number of elements in the array.
 
    In struct types, NELEM is the number of elements in the struct type.
-   ELEMS is a chain of PKL_AST_STRUCT_TYPE_ELEM nodes.  */
+   ELEMS is a chain of PKL_AST_STRUCT_TYPE_ELEM nodes.
+
+   When the size of a value of a given type can be determined at
+   compile time, we say that such type is "complete".  Otherwise, we
+   say that the type is "incomplete" and should be completed at
+   runtime.  */
 
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
-#define PKL_AST_TYPE_TYPEOF(AST) ((AST)->type.type_of)
+#define PKL_AST_TYPE_COMPLETE_P(AST) ((AST)->type.complete_p)
 #define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_NELEM(AST) ((AST)->type.val.array.nelem)
@@ -539,8 +541,8 @@ struct pkl_ast_type
   struct pkl_ast_common common;
 
   enum pkl_ast_type_code code;
+  int complete_p;
   char *name;
-  int type_of;
   
   union
   {
@@ -581,10 +583,9 @@ pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (size_t nelem, pkl_ast_node elems);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast_node base_type, int unit);
 
-pkl_ast_node pkl_ast_make_metatype (pkl_ast_node type);
-
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
+size_t pkl_ast_sizeof_type (pkl_ast_node type);
 
 /* PKL_AST_DECL nodes represent the declaration of a named entity:
    function, type, variable....

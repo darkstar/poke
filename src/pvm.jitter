@@ -2190,7 +2190,7 @@ instruction mktym () # _ -> TYP
   end
 end
 
-instruction mktya () # TYPE ULONG -> TYPE
+instruction mktya () # TYP ULONG -> TYP
   code
 #define F(res, a, b) { res = pvm_make_array_type (b, a); }
     JITTER_BINARY_STACK (F);  

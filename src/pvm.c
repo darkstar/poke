@@ -334,9 +334,6 @@ pvm_sizeof (pvm_val val)
           assert (0);
         };
     }
-
-  /* XXX: handle types */
-  /* XXX: handle maps.  */
   
   assert (0);
   return 0;

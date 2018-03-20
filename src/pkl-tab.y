@@ -267,7 +267,7 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
-        | TYPEOF expression %prec UNARY
+/* XXX    | TYPEOF expression %prec UNARY
         	{
                   pkl_ast_node metatype;
                   
@@ -280,34 +280,80 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF, $2);
                   metatype = pkl_ast_make_metatype (PKL_AST_TYPE ($2));
                   PKL_AST_TYPE ($$) = ASTREF (metatype);
-                }
+                  }
+*/
         | SIZEOF expression %prec UNARY
         	{
-                  /*                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "operand to sizeof can't be a type.");
-                      YYERROR;
-                      } */
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
+                  /* XXX: the details of the offset types are arbitrary.  */
                   PKL_AST_TYPE ($$)
-                    = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                 64, 0);
+                    = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
+                                                                           64, 0),
+                                                PKL_AST_OFFSET_UNIT_BYTES);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($$));
                 }
-        | ELEMSOF expression %prec UNARY
+        | SIZEOF type_specifier %prec UNARY
         	{
-                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
+                  pkl_ast_node magnitude_type, magnitude, offset_type;
+                  
+                  if (!PKL_AST_TYPE_COMPLETE_P ($2))
                     {
                       pkl_tab_error (&@2, pkl_parser,
-                                     "operand to elemsof can't be a type.");
+                                     "sizeof only works on complete types");
                       YYERROR;
                     }
+
+
+                  /* Calculate the size of the complete type in bytes
+                     and put it in an integer node.  */
+                  magnitude_type = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                              64, 0);
+                  magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type ($2));
+                  PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
+
+                  /* Build an offset with that magnitude, and unit
+                     bytes.  */
+                  $$ = pkl_ast_make_offset (magnitude,
+                                            PKL_AST_OFFSET_UNIT_BITS);
+                  offset_type = pkl_ast_make_offset_type (magnitude_type,
+                                                          PKL_AST_OFFSET_UNIT_BITS);
+                  PKL_AST_TYPE ($$) = ASTREF (offset_type);
+                }
+	| SIZEOF '(' type_specifier ')' %prec UNARY
+        	{
+                  pkl_ast_node magnitude_type, magnitude, offset_type;
+
+                  if (!PKL_AST_TYPE_COMPLETE_P ($3))
+                    {
+                      pkl_tab_error (&@3, pkl_parser,
+                                     "sizeof only works on complete types");
+                      YYERROR;
+                    }
+                  
+                  /* Calculate the size of the complete type in bytes
+                     and put it in an integer node.  */
+                  magnitude_type = pkl_ast_get_integral_type (pkl_parser->ast,
+                                                              64, 0);
+                  magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type ($3));
+                  PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
+
+                  /* Build an offset with that magnitude, and unit
+                     bits.  */
+                  $$ = pkl_ast_make_offset (magnitude,
+                                            PKL_AST_OFFSET_UNIT_BITS);
+                  offset_type = pkl_ast_make_offset_type (magnitude_type,
+                                                          PKL_AST_OFFSET_UNIT_BITS);
+                  PKL_AST_TYPE ($$) = ASTREF (offset_type);
+                }
+/* XXX not needed with offsets?
+        | ELEMSOF expression %prec UNARY
+        	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $2);
                   PKL_AST_TYPE ($$)
                     = pkl_ast_get_integral_type (pkl_parser->ast,
                                                  64, 0);
                 }
+*/
         | expression '+' expression
         	{
                   if (!promote_operands_binary (pkl_parser->ast,
@@ -590,7 +636,7 @@ expression:
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
-        | expression '@' expression
+/*        | expression '@' expression
         	{
                   if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($1)) == 0)
                     {
@@ -608,6 +654,7 @@ expression:
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF ($1);
                 }
+*/
         | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
 	| '[' expression IDENTIFIER ']'
@@ -654,16 +701,6 @@ primary:
 	  INTEGER
         | CHAR
         | STR
-        | type_specifier
-          /* For debugging.  */
-          	{
-                  pkl_ast_node metatype;
-                  
-                  $$ = $1;
-                  metatype = pkl_ast_make_metatype ($1);
-                  PKL_AST_TYPE ($$) = ASTREF (metatype);
-                }
-          /* | IDENTIFIER */
         | '(' expression ')'
         	{ $$ = $2; }
 	| primary INC
@@ -778,6 +815,10 @@ type_specifier:
                       YYERROR;
                     }
                   $$ = pkl_ast_make_array_type ($3, $1);
+                }
+	| type_specifier '[' ']'
+        	{
+                  $$ = pkl_ast_make_array_type (NULL, $1);
                 }
         | struct_type_specifier
         ;
