@@ -77,6 +77,12 @@ state-struct-backing-c
   end
 end
 
+state-struct-runtime-c
+  code
+      uint32_t push_hi;
+  end
+end
+
 state-initialization-c
   code
       jitter_state_backing->exit_code = PVM_EXIT_OK;
@@ -129,6 +135,22 @@ instruction push (?Rnl pvm_literal_printer)
   code
     pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
+  end
+end
+
+instruction push-hi (?Rnl pvm_literal_printer)
+  code
+     jitter_state_runtime.push_hi
+       = JITTER_ARGN0;
+  end
+end
+
+instruction push-lo (?Rnl pvm_literal_printer)
+  code
+     pvm_val k
+       = (jitter_state_runtime.push_hi << 32)
+         | JITTER_ARGN0;
+     JITTER_PUSH_STACK (k);
   end
 end
 
