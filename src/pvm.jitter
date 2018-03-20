@@ -161,14 +161,14 @@ instruction push (?Rnl pvm_literal_printer)
   end
 end
 
-instruction push-hi (?Rnl pvm_literal_printer_hi)
+instruction pushhi (?Rnl pvm_literal_printer_hi)
   code
      jitter_state_runtime.push_hi
        = JITTER_ARGN0;
   end
 end
 
-instruction push-lo (?Rnl pvm_literal_printer_lo)
+instruction pushlo (?Rnl pvm_literal_printer_lo)
   code
      pvm_val k
        = ((pvm_val) jitter_state_runtime.push_hi << 32)

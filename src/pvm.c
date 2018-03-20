@@ -65,7 +65,7 @@ pvm_make_byte (int8_t value)
 pvm_val
 pvm_make_ubyte (uint8_t value)
 {
-  return (value << 3) | PVM_VAL_TAG_UBYTE;
+  return ((pvm_val) value << 3) | PVM_VAL_TAG_UBYTE;
 }
 
 pvm_val
@@ -77,7 +77,7 @@ pvm_make_half (int16_t value)
 pvm_val
 pvm_make_uhalf (uint16_t value)
 {
-  return (value << 3) | PVM_VAL_TAG_UHALF;
+  return ((pvm_val) value << 3) | PVM_VAL_TAG_UHALF;
 }
 
 pvm_val
@@ -89,7 +89,9 @@ pvm_make_int (int32_t value)
 pvm_val
 pvm_make_uint (uint32_t value)
 {
-  return (value << 3) | PVM_VAL_TAG_UINT;
+  printf ("ZZZ 0x%lx\n", (pvm_val) value);
+  printf ("YYY 0x%lx\n", (pvm_val) value << 3);
+  return ((pvm_val) value << 3) | PVM_VAL_TAG_UINT;
 }
 
 static pvm_val_box
