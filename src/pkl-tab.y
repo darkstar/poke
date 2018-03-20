@@ -179,7 +179,7 @@ static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
 %type <ast> struct_elem_list struct_elem
 %type <ast> type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
-%type <ast> stmt_list stmt pushlevel compstmt
+/*                      %type <ast> stmt_list stmt pushlevel compstmt*/
 
 %start program
 
@@ -815,16 +815,17 @@ struct_elem_type:
  * Statements.
  */
 
+/*
 pushlevel:
-         /* This rule is used below in order to set a new current
+         * This rule is used below in order to set a new current
             binding level that will be in effect for subsequent
-            reductions of declarations.  */
+            reductions of declarations.  *
 	  %empty
 		{
                   push_level ();
                   $$ = pkl_parser->current_block;
                   pkl_parser->current_block
-                    = pkl_ast_make_let (/* supercontext */ $$, /* body */ NULL);
+                    = pkl_ast_make_let (* supercontext * $$, * body * NULL);
                 }
 	;
 
@@ -836,8 +837,8 @@ compstmt:
                   $$ = pkl_parser->current_block; 
                   PKL_AST_LET_BODY ($$, $3);
                   pop_level ();
-                  /* XXX: build a compound instead of a let if
-                     stmt_list doesn't contain any declaration.  */
+                  * XXX: build a compound instead of a let if
+                     stmt_list doesn't contain any declaration.  *
                 }
         ;
 
@@ -852,6 +853,7 @@ stmt:
         | IDENTIFIER '=' expression ';'
           	{ $$ = pkl_ast_make_assign_stmt ($1, $3); }
         ;
+*/
           
 /*
  * Declarations.
