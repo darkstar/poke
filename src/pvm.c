@@ -381,7 +381,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   if (val == PVM_NULL)
     fprintf (out, "null");
   else if (PVM_IS_LONG (val))
-    fprintf (out, "%ldL", PVM_VAL_LONG (val));
+    fprintf (out, "%" PRIi64 "L", PVM_VAL_LONG (val));
   else if (PVM_IS_INT (val))
     fprintf (out, "%d", PVM_VAL_INT (val));
   else if (PVM_IS_HALF (val))
@@ -389,7 +389,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   else if (PVM_IS_BYTE (val))
     fprintf (out, "%dB", PVM_VAL_BYTE (val));
   else if (PVM_IS_ULONG (val))
-    fprintf (out, "%luUL", PVM_VAL_ULONG (val));
+    fprintf (out, "%" PRIu64 "UL", PVM_VAL_ULONG (val));
   else if (PVM_IS_UINT (val))
     fprintf (out, "%uU", PVM_VAL_UINT (val));
   else if (PVM_IS_UHALF (val))
@@ -459,7 +459,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
-          fprintf (out, "[%lu]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
+          fprintf (out, "[%" PRIu64 "]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
           break;
         case PVM_TYPE_OFFSET:
           fprintf (out, "[");

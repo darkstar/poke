@@ -47,10 +47,10 @@ struct pk_cmd_arg
   union
   {
     pvm_program exp;
-    long long int integer;
+    int64_t integer;
     pk_io_off addr;
     const char *str;
-    long long int tag;
+    int64_t tag;
   } val;
 };
 

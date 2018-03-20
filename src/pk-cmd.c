@@ -82,13 +82,13 @@ skip_blanks (char *p)
 }
 
 static inline int
-pk_atoi (char **p, long long int *number)
+pk_atoi (char **p, int64_t *number)
 {
   long int li;
   char *end;
 
   errno = 0;
-  li = strtol (*p, &end, 0);
+  li = strtoll (*p, &end, 0);
   if ((errno != 0 && li == 0)
       || end == *p)
     return 0;
