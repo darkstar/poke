@@ -44,10 +44,10 @@ poke_LDFLAGS =
 
 # Integration with jitter.
 
-poke_CPPFLAGS += $(JITTER_CPPFLAGS)
-poke_CFLAGS += $(JITTER_CFLAGS)
-poke_LDADD += $(JITTER_LDADD)
-poke_LDFLAGS += $(JITTER_LDFLAGS)
+poke_CPPFLAGS += $(JITTER_DIRECT_THREADING_CPPFLAGS)
+poke_CFLAGS += $(JITTER_DIRECT_THREADING_CFLAGS)
+poke_LDADD += $(JITTER_DIRECT_THREADING_LDADD)
+poke_LDFLAGS += $(JITTER_DIRECT_THREADING_LDFLAGS)
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter

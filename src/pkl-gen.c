@@ -43,12 +43,17 @@ pvm_push_val (pvm_program program, pvm_val val)
       PVM_APPEND_INSTRUCTION (program, pushhi);
       pvm_append_unsigned_literal_parameter (program,
                                              ((jitter_uint) (val >> 32)));
+
+      PVM_APPEND_INSTRUCTION (program, pushlo);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val & 0xffffffff)));
     }
-
-  PVM_APPEND_INSTRUCTION (program, pushlo);
-  pvm_append_unsigned_literal_parameter (program,
-                                         ((jitter_uint) (val & 0xffffffff)));
-
+  else
+    {
+      PVM_APPEND_INSTRUCTION (program, push32);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val & 0xffffffff)));
+    }
 #endif
 }
 

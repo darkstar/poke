@@ -176,7 +176,13 @@ instruction pushlo (?Rnl pvm_literal_printer_lo)
        = ((pvm_val) jitter_state_runtime.push_hi << 32)
          | JITTER_ARGN0;
      JITTER_PUSH_STACK (k);
-     jitter_state_runtime.push_hi = 0;
+  end
+end
+
+instruction push32 (?Rnl pvm_literal_printer)
+  code
+    pvm_val k = JITTER_ARGN0;
+    JITTER_PUSH_STACK (k);
   end
 end
 
