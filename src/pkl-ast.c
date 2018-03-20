@@ -450,6 +450,11 @@ pkl_ast_sizeof_type (pkl_ast_node type)
         pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (type);
         pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
 
+        /* If the array type is complete the node holding the number
+           of elements should be an integer node.  */
+        if (PKL_AST_CODE (nelem) != PKL_AST_INTEGER)
+          assert (0);
+
         return PKL_AST_INTEGER_VALUE (nelem)
           * pkl_ast_sizeof_type (etype);
         break;
