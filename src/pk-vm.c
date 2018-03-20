@@ -51,7 +51,7 @@ extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd vm_disas_cmd =
   {"disassemble", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas,
-   "vm disassemble EXP\n\
+   "vm disassemble[/n] EXP\n\
 Flags:\n\
   n (do a native disassemble)"};
 
