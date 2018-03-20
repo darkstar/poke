@@ -23,10 +23,13 @@
 #include "pk-cmd.h"
 #include "pvm.h"
 
+#define PK_VM_DIS_UFLAGS "n"
+#define PK_VM_DIS_F_NAT 0x1
+
 static int
 pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
-  /* disassemble expression EXP */
+  /* disassemble expression EXP.  */
 
   pvm_program prog;
   
@@ -34,7 +37,12 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
   prog = PK_CMD_ARG_EXP (argv[0]);
-  pvm_print_program (stdout, prog);
+
+  if (uflags & PK_VM_DIS_F_NAT)
+    pvm_disassemble_program (prog, true,
+                             JITTER_OBJDUMP, NULL);
+  else
+    pvm_print_program (stdout, prog);
   
   return 1;
 }
@@ -42,7 +50,10 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd vm_disas_cmd =
-  {"disassemble", "e", "", 0, NULL, pk_cmd_vm_disas, "vm disassemble EXP"};
+  {"disassemble", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas,
+   "vm disassemble EXP\n\
+Flags:\n\
+  n (do a native disassemble)"};
 
 struct pk_cmd *vm_cmds[] =
   {
@@ -54,4 +65,3 @@ struct pk_trie *vm_trie;
 
 struct pk_cmd vm_cmd =
   {"vm", "", "", 0, &vm_trie, NULL, "vm (disassemble)"};
-
