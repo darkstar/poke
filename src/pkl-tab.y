@@ -35,6 +35,7 @@
 #include <assert.h>
 
 #include "pkl-ast.h"
+#include "pkl-fold.h"
 #include "pkl-parser.h" /* For struct pkl_parser.  */
 #define YYDEBUG 1
 #include "pkl-tab.h"
@@ -331,9 +332,23 @@ expression:
                                      "invalid operators to '+'.");
                       YYERROR;
                     }
-                  $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
-                                                $1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+
+                  if (PKL_AST_CODE ($1) == PKL_AST_INTEGER
+                      && PKL_AST_CODE ($3) == PKL_AST_INTEGER)
+                    {
+                      /* XXX: this is a test.  */
+                      int64_t val1 = PKL_AST_INTEGER_VALUE ($1);
+                      int64_t val2 = PKL_AST_INTEGER_VALUE ($3);
+
+                      $$ = pkl_ast_make_integer (val1 + val2);
+                      PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                    }
+                  else
+                    {
+                      $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
+                                                    $1, $3);
+                      PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                    }
                 }
         | expression '-' expression
         	{
