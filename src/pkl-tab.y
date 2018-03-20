@@ -103,6 +103,10 @@ static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
 static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
                                         YYLTYPE *llocp,
                                         pkl_ast_node stype_elems);
+
+static pkl_ast_node finish_sizeof_type (struct pkl_parser *parser,
+                                        YYLTYPE *llocp,
+                                        pkl_ast_node type);
 %}
 
 %union {
@@ -294,56 +298,17 @@ expression:
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
-                  pkl_ast_node magnitude_type, magnitude, offset_type;
-                  
-                  if (!PKL_AST_TYPE_COMPLETE_P ($2))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "sizeof only works on complete types");
-                      YYERROR;
-                    }
-
-
-                  /* Calculate the size of the complete type in bytes
-                     and put it in an integer node.  */
-                  magnitude_type = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                              64, 0);
-                  magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type ($2));
-                  PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
-
-                  /* Build an offset with that magnitude, and unit
-                     bytes.  */
-                  $$ = pkl_ast_make_offset (magnitude,
-                                            PKL_AST_OFFSET_UNIT_BITS);
-                  offset_type = pkl_ast_make_offset_type (magnitude_type,
-                                                          PKL_AST_OFFSET_UNIT_BITS);
-                  PKL_AST_TYPE ($$) = ASTREF (offset_type);
+                  $$ = finish_sizeof_type (pkl_parser,
+                                           &@2, $2);
+                  if ($$ == NULL)
+                    YYERROR;
                 }
 	| SIZEOF '(' type_specifier ')' %prec UNARY
         	{
-                  pkl_ast_node magnitude_type, magnitude, offset_type;
-
-                  if (!PKL_AST_TYPE_COMPLETE_P ($3))
-                    {
-                      pkl_tab_error (&@3, pkl_parser,
-                                     "sizeof only works on complete types");
-                      YYERROR;
-                    }
-                  
-                  /* Calculate the size of the complete type in bytes
-                     and put it in an integer node.  */
-                  magnitude_type = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                              64, 0);
-                  magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type ($3));
-                  PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
-
-                  /* Build an offset with that magnitude, and unit
-                     bits.  */
-                  $$ = pkl_ast_make_offset (magnitude,
-                                            PKL_AST_OFFSET_UNIT_BITS);
-                  offset_type = pkl_ast_make_offset_type (magnitude_type,
-                                                          PKL_AST_OFFSET_UNIT_BITS);
-                  PKL_AST_TYPE ($$) = ASTREF (offset_type);
+                  $$ = finish_sizeof_type (pkl_parser,
+                                           &@3, $3);
+                  if ($$ == NULL)
+                    YYERROR;
                 }
 /* XXX not needed with offsets?
         | ELEMSOF expression %prec UNARY
@@ -1370,3 +1335,36 @@ finish_struct_type (struct pkl_parser *parser,
   return stype;
 }
 
+static pkl_ast_node
+finish_sizeof_type (struct pkl_parser *parser,
+                    YYLTYPE *llocp,
+                    pkl_ast_node type)
+{
+  pkl_ast_node offset;
+  pkl_ast_node magnitude_type, magnitude, offset_type;
+
+  if (!PKL_AST_TYPE_COMPLETE_P (type))
+    {
+      pkl_tab_error (llocp, parser,
+                     "sizeof only works on complete types");
+      return NULL;
+    }
+
+  
+  /* Calculate the size of the complete type in bytes and put it in an
+     integer node.  */
+  magnitude_type = pkl_ast_get_integral_type (parser->ast,
+                                              64, 0);
+  magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type (type));
+  PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
+  
+  /* Build an offset with that magnitude, and unit
+     bytes.  */
+  offset = pkl_ast_make_offset (magnitude,
+                                PKL_AST_OFFSET_UNIT_BITS);
+  offset_type = pkl_ast_make_offset_type (magnitude_type,
+                                          PKL_AST_OFFSET_UNIT_BITS);
+  PKL_AST_TYPE (offset) = ASTREF (offset_type);
+
+  return offset;
+}

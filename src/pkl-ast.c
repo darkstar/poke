@@ -255,6 +255,7 @@ pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype)
   PKL_AST_TYPE_A_NELEM (type) = ASTREF (nelem);
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
 
+  /* XXX: work with expressions.  This requires constant folding.  */
   PKL_AST_TYPE_COMPLETE_P (type)
     = nelem != NULL && PKL_AST_TYPE_COMPLETE_P (etype);
   
