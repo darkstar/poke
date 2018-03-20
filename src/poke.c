@@ -198,6 +198,8 @@ repl ()
 #endif
 
       ret = pk_cmd_exec (line);
+      if (!ret)
+        /* Avoid gcc warning here.  */ ;
       free (line);
     }
 }

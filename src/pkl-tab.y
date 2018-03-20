@@ -60,11 +60,11 @@ pkl_tab_error (YYLTYPE *llocp,
                char const *err)
 {
   /* XXX if (!pkl_parser->interactive) */
-  if (pkl_parser->filename == NULL)
+  if (pkl_parser->filename != NULL)
     fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
              llocp->first_line, err);
   else
-    fprintf (stderr, "%d: %s\n", llocp->first_line, err);
+    fprintf (stderr, "%s\n", err);
 }
 
 /* Forward declarations for functions defined below in this file,

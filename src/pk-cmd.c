@@ -257,6 +257,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   uint64_t uflags;
   const char *a;
   char filename[NAME_MAX];
+  int besilent = 0;
 
   /* Skip blanks, and return if the command is composed by only blank
      characters.  */
@@ -361,6 +362,11 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         match = 1;
                         p = end;
                       }
+                    else
+                      /* The compiler should have emitted diagnostic
+                         messages, so don't bother the user with the
+                         usage message.  */
+                      besilent = 1;
                     
                     break;
                   }
@@ -521,7 +527,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   return ret;
 
  usage:
-  printf (_("Usage: %s\n"), cmd->usage);
+  if (!besilent)
+    printf (_("Usage: %s\n"), cmd->usage);
   return 0;
 }
 
