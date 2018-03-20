@@ -610,21 +610,6 @@ expression:
                 }
         | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
-        ;
-
-unary_operator:
-	  '-'		{ $$ = PKL_AST_OP_NEG; }
-	| '+'		{ $$ = PKL_AST_OP_POS; }
-	| INC		{ $$ = PKL_AST_OP_PREINC; }
-	| DEC		{ $$ = PKL_AST_OP_PREDEC; }
-	| '~'		{ $$ = PKL_AST_OP_BNOT; }
-	| '!'		{ $$ = PKL_AST_OP_NOT; }
-	;
-
-primary:
-	  INTEGER
-        | CHAR
-        | STR
 	| '[' expression IDENTIFIER ']'
         	{
                   int units;
@@ -648,11 +633,26 @@ primary:
                                      "expected integer expression");
                       YYERROR;
                     }
-
+                  
                   $$ = pkl_ast_make_offset ($2, units);
                   type = pkl_ast_make_offset_type (magnitude_type, units);
                   PKL_AST_TYPE ($$) = ASTREF (type);
                 }
+        ;
+
+unary_operator:
+	  '-'		{ $$ = PKL_AST_OP_NEG; }
+	| '+'		{ $$ = PKL_AST_OP_POS; }
+	| INC		{ $$ = PKL_AST_OP_PREINC; }
+	| DEC		{ $$ = PKL_AST_OP_PREDEC; }
+	| '~'		{ $$ = PKL_AST_OP_BNOT; }
+	| '!'		{ $$ = PKL_AST_OP_NOT; }
+	;
+
+primary:
+	  INTEGER
+        | CHAR
+        | STR
         | type_specifier
           	{
                   pkl_ast_node metatype;
