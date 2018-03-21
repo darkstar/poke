@@ -1,4 +1,4 @@
-/* pkl-fold.c - Constant folding for the poke compiler. */
+/* pkl-fold.c - Constant folding pass for the poke compiler. */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
