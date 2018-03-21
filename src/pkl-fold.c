@@ -200,6 +200,8 @@ emul_ge (uint64_t op1, uint64_t op2)
 static pkl_ast_node
 pkl_fold_1 (pkl_ast_node ast)
 {
+  pkl_ast_node ast_orig = ast;
+  
   switch (PKL_AST_CODE (ast))
     {
     case PKL_AST_EXP:
@@ -283,13 +285,15 @@ pkl_fold_1 (pkl_ast_node ast)
             {
               pkl_ast_node to_type;
               pkl_ast_node from_type;
-              op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
+              PKL_AST_EXP_OPERAND (ast, 0)
+                = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
+              op1 = PKL_AST_EXP_OPERAND (ast, 0);
 
 #define CAST_TO(T)                                                      \
               do                                                        \
                 {                                                       \
                   new = pkl_ast_make_integer ((T) PKL_AST_INTEGER_VALUE (op1)); \
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (to_type)); \
+                  PKL_AST_TYPE (new) = ASTREF (to_type);                \
                                                                         \
                   pkl_ast_node_free (ast);                              \
                   ast = new;                                            \
@@ -706,6 +710,13 @@ pkl_fold_1 (pkl_ast_node ast)
       break;
     }
 
+  /* If a new node was created to replace the incoming node, increase
+     its reference counter.  This assumes that the node returned by
+     this function will be stored in some other node (or the top-level
+     AST structure).  */
+  if (ast != ast_orig)
+    ASTREF (ast);
+  
   return ast;
 }
 
