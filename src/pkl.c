@@ -23,6 +23,7 @@
 #include "pkl.h"
 #include "pkl-gen.h"
 #include "pkl-parser.h"
+#include "pkl-fold.h"
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -41,6 +42,12 @@ pkl_compile_buffer (pvm_program *prog,
       /* Memory exhaustion.  */
       printf (_("out of memory\n"));
     }
+
+  /* XXX */
+  pkl_ast_print (stdout, ast->ast);
+  ast = pkl_fold (ast);
+  fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
+  pkl_ast_print (stdout, ast->ast);
 
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */

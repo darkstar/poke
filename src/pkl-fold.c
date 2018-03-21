@@ -151,7 +151,6 @@ emul_ge (uint64_t op1, uint64_t op2)
                                             PKL_AST_INTEGER_VALUE (op2))); \
           PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
                                                                         \
-          ASTREF (ast);                                                 \
           pkl_ast_node_free (ast);                                      \
           ast = new;                                                    \
         }                                                               \
@@ -167,7 +166,6 @@ emul_ge (uint64_t op1, uint64_t op2)
                                             PKL_AST_STRING_POINTER (op2))); \
           PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
                                                                         \
-          ASTREF (ast);                                                 \
           pkl_ast_node_free (ast);                                      \
           ast = new;                                                    \
         }                                                               \
@@ -208,17 +206,15 @@ pkl_fold_1 (pkl_ast_node ast)
       {
         pkl_ast_node new, op1 = NULL, op2 = NULL;
 
-        if (PKL_AST_EXP_NUMOPS (ast) == 1)
-          op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
-        else if (PKL_AST_EXP_NUMOPS (ast) == 2)
-          {
-            op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
-            op2 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 1));
-          }
-        else
-          assert (0);
+        if (PKL_AST_EXP_NUMOPS (ast) > 1)
+          PKL_AST_EXP_OPERAND (ast, 0)
+              = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
+        if (PKL_AST_EXP_NUMOPS (ast) == 2)
+          PKL_AST_EXP_OPERAND (ast, 1)
+            = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 1));
 
-        /* Replace the node's operands with op1 and op2!  */
+        op1 = PKL_AST_EXP_OPERAND (ast, 0);
+        op2 = PKL_AST_EXP_OPERAND (ast, 1);
 
         switch (PKL_AST_EXP_CODE (ast))
           {
@@ -295,7 +291,6 @@ pkl_fold_1 (pkl_ast_node ast)
                   new = pkl_ast_make_integer ((T) PKL_AST_INTEGER_VALUE (op1)); \
                   PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (to_type)); \
                                                                         \
-                  ASTREF (ast);                                         \
                   pkl_ast_node_free (ast);                              \
                   ast = new;                                            \
                 } while (0)

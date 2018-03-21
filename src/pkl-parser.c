@@ -26,7 +26,6 @@
 #include "pkl-parser.h"
 #include "pkl-tab.h"
 #include "pkl-lex.h"
-#include "pkl-fold.h"
 
 pkl_bind_level
 pkl_bind_level_new (void)
@@ -203,14 +202,7 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
   /* XXX */
   /*  pkl_tab_debug = 1; */
   ret = pkl_tab_parse (parser);
-
   *ast = parser->ast;
-    /* XXX */
-  pkl_ast_print (stdout, parser->ast->ast);
-  *ast = pkl_fold (*ast);
-  fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
-  pkl_ast_print (stdout, parser->ast->ast);
-
   if (end != NULL)
     *end = buffer + parser->nchars;
   pkl_tab__delete_buffer (yybuffer, parser->scanner);
