@@ -196,6 +196,8 @@ pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
         else
           assert (0);
 
+        /* Replace the node's operands with op1 and op2!  */
+
         switch (PKL_AST_EXP_CODE (ast))
           {
             /* Binary operators.  */
