@@ -21,8 +21,14 @@
 
 #include <config.h>
 
-#include <string.h>
 #include "pkl-ast.h"
+#include "pkl-parser.h"
 
+/* Perform constant-folding in the given AST and return it.  Note that
+   when the function finds an ast node that is not an expression or an
+   expression primary, or an unkown operator, it stops the process.
+   Also, it assumes AST is well formed, i.e. these are valid operands
+   for the operators.  */
+pkl_ast_node pkl_fold (struct pkl_parser *parser, pkl_ast_node ast);
 
 #endif /* PKL_FOLD_H */

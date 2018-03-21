@@ -222,6 +222,8 @@ program_elem:
                     /* Expressions are not valid top-level structures
                        in full poke programs.  */
                     YYERROR;
+                  /* XXX make constant folding conditional.  */
+                  $1 = pkl_fold (pkl_parser, $1);
                   $$ = $1;
                 }
 	| expression ','
@@ -230,6 +232,8 @@ program_elem:
                     /* Expressions are not valid top-level structures
                        in full poke programs.  */
                     YYERROR;
+                  /* XXX make constant folding conditional.  */
+                  $1 = pkl_fold (pkl_parser, $1);
                   $$ = pkl_ast_make_program ($1);
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
@@ -261,7 +265,7 @@ expression:
                   $$ = pkl_ast_make_unary_exp ($1, $2);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
                 }
-        | '(' expression ')' expression %prec UNARY
+        | '(' type_specifier ')' expression %prec UNARY
         	{
                   if (PKL_AST_CODE ($2) != PKL_AST_TYPE)
                     {
@@ -333,22 +337,10 @@ expression:
                       YYERROR;
                     }
 
-                  if (PKL_AST_CODE ($1) == PKL_AST_INTEGER
-                      && PKL_AST_CODE ($3) == PKL_AST_INTEGER)
-                    {
-                      /* XXX: this is a prototype.  */
-                      int64_t val1 = PKL_AST_INTEGER_VALUE ($1);
-                      int64_t val2 = PKL_AST_INTEGER_VALUE ($3);
 
-                      $$ = pkl_ast_make_integer (val1 + val2);
-                      PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
-                    }
-                  else
-                    {
-                      $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
-                                                    $1, $3);
-                      PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
-                    }
+                  $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
+                                                $1, $3);
+                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '-' expression
         	{
@@ -794,7 +786,8 @@ type_specifier:
                                      "invalid size in array type literal.");
                       YYERROR;
                     }
-                  $$ = pkl_ast_make_array_type ($3, $1);
+                  $$ = pkl_ast_make_array_type (pkl_fold (pkl_parser, $3),
+                                                $1);
                 }
 	| type_specifier '[' ']'
         	{
@@ -1000,10 +993,12 @@ static int
 promote_to_integral (size_t size, int sign,
                      pkl_ast ast, pkl_ast_node *a)
 {
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (*a)) == PKL_TYPE_INTEGRAL)
+  pkl_ast_node type = PKL_AST_TYPE (*a);
+  
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
     {
-      if (!(PKL_AST_TYPE_I_SIZE (*a) == size
-            && PKL_AST_TYPE_I_SIGNED (*a) == sign))
+      if (PKL_AST_TYPE_I_SIZE (type) != size
+          || PKL_AST_TYPE_I_SIGNED (type) != sign)
         {
           pkl_ast_node desired_type
             = pkl_ast_get_integral_type (ast, size, sign);
