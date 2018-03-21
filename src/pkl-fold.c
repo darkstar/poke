@@ -22,8 +22,6 @@
 #include <assert.h>
 #include <stdint.h>
 #include "pkl-ast.h"
-#include "pkl-parser.h"
-
 
 static inline uint64_t
 emul_or (uint64_t op1, uint64_t op2)
@@ -177,8 +175,32 @@ emul_ge (uint64_t op1, uint64_t op2)
   while (0)
 
 
-pkl_ast_node
-pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
+/* Note that in the following macro an l-value should be passed for
+   CHAIN.  */
+#define PKL_FOLD_CHAIN(CHAIN)                           \
+  do                                                    \
+    {                                                   \
+      pkl_ast_node elem, last, next;                    \
+                                                        \
+      /* Process first element in the chain.  */        \
+      elem = (CHAIN);                                   \
+      next = PKL_AST_CHAIN (elem);                      \
+      CHAIN = pkl_fold_1 (elem);                        \
+      last = (CHAIN);                                   \
+      elem = next;                                      \
+                                                        \
+      /* Process rest of the chain.  */                 \
+      while (elem)                                      \
+        {                                               \
+          next = PKL_AST_CHAIN (elem);                  \
+          PKL_AST_CHAIN (last) = pkl_fold_1 (elem);     \
+          last = PKL_AST_CHAIN (last);                  \
+          elem = next;                                  \
+        }                                               \
+    } while (0)
+
+static pkl_ast_node
+pkl_fold_1 (pkl_ast_node ast)
 {
   switch (PKL_AST_CODE (ast))
     {
@@ -187,11 +209,11 @@ pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
         pkl_ast_node new, op1 = NULL, op2 = NULL;
 
         if (PKL_AST_EXP_NUMOPS (ast) == 1)
-          op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
+          op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
         else if (PKL_AST_EXP_NUMOPS (ast) == 2)
           {
-            op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
-            op2 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 1));
+            op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
+            op2 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 1));
           }
         else
           assert (0);
@@ -265,7 +287,7 @@ pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
             {
               pkl_ast_node to_type;
               pkl_ast_node from_type;
-              op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
+              op1 = pkl_fold_1 (PKL_AST_EXP_OPERAND (ast, 0));
 
 #define CAST_TO(T)                                                      \
               do                                                        \
@@ -597,12 +619,104 @@ pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
 
         break;
       }
+    case PKL_AST_PROGRAM:
+      PKL_FOLD_CHAIN (PKL_AST_PROGRAM_ELEMS (ast));
+      break;
     case PKL_AST_COND_EXP:
-      /* XXX: writeme  */
+      PKL_AST_COND_EXP_COND (ast)
+        = pkl_fold_1 (PKL_AST_COND_EXP_COND (ast));
+      PKL_AST_COND_EXP_THENEXP (ast)
+        = pkl_fold_1 (PKL_AST_COND_EXP_THENEXP (ast));
+      PKL_AST_COND_EXP_ELSEEXP (ast)
+        = pkl_fold_1 (PKL_AST_COND_EXP_ELSEEXP (ast));
+      break;
+    case PKL_AST_ARRAY:
+      PKL_FOLD_CHAIN (PKL_AST_ARRAY_ELEMS (ast));
+      break;
+    case PKL_AST_ARRAY_ELEM:
+      PKL_AST_ARRAY_ELEM_EXP (ast)
+        = pkl_fold_1 (PKL_AST_ARRAY_ELEM_EXP (ast));
+      break;
+    case PKL_AST_ARRAY_REF:
+      PKL_AST_ARRAY_REF_ARRAY (ast)
+        = pkl_fold_1 (PKL_AST_ARRAY_REF_ARRAY (ast));
+      PKL_AST_ARRAY_REF_INDEX (ast)
+        = pkl_fold_1 (PKL_AST_ARRAY_REF_INDEX (ast));
+      break;
+    case PKL_AST_STRUCT:
+      PKL_FOLD_CHAIN (PKL_AST_STRUCT_ELEMS (ast));
+      break;
+    case PKL_AST_STRUCT_ELEM:
+      PKL_AST_STRUCT_ELEM_NAME (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_ELEM_NAME (ast));
+      PKL_AST_STRUCT_ELEM_EXP (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_ELEM_EXP (ast));
+      break;
+    case PKL_AST_STRUCT_REF:
+      PKL_AST_STRUCT_REF_STRUCT (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_REF_STRUCT (ast));
+      PKL_AST_STRUCT_REF_IDENTIFIER (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
+      break;
+    case PKL_AST_OFFSET:
+      PKL_AST_OFFSET_MAGNITUDE (ast)
+        = pkl_fold_1 (PKL_AST_OFFSET_MAGNITUDE (ast));
+      break;
+    case PKL_AST_TYPE:
+      {
+        switch (PKL_AST_TYPE_CODE (ast))
+          {
+          case PKL_TYPE_ARRAY:
+            PKL_AST_TYPE_A_NELEM (ast)
+              = pkl_fold_1 (PKL_AST_TYPE_A_NELEM (ast));
+            PKL_AST_TYPE_A_ETYPE (ast)
+              = pkl_fold_1 (PKL_AST_TYPE_A_ETYPE (ast));
+            break;
+          case PKL_TYPE_STRUCT:
+            PKL_AST_TYPE_S_ELEMS (ast)
+              = pkl_fold_1 (PKL_AST_TYPE_S_ELEMS (ast));
+            break;
+          case PKL_TYPE_OFFSET:
+            PKL_AST_TYPE_O_BASE_TYPE (ast)
+              = pkl_fold_1 (PKL_AST_TYPE_O_BASE_TYPE (ast));
+            break;
+          case PKL_TYPE_INTEGRAL:
+          case PKL_TYPE_STRING:
+            /* Nothing to fold.  */
+            break;
+          case PKL_TYPE_NOTYPE:
+          default:
+            assert (0);
+          }
+        break;
+      }
+    case PKL_AST_STRUCT_TYPE_ELEM:
+      PKL_AST_STRUCT_TYPE_ELEM_NAME (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_TYPE_ELEM_NAME (ast));
+      PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast)
+        = pkl_fold_1 (PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast));
+      break;
+    case PKL_AST_INTEGER:
+    case PKL_AST_STRING:
+    case PKL_AST_IDENTIFIER:
+      /* Nothing to fold.  */
+      break;
+    case PKL_AST_DECL:
+    case PKL_AST_ENUM:
+    case PKL_AST_ENUMERATOR:
+      /* Not yet needed/implemented.  */
       assert (0);
+      break;
     default:
       break;
     }
 
+  return ast;
+}
+
+pkl_ast
+pkl_fold (pkl_ast ast)
+{
+  ast->ast = pkl_fold_1 (ast->ast);
   return ast;
 }

@@ -571,10 +571,6 @@ struct pkl_ast_type
     } off;
     
   } val;
-
-  /* XXX */  
-  union pkl_ast_node *enumeration;
-  union pkl_ast_node *strt;
 };
 
 pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);

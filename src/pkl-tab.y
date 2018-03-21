@@ -1354,7 +1354,6 @@ finish_sizeof_type (struct pkl_parser *parser,
                      "sizeof only works on complete types");
       return NULL;
     }
-
   
   /* Calculate the size of the complete type in bytes and put it in an
      integer node.  */
