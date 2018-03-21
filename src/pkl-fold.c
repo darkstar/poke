@@ -24,311 +24,246 @@
 #include "pkl-ast.h"
 #include "pkl-parser.h"
 
-static pkl_ast_node
-pkl_fold_1 (struct pkl_parser *parser, pkl_ast_node ast)
-{
-  pkl_ast_node new, op1, op2;
 
+static inline uint64_t
+emul_or (uint64_t op1, uint64_t op2)
+{
+  return op1 || op2;
+}
+
+static inline uint64_t
+emul_ior (uint64_t op1, uint64_t op2)
+{
+  return op1 | op2;
+}
+
+static inline uint64_t
+emul_xor (uint64_t op1, uint64_t op2)
+{
+  return op1 ^ op2;
+}
+
+static inline uint64_t
+emul_and (uint64_t op1, uint64_t op2)
+{
+  return op1 && op2;
+}
+
+static inline uint64_t
+emul_band (uint64_t op1, uint64_t op2)
+{
+  return op1 & op2;
+}
+
+static inline uint64_t
+emul_eq (uint64_t op1, uint64_t op2)
+{
+  printf ("XXX %lu %ld\n", op1, op2);
+  return op1 == op2;
+}
+
+static inline uint64_t
+emul_eqs (const char *op1, const char *op2)
+{
+  return (strcmp (op1, op2) == 0);
+}
+
+static inline uint64_t
+emul_ne (uint64_t op1, uint64_t op2)
+{
+  return (op1 != op2);
+}
+
+static inline uint64_t
+emul_sl (uint64_t op1, uint64_t op2)
+{
+  /* XXX writeme */
+  assert (0);
+  return 0;
+}
+
+static inline uint64_t
+emul_sr (uint64_t op1, uint64_t op2)
+{
+  /* XXX writeme */
+  assert (0);
+  return 0;
+}
+
+static inline uint64_t
+emul_add (uint64_t op1, uint64_t op2)
+{
+  return op1 + op2;
+}
+
+static inline uint64_t
+emul_sub (uint64_t op1, uint64_t op2)
+{
+  return op1 - op2;
+}
+
+static inline uint64_t
+emul_mul (uint64_t op1, uint64_t op2)
+{
+  return op1 * op2;
+}
+
+static inline uint64_t
+emul_div (uint64_t op1, uint64_t op2)
+{
+  return op1 / op2;
+}
+
+static inline uint64_t
+emul_mod (uint64_t op1, uint64_t op2)
+{
+  return op1 % op2;
+}
+
+static inline uint64_t
+emul_lt (uint64_t op1, uint64_t op2)
+{
+  return op1 < op2;
+}
+
+static inline uint64_t
+emul_gt (uint64_t op1, uint64_t op2)
+{
+  return op1 > op2;
+}
+
+static inline uint64_t
+emul_le (uint64_t op1, uint64_t op2)
+{
+  return op1 <= op2;
+}
+
+static inline uint64_t
+emul_ge (uint64_t op1, uint64_t op2)
+{
+  return op1 >= op2;
+}
+
+#define OP_BINARY_INT(emul)                                             \
+  do                                                                    \
+    {                                                                   \
+      if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)                        \
+        {                                                               \
+          new = pkl_ast_make_integer (emul (PKL_AST_INTEGER_VALUE (op1), \
+                                            PKL_AST_INTEGER_VALUE (op2))); \
+          PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
+                                                                        \
+          ASTREF (ast);                                                 \
+          pkl_ast_node_free (ast);                                      \
+          ast = new;                                                    \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+#define OP_BINARY_STR(emul)                                             \
+  do                                                                    \
+    {                                                                   \
+      if (PKL_AST_CODE (op1) == PKL_AST_STRING)                         \
+        {                                                               \
+          new = pkl_ast_make_integer (emul (PKL_AST_STRING_POINTER (op1), \
+                                            PKL_AST_STRING_POINTER (op2))); \
+          PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
+                                                                        \
+          ASTREF (ast);                                                 \
+          pkl_ast_node_free (ast);                                      \
+          ast = new;                                                    \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+
+pkl_ast_node
+pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
+{
   switch (PKL_AST_CODE (ast))
     {
     case PKL_AST_EXP:
       {
+        pkl_ast_node new, op1 = NULL, op2 = NULL;
+
+        if (PKL_AST_EXP_NUMOPS (ast) == 1)
+          op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
+        else if (PKL_AST_EXP_NUMOPS (ast) == 2)
+          {
+            op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
+            op2 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 1));
+          }
+        else
+          assert (0);
+
         switch (PKL_AST_EXP_CODE (ast))
           {
             /* Binary operators.  */
           case PKL_AST_OP_OR:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              || PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_or);
+            break;
           case PKL_AST_OP_IOR:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              | PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }            
+            OP_BINARY_INT (emul_ior);
+            break;
           case PKL_AST_OP_XOR:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              ^ PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_xor);
+            break;
           case PKL_AST_OP_AND:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              && PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_and);
+            break;
           case PKL_AST_OP_BAND:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              & PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_band);
+            break;
           case PKL_AST_OP_EQ:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              == PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-              else if (PKL_AST_CODE (op1) == PKL_AST_STRING)
-                {
-                  new = pkl_ast_make_integer (strcmp (PKL_AST_STRING_POINTER (op1),
-                                                      PKL_AST_STRING_POINTER (op2)) == 0);
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_eq);
+            OP_BINARY_STR (emul_eqs);
+            break;
           case PKL_AST_OP_NE:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              != PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_ne);
+            break;
           case PKL_AST_OP_SL:
+            OP_BINARY_INT (emul_sl);
             break;
           case PKL_AST_OP_SR:
+            OP_BINARY_INT (emul_sr);
             break;
           case PKL_AST_OP_ADD:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              + PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_add);
+            break;
           case PKL_AST_OP_SUB:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              - PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_sub);
+            break;
           case PKL_AST_OP_MUL:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              * PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_mul);
+            break;
           case PKL_AST_OP_DIV:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              / PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_div);
+            break;
           case PKL_AST_OP_MOD:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              % PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_mod);
+            break;
           case PKL_AST_OP_LT:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              < PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_lt);
+            break;
           case PKL_AST_OP_GT:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              > PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_gt);
+            break;
           case PKL_AST_OP_LE:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              <= PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_le);
+            break;
           case PKL_AST_OP_GE:
-            {
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
-              op2 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 1));
-
-              if (PKL_AST_CODE (op1) == PKL_AST_INTEGER)
-                {
-                  new = pkl_ast_make_integer (PKL_AST_INTEGER_VALUE (op1)
-                                              >= PKL_AST_INTEGER_VALUE (op2));
-                  PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));
-
-                  pkl_ast_node_free (ast);
-                  ast = new;
-                }
-
-              break;
-            }
+            OP_BINARY_INT (emul_ge);
+            break;
           case PKL_AST_OP_SCONC:
+            /* XXX writeme */
             break;
           case PKL_AST_OP_MAP:
+            /* XXX: writeme */
           case PKL_AST_OP_CAST:
             {
               pkl_ast_node to_type;
               pkl_ast_node from_type;
-              op1 = pkl_fold_1 (parser, PKL_AST_EXP_OPERAND (ast, 0));
+              op1 = pkl_fold (parser, PKL_AST_EXP_OPERAND (ast, 0));
 
 #define CAST_TO(T)                                                      \
               do                                                        \
@@ -645,6 +580,9 @@ pkl_fold_1 (struct pkl_parser *parser, pkl_ast_node ast)
           case PKL_AST_OP_SIZEOF:
           case PKL_AST_OP_ELEMSOF:
           case PKL_AST_OP_TYPEOF:
+            /* There is no need to handle this here, since the
+               corresponding rules in pkl-tab.y do the folding.  */
+            break;
           case PKL_AST_OP_POS:
           case PKL_AST_OP_NEG:
           case PKL_AST_OP_BNOT:
@@ -665,11 +603,4 @@ pkl_fold_1 (struct pkl_parser *parser, pkl_ast_node ast)
     }
 
   return ast;
-}
-
-pkl_ast_node
-pkl_fold (struct pkl_parser *parser, pkl_ast_node ast)
-{
-  ASTREF (ast);
-  return pkl_fold_1 (parser, ast);
 }
