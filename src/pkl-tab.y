@@ -764,14 +764,14 @@ array_elem:
                   $$ = pkl_ast_make_array_elem (PKL_AST_ARRAY_NOINDEX,
                                                 $1);
                   /* Note how array elems do not have a type.  See
-                     `check_array' above.  */
+                     `finish_array' above.  */
                 }
         | '[' INTEGER ']' '=' expression
         	{
                   $$ = pkl_ast_make_array_elem (PKL_AST_INTEGER_VALUE ($2),
                                                 $5);
                   /* Note how array elems do not have a type.  See
-                     `check_array' above.  */
+                     `finish_array' above.  */
                 }
         ;
 
