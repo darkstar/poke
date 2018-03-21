@@ -222,8 +222,6 @@ program_elem:
                     /* Expressions are not valid top-level structures
                        in full poke programs.  */
                     YYERROR;
-                  /* XXX make constant folding conditional.  */
-                  $1 = pkl_fold (pkl_parser, $1);
                   $$ = $1;
                 }
 	| expression ','
@@ -232,8 +230,6 @@ program_elem:
                     /* Expressions are not valid top-level structures
                        in full poke programs.  */
                     YYERROR;
-                  /* XXX make constant folding conditional.  */
-                  $1 = pkl_fold (pkl_parser, $1);
                   $$ = pkl_ast_make_program ($1);
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
@@ -786,8 +782,7 @@ type_specifier:
                                      "invalid size in array type literal.");
                       YYERROR;
                     }
-                  $$ = pkl_ast_make_array_type (pkl_fold (pkl_parser, $3),
-                                                $1);
+                  $$ = pkl_ast_make_array_type ($3, $1);
                 }
 	| type_specifier '[' ']'
         	{
