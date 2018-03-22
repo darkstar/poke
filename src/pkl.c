@@ -28,10 +28,10 @@
 
 /* Compiler passes and phases.  */
 
-extern struct pkl_phase satan_phase;  /* pkl-satan.c  */
+extern struct pkl_phase satanize;  /* pkl-satan.c  */
 
 static struct pkl_phase *post_fold_phases[] =
-  { &satan_phase, NULL };
+  { &satanize, NULL };
 
 int
 pkl_compile_buffer (pvm_program *prog,

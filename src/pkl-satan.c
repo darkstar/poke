@@ -26,12 +26,12 @@
    constants!  */
 
 static pkl_ast_node
-pkl_devil_handle_integer (pkl_ast_node ast,
-                          void *data)
+pkl_satanize_integer (pkl_ast_node ast,
+                      void *data)
 {
   PKL_AST_INTEGER_VALUE (ast) = 666;
   return ast;
 }
 
-struct pkl_phase satan_phase =
-  { .code_handlers[PKL_AST_INTEGER] = pkl_devil_handle_integer };
+struct pkl_phase satanize =
+  { .code_handlers[PKL_AST_INTEGER] = pkl_satanize_integer };
