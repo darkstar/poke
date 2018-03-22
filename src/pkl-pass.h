@@ -94,7 +94,19 @@ struct pkl_phase
 
 typedef struct pkl_phase *pkl_phase;
 
+/* The following macro should be used in order to define phase
+   handlers.  */
+
+#define PKL_PHASE_HANDLER(name,...)             \
+  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast_node _ast, void *_data)
+
 /* The following macros are to be used in node handlers.
+
+   PKL_PASS_DATA expands to an l-value holding the data pointer passed
+   to `pkl_do_pass'.
+
+   PKL_PASS_AST expands to an l-value holding the AST of the node
+   being processed.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
@@ -102,8 +114,11 @@ typedef struct pkl_phase *pkl_phase;
    PKL_PASS_ERROR can be used in order to interrupt the execution of
    the compiler pass, making `pkl_do_pass' to return an error code.  */
 
-#define PKL_PASS_EXIT do { longjmp (toplevel, 1); } while (0)
-#define PKL_PASS_ERROR do { longjmp (toplevel, 2); } while (0)
+#define PKL_PASS_DATA _data
+#define PKL_PASS_AST _ast
+
+#define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
+#define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
    (or transformations) in sequence to each AST node.  USER is a

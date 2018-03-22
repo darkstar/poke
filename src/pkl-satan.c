@@ -26,19 +26,16 @@
    it triggers a compilation error if the anti-demonic constant 999 is
    found in the program.  */
 
-static pkl_ast_node
-pkl_satanize_integer (jmp_buf toplevel,
-                      pkl_ast_node ast,
-                      void *data)
+PKL_PHASE_HANDLER (pkl_satanize_integer)
 {
-  if (PKL_AST_INTEGER_VALUE (ast) == 999)
+  if (PKL_AST_INTEGER_VALUE (PKL_PASS_AST) == 999)
     {
       printf ("error: Satan doesn't like 999\n");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_INTEGER_VALUE (ast) = 666;
-  return ast;
+  PKL_AST_INTEGER_VALUE (PKL_PASS_AST) = 666;
+  return PKL_PASS_AST;
 }
 
 struct pkl_phase satanize =
