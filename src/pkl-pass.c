@@ -54,27 +54,28 @@
                                                                 \
       /* XXX: handle errors. */                                 \
       while ((phase = va_arg (VALIST, pkl_phase)))              \
-        ast                                                     \
-          = phase->CLASS##_handlers[(DISCR)] (ast, data);       \
+        if (phase->CLASS##_handlers[(DISCR)])                   \
+          {                                                     \
+            ast                                                 \
+              = phase->CLASS##_handlers[(DISCR)] (ast, data);   \
+          }                                                     \
     }                                                           \
   while (0)
 
 static pkl_ast_node
 pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
 {
-  va_list phases, phases2, phases3;
+  va_list phases;
   pkl_ast_node ast_orig = ast;
+  int astcode = PKL_AST_CODE (ast);
 
   va_start (phases, data);
-  va_copy (phases, phases2);
-  va_copy (phases, phases3);
-  
-  switch (PKL_AST_CODE (ast))
+
+  /* Visit child nodes first in a depth-first fashion.  */
+  switch (astcode)
     {
     case PKL_AST_EXP:
       {
-        int opcode = PKL_AST_EXP_CODE (ast);
-
         if (PKL_AST_EXP_NUMOPS (ast) > 1)
           PKL_AST_EXP_OPERAND (ast, 0)
             = pkl_do_pass_1 (PKL_AST_EXP_OPERAND (ast, 0), data,
@@ -83,28 +84,10 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
           PKL_AST_EXP_OPERAND (ast, 1)
             = pkl_do_pass_1 (PKL_AST_EXP_OPERAND (ast, 1), data,
                              phases);
-        
-
-#define PKL_DEF_OP(ocode, str)                                          \
-          case ocode:                                                   \
-            PKL_CALL_PHASES (op, ocode, phases3);                       \
-            break;
-
-        switch (opcode)
-          {
-#include "pkl-ops.def"
-          default:
-            assert (0);
-          }
-#undef PKL_DEF_OP
-
-        /* CALL PHASES for specific operators.  */
-        PKL_CALL_PHASES (code, PKL_AST_EXP, phases2);
         break;
       }
     case PKL_AST_PROGRAM:
       PKL_PASS_CHAIN (PKL_AST_PROGRAM_ELEMS (ast));
-      PKL_CALL_PHASES (code, PKL_AST_PROGRAM, phases2);
       break;
     case PKL_AST_COND_EXP:
       PKL_AST_COND_EXP_COND (ast)
@@ -116,18 +99,14 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       PKL_AST_COND_EXP_ELSEEXP (ast)
         = pkl_do_pass_1 (PKL_AST_COND_EXP_ELSEEXP (ast), data,
                          phases);
-
-      PKL_CALL_PHASES (code, PKL_AST_COND_EXP, phases2);
       break;
     case PKL_AST_ARRAY:
       PKL_PASS_CHAIN (PKL_AST_ARRAY_ELEMS (ast));
-      PKL_CALL_PHASES (code, PKL_AST_ARRAY, phases2);
       break;
     case PKL_AST_ARRAY_ELEM:
       PKL_AST_ARRAY_ELEM_EXP (ast)
         = pkl_do_pass_1 (PKL_AST_ARRAY_ELEM_EXP (ast), data,
                          phases);
-      PKL_CALL_PHASES (code, PKL_AST_ARRAY_ELEM, phases2);
       break;
     case PKL_AST_ARRAY_REF:
       PKL_AST_ARRAY_REF_ARRAY (ast)
@@ -136,11 +115,9 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       PKL_AST_ARRAY_REF_INDEX (ast)
         = pkl_do_pass_1 (PKL_AST_ARRAY_REF_INDEX (ast), data,
                          phases);
-      PKL_CALL_PHASES (code, PKL_AST_ARRAY_REF, phases2);
       break;
     case PKL_AST_STRUCT:
       PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (ast));
-      PKL_CALL_PHASES (code, PKL_AST_STRUCT, phases2);
       break;
     case PKL_AST_STRUCT_ELEM:
       PKL_AST_STRUCT_ELEM_NAME (ast)
@@ -149,7 +126,6 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       PKL_AST_STRUCT_ELEM_EXP (ast)
         = pkl_do_pass_1 (PKL_AST_STRUCT_ELEM_EXP (ast), data,
                          phases);
-      PKL_CALL_PHASES (code, PKL_AST_STRUCT_ELEM, phases2);
       break;
     case PKL_AST_STRUCT_REF:
       PKL_AST_STRUCT_REF_STRUCT (ast)
@@ -158,19 +134,14 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       PKL_AST_STRUCT_REF_IDENTIFIER (ast)
         = pkl_do_pass_1 (PKL_AST_STRUCT_REF_IDENTIFIER (ast), data,
                          phases);
-      PKL_CALL_PHASES (code, PKL_AST_STRUCT_REF, phases2);
       break;
     case PKL_AST_OFFSET:
       PKL_AST_OFFSET_MAGNITUDE (ast)
         = pkl_do_pass_1 (PKL_AST_OFFSET_MAGNITUDE (ast), data,
                          phases);
-
-      PKL_CALL_PHASES (code, PKL_AST_OFFSET, phases2);
       break;
     case PKL_AST_TYPE:
       {
-        int typecode = PKL_AST_TYPE_CODE (ast);
-
         switch (PKL_AST_TYPE_CODE (ast))
           {
           case PKL_TYPE_ARRAY:
@@ -180,35 +151,24 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
             PKL_AST_TYPE_A_ETYPE (ast)
               = pkl_do_pass_1 (PKL_AST_TYPE_A_ETYPE (ast), data,
                                phases);
-
-            PKL_CALL_PHASES (type, typecode, phases3);
             break;
           case PKL_TYPE_STRUCT:
             PKL_AST_TYPE_S_ELEMS (ast)
               = pkl_do_pass_1 (PKL_AST_TYPE_S_ELEMS (ast), data,
                                phases);
-
-            PKL_CALL_PHASES (type, typecode, phases3);
             break;
           case PKL_TYPE_OFFSET:
             PKL_AST_TYPE_O_BASE_TYPE (ast)
               = pkl_do_pass_1 (PKL_AST_TYPE_O_BASE_TYPE (ast), data,
                                phases);
-
-            PKL_CALL_PHASES (type, typecode, phases3);
             break;
           case PKL_TYPE_INTEGRAL:
-            PKL_CALL_PHASES (type, typecode, phases3);
-            break;
           case PKL_TYPE_STRING:
-            PKL_CALL_PHASES (type, typecode, phases3);
-            break;
           case PKL_TYPE_NOTYPE:
+            break;
           default:
             assert (0);
           }
-
-        PKL_CALL_PHASES (code, PKL_AST_TYPE, phases2);
         break;
       }
     case PKL_AST_STRUCT_TYPE_ELEM:
@@ -218,30 +178,55 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast)
         = pkl_do_pass_1 (PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast), data,
                          phases);
-      /* CALL PHASES */
       break;
     case PKL_AST_INTEGER:
-      /* CALL PHASES */
-      break;
     case PKL_AST_STRING:
-      /* CALL PHASES */
-      break;
     case PKL_AST_IDENTIFIER:
-      /* CALL PHASES */
-      break;
     case PKL_AST_DECL:
-      /* CALL PHASES */
-      break;
     case PKL_AST_ENUM:
-      /* CALL PHASES */
-      break;
     case PKL_AST_ENUMERATOR:
-      /* CALL PHASES */
       break;
     default:
-      break;
+      assert (0);
     }
 
+  va_end (phases);
+
+  /* Call the phase handlers defined for specific opcodes.  */
+  if (astcode == PKL_AST_EXP)
+    {
+      int opcode = PKL_AST_EXP_CODE (ast);
+        
+#define PKL_DEF_OP(ocode, str)                                          \
+          case ocode:                                                   \
+            PKL_CALL_PHASES (op, ocode, phases);                       \
+            break;
+
+      va_start (phases, data);
+      switch (opcode)
+        {
+#include "pkl-ops.def"
+        default:
+          assert (0);
+        }
+#undef PKL_DEF_OP
+
+      va_end (phases);
+    }
+
+  /* Call the phase handlers defined for specific types.  */
+  if (astcode == PKL_AST_TYPE)
+    {
+      int typecode = PKL_AST_TYPE_CODE (ast);
+
+      va_start (phases, data);
+      PKL_CALL_PHASES (type, typecode, phases);
+      va_end (phases);
+    }
+
+  /* Call the phase handlers defined for node codes.  */
+  va_start (phases, data);
+  PKL_CALL_PHASES (code, astcode, phases);
   va_end (phases);
 
   /* If a new node was created to replace the incoming node, increase
