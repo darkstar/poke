@@ -42,7 +42,7 @@
                   /* Restart the subtree with the rest of the phases. */ \
                   node = pkl_do_pass_1 (toplevel, ast, node, data, phases + i + 1); \
                   /* goto restart */                                    \
-                  break;;                                               \
+                  break;                                                \
                 }                                                       \
             }                                                           \
           i++;                                                          \
