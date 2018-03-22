@@ -71,21 +71,6 @@ pkl_tab_error (YYLTYPE *llocp,
    after the rules section.  See the comments at the definition of the
    functions for information about what they do.  */
 
-
-static int promote_to_integral (size_t size, int sign, pkl_ast ast,
-                                pkl_ast_node *a);
-
-static int promote_to_bool (pkl_ast ast, pkl_ast_node *a);
-
-static int promote_to_ulong (pkl_ast ast, pkl_ast_node *a);
-
-static int promote_operands_binary (pkl_ast ast,
-                                    pkl_ast_node *a,
-                                    pkl_ast_node *b,
-                                    int allow_strings,
-                                    int allow_arrays,
-                                    int allow_structs);
-
 static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
                                   pkl_ast_node elems);
@@ -249,14 +234,6 @@ expression:
 	  primary
         | unary_operator expression %prec UNARY
           	{
-                  if (($1 == PKL_AST_OP_NOT
-                       && !promote_to_bool (pkl_parser->ast, &$2))
-                      || (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($2)) != PKL_TYPE_INTEGRAL))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operand to unary operator.");
-                        YYERROR;
-                    }
                   $$ = pkl_ast_make_unary_exp ($1, $2);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
                 }
@@ -321,307 +298,112 @@ expression:
 */
         | expression '+' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to '+'.");
-                      YYERROR;
-                    }
-
-
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '-' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to '-'.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '*' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to '*'.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '/' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to '/'.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '%' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to '%'.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SL expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to <<");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SR expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to >>");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression EQ expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to ==");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression NE expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to !=");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '<' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to <");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '>' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to >");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression LE expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to <=");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression GE expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                1 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to >=");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '|' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to |");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '^' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to ^");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression '&' expression
         	{
-                  if (!promote_operands_binary (pkl_parser->ast,
-                                                &$1, &$3,
-                                                0 /* allow_strings */,
-                                                0 /* allow_arrays */,
-                                                0 /* allow_structs */))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to &");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression AND expression
         	{
-                  if (!promote_to_bool (pkl_parser->ast, &$1)
-                      || !promote_to_bool (pkl_parser->ast, &$3))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to &&");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression OR expression
         	{
-                  if (!promote_to_bool (pkl_parser->ast, &$1)
-                      || !promote_to_bool (pkl_parser->ast, &$3))
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "invalid operators to ||");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
-/*        | expression '@' expression
-        	{
-                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($1)) == 0)
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "expected type in mapping.");
-                      YYERROR;
-                    }
-                  if (!promote_to_ulong (pkl_parser->ast, &$3))
-                    {
-                      pkl_tab_error (&@3, pkl_parser,
-                                     "invalid IO offset in mapping.");
-                      YYERROR;
-                    }
-		  $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MAP,
-                                                $1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF ($1);
-                }
-*/
         | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
 	| '[' expression IDENTIFIER ']'
@@ -691,11 +473,7 @@ primary:
                                      "operator to [] must be an array.");
                       YYERROR;
                     }
-                  if (!promote_to_ulong (pkl_parser->ast, &$3))
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "invalid index in array reference.");
-                    }
+
                   $$ = pkl_ast_make_array_ref ($1, $3);
                   PKL_AST_TYPE ($$) =
                     ASTREF (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE ($1)));
@@ -775,12 +553,6 @@ type_specifier:
 	  TYPENAME
         | type_specifier '[' expression ']'
           	{
-                  if (!promote_to_ulong (pkl_parser->ast, &$3))
-                    {
-                      pkl_tab_error (&@3, pkl_parser,
-                                     "invalid size in array type literal.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_array_type ($3, $1);
                 }
 	| type_specifier '[' ']'
@@ -978,144 +750,6 @@ enumerator:
 */
 
 %%
-
-/* Promote a given node AST to an integral type of width SIZE and sign
-   SIGN, if possible.  Put the resulting node in A.  Return 1 if the
-   promotion was successful, 0 otherwise.  */
-
-static int
-promote_to_integral (size_t size, int sign,
-                     pkl_ast ast, pkl_ast_node *a)
-{
-  pkl_ast_node type = PKL_AST_TYPE (*a);
-  
-  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
-    {
-      if (PKL_AST_TYPE_I_SIZE (type) != size
-          || PKL_AST_TYPE_I_SIGNED (type) != sign)
-        {
-          pkl_ast_node desired_type
-            = pkl_ast_get_integral_type (ast, size, sign);
-          *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
-          PKL_AST_TYPE (*a) = ASTREF (desired_type);
-        }
-
-      return 1;
-    }
-
-  return 0;
-}
-
-/* Promote a given node AST to a bool type, if possible.  Put the
-   resulting node in A.  Return 1 if the promotion was successful, 0
-   otherwise.  */
-
-static int
-promote_to_bool (pkl_ast ast, pkl_ast_node *a)
-{
-  return promote_to_integral (32, 1, ast, a);
-}
-
-/* Promote a given node AST to an unsigned long type, if possible.
-   Put the resulting node in A.  Return 1 if the promotion was
-   successful, 0 otherwise.  */
-
-static int
-promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
-{
-  return promote_to_integral (64, 0, ast, a);
-}
-
-/* Promote the arguments to a binary operand to satisfy the language
-   restrictions.  Put the resulting nodes in A and B.  Return 1 if the
-   promotions were successful, 0 otherwise.  */
-
-static int
-promote_operands_binary (pkl_ast ast,
-                         pkl_ast_node *a,
-                         pkl_ast_node *b,
-                         int allow_strings,
-                         int allow_arrays,
-                         int allow_structs)
-{
-  pkl_ast_node *to_promote_a = NULL;
-  pkl_ast_node *to_promote_b = NULL;
-  pkl_ast_node ta = PKL_AST_TYPE (*a);
-  pkl_ast_node tb = PKL_AST_TYPE (*b);
-  size_t size_a;
-  size_t size_b;
-  int sign_a;
-  int sign_b;
-
-  /* Both arguments should be either integrals, strings, arrays or
-     structs.  */
-
-  if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
-    return 0;
-
-  if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
-      || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
-      || (!allow_structs && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRUCT))
-    return 0;
-
-
-  if (!(PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL))
-    /* No need to promote non-integral types.  */
-    return 1;
-
-  /* Handle promotion of integral operands.  The rules are:
-
-     - If one operand is narrower than the other, it is promoted to
-       have the same width.  
-
-     - If one operand is unsigned and the other signed, the signed
-       operand is promoted to unsigned.  */
-
-  size_a = PKL_AST_TYPE_I_SIZE (ta);
-  size_b = PKL_AST_TYPE_I_SIZE (tb);
-  sign_a = PKL_AST_TYPE_I_SIGNED (ta);
-  sign_b = PKL_AST_TYPE_I_SIGNED (tb);
-
-  if (size_a > size_b)
-    {
-      size_b = size_a;
-      to_promote_b = b;
-    }
-  else if (size_a < size_b)
-    {
-      size_a = size_b;
-      to_promote_a = a;
-    }
-
-  if (sign_a == 0 && sign_b == 1)
-    {
-      sign_b = 0;
-      to_promote_b = b;
-    }
-  else if (sign_a == 1 && sign_b == 0)
-    {
-      sign_a = 0;
-      to_promote_a = b;
-    }
-
-  if (to_promote_a != NULL)
-    {
-      pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_a, sign_a);
-      *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
-      PKL_AST_TYPE (*a) = ASTREF (t);
-    }
-
-  if (to_promote_b != NULL)
-    {
-      pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_b, sign_b);
-      *b = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *b);
-      PKL_AST_TYPE (*b) = ASTREF (t);
-    }
-
-  return 1;
-}
 
 /* Finish an array and return it.  Check that the types of all the
    array elements are the same, and derive the type of the array from

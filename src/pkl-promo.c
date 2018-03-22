@@ -44,6 +44,7 @@ promote_to_integral (size_t size, int sign,
             = pkl_ast_get_integral_type (ast, size, sign);
           *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
+          ASTREF (*a);
         }
 
       return 1;
@@ -165,7 +166,7 @@ promote_operands_binary (pkl_ast ast,
   return 1;
 
  error:
-  fprintf (stderr, "error: invalid operands to expression");
+  fprintf (stderr, "error: invalid operands to expression\n");
   return 0;
 }
 
@@ -211,7 +212,7 @@ PKL_PHASE_HANDLER (pkl_promo_binary_bool)
   if (!promote_to_bool (PKL_PASS_AST, &op1)
       || !promote_to_bool (PKL_PASS_AST, &op2))
     {
-      fprintf (stderr, "error: invalid arguments to expression\n");
+      fprintf (stderr, "error: operator requires boolean arguments\n");
       PKL_PASS_ERROR;
     }
 
@@ -219,6 +220,24 @@ PKL_PHASE_HANDLER (pkl_promo_binary_bool)
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1) = op2;
   return PKL_PASS_NODE;
 }
+
+/* Handler for unary operations whose operand should be a boolean
+   value.  */
+
+PKL_PHASE_HANDLER (pkl_promo_unary_bool)
+{
+  pkl_ast_node op = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+
+  if (!promote_to_bool (PKL_PASS_AST, &op))
+    {
+      fprintf (stderr, "error: operator requires a boolean argument\n");
+      PKL_PASS_ERROR;
+    }
+
+  PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op;
+  return PKL_PASS_NODE;
+}
+
 
 /* Handler for promoting indexes in array references to unsigned 64
    bit values.  */
@@ -273,6 +292,7 @@ struct pkl_phase pkl_phase_promo =
     .op_df_handlers[PKL_AST_OP_BAND] = pkl_promo_binary_int,
     .op_df_handlers[PKL_AST_OP_AND] = pkl_promo_binary_bool,
     .op_df_handlers[PKL_AST_OP_OR] = pkl_promo_binary_bool,
+    .op_df_handlers[PKL_AST_OP_NOT] = pkl_promo_unary_bool,
     .op_df_handlers[PKL_AST_ARRAY_REF] = pkl_promo_array_ref,
     .type_df_handlers[PKL_TYPE_ARRAY] = pkl_promo_type_array,
   };
