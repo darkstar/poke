@@ -254,6 +254,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, struct pkl_phase *phases[])
 pkl_ast
 pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[])
 {
+  /* XXX setjmp here for error handling.  */
   ast->ast = pkl_do_pass_1 (ast->ast, data, phases);
   return ast;
 }
