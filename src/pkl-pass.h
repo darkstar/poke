@@ -77,7 +77,7 @@
 typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast ast,
                                               pkl_ast_node node,
-                                              void *data,
+                                              void *payload,
                                               int *restart);
 
 struct pkl_phase
@@ -97,8 +97,8 @@ typedef struct pkl_phase *pkl_phase;
 
 /* The following macros are to be used in node handlers.
 
-   PKL_PASS_DATA expands to an l-value holding the data pointer passed
-   to `pkl_do_pass'.
+   PKL_PASS_PAYLOAD expands to an l-value holding the data pointer
+   passed to `pkl_do_pass'.
 
    PKL_PASS_AST expands to an l-value holding the pkl_ast value
    corresponding to the AST being processed.
@@ -120,7 +120,7 @@ typedef struct pkl_phase *pkl_phase;
    Please make sure to any node you create unless they are linked to
    the AST.  Otherwise you will leak memory.  */
 
-#define PKL_PASS_DATA _data
+#define PKL_PASS_PAYLOAD _payload
 #define PKL_PASS_AST _ast
 #define PKL_PASS_NODE _node
 #define PKL_PASS_RESTART (*_restart)
@@ -133,7 +133,7 @@ typedef struct pkl_phase *pkl_phase;
 
 #define PKL_PHASE_BEGIN_HANDLER(name)                                   \
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
-                            pkl_ast_node _node, void *_data,            \
+                            pkl_ast_node _node, void *_payload,         \
                             int *_restart)                              \
   {                                                                     \
      PKL_PASS_RESTART = 0;
@@ -143,9 +143,13 @@ typedef struct pkl_phase *pkl_phase;
   }
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
-   (or transformations) in sequence to each AST node.  USER is a
-   pointer that will be passed to the node handlers defined in the
-   array PHASES, which should be NULL terminated.
+   (or transformations) in sequence to each AST node.
+   
+   PHASES is a NULL-terminated array of pointers to node handlers.
+
+   PAYLOADS is an array of pointers to payloads, which will be passed
+   to the node handlers occupying the same position in the PHASES
+   array.
 
    Running several phases in parallel in the same pass is good for
    performance.  However, there is an important consideration: if a
@@ -155,6 +159,7 @@ typedef struct pkl_phase *pkl_phase;
    Return 0 if some error occurred during the pass execution.  Return
    1 otherwise.  */
 
-int pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[]);
+int pkl_do_pass (pkl_ast ast,
+                 struct pkl_phase *phases[], void *payloads[]);
 
 #endif /* PKL_PASS_H  */
