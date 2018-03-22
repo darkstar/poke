@@ -34,7 +34,6 @@
 #include <assert.h>
 
 #include "pkl-ast.h"
-#include "pkl-fold.h"
 #include "pkl-parser.h" /* For struct pkl_parser.  */
 #define YYDEBUG 1
 #include "pkl-tab.h"

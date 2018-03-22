@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* This file defines a compiler phase that promotes the operands of
+/* This file implements a compiler phase that promotes the operands of
    expressions in order to satisfy the compiler backend
    restrictions.  */
 

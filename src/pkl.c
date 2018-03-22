@@ -23,16 +23,13 @@
 #include "pkl.h"
 #include "pkl-gen.h"
 #include "pkl-parser.h"
-#include "pkl-fold.h"
 #include "pkl-pass.h"
 
 /* Compiler passes and phases.  */
 
 extern struct pkl_phase satanize;  /* pkl-satan.c  */
 extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
-
-static struct pkl_phase *compiler_phases[] =
-  { &pkl_phase_promo, NULL };
+extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -51,21 +48,34 @@ pkl_compile_buffer (pvm_program *prog,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  /* XXX */
-  pkl_ast_print (stdout, ast->ast);
+  if (1) /* Multi-pass.  */
+    {
+      struct pkl_phase *promo_pass[] =
+        { &pkl_phase_promo, NULL };
+      struct pkl_phase *fold_pass[] =
+        { &pkl_phase_fold, NULL };
 
-  /* Run the rest of the compile phases.  */
-  ret = pkl_do_pass (ast, NULL, compiler_phases);
-  if (!ret)
-    goto error;
-  
-  fprintf (stdout, "===========  PROMOTING ======\n");
-  pkl_ast_print (stdout, ast->ast);
+      pkl_ast_print (stdout, ast->ast);
 
-  
-  ast = pkl_fold (ast);
-  fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
-  pkl_ast_print (stdout, ast->ast);
+      fprintf (stdout, "===========  PROMOTING ======\n");
+      if (!pkl_do_pass (ast, NULL, promo_pass))
+        goto error;
+      pkl_ast_print (stdout, ast->ast);
+      
+      fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
+      if (!pkl_do_pass (ast, NULL, fold_pass))
+        goto error;
+      pkl_ast_print (stdout, ast->ast);
+    }
+  else
+    {
+      struct pkl_phase *compiler_phases[] =
+        { &pkl_phase_promo, &pkl_phase_fold, NULL };
+
+      /* Run the rest of the compile phases.  */
+      if (!pkl_do_pass (ast, NULL, compiler_phases))
+        goto error;
+    }
 
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
