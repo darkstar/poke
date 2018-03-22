@@ -75,7 +75,8 @@
    then no action is performed on a node other than traversing it.  */
 
 typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
-                                              pkl_ast_node ast,
+                                              pkl_ast ast,
+                                              pkl_ast_node node,
                                               void *data);
 
 struct pkl_phase
@@ -97,15 +98,19 @@ typedef struct pkl_phase *pkl_phase;
    handlers.  */
 
 #define PKL_PHASE_HANDLER(name)                                         \
-  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast_node _ast, void *_data)
+  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
+                            pkl_ast_node _node, void *_data)
 
 /* The following macros are to be used in node handlers.
 
    PKL_PASS_DATA expands to an l-value holding the data pointer passed
    to `pkl_do_pass'.
 
-   PKL_PASS_AST expands to an l-value holding the AST of the node
-   being processed.
+   PKL_PASS_AST expands to an l-value holding the pkl_ast value
+   corresponding to the AST being processed.
+
+   PKL_PASS_NODE expands to an l-value holding the pkl_ast_node for
+   the being processed.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
@@ -115,6 +120,7 @@ typedef struct pkl_phase *pkl_phase;
 
 #define PKL_PASS_DATA _data
 #define PKL_PASS_AST _ast
+#define PKL_PASS_NODE _node
 
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)

@@ -28,14 +28,14 @@
 
 PKL_PHASE_HANDLER (pkl_satanize_integer)
 {
-  if (PKL_AST_INTEGER_VALUE (PKL_PASS_AST) == 999)
+  if (PKL_AST_INTEGER_VALUE (PKL_PASS_NODE) == 999)
     {
       printf ("error: Satan doesn't like 999\n");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_INTEGER_VALUE (PKL_PASS_AST) = 666;
-  return PKL_PASS_AST;
+  PKL_AST_INTEGER_VALUE (PKL_PASS_NODE) = 666;
+  return PKL_PASS_NODE;
 }
 
 struct pkl_phase satanize =
