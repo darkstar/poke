@@ -194,6 +194,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
   pkl_ast_node node_orig = node;
   int node_code = PKL_AST_CODE (node);
 
+  /* If there are no passes then there is nothing to do. */
+  if (phases == NULL)
+    return node;
+
   /* Call the breadth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, data, phases,
                                  PKL_PASS_BREADTH_FIRST);
