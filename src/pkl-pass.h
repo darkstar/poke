@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <setjmp.h>
 #include "pkl-ast.h"
 
 /* A `pass' is a complete run over a given AST.  A `phase' is an
@@ -30,23 +31,39 @@
    in the AST.  One pass may integrate several phases.
 
    Implementing a phase involves defining a struct pkl_phase variable
-   and filling it up.  Like Gaul, a pkl_hase contains four tables:
+   and filling it up.  A pkl_hase struct contains:
 
-   - A table indexed by node codes, which must be values in the
-     `pkl_ast_code' enumeration defined in pkl-ast.h.  For example,
-     PKL_AST_ARRAY.
+   - CODE_DF_HANDLERS is a table indexed by node codes, which must be
+     values in the `pkl_ast_code' enumeration defined in pkl-ast.h.
+     For example, PKL_AST_ARRAY.  It maps codes to
+     pkl_phase_handler_fn functions.
 
-   - A table indexed by operator codes, which must be values in the
-     `pkl_ast_op' enumeration defined in pkl-ast.h.  This enumeration
-     is in turn generated from the operators defined in pkl-ops.def.
-     For example, PKL_AST_OP_ADD.
+   - OP_DF_HANDLERS is a table indexed by operator codes, which must
+     be values in the `pkl_ast_op' enumeration defined in pkl-ast.h.
+     This enumeration is in turn generated from the operators defined
+     in pkl-ops.def.  For example, PKL_AST_OP_ADD.  It maps codes to
+     pkl_phase_handler_fn functions.
 
-   - A table indexed by type codes, which must be values in the
-     `pkl_ast_type_code' enumeration defined in pkl-ast.h. For
-     example, PKL_TYPE_STRING.
+   - TYPE_DF_HANDLERS a table is indexed by type codes, which must be
+     values in the `pkl_ast_type_code' enumeration defined in
+     pkl-ast.h. For example, PKL_TYPE_STRING.  It maps codes to
+     pkl_phase_handler_fn functions.
 
-   These tables map codes to node handlers.  Each node handler must
-   follow the function prototype declared below.
+   - DEFAULT_DF_HANDLER is invoked for every node.  It can be NULL,
+     meaning no default handler is invoked at all.  It maps codes to
+     pkl_phase_handler_fn functions.
+
+   The handlers defined in the tables above are invoked while
+   traversing the AST in depth-first order.  Additional tables exist
+   to define handlers that are executed while traversing the AST in
+   breadth-first order:
+
+   - CODE_BF_HANDLERS
+   - OP_BF_HANDLERS
+   - TYPE_BF_HANDLERS
+   - DEFAULT_BF_HANDLERS
+
+   A given phase can define handlers of both types: DF and BF.
 
    Note that if a given node class falls in several categories as
    implemented in the handlers tables, the more general handler will
@@ -55,33 +72,47 @@
    handler in `type_handlers' will be invoked first, followed by the
    handler in `code_handlers'.
 
-   DEFAULT_HANDLER, if defined, is invoked for every node.
-
    If the default handler is NULL and no other handler is executed,
    then no action is performed on a node other than traversing it.  */
 
-typedef pkl_ast_node (*pkl_phase_handler_fn) (pkl_ast_node ast,
+typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
+                                              pkl_ast_node ast,
                                               void *data);
 
 struct pkl_phase
 {
-  pkl_phase_handler_fn default_handler;
+  pkl_phase_handler_fn default_df_handler;
+  pkl_phase_handler_fn code_df_handlers[PKL_AST_LAST];
+  pkl_phase_handler_fn op_df_handlers[PKL_AST_OP_LAST];
+  pkl_phase_handler_fn type_df_handlers[PKL_TYPE_NOTYPE];
 
-  pkl_phase_handler_fn code_handlers[PKL_AST_LAST];
-  pkl_phase_handler_fn op_handlers[PKL_AST_OP_LAST];
-  pkl_phase_handler_fn type_handlers[PKL_TYPE_NOTYPE];
+  pkl_phase_handler_fn default_bf_handler;
+  pkl_phase_handler_fn code_bf_handlers[PKL_AST_LAST];
+  pkl_phase_handler_fn op_bf_handlers[PKL_AST_OP_LAST];
+  pkl_phase_handler_fn type_bf_handlers[PKL_TYPE_NOTYPE];
 };
 
 typedef struct pkl_phase *pkl_phase;
 
+/* The following macros are to be used in node handlers.
+   
+   PKL_PASS_EXIT can be used in order to interrupt the execution of
+   the compiler pass.
+
+   PKL_PASS_ERROR can be used in order to interrupt the execution of
+   the compiler pass, making `pkl_do_pass' to return an error code.  */
+
+#define PKL_PASS_EXIT do { longjmp (toplevel, 1); } while (0)
+#define PKL_PASS_ERROR do { longjmp (toplevel, 2); } while (0)
+
 /* Traverse AST in a depth-first fashion, applying the provided phases
    (or transformations) in sequence to each AST node.  USER is a
    pointer that will be passed to the node handlers defined in the
-   array PHASES, which should be NULL terminated.  Return the
-   traversed AST.
-   
-   XXX: error handling.  */
+   array PHASES, which should be NULL terminated.
 
-pkl_ast pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[]);
+   Return 0 if some error occurred during the pass execution.  Return
+   1 otherwise.  */
+
+int pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[]);
 
 #endif /* PKL_PASS_H  */

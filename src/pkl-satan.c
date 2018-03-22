@@ -21,17 +21,25 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
-/* This is the compiler phase of Satan: it turns every integral
-   constant in the program into 666, and it also overflows 8-bit
-   constants!  */
+/* This is Satan's compiler phase: it turns every integral constant in
+   the program into 666, and it also overflows 8-bit constants!  Also,
+   it triggers a compilation error if the anti-demonic constant 999 is
+   found in the program.  */
 
 static pkl_ast_node
-pkl_satanize_integer (pkl_ast_node ast,
+pkl_satanize_integer (jmp_buf toplevel,
+                      pkl_ast_node ast,
                       void *data)
 {
+  if (PKL_AST_INTEGER_VALUE (ast) == 999)
+    {
+      printf ("error: Satan doesn't like 999\n");
+      PKL_PASS_ERROR;
+    }
+
   PKL_AST_INTEGER_VALUE (ast) = 666;
   return ast;
 }
 
 struct pkl_phase satanize =
-  { .code_handlers[PKL_AST_INTEGER] = pkl_satanize_integer };
+  { .code_df_handlers[PKL_AST_INTEGER] = pkl_satanize_integer };

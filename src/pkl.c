@@ -55,7 +55,10 @@ pkl_compile_buffer (pvm_program *prog,
   fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
   pkl_ast_print (stdout, ast->ast);
 
-  ast = pkl_do_pass (ast, NULL, post_fold_phases);
+  ret = pkl_do_pass (ast, NULL, post_fold_phases);
+  if (!ret)
+    goto error;
+  
   fprintf (stdout, "===========  SATANIZING ======\n");
   pkl_ast_print (stdout, ast->ast);
 
