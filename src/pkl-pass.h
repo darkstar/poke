@@ -60,10 +60,10 @@
    handler in `type_handlers' will be invoked first, followed by the
    handler in `code_handlers'.
 
-   If there is not a handler registered for a given node class, then
-   DEFAULT_HANDLER is invoked if it is defined.  If the default
-   handler is NULL then no action is performed on the node other than
-   traversing it.  */
+   DEFAULT_HANDLER, if defined, is invoked for every node.
+
+   If the default handler is NULL and no other handler is executed,
+   then no action is performed on a node other than traversing it.  */
 
 typedef pkl_ast_node (*pkl_phase_handler_fn) (pkl_ast_node ast,
                                               void *data);
