@@ -116,7 +116,9 @@ typedef struct pkl_phase *pkl_phase;
    the compiler pass.
 
    PKL_PASS_ERROR can be used in order to interrupt the execution of
-   the compiler pass, making `pkl_do_pass' to return an error code.  */
+   the compiler pass, making `pkl_do_pass' to return an error code.
+   Please make sure to any node you create unless they are linked to
+   the AST.  Otherwise you will leak memory.  */
 
 #define PKL_PASS_DATA _data
 #define PKL_PASS_AST _ast
