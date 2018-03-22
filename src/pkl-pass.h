@@ -77,7 +77,8 @@
 typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast ast,
                                               pkl_ast_node node,
-                                              void *data);
+                                              void *data,
+                                              int *restart);
 
 struct pkl_phase
 {
@@ -94,13 +95,6 @@ struct pkl_phase
 
 typedef struct pkl_phase *pkl_phase;
 
-/* The following macro should be used in order to define phase
-   handlers.  */
-
-#define PKL_PHASE_HANDLER(name)                                         \
-  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
-                            pkl_ast_node _node, void *_data)
-
 /* The following macros are to be used in node handlers.
 
    PKL_PASS_DATA expands to an l-value holding the data pointer passed
@@ -110,7 +104,13 @@ typedef struct pkl_phase *pkl_phase;
    corresponding to the AST being processed.
 
    PKL_PASS_NODE expands to an l-value holding the pkl_ast_node for
-   the being processed.
+   the node being processed.
+
+   PKL_PASS_RESTART expands to an l-value that should be set to 1 if
+   the handler modifies its subtree structure in any way, either
+   creating new nodes or removing existing nodes.  This makes the pass
+   machinery to do the right thing (hopefully.)  By default its value
+   is 0.  This macro should _not_ be used as an r-value.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
@@ -123,14 +123,34 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_DATA _data
 #define PKL_PASS_AST _ast
 #define PKL_PASS_NODE _node
+#define PKL_PASS_RESTART (*_restart)
 
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
+
+/* The following macros should be used in order to define phase
+   handlers.  */
+
+#define PKL_PHASE_BEGIN_HANDLER(name)                                   \
+  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
+                            pkl_ast_node _node, void *_data,            \
+                            int *_restart)                              \
+  {                                                                     \
+     PKL_PASS_RESTART = 0;
+
+#define PKL_PHASE_END_HANDLER                       \
+      return PKL_PASS_NODE;                         \
+  }
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
    (or transformations) in sequence to each AST node.  USER is a
    pointer that will be passed to the node handlers defined in the
    array PHASES, which should be NULL terminated.
+
+   Running several phases in parallel in the same pass is good for
+   performance.  However, there is an important consideration: if a
+   phase requires to process each AST nodes just once, no restarting
+   phases must precede it in a pass.
 
    Return 0 if some error occurred during the pass execution.  Return
    1 otherwise.  */

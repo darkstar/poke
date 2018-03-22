@@ -31,10 +31,12 @@
 
 static int
 promote_to_integral (size_t size, int sign,
-                     pkl_ast ast, pkl_ast_node *a)
+                     pkl_ast ast, pkl_ast_node *a,
+                     int *restart)
 {
   pkl_ast_node type = PKL_AST_TYPE (*a);
   
+  *restart = 0;
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
     {
       if (PKL_AST_TYPE_I_SIZE (type) != size
@@ -45,6 +47,7 @@ promote_to_integral (size_t size, int sign,
           *a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, *a);
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
           ASTREF (*a);
+          *restart = 1;
         }
 
       return 1;
@@ -58,9 +61,9 @@ promote_to_integral (size_t size, int sign,
    otherwise.  */
 
 static int
-promote_to_bool (pkl_ast ast, pkl_ast_node *a)
+promote_to_bool (pkl_ast ast, pkl_ast_node *a, int *restart)
 {
-  return promote_to_integral (32, 1, ast, a);
+  return promote_to_integral (32, 1, ast, a, restart);
 }
 
 /* Promote a given node AST to an unsigned long type, if possible.
@@ -68,9 +71,9 @@ promote_to_bool (pkl_ast ast, pkl_ast_node *a)
    successful, 0 otherwise.  */
 
 static int
-promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
+promote_to_ulong (pkl_ast ast, pkl_ast_node *a, int *restart)
 {
-  return promote_to_integral (64, 0, ast, a);
+  return promote_to_integral (64, 0, ast, a, restart);
 }
 
 /* Promote the arguments to a binary operand to satisfy the language
@@ -80,6 +83,7 @@ promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
 static int
 promote_operands_binary (pkl_ast ast,
                          pkl_ast_node exp,
+                         int *restart,
                          int allow_strings,
                          int allow_arrays,
                          int allow_structs)
@@ -94,6 +98,8 @@ promote_operands_binary (pkl_ast ast,
   size_t size_b;
   int sign_a;
   int sign_b;
+
+  *restart = 0;
 
   /* Both arguments should be either integrals, strings, arrays or
      structs.  */
@@ -152,6 +158,7 @@ promote_operands_binary (pkl_ast ast,
       a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, a);
       PKL_AST_TYPE (a) = ASTREF (t);
       PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (a);
+      *restart = 1;
     }
 
   if (to_promote_b != NULL)
@@ -161,6 +168,7 @@ promote_operands_binary (pkl_ast ast,
       b = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, b);
       PKL_AST_TYPE (b) = ASTREF (t);
       PKL_AST_EXP_OPERAND (exp, 1) = ASTREF (b);
+      *restart =1;
     }
 
   return 1;
@@ -173,44 +181,54 @@ promote_operands_binary (pkl_ast ast,
 /* Handler for binary operations whose operands should be both
    integral values of the same size and signedness.  */
 
-PKL_PHASE_HANDLER (pkl_promo_binary_int)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_int)
 {
+  int restart;
+  
   if (!promote_operands_binary (PKL_PASS_AST,
                                 PKL_PASS_NODE,
+                                &restart,
                                 0 /* allow_strings */,
                                 0 /* allow_arrays */,
                                 0 /* allow_structs */))
     PKL_PASS_ERROR;
 
-  return PKL_PASS_NODE;
+  PKL_PASS_RESTART = restart;
 }
+PKL_PHASE_END_HANDLER
 
 /* Handler for binary operations whose operands should be both either
    integral values of the same szie and signedness, or string
    values.  */
 
-PKL_PHASE_HANDLER (pkl_promo_binary_int_str)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_int_str)
 {
+  int restart;
+  
   if (!promote_operands_binary (PKL_PASS_AST,
                                 PKL_PASS_NODE,
+                                &restart,
                                 1 /* allow_strings */,
                                 0 /* allow_arrays */,
                                 0 /* allow_structs */))
     PKL_PASS_ERROR;
 
-  return PKL_PASS_NODE;
+  PKL_PASS_RESTART = restart;
 }
+PKL_PHASE_END_HANDLER
 
 /* Handler for binary operations whose operands should be both boolean
    values.  */
 
-PKL_PHASE_HANDLER (pkl_promo_binary_bool)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_bool)
 {
+  int restart1, restart2;
+  
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
   
-  if (!promote_to_bool (PKL_PASS_AST, &op1)
-      || !promote_to_bool (PKL_PASS_AST, &op2))
+  if (!promote_to_bool (PKL_PASS_AST, &op1, &restart1)
+      || !promote_to_bool (PKL_PASS_AST, &op2, &restart2))
     {
       fprintf (stderr, "error: operator requires boolean arguments\n");
       PKL_PASS_ERROR;
@@ -218,60 +236,67 @@ PKL_PHASE_HANDLER (pkl_promo_binary_bool)
 
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op1;
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1) = op2;
-  return PKL_PASS_NODE;
+
+  PKL_PASS_RESTART = restart1 || restart2;
 }
+PKL_PHASE_END_HANDLER
 
 /* Handler for unary operations whose operand should be a boolean
    value.  */
 
-PKL_PHASE_HANDLER (pkl_promo_unary_bool)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_unary_bool)
 {
+  int restart;
   pkl_ast_node op = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
 
-  if (!promote_to_bool (PKL_PASS_AST, &op))
+  if (!promote_to_bool (PKL_PASS_AST, &op, &restart))
     {
       fprintf (stderr, "error: operator requires a boolean argument\n");
       PKL_PASS_ERROR;
     }
 
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op;
-  return PKL_PASS_NODE;
+  PKL_PASS_RESTART = restart;
 }
-
+PKL_PHASE_END_HANDLER
 
 /* Handler for promoting indexes in array references to unsigned 64
    bit values.  */
 
-PKL_PHASE_HANDLER (pkl_promo_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_ref)
 {
+  int restart;
   pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE);
 
-  if (!promote_to_ulong (PKL_PASS_AST, &index))
+  if (!promote_to_ulong (PKL_PASS_AST, &index, &restart))
     {
       fprintf (stderr, "error: an array subscript should be an integral value\n");
       PKL_PASS_ERROR;
     }
 
   PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE) = index;
-  return PKL_PASS_NODE;
+  PKL_PASS_RESTART = restart;
 }
+PKL_PHASE_END_HANDLER
 
 /* Handler for promoting the array size in array type literals to 64
    unsigned bit values.  */
 
-PKL_PHASE_HANDLER (pkl_promo_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
 {
+  int restart;
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
 
-  if (!promote_to_ulong (PKL_PASS_AST, &nelem))
+  if (!promote_to_ulong (PKL_PASS_AST, &nelem, &restart))
     {
       fprintf (stderr, "error: an array size should be an integral value\n");
       PKL_PASS_ERROR;
     }
 
   PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE) = nelem;
-  return PKL_PASS_NODE;
+  PKL_PASS_RESTART = restart;
 }
+PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   { .op_df_handlers[PKL_AST_OP_ADD] = pkl_promo_binary_int_str,

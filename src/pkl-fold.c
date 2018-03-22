@@ -164,6 +164,7 @@ emul_ge (uint64_t op1, uint64_t op2)
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
           PKL_PASS_NODE = new;                                          \
+          PKL_PASS_RESTART = 1;                                         \
         }                                                               \
     }                                                                   \
   while (0)
@@ -183,6 +184,7 @@ emul_ge (uint64_t op1, uint64_t op2)
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
           PKL_PASS_NODE = new;                                          \
+          PKL_PASS_RESTART = 1;                                         \
         }                                                               \
     }                                                                   \
   while (0)
@@ -190,11 +192,11 @@ emul_ge (uint64_t op1, uint64_t op2)
 /* Handlers for the several expression codes.  */
 
 #define PKL_PHASE_HANDLER_BIN_INT(op, emul)          \
-  PKL_PHASE_HANDLER (pkl_fold_##op)                  \
+  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##op)            \
   {                                                  \
     OP_BINARY_INT (emul);                            \
-    return PKL_PASS_NODE;                            \
-  }
+  }                                                  \
+  PKL_PHASE_END_HANDLER
 
 PKL_PHASE_HANDLER_BIN_INT (or, emul_or);
 PKL_PHASE_HANDLER_BIN_INT (ior, emul_ior);
@@ -214,19 +216,19 @@ PKL_PHASE_HANDLER_BIN_INT (gt, emul_gt);
 PKL_PHASE_HANDLER_BIN_INT (le, emul_le);
 PKL_PHASE_HANDLER_BIN_INT (ge, emul_ge);
 
-PKL_PHASE_HANDLER (pkl_fold_eq)
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_eq)
 {
   OP_BINARY_INT (emul_eq);
   OP_BINARY_STR (emul_eqs);
-  return PKL_PASS_NODE;
 }
+PKL_PHASE_END_HANDLER
 
 #define PKL_PHASE_HANDLER_UNIMPL(op)            \
-  PKL_PHASE_HANDLER (pkl_fold_##op)             \
+  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##op)       \
   {                                             \
     assert (0); /* WRITEME */                   \
-    return PKL_PASS_NODE;                       \
-  }
+  }                                             \
+  PKL_PHASE_END_HANDLER
 
 PKL_PHASE_HANDLER_UNIMPL (map);
 PKL_PHASE_HANDLER_UNIMPL (sizeof);
@@ -238,7 +240,7 @@ PKL_PHASE_HANDLER_UNIMPL (bnot);
 PKL_PHASE_HANDLER_UNIMPL (not);
 PKL_PHASE_HANDLER_UNIMPL (sconc);
 
-PKL_PHASE_HANDLER (pkl_fold_cast)
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_cast)
 {
 #define CAST_TO(T)                                                      \
   do                                                                    \
@@ -251,6 +253,7 @@ PKL_PHASE_HANDLER (pkl_fold_cast)
                                                                         \
       pkl_ast_node_free (PKL_PASS_NODE);                                \
       PKL_PASS_NODE = new;                                              \
+      PKL_PASS_RESTART = 1;                                             \
     } while (0)
 
   pkl_ast_node to_type = PKL_AST_TYPE (PKL_PASS_NODE);
@@ -547,9 +550,8 @@ PKL_PHASE_HANDLER (pkl_fold_cast)
         }
     }
 #undef CAST_TO
-
-  return PKL_PASS_NODE;
 }
+PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_fold =
   {

@@ -28,27 +28,63 @@
       while (phases[i])                                                 \
         {                                                               \
           if (phases[i]->CLASS##_##ORDER##_handlers[(DISCR)])           \
-            node                                                        \
-              = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (toplevel, ast, node, data); \
+            {                                                           \
+              int restart;                                              \
+              node                                                      \
+                = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (toplevel, \
+                                                                  ast,  \
+                                                                  node, \
+                                                                  data, \
+                                                                  &restart); \
+                                                                        \
+              if (restart)                                              \
+                {                                                       \
+                  /* Restart the subtree with the rest of the phases. */ \
+                  node = pkl_do_pass_1 (toplevel, ast, node, data, phases + i + 1); \
+                  /* goto restart */                                    \
+                  break;;                                               \
+                }                                                       \
+            }                                                           \
           i++;                                                          \
         }                                                               \
     }                                                                   \
   while (0)
 
-#define PKL_CALL_PHASES_DFL(ORDER)                              \
-  do                                                            \
-    {                                                           \
-    size_t i = 0;                                               \
-                                                                \
-    while (phases[i])                                           \
-      {                                                         \
-        if (phases[i]->default_##ORDER##_handler)               \
-          node                                                  \
-            = phases[i]->default_##ORDER##_handler (toplevel, ast, node, data); \
-        i++;                                                    \
-      }                                                         \
-    }                                                           \
-    while (0)
+#define PKL_CALL_PHASES_DFL(ORDER)                                      \
+  do                                                                    \
+    {                                                                   \
+      size_t i = 0;                                                     \
+                                                                        \
+      while (phases[i])                                                 \
+        {                                                               \
+          if (phases[i]->default_##ORDER##_handler)                     \
+            {                                                           \
+              int restart;                                              \
+              node                                                      \
+                = phases[i]->default_##ORDER##_handler (toplevel,       \
+                                                        ast,            \
+                                                        node,           \
+                                                        data,           \
+                                                        &restart);      \
+                                                                        \
+              if (restart)                                              \
+                {                                                       \
+                  /* Restart the subtree with the rest of the phases. */ \
+                  node = pkl_do_pass_1 (toplevel, ast, node, data, phases + i + 1); \
+                  /* goto restart */                                    \
+                  break;;                                               \
+                }                                                       \
+            }                                                           \
+          i++;                                                          \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+/* Forward prototype.  */
+static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
+                                   pkl_ast ast, pkl_ast_node node,
+                                   void *data, struct pkl_phase *phases[]);
+
 
 #define PKL_PASS_DEPTH_FIRST 0
 #define PKL_PASS_BREADTH_FIRST 1

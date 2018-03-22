@@ -26,7 +26,7 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
-PKL_PHASE_HANDLER (pkl_satanize_integer)
+PKL_PHASE_BEGIN_HANDLER (pkl_satanize_integer)
 {
   if (PKL_AST_INTEGER_VALUE (PKL_PASS_NODE) == 999)
     {
@@ -35,8 +35,8 @@ PKL_PHASE_HANDLER (pkl_satanize_integer)
     }
 
   PKL_AST_INTEGER_VALUE (PKL_PASS_NODE) = 666;
-  return PKL_PASS_NODE;
 }
+PKL_PHASE_END_HANDLER
 
 struct pkl_phase satanize =
   { .code_df_handlers[PKL_AST_INTEGER] = pkl_satanize_integer };
