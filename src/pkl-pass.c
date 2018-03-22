@@ -167,6 +167,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
           case PKL_TYPE_NOTYPE:
             break;
           default:
+            /* Unknown type code.  */
             assert (0);
           }
         break;
@@ -187,6 +188,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
     case PKL_AST_ENUMERATOR:
       break;
     default:
+      /* Unknown node code.  This kills the poke :'( */
       assert (0);
     }
 
@@ -207,6 +209,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
         {
 #include "pkl-ops.def"
         default:
+          /* Unknown operation code.  */
           assert (0);
         }
 #undef PKL_DEF_OP
