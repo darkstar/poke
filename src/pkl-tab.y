@@ -123,8 +123,6 @@ static pkl_ast_node finish_sizeof_type (struct pkl_parser *parser,
 %token WHILE
 %token IF
 %token SIZEOF
-%token TYPEOF
-%token ELEMSOF
 %token ASSERT
 %token ERR
 
@@ -248,21 +246,6 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
-/* XXX    | TYPEOF expression %prec UNARY
-        	{
-                  pkl_ast_node metatype;
-                  
-                  if (PKL_AST_TYPE_TYPEOF (PKL_AST_TYPE ($2)) > 0)
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "operand to typeof can't be a type.");
-                      YYERROR;
-                    }
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_TYPEOF, $2);
-                  metatype = pkl_ast_make_metatype (PKL_AST_TYPE ($2));
-                  PKL_AST_TYPE ($$) = ASTREF (metatype);
-                  }
-*/
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
@@ -287,15 +270,6 @@ expression:
                   if ($$ == NULL)
                     YYERROR;
                 }
-/* XXX not needed with offsets?
-        | ELEMSOF expression %prec UNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_ELEMSOF, $2);
-                  PKL_AST_TYPE ($$)
-                    = pkl_ast_get_integral_type (pkl_parser->ast,
-                                                 64, 0);
-                }
-*/
         | expression '+' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
