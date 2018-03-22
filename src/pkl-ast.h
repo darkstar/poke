@@ -57,6 +57,7 @@ enum pkl_ast_code
   PKL_AST_ENUMERATOR,
   /* Statements.  */
   PKL_AST_LET,
+  PKL_AST_LAST
 };
 
 /* The AST nodes representing expressions are characterized by
@@ -69,6 +70,7 @@ enum pkl_ast_code
 enum pkl_ast_op
 {
 #include "pkl-ops.def"
+ PKL_AST_OP_LAST
 };
 #undef PKL_DEF_OP
 
