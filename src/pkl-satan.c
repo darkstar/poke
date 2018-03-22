@@ -16,15 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-
-#include "pkl-ast.h"
-#include "pkl-pass.h"
-
 /* This is Satan's compiler phase: it turns every integral constant in
    the program into 666, and it also overflows 8-bit constants!  Also,
    it triggers a compilation error if the anti-demonic constant 999 is
    found in the program.  */
+
+#include <config.h>
+
+#include "pkl-ast.h"
+#include "pkl-pass.h"
 
 PKL_PHASE_HANDLER (pkl_satanize_integer)
 {
