@@ -53,12 +53,12 @@
    These tables map codes to node handlers.  Each node handler must
    follow the function prototype declared below.
 
-   Note that it is possible to define a handler for PKL_AST_EXP nodes,
-   and also handlers for specific PKL_AST_OP_* operations; the more
-   general handler will be executed first, followed by the more
-   particular handlers.  The same applies to handlers for specific
-   integral types and PKL_TYPE_INTEGRAL, and for handlers for specific
-   type codesa nd PKL_AST_TYPE.
+   Note that if a given node class falls in several categories as
+   implemented in the handlers tables, the more general handler will
+   be executed first, followed by the more particular handlers.  For
+   example, for a PKL_AST_TYPE node with cype code PKL_TYPE_ARRAY, the
+   handler in `type_handlers' will be invoked first, followed by the
+   handler in `code_handlers'.
 
    If there is not a handler registered for a given node class, then
    DEFAULT_HANDLER is invoked if it is defined.  If the default
@@ -75,7 +75,6 @@ struct pkl_phase
   pkl_phase_handler_fn code_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_handlers[PKL_AST_OP_LAST];
   pkl_phase_handler_fn type_handlers[PKL_TYPE_NOTYPE];
-  pkl_phase_handler_fn op_integral_types[PKL_TYPE_LAST_INTEGRAL];
 };
 
 typedef struct pkl_phase *pkl_phase;
