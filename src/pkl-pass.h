@@ -81,11 +81,12 @@ typedef struct pkl_phase *pkl_phase;
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
    (or transformations) in sequence to each AST node.  USER is a
-   pointer that will be passed to the node handlers defined as a list
-   of PHASEs, terminated by a NULL.  Return the traversed AST.
+   pointer that will be passed to the node handlers defined in the
+   array PHASES, which should be NULL terminated.  Return the
+   traversed AST.
    
    XXX: error handling.  */
 
-pkl_ast pkl_do_pass (pkl_ast ast, void *data, /* pkl_phase phase */ ...);
+pkl_ast pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[]);
 
 #endif /* PKL_PASS_H  */

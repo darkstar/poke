@@ -26,9 +26,12 @@
 #include "pkl-fold.h"
 #include "pkl-pass.h"
 
-/* Compiler phases, defined elsewhere.  */
+/* Compiler passes and phases.  */
 
-extern struct pkl_phase *satan_phase;
+extern struct pkl_phase satan_phase;  /* pkl-satan.c  */
+
+static struct pkl_phase *post_fold_phases[] =
+  { &satan_phase, NULL };
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -54,10 +57,10 @@ pkl_compile_buffer (pvm_program *prog,
   fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
   pkl_ast_print (stdout, ast->ast);
 
-  ast = pkl_do_pass (ast, NULL, satan_phase, NULL);
+  ast = pkl_do_pass (ast, NULL, post_fold_phases);
   fprintf (stdout, "===========  SATANIZING ======\n");
   pkl_ast_print (stdout, ast->ast);
-  
+
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
     goto error;

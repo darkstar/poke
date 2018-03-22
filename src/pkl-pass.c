@@ -49,13 +49,10 @@
 
 
 static pkl_ast_node
-pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
+pkl_do_pass_1 (pkl_ast_node ast, void *data, struct pkl_phase *phases[])
 {
-  va_list phases;
   pkl_ast_node ast_orig = ast;
   int astcode = PKL_AST_CODE (ast);
-
-  va_start (phases, data);
 
   /* Visit child nodes first in a depth-first fashion.  */
   switch (astcode)
@@ -178,42 +175,39 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
       assert (0);
     }
 
-  va_end (phases);
-
 #define PKL_CALL_PHASES(CLASS,DISCR)                            \
   do                                                            \
     {                                                           \
-      pkl_phase phase;                                          \
+    size_t i = 0;                                               \
                                                                 \
-      /* XXX: handle errors. */                                 \
-      while ((phase = va_arg (phases, pkl_phase)))              \
-        {                                                       \
-          if (phase->CLASS##_handlers[(DISCR)])                 \
-            {                                                   \
-              ast                                               \
-                = phase->CLASS##_handlers[(DISCR)] (ast, data); \
-            }                                                   \
-        }                                                       \
-    }                                                           \
-  while (0)
+    /* XXX: handle errors. */                                   \
+    while (phases[i])                                           \
+      {                                                         \
+        if (phases[i]->CLASS##_handlers[(DISCR)])               \
+          ast                                                   \
+            = phases[i]->CLASS##_handlers[(DISCR)] (ast, data); \
+        i++;                                                    \
+      }                                                         \
+}                                                               \
+ while (0)
 
-#define PKL_CALL_PHASES_DFL(VALIST)                             \
+
+#define PKL_CALL_PHASES_DFL                                     \
   do                                                            \
     {                                                           \
-      pkl_phase phase;                                          \
+    size_t i = 0;                                               \
                                                                 \
-      /* XXX: handle errors. */                                 \
-      va_start (phases, data);                                  \
-      while ((phase = va_arg (VALIST, pkl_phase)))              \
-        if (phase->default_handler)                             \
-          {                                                     \
-            ast                                                 \
-              = phase->default_handler (ast, data);             \
-          }                                                     \
-      va_end (phases);                                          \
+    /* XXX: handle errors. */                                   \
+    while (phases[i])                                           \
+      {                                                         \
+        if (phases[i]->default_handler)                         \
+          ast                                                   \
+            = phases[i]->default_handler (ast, data);           \
+        i++;                                                    \
+      }                                                         \
     }                                                           \
-  while (0)
-
+    while (0)
+  
   /* Call the phase handlers defined for specific opcodes.  */
   if (astcode == PKL_AST_EXP)
     {
@@ -246,7 +240,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
   PKL_CALL_PHASES (code, astcode);
 
   /* Call the default handlers if defined.  */
-  PKL_CALL_PHASES_DFL (phases);
+  PKL_CALL_PHASES_DFL;
 
   /* If a new node was created to replace the incoming node, increase
      its reference counter.  This assumes that the node returned by
@@ -259,13 +253,8 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, ...)
 }
 
 pkl_ast
-pkl_do_pass (pkl_ast ast, void *data, ...)
+pkl_do_pass (pkl_ast ast, void *data, struct pkl_phase *phases[])
 {
-  va_list phases;
-
-  va_start (phases, data);
   ast->ast = pkl_do_pass_1 (ast->ast, data, phases);
-  va_end (phases);
-
   return ast;
 }
