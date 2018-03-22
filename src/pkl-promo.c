@@ -17,10 +17,8 @@
  */
 
 /* This file defines a compiler phase that promotes the operands of
-   expressions in order to satisfy the compiler backend restrictions.
-
-   XXX: summarize these restrictions here.  */
-
+   expressions in order to satisfy the compiler backend
+   restrictions.  */
 
 #include <config.h>
 
@@ -50,7 +48,7 @@ promote_to_integral (size_t size, int sign,
 
       return 1;
     }
-
+  
   return 0;
 }
 
@@ -100,12 +98,12 @@ promote_operands_binary (pkl_ast ast,
      structs.  */
 
   if (PKL_AST_TYPE_CODE (ta) != PKL_AST_TYPE_CODE (tb))
-    return 0;
+    goto error;
 
   if ((!allow_strings && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRING)
       || (!allow_arrays && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_ARRAY)
       || (!allow_structs && PKL_AST_TYPE_CODE (ta) == PKL_TYPE_STRUCT))
-    return 0;
+    goto error;
 
   if (!(PKL_AST_TYPE_CODE (ta) == PKL_TYPE_INTEGRAL))
     /* No need to promote non-integral types.  */
@@ -165,6 +163,10 @@ promote_operands_binary (pkl_ast ast,
     }
 
   return 1;
+
+ error:
+  fprintf (stderr, "error: invalid operands to expression");
+  return 0;
 }
 
 /* Handler for binary operations whose operands should be both
@@ -208,7 +210,10 @@ PKL_PHASE_HANDLER (pkl_promo_binary_bool)
   
   if (!promote_to_bool (PKL_PASS_AST, &op1)
       || !promote_to_bool (PKL_PASS_AST, &op2))
-    PKL_PASS_ERROR;
+    {
+      fprintf (stderr, "error: invalid arguments to expression\n");
+      PKL_PASS_ERROR;
+    }
 
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op1;
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1) = op2;
@@ -223,7 +228,10 @@ PKL_PHASE_HANDLER (pkl_promo_array_ref)
   pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE);
 
   if (!promote_to_ulong (PKL_PASS_AST, &index))
-    PKL_PASS_ERROR;
+    {
+      fprintf (stderr, "error: an array subscript should be an integral value\n");
+      PKL_PASS_ERROR;
+    }
 
   PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE) = index;
   return PKL_PASS_NODE;
@@ -237,7 +245,10 @@ PKL_PHASE_HANDLER (pkl_promo_type_array)
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
 
   if (!promote_to_ulong (PKL_PASS_AST, &nelem))
-    PKL_PASS_ERROR;
+    {
+      fprintf (stderr, "error: an array size should be an integral value\n");
+      PKL_PASS_ERROR;
+    }
 
   PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE) = nelem;
   return PKL_PASS_NODE;
