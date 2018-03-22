@@ -29,9 +29,12 @@
 /* Compiler passes and phases.  */
 
 extern struct pkl_phase satanize;  /* pkl-satan.c  */
+extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
 
+static struct pkl_phase *pre_fold_phases[] =
+  { &pkl_phase_promo, NULL };
 static struct pkl_phase *post_fold_phases[] =
-  { &satanize, NULL };
+  { NULL };
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -51,6 +54,15 @@ pkl_compile_buffer (pvm_program *prog,
 
   /* XXX */
   pkl_ast_print (stdout, ast->ast);
+
+  ret = pkl_do_pass (ast, NULL, pre_fold_phases);
+  if (!ret)
+    goto error;
+  
+  fprintf (stdout, "===========  PROMOTING ======\n");
+  pkl_ast_print (stdout, ast->ast);
+
+  
   ast = pkl_fold (ast);
   fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
   pkl_ast_print (stdout, ast->ast);
@@ -59,8 +71,8 @@ pkl_compile_buffer (pvm_program *prog,
   if (!ret)
     goto error;
   
-  fprintf (stdout, "===========  SATANIZING ======\n");
-  pkl_ast_print (stdout, ast->ast);
+  ///  fprintf (stdout, "===========  SATANIZING ======\n");
+  //  pkl_ast_print (stdout, ast->ast);
 
   if (!pkl_gen (&p, ast))
     /* Compiler back-end error.  */
