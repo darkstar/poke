@@ -79,11 +79,11 @@ promote_to_ulong (pkl_ast ast, pkl_ast_node *a)
    promotions were successful, 0 otherwise.  */
 
 static int
-pkl_promote_operands_binary (pkl_ast ast,
-                             pkl_ast_node exp,
-                             int allow_strings,
-                             int allow_arrays,
-                             int allow_structs)
+promote_operands_binary (pkl_ast ast,
+                         pkl_ast_node exp,
+                         int allow_strings,
+                         int allow_arrays,
+                         int allow_structs)
 {
   pkl_ast_node a = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node b = PKL_AST_EXP_OPERAND (exp, 1);
@@ -172,11 +172,11 @@ pkl_promote_operands_binary (pkl_ast ast,
 
 PKL_PHASE_HANDLER (pkl_promo_binary_int)
 {
-  if (!pkl_promote_operands_binary (PKL_PASS_AST,
-                                    PKL_PASS_NODE,
-                                    0 /* allow_strings */,
-                                    0 /* allow_arrays */,
-                                    0 /* allow_structs */))
+  if (!promote_operands_binary (PKL_PASS_AST,
+                                PKL_PASS_NODE,
+                                0 /* allow_strings */,
+                                0 /* allow_arrays */,
+                                0 /* allow_structs */))
     PKL_PASS_ERROR;
 
   return PKL_PASS_NODE;
@@ -188,11 +188,11 @@ PKL_PHASE_HANDLER (pkl_promo_binary_int)
 
 PKL_PHASE_HANDLER (pkl_promo_binary_int_str)
 {
-  if (!pkl_promote_operands_binary (PKL_PASS_AST,
-                                    PKL_PASS_NODE,
-                                    1 /* allow_strings */,
-                                    0 /* allow_arrays */,
-                                    0 /* allow_structs */))
+  if (!promote_operands_binary (PKL_PASS_AST,
+                                PKL_PASS_NODE,
+                                1 /* allow_strings */,
+                                0 /* allow_arrays */,
+                                0 /* allow_structs */))
     PKL_PASS_ERROR;
 
   return PKL_PASS_NODE;
@@ -208,15 +208,38 @@ PKL_PHASE_HANDLER (pkl_promo_binary_bool)
   
   if (!promote_to_bool (PKL_PASS_AST, &op1)
       || !promote_to_bool (PKL_PASS_AST, &op2))
-    {
-      /* XXX: errors with location.  */
-      printf ("invalid operators in expression.");
-      PKL_PASS_ERROR;
-    }
+    PKL_PASS_ERROR;
 
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op1;
   PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1) = op2;
+  return PKL_PASS_NODE;
+}
 
+/* Handler for promoting indexes in array references to unsigned 64
+   bit values.  */
+
+PKL_PHASE_HANDLER (pkl_promo_array_ref)
+{
+  pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE);
+
+  if (!promote_to_ulong (PKL_PASS_AST, &index))
+    PKL_PASS_ERROR;
+
+  PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE) = index;
+  return PKL_PASS_NODE;
+}
+
+/* Handler for promoting the array size in array type literals to 64
+   unsigned bit values.  */
+
+PKL_PHASE_HANDLER (pkl_promo_type_array)
+{
+  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
+
+  if (!promote_to_ulong (PKL_PASS_AST, &nelem))
+    PKL_PASS_ERROR;
+
+  PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE) = nelem;
   return PKL_PASS_NODE;
 }
 
