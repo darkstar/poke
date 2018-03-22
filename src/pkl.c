@@ -46,10 +46,8 @@ pkl_compile_buffer (pvm_program *prog,
     /* Parse error.  */
     goto error;
   else if (ret == 2)
-    {
-      /* Memory exhaustion.  */
-      printf (_("out of memory\n"));
-    }
+    /* Memory exhaustion.  */
+    printf (_("out of memory\n"));
 
   /* XXX */
   pkl_ast_print (stdout, ast->ast);
