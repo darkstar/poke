@@ -20,21 +20,21 @@
 
 #include "pkl-pass.h"
 
-#define PKL_CALL_PHASES(CLASS,ORDER,DISCR)                      \
-  do                                                            \
-    {                                                           \
-    size_t i = 0;                                               \
-                                                                \
-    /* XXX: handle errors. */                                   \
-    while (phases[i])                                           \
-      {                                                         \
-        if (phases[i]->CLASS##_##ORDER##_handlers[(DISCR)])     \
-          node                                                  \
-            = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (toplevel, ast, node, data); \
-        i++;                                                    \
-      }                                                         \
-}                                                               \
- while (0)
+#define PKL_CALL_PHASES(CLASS,ORDER,DISCR)                              \
+  do                                                                    \
+    {                                                                   \
+      size_t i = 0;                                                     \
+                                                                        \
+      /* XXX: handle errors. */                                         \
+      while (phases[i])                                                 \
+        {                                                               \
+          if (phases[i]->CLASS##_##ORDER##_handlers[(DISCR)])           \
+            node                                                        \
+              = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (toplevel, ast, node, data); \
+          i++;                                                          \
+        }                                                               \
+    }                                                                   \
+  while (0)
 
 #define PKL_CALL_PHASES_DFL(ORDER)                              \
   do                                                            \
