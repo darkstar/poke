@@ -48,7 +48,7 @@ pkl_compile_buffer (pvm_program *prog,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  if (1) /* Multi-pass.  */
+  if (0) /* Multi-pass.  */
     {
       struct pkl_phase *promo_pass[] =
         { &pkl_phase_promo, NULL };
