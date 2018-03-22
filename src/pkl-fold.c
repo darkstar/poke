@@ -56,7 +56,6 @@ emul_band (uint64_t op1, uint64_t op2)
 static inline uint64_t
 emul_eq (uint64_t op1, uint64_t op2)
 {
-  printf ("XXX %lu %ld\n", op1, op2);
   return op1 == op2;
 }
 
