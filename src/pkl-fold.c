@@ -569,4 +569,5 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (ELEMSOF, elemsof), ENTRY (TYPEOF, typeof),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
    ENTRY (NOT, not),
+#undef ENTRY
   };
