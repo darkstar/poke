@@ -18,7 +18,6 @@
 
 #include <config.h>
 
-#include <stdarg.h>
 #include "pkl-pass.h"
 
 #define PKL_CALL_PHASES(CLASS,ORDER,DISCR)                      \

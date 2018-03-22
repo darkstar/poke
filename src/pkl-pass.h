@@ -22,7 +22,6 @@
 #include <config.h>
 
 #include <assert.h>
-#include <stdarg.h>
 #include <setjmp.h>
 #include "pkl-ast.h"
 
@@ -97,7 +96,7 @@ typedef struct pkl_phase *pkl_phase;
 /* The following macro should be used in order to define phase
    handlers.  */
 
-#define PKL_PHASE_HANDLER(name,...)             \
+#define PKL_PHASE_HANDLER(name)                                         \
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast_node _ast, void *_data)
 
 /* The following macros are to be used in node handlers.
