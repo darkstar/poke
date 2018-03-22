@@ -1,4 +1,4 @@
-/* pkl-fold.h - Constant folding for the poke compiler. */
+/* pkl-fold.h - Constant folding phase for the poke compiler. */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
