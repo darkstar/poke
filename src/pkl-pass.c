@@ -25,7 +25,6 @@
     {                                                                   \
       size_t i = 0;                                                     \
                                                                         \
-      /* XXX: handle errors. */                                         \
       while (phases[i])                                                 \
         {                                                               \
           if (phases[i]->CLASS##_##ORDER##_handlers[(DISCR)])           \
@@ -41,7 +40,6 @@
     {                                                           \
     size_t i = 0;                                               \
                                                                 \
-    /* XXX: handle errors. */                                   \
     while (phases[i])                                           \
       {                                                         \
         if (phases[i]->default_##ORDER##_handler)               \
