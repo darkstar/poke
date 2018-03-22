@@ -30,7 +30,7 @@
    in the AST.  One pass may integrate several phases.
 
    Implementing a phase involves defining a struct pkl_phase variable
-   and filling it up.  Unlike Gaul, a pkl_hase contains four tables:
+   and filling it up.  Like Gaul, a pkl_hase contains four tables:
 
    - A table indexed by node codes, which must be values in the
      `pkl_ast_code' enumeration defined in pkl-ast.h.  For example,
@@ -44,11 +44,6 @@
    - A table indexed by type codes, which must be values in the
      `pkl_ast_type_code' enumeration defined in pkl-ast.h. For
      example, PKL_TYPE_STRING.
-
-   - A table indexed by integral type codes, which must be values in
-     the `pkl_ast_integral_type_code' enumeration defined in
-     pkl-ast.h.  This enumeration is in turn generated from the types
-     define din pkl-types.def.  For example, PKL_TYPE_UINT32.
 
    These tables map codes to node handlers.  Each node handler must
    follow the function prototype declared below.

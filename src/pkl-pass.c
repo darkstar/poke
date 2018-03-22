@@ -21,8 +21,8 @@
 #include <stdarg.h>
 #include "pkl-pass.h"
 
-/* Note that in the following macro an l-value should be passed for
-   CHAIN.  */
+/* Note that in the following macro CHAIN should expand to an
+   l-value.  */
 #define PKL_PASS_CHAIN(CHAIN)                                   \
   do                                                            \
     {                                                           \
@@ -169,6 +169,7 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, struct pkl_phase *phases[])
     case PKL_AST_DECL:
     case PKL_AST_ENUM:
     case PKL_AST_ENUMERATOR:
+      /* These node types have no children.  */
       break;
     default:
       /* Unknown node code.  This kills the poke :'( */
@@ -191,7 +192,6 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, struct pkl_phase *phases[])
 }                                                               \
  while (0)
 
-
 #define PKL_CALL_PHASES_DFL                                     \
   do                                                            \
     {                                                           \
@@ -213,19 +213,18 @@ pkl_do_pass_1 (pkl_ast_node ast, void *data, struct pkl_phase *phases[])
     {
       int opcode = PKL_AST_EXP_CODE (ast);
         
+      switch (opcode)
+        {
 #define PKL_DEF_OP(ocode, str)                                          \
           case ocode:                                                   \
             PKL_CALL_PHASES (op, ocode);                                \
             break;
-
-      switch (opcode)
-        {
 #include "pkl-ops.def"
+#undef PKL_DEF_OP
         default:
           /* Unknown operation code.  */
           assert (0);
         }
-#undef PKL_DEF_OP
     }
 
   /* Call the phase handlers defined for specific types.  */
