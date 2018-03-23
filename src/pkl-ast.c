@@ -26,15 +26,12 @@
 #include "xalloc.h"
 #include "pkl-ast.h"
 
-/* Return the endianness of the running system.  */
+/* Return the default endianness.  */
 
 enum pkl_ast_endian
 pkl_ast_default_endian (void)
 {
-  char buffer[4] = { 0x0, 0x0, 0x0, 0x1 };
-  uint32_t canary = *((uint32_t *) buffer);
-
-  return canary == 0x1 ? PKL_AST_MSB : PKL_AST_LSB;
+  return PKL_AST_MSB;
 }
 
 /* Allocate and return a new AST node, with the given CODE.  The rest
