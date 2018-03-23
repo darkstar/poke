@@ -60,9 +60,14 @@ pvm_push_val (pvm_program program, pvm_val val)
 #endif
 }
 
-/* The following handler is to be executed in breath-first for the
-   program node. It initializes the payload and also generates the
-   standard prologue.  */
+/*
+ * PROGRAM
+ * | PROGRAM_ELEM
+ * | ...
+ *
+ * This function initializes the payload and also generates the
+ * standard prologue.
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
 {
@@ -105,8 +110,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
-/* The following handler is to be executed in depth-first for the
-   program node.  It generates the standard epilogue.  */
+/*
+ * | PROGRAM_ELEM
+ * | ...
+ * PROGRAM
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 {
@@ -124,8 +132,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 }
 PKL_PHASE_END_HANDLER
 
-/* The following handlers generate code for the rest of the supported
-   node types.  */
+/*
+ * INTEGER
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
 {
@@ -179,6 +188,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * STRING
+ */
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 {
   pkl_gen_payload payload
@@ -192,6 +205,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * ARRAY_INITIALIZER
+ * | ARRAY_INITIALIZER_EXP
+ */
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_array_initializer)
 {
   pkl_gen_payload payload
@@ -203,6 +221,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_array_initializer)
   pvm_push_val (payload->program, idx);
 }
 PKL_PHASE_END_HANDLER
+
+/*
+ *  | ARRAY_INITIALIZER
+ *  | ...
+ *  | ARRAY_TYPE
+ *  ARRAY
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
 {
@@ -221,7 +246,40 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* Type nodes.  */
+/*
+ *  | STRUCT_ELEM
+ *  | ...
+ *  STRUCT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE)));
+
+  PVM_APPEND_INSTRUCTION (program, mksct);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ *  STRUCT_ELEM
+ *  | STRUCT_ELEM_NAME
+ *  | STRUCT_ELEM_EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
+{
+  /* Nothing to do.  */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * TYPE_INTEGRAL
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
 {
@@ -240,6 +298,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * | ETYPE
+ * | NELEM
+ * TYPE_ARRAY
+ */
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
 {
   pkl_gen_payload payload
@@ -249,7 +313,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* Expression nodes.  */
+/* 
+ * All the expression handlers below have this AST context:
+ *
+ * | OPERAND
+ * | ...
+ * EXP
+ */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {
@@ -331,6 +401,8 @@ struct pkl_phase pkl_phase_gen =
     .code_df_handlers[PKL_AST_STRING] = pkl_gen_df_string,
     .code_df_handlers[PKL_AST_ARRAY] = pkl_gen_df_array,
     .code_bf_handlers[PKL_AST_ARRAY_INITIALIZER] = pkl_gen_bf_array_initializer,
+    .code_df_handlers[PKL_AST_STRUCT] = pkl_gen_df_struct,
+    .code_bf_handlers[PKL_AST_STRUCT_ELEM] = pkl_gen_bf_struct_elem,
     .op_df_handlers[PKL_AST_OP_ADD] = pkl_gen_df_op_add,
     .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_df_type_integral,
     .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_df_type_array,
@@ -1114,6 +1186,7 @@ pkl_gen_struct (pkl_ast_node ast,
                 size_t *label)
 {
   pkl_ast_node e;
+  /* DONE */
 
   for (e = PKL_AST_STRUCT_ELEMS (ast);
        e;
