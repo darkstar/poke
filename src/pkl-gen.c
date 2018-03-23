@@ -422,6 +422,35 @@ BIN_INTEGRAL_EXP_HANDLER (sub);
 BIN_INTEGRAL_EXP_HANDLER (mul);
 BIN_INTEGRAL_EXP_HANDLER (div);
 BIN_INTEGRAL_EXP_HANDLER (mod);
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, and);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_or)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, or);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_not)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, not);
+}
+PKL_PHASE_END_HANDLER
+
+
 //BIN_INTEGRAL_EXP_HANDLER (and);
 //BIN_INTEGRAL_EXP_HANDLER (or);
 //BIN_INTEGRAL_EXP_HANDLER (band);
@@ -433,7 +462,7 @@ BIN_INTEGRAL_EXP_HANDLER (mod);
 /* With strings: eq, ne, lt, le, gt, ge */
 /* Others: sizeof, elemsof, typeof, map, cast */
 
-/* Unary: neg, not, bnot */
+/* Unary: neg, bnot */
 
 
 #undef BIN_INTEGRAL_EXP_HANDLER
@@ -473,6 +502,9 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_MUL] = pkl_gen_df_op_mul,
     .op_df_handlers[PKL_AST_OP_MOD] = pkl_gen_df_op_mod,
     .op_df_handlers[PKL_AST_OP_DIV] = pkl_gen_df_op_div,
+    .op_df_handlers[PKL_AST_OP_AND] = pkl_gen_df_op_and,
+    .op_df_handlers[PKL_AST_OP_OR] = pkl_gen_df_op_or,
+    .op_df_handlers[PKL_AST_OP_NOT] = pkl_gen_df_op_not,
     .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_df_type_integral,
     .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_df_type_array,
   };
