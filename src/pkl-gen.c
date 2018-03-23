@@ -319,6 +319,55 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * TYPE_STRING
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, mktys);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | STRUCT_TYPE_ELEM
+ * | ...
+ * TYPE_STRUCT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
+{
+ pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+ pvm_program program = payload->program;
+
+ pvm_push_val (program,
+               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE)));
+ PVM_APPEND_INSTRUCTION (program, mktysct);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * STRUCT_TYPE_ELEM
+ * | [STRUCT_TYPE_ELEM_NAME]
+ * | STRUCT_TYPE_ELEM_TYPE
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_type_elem)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  /* If the struct type element doesn't include a name, generate a
+     null value as expected by the mktysct instruction.  */
+  if (!PKL_AST_STRUCT_TYPE_ELEM_NAME (PKL_PASS_NODE))
+    pvm_push_val (payload->program, PVM_NULL);
+}
+PKL_PHASE_END_HANDLER
+
 /* 
  * Expression handlers.
  *
@@ -833,6 +882,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_bf_array_initializer),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
+   PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_TYPE_ELEM, pkl_gen_bf_struct_type_elem),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_df_op_add),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_df_op_sub),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_df_op_mul),
@@ -858,6 +908,8 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_CAST, pkl_gen_df_op_cast),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
   };
 
 #if 0
