@@ -34,6 +34,7 @@ extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
 extern struct pkl_phase pkl_phase_gen; /* pkl-gen.c */
 extern struct pkl_phase pkl_phase_anal1; /* pkl-anal.c */
 extern struct pkl_phase pkl_phase_anal2; /* pkl-anal.c */
+extern struct pkl_phase pkl_phase_typify;
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -57,13 +58,20 @@ pkl_compile_buffer (pvm_program *prog,
   if (0) /* Multi-pass.  */
     {
       struct pkl_phase *anal1_pass[] = { &pkl_phase_anal1, NULL };
+      void *anal1_payloads[] = { &anal1_payload };
       struct pkl_phase *promo_pass[] = { &pkl_phase_promo, NULL };
       struct pkl_phase *fold_pass[] =  { &pkl_phase_fold, NULL };
+      struct pkl_phase *gen_pass[] = { &pkl_phase_gen, NULL };
+      void *gen_payloads[] = { &gen_payload };
+
 
       pkl_ast_print (stdout, ast->ast);
 
       fprintf (stdout, "===========  ANALYZING 1 ======\n");
-      if (!pkl_do_pass (ast, anal1_pass, NULL))
+      if (!pkl_do_pass (ast, anal1_pass, anal1_payloads))
+        goto error;
+
+      if (anal1_payload.errors > 0)
         goto error;
 
       fprintf (stdout, "===========  PROMOTING ======\n");
@@ -76,14 +84,15 @@ pkl_compile_buffer (pvm_program *prog,
         goto error;
       pkl_ast_print (stdout, ast->ast);
 
-      fprintf (stdout, "===========  ANALYZING 2 ======\n");
-      if (!pkl_do_pass (ast, anal1_pass, NULL))
+      fprintf (stdout, "===========  GENERATING ======\n");
+      if (!pkl_do_pass (ast, gen_pass, gen_payloads))
         goto error;
     }
   else
     {
       struct pkl_phase *frontend_phases[]
         = { &pkl_phase_anal1,
+            &pkl_phase_typify,
             &pkl_phase_promo,
             /* &pkl_phase_fold */ NULL ,
             &pkl_phase_anal2,
@@ -91,6 +100,7 @@ pkl_compile_buffer (pvm_program *prog,
           };
       void *frontend_payloads[]
         = { &anal1_payload, /* anal1 */
+            NULL, /* typify */
             NULL, /* promo */
             NULL, /* fold */
             &anal2_payload  /* anal2 */
@@ -106,7 +116,8 @@ pkl_compile_buffer (pvm_program *prog,
           || anal2_payload.errors > 0)
         goto error;
 
-      /*XXX      pkl_ast_print (stdout, ast->ast);*/
+      /* XXX */
+      pkl_ast_print (stdout, ast->ast);
       
       if (!pkl_do_pass (ast, backend_phases, backend_payloads))
         goto error;
@@ -143,10 +154,6 @@ pkl_compile_file (pvm_program *prog,
       /* Memory exhaustion.  */
       printf (_("out of memory\n"));
     }
-
-  //  if (!pkl_gen (&p, ast))
-  //    /* Compiler back-end error.  */
-  //    goto error;
 
   pvm_specialize_program (p);
   *prog = p;
