@@ -445,7 +445,40 @@ LOGIC_EXP_HANDLER (not);
 //BIN_INTEGRAL_EXP_HANDLER (sl);
 //BIN_INTEGRAL_EXP_HANDLER (sr);
 
-/* With strings: eq, ne, lt, le, gt, ge */
+#define RELA_EXP_HANDLER(op)                            \
+  PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
+  {                                                     \
+    pkl_gen_payload payload                             \
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;             \
+                                                        \
+    pvm_program program = payload->program;             \
+    pkl_ast_node node = PKL_PASS_NODE;                  \
+    pkl_ast_node type = PKL_AST_TYPE (node);            \
+                                                        \
+    switch (PKL_AST_TYPE_CODE (type))                   \
+      {                                                 \
+      case PKL_TYPE_INTEGRAL:                           \
+        INTEGRAL_EXP (op);                              \
+        break;                                          \
+      case PKL_TYPE_STRING:                             \
+        PVM_APPEND_INSTRUCTION (program, op##s);        \
+        break;                                          \
+      default:                                          \
+        assert (0);                                     \
+        break;                                          \
+      }                                                 \
+  }                                                     \
+  PKL_PHASE_END_HANDLER
+
+RELA_EXP_HANDLER (eq);
+RELA_EXP_HANDLER (ne);
+RELA_EXP_HANDLER (lt);
+RELA_EXP_HANDLER (le);
+RELA_EXP_HANDLER (gt);
+RELA_EXP_HANDLER (ge);
+
+#undef RELA_EXP_HANDLER
+  
 /* Others: sizeof, elemsof, typeof, map, cast */
 
 /* Unary: neg, bnot */
@@ -494,6 +527,12 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_AND] = pkl_gen_df_op_and,
     .op_df_handlers[PKL_AST_OP_OR] = pkl_gen_df_op_or,
     .op_df_handlers[PKL_AST_OP_NOT] = pkl_gen_df_op_not,
+    .op_df_handlers[PKL_AST_OP_EQ] = pkl_gen_df_op_eq,
+    .op_df_handlers[PKL_AST_OP_NE] = pkl_gen_df_op_ne,
+    .op_df_handlers[PKL_AST_OP_LT] = pkl_gen_df_op_lt,
+    .op_df_handlers[PKL_AST_OP_LE] = pkl_gen_df_op_le,
+    .op_df_handlers[PKL_AST_OP_GT] = pkl_gen_df_op_gt,
+    .op_df_handlers[PKL_AST_OP_GE] = pkl_gen_df_op_ge,
     .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_df_type_integral,
     .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_df_type_array,
   };
