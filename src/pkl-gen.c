@@ -64,7 +64,7 @@ pvm_push_val (pvm_program program, pvm_val val)
    program node. It initializes the payload and also generates the
    standard prologue.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_program_bf)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -108,7 +108,7 @@ PKL_PHASE_END_HANDLER
 /* The following handler is to be executed in depth-first for the
    program node.  It generates the standard epilogue.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_program_df)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -127,7 +127,7 @@ PKL_PHASE_END_HANDLER
 /* The following handlers generate code for the rest of the supported
    node types.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_integer)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -179,7 +179,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_integer)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_string)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -223,7 +223,7 @@ PKL_PHASE_END_HANDLER
 
 /* Type nodes.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_type_integral)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -240,7 +240,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_type_integral)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -251,7 +251,7 @@ PKL_PHASE_END_HANDLER
 
 /* Expression nodes.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_op_add)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -325,15 +325,15 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   { .default_handler = pkl_gen_noimpl,
-    .code_bf_handlers[PKL_AST_PROGRAM] = pkl_gen_program_bf,
-    .code_df_handlers[PKL_AST_PROGRAM] = pkl_gen_program_df,
-    .code_df_handlers[PKL_AST_INTEGER] = pkl_gen_integer,
-    .code_df_handlers[PKL_AST_STRING] = pkl_gen_string,
+    .code_bf_handlers[PKL_AST_PROGRAM] = pkl_gen_bf_program,
+    .code_df_handlers[PKL_AST_PROGRAM] = pkl_gen_df_program,
+    .code_df_handlers[PKL_AST_INTEGER] = pkl_gen_df_integer,
+    .code_df_handlers[PKL_AST_STRING] = pkl_gen_df_string,
     .code_df_handlers[PKL_AST_ARRAY] = pkl_gen_df_array,
     .code_bf_handlers[PKL_AST_ARRAY_INITIALIZER] = pkl_gen_bf_array_initializer,
-    .op_df_handlers[PKL_AST_OP_ADD] = pkl_gen_op_add,
-    .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_type_integral,
-    .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_type_array,
+    .op_df_handlers[PKL_AST_OP_ADD] = pkl_gen_df_op_add,
+    .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_df_type_integral,
+    .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_df_type_array,
   };
 
 #if 0

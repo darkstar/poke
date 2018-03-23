@@ -2055,8 +2055,8 @@ end
 
 ## Array instructions.
 
-# XXX                                 nelems ninitializers
-instruction mka () # [IDX VAL]... TYP ULONG ULONG -> ARR
+# [IDX VAL]... TYP ULONG(ninitializer) ULONG(nelem) -> ARR
+instruction mka ()
   code
     size_t i;
     pvm_val nelem, ninitializer, arr, type;
@@ -2076,7 +2076,6 @@ instruction mka () # [IDX VAL]... TYP ULONG ULONG -> ARR
       size_t index
         = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
 
-printf ("SETTING ELEM %lu TO %d\n", index, PVM_VAL_INT (JITTER_TOP_STACK()));
       PVM_VAL_ARR_ELEM (arr, index) = JITTER_TOP_STACK ();
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
