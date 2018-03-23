@@ -39,4 +39,4 @@ PKL_PHASE_BEGIN_HANDLER (pkl_satanize_integer)
 PKL_PHASE_END_HANDLER
 
 struct pkl_phase satanize =
-  { .code_df_handlers[PKL_AST_INTEGER] = pkl_satanize_integer };
+  { PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_satanize_integer)};

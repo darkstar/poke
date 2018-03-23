@@ -96,6 +96,28 @@ struct pkl_phase
 
 typedef struct pkl_phase *pkl_phase;
 
+/* The following macros should be used in order to register handlers
+   in a `struct pkl_phase'.  This allows changing the structure layout
+   without impacting the phase definitions.  */
+
+#define PKL_PHASE_DEFAULT_HANDLER(handler)      \
+  .default_handler = handler
+
+#define PKL_PHASE_BF_HANDLER(code, handler)     \
+  .code_bf_handlers[code] = handler
+#define PKL_PHASE_DF_HANDLER(code, handler)     \
+  .code_df_handlers[code] = handler
+
+#define PKL_PHASE_BF_OP_HANDLER(code,handler)   \
+  .op_bf_handlers[code] = handler
+#define PKL_PHASE_DF_OP_HANDLER(code,handler)   \
+  .op_df_handlers[code] = handler
+
+#define PKL_PHASE_BF_TYPE_HANDLER(code,handler) \
+  .type_bf_handlers[code] = handler
+#define PKL_PHASE_DF_TYPE_HANDLER(code,handler) \
+  .type_df_handlers[code] = handler
+
 /* The following macros are to be used in node handlers.
 
    PKL_PASS_PAYLOAD expands to an l-value holding the data pointer
