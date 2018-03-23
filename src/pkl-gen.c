@@ -1,4 +1,4 @@
-/* pkl-gen.c - Code generator for Poke.  */
+/* pkl-gen.c - Code generation phase for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -19,9 +19,12 @@
 #include <config.h>
 #include <stdio.h>
 #include <assert.h>
+#include <jitter/jitter.h>
 
 #include "pvm.h"
 #include "pkl-gen.h"
+#include "pkl-ast.h"
+#include "pkl-pass.h"
 
 /* The following function is used to push pvm_val values to the PVM
    stack.  */
@@ -57,19 +60,83 @@ pvm_push_val (pvm_program program, pvm_val val)
 #endif
 }
 
-/* Forward declaration.  */
-static int pkl_gen_1 (pkl_ast_node ast, pvm_program program,
-                      size_t *label);
+/* The following handler is to be executed in breath-first for the
+   program node. It initializes the payload and also generates the
+   standard prologue.  */
 
-static int
-pkl_gen_integer (pkl_ast_node ast,
-                 pvm_program program,
-                 size_t *label)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_program_bf)
 {
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pvm_val val;
+  pvm_program program;
+  size_t label;
+  
+  program = pvm_make_program ();
+  label = 0;
+
+  /* Standard prologue.  */
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program,
+                                       "Lstart");
+  
+  pvm_append_symbolic_label (program, "Ldivzero");
+  
+  val = pvm_make_int (PVM_EXIT_EDIVZ);
+  pvm_push_val (program, val);
+  
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lexit");
+  
+  pvm_append_symbolic_label (program, "Lerror");
+  
+  val = pvm_make_int (PVM_EXIT_ERROR);
+  pvm_push_val (program, val);
+  
+  pvm_append_symbolic_label (program, "Lexit");
+  PVM_APPEND_INSTRUCTION (program, exit);
+  
+  pvm_append_symbolic_label (program, "Lstart");
+
+  /* Initialize payload.  */
+  payload->program = program;
+  payload->label = label;
+}
+PKL_PHASE_END_HANDLER
+
+/* The following handler is to be executed in depth-first for the
+   program node.  It generates the standard epilogue.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_program_df)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  struct pvm_program *program = payload->program;
+  pvm_val val;
+
+  /* Standard epilogue.  */
+  val = pvm_make_int (PVM_EXIT_OK);
+  pvm_push_val (program, val);
+    
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lexit");
+}
+PKL_PHASE_END_HANDLER
+
+/* The following handlers generate code for the rest of the supported
+   node types.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_integer)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node integer = PKL_PASS_NODE;
   pkl_ast_node type;
   pvm_val val;
 
-  type = PKL_AST_TYPE (ast);
+  type = PKL_AST_TYPE (integer);
   assert (type != NULL
           && PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL);
 
@@ -77,30 +144,30 @@ pkl_gen_integer (pkl_ast_node ast,
     {
     case 64:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_long (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_long (PKL_AST_INTEGER_VALUE (integer));
       else
-        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (integer));
       break;
 
     case 32:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_int (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_int (PKL_AST_INTEGER_VALUE (integer));
       else
-        val = pvm_make_uint (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_uint (PKL_AST_INTEGER_VALUE (integer));
       break;
 
     case 16:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_half (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_half (PKL_AST_INTEGER_VALUE (integer));
       else
-        val = pvm_make_uhalf (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_uhalf (PKL_AST_INTEGER_VALUE (integer));
       break;
 
     case 8:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_byte (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_byte (PKL_AST_INTEGER_VALUE (integer));
       else
-        val = pvm_make_ubyte (PKL_AST_INTEGER_VALUE (ast));
+        val = pvm_make_ubyte (PKL_AST_INTEGER_VALUE (integer));
       break;
 
     default:
@@ -108,22 +175,168 @@ pkl_gen_integer (pkl_ast_node ast,
       break;
     }
 
-  pvm_push_val (program, val);
-  return 1;
+  pvm_push_val (payload->program, val);
 }
+PKL_PHASE_END_HANDLER
 
-static int
-pkl_gen_string (pkl_ast_node ast,
-                pvm_program program,
-                size_t *label)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_string)
 {
-  pvm_val val;
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  val = pvm_make_string (PKL_AST_STRING_POINTER (ast));
+  pkl_ast_node string = PKL_PASS_NODE;
+  pvm_val val
+    = pvm_make_string (PKL_AST_STRING_POINTER (string));
 
-  pvm_push_val (program, val);
-  return 1;
+  pvm_push_val (payload->program, val);
 }
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_array_initializer)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pvm_val idx
+    = pvm_make_ulong (PKL_AST_ARRAY_INITIALIZER_INDEX (node));
+
+  pvm_push_val (payload->program, idx);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_ARRAY_NELEM (node)));
+
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (node)));
+
+  PVM_APPEND_INSTRUCTION (program, mka);
+}
+PKL_PHASE_END_HANDLER
+
+/* Type nodes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_type_integral)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node)));
+
+  pvm_push_val (program,
+                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node)));
+  
+  PVM_APPEND_INSTRUCTION (program, mktyi);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_type_array)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, mktya);
+}
+PKL_PHASE_END_HANDLER
+
+/* Expression nodes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_op_add)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      {
+        uint64_t size = PKL_AST_TYPE_I_SIZE (type);
+        int signed_p = PKL_AST_TYPE_I_SIGNED (type);
+
+        /* XXX: use a table with pvm_append_instruction_name (program,
+           "addb") */
+        
+        switch (size)
+          {
+          case 8:
+            if (signed_p)
+              PVM_APPEND_INSTRUCTION (program, addb);
+            else
+              PVM_APPEND_INSTRUCTION (program, addbu);
+            break;
+            
+          case 16:
+            if (signed_p)
+              PVM_APPEND_INSTRUCTION (program, addh);
+            else
+              PVM_APPEND_INSTRUCTION (program, addhu);
+            break;
+            
+          case 32:
+            if (signed_p)
+              PVM_APPEND_INSTRUCTION (program, addi);
+            else
+              PVM_APPEND_INSTRUCTION (program, addiu);
+            break;
+            
+          case 64:
+            if (signed_p)
+              PVM_APPEND_INSTRUCTION (program, addl);
+            else
+              PVM_APPEND_INSTRUCTION (program, addlu);
+            break;
+          }
+        break;
+      }
+    case PKL_TYPE_STRING:
+      PVM_APPEND_INSTRUCTION (program, sconc);
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* The handler below genrates and ICE if a node couldn't be processed
+   by the code generator.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_noimpl)
+{
+  printf ("error: unrecognized node code %d in code generator\n",
+          PKL_AST_CODE (PKL_PASS_NODE));
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
+struct pkl_phase pkl_phase_gen =
+  { .default_handler = pkl_gen_noimpl,
+    .code_bf_handlers[PKL_AST_PROGRAM] = pkl_gen_program_bf,
+    .code_df_handlers[PKL_AST_PROGRAM] = pkl_gen_program_df,
+    .code_df_handlers[PKL_AST_INTEGER] = pkl_gen_integer,
+    .code_df_handlers[PKL_AST_STRING] = pkl_gen_string,
+    .code_df_handlers[PKL_AST_ARRAY] = pkl_gen_df_array,
+    .code_bf_handlers[PKL_AST_ARRAY_INITIALIZER] = pkl_gen_bf_array_initializer,
+    .op_df_handlers[PKL_AST_OP_ADD] = pkl_gen_op_add,
+    .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_type_integral,
+    .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_type_array,
+  };
+
+#if 0
 
 static int
 pkl_gen_op (pkl_ast_node ast,
@@ -131,6 +344,7 @@ pkl_gen_op (pkl_ast_node ast,
             size_t *label,
             enum pkl_ast_op what)
 {
+  pkl_ast_node type = PKL_AST_TYPE (ast);
 
 #define PVM_APPEND_ARITH_INSTRUCTION(what,suffix)               \
   do                                                            \
@@ -202,9 +416,7 @@ pkl_gen_op (pkl_ast_node ast,
           break;                                                \
         }                                                       \
     } while (0)
-
-  pkl_ast_node type = PKL_AST_TYPE (ast);
-
+  
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -291,6 +503,7 @@ pkl_gen_op (pkl_ast_node ast,
 
   return 1;
 }
+
 
 static int
 pkl_gen_op_int (pkl_ast_node ast,
@@ -884,43 +1097,6 @@ pkl_gen_exp (pkl_ast_node ast,
 }
 
 static int
-pkl_gen_array (pkl_ast_node ast,
-               pvm_program program,
-               size_t *label)
-{
-  pkl_ast_node e;
-
-  assert (PKL_AST_TYPE_CODE (PKL_AST_TYPE (ast)) == PKL_TYPE_ARRAY);
-
-  /* Create the array.  */
-
-  if (!pkl_gen_type (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (ast)),
-                     program, label))
-    return 0;
-
-  pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_ARRAY_NELEM (ast)));
-
-  PVM_APPEND_INSTRUCTION (program, mka);
-  
-  /* Insert the elements.  */
-  for (e = PKL_AST_ARRAY_ELEMS (ast);
-       e;
-       e = PKL_AST_CHAIN (e))
-    {
-      pvm_val idx = pvm_make_ulong (PKL_AST_ARRAY_ELEM_INDEX (e));
-      
-      pvm_push_val (program, idx);
-      
-      pkl_gen_1 (PKL_AST_ARRAY_ELEM_EXP (e), program, label);
-      
-      PVM_APPEND_INSTRUCTION (program, aset);
-    }
-  
-  return 1;
-}
-
-static int
 pkl_gen_array_ref (pkl_ast_node ast,
                    pvm_program program,
                    size_t *label)
@@ -1025,12 +1201,6 @@ pkl_gen_1 (pkl_ast_node ast,
 
   switch (PKL_AST_CODE (ast))
     {
-    case PKL_AST_PROGRAM:
-      for (tmp = PKL_AST_PROGRAM_ELEMS (ast); tmp; tmp = PKL_AST_CHAIN (tmp))
-        if (!pkl_gen_1 (tmp, program, label))
-          goto error;
-      break;
-      
     case PKL_AST_INTEGER:
       if (!pkl_gen_integer (ast, program, label))
         goto error;     
@@ -1088,70 +1258,4 @@ pkl_gen_1 (pkl_ast_node ast,
   return 0;
 }
 
-int
-pkl_gen (pvm_program *prog, pkl_ast ast)
-{
-  struct pvm_program *program;
-  size_t label;
-
-  label = 0;
-  program = pvm_make_program ();
-  if (program == NULL)
-    goto error;
-
-  /* Standard prologue.  */
-  {
-    pvm_val val;
-    
-    PVM_APPEND_INSTRUCTION (program, ba);
-    pvm_append_symbolic_label_parameter (program, "Lstart");
-
-    pvm_append_symbolic_label (program, "Ldivzero");
-
-    val = pvm_make_int (PVM_EXIT_EDIVZ);
-    pvm_push_val (program, val);
-
-    PVM_APPEND_INSTRUCTION (program, ba);
-    pvm_append_symbolic_label_parameter (program, "Lexit");
-    
-    pvm_append_symbolic_label (program, "Lerror");
-    
-    val = pvm_make_int (PVM_EXIT_ERROR);
-    pvm_push_val (program, val);
-        
-    pvm_append_symbolic_label (program, "Lexit");
-    PVM_APPEND_INSTRUCTION (program, exit);
-
-    /* XXX: insert here programs defined in the global scope:
-       - Functions.
-       - Structs.
-     */
-
-    pvm_append_symbolic_label (program, "Lstart");
-  }
-
-  if (!pkl_gen_1 (ast->ast, program, &label))
-    {
-      /* XXX: handle code generation errors.  */
-      pvm_destroy_program (program);
-      goto error;
-    }
-
-  /* Standard epilogue.  */
-  {
-    pvm_val val;
-
-    /* The exit status is OK.  */
-    val = pvm_make_int (PVM_EXIT_OK);
-    pvm_push_val (program, val);
-    
-    PVM_APPEND_INSTRUCTION (program, ba);
-    pvm_append_symbolic_label_parameter (program, "Lexit");
-  }
-
-  *prog = program;
-  return 1;
-  
- error:
-  return 0;
-}
+#endif

@@ -42,7 +42,7 @@ enum pkl_ast_code
   PKL_AST_STRING,
   PKL_AST_IDENTIFIER,
   PKL_AST_ARRAY,
-  PKL_AST_ARRAY_ELEM,
+  PKL_AST_ARRAY_INITIALIZER,
   PKL_AST_ARRAY_REF,
   PKL_AST_STRUCT,
   PKL_AST_STRUCT_ELEM,
@@ -264,28 +264,31 @@ pkl_ast_node pkl_ast_make_string (const char *str);
    allowed.  */
 
 #define PKL_AST_ARRAY_NELEM(AST) ((AST)->array.nelem)
-#define PKL_AST_ARRAY_ELEMS(AST) ((AST)->array.elems)
+#define PKL_AST_ARRAY_NINITIALIZER(AST) ((AST)->array.ninitializer)
+#define PKL_AST_ARRAY_INITIALIZERS(AST) ((AST)->array.initializers)
 
 struct pkl_ast_array
 {
   struct pkl_ast_common common;
 
   size_t nelem;
-  union pkl_ast_node *elems;
+  size_t ninitializer;
+  union pkl_ast_node *initializers;
 };
 
 pkl_ast_node pkl_ast_make_array (size_t nelem,
-                                 pkl_ast_node elems);
+                                 size_t ninitializer,
+                                 pkl_ast_node initializers);
 
 
-/* PKL_AST_ARRAY_ELEM nodes represent nodes in array literals.  They
-   are characterized by an index into the array and a contained
-   expression.  */
+/* PKL_AST_ARRAY_INITIALIZER nodes represent initializers in array
+   literals.  They are characterized by an index into the array and a
+   contained expression.  */
 
-#define PKL_AST_ARRAY_ELEM_INDEX(AST) ((AST)->array_elem.index)
-#define PKL_AST_ARRAY_ELEM_EXP(AST) ((AST)->array_elem.exp)
+#define PKL_AST_ARRAY_INITIALIZER_INDEX(AST) ((AST)->array_initializer.index)
+#define PKL_AST_ARRAY_INITIALIZER_EXP(AST) ((AST)->array_initializer.exp)
 
-struct pkl_ast_array_elem
+struct pkl_ast_array_initializer
 {
   struct pkl_ast_common common;
 
@@ -294,8 +297,8 @@ struct pkl_ast_array_elem
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_array_elem (size_t index,
-                                      pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_array_initializer (size_t index,
+                                             pkl_ast_node exp);
 
 
 /* PKL_AST_STRUCT nodes represent struct literals.  */
@@ -651,7 +654,7 @@ union pkl_ast_node
   struct pkl_ast_string string;
   struct pkl_ast_identifier identifier;
   struct pkl_ast_array array;
-  struct pkl_ast_array_elem array_elem;
+  struct pkl_ast_array_initializer array_initializer;
   struct pkl_ast_array_ref aref;
   struct pkl_ast_struct sct;
   struct pkl_ast_struct_elem sct_elem;

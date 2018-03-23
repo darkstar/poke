@@ -21,23 +21,24 @@
 #define _(str) gettext (str)
 
 #include "pkl.h"
-#include "pkl-gen.h"
 #include "pkl-parser.h"
 #include "pkl-pass.h"
+#include "pkl-gen.h"
 
 /* Compiler passes and phases.  */
 
 extern struct pkl_phase satanize;  /* pkl-satan.c  */
 extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
 extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
+extern struct pkl_phase pkl_phase_gen; /* pkl-gen.c */
 
 int
 pkl_compile_buffer (pvm_program *prog,
                     int what, char *buffer, char **end)
 {
   pkl_ast ast = NULL;
-  pvm_program p;
   int ret;
+  struct pkl_gen_payload gen_payload = { NULL, 0 };
 
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&ast, what, buffer, end);
@@ -50,46 +51,49 @@ pkl_compile_buffer (pvm_program *prog,
 
   if (0) /* Multi-pass.  */
     {
-      struct pkl_phase *promo_pass[] =
-        { &pkl_phase_promo, NULL };
-      struct pkl_phase *fold_pass[] =
-        { &pkl_phase_fold, NULL };
+      struct pkl_phase *promo_pass[] = { &pkl_phase_promo, NULL };
+      struct pkl_phase *fold_pass[] =  { &pkl_phase_fold, NULL };
 
       pkl_ast_print (stdout, ast->ast);
 
       fprintf (stdout, "===========  PROMOTING ======\n");
-      if (!pkl_do_pass (ast, NULL, promo_pass))
+      if (!pkl_do_pass (ast, promo_pass, NULL))
         goto error;
       pkl_ast_print (stdout, ast->ast);
       
       fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
-      if (!pkl_do_pass (ast, NULL, fold_pass))
+      if (!pkl_do_pass (ast, fold_pass, NULL))
         goto error;
       pkl_ast_print (stdout, ast->ast);
     }
   else
     {
-      struct pkl_phase *compiler_phases[] =
-        { &pkl_phase_promo, &pkl_phase_fold, NULL };
+      struct pkl_phase *frontend_phases[]
+        = { &pkl_phase_promo, /* &pkl_phase_fold */ NULL , NULL };
+      void *frontend_payloads[] = { NULL, NULL };
 
-      /* Run the rest of the compile phases.  */
-      if (!pkl_do_pass (ast, NULL, compiler_phases))
+      struct pkl_phase *backend_phases[] = { &pkl_phase_gen, NULL };
+      void *backend_payloads[] = { &gen_payload };
+      
+      if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
+        goto error;
+
+      pkl_ast_print (stdout, ast->ast);
+      
+      if (!pkl_do_pass (ast, backend_phases, backend_payloads))
         goto error;
     }
 
-  if (!pkl_gen (&p, ast))
-    /* Compiler back-end error.  */
-    goto error;
-
   pkl_ast_free (ast);
 
-  pvm_specialize_program (p);
-  *prog = p;
+  pvm_specialize_program (gen_payload.program);
+  *prog = gen_payload.program;
 
   return 1;
 
  error:
   pkl_ast_free (ast);
+  pvm_destroy_program (gen_payload.program);
   return 0;
 }
 
@@ -100,7 +104,7 @@ pkl_compile_file (pvm_program *prog,
 {
   int ret;
   pkl_ast ast = NULL;
-  pvm_program p;
+  pvm_program p = NULL; /* This is to avoid a compiler warning.  */
 
   ret = pkl_parse_file (&ast, PKL_PARSE_PROGRAM, fd, fname);
   if (ret == 1)
@@ -112,9 +116,9 @@ pkl_compile_file (pvm_program *prog,
       printf (_("out of memory\n"));
     }
 
-  if (!pkl_gen (&p, ast))
-    /* Compiler back-end error.  */
-    goto error;
+  //  if (!pkl_gen (&p, ast))
+  //    /* Compiler back-end error.  */
+  //    goto error;
 
   pvm_specialize_program (p);
   *prog = p;

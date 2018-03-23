@@ -504,12 +504,14 @@ pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values)
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
-pkl_ast_make_array (size_t nelem, pkl_ast_node elems)
+pkl_ast_make_array (size_t nelem, size_t ninitializer,
+                    pkl_ast_node initializers)
 {
   pkl_ast_node array = pkl_ast_make_node (PKL_AST_ARRAY);
 
   PKL_AST_ARRAY_NELEM (array) = nelem;
-  PKL_AST_ARRAY_ELEMS (array) = ASTREF (elems);
+  PKL_AST_ARRAY_NINITIALIZER (array) = ninitializer;
+  PKL_AST_ARRAY_INITIALIZERS (array) = ASTREF (initializers);
 
   return array;
 }
@@ -517,14 +519,15 @@ pkl_ast_make_array (size_t nelem, pkl_ast_node elems)
 /* Build and return an AST node for an array element.  */
 
 pkl_ast_node
-pkl_ast_make_array_elem (size_t index, pkl_ast_node exp)
+pkl_ast_make_array_initializer (size_t index, pkl_ast_node exp)
 {
-  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_ARRAY_ELEM);
+  pkl_ast_node initializer
+    = pkl_ast_make_node (PKL_AST_ARRAY_INITIALIZER);
 
-  PKL_AST_ARRAY_ELEM_INDEX (elem) = index;
-  PKL_AST_ARRAY_ELEM_EXP (elem) = ASTREF (exp);
+  PKL_AST_ARRAY_INITIALIZER_INDEX (initializer) = index;
+  PKL_AST_ARRAY_INITIALIZER_EXP (initializer) = ASTREF (exp);
 
-  return elem;
+  return initializer;
 }
 
 /* Build and return an AST node for a struct.  */
@@ -715,14 +718,14 @@ pkl_ast_node_free (pkl_ast_node ast)
         }
       break;
       
-    case PKL_AST_ARRAY_ELEM:
+    case PKL_AST_ARRAY_INITIALIZER:
 
-      pkl_ast_node_free (PKL_AST_ARRAY_ELEM_EXP (ast));
+      pkl_ast_node_free (PKL_AST_ARRAY_INITIALIZER_EXP (ast));
       break;
 
     case PKL_AST_ARRAY:
 
-      for (t = PKL_AST_ARRAY_ELEMS (ast); t; t = n)
+      for (t = PKL_AST_ARRAY_INITIALIZERS (ast); t; t = n)
         {
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
@@ -1154,20 +1157,21 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST_CHAIN (STRUCT_ELEMS);
       break;
       
-    case PKL_AST_ARRAY_ELEM:
-      IPRINTF ("ARRAY_ELEM::\n");
+    case PKL_AST_ARRAY_INITIALIZER:
+      IPRINTF ("ARRAY_INITIALIZER::\n");
 
-      PRINT_AST_IMM (index, ARRAY_ELEM_INDEX, "%zu");
-      PRINT_AST_SUBAST (exp, ARRAY_ELEM_EXP);
+      PRINT_AST_IMM (index, ARRAY_INITIALIZER_INDEX, "%zu");
+      PRINT_AST_SUBAST (exp, ARRAY_INITIALIZER_EXP);
       break;
 
     case PKL_AST_ARRAY:
       IPRINTF ("ARRAY::\n");
 
       PRINT_AST_IMM (nelem, ARRAY_NELEM, "%zu");
+      PRINT_AST_IMM (ninitializer, ARRAY_NINITIALIZER, "%zu");
       PRINT_AST_SUBAST (type, TYPE);
-      IPRINTF ("elems:\n");
-      PRINT_AST_SUBAST_CHAIN (ARRAY_ELEMS);
+      IPRINTF ("initializers:\n");
+      PRINT_AST_SUBAST_CHAIN (ARRAY_INITIALIZERS);
       break;
 
     case PKL_AST_ENUMERATOR:

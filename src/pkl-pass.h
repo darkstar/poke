@@ -48,10 +48,6 @@
      pkl-ast.h. For example, PKL_TYPE_STRING.  It maps codes to
      pkl_phase_handler_fn functions.
 
-   - DEFAULT_DF_HANDLER is invoked for every node.  It can be NULL,
-     meaning no default handler is invoked at all.  It maps codes to
-     pkl_phase_handler_fn functions.
-
    The handlers defined in the tables above are invoked while
    traversing the AST in depth-first order.  Additional tables exist
    to define handlers that are executed while traversing the AST in
@@ -60,9 +56,13 @@
    - CODE_BF_HANDLERS
    - OP_BF_HANDLERS
    - TYPE_BF_HANDLERS
-   - DEFAULT_BF_HANDLERS
 
    A given phase can define handlers of both types: DF and BF.
+
+   There is also another handler that the user can install:
+
+   - DEFAULT_HANDLER, if not NULL, is invoked for every node for which
+     no other handler (BF or DF) has been invoked.
 
    Note that if a given node class falls in several categories as
    implemented in the handlers tables, the more general handler will
@@ -78,16 +78,17 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast ast,
                                               pkl_ast_node node,
                                               void *payload,
-                                              int *restart);
+                                              int *restart,
+                                              size_t child_pos);
 
 struct pkl_phase
 {
-  pkl_phase_handler_fn default_df_handler;
+  pkl_phase_handler_fn default_handler;
+
   pkl_phase_handler_fn code_df_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_df_handlers[PKL_AST_OP_LAST];
   pkl_phase_handler_fn type_df_handlers[PKL_TYPE_NOTYPE];
 
-  pkl_phase_handler_fn default_bf_handler;
   pkl_phase_handler_fn code_bf_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_bf_handlers[PKL_AST_OP_LAST];
   pkl_phase_handler_fn type_bf_handlers[PKL_TYPE_NOTYPE];
@@ -105,6 +106,10 @@ typedef struct pkl_phase *pkl_phase;
 
    PKL_PASS_NODE expands to an l-value holding the pkl_ast_node for
    the node being processed.
+
+   PKL_PASS_CHILD_POS expands to an l-value holding the position (zero
+   based) of the node being processed in the parent's node chain.  If
+   the node is not part of a chain, this holds 0.
 
    PKL_PASS_RESTART expands to an l-value that should be set to 1 if
    the handler modifies its subtree structure in any way, either
@@ -124,6 +129,7 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_AST _ast
 #define PKL_PASS_NODE _node
 #define PKL_PASS_RESTART (*_restart)
+#define PKL_PASS_CHILD_POS _child_pos
 
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
@@ -134,7 +140,7 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PHASE_BEGIN_HANDLER(name)                                   \
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
                             pkl_ast_node _node, void *_payload,         \
-                            int *_restart)                              \
+                            int *_restart, size_t _child_pos)           \
   {                                                                     \
      PKL_PASS_RESTART = 0;
 

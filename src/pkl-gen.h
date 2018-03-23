@@ -1,4 +1,4 @@
-/* pkl-gen.h - Code generator for Poke.  */
+/* pkl-gen.h - Code generation pass for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -22,11 +22,15 @@
 #include <config.h>
 #include <jitter/jitter.h>
 #include "pkl-ast.h"
+#include "pkl-pass.h"
 #include "pvm.h"
 
-/* Lower an AST to a PVM program and return it.  Return 0 if a
-   compilation error occurs.  Return 1 otherwise.  */
+struct pkl_gen_payload
+{
+  pvm_program program;
+  size_t label;
+};
 
-int pkl_gen (pvm_program *prog, pkl_ast ast);
+typedef struct pkl_gen_payload *pkl_gen_payload;
 
 #endif /* !PKL_GEN_H  */
