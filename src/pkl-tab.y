@@ -236,19 +236,14 @@ expression:
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
-                  if (PKL_AST_CODE ($2) != PKL_AST_TYPE)
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "expected type in cast.");
-                      YYERROR;
-                    }
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
                   PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  /* XXX: the details of the offset types are arbitrary.  */
+                  /* XXX: the details of the offset type are
+                     arbitrary.  */
                   PKL_AST_TYPE ($$)
                     = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
                                                                            64, 0),
