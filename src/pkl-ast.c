@@ -1010,6 +1010,23 @@ pkl_ast_get_registered (pkl_ast ast,
   return NULL;
 }
 
+pkl_ast_node
+pkl_ast_reverse (pkl_ast_node ast)
+{
+  pkl_ast_node prev = NULL, decl, next;
+
+  for (decl = ast; decl != NULL; decl = next)
+    {
+      next = PKL_AST_CHAIN (decl);
+      if (next)
+        PKL_AST_REFCOUNT (next) -= 1;
+      PKL_AST_CHAIN (decl) = ASTREF (prev);
+      prev = decl;
+    }
+
+  return prev;
+}
+
 #ifdef PKL_DEBUG
 
 /* The following macros are commodities to be used to keep the

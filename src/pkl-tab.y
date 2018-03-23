@@ -786,8 +786,8 @@ finish_array (struct pkl_parser *parser,
                                                           64, 0);
   type = pkl_ast_make_array_type (array_nelem, type);
 
-  /* XXX: we need to reverse the list of initializers.  */
-  array = pkl_ast_make_array (nelem, ninitializer, initializers);
+  array = pkl_ast_make_array (nelem, ninitializer,
+                              pkl_ast_reverse (initializers));
   PKL_AST_TYPE (array) = ASTREF (type);
   
   return array;

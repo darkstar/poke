@@ -737,6 +737,11 @@ pkl_ast_node pkl_ast_get_integral_type (pkl_ast ast,
 
 void pkl_ast_print (FILE *fd, pkl_ast_node ast);
 
+/* Reverse the order of elements chained by CHAIN, and return the new
+   head of the chain (old last element).  */
+
+pkl_ast_node pkl_ast_reverse (pkl_ast_node ast);
+
 #endif
 
 #endif /* ! PKL_AST_H */
