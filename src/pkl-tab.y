@@ -788,9 +788,8 @@ finish_array (struct pkl_parser *parser,
   return array;
 }
 
-/* Finish a struct and return it.  Check that there are not struct
-   elements defined with the same name.  Derive the type of the struct
-   after the types of its elements.
+/* Finish a struct and return it.  Derive the type of the struct after
+   the types of its elements.
 
    In case of a syntax error, return NULL.  */
 
@@ -799,7 +798,7 @@ finish_struct (struct pkl_parser *parser,
                YYLTYPE *llocp,
                pkl_ast_node elems)
 {
-  pkl_ast_node t, u;
+  pkl_ast_node t;
   pkl_ast_node struct_type_elems, type, sct;
   size_t nelem;
 
@@ -815,27 +814,7 @@ finish_struct (struct pkl_parser *parser,
       /* Add the name for this struct element.  */
       name = PKL_AST_STRUCT_ELEM_NAME (t);
       if (name)
-        {
-          assert (PKL_AST_CODE (name) == PKL_AST_IDENTIFIER);
-          for (u = elems; u != t; u = PKL_AST_CHAIN (u))
-            {
-              pkl_ast_node uname
-                = PKL_AST_STRUCT_ELEM_NAME (u);
-
-              if (uname == NULL)
-                continue;
-              
-              if (strcmp (PKL_AST_IDENTIFIER_POINTER (name),
-                          PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
-                {
-                  pkl_tab_error (llocp, parser,
-                                 "duplicated element name in struct.");
-                  return NULL;
-                }
-            }
-
           ename = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (name));
-        }
       else
         ename = pkl_ast_make_identifier ("");
 

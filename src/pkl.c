@@ -31,6 +31,8 @@ extern struct pkl_phase satanize;  /* pkl-satan.c  */
 extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
 extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
 extern struct pkl_phase pkl_phase_gen; /* pkl-gen.c */
+extern struct pkl_phase pkl_phase_anal1; /* pkl-anal.c */
+extern struct pkl_phase pkl_phase_anal2; /* pkl-anal.c */
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -51,10 +53,15 @@ pkl_compile_buffer (pvm_program *prog,
 
   if (0) /* Multi-pass.  */
     {
+      struct pkl_phase *anal1_pass[] = { &pkl_phase_anal1, NULL };
       struct pkl_phase *promo_pass[] = { &pkl_phase_promo, NULL };
       struct pkl_phase *fold_pass[] =  { &pkl_phase_fold, NULL };
 
       pkl_ast_print (stdout, ast->ast);
+
+      fprintf (stdout, "===========  ANALYZING 1 ======\n");
+      if (!pkl_do_pass (ast, anal1_pass, NULL))
+        goto error;
 
       fprintf (stdout, "===========  PROMOTING ======\n");
       if (!pkl_do_pass (ast, promo_pass, NULL))
@@ -65,12 +72,26 @@ pkl_compile_buffer (pvm_program *prog,
       if (!pkl_do_pass (ast, fold_pass, NULL))
         goto error;
       pkl_ast_print (stdout, ast->ast);
+
+      fprintf (stdout, "===========  ANALYZING 2 ======\n");
+      if (!pkl_do_pass (ast, anal1_pass, NULL))
+        goto error;
     }
   else
     {
       struct pkl_phase *frontend_phases[]
-        = { &pkl_phase_promo, /* &pkl_phase_fold */ NULL , NULL };
-      void *frontend_payloads[] = { NULL, NULL };
+        = { &pkl_phase_anal1,
+            &pkl_phase_promo,
+            /* &pkl_phase_fold */ NULL ,
+            &pkl_phase_anal2,
+            NULL
+          };
+      void *frontend_payloads[]
+        = { NULL, /* anal1 */
+            NULL, /* promo */
+            NULL, /* fold */
+            NULL  /* anal2 */
+          };
 
       struct pkl_phase *backend_phases[] = { &pkl_phase_gen, NULL };
       void *backend_payloads[] = { &gen_payload };
