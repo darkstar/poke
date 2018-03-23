@@ -189,6 +189,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
 PKL_PHASE_END_HANDLER
 
 /*
+ * IDENTIFIER
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_identifier)
+{
+  /* XXX this doesn't feel right.  */
+
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node identifier = PKL_PASS_NODE;
+  pvm_val val
+    = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (identifier));
+
+  pvm_push_val (payload->program, val);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * STRING
  */
 
@@ -877,6 +896,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
+   PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
    PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_bf_array_initializer),
