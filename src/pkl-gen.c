@@ -266,6 +266,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | ARRAY_REF_ARRAY
+ * | ARRAY_REF_INDEX
+ * ARRAY_REF
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_ref)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, aref);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  *  | STRUCT_ELEM
  *  | ...
  *  STRUCT
@@ -871,7 +886,7 @@ PKL_PHASE_END_HANDLER
 #undef BIN_INTEGRAL_EXP_HANDLER
 #undef INTEGRAL_EXP
 
-/* The handler below genrates and ICE if a node couldn't be processed
+/* The handler below generates and ICE if a node couldn't be processed
    by the code generator.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_noimpl)
@@ -899,6 +914,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_df_array_ref),
    PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_bf_array_initializer),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
