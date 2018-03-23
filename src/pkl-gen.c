@@ -327,7 +327,7 @@ PKL_PHASE_END_HANDLER
  * EXP
  */
 
-#define INTEGRAL_EXP(op)                                \
+#define INTEGRAL_EXP(insn)                              \
   {                                                     \
     uint64_t size = PKL_AST_TYPE_I_SIZE (type);         \
     int signed_p = PKL_AST_TYPE_I_SIGNED (type);        \
@@ -336,30 +336,30 @@ PKL_PHASE_END_HANDLER
       {                                                 \
       case 8:                                           \
         if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, op##b);      \
+          PVM_APPEND_INSTRUCTION (program, insn##b);    \
         else                                            \
-          PVM_APPEND_INSTRUCTION (program, op##bu);     \
+          PVM_APPEND_INSTRUCTION (program, insn##bu);   \
         break;                                          \
                                                         \
       case 16:                                          \
         if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, op##h);      \
+          PVM_APPEND_INSTRUCTION (program, insn##h);    \
         else                                            \
-          PVM_APPEND_INSTRUCTION (program, op##hu);     \
+          PVM_APPEND_INSTRUCTION (program, insn##hu);   \
         break;                                          \
                                                         \
       case 32:                                          \
         if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, op##i);      \
+          PVM_APPEND_INSTRUCTION (program, insn##i);    \
         else                                            \
-          PVM_APPEND_INSTRUCTION (program, op##iu);     \
+          PVM_APPEND_INSTRUCTION (program, insn##iu);   \
         break;                                          \
                                                         \
       case 64:                                          \
         if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, op##l);      \
+          PVM_APPEND_INSTRUCTION (program, insn##l);    \
         else                                            \
-          PVM_APPEND_INSTRUCTION (program, op##lu);     \
+          PVM_APPEND_INSTRUCTION (program, insn##lu);   \
         break;                                          \
       }                                                 \
   }
@@ -388,7 +388,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 }
 PKL_PHASE_END_HANDLER
 
-#define BIN_INTEGRAL_EXP_HANDLER(op)                            \
+#define BIN_INTEGRAL_EXP_HANDLER(op,insn)                       \
   PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)                  \
   {                                                             \
     pkl_gen_payload payload                                     \
@@ -409,7 +409,7 @@ PKL_PHASE_END_HANDLER
     switch (PKL_AST_TYPE_CODE (type))                           \
       {                                                         \
       case PKL_TYPE_INTEGRAL:                                   \
-        INTEGRAL_EXP (op);                                      \
+        INTEGRAL_EXP (insn);                                    \
         break;                                                  \
       default:                                                  \
         assert (0);                                             \
@@ -418,44 +418,30 @@ PKL_PHASE_END_HANDLER
   }                                                             \
   PKL_PHASE_END_HANDLER
 
-BIN_INTEGRAL_EXP_HANDLER (sub);
-BIN_INTEGRAL_EXP_HANDLER (mul);
-BIN_INTEGRAL_EXP_HANDLER (div);
-BIN_INTEGRAL_EXP_HANDLER (mod);
+BIN_INTEGRAL_EXP_HANDLER (sub, sub);
+BIN_INTEGRAL_EXP_HANDLER (mul, mul);
+BIN_INTEGRAL_EXP_HANDLER (div, div);
+BIN_INTEGRAL_EXP_HANDLER (mod, mod);
+BIN_INTEGRAL_EXP_HANDLER (band, band);
+BIN_INTEGRAL_EXP_HANDLER (ior, bor);
+BIN_INTEGRAL_EXP_HANDLER (xor, bxor);
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
-{
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+#define LOGIC_EXP_HANDLER(op)                           \
+  PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
+  {                                                     \
+    pkl_gen_payload payload                             \
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;             \
+                                                        \
+    PVM_APPEND_INSTRUCTION (payload->program, op);      \
+  }                                                     \
+  PKL_PHASE_END_HANDLER
 
-  PVM_APPEND_INSTRUCTION (payload->program, and);
-}
-PKL_PHASE_END_HANDLER
+LOGIC_EXP_HANDLER (and);
+LOGIC_EXP_HANDLER (or);
+LOGIC_EXP_HANDLER (not);
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_or)
-{
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+#undef LOGIC_EXP_HANDLER
 
-  PVM_APPEND_INSTRUCTION (payload->program, or);
-}
-PKL_PHASE_END_HANDLER
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_not)
-{
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  PVM_APPEND_INSTRUCTION (payload->program, not);
-}
-PKL_PHASE_END_HANDLER
-
-
-//BIN_INTEGRAL_EXP_HANDLER (and);
-//BIN_INTEGRAL_EXP_HANDLER (or);
-//BIN_INTEGRAL_EXP_HANDLER (band);
-//BIN_INTEGRAL_EXP_HANDLER (ior);
-//BIN_INTEGRAL_EXP_HANDLER (xor);
 //BIN_INTEGRAL_EXP_HANDLER (sl);
 //BIN_INTEGRAL_EXP_HANDLER (sr);
 
@@ -501,6 +487,9 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_SUB] = pkl_gen_df_op_sub,
     .op_df_handlers[PKL_AST_OP_MUL] = pkl_gen_df_op_mul,
     .op_df_handlers[PKL_AST_OP_MOD] = pkl_gen_df_op_mod,
+    .op_df_handlers[PKL_AST_OP_BAND] = pkl_gen_df_op_band,
+    .op_df_handlers[PKL_AST_OP_IOR] = pkl_gen_df_op_ior,
+    .op_df_handlers[PKL_AST_OP_XOR] = pkl_gen_df_op_xor,
     .op_df_handlers[PKL_AST_OP_DIV] = pkl_gen_df_op_div,
     .op_df_handlers[PKL_AST_OP_AND] = pkl_gen_df_op_and,
     .op_df_handlers[PKL_AST_OP_OR] = pkl_gen_df_op_or,
