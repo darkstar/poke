@@ -423,6 +423,8 @@ BIN_INTEGRAL_EXP_HANDLER (mul, mul);
 BIN_INTEGRAL_EXP_HANDLER (div, div);
 BIN_INTEGRAL_EXP_HANDLER (mod, mod);
 BIN_INTEGRAL_EXP_HANDLER (band, band);
+BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
+BIN_INTEGRAL_EXP_HANDLER (neg, neg);
 BIN_INTEGRAL_EXP_HANDLER (ior, bor);
 BIN_INTEGRAL_EXP_HANDLER (xor, bxor);
 
@@ -478,11 +480,326 @@ RELA_EXP_HANDLER (gt);
 RELA_EXP_HANDLER (ge);
 
 #undef RELA_EXP_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sizeof)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, siz);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_cast)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+
+  /* XXX: rewrite this crap.  */
+
+  pkl_ast_node to_type;
+  pkl_ast_node from_type;
+
+  to_type = PKL_AST_TYPE (node);
+  from_type = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (node, 0));
   
-/* Others: sizeof, elemsof, typeof, map, cast */
+  if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
+    {
+      size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
+      int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
+      
+      size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
+      int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
 
-/* Unary: neg, bnot */
+      if (from_type_size == to_type_size)
+        {
+          if (from_type_sign == to_type_sign)
+            /* Wheee, nothing to do.  */
+            PKL_PASS_DONE;
 
+          if (from_type_size == 64)
+            {
+              if (to_type_sign)
+                /* uint64 -> int64 */
+                PVM_APPEND_INSTRUCTION (program, lutol);
+              else
+                /* int64 -> uint64 */
+                PVM_APPEND_INSTRUCTION (program, ltolu);
+            }
+          else
+            {
+              if (to_type_sign)
+                {
+                  switch (from_type_size)
+                    {
+                    case 8: /* uint8  -> int8 */
+                      PVM_APPEND_INSTRUCTION (program, butob);
+                      break;
+                    case 16: /* uint16 -> int16 */
+                      PVM_APPEND_INSTRUCTION (program, hutoh);
+                      break;
+                    case 32: /* uint32 -> int32 */
+                      PVM_APPEND_INSTRUCTION (program, iutoi);
+                      break;
+                    default:
+                      assert (0);
+                      break;
+                    }
+                }
+              else
+                {
+                  switch (from_type_size)
+                    {
+                    case 8: /* int8 -> uint8 */
+                      PVM_APPEND_INSTRUCTION (program, btobu);
+                      break;
+                    case 16: /* int16 -> uint16 */
+                      PVM_APPEND_INSTRUCTION (program, htohu);
+                      break;
+                    case 32: /* int32 -> uint32 */
+                      PVM_APPEND_INSTRUCTION (program, itoiu);
+                      break;
+                    default:
+                      assert (0);
+                      break;
+                    }
+                }
+            }
+        }
+      else /* from_type_size != to_type_size */
+        {
+          switch (from_type_size)
+            {
+            case 64:
+              switch (to_type_size)
+                {
+                case 8:
+                  if (from_type_sign && to_type_sign)
+                    /* int64 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, ltob);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int64 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, ltobu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint64 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, lutob);
+                  else
+                    /* uint64 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, lutobu);
+                  break;
+
+                case 16:
+                  if (from_type_sign && to_type_sign)
+                    /* int64 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, ltoh);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int64 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, ltohu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint64 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, lutoh);
+                  else
+                    /* uint64 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, lutohu);
+                  break;
+
+                case 32:
+                  if (from_type_sign && to_type_sign)
+                    /* int64 -> int32 */
+                    PVM_APPEND_INSTRUCTION (program, ltoi);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int64 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, ltoiu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint64 -> int32 */
+                    PVM_APPEND_INSTRUCTION (program, lutoi);
+                  else
+                    /* uint64 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, lutoiu);
+                  break;
+
+                default:
+                  assert (0);
+                  break;
+                }
+              break;
+
+            case 32:
+              switch (to_type_size)
+                {
+                case 8:
+                  if (from_type_sign && to_type_sign)
+                    /* int32 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, itob);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int32 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, itobu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint32 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, iutob);
+                  else
+                    /* uint32 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, iutobu);
+                  break;
+
+                case 16:
+                  if (from_type_sign && to_type_sign)
+                    /* int32 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, itoh);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int32 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, itohu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint32 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, iutoh);
+                  else
+                    /* uint32 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, iutohu);
+                  break;
+
+                case 64:
+                  if (from_type_sign && to_type_sign)
+                    /* int32 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, itol);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int32 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, itolu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint32 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, iutol);
+                  else
+                    /* uint32 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, iutolu);
+                  break;
+
+                default:
+                  assert (0);
+                  break;
+                }
+              break;
+
+            case 16:
+              switch (to_type_size)
+                {
+                case 8:
+                  if (from_type_sign && to_type_sign)
+                    /* int16 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, htob);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int16 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, htobu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint16 -> int8 */
+                    PVM_APPEND_INSTRUCTION (program, hutob);
+                  else
+                    /* uint16 -> uint8 */
+                    PVM_APPEND_INSTRUCTION (program, hutobu);
+                  break;
+
+                case 32:
+                  if (from_type_sign && to_type_sign)
+                    /* int16 -> int32 */
+                    PVM_APPEND_INSTRUCTION (program, htoi);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int16 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, htoiu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint16 -> int32 */
+                    PVM_APPEND_INSTRUCTION (program, hutoi);
+                  else
+                    /* uint16 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, hutoiu);
+                  break;
+
+                case 64:
+                  if (from_type_sign && to_type_sign)
+                    /* int16 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, htol);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int16 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, htolu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint16 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, hutol);
+                  else
+                    /* uint16 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, hutolu);
+                  break;
+
+                default:
+                  assert (0);
+                  break;
+                }
+              break;
+
+            case 8:
+              switch (to_type_size)
+                {
+                case 16:
+                  if (from_type_sign && to_type_sign)
+                    /* int8 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, btoh);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int8 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, btohu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint8 -> int16 */
+                    PVM_APPEND_INSTRUCTION (program, butoh);
+                  else
+                    /* uint8 -> uint16 */
+                    PVM_APPEND_INSTRUCTION (program, butohu);
+                  break;
+
+                case 32:
+                  if (from_type_sign && to_type_sign)
+                    /* int8 -> int32 */
+                    PVM_APPEND_INSTRUCTION (program, btoi);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int8 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, btoiu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint8-> int32 */
+                    PVM_APPEND_INSTRUCTION (program, butoi);
+                  else
+                    /* uint8 -> uint32 */
+                    PVM_APPEND_INSTRUCTION (program, butoiu);
+                  break;
+
+                case 64:
+                  if (from_type_sign && to_type_sign)
+                    /* int8 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, btol);
+                  else if (from_type_sign && !to_type_sign)
+                    /* int8 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, btolu);
+                  else if (!from_type_sign && to_type_sign)
+                    /* uint8 -> int64 */
+                    PVM_APPEND_INSTRUCTION (program, butol);
+                  else
+                    /* uint8 -> uint64 */
+                    PVM_APPEND_INSTRUCTION (program, butolu);
+                  break;
+
+                default:
+                  assert (0);
+                  break;
+                }
+              break;
+            default:
+              assert (0);
+              break;
+            }
+        }
+    }
+  else
+    /* XXX: handle casts to structs and arrays.  For structs, reorder
+       fields.  */
+    assert (0);
+}
+PKL_PHASE_END_HANDLER
 
 #undef BIN_INTEGRAL_EXP_HANDLER
 #undef INTEGRAL_EXP
@@ -521,6 +838,8 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_MUL] = pkl_gen_df_op_mul,
     .op_df_handlers[PKL_AST_OP_MOD] = pkl_gen_df_op_mod,
     .op_df_handlers[PKL_AST_OP_BAND] = pkl_gen_df_op_band,
+    .op_df_handlers[PKL_AST_OP_BNOT] = pkl_gen_df_op_bnot,
+    .op_df_handlers[PKL_AST_OP_NEG] = pkl_gen_df_op_neg,
     .op_df_handlers[PKL_AST_OP_IOR] = pkl_gen_df_op_ior,
     .op_df_handlers[PKL_AST_OP_XOR] = pkl_gen_df_op_xor,
     .op_df_handlers[PKL_AST_OP_DIV] = pkl_gen_df_op_div,
@@ -533,6 +852,8 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_LE] = pkl_gen_df_op_le,
     .op_df_handlers[PKL_AST_OP_GT] = pkl_gen_df_op_gt,
     .op_df_handlers[PKL_AST_OP_GE] = pkl_gen_df_op_ge,
+    .op_df_handlers[PKL_AST_OP_SIZEOF] = pkl_gen_df_op_sizeof,
+    .op_df_handlers[PKL_AST_OP_CAST] = pkl_gen_df_op_cast,
     .type_df_handlers[PKL_TYPE_INTEGRAL] = pkl_gen_df_type_integral,
     .type_df_handlers[PKL_TYPE_ARRAY] = pkl_gen_df_type_array,
   };
