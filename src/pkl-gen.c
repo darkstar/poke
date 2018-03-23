@@ -427,6 +427,8 @@ BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
 BIN_INTEGRAL_EXP_HANDLER (neg, neg);
 BIN_INTEGRAL_EXP_HANDLER (ior, bor);
 BIN_INTEGRAL_EXP_HANDLER (xor, bxor);
+BIN_INTEGRAL_EXP_HANDLER (sl, bsl);
+BIN_INTEGRAL_EXP_HANDLER (sr, bsr);
 
 #define LOGIC_EXP_HANDLER(op)                           \
   PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
@@ -443,9 +445,6 @@ LOGIC_EXP_HANDLER (or);
 LOGIC_EXP_HANDLER (not);
 
 #undef LOGIC_EXP_HANDLER
-
-//BIN_INTEGRAL_EXP_HANDLER (sl);
-//BIN_INTEGRAL_EXP_HANDLER (sr);
 
 #define RELA_EXP_HANDLER(op)                            \
   PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
@@ -842,6 +841,8 @@ struct pkl_phase pkl_phase_gen =
     .op_df_handlers[PKL_AST_OP_NEG] = pkl_gen_df_op_neg,
     .op_df_handlers[PKL_AST_OP_IOR] = pkl_gen_df_op_ior,
     .op_df_handlers[PKL_AST_OP_XOR] = pkl_gen_df_op_xor,
+    .op_df_handlers[PKL_AST_OP_SL] = pkl_gen_df_op_sl,
+    .op_df_handlers[PKL_AST_OP_SR] = pkl_gen_df_op_sr,
     .op_df_handlers[PKL_AST_OP_DIV] = pkl_gen_df_op_div,
     .op_df_handlers[PKL_AST_OP_AND] = pkl_gen_df_op_and,
     .op_df_handlers[PKL_AST_OP_OR] = pkl_gen_df_op_or,
