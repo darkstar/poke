@@ -953,7 +953,7 @@ PKL_PHASE_END_HANDLER
 #undef BIN_INTEGRAL_EXP_HANDLER
 #undef INTEGRAL_EXP
 
-/* The handler below generates and ICE if a node couldn't be processed
+/* The handler below generates and ICE if a given node isn't handled
    by the code generator.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_noimpl)
