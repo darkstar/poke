@@ -224,6 +224,41 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
+/* XXX: make offsets to have a child unit which is a 
+ *      PKL_AST_INTEGER of type 64U.  A compiler phase should
+ *      extract that from (complete) types whenever needed.
+ *
+ * | TYPE
+ * | MAGNITUDE
+ * OFFSET
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_offset)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pvm_program program = payload->program;
+  pvm_val val;
+
+  switch (PKL_AST_OFFSET_UNIT (node))
+    {
+    case PKL_AST_OFFSET_UNIT_BITS:
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS);
+      break;
+    case PKL_AST_OFFSET_UNIT_BYTES:
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES);
+      break;
+    default:
+      /* Invalid unit. */
+      assert (0);
+    }
+
+  pvm_push_val (program, val);
+  PVM_APPEND_INSTRUCTION (program, mko);
+}
+PKL_PHASE_END_HANDLER
+
 /*
  * ARRAY_INITIALIZER
  * | ARRAY_INITIALIZER_EXP
@@ -318,6 +353,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | STRUCT
+ * | IDENTIFIER
+ * STRUCT_REF
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct_ref)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  PVM_APPEND_INSTRUCTION (payload->program, sctref);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * TYPE_INTEGRAL
  */
 
@@ -363,6 +413,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
   PVM_APPEND_INSTRUCTION (payload->program, mktys);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | BASE_TYPE
+ * TYPE_OFFSET
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+  int unit = PKL_AST_TYPE_O_UNIT (PKL_PASS_NODE);
+
+  pvm_push_val (program, pvm_make_ulong (unit));
+  PVM_APPEND_INSTRUCTION (program, mktyo);
 }
 PKL_PHASE_END_HANDLER
 
@@ -913,11 +980,13 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_df_array_ref),
    PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_bf_array_initializer),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_df_struct_ref),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_TYPE_ELEM, pkl_gen_bf_struct_type_elem),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_df_op_add),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_df_op_sub),
@@ -945,102 +1014,6 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_df_type_offset),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
   };
-
-#if 0
-static int
-pkl_gen_array_ref (pkl_ast_node ast,
-                   pvm_program program,
-                   size_t *label)
-{
-  pkl_gen_1 (PKL_AST_ARRAY_REF_ARRAY (ast), program, label);
-  pkl_gen_1 (PKL_AST_ARRAY_REF_INDEX (ast), program, label);
-  PVM_APPEND_INSTRUCTION (program, aref);
-
-  return 1;
-}
-
-static int
-pkl_gen_struct (pkl_ast_node ast,
-                pvm_program program,
-                size_t *label)
-{
-  pkl_ast_node e;
-  /* DONE */
-
-  for (e = PKL_AST_STRUCT_ELEMS (ast);
-       e;
-       e = PKL_AST_CHAIN (e))
-    {
-      pvm_val name;
-
-      if (PKL_AST_STRUCT_ELEM_NAME (e) == NULL)
-        name = PVM_NULL;
-      else
-        name
-          = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_NAME (e)));
-      
-      pvm_push_val (program, name);
-      pkl_gen_1 (PKL_AST_STRUCT_ELEM_EXP (e), program, label);
-    }
-
-  pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_STRUCT_NELEM (ast)));
-
-  PVM_APPEND_INSTRUCTION (program, mksct);
-  return 1;
-}
-
-static int
-pkl_gen_struct_ref (pkl_ast_node ast,
-                    pvm_program program,
-                    size_t *label)
-{
-  char *name
-    = PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
-  
-  pkl_gen_1 (PKL_AST_STRUCT_REF_STRUCT (ast), program, label);
-
-  pvm_push_val (program, pvm_make_string (name));
-  PVM_APPEND_INSTRUCTION (program, sctref);
-
-  return 1;
-}
-
-static int
-pkl_gen_offset (pkl_ast_node ast,
-                pvm_program program,
-                size_t *label)
-{
-  pkl_ast_node type;
-  pvm_val val;
-
-  type = PKL_AST_TYPE (ast);
-  if (!pkl_gen_type (PKL_AST_TYPE_O_BASE_TYPE (type),
-                     program, label))
-    return 0;
-
-  if (!pkl_gen_1 (PKL_AST_OFFSET_MAGNITUDE (ast),
-                  program, label))
-    return 0;
-
-  switch (PKL_AST_OFFSET_UNIT (ast))
-    {
-    case PKL_AST_OFFSET_UNIT_BITS:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS);
-      break;
-    case PKL_AST_OFFSET_UNIT_BYTES:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES);
-      break;
-    default:
-      /* Invalid unit. */
-      assert (0);
-    }
-  pvm_push_val (program, val);
-      
-  PVM_APPEND_INSTRUCTION (program, mko);
-  return 1;
-}
-
-#endif

@@ -971,8 +971,7 @@ finish_sizeof_type (struct pkl_parser *parser,
   magnitude = pkl_ast_make_integer (pkl_ast_sizeof_type (type));
   PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
   
-  /* Build an offset with that magnitude, and unit
-     bytes.  */
+  /* Build an offset with that magnitude, and unit bits.  */
   offset = pkl_ast_make_offset (magnitude,
                                 PKL_AST_OFFSET_UNIT_BITS);
   offset_type = pkl_ast_make_offset_type (magnitude_type,
