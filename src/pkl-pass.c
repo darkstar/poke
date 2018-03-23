@@ -220,11 +220,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
     {
     case PKL_AST_EXP:
       {
-        if (PKL_AST_EXP_NUMOPS (node) > 1)
-          PKL_AST_EXP_OPERAND (node, 0)
-            = pkl_do_pass_1 (toplevel, ast,
-                             PKL_AST_EXP_OPERAND (node, 0), 0, payloads,
-                             phases);
+        PKL_AST_EXP_OPERAND (node, 0)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_EXP_OPERAND (node, 0), 0, payloads,
+                           phases);
         if (PKL_AST_EXP_NUMOPS (node) == 2)
           PKL_AST_EXP_OPERAND (node, 1)
             = pkl_do_pass_1 (toplevel, ast,
@@ -275,10 +274,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
       PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (node));
       break;
     case PKL_AST_STRUCT_ELEM:
-      PKL_AST_STRUCT_ELEM_NAME (node)
-        = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_ELEM_NAME (node), 0, payloads,
-                         phases);
+      if (PKL_AST_STRUCT_ELEM_NAME (node))
+        PKL_AST_STRUCT_ELEM_NAME (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_STRUCT_ELEM_NAME (node), 0, payloads,
+                           phases);
       PKL_AST_STRUCT_ELEM_EXP (node)
         = pkl_do_pass_1 (toplevel, ast,
                          PKL_AST_STRUCT_ELEM_EXP (node), 0, payloads,

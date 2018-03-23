@@ -267,13 +267,19 @@ PKL_PHASE_END_HANDLER
 
 /*
  *  STRUCT_ELEM
- *  | STRUCT_ELEM_NAME
+ *  | [STRUCT_ELEM_NAME]
  *  | STRUCT_ELEM_EXP
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
 {
-  /* Nothing to do.  */
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  /* If the struct initializer doesn't include a name, generate a null
+     value as expected by the mksct instruction.  */
+  if (!PKL_AST_STRUCT_ELEM_NAME (PKL_PASS_NODE))
+    pvm_push_val (payload->program, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -316,8 +322,8 @@ PKL_PHASE_END_HANDLER
 /* 
  * All the expression handlers below have this AST context:
  *
- * | OPERAND
- * | ...
+ * | OPERAND1
+ * | [OPERAND2]
  * EXP
  */
 
