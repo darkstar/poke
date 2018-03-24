@@ -381,17 +381,7 @@ primary:
         	{ $$ = $2; }
         | primary '[' expression ']' %prec '.'
         	{
-                  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1))
-                      != PKL_TYPE_ARRAY)
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "operator to [] must be an array.");
-                      YYERROR;
-                    }
-
                   $$ = pkl_ast_make_array_ref ($1, $3);
-                  PKL_AST_TYPE ($$) =
-                    ASTREF (PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE ($1)));
                 }
         | '[' array_initializer_list ']'
         	{

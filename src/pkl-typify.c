@@ -19,7 +19,7 @@
 /* Each expression node in the AST should be characterized by a type.
    This file contains the implementation of a compiler phase that
    annotates these nodes with their respective types, according to the
-   rules documented below.
+   rules documented below.  It also performs some type-checking.
 
    The types for INTEGER, CHAR and STRING nodes are set by the lexer.
    See pkl-lex.l.
@@ -204,7 +204,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array)
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
-
   /* Check that the types of all the array elements are the same, and
      derive the type of the array from the first of them.  */
 
@@ -239,6 +238,42 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array_ref)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node array_ref = PKL_PASS_NODE;
+  pkl_ast_node array_ref_index
+    = PKL_AST_ARRAY_REF_INDEX (array_ref);
+  pkl_ast_node array_ref_array
+    = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+
+  pkl_ast_node type;
+
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_array))
+      != PKL_TYPE_ARRAY)
+    {
+      fputs ("error: operator to [] must be an array\n",
+             stderr);
+      payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_index))
+      != PKL_TYPE_INTEGRAL)
+    {
+      fputs ("error: array index should be an integer\n",
+             stderr);
+      PKL_PASS_DONE;
+    }
+
+  type
+    = PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (array_ref_array));
+  PKL_AST_TYPE (array_ref) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
@@ -246,6 +281,7 @@ struct pkl_phase pkl_phase_typify =
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify_df_array_ref),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
 
