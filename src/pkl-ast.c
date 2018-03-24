@@ -237,6 +237,8 @@ pkl_ast_make_integral_type (int signed_p, size_t size)
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_INTEGRAL;
+  PKL_AST_TYPE_COMPLETE (type)
+    = PKL_AST_TYPE_COMPLETE_YES;
   PKL_AST_TYPE_I_SIGNED (type) = signed_p;
   PKL_AST_TYPE_I_SIZE (type) = size;
   return type;
@@ -262,6 +264,8 @@ pkl_ast_make_string_type (void)
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRING;
+  PKL_AST_TYPE_COMPLETE (type)
+    = PKL_AST_TYPE_COMPLETE_NO;
   return type;
 }
 
@@ -273,6 +277,8 @@ pkl_ast_make_offset_type (pkl_ast_node base_type, int unit)
   assert (base_type);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_OFFSET;
+  PKL_AST_TYPE_COMPLETE (type)
+    = PKL_AST_TYPE_COMPLETE_YES;
   PKL_AST_TYPE_O_UNIT (type) = unit;
   PKL_AST_TYPE_O_BASE_TYPE (type) = base_type;
 
@@ -424,8 +430,6 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 size_t
 pkl_ast_sizeof_type (pkl_ast_node type)
 {
-  /* XXX move to trans2  */
-
   /* This function should only be called on complete types.  */
   assert (PKL_AST_TYPE_COMPLETE (type)
           == PKL_AST_TYPE_COMPLETE_YES);
@@ -439,11 +443,6 @@ pkl_ast_sizeof_type (pkl_ast_node type)
       {
         pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (type);
         pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
-
-        /* If the array type is complete the node holding the number
-           of elements should be an integer node.  */
-        if (PKL_AST_CODE (nelem) != PKL_AST_INTEGER)
-          assert (0);
 
         return PKL_AST_INTEGER_VALUE (nelem)
           * pkl_ast_sizeof_type (etype);

@@ -448,10 +448,54 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_struct)
 }
 PKL_PHASE_END_HANDLER
 
+/* Determine the completeness of the type associated with a TYPEOF
+   (TYPE).  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
+{
+  pkl_ast_node op
+    = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+
+  if (PKL_AST_CODE (op) != PKL_AST_TYPE)
+    /* This is a TYPEOF (VALUE).  Nothing to do.  */
+    PKL_PASS_DONE;
+
+  /* XXX: the logic in this switch is duplicated from the other rules.
+     Abstract it in a single function.  */
+  switch (PKL_AST_TYPE_CODE (op))
+    {
+    case PKL_TYPE_INTEGRAL:
+    case PKL_TYPE_OFFSET:
+    case PKL_TYPE_STRUCT: /* XXX: this will change.  */
+      PKL_AST_TYPE_COMPLETE (op)
+        = PKL_AST_TYPE_COMPLETE_YES;
+      break;
+    case PKL_TYPE_STRING:
+      PKL_AST_TYPE_COMPLETE (op)
+        = PKL_AST_TYPE_COMPLETE_NO;
+      break;
+    case PKL_TYPE_ARRAY:
+      {
+        pkl_ast_node nelem
+          = PKL_AST_TYPE_A_NELEM (op);
+        PKL_AST_TYPE_COMPLETE (op)
+          = (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
+             ? PKL_AST_TYPE_COMPLETE_YES
+             : PKL_AST_TYPE_COMPLETE_NO);
+        printf ("JE: %d\n", PKL_AST_CODE (nelem));
+        break;
+      }
+    default:
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify2_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify2_df_struct),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),
   };

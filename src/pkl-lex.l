@@ -239,7 +239,6 @@ D [0-9]
   }
 
   type = pkl_ast_get_integral_type (yyextra->ast, width, signed_p);
-  PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_YES;
 
   yylval->ast = pkl_ast_make_integer (value);
   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
@@ -291,7 +290,6 @@ D [0-9]
    /* XXX: handle escape characters.  */
 
    type = pkl_ast_get_string_type (yyextra->ast);
-   PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_NO;
 
    yylval->ast = pkl_ast_make_string (yytext + 1);
    PKL_AST_TYPE (yylval->ast) = ASTREF (type);
