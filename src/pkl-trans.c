@@ -44,9 +44,93 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
+/* Compute and set the number of elements in a STRUCT node.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_struct)
+{
+  pkl_ast_node astruct = PKL_PASS_NODE;
+  pkl_ast_node t;
+  size_t nelem = 0;
+
+  for (t = PKL_AST_STRUCT_ELEMS (astruct); t; t = PKL_AST_CHAIN (t))
+    nelem++;
+
+  PKL_AST_STRUCT_NELEM (astruct) = nelem;
+}
+PKL_PHASE_END_HANDLER
+
+/* Compute and set the number of elements in a struct TYPE node.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_struct)
+{
+  pkl_ast_node struct_type = PKL_PASS_NODE;
+  pkl_ast_node t;
+  size_t nelem = 0;
+
+  for (t = PKL_AST_TYPE_S_ELEMS (struct_type); t;
+       t = PKL_AST_CHAIN (t))
+    nelem++;
+
+  PKL_AST_TYPE_S_NELEM (struct_type) = nelem;
+}
+PKL_PHASE_END_HANDLER
+
+/* Compute and set the indexes of all the elements of an ARRAY node
+   and set the size of the array consequently.  Also, reverse the list
+   of initializers so they are handled in the right order in
+   depth-first.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
+{
+  pkl_ast_node array = PKL_PASS_NODE;
+  pkl_ast_node initializers
+    = PKL_AST_ARRAY_INITIALIZERS (array);
+
+  pkl_ast_node tmp;
+  size_t index, nelem, ninitializer;
+
+  nelem = 0;
+  for (index = 0, tmp = initializers, ninitializer = 0;
+       tmp;
+       tmp = PKL_AST_CHAIN (tmp), ++ninitializer)
+    {
+      size_t initializer_index = PKL_AST_ARRAY_INITIALIZER_INDEX (tmp);
+      size_t elems_appended, effective_index;
+      
+      /* Set the index of the initializer.  */
+      if (initializer_index == PKL_AST_ARRAY_NOINDEX)
+        {
+          effective_index = index;
+          elems_appended = 1;
+        }
+      else
+        {
+          if (initializer_index < index)
+            elems_appended = 0;
+          else
+            elems_appended = initializer_index - index + 1;
+          effective_index = initializer_index;
+        }
+      
+      PKL_AST_ARRAY_INITIALIZER_INDEX (tmp) = effective_index;
+      index += elems_appended;
+      nelem += elems_appended;
+    }
+
+  PKL_AST_ARRAY_NELEM (array) = nelem;
+  PKL_AST_ARRAY_NINITIALIZER (array) = ninitializer;
+  initializers = pkl_ast_reverse (initializers);
+  PKL_AST_ARRAY_INITIALIZERS (array)
+    = ASTREF (initializers);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans1_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
   };
 
 /* SIZEOF nodes whose operand is a complete type should be replaced

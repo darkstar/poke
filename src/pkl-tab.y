@@ -66,13 +66,6 @@ pkl_tab_error (YYLTYPE *llocp,
     fprintf (stderr, "%s\n", err);
 }
 
-/* Forward declarations for functions defined below in this file,
-   after the rules section.  See the comments at the definition of the
-   functions for information about what they do.  */
-
-static pkl_ast_node finish_array (struct pkl_parser *parser,
-                                  YYLTYPE *llocp,
-                                  pkl_ast_node elems);
 %}
 
 %union {
@@ -361,18 +354,13 @@ primary:
                 }
         | '[' array_initializer_list ']'
         	{
-                  $$ = finish_array (pkl_parser, &@2, $2);
-                  if ($$ == NULL)
-                    YYERROR;
+                    $$ = pkl_ast_make_array (0 /* nelem */,
+                                             0 /* ninitializer */,
+                                             $2);
                 }
 	| '{' struct_elem_list '}'
         	{
-                    pkl_ast_node t;
-                    size_t nelem = 0;
-
-                    for (t = $2; t; t = PKL_AST_CHAIN (t))
-                        nelem += 1;
-                    $$ = pkl_ast_make_struct (nelem, $2);
+                    $$ = pkl_ast_make_struct (0 /* nelem */, $2);
                 }
         | primary '.' IDENTIFIER
         	{
@@ -444,13 +432,7 @@ struct_type_specifier:
                 }
         | STRUCT '{' struct_elem_type_list '}'
         	{
-                  pkl_ast_node t;
-                  size_t nelem = 0;
-
-                  for (t = $3; t; t = PKL_AST_CHAIN (t))
-                     nelem += 1;
-
-                  $$ = pkl_ast_make_struct_type (nelem, $3);
+                  $$ = pkl_ast_make_struct_type (0 /* nelem */, $3);
                 }
         ;
 
@@ -628,49 +610,3 @@ enumerator:
 */
 
 %%
-
-/* Finish an array and return it.  Compute and set the indexes of all
-   the elements and set the size of the array consequently.
-
-   In case of a syntax error, return NULL.  */
-
-static pkl_ast_node
-finish_array (struct pkl_parser *parser,
-              YYLTYPE *llocp,
-              pkl_ast_node initializers)
-{
-  pkl_ast_node array, tmp;
-  size_t index, nelem, ninitializer;
-
-  nelem = 0;
-  for (index = 0, tmp = initializers, ninitializer = 0;
-       tmp;
-       tmp = PKL_AST_CHAIN (tmp), ++ninitializer)
-    {
-      size_t initializer_index = PKL_AST_ARRAY_INITIALIZER_INDEX (tmp);
-      size_t elems_appended, effective_index;
-      
-      /* Set the index of the initializer.  */
-      if (initializer_index == PKL_AST_ARRAY_NOINDEX)
-        {
-          effective_index = index;
-          elems_appended = 1;
-        }
-      else
-        {
-          if (initializer_index < index)
-            elems_appended = 0;
-          else
-            elems_appended = initializer_index - index + 1;
-          effective_index = initializer_index;
-        }
-      
-      PKL_AST_ARRAY_INITIALIZER_INDEX (tmp) = effective_index;
-      index += elems_appended;
-      nelem += elems_appended;
-    }
-
-  array = pkl_ast_make_array (nelem, ninitializer,
-                              pkl_ast_reverse (initializers));
-  return array;
-}
