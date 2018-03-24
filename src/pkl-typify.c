@@ -160,9 +160,24 @@ TYPIFY_BIN (band);
 
 #undef TYPIFY_BIN
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_sizeof)
+{
+  pkl_ast_node itype
+    = pkl_ast_get_integral_type (PKL_PASS_AST,
+                                 64, 0);
+  pkl_ast_node type
+    = pkl_ast_make_offset_type (itype,
+                                PKL_AST_OFFSET_UNIT_BITS);
+
+  PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
+
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify_df_op_boolean),

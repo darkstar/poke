@@ -244,11 +244,11 @@ expression:
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
                   /* XXX: the details of the offset type are
                      arbitrary.  */
-                  PKL_AST_TYPE ($$)
-                    = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
-                                                                           64, 0),
-                                                PKL_AST_OFFSET_UNIT_BITS);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($$));
+                  //                  PKL_AST_TYPE ($$)
+                  //                    = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
+                  //                                                                           64, 0),
+                  //                                                PKL_AST_OFFSET_UNIT_BITS);
+                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($$));
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
