@@ -517,7 +517,7 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
 
    In integral types, SIGNED is 1 if the type denotes a signed numeric
    type.  In non-integral types SIGNED is 0.  SIZE is the size in bits
-   of type.  Integral types are always complete.
+   of type.
 
    In array types, ETYPE is a PKL_AST_TYPE node.  If NELEM is present
    then it is the number of elements in the array.
@@ -528,11 +528,11 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
    When the size of a value of a given type can be determined at
    compile time, we say that such type is "complete".  Otherwise, we
    say that the type is "incomplete" and should be completed at
-   runtime.  */
+   run-time.  */
 
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
-#define PKL_AST_TYPE_COMPLETE_P(AST) ((AST)->type.complete_p)
+#define PKL_AST_TYPE_COMPLETE(AST) ((AST)->type.complete)
 #define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_NELEM(AST) ((AST)->type.val.array.nelem)
@@ -542,12 +542,16 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
 #define PKL_AST_TYPE_O_UNIT(AST) ((AST)->type.val.off.unit)
 #define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
 
+#define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
+#define PKL_AST_TYPE_IS_COMPLETE 1
+#define PKL_AST_TYPE_NO_COMPLETE 2
+  
 struct pkl_ast_type
 {
   struct pkl_ast_common common;
 
   enum pkl_ast_type_code code;
-  int complete_p;
+  int complete;
   char *name;
   
   union

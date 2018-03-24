@@ -226,6 +226,8 @@ pkl_ast_make_type (void)
   pkl_ast_node type = pkl_ast_make_node (PKL_AST_TYPE);
 
   PKL_AST_TYPE_NAME (type) = NULL;
+  PKL_AST_TYPE_COMPLETE (type)
+    = PKL_AST_TYPE_COMPLETE_UNKNOWN;
   return type;
 }
 
@@ -235,7 +237,6 @@ pkl_ast_make_integral_type (int signed_p, size_t size)
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_INTEGRAL;
-  PKL_AST_TYPE_COMPLETE_P (type) = 1;
   PKL_AST_TYPE_I_SIGNED (type) = signed_p;
   PKL_AST_TYPE_I_SIZE (type) = size;
   return type;
@@ -252,11 +253,6 @@ pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype)
   PKL_AST_TYPE_A_NELEM (type) = ASTREF (nelem);
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
 
-  PKL_AST_TYPE_COMPLETE_P (type)
-    = (nelem != NULL
-       && PKL_AST_CODE (nelem) == PKL_AST_INTEGER
-       && PKL_AST_TYPE_COMPLETE_P (etype));
-  
   return type;
 }
 
@@ -266,7 +262,6 @@ pkl_ast_make_string_type (void)
   pkl_ast_node type = pkl_ast_make_type ();
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRING;
-  PKL_AST_TYPE_COMPLETE_P (type) = 0;
   return type;
 }
 
@@ -278,7 +273,6 @@ pkl_ast_make_offset_type (pkl_ast_node base_type, int unit)
   assert (base_type);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_OFFSET;
-  PKL_AST_TYPE_COMPLETE_P (type) = 1;
   PKL_AST_TYPE_O_UNIT (type) = unit;
   PKL_AST_TYPE_O_BASE_TYPE (type) = base_type;
 
@@ -295,10 +289,6 @@ pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
   if (struct_type_elems)
     PKL_AST_TYPE_S_ELEMS (type) = ASTREF (struct_type_elems);
 
-  /* XXX: determine here whether the struct type is complete or
-     not.  For the time being, they are all complete.  */
-  PKL_AST_TYPE_COMPLETE_P (type) = 1;
-  
   return type;
 }
 
@@ -325,7 +315,7 @@ pkl_ast_dup_type (pkl_ast_node type)
   pkl_ast_node t, new = pkl_ast_make_type ();
   
   PKL_AST_TYPE_CODE (new) = PKL_AST_TYPE_CODE (type);
-  PKL_AST_TYPE_COMPLETE_P (new) = PKL_AST_TYPE_COMPLETE_P (type);
+  PKL_AST_TYPE_COMPLETE (new) = PKL_AST_TYPE_COMPLETE (type);
   
   switch (PKL_AST_TYPE_CODE (type))
     {
@@ -380,8 +370,7 @@ pkl_ast_dup_type (pkl_ast_node type)
 int
 pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 {
-  if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b)
-      || PKL_AST_TYPE_COMPLETE_P (a) != PKL_AST_TYPE_COMPLETE_P (b))
+  if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b))
     return 0;
 
   switch (PKL_AST_TYPE_CODE (a))
@@ -435,8 +424,11 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 size_t
 pkl_ast_sizeof_type (pkl_ast_node type)
 {
+  /* XXX move to trans2  */
+
   /* This function should only be called on complete types.  */
-  assert (PKL_AST_TYPE_COMPLETE_P (type));
+  assert (PKL_AST_TYPE_COMPLETE (type)
+          == PKL_AST_TYPE_IS_COMPLETE);
 
   switch (PKL_AST_TYPE_CODE (type))
     {
