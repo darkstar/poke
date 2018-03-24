@@ -1,4 +1,4 @@
-/* pkl-typify.c - Type annotation phase for the poke compiler.  */
+/* pkl-typify.c - Type annotation phases for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,45 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* Each expression node in the AST should be characterized by a type.
-   This file contains the implementation of a compiler phase that
-   annotates these nodes with their respective types, according to the
-   rules documented below.  It also performs type-checking.
+/* This file contains the implementation of two compiler phases:
 
-   The types for INTEGER, CHAR and STRING nodes are set by the lexer.
-   See pkl-lex.l.
+   `typify1' annotates expression nodes in the AST with their
+   respective types, according to the rules documented in the handlers
+   below.  It also performs type-checking.  It relies on the lexer to
+   set the types for INTEGER, CHAR, STRING and other lexical entities.
 
-   The type of an unary operation NOT or a binary operation EQ, NE,
-   LT, GT, LE, GE, AND and OR is a boolean encoded as a 32-bit signed
-   integer type.
-
-   The type of an unary operation NEG, POS, BNOT is the type of its
-   single operand.
-
-   The type of a CAST is the type of its target type.
-
-   The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
-   IOR, XOR and BAND is an integer type with the following
-   characteristics: if any of the operands is unsigned, the operation
-   is unsigned.  The width of the operation is the width of the widest
-   operand.
-
-   The type of a SIZEOF operation is an offset type with an unsigned
-   64-bit magnitude and units bits.
-
-   The type of an offset is an offset type featuring the type of its
-   magnitude, and its unit.
-
-   The type of an ARRAY is determined from the number and the type of
-   its initializers.
-
-   The type of an ARRAY_REF is the type of the elements of the array
-   it references.
-
-   The type of a STRUCT is determined from the types of its elements.
-
-   The type of a STRUCT_REF is the type of the referred element in the
-   struct.
+   `typify2' determines which types are "complete" and annotate it in
+   the type nodes.  A type if complete if its size in bits can be
+   determined at compile-time, and that size is constant.  Note that
+   not-complete types are legal poke entities, but certain operations
+   are not allowed on them.  Note that this phase should be run after
+   constant-folding.
 */
 
 #include <config.h>
@@ -65,7 +39,7 @@
 #include "pkl-pass.h"
 #include "pkl-typify.h"
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_bf_program)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -74,7 +48,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_boolean)
+/* The type of an unary operation NOT or a binary operation EQ, NE,
+   LT, GT, LE, GE, AND and OR is a boolean encoded as a 32-bit signed
+   integer type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
 {
   pkl_ast_node type
     = pkl_ast_get_integral_type (PKL_PASS_AST, 32, 1);
@@ -84,7 +62,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_boolean)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_first_operand)
+/* The type of an unary operation NEG, POS, BNOT is the type of its
+   single operand.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_first_operand)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type
@@ -94,7 +75,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_first_operand)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_cast)
+/* The type of a CAST is the type of its target type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
 {
   pkl_ast_node cast = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
@@ -103,8 +86,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_cast)
 }
 PKL_PHASE_END_HANDLER
 
+
+/* The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
+   IOR, XOR and BAND is an integer type with the following
+   characteristics: if any of the operands is unsigned, the operation
+   is unsigned.  The width of the operation is the width of the widest
+   operand.  */
+
 #define TYPIFY_BIN(op)                                                  \
-  PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_##op)                          \
+  PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_##op)                         \
   {                                                                     \
     pkl_typify_payload payload                                          \
       = (pkl_typify_payload) PKL_PASS_PAYLOAD;                          \
@@ -175,7 +165,10 @@ TYPIFY_BIN (band);
 
 #undef TYPIFY_BIN
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_sizeof)
+/* The type of a SIZEOF operation is an offset type with an unsigned
+   64-bit magnitude and units bits.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
 {
   pkl_ast_node itype
     = pkl_ast_get_integral_type (PKL_PASS_AST,
@@ -188,7 +181,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_offset)
+/* The type of an offset is an offset type featuring the type of its
+   magnitude, and its unit.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
 {
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node magnitude_type
@@ -201,7 +197,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_offset)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array)
+/* The type of an ARRAY is determined from the number and the type of
+   its initializers.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -240,7 +239,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array_ref)
+/* The type of an ARRAY_REF is the type of the elements of the array
+   it references.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -276,7 +278,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array_ref)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct)
+/* The type of a STRUCT is determined from the types of its
+   elements.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
@@ -300,7 +305,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_elem)
+/* The type of a STRUCT_ELEM in a struct initializer is the type of
+   it's expression.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
 {
   pkl_ast_node struct_elem = PKL_PASS_NODE;
   pkl_ast_node struct_elem_name
@@ -319,7 +327,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_elem)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_ref)
+/* The type of a STRUCT_REF is the type of the referred element in the
+   struct.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -368,40 +379,40 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify1_bf_program),
 
-   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify_df_array_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify_df_struct_elem),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify_df_struct_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify1_df_cast),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify1_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify1_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_df_array_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify1_df_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_df_struct_elem),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
 
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
 
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify1_df_op_boolean),
 
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify_df_add),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify_df_sub),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify_df_mul),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify_df_div),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify_df_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_typify_df_sl),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_typify_df_sr),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify_df_ior),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify_df_xor),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify_df_band),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify1_df_add),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify1_df_sub),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify1_df_mul),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify1_df_div),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify1_df_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_typify1_df_sl),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_typify1_df_sr),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify1_df_ior),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify1_df_xor),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify1_df_band),
 
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify_df_first_operand),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify_df_first_operand),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify_df_first_operand),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_df_first_operand),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_df_first_operand),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
   };

@@ -408,12 +408,10 @@ struct_elem:
 	  expression
           	{
                   $$ = pkl_ast_make_struct_elem (NULL, $1);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | '.' IDENTIFIER '=' expression
 	        {
                   $$ = pkl_ast_make_struct_elem ($2, $4);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($4));
                 }
         ;
 
