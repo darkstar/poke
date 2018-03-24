@@ -543,8 +543,8 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
 #define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
 
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
-#define PKL_AST_TYPE_IS_COMPLETE 1
-#define PKL_AST_TYPE_NO_COMPLETE 2
+#define PKL_AST_TYPE_COMPLETE_YES 1
+#define PKL_AST_TYPE_COMPLETE_NO 2
   
 struct pkl_ast_type
 {

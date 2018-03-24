@@ -428,7 +428,7 @@ pkl_ast_sizeof_type (pkl_ast_node type)
 
   /* This function should only be called on complete types.  */
   assert (PKL_AST_TYPE_COMPLETE (type)
-          == PKL_AST_TYPE_IS_COMPLETE);
+          == PKL_AST_TYPE_COMPLETE_YES);
 
   switch (PKL_AST_TYPE_CODE (type))
     {

@@ -733,7 +733,7 @@ finish_sizeof_type (struct pkl_parser *parser,
   pkl_ast_node magnitude_type, magnitude, offset_type;
 
   if (PKL_AST_TYPE_COMPLETE (type)
-      != PKL_AST_TYPE_IS_COMPLETE)
+      != PKL_AST_TYPE_COMPLETE_YES)
     {
       pkl_tab_error (llocp, parser,
                      "sizeof only works on complete types");
