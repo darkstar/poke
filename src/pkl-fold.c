@@ -256,9 +256,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_cast)
       PKL_PASS_RESTART = 1;                                             \
     } while (0)
 
-  pkl_ast_node to_type = PKL_AST_TYPE (PKL_PASS_NODE);
-  pkl_ast_node from_type
-    = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0));
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_CAST_EXP (node);
+
+  pkl_ast_node to_type = PKL_AST_CAST_TYPE (node);
+  pkl_ast_node from_type = PKL_AST_TYPE (exp);
   
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
@@ -555,6 +557,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_fold =
   {
+   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_fold_cast),
 #define ENTRY(ops, fs)\
    .op_df_handlers[PKL_AST_OP_##ops] = pkl_fold_##fs
 
@@ -565,7 +568,7 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (MUL, mul), ENTRY (DIV, div), ENTRY (MOD, mod),
    ENTRY (LT, lt), ENTRY (GT, gt), ENTRY (LE, le),
    ENTRY (GE, ge), ENTRY (SCONC, sconc), ENTRY (MAP, map),
-   ENTRY (CAST, cast), ENTRY (SIZEOF, sizeof),
+   ENTRY (SIZEOF, sizeof),
    ENTRY (ELEMSOF, elemsof), ENTRY (TYPEOF, typeof),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
    ENTRY (NOT, not),

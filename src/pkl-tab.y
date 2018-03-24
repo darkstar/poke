@@ -236,12 +236,8 @@ expression:
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
-                  PKL_AST_TYPE ($$) = ASTREF ($2); /* XXX: this is
-                                                      ugly.  Use a
-                                                      different ast
-                                                      node for
-                                                      casts.  */
+                  $$ = pkl_ast_make_cast ($2, $4);
+                  //PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
         | SIZEOF expression %prec UNARY
         	{

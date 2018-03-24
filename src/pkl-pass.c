@@ -304,6 +304,12 @@ pkl_do_pass_1 (jmp_buf toplevel,
                          PKL_AST_OFFSET_MAGNITUDE (node), 0, payloads,
                          phases);
       break;
+    case PKL_AST_CAST:
+      PKL_AST_CAST_EXP (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_CAST_EXP (node), 0, payloads,
+                         phases);
+      break;
     case PKL_AST_TYPE:
       {
         switch (PKL_AST_TYPE_CODE (node))

@@ -31,7 +31,7 @@
    The type of an unary operation NEG, POS, BNOT is the type of its
    single operand.
 
-   The type of a CAST is set by the parser. XXX: this is ugly.
+   The type of a CAST is the type of its target type.
 
    The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
    IOR, XOR, BAND, AND and OR is an integer type with the following
@@ -82,8 +82,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_first_operand)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_cast)
+{
+  pkl_ast_node cast = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
+  
+  PKL_AST_TYPE (cast) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
+   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
+
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify_df_op_boolean),

@@ -96,7 +96,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_exp)
   /* Every expression node should have a type annotation.  */
   if (PKL_AST_TYPE (PKL_PASS_NODE) == NULL)
     {
-      fprintf (stderr, "internal compiler error: expression node with no type");
+      fprintf (stderr, "internal compiler error: expression node with no type\n");
       payload->errors++;
     }
 }

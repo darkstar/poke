@@ -48,6 +48,7 @@ enum pkl_ast_code
   PKL_AST_STRUCT_ELEM,
   PKL_AST_STRUCT_REF,
   PKL_AST_OFFSET,
+  PKL_AST_CAST,
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_TYPE_ELEM,
@@ -640,6 +641,25 @@ struct pkl_ast_offset
 
 pkl_ast_node pkl_ast_make_offset (pkl_ast_node magnitude, int unit);
 
+/* PKL_AST_CAST nodes represent casts at the language level.
+   
+   TYPE is the target type in the case.
+   EXP is the expression whole value should be casted to the targe
+   type.  */
+
+#define PKL_AST_CAST_TYPE(AST) ((AST)->cast.type)
+#define PKL_AST_CAST_EXP(AST) ((AST)->cast.exp)
+
+struct pkl_ast_cast
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *type;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -660,6 +680,7 @@ union pkl_ast_node
   struct pkl_ast_struct_elem sct_elem;
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_offset offset;
+  struct pkl_ast_cast cast;
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_type_elem sct_type_elem;

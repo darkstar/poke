@@ -561,16 +561,31 @@ pkl_ast_make_struct_elem (pkl_ast_node name,
 pkl_ast_node
 pkl_ast_make_offset (pkl_ast_node magnitude, int unit)
 {
-  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_OFFSET);
+  pkl_ast_node offset = pkl_ast_make_node (PKL_AST_OFFSET);
 
   assert (unit == PKL_AST_OFFSET_UNIT_BITS
           || unit == PKL_AST_OFFSET_UNIT_BYTES);
   
   if (magnitude != NULL)
-    PKL_AST_OFFSET_MAGNITUDE (elem) = ASTREF (magnitude);
-  PKL_AST_OFFSET_UNIT (elem) = unit;
+    PKL_AST_OFFSET_MAGNITUDE (offset) = ASTREF (magnitude);
+  PKL_AST_OFFSET_UNIT (offset) = unit;
 
-  return elem;
+  return offset;
+}
+
+/* Build and return an AST node for a cast.  */
+
+pkl_ast_node
+pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
+{
+  pkl_ast_node cast = pkl_ast_make_node (PKL_AST_CAST);
+
+  assert (type && exp);
+
+  PKL_AST_CAST_TYPE (cast) = ASTREF (type);
+  PKL_AST_CAST_EXP (cast) = ASTREF (exp);
+
+  return cast;
 }
 
 /* Build and return an AST node for a PKL program.  */
@@ -733,6 +748,12 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_OFFSET:
 
       pkl_ast_node_free (PKL_AST_OFFSET_MAGNITUDE (ast));
+      break;
+
+    case PKL_AST_CAST:
+
+      pkl_ast_node_free (PKL_AST_CAST_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_CAST_EXP (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -1274,6 +1295,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_IMM (unit, OFFSET_UNIT, "%d");
       break;
 
+    case PKL_AST_CAST:
+      IPRINTF ("CAST::\n");
+
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (cast_type, CAST_TYPE);
+      PRINT_AST_SUBAST (exp, CAST_EXP);
+      break;
+      
     default:
       IPRINTF ("UNKNOWN:: code=%d\n", PKL_AST_CODE (ast));
       break;
