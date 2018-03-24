@@ -507,7 +507,7 @@ struct pkl_ast_struct_type_elem
   union pkl_ast_node *type;
 };
 
-pkl_ast_node pkl_ast_make_struct_type_elem (pkl_ast_node name,
+pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
                                             pkl_ast_node type);
 
 /* PKL_AST_TYPE nodes represent types.

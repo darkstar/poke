@@ -303,7 +303,7 @@ pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
 }
 
 pkl_ast_node
-pkl_ast_make_struct_type_elem (pkl_ast_node name,
+pkl_ast_make_struct_elem_type (pkl_ast_node name,
                                pkl_ast_node type)
 {
   pkl_ast_node struct_type_elem
@@ -354,7 +354,7 @@ pkl_ast_dup_type (pkl_ast_node type)
                ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
                : NULL);
           pkl_ast_node struct_type_elem
-            = pkl_ast_make_struct_type_elem (new_struct_type_elem_name,
+            = pkl_ast_make_struct_elem_type (new_struct_type_elem_name,
                                              pkl_ast_dup_type (struct_type_elem_type));
 
           PKL_AST_TYPE_S_ELEMS (new)

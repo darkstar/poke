@@ -274,6 +274,49 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array_ref)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct)
+{
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type;
+  pkl_ast_node t, struct_elem_types = NULL;
+
+
+  /* Build a chain with the types of the struct elements.  */
+  for (t = PKL_AST_STRUCT_ELEMS (node); t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node struct_elem_type
+        =  PKL_AST_TYPE (t);
+
+      struct_elem_types = pkl_ast_chainon (struct_elem_types,
+                                           ASTREF (struct_elem_type));
+    }
+
+  /* Build the type of the struct.  */
+  type = pkl_ast_make_struct_type (PKL_AST_STRUCT_NELEM (node),
+                                   struct_elem_types);
+  PKL_AST_TYPE (node) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_elem)
+{
+  pkl_ast_node struct_elem = PKL_PASS_NODE;
+  pkl_ast_node struct_elem_name
+    = PKL_AST_STRUCT_ELEM_NAME (struct_elem);
+  pkl_ast_node struct_elem_exp
+    = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
+  pkl_ast_node struct_elem_exp_type
+    = PKL_AST_TYPE (struct_elem_exp);
+  
+  pkl_ast_node type
+    = pkl_ast_make_struct_elem_type (struct_elem_name,
+                                     struct_elem_exp_type);
+
+  /* XXX: .y used a type dup for this.  why? */
+  PKL_AST_TYPE (struct_elem) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
@@ -282,6 +325,8 @@ struct pkl_phase pkl_phase_typify =
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify_df_array_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify_df_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify_df_struct_elem),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
 

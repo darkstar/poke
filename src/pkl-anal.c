@@ -60,6 +60,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
       pkl_ast_node ename = PKL_AST_STRUCT_ELEM_NAME (t);
       pkl_ast_node u;
 
+      if (ename == NULL)
+        continue;
+
       for (u = elems; u != t; u = PKL_AST_CHAIN (u))
         {
           pkl_ast_node uname = PKL_AST_STRUCT_ELEM_NAME (u);

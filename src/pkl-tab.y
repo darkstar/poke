@@ -74,10 +74,6 @@ static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
                                   pkl_ast_node elems);
 
-static pkl_ast_node finish_struct (struct pkl_parser *parser,
-                                   YYLTYPE *llocp,
-                                   pkl_ast_node elems);
-
 static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
                                        YYLTYPE *loc_sct,
                                        YYLTYPE *loc_identifier,
@@ -391,9 +387,12 @@ primary:
                 }
 	| '{' struct_elem_list '}'
         	{
-                  $$ = finish_struct (pkl_parser, &@2, $2);
-                  if ($$ == NULL)
-                    YYERROR;
+                    pkl_ast_node t;
+                    size_t nelem = 0;
+
+                    for (t = $2; t; t = PKL_AST_CHAIN (t))
+                        nelem += 1;
+                    $$ = pkl_ast_make_struct (nelem, $2);
                 }
         | primary '.' IDENTIFIER
         	{
@@ -486,11 +485,11 @@ struct_elem_type_list:
 struct_elem_type:
 	  type_specifier IDENTIFIER ';'
           	{
-                  $$ = pkl_ast_make_struct_type_elem ($2, $1);
+                  $$ = pkl_ast_make_struct_elem_type ($2, $1);
                 }
         | type_specifier ';'
         	{
-                  $$ = pkl_ast_make_struct_type_elem (NULL, $1);
+                  $$ = pkl_ast_make_struct_elem_type (NULL, $1);
                 }
         ;
 
@@ -696,54 +695,6 @@ finish_array (struct pkl_parser *parser,
   array = pkl_ast_make_array (nelem, ninitializer,
                               pkl_ast_reverse (initializers));
   return array;
-}
-
-/* Finish a struct and return it.  Derive the type of the struct after
-   the types of its elements.
-
-   In case of a syntax error, return NULL.  */
-
-static pkl_ast_node
-finish_struct (struct pkl_parser *parser,
-               YYLTYPE *llocp,
-               pkl_ast_node elems)
-{
-  pkl_ast_node t;
-  pkl_ast_node struct_type_elems, type, sct;
-  size_t nelem;
-
-  struct_type_elems = NULL;
-  nelem = 0;
-  for (t = elems; t; t = PKL_AST_CHAIN (t))
-    {
-      pkl_ast_node name;
-      pkl_ast_node struct_type_elem;
-      pkl_ast_node ename;
-      pkl_ast_node type;
-
-      /* Add the name for this struct element.  */
-      name = PKL_AST_STRUCT_ELEM_NAME (t);
-      if (name)
-          ename = pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (name));
-      else
-        ename = pkl_ast_make_identifier ("");
-
-      type = PKL_AST_TYPE (PKL_AST_STRUCT_ELEM_EXP (t));
-
-      struct_type_elem = pkl_ast_make_struct_type_elem (ename,
-                                                        pkl_ast_dup_type (type));
-      struct_type_elems = pkl_ast_chainon (struct_type_elems,
-                                           struct_type_elem);
-      nelem += 1;
-    }
-
-  /* Now build the type for the struct.  */
-  type = pkl_ast_make_struct_type (nelem, struct_type_elems);
-
-  sct = pkl_ast_make_struct (nelem, elems);
-  PKL_AST_TYPE (sct) = ASTREF (type);
-  
-  return sct;
 }
 
 /* Finish a reference to a struct and return it.  Check whether SCT is
