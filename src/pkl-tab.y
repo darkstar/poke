@@ -377,7 +377,7 @@ expression:
 	| '[' expression IDENTIFIER ']'
         	{
                   int units;
-                  pkl_ast_node magnitude_type, type;
+                  pkl_ast_node magnitude_type; //, type;
                   
                   if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "b") == 0)
                     units = PKL_AST_OFFSET_UNIT_BITS;
@@ -400,8 +400,8 @@ expression:
                     }
                   
                   $$ = pkl_ast_make_offset ($2, units);
-                  type = pkl_ast_make_offset_type (magnitude_type, units);
-                  PKL_AST_TYPE ($$) = ASTREF (type);
+//                  type = pkl_ast_make_offset_type (magnitude_type, units);
+  //                PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         ;
 

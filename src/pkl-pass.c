@@ -295,10 +295,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
                          phases);
       break;
     case PKL_AST_OFFSET:
-      PKL_AST_TYPE (node)
-        = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_TYPE (node), 0, payloads,
-                         phases);
+      if (PKL_AST_TYPE (node))
+        PKL_AST_TYPE (node) = pkl_do_pass_1 (toplevel, ast,
+                                             PKL_AST_TYPE (node), 0, payloads,
+                                             phases);
       PKL_AST_OFFSET_MAGNITUDE (node)
         = pkl_do_pass_1 (toplevel, ast,
                          PKL_AST_OFFSET_MAGNITUDE (node), 0, payloads,
