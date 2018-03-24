@@ -1,4 +1,4 @@
-/* pkl-anal.h - Analysis phases for the poke compiler.  */
+/* pkl-trans.c - Transformation phases for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,20 +16,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PKL_ANAL_H
-#define PKL_ANAL_H
-
 #include <config.h>
+
+#include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-trans.h"
 
-struct pkl_anal_payload
-{
-  int errors;
-};
+/* This file implements several transformation compiler phases which,
+   generally speaking, are not restartable.
 
-typedef struct pkl_anal_payload *pkl_anal_payload;
+   `trans1' is run immediately after parsing.
+   `trans2' is run before anal2.
 
-extern struct pkl_phase pkl_phase_anal1;
-extern struct pkl_phase pkl_phase_anal2;
+  See the handlers below for detailed information about the specific
+  transformations these phases perform.  */
 
-#endif /* PKL_ANAL_H */
+
+
+struct pkl_phase pkl_phase_trans1 =
+  {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
+  };
+
+struct pkl_phase pkl_phase_trans2 =
+  {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
+  };

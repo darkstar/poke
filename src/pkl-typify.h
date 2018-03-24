@@ -1,4 +1,4 @@
-/* pkl-anal.h - Analysis phases for the poke compiler.  */
+/* pkl-typify.c - Type annotation phase for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PKL_ANAL_H
-#define PKL_ANAL_H
+#ifndef PKL_TYPIFY_H
+#define PKL_TYPIFY_H
 
 #include <config.h>
-#include "pkl-pass.h"
+#include <pkl-pass.h>
 
-struct pkl_anal_payload
+struct pkl_typify_payload
 {
   int errors;
 };
 
-typedef struct pkl_anal_payload *pkl_anal_payload;
+typedef struct pkl_typify_payload *pkl_typify_payload;
 
-extern struct pkl_phase pkl_phase_anal1;
-extern struct pkl_phase pkl_phase_anal2;
+extern struct pkl_phase pkl_phase_typify1;
+extern struct pkl_phase pkl_phase_typify2;
 
-#endif /* PKL_ANAL_H */
+#endif /* PKL_TYPIFY_H */

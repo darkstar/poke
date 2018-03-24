@@ -27,11 +27,11 @@
    raise errors and/or warnings but won't alter the structure of the
    AST.  These phases are restartable.
 
-   `anal1' is run immediately after parsing.
-   `anal2' is run after constant folding.
+   `anal1' is run immediately after trans1.
+   `anal2' is run after constant folding and before gen.
 
    See the handlers below for detailed information about what these
-   passes check for.  */
+   phases check for.  */
 
 /* The following handler is used in both anal1 and anal2, and
    initializes the phase payload.  */
