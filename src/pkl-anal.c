@@ -92,10 +92,10 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
   };
 
-/* Every expression node should be annotated with a type, and the
-   type's completeness should have been determined.  */
+/* Every expression, array and struct node should be annotated with a
+   type, and the type's completeness should have been determined.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -104,7 +104,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
   if (type == NULL)
     {
       fprintf (stderr,
-               "internal compiler error: expression node with no type\n");
+               "internal compiler error: node with no type\n");
       payload->errors++;
       PKL_PASS_DONE;
     }
@@ -120,8 +120,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
 }
 PKL_PHASE_END_HANDLER
 
-/* The magnitude in offset literals should be an integral
-   expression.  */
+/* The magnitude in offset literals should be an integral expression.
+   Also, it must have a type and its completeness should be known.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
 {
@@ -131,6 +131,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (node);
   pkl_ast_node magnitude_type = PKL_AST_TYPE (magnitude);
+  pkl_ast_node type = PKL_AST_TYPE (node);
 
   if (PKL_AST_TYPE_CODE (magnitude_type)
       != PKL_TYPE_INTEGRAL)
@@ -138,6 +139,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
       fprintf (stderr,
                "error: expected integer expression in offset\n");
       payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  if (type == NULL)
+    {
+      fprintf (stderr,
+               "internal compiler error: node with no type\n");
+      payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  if (PKL_AST_TYPE_COMPLETE (type)
+      == PKL_AST_TYPE_COMPLETE_UNKNOWN)
+    {
+      fprintf (stderr,
+               "internal compiler error: type completeness is unknown\n");
+      payload->errors++;
+      PKL_PASS_DONE;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -145,6 +164,8 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_anal2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_exp),
+   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_checktype),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
   };

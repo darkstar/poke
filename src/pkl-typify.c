@@ -25,13 +25,13 @@
    and propagates that information up the AST.
 
    `typify2' determines which types are "complete" and annotates the
-   type nodes accordingly.  A type if complete if its size in bits can
-   be determined at compile-time, and that size is constant.  Note
-   that not-complete types are legal poke entities, but certain
-   operations are not allowed on them.  Note that this phase should be
-   run after constant-folding.  Note also that the completeness of
-   INTEGER, CHAR, STRING and other lexical entities is set by the
-   lexer.
+   type nodes accordingly, for EXP nodes whose type-completeness has
+   not been already determined in the lexer or indirectly, by
+   propagating types, in typify1: namely, ARRAYs and STRUCTs.  A type
+   if complete if its size in bits can be determined at compile-time,
+   and that size is constant.  Note that not-complete types are legal
+   poke entities, but certain operations are not allowed on them.
+   Note that this phase should be run after constant-folding.
 */
 
 #include <config.h>
@@ -422,8 +422,36 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
   };
 
+/* An array type is considered complete if the number of elements
+   contained in the array is known, and it is constant.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_array)
+{
+  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
+  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
+
+  PKL_AST_TYPE_COMPLETE (type)
+    = (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
+       ? PKL_AST_TYPE_COMPLETE_YES
+       : PKL_AST_TYPE_COMPLETE_NO);
+}
+PKL_PHASE_END_HANDLER
+
+/* A struct type is considered complete if all of its fields are
+   complete.  XXX: for the time being only simple structs are
+   supported, which are always complete.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_struct)
+{
+  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
+  PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_YES;
+}
+PKL_PHASE_END_HANDLER
+
 
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify2_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify2_df_struct),
   };
