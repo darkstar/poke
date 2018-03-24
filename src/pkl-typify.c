@@ -34,10 +34,10 @@
    The type of a CAST is the type of its target type.
 
    The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
-   IOR, XOR, BAND, AND and OR is an integer type with the following
-   characteristics:
-   - If any of the operands is unsigned, the operation is unsigned.
-   - The width of the operation is the width of the widest operand.
+   IOR, XOR and BAND is an integer type with the following
+   characteristics: - If any of the operands is unsigned, the
+   operation is unsigned.  - The width of the operation is the width
+   of the widest operand.
 
    The type of a SIZEOF operation is an offset type with an unsigned
    64-bit magnitude and units bits.
@@ -91,48 +91,74 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_cast)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_add)
-{
-  pkl_ast_node exp = PKL_PASS_NODE;
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
-  pkl_ast_node t1 = PKL_AST_TYPE (op1);
-  pkl_ast_node t2 = PKL_AST_TYPE (op2);
+#define TYPIFY_BIN(op)                                                  \
+  PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_##op)                          \
+  {                                                                     \
+  pkl_ast_node exp = PKL_PASS_NODE;                                     \
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);                      \
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);                      \
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);                                 \
+  pkl_ast_node t2 = PKL_AST_TYPE (op2);                                 \
+                                                                        \
+  pkl_ast_node type;                                                    \
+                                                                        \
+  if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))                 \
+    goto error;                                                         \
+                                                                        \
+  switch (PKL_AST_TYPE_CODE (t1))                                       \
+    {                                                                   \
+    CASE_STR                                                            \
+    case PKL_TYPE_INTEGRAL:                                             \
+      {                                                                 \
+        int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                      \
+                        && PKL_AST_TYPE_I_SIGNED (t2));                 \
+        int size                                                        \
+          = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)        \
+             ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));    \
+                                                                        \
+        type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p); \
+        break;                                                          \
+      }                                                                 \
+    default:                                                            \
+      goto error;                                                       \
+      break;                                                            \
+    }                                                                   \
+                                                                        \
+  PKL_AST_TYPE (exp) = ASTREF (type);                                   \
+  PKL_PASS_DONE;                                                        \
+                                                                        \
+  error:                                                                \
+  fprintf (stderr, "error: invalid operands to expression\n");          \
+  PKL_PASS_ERROR;                                                       \
+  }                                                                     \
+  PKL_PHASE_END_HANDLER
 
-  pkl_ast_node type;
+/* ADD and SUB accept both integral and string operands.  */
 
-  if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))
-    goto error;
-
-  switch (PKL_AST_TYPE_CODE (t1))
-    {
-    case PKL_TYPE_STRING:
-      type = pkl_ast_get_string_type (PKL_PASS_AST);
+#define CASE_STR                                                        \
+    case PKL_TYPE_STRING:                                               \
+      type = pkl_ast_get_string_type (PKL_PASS_AST);                    \
       break;
-    case PKL_TYPE_INTEGRAL:
-      {      
-        int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)
-                        && PKL_AST_TYPE_I_SIGNED (t2));
-        int size
-          = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)
-             ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));
 
-        type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p);
-        break;
-      }
-    default:
-      goto error;
-      break;
-    }
+TYPIFY_BIN (add);
+TYPIFY_BIN (sub);
 
-  PKL_AST_TYPE (exp) = ASTREF (type);
-  PKL_PASS_DONE;
+/* But the following operations only accept integers, so define
+   CASE_STR to the empty string.  */
 
- error:
-      fprintf (stderr, "error: invalid operands to expression\n");
-      PKL_PASS_ERROR;
-}
-PKL_PHASE_END_HANDLER
+#undef CASE_STR
+#define CASE_STR
+
+TYPIFY_BIN (mul);
+TYPIFY_BIN (div);
+TYPIFY_BIN (mod);
+TYPIFY_BIN (sl);
+TYPIFY_BIN (sr);
+TYPIFY_BIN (ior);
+TYPIFY_BIN (xor);
+TYPIFY_BIN (band);
+
+#undef TYPIFY_BIN
 
 struct pkl_phase pkl_phase_typify =
   {
@@ -149,6 +175,15 @@ struct pkl_phase pkl_phase_typify =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify_df_op_boolean),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify_df_add),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify_df_sub),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify_df_mul),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify_df_div),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify_df_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_typify_df_sl),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_typify_df_sr),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify_df_ior),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify_df_xor),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify_df_band),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify_df_first_operand),

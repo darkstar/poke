@@ -274,7 +274,7 @@ expression:
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '*' expression
         	{
