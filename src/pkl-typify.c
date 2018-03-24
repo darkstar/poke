@@ -19,7 +19,7 @@
 /* Each expression node in the AST should be characterized by a type.
    This file contains the implementation of a compiler phase that
    annotates these nodes with their respective types, according to the
-   rules documented below.  It also performs some type-checking.
+   rules documented below.  It also performs type-checking.
 
    The types for INTEGER, CHAR and STRING nodes are set by the lexer.
    See pkl-lex.l.
