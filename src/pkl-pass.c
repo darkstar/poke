@@ -250,9 +250,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_ARRAY:
       PKL_PASS_CHAIN (PKL_AST_ARRAY_INITIALIZERS (node));
-      PKL_AST_TYPE (node) = pkl_do_pass_1 (toplevel, ast,
-                                           PKL_AST_TYPE (node), 0, payloads,
-                                           phases);
+      if (PKL_AST_TYPE (node))
+        PKL_AST_TYPE (node) = pkl_do_pass_1 (toplevel, ast,
+                                             PKL_AST_TYPE (node), 0, payloads,
+                                             phases);
       break;
     case PKL_AST_ARRAY_INITIALIZER:
       PKL_AST_ARRAY_INITIALIZER_EXP (node)

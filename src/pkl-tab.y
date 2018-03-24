@@ -451,15 +451,11 @@ array_initializer:
           	{
                   $$ = pkl_ast_make_array_initializer (PKL_AST_ARRAY_NOINDEX,
                                                        $1);
-                  /* Note how array initializers do not have a type.
-                     See `finish_array' above.  */
                 }
-        | '[' INTEGER ']' '=' expression
+        | '.' '[' INTEGER ']' '=' expression
         	{
-                  $$ = pkl_ast_make_array_initializer (PKL_AST_INTEGER_VALUE ($2),
-                                                       $5);
-                  /* Note how array initializers do not have a type.
-                     See `finish_array' above.  */
+                  $$ = pkl_ast_make_array_initializer (PKL_AST_INTEGER_VALUE ($3),
+                                                       $6);
                 }
         ;
 
@@ -666,10 +662,8 @@ enumerator:
 
 %%
 
-/* Finish an array and return it.  Check that the types of all the
-   array elements are the same, and derive the type of the array from
-   them.  Also compute and set the indexes of all the elements and set
-   the size of the array consequently.
+/* Finish an array and return it.  Compute and set the indexes of all
+   the elements and set the size of the array consequently.
 
    In case of a syntax error, return NULL.  */
 
@@ -678,31 +672,18 @@ finish_array (struct pkl_parser *parser,
               YYLTYPE *llocp,
               pkl_ast_node initializers)
 {
-  pkl_ast_node array, tmp, array_nelem, type;
+  pkl_ast_node array, tmp;
   size_t index, nelem, ninitializer;
 
-  type = NULL;
   nelem = 0;
   for (index = 0, tmp = initializers, ninitializer = 0;
        tmp;
        tmp = PKL_AST_CHAIN (tmp), ++ninitializer)
     {
-      pkl_ast_node initializer = PKL_AST_ARRAY_INITIALIZER_EXP (tmp);
       size_t initializer_index = PKL_AST_ARRAY_INITIALIZER_INDEX (tmp);
       size_t elems_appended, effective_index;
       
-      /* First check the type of the initializer.  */
-      assert (PKL_AST_TYPE (initializer));
-      if (type == NULL)
-        type = PKL_AST_TYPE (initializer);
-      else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
-        {
-          pkl_tab_error (llocp, parser,
-                         "array initializer is of the wrong type.");
-          return NULL;
-        }        
-      
-      /* Then set the index of the initializer.  */
+      /* Set the index of the initializer.  */
       if (initializer_index == PKL_AST_ARRAY_NOINDEX)
         {
           effective_index = index;
@@ -722,16 +703,8 @@ finish_array (struct pkl_parser *parser,
       nelem += elems_appended;
     }
 
-  /* Finally, set the type of the array itself.  */
-  array_nelem = pkl_ast_make_integer (nelem);
-  PKL_AST_TYPE (array_nelem) = pkl_ast_get_integral_type (parser->ast,
-                                                          64, 0);
-  type = pkl_ast_make_array_type (array_nelem, type);
-
   array = pkl_ast_make_array (nelem, ninitializer,
                               pkl_ast_reverse (initializers));
-  PKL_AST_TYPE (array) = ASTREF (type);
-  
   return array;
 }
 

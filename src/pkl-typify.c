@@ -199,12 +199,53 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_offset)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_array)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+
+  /* Check that the types of all the array elements are the same, and
+     derive the type of the array from the first of them.  */
+
+  pkl_ast_node array = PKL_PASS_NODE;
+  pkl_ast_node initializers = PKL_AST_ARRAY_INITIALIZERS (array);
+  
+  pkl_ast_node tmp, type = NULL, array_nelem, array_nelem_type;
+
+  for (tmp = initializers; tmp; tmp = PKL_AST_CHAIN (tmp))
+    {
+      pkl_ast_node initializer = PKL_AST_ARRAY_INITIALIZER_EXP (tmp);
+
+      if (type == NULL)
+        type = PKL_AST_TYPE (initializer);
+      else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
+        {
+          fputs ("error: array initializer is of the wrong type\n",
+                 stderr);
+          payload->errors++;
+          PKL_PASS_DONE;
+        }        
+    }
+
+  /* Build the type of the array. */
+  array_nelem = pkl_ast_make_integer (PKL_AST_ARRAY_NELEM (array));
+  array_nelem_type = pkl_ast_get_integral_type (PKL_PASS_AST,
+                                                64, 0);
+  PKL_AST_TYPE (array_nelem) = ASTREF (array_nelem_type);
+
+  type = pkl_ast_make_array_type (array_nelem, type);
+  PKL_AST_TYPE (array) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
 
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify_df_array),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
 
