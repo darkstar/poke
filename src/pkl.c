@@ -42,6 +42,7 @@ pkl_compile_buffer (pvm_program *prog,
   struct pkl_gen_payload gen_payload = { NULL, 0 };
   struct pkl_anal_payload anal1_payload = { 0 };
   struct pkl_typify_payload typify1_payload = { 0 };
+  struct pkl_typify_payload typify2_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
 
   /* Parse the input program into an AST.  */
@@ -93,15 +94,17 @@ pkl_compile_buffer (pvm_program *prog,
             &pkl_phase_typify1,
             &pkl_phase_promo,
             /* &pkl_phase_fold, */
+            &pkl_phase_typify2,
             &pkl_phase_anal2,
             NULL,
           };
       void *frontend_payloads[]
-        = { &anal1_payload, /* anal1 */
-            &typify1_payload, /* typify1 */
+        = { &anal1_payload,
+            &typify1_payload,
             NULL, /* promo */
             /* NULL, fold */
-            &anal2_payload, /* anal2 */
+            &typify2_payload,
+            &anal2_payload,
           };
 
       struct pkl_phase *backend_phases[] = { &pkl_phase_gen, NULL };
@@ -115,7 +118,8 @@ pkl_compile_buffer (pvm_program *prog,
 
       if (anal1_payload.errors > 0
           || anal2_payload.errors > 0
-          || typify1_payload.errors > 0)
+          || typify1_payload.errors > 0
+          || typify2_payload.errors > 0)
         goto error;
 
       /* XXX */

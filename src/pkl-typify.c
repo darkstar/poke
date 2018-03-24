@@ -40,7 +40,10 @@
 #include "pkl-pass.h"
 #include "pkl-typify.h"
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_bf_program)
+/* The following handler is used in both `typify1' and `typify2'.  It
+   initializes the payload.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -379,7 +382,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify1 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify1_bf_program),
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
 
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify1_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify1_df_offset),
@@ -415,4 +418,10 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
+  };
+
+
+struct pkl_phase pkl_phase_typify2 =
+  {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
   };
