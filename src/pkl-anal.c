@@ -87,8 +87,7 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
   };
 
-
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_exp)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -96,7 +95,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_exp)
   /* Every expression node should have a type annotation.  */
   if (PKL_AST_TYPE (PKL_PASS_NODE) == NULL)
     {
-      fprintf (stderr, "internal compiler error: expression node with no type\n");
+      fprintf (stderr,
+               "internal compiler error: expression node with no type\n");
+      payload->errors++;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (node);
+  pkl_ast_node magnitude_type = PKL_AST_TYPE (magnitude);
+
+  if (PKL_AST_TYPE_CODE (magnitude_type)
+      != PKL_TYPE_INTEGRAL)
+    {
+      fprintf (stderr,
+               "error: expected integer expression in offset\n");
       payload->errors++;
     }
 }
@@ -105,5 +124,6 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_anal2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_exp),
+   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_exp),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
   };

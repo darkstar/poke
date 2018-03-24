@@ -232,23 +232,14 @@ expression:
         | unary_operator expression %prec UNARY
           	{
                   $$ = pkl_ast_make_unary_exp ($1, $2);
-                  //        PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
                   $$ = pkl_ast_make_cast ($2, $4);
-                  //PKL_AST_TYPE ($$) = ASTREF ($2);
                 }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  /* XXX: the details of the offset type are
-                     arbitrary.  */
-                  //                  PKL_AST_TYPE ($$)
-                  //                    = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
-                  //                                                                           64, 0),
-                  //                                                PKL_AST_OFFSET_UNIT_BITS);
-                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($$));
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
@@ -268,116 +259,97 @@ expression:
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
-                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '-' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
-                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '*' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '/' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '%' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression SR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression EQ expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression NE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '<' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '>' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression LE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression GE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '|' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression '^' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression '&' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
                                                 $1, $3);
-                  // PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
         | expression AND expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
-                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
-                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
 	| '[' expression IDENTIFIER ']'
         	{
                   int units;
-                  pkl_ast_node magnitude_type; //, type;
                   
                   if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "b") == 0)
                     units = PKL_AST_OFFSET_UNIT_BITS;
@@ -390,18 +362,7 @@ expression:
                       YYERROR;
                     }
 
-                  magnitude_type = PKL_AST_TYPE ($2);
-                  if (PKL_AST_CODE ($2) == PKL_AST_TYPE
-                      || PKL_AST_TYPE_CODE (magnitude_type) != PKL_TYPE_INTEGRAL)
-                    {
-                      pkl_tab_error (&@1, pkl_parser,
-                                     "expected integer expression");
-                      YYERROR;
-                    }
-                  
                   $$ = pkl_ast_make_offset ($2, units);
-//                  type = pkl_ast_make_offset_type (magnitude_type, units);
-  //                PKL_AST_TYPE ($$) = ASTREF (type);
                 }
         ;
 
