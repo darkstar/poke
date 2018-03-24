@@ -27,12 +27,14 @@
    raise errors and/or warnings but won't alter the structure of the
    AST.  These phases are restartable.
 
-   `pkl_phase_anal1' is run immediately after parsing.
-   `pkl_phase_anal2' is run after constant folding.
+   `anal1' is run immediately after parsing.
+   `anal2' is run after constant folding.
 
    See the handlers below for detailed information about what these
    passes check for.  */
 
+/* The following handler is used in both anal1 and anal2, and
+   initializes the phase payload.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
 {
@@ -44,6 +46,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
+/* In struct literals, make sure that the names of it's elements are
+   unique in the structure.  */
+
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
 {
   pkl_anal_payload payload
@@ -53,8 +58,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
   pkl_ast_node elems = PKL_AST_STRUCT_ELEMS (node);
   pkl_ast_node t;
 
-  /* Make sure that the names in the structure elements are unique in
-     the structure.  */
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {     
       pkl_ast_node ename = PKL_AST_STRUCT_ELEM_NAME (t);
@@ -83,19 +86,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
 }
 PKL_PHASE_END_HANDLER
 
-
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
   };
 
+/* Every expression node should be annotated with a type.  */
+
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
 
-  /* Every expression node should have a type annotation.  */
   if (PKL_AST_TYPE (PKL_PASS_NODE) == NULL)
     {
       fprintf (stderr,
@@ -104,6 +107,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
     }
 }
 PKL_PHASE_END_HANDLER
+
+/* The magnitude in offset literals should be an integral
+   expression.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
 {
