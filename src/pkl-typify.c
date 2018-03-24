@@ -35,9 +35,9 @@
 
    The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
    IOR, XOR and BAND is an integer type with the following
-   characteristics: - If any of the operands is unsigned, the
-   operation is unsigned.  - The width of the operation is the width
-   of the widest operand.
+   characteristics: if any of the operands is unsigned, the operation
+   is unsigned.  The width of the operation is the width of the widest
+   operand.
 
    The type of a SIZEOF operation is an offset type with an unsigned
    64-bit magnitude and units bits.
