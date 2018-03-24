@@ -347,15 +347,15 @@ pkl_do_pass_1 (jmp_buf toplevel,
           }
         break;
       }
-    case PKL_AST_STRUCT_TYPE_ELEM:
-      if (PKL_AST_STRUCT_TYPE_ELEM_NAME (node))
-        PKL_AST_STRUCT_TYPE_ELEM_NAME (node)
+    case PKL_AST_STRUCT_ELEM_TYPE:
+      if (PKL_AST_STRUCT_ELEM_TYPE_NAME (node))
+        PKL_AST_STRUCT_ELEM_TYPE_NAME (node)
           = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_STRUCT_TYPE_ELEM_NAME (node), 0, payloads,
+                           PKL_AST_STRUCT_ELEM_TYPE_NAME (node), 0, payloads,
                            phases);
-      PKL_AST_STRUCT_TYPE_ELEM_TYPE (node)
+      PKL_AST_STRUCT_ELEM_TYPE_TYPE (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_TYPE_ELEM_TYPE (node), 0, payloads,
+                         PKL_AST_STRUCT_ELEM_TYPE_TYPE (node), 0, payloads,
                          phases);
       break;
     case PKL_AST_INTEGER:

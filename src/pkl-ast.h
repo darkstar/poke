@@ -51,7 +51,7 @@ enum pkl_ast_code
   PKL_AST_CAST,
   /* Types.  */
   PKL_AST_TYPE,
-  PKL_AST_STRUCT_TYPE_ELEM,
+  PKL_AST_STRUCT_ELEM_TYPE,
   /* Declarations.  */
   PKL_AST_DECL,
   PKL_AST_ENUM,
@@ -488,7 +488,7 @@ struct pkl_ast_struct_ref
 pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node sct,
                                       pkl_ast_node identifier);
 
-/* PKL_AST_STRUCT_TYPE_ELEM nodes represent the element part of a
+/* PKL_AST_STRUCT_ELEM_TYPE nodes represent the element part of a
    struct type.
 
    NAME is a PKL_AST_IDENTIFIER node, or NULL if the struct type
@@ -496,10 +496,10 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node sct,
 
    TYPE is a PKL_AST_TYPE node.  */
 
-#define PKL_AST_STRUCT_TYPE_ELEM_NAME(AST) ((AST)->sct_type_elem.name)
-#define PKL_AST_STRUCT_TYPE_ELEM_TYPE(AST) ((AST)->sct_type_elem.type)
+#define PKL_AST_STRUCT_ELEM_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
+#define PKL_AST_STRUCT_ELEM_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
 
-struct pkl_ast_struct_type_elem
+struct pkl_ast_struct_elem_type
 {
   struct pkl_ast_common common;
 
@@ -523,7 +523,7 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
    then it is the number of elements in the array.
 
    In struct types, NELEM is the number of elements in the struct type.
-   ELEMS is a chain of PKL_AST_STRUCT_TYPE_ELEM nodes.
+   ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.
 
    When the size of a value of a given type can be determined at
    compile time, we say that such type is "complete".  Otherwise, we
@@ -683,7 +683,7 @@ union pkl_ast_node
   struct pkl_ast_cast cast;
   /* Types.  */
   struct pkl_ast_type type;
-  struct pkl_ast_struct_type_elem sct_type_elem;
+  struct pkl_ast_struct_elem_type sct_type_elem;
   /* Declarations.  */
   struct pkl_ast_decl decl;
   struct pkl_ast_enum enumeration;

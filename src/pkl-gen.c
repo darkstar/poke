@@ -784,7 +784,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_type_elem)
 
   /* If the struct type element doesn't include a name, generate a
      null value as expected by the mktysct instruction.  */
-  if (!PKL_AST_STRUCT_TYPE_ELEM_NAME (PKL_PASS_NODE))
+  if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
     pvm_push_val (payload->program, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
@@ -997,7 +997,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_df_struct_ref),
-   PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_TYPE_ELEM, pkl_gen_bf_struct_type_elem),
+   PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_gen_bf_struct_type_elem),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_df_op_add),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_df_op_sub),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_df_op_mul),

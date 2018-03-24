@@ -307,11 +307,11 @@ pkl_ast_make_struct_elem_type (pkl_ast_node name,
                                pkl_ast_node type)
 {
   pkl_ast_node struct_type_elem
-    = pkl_ast_make_node (PKL_AST_STRUCT_TYPE_ELEM);
+    = pkl_ast_make_node (PKL_AST_STRUCT_ELEM_TYPE);
 
-  PKL_AST_STRUCT_TYPE_ELEM_NAME (struct_type_elem)
+  PKL_AST_STRUCT_ELEM_TYPE_NAME (struct_type_elem)
     = ASTREF (name);
-  PKL_AST_STRUCT_TYPE_ELEM_TYPE (struct_type_elem)
+  PKL_AST_STRUCT_ELEM_TYPE_TYPE (struct_type_elem)
     = ASTREF (type);
 
   return struct_type_elem;
@@ -346,9 +346,9 @@ pkl_ast_dup_type (pkl_ast_node type)
       for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
         {
           pkl_ast_node struct_type_elem_name
-            = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+            = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
           pkl_ast_node struct_type_elem_type
-            = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
+            = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
           pkl_ast_node new_struct_type_elem_name
             = (struct_type_elem_name
                ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
@@ -413,10 +413,10 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
              sa && sb;
              sa = PKL_AST_CHAIN (sa), sb = PKL_AST_CHAIN (sb))
           {
-            if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (sa)),
-                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (sb)))
-                || !pkl_ast_type_equal (PKL_AST_STRUCT_TYPE_ELEM_TYPE (sa),
-                                        PKL_AST_STRUCT_TYPE_ELEM_TYPE (sb)))
+            if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (sa)),
+                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (sb)))
+                || !pkl_ast_type_equal (PKL_AST_STRUCT_ELEM_TYPE_TYPE (sa),
+                                        PKL_AST_STRUCT_ELEM_TYPE_TYPE (sb)))
               return 0;
           }
         break;
@@ -464,7 +464,7 @@ pkl_ast_sizeof_type (pkl_ast_node type)
 
         for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
           {
-            pkl_ast_node elem_type = PKL_AST_STRUCT_TYPE_ELEM_TYPE (t);
+            pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
             size += pkl_ast_sizeof_type (elem_type);
           }
 
@@ -687,10 +687,10 @@ pkl_ast_node_free (pkl_ast_node ast)
       
       break;
 
-    case PKL_AST_STRUCT_TYPE_ELEM:
+    case PKL_AST_STRUCT_ELEM_TYPE:
 
-      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_ELEM_NAME (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_ELEM_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_NAME (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_TYPE (ast));
       break;
       
     case PKL_AST_ARRAY_REF:
@@ -1264,11 +1264,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         }
       break;
 
-    case PKL_AST_STRUCT_TYPE_ELEM:
-      IPRINTF ("STRUCT_TYPE_ELEM::\n");
+    case PKL_AST_STRUCT_ELEM_TYPE:
+      IPRINTF ("STRUCT_ELEM_TYPE::\n");
       
-      PRINT_AST_SUBAST (name, STRUCT_TYPE_ELEM_NAME);
-      PRINT_AST_SUBAST (type, STRUCT_TYPE_ELEM_TYPE);
+      PRINT_AST_SUBAST (name, STRUCT_ELEM_TYPE_NAME);
+      PRINT_AST_SUBAST (type, STRUCT_ELEM_TYPE_TYPE);
       break;
       
     case PKL_AST_ARRAY_REF:

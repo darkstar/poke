@@ -724,10 +724,10 @@ finish_struct_ref (struct pkl_parser *parser,
   type = NULL;
   for (e = PKL_AST_TYPE_S_ELEMS (stype); e; e = PKL_AST_CHAIN (e))
     {
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_TYPE_ELEM_NAME (e)),
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (e)),
                   PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
         {
-          type = PKL_AST_STRUCT_TYPE_ELEM_TYPE (e);
+          type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (e);
           break;
         }
     }
@@ -763,8 +763,8 @@ finish_struct_type (struct pkl_parser *parser,
     {
       for (u = stype_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_ELEM_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_ELEM_NAME (t);
+          pkl_ast_node tname = PKL_AST_STRUCT_ELEM_TYPE_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
 
           if (uname
               && tname
