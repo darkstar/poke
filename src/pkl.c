@@ -92,16 +92,16 @@ pkl_compile_buffer (pvm_program *prog,
         = { &pkl_phase_anal1,
             &pkl_phase_typify1,
             &pkl_phase_promo,
+            /* &pkl_phase_fold, */
             &pkl_phase_anal2,
-            /* &pkl_phase_fold */ NULL ,
             NULL,
           };
       void *frontend_payloads[]
         = { &anal1_payload, /* anal1 */
             &typify1_payload, /* typify1 */
             NULL, /* promo */
+            /* NULL, fold */
             &anal2_payload, /* anal2 */
-            NULL, /* fold */
           };
 
       struct pkl_phase *backend_phases[] = { &pkl_phase_gen, NULL };
