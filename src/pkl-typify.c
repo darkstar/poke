@@ -94,8 +94,8 @@ PKL_PHASE_END_HANDLER
    is unsigned.  The width of the operation is the width of the widest
    operand.  */
 
-#define TYPIFY_BIN(op)                                                  \
-  PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_##op)                         \
+#define TYPIFY_BIN(OP)                                                  \
+  PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_##OP)                         \
   {                                                                     \
     pkl_typify_payload payload                                          \
       = (pkl_typify_payload) PKL_PASS_PAYLOAD;                          \
