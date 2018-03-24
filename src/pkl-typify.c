@@ -87,9 +87,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
 }
 PKL_PHASE_END_HANDLER
 
-
 /* The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
-   IOR, XOR and BAND is an integer type with the following
+   IOR, XOR and BAND is an integral type with the following
    characteristics: if any of the operands is unsigned, the operation
    is unsigned.  The width of the operation is the width of the widest
    operand.  */
