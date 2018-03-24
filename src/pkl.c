@@ -32,10 +32,6 @@
 extern struct pkl_phase satanize;  /* pkl-satan.c  */
 extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
 extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
-extern struct pkl_phase pkl_phase_gen; /* pkl-gen.c */
-extern struct pkl_phase pkl_phase_anal1; /* pkl-anal.c */
-extern struct pkl_phase pkl_phase_anal2; /* pkl-anal.c */
-extern struct pkl_phase pkl_phase_typify;
 
 int
 pkl_compile_buffer (pvm_program *prog,
@@ -45,7 +41,7 @@ pkl_compile_buffer (pvm_program *prog,
   int ret;
   struct pkl_gen_payload gen_payload = { NULL, 0 };
   struct pkl_anal_payload anal1_payload = { 0 };
-  struct pkl_typify_payload typify_payload = { 0 };
+  struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
 
   /* Parse the input program into an AST.  */
@@ -94,7 +90,7 @@ pkl_compile_buffer (pvm_program *prog,
     {
       struct pkl_phase *frontend_phases[]
         = { &pkl_phase_anal1,
-            &pkl_phase_typify,
+            &pkl_phase_typify1,
             &pkl_phase_promo,
             &pkl_phase_anal2,
             /* &pkl_phase_fold */ NULL ,
@@ -102,7 +98,7 @@ pkl_compile_buffer (pvm_program *prog,
           };
       void *frontend_payloads[]
         = { &anal1_payload, /* anal1 */
-            &typify_payload, /* typify */
+            &typify1_payload, /* typify1 */
             NULL, /* promo */
             &anal2_payload, /* anal2 */
             NULL, /* fold */
@@ -119,7 +115,7 @@ pkl_compile_buffer (pvm_program *prog,
 
       if (anal1_payload.errors > 0
           || anal2_payload.errors > 0
-          || typify_payload.errors > 0)
+          || typify1_payload.errors > 0)
         goto error;
 
       /* XXX */

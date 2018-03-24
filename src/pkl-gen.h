@@ -20,6 +20,9 @@
 #define PKL_GEN_H
 
 #include <config.h>
+
+#include <stdlib.h>
+
 #include <jitter/jitter.h>
 #include "pkl-ast.h"
 #include "pkl-pass.h"
@@ -32,5 +35,7 @@ struct pkl_gen_payload
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
+
+extern struct pkl_phase pkl_phase_gen;
 
 #endif /* !PKL_GEN_H  */

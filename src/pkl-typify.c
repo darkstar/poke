@@ -378,7 +378,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 }
 PKL_PHASE_END_HANDLER
 
-struct pkl_phase pkl_phase_typify =
+struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify1_bf_program),
 
