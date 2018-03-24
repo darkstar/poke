@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PKL_ANAL_H
-#define PKL_ANAL_H
+#ifndef PKL_TRANS_H
+#define PKL_TRANS_H
 
 #include <config.h>
 #include "pkl-pass.h"
@@ -32,4 +32,4 @@ typedef struct pkl_trans_payload *pkl_trans_payload;
 extern struct pkl_phase pkl_phase_trans1;
 extern struct pkl_phase pkl_phase_trans2;
 
-#endif /* PKL_ANAL_H */
+#endif /* PKL_TRANS_H */

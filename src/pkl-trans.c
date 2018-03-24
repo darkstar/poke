@@ -31,7 +31,15 @@
   See the handlers below for detailed information about the specific
   transformations these phases perform.  */
 
+/* The following handler is used in both trans1 and tran2 and
+   initializes the phase payload.  */
 
+PKL_PHASE_BEGIN_HANDLER (pkl_trans_bf_program)
+{
+  pkl_trans_payload payload = PKL_PASS_PAYLOAD;
+  payload->errors = 0;
+}
+PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans1 =
   {
