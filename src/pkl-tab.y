@@ -74,12 +74,6 @@ static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
                                   pkl_ast_node elems);
 
-static pkl_ast_node finish_struct_ref (struct pkl_parser *parser,
-                                       YYLTYPE *loc_sct,
-                                       YYLTYPE *loc_identifier,
-                                       pkl_ast_node sct,
-                                       pkl_ast_node identifier);
-
 static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
                                         YYLTYPE *llocp,
                                         pkl_ast_node stype_elems);
@@ -396,11 +390,7 @@ primary:
                 }
         | primary '.' IDENTIFIER
         	{
-                  $$ = finish_struct_ref (pkl_parser,
-                                          &@1, &@3,
-                                          $1, $3);
-                  if ($$ == NULL)
-                    YYERROR;
+                  $$ = pkl_ast_make_struct_ref ($1, $3);
                 }
 	;
 
@@ -695,54 +685,6 @@ finish_array (struct pkl_parser *parser,
   array = pkl_ast_make_array (nelem, ninitializer,
                               pkl_ast_reverse (initializers));
   return array;
-}
-
-/* Finish a reference to a struct and return it.  Check whether SCT is
-   indeed a struct, and also that it contains an element named after
-   IDENTIFIER.  Also set the type of the struct ref after the type of
-   the referred element.
-
-   In case of a syntax error, return NULL.  */
-
-static pkl_ast_node
-finish_struct_ref (struct pkl_parser *parser,
-                   YYLTYPE *loc_sct,
-                   YYLTYPE *loc_identifier,
-                   pkl_ast_node sct,
-                   pkl_ast_node identifier)
-{
-  pkl_ast_node e, type, sref, stype;
-
-  stype = PKL_AST_TYPE (sct);
-  if (PKL_AST_TYPE_CODE (stype) != PKL_TYPE_STRUCT)
-    {
-      pkl_tab_error (loc_sct, parser,
-                     "expected struct.");
-      return NULL;
-    }
-
-  type = NULL;
-  for (e = PKL_AST_TYPE_S_ELEMS (stype); e; e = PKL_AST_CHAIN (e))
-    {
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (e)),
-                  PKL_AST_IDENTIFIER_POINTER (identifier)) == 0)
-        {
-          type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (e);
-          break;
-        }
-    }
-
-  if (type == NULL)
-    {
-      pkl_tab_error (loc_identifier, parser,
-                     "invalid struct member");
-      return NULL;
-    }
-
-  sref = pkl_ast_make_struct_ref (sct, identifier);
-  PKL_AST_TYPE (sref) = ASTREF (type);
-  
-  return sref;
 }
 
 /* Finish a struct type and return it.  Check that no duplicated named

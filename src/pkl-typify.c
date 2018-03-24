@@ -59,6 +59,8 @@
 
 #include <config.h>
 
+#include <string.h>
+
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 #include "pkl-typify.h"
@@ -317,6 +319,53 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_elem)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_struct_ref)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node struct_ref = PKL_PASS_NODE;
+  pkl_ast_node astruct =
+    PKL_AST_STRUCT_REF_STRUCT (struct_ref);
+  pkl_ast_node field_name =
+    PKL_AST_STRUCT_REF_IDENTIFIER (struct_ref);
+  pkl_ast_node struct_type = PKL_AST_TYPE (astruct);
+  pkl_ast_node t, type = NULL;
+
+  if (PKL_AST_TYPE_CODE (struct_type) != PKL_TYPE_STRUCT)
+    {
+      fputs ("error: expected struct\n", stderr);
+      payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  /* Search for the referred field type.  */
+  for (t = PKL_AST_TYPE_S_ELEMS (struct_type); t;
+       t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node struct_elem_type_name
+        = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
+      
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (struct_elem_type_name),
+                  PKL_AST_IDENTIFIER_POINTER (field_name)) == 0)
+        {
+          type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
+          break;
+        }
+    }
+
+  if (type == NULL)
+    {
+      fputs ("error: referred field doesn't exist in struct\n",
+             stderr);
+      payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  PKL_AST_TYPE (struct_ref) = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
@@ -327,6 +376,7 @@ struct pkl_phase pkl_phase_typify =
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify_df_array_ref),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify_df_struct),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify_df_struct_elem),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify_df_struct_ref),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify_df_op_sizeof),
 
