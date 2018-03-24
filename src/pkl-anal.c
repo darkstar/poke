@@ -1,4 +1,4 @@
-/* pkl-anal.c - Analysis phase for the poke compiler.  */
+/* pkl-anal.c - Analysis phases for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 

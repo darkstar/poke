@@ -128,6 +128,7 @@ PKL_PHASE_END_HANDLER
   PKL_PASS_DONE;                                                        \
                                                                         \
   error:                                                                \
+  /* XXX: move check and report to anal1.  */                           \
   fprintf (stderr, "error: invalid operands to expression\n");          \
   PKL_PASS_ERROR;                                                       \
   }                                                                     \
