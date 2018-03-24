@@ -101,7 +101,7 @@ pkl_compile_buffer (pvm_program *prog,
             &pkl_phase_anal1,
             &pkl_phase_typify1,
             &pkl_phase_promo,
-            /* &pkl_phase_fold, */
+            &pkl_phase_fold,
             &pkl_phase_typify2,
             &pkl_phase_trans2,
             &pkl_phase_anal2,
@@ -112,7 +112,7 @@ pkl_compile_buffer (pvm_program *prog,
             &anal1_payload,
             &typify1_payload,
             NULL, /* promo */
-            /* NULL, fold */
+            NULL, /* fold */
             &typify2_payload,
             &trans2_payload,
             &anal2_payload,
@@ -122,7 +122,7 @@ pkl_compile_buffer (pvm_program *prog,
       void *backend_payloads[] = { &gen_payload };
 
       /* XXX */
-      pkl_ast_print (stdout, ast->ast);
+      /* pkl_ast_print (stdout, ast->ast); */
       
       if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
         goto error;
@@ -136,7 +136,7 @@ pkl_compile_buffer (pvm_program *prog,
         goto error;
 
       /* XXX */
-      pkl_ast_print (stdout, ast->ast);
+      /* pkl_ast_print (stdout, ast->ast); */
       
       if (!pkl_do_pass (ast, backend_phases, backend_payloads))
         goto error;

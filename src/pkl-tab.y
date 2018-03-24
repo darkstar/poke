@@ -66,6 +66,21 @@ pkl_tab_error (YYLTYPE *llocp,
     fprintf (stderr, "%s\n", err);
 }
 
+/* Convert a YYLTYPE value into an AST location and return it.  */
+
+static inline struct pkl_ast_loc
+ASTLOC (YYLTYPE llocp)
+{
+  struct pkl_ast_loc loc;
+
+  loc.first_line = llocp.first_line;
+  loc.last_line = llocp.last_line;
+  loc.first_column = llocp.first_column;
+  loc.last_column = llocp.last_column;
+
+  return loc;
+}
+
 %}
 
 %union {
@@ -207,112 +222,135 @@ expression:
         | unary_operator expression %prec UNARY
           	{
                   $$ = pkl_ast_make_unary_exp ($1, $2);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
                   $$ = pkl_ast_make_cast ($2, $4);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| SIZEOF '(' type_specifier ')' %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '+' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '-' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '*' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '/' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '%' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression SR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression EQ expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| expression NE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '<' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '>' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression LE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| expression GE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '|' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression '^' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| expression '&' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | expression AND expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
@@ -332,6 +370,7 @@ expression:
                     }
 
                   $$ = pkl_ast_make_offset ($2, units);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         ;
 
@@ -351,20 +390,24 @@ primary:
         | primary '[' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_array_ref ($1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | '[' array_initializer_list ']'
         	{
                     $$ = pkl_ast_make_array (0 /* nelem */,
                                              0 /* ninitializer */,
                                              $2);
+                    PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| '{' struct_elem_list '}'
         	{
                     $$ = pkl_ast_make_struct (0 /* nelem */, $2);
+                    PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | primary '.' IDENTIFIER
         	{
                   $$ = pkl_ast_make_struct_ref ($1, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	;
 
@@ -382,10 +425,12 @@ struct_elem:
 	  expression
           	{
                   $$ = pkl_ast_make_struct_elem (NULL, $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | '.' IDENTIFIER '=' expression
 	        {
                   $$ = pkl_ast_make_struct_elem ($2, $4);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         ;
 
@@ -402,11 +447,13 @@ array_initializer:
           	{
                   $$ = pkl_ast_make_array_initializer (PKL_AST_ARRAY_NOINDEX,
                                                        $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | '.' '[' INTEGER ']' '=' expression
         	{
                   $$ = pkl_ast_make_array_initializer (PKL_AST_INTEGER_VALUE ($3),
                                                        $6);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         ;
 
@@ -416,10 +463,12 @@ type_specifier:
         | type_specifier '[' expression ']'
           	{
                   $$ = pkl_ast_make_array_type ($3, $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
 	| type_specifier '[' ']'
         	{
                   $$ = pkl_ast_make_array_type (NULL, $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | struct_type_specifier
         ;
@@ -429,10 +478,12 @@ struct_type_specifier:
 	  STRUCT '{' '}'
           	{
                   $$ = pkl_ast_make_struct_type (0, NULL);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | STRUCT '{' struct_elem_type_list '}'
         	{
                   $$ = pkl_ast_make_struct_type (0 /* nelem */, $3);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         ;
 
@@ -446,10 +497,12 @@ struct_elem_type:
 	  type_specifier IDENTIFIER ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type ($2, $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         | type_specifier ';'
         	{
                   $$ = pkl_ast_make_struct_elem_type (NULL, $1);
+                  PKL_AST_LOC ($$) = ASTLOC (@$);
                 }
         ;
 

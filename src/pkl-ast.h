@@ -153,6 +153,10 @@ typedef union pkl_ast_node *pkl_ast_node;
 
    CODE identifies the type of node.
 
+   LOC is the location in the source program of the entity represented
+   by the node.  It is the task of the parser to fill in this
+   information, which is used in error reporting.
+
    The LITERAL_P flag is used in expression nodes, and tells whether
    the expression is constant, i.e. whether the value of the
    expression can be calculated at compile time.  This is used to
@@ -169,6 +173,7 @@ typedef union pkl_ast_node *pkl_ast_node;
 #define PKL_AST_TYPE(AST) ((AST)->common.type)
 #define PKL_AST_CHAIN2(AST) ((AST)->common.chain2)
 #define PKL_AST_CODE(AST) ((AST)->common.code)
+#define PKL_AST_LOC(AST) ((AST)->common.loc)
 #define PKL_AST_LITERAL_P(AST) ((AST)->common.literal_p)
 #define PKL_AST_REGISTERED_P(AST) ((AST)->common.registered_p)
 #define PKL_AST_REFCOUNT(AST) ((AST)->common.refcount)
@@ -177,12 +182,23 @@ typedef union pkl_ast_node *pkl_ast_node;
 #define ASTREF(AST) ((AST) ? (++((AST)->common.refcount), (AST)) \
                      : NULL)
 
+struct pkl_ast_loc
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
+
+typedef struct pkl_ast_loc pkl_ast_loc;
+
 struct pkl_ast_common
 {
   union pkl_ast_node *chain;
   union pkl_ast_node *type;
   union pkl_ast_node *chain2;
   enum pkl_ast_code code : 8;
+  struct pkl_ast_loc loc;
   int refcount;
 
   unsigned literal_p : 1;
@@ -662,7 +678,8 @@ struct pkl_ast_cast
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
+                                pkl_ast_node exp);
 
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
