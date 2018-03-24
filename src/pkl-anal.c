@@ -92,18 +92,30 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
   };
 
-/* Every expression node should be annotated with a type.  */
+/* Every expression node should be annotated with a type, and the
+   type's completeness should have been determined.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_exp)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
 
-  if (PKL_AST_TYPE (PKL_PASS_NODE) == NULL)
+  if (type == NULL)
     {
       fprintf (stderr,
                "internal compiler error: expression node with no type\n");
       payload->errors++;
+      PKL_PASS_DONE;
+    }
+
+  if (PKL_AST_TYPE_COMPLETE (type)
+      == PKL_AST_TYPE_COMPLETE_UNKNOWN)
+    {
+      fprintf (stderr,
+               "internal compiler error: type completeness is unknown\n");
+      payload->errors++;
+      PKL_PASS_DONE;
     }
 }
 PKL_PHASE_END_HANDLER

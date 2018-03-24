@@ -29,7 +29,9 @@
    be determined at compile-time, and that size is constant.  Note
    that not-complete types are legal poke entities, but certain
    operations are not allowed on them.  Note that this phase should be
-   run after constant-folding.
+   run after constant-folding.  Note also that the completeness of
+   INTEGER, CHAR, STRING and other lexical entities is set by the
+   lexer.
 */
 
 #include <config.h>

@@ -1232,6 +1232,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           break;
         }
       PRINT_AST_IMM (code, TYPE_CODE, "%d");
+      PRINT_AST_IMM (complete, TYPE_COMPLETE, "%d");
       switch (PKL_AST_TYPE_CODE (ast))
         {
         case PKL_TYPE_INTEGRAL:
