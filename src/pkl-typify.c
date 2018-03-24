@@ -19,7 +19,7 @@
 /* Each expression node in the AST should be characterized by a type.
    This file contains the implementation of a compiler phase that
    annotates these nodes with their respective types, according to the
-   following rules:
+   rules documented below.
 
    The types for INTEGER, CHAR and STRING nodes are set by the lexer.
    See pkl-lex.l.
@@ -28,8 +28,10 @@
    LT, GT, LE, GE, AND and OR is a boolean encoded as a 32-bit signed
    integer type.
 
-   The type of an unary operation NEG, POS, BNOT or CAST is the type
-   of its single operand.
+   The type of an unary operation NEG, POS, BNOT is the type of its
+   single operand.
+
+   The type of a CAST is set by the parser. XXX: this is ugly.
 
    The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
    IOR, XOR, BAND, AND and OR is an integer type with the following
@@ -60,17 +62,39 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_or)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_boolean)
 {
-  pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type
-    = PKL_AST_EXP_OPERAND (node, 0);
+    = pkl_ast_get_integral_type (PKL_PASS_AST, 32, 1);
 
-  PKL_AST_TYPE (node) = ASTREF (type);
+  PKL_AST_TYPE (PKL_PASS_NODE)
+    = ASTREF (type);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_first_operand)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node type
+    = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (exp, 0));
+  
+  PKL_AST_TYPE (exp) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify =
   {
-   
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify_df_op_boolean),
+
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify_df_first_operand),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify_df_first_operand),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify_df_first_operand),
   };

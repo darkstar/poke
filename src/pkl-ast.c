@@ -1135,9 +1135,9 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 #undef PKL_DEF_OP
 
         IPRINTF ("EXPRESSION::\n");
-        PRINT_AST_SUBAST (type, TYPE);
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
+        PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
         IPRINTF ("operands:\n");
         for (i = 0; i < PKL_AST_EXP_NUMOPS (ast); i++)

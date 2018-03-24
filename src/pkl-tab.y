@@ -232,12 +232,16 @@ expression:
         | unary_operator expression %prec UNARY
           	{
                   $$ = pkl_ast_make_unary_exp ($1, $2);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
+                  //        PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($2));
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, $4);
-                  PKL_AST_TYPE ($$) = ASTREF ($2);
+                  PKL_AST_TYPE ($$) = ASTREF ($2); /* XXX: this is
+                                                      ugly.  Use a
+                                                      different ast
+                                                      node for
+                                                      casts.  */
                 }
         | SIZEOF expression %prec UNARY
         	{
@@ -364,13 +368,13 @@ expression:
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
+                  //                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
@@ -408,8 +412,6 @@ expression:
 unary_operator:
 	  '-'		{ $$ = PKL_AST_OP_NEG; }
 	| '+'		{ $$ = PKL_AST_OP_POS; }
-	| INC		{ $$ = PKL_AST_OP_PREINC; }
-	| DEC		{ $$ = PKL_AST_OP_PREDEC; }
 	| '~'		{ $$ = PKL_AST_OP_BNOT; }
 	| '!'		{ $$ = PKL_AST_OP_NOT; }
 	;
