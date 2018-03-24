@@ -91,6 +91,49 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_cast)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_add)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);
+  pkl_ast_node t2 = PKL_AST_TYPE (op2);
+
+  pkl_ast_node type;
+
+  if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))
+    goto error;
+
+  switch (PKL_AST_TYPE_CODE (t1))
+    {
+    case PKL_TYPE_STRING:
+      type = pkl_ast_get_string_type (PKL_PASS_AST);
+      break;
+    case PKL_TYPE_INTEGRAL:
+      {      
+        int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)
+                        && PKL_AST_TYPE_I_SIGNED (t2));
+        int size
+          = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)
+             ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));
+
+        type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p);
+        break;
+      }
+    default:
+      goto error;
+      break;
+    }
+
+  PKL_AST_TYPE (exp) = ASTREF (type);
+  PKL_PASS_DONE;
+
+ error:
+      fprintf (stderr, "error: invalid operands to expression\n");
+      PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify =
   {
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
@@ -104,6 +147,8 @@ struct pkl_phase pkl_phase_typify =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify_df_op_boolean),
+
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify_df_add),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify_df_first_operand),

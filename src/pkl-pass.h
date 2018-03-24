@@ -155,7 +155,7 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_NODE _node
 #define PKL_PASS_RESTART (*_restart)
 #define PKL_PASS_CHILD_POS _child_pos
-#define PKL_PASS_DONE do { goto exit; } while (0)
+#define PKL_PASS_DONE do { goto _exit; } while (0)
 
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
@@ -170,11 +170,11 @@ typedef struct pkl_phase *pkl_phase;
   {                                                                     \
      PKL_PASS_RESTART = 0;
 
-#define PKL_PHASE_END_HANDLER                       \
-                                                    \
-  goto exit; /* To avoid compiler warning */        \
-  exit:                                             \
-      return PKL_PASS_NODE;                         \
+#define PKL_PHASE_END_HANDLER                        \
+                                                     \
+   goto _exit; /* To avoid compiler warning */       \
+_exit:                                               \
+   return PKL_PASS_NODE;                             \
   }
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
