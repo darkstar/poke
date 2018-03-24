@@ -247,7 +247,7 @@ expression:
                   PKL_AST_TYPE ($$)
                     = pkl_ast_make_offset_type (pkl_ast_get_integral_type (pkl_parser->ast,
                                                                            64, 0),
-                                                PKL_AST_OFFSET_UNIT_BYTES);
+                                                PKL_AST_OFFSET_UNIT_BITS);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($$));
                 }
         | SIZEOF type_specifier %prec UNARY
@@ -372,8 +372,8 @@ expression:
                                                 $1, $3);
                   PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
                 }
-        | expression '?' expression ':' expression
-        	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }
+/*                      | expression '?' expression ':' expression
+        	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
 	| '[' expression IDENTIFIER ']'
         	{
                   int units;
@@ -420,18 +420,6 @@ primary:
         | STR
         | '(' expression ')'
         	{ $$ = $2; }
-	| primary INC
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTINC,
-                                               $1);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
-                }
-        | primary DEC
-        	{
-                  $$ = pkl_ast_make_unary_exp (PKL_AST_OP_POSTDEC,
-                                               $1);
-                  PKL_AST_TYPE ($$) = ASTREF (PKL_AST_TYPE ($1));
-                }
         | primary '[' expression ']' %prec '.'
         	{
                   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE ($1))

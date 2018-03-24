@@ -17,8 +17,9 @@
  */
 
 /* This file implements a compiler phase that promotes the operands of
-   expressions in order to satisfy the compiler backend
-   restrictions.  */
+   expressions following language rules.  */
+
+/* XXX: update the type of the expressions!  */
 
 #include <config.h>
 
@@ -158,6 +159,7 @@ promote_operands_binary (pkl_ast ast,
       a = pkl_ast_make_unary_exp (PKL_AST_OP_CAST, a);
       PKL_AST_TYPE (a) = ASTREF (t);
       PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (a);
+
       *restart = 1;
     }
 

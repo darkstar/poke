@@ -44,7 +44,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -84,10 +84,26 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
   };
+
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_exp)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  /* Every expression node should have a type annotation.  */
+  if (PKL_AST_TYPE (PKL_PASS_NODE) == NULL)
+    {
+      fprintf (stderr, "internal compiler error: expression node with no type");
+      payload->errors++;
+    }
+}
+PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_anal2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_exp),
   };
