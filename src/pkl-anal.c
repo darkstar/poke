@@ -86,10 +86,47 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
 }
 PKL_PHASE_END_HANDLER
 
+/* In struct TYPE nodes, check that no duplicated named element are
+   declared in the type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node struct_type = PKL_PASS_NODE;
+  pkl_ast_node struct_type_elems
+    = PKL_AST_TYPE_S_ELEMS (struct_type);
+  pkl_ast_node t;
+
+  for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node u;
+      for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
+        {
+          pkl_ast_node tname = PKL_AST_STRUCT_ELEM_TYPE_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
+          
+          if (uname
+              && tname
+              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
+                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
+            {
+              fputs ("error: duplicated element name in struct type spec\n",
+                     stderr);
+              payload->errors++;
+              PKL_PASS_DONE;
+            }
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
   };
 
 /* Every expression, array and struct node should be annotated with a

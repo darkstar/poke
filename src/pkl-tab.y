@@ -73,10 +73,6 @@ pkl_tab_error (YYLTYPE *llocp,
 static pkl_ast_node finish_array (struct pkl_parser *parser,
                                   YYLTYPE *llocp,
                                   pkl_ast_node elems);
-
-static pkl_ast_node finish_struct_type (struct pkl_parser *parser,
-                                        YYLTYPE *llocp,
-                                        pkl_ast_node stype_elems);
 %}
 
 %union {
@@ -448,9 +444,13 @@ struct_type_specifier:
                 }
         | STRUCT '{' struct_elem_type_list '}'
         	{
-                  $$ = finish_struct_type (pkl_parser, &@3, $3);
-                  if ($$ == NULL)
-                    YYERROR;
+                  pkl_ast_node t;
+                  size_t nelem = 0;
+
+                  for (t = $3; t; t = PKL_AST_CHAIN (t))
+                     nelem += 1;
+
+                  $$ = pkl_ast_make_struct_type (nelem, $3);
                 }
         ;
 
@@ -673,43 +673,4 @@ finish_array (struct pkl_parser *parser,
   array = pkl_ast_make_array (nelem, ninitializer,
                               pkl_ast_reverse (initializers));
   return array;
-}
-
-/* Finish a struct type and return it.  Check that no duplicated named
-   elements are declared in the type.
-
-   In case of a syntax error, return NULL.  */
-
-static pkl_ast_node
-finish_struct_type (struct pkl_parser *parser,
-                    YYLTYPE *llocp,
-                    pkl_ast_node stype_elems)
-{
-  pkl_ast_node t, u, stype;
-  size_t nelem;
-
-  nelem = 0;
-  for (t = stype_elems; t; t = PKL_AST_CHAIN (t))
-    {
-      for (u = stype_elems; u != t; u = PKL_AST_CHAIN (u))
-        {
-          pkl_ast_node tname = PKL_AST_STRUCT_ELEM_TYPE_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
-
-          if (uname
-              && tname
-              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
-                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
-            {
-              pkl_tab_error (llocp, parser,
-                             "duplicated element name in struct type spec.");
-              return NULL;
-            }
-        }
-      
-      nelem += 1;
-    }
-
-  stype = pkl_ast_make_struct_type (nelem, stype_elems);
-  return stype;
 }
