@@ -61,6 +61,16 @@
 
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-typify.h"
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  payload->errors = 0;
+}
+PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_op_boolean)
 {
@@ -94,43 +104,45 @@ PKL_PHASE_END_HANDLER
 #define TYPIFY_BIN(op)                                                  \
   PKL_PHASE_BEGIN_HANDLER (pkl_typify_df_##op)                          \
   {                                                                     \
-  pkl_ast_node exp = PKL_PASS_NODE;                                     \
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);                      \
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);                      \
-  pkl_ast_node t1 = PKL_AST_TYPE (op1);                                 \
-  pkl_ast_node t2 = PKL_AST_TYPE (op2);                                 \
+    pkl_typify_payload payload                                          \
+      = (pkl_typify_payload) PKL_PASS_PAYLOAD;                          \
                                                                         \
-  pkl_ast_node type;                                                    \
+    pkl_ast_node exp = PKL_PASS_NODE;                                   \
+    pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);                    \
+    pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);                    \
+    pkl_ast_node t1 = PKL_AST_TYPE (op1);                               \
+    pkl_ast_node t2 = PKL_AST_TYPE (op2);                               \
                                                                         \
-  if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))                 \
-    goto error;                                                         \
+    pkl_ast_node type;                                                  \
                                                                         \
-  switch (PKL_AST_TYPE_CODE (t1))                                       \
-    {                                                                   \
-    CASE_STR                                                            \
-    case PKL_TYPE_INTEGRAL:                                             \
+    if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))               \
+      goto error;                                                       \
+                                                                        \
+    switch (PKL_AST_TYPE_CODE (t1))                                     \
       {                                                                 \
-        int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                      \
-                        && PKL_AST_TYPE_I_SIGNED (t2));                 \
-        int size                                                        \
-          = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)        \
-             ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));    \
+      CASE_STR                                                          \
+      case PKL_TYPE_INTEGRAL:                                           \
+        {                                                               \
+          int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                    \
+                          && PKL_AST_TYPE_I_SIGNED (t2));               \
+          int size                                                      \
+            = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)      \
+               ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));  \
                                                                         \
-        type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p); \
+          type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p); \
+          break;                                                        \
+        }                                                               \
+      default:                                                          \
+        goto error;                                                     \
         break;                                                          \
       }                                                                 \
-    default:                                                            \
-      goto error;                                                       \
-      break;                                                            \
-    }                                                                   \
                                                                         \
-  PKL_AST_TYPE (exp) = ASTREF (type);                                   \
-  PKL_PASS_DONE;                                                        \
+    PKL_AST_TYPE (exp) = ASTREF (type);                                 \
+    PKL_PASS_DONE;                                                      \
                                                                         \
   error:                                                                \
-  /* XXX: move check and report to anal1.  */                           \
-  fprintf (stderr, "error: invalid operands to expression\n");          \
-  PKL_PASS_ERROR;                                                       \
+    fprintf (stderr, "error: invalid operands to expression\n");        \
+    payload->errors++;                                                  \
   }                                                                     \
   PKL_PHASE_END_HANDLER
 
@@ -189,6 +201,8 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify =
   {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
+
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify_df_offset),
 

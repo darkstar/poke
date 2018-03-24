@@ -25,6 +25,7 @@
 #include "pkl-pass.h"
 #include "pkl-gen.h"
 #include "pkl-anal.h"
+#include "pkl-typify.h"
 
 /* Compiler passes and phases.  */
 
@@ -44,6 +45,7 @@ pkl_compile_buffer (pvm_program *prog,
   int ret;
   struct pkl_gen_payload gen_payload = { NULL, 0 };
   struct pkl_anal_payload anal1_payload = { 0 };
+  struct pkl_typify_payload typify_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
 
   /* Parse the input program into an AST.  */
@@ -100,7 +102,7 @@ pkl_compile_buffer (pvm_program *prog,
           };
       void *frontend_payloads[]
         = { &anal1_payload, /* anal1 */
-            NULL, /* typify */
+            &typify_payload, /* typify */
             NULL, /* promo */
             &anal2_payload, /* anal2 */
             NULL, /* fold */
@@ -116,7 +118,8 @@ pkl_compile_buffer (pvm_program *prog,
         goto error;
 
       if (anal1_payload.errors > 0
-          || anal2_payload.errors > 0)
+          || anal2_payload.errors > 0
+          || typify_payload.errors > 0)
         goto error;
 
       /* XXX */
