@@ -22,6 +22,7 @@
 
 #include <config.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
@@ -175,7 +176,8 @@ promote_operands_binary (pkl_ast ast,
   return 1;
 
  error:
-  fprintf (stderr, "error: invalid operands to expression\n");
+  pkl_error (PKL_AST_LOC (exp),
+             "invalid operands to expression");
   return 0;
 }
 
@@ -224,19 +226,21 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_bool)
 {
   int restart1, restart2;
-  
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
+
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
   
   if (!promote_to_bool (PKL_PASS_AST, &op1, &restart1)
       || !promote_to_bool (PKL_PASS_AST, &op2, &restart2))
     {
-      fprintf (stderr, "error: operator requires boolean arguments\n");
+      pkl_error (PKL_AST_LOC (node),
+                 "operator requires boolean arguments");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op1;
-  PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1) = op2;
+  PKL_AST_EXP_OPERAND (node, 0) = op1;
+  PKL_AST_EXP_OPERAND (node, 1) = op2;
 
   PKL_PASS_RESTART = restart1 || restart2;
 }
@@ -248,15 +252,18 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_unary_bool)
 {
   int restart;
-  pkl_ast_node op = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node op = PKL_AST_EXP_OPERAND (node, 0);
 
   if (!promote_to_bool (PKL_PASS_AST, &op, &restart))
     {
-      fprintf (stderr, "error: operator requires a boolean argument\n");
+      pkl_error (PKL_AST_LOC (node),
+                 "operator requires a boolean argument");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0) = op;
+  PKL_AST_EXP_OPERAND (node, 0) = op;
   PKL_PASS_RESTART = restart;
 }
 PKL_PHASE_END_HANDLER
@@ -267,15 +274,18 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_ref)
 {
   int restart;
-  pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE);
+
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (node);
 
   if (!promote_to_ulong (PKL_PASS_AST, &index, &restart))
     {
-      fprintf (stderr, "error: an array subscript should be an integral value\n");
+      pkl_error (PKL_AST_LOC (node),
+                 "an array subscript should be an integral value");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_ARRAY_REF_INDEX (PKL_PASS_NODE) = index;
+  PKL_AST_ARRAY_REF_INDEX (node) = index;
   PKL_PASS_RESTART = restart;
 }
 PKL_PHASE_END_HANDLER
@@ -286,15 +296,18 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
 {
   int restart;
-  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
+ 
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (node);
 
   if (!promote_to_ulong (PKL_PASS_AST, &nelem, &restart))
     {
-      fprintf (stderr, "error: an array size should be an integral value\n");
+      pkl_error (PKL_AST_LOC (node),
+                 "an array size should be an integral value");
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE) = nelem;
+  PKL_AST_TYPE_A_NELEM (node) = nelem;
   PKL_PASS_RESTART = restart;
 }
 PKL_PHASE_END_HANDLER
