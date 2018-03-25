@@ -237,7 +237,10 @@ pkl_error (pkl_ast ast,
     for (i = 1; i < loc.first_column; ++i)
       fputc (' ', stderr);
     for (; i < loc.last_column; ++i)
-      fputc ('~', stderr);
+      if (i == loc.first_column)
+        fputc ('^', stderr);
+      else
+        fputc ('~', stderr);
     fputc ('\n', stderr);
   }
 }

@@ -189,6 +189,7 @@ program_elem:
                        in full poke programs.  */
                     YYERROR;
                   $$ = pkl_ast_make_program ($1);
+                  PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
                 }
@@ -377,7 +378,15 @@ primary:
                   PKL_AST_LOC ($$) = @$;
                 }
         | CHAR
+                {
+                  $$ = $1;
+                  PKL_AST_LOC ($$) = @$;
+                }
         | STR
+                {
+                  $$ = $1;
+                  PKL_AST_LOC ($$) = @$;
+                } 
         | '(' expression ')'
         	{
                     $$ = $2;
