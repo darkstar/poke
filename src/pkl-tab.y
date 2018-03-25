@@ -33,6 +33,7 @@
 #include <xalloc.h>
 #include <assert.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-parser.h" /* For struct pkl_parser.  */
 #define YYDEBUG 1
@@ -49,23 +50,6 @@
   
 #define PKL_AST_CHILDREN_STEP 12
 
-/* Error reporting function.  When this function returns, the parser
-   may try to recover the error.  If it is unable to recover, then it
-   returns with 1 (syntax error) immediately.  */
-  
-void
-pkl_tab_error (YYLTYPE *llocp,
-               struct pkl_parser *pkl_parser,
-               char const *err)
-{
-  /* XXX if (!pkl_parser->interactive) */
-  if (pkl_parser->filename != NULL)
-    fprintf (stderr, "%s: %d: %s\n", pkl_parser->filename,
-             llocp->first_line, err);
-  else
-    fprintf (stderr, "%s\n", err);
-}
-
 /* Convert a YYLTYPE value into an AST location and return it.  */
 
 static inline struct pkl_ast_loc
@@ -79,6 +63,14 @@ ASTLOC (YYLTYPE llocp)
   loc.last_column = llocp.last_column;
 
   return loc;
+}
+
+void
+pkl_tab_error (YYLTYPE *llocp,
+               struct pkl_parser *pkl_parser,
+               char const *err)
+{
+    pkl_error (ASTLOC (*llocp), err);
 }
 
 %}
@@ -364,8 +356,7 @@ expression:
                     units = PKL_AST_OFFSET_UNIT_BYTES;
                   else
                     {
-                      pkl_tab_error (&@3, pkl_parser,
-                                     "expected `b' or `B'");
+                      pkl_error (ASTLOC(@3), "expected `b' or `B'");
                       YYERROR;
                     }
 
