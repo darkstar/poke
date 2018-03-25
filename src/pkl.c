@@ -267,6 +267,9 @@ pkl_ice (pkl_ast_loc loc,
 {
   va_list valist;
 
+  /* XXX: dump the AST plus additional details on the current state to
+     a temporary file.  */
+
   va_start (valist, fmt);
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
@@ -274,6 +277,6 @@ pkl_ice (pkl_ast_loc loc,
   fputs ("internal compiler error: ", stderr);
   vfprintf (stderr, fmt, valist);
   fputc ('\n', stderr);
-  fputs ("please report this to bug-poke@gnu.org\n", stderr);
+  fputs ("Please report this error to bug-poke@gnu.org.\n", stderr);
   va_end (valist);
 }

@@ -125,11 +125,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
 }
 PKL_PHASE_END_HANDLER
 
+/* Every node in the AST should have a valid location after
+   parsing.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_default)
+{
+  if (!PKL_AST_LOC_VALID (PKL_AST_LOC (PKL_PASS_NODE)))
+    {
+      pkl_ice (PKL_AST_NOLOC, "node has no location");
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
+   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal1_df_default),
   };
 
 
