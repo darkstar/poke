@@ -21,7 +21,9 @@
 
 #include <config.h>
 #include <stdio.h>
+#include <stdarg.h>
 
+#include "pkl-ast.h"
 #include "pvm.h"
 
 /* Compile a poke expression, or a program, from a NULL-terminated
@@ -39,5 +41,9 @@ int pkl_compile_buffer (pvm_program *prog, int what, char *buffer,
    compilation error.  Return 1 otherwise.  */
 
 int pkl_compile_file (pvm_program *prog, FILE *fd, const char *fname);
+
+/* Print an error message to the standard error.  */
+
+void pkl_error (pkl_ast_loc loc, const char *fmt, ...);
 
 #endif /* ! PKL_H */

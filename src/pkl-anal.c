@@ -19,6 +19,7 @@
 #include <config.h>
 #include <string.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 #include "pkl-anal.h"
@@ -76,7 +77,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
           if (strcmp (PKL_AST_IDENTIFIER_POINTER (ename),
                       PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
             {
-              fprintf (stderr, "error: duplicated name element in struct\n");
+              pkl_error (PKL_AST_LOC (uname),
+                         "Duplicated name element in struct");
               payload->errors++;
               /* Do not report more duplicates in this struct.  */
               break;

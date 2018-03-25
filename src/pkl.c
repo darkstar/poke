@@ -19,8 +19,10 @@
 #include <config.h>
 #include <gettext.h>
 #define _(str) gettext (str)
+#include <stdarg.h>
 
 #include "pkl.h"
+#include "pkl-ast.h"
 #include "pkl-parser.h"
 #include "pkl-pass.h"
 #include "pkl-gen.h"
@@ -182,4 +184,19 @@ pkl_compile_file (pvm_program *prog,
  error:
   pkl_ast_free (ast);
   return 0;
+}
+
+void
+pkl_error (pkl_ast_loc loc,
+           const char *fmt,
+           ...)
+{
+  va_list valist;
+
+  va_start (valist, fmt);
+  fprintf (stderr, "%d:%d: ",
+           loc.first_line, loc.first_column);
+  vfprintf (stderr, fmt, valist);
+  fputc ('\n', stderr);
+  va_end (valist);
 }
