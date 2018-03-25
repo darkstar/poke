@@ -22,6 +22,7 @@
 #include <string.h>
 #include <gc.h>
 
+#include "pk-term.h"
 #include "pvm.h"
 
 static struct pvm_state pvm_state;
@@ -378,23 +379,23 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   if (val == PVM_NULL)
     fprintf (out, "null");
   else if (PVM_IS_LONG (val))
-    fprintf (out, "%" PRIi64 "L", PVM_VAL_LONG (val));
+    fprintf (out, GREEN "%" PRIi64 "L" NOATTR, PVM_VAL_LONG (val));
   else if (PVM_IS_INT (val))
-    fprintf (out, "%d", PVM_VAL_INT (val));
+    fprintf (out, GREEN "%d" NOATTR, PVM_VAL_INT (val));
   else if (PVM_IS_HALF (val))
-    fprintf (out, "%dH", PVM_VAL_HALF (val));
+    fprintf (out, GREEN "%dH" NOATTR, PVM_VAL_HALF (val));
   else if (PVM_IS_BYTE (val))
-    fprintf (out, "%dB", PVM_VAL_BYTE (val));
+    fprintf (out, GREEN "%dB" NOATTR, PVM_VAL_BYTE (val));
   else if (PVM_IS_ULONG (val))
-    fprintf (out, "%" PRIu64 "UL", PVM_VAL_ULONG (val));
+    fprintf (out, GREEN "%" PRIu64 "UL" NOATTR, PVM_VAL_ULONG (val));
   else if (PVM_IS_UINT (val))
-    fprintf (out, "%uU", PVM_VAL_UINT (val));
+    fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
   else if (PVM_IS_UHALF (val))
-    fprintf (out, "%uUH", PVM_VAL_UHALF (val));
+    fprintf (out, GREEN "%uUH" NOATTR, PVM_VAL_UHALF (val));
   else if (PVM_IS_UBYTE (val))
-    fprintf (out, "%uUB", PVM_VAL_UBYTE (val));
+    fprintf (out, GREEN "%uUB" NOATTR, PVM_VAL_UBYTE (val));
   else if (PVM_IS_STR (val))
-    fprintf (out, "\"%s\"", PVM_VAL_STR (val));
+    fprintf (out, BROWN "\"%s\"" NOATTR, PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, idx;

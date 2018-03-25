@@ -21,6 +21,8 @@
 #define _(str) gettext (str)
 #include <stdarg.h>
 
+#include "pk-term.h"
+
 #include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-parser.h"
@@ -198,13 +200,14 @@ pkl_error (pkl_ast ast,
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
              loc.first_line, loc.first_column);
-  fputs ("error: ", stderr);
+  fputs (RED REVERSE "error: " NOATTR, stderr);
   va_start (valist, fmt);
   vfprintf (stderr, fmt, valist);
   va_end (valist);
   fputc ('\n', stderr);
 
   /* XXX: make fancy output optional.  */
+  if (PKL_AST_LOC_VALID (loc))
   {
     size_t cur_line = 1;
     size_t cur_column = 1;
