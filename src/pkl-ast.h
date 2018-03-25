@@ -139,6 +139,9 @@ typedef union pkl_ast_node *pkl_ast_node;
 /* The `pkl_ast_common' struct defines fields which are common to
    every node in the AST, regardless of their type.
 
+   UID is an unique identifier that characterizes the node.  It is
+   allocated when the node is created, and then never reused again.
+
    CHAIN and CHAIN2 are used to chain AST nodes together.  This serves
    several purposes in the compiler:
 
@@ -169,6 +172,7 @@ typedef union pkl_ast_node *pkl_ast_node;
 
    There is no constructor defined for common nodes.  */
 
+#define PKL_AST_UID(AST) ((AST)->common.uid)
 #define PKL_AST_CHAIN(AST) ((AST)->common.chain)
 #define PKL_AST_TYPE(AST) ((AST)->common.type)
 #define PKL_AST_CHAIN2(AST) ((AST)->common.chain2)
@@ -203,6 +207,7 @@ static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
 
 struct pkl_ast_common
 {
+  size_t uid;
   union pkl_ast_node *chain;
   union pkl_ast_node *type;
   union pkl_ast_node *chain2;

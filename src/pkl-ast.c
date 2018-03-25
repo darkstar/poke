@@ -41,10 +41,12 @@ static pkl_ast_node
 pkl_ast_make_node (enum pkl_ast_code code)
 {
   pkl_ast_node ast;
+  static size_t uid = 0;
 
   ast = xmalloc (sizeof (union pkl_ast_node));
   memset (ast, 0, sizeof (union pkl_ast_node));
   PKL_AST_CODE (ast) = code;
+  PKL_AST_UID (ast) = uid++;
 
   return ast;
 }
@@ -1104,18 +1106,27 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("NULL::\n");
       return;
     }
+
+#define PRINT_COMMON_FIELDS                                     \
+  do                                                            \
+    {                                                           \
+      IPRINTF ("uid: %" PRIu64 "\n", PKL_AST_UID (ast));        \
+    }                                                           \
+  while (0)
   
   switch (PKL_AST_CODE (ast))
     {
     case PKL_AST_PROGRAM:
       IPRINTF ("PROGRAM::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST_CHAIN (PROGRAM_ELEMS);
       break;
 
     case PKL_AST_IDENTIFIER:
       IPRINTF ("IDENTIFIER::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_IMM (length, IDENTIFIER_LENGTH, "%zu");
       PRINT_AST_IMM (pointer, IDENTIFIER_POINTER, "%p");
       PRINT_AST_OPT_IMM (*pointer, IDENTIFIER_POINTER, "'%s'");
@@ -1124,6 +1135,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_INTEGER:
       IPRINTF ("INTEGER::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (value, INTEGER_VALUE, "%" PRIu64);
       break;
@@ -1131,6 +1143,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_STRING:
       IPRINTF ("STRING::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (length, STRING_LENGTH, "%zu");
       PRINT_AST_IMM (pointer, STRING_POINTER, "%p");
@@ -1148,6 +1161,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 #undef PKL_DEF_OP
 
         IPRINTF ("EXPRESSION::\n");
+
+        PRINT_COMMON_FIELDS;
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
         PRINT_AST_SUBAST (type, TYPE);
@@ -1162,6 +1177,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_COND_EXP:
       IPRINTF ("COND_EXPRESSION::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (condition, COND_EXP_COND);
       PRINT_AST_OPT_SUBAST (thenexp, COND_EXP_THENEXP);
       PRINT_AST_OPT_SUBAST (elseexp, COND_EXP_ELSEEXP);
@@ -1170,6 +1186,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_STRUCT_ELEM:
       IPRINTF ("STRUCT_ELEM::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (name, STRUCT_ELEM_NAME);
       PRINT_AST_SUBAST (exp, STRUCT_ELEM_EXP);
@@ -1178,6 +1195,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_STRUCT:
       IPRINTF ("STRUCT::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (nelem, STRUCT_NELEM, "%zu");
       IPRINTF ("elems:\n");
@@ -1187,6 +1205,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ARRAY_INITIALIZER:
       IPRINTF ("ARRAY_INITIALIZER::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_IMM (index, ARRAY_INITIALIZER_INDEX, "%zu");
       PRINT_AST_SUBAST (exp, ARRAY_INITIALIZER_EXP);
       break;
@@ -1194,6 +1213,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ARRAY:
       IPRINTF ("ARRAY::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_IMM (nelem, ARRAY_NELEM, "%zu");
       PRINT_AST_IMM (ninitializer, ARRAY_NINITIALIZER, "%zu");
       PRINT_AST_SUBAST (type, TYPE);
@@ -1204,6 +1224,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ENUMERATOR:
       IPRINTF ("ENUMERATOR::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (identifier, ENUMERATOR_IDENTIFIER);
       PRINT_AST_SUBAST (value, ENUMERATOR_VALUE);
       break;
@@ -1211,6 +1232,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ENUM:
       IPRINTF ("ENUM::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (tag, ENUM_TAG);
       IPRINTF ("values:\n");
       PRINT_AST_SUBAST_CHAIN (ENUM_VALUES);
@@ -1219,6 +1241,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_TYPE:
       IPRINTF ("TYPE::\n");
 
+      PRINT_COMMON_FIELDS;
       IPRINTF ("code:\n");
       switch (PKL_AST_TYPE_CODE (ast))
         {
@@ -1259,7 +1282,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
     case PKL_AST_STRUCT_ELEM_TYPE:
       IPRINTF ("STRUCT_ELEM_TYPE::\n");
-      
+
+      PRINT_COMMON_FIELDS;      
       PRINT_AST_SUBAST (name, STRUCT_ELEM_TYPE_NAME);
       PRINT_AST_SUBAST (type, STRUCT_ELEM_TYPE_TYPE);
       break;
@@ -1267,6 +1291,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_ARRAY_REF:
       IPRINTF ("ARRAY_REF::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (array, ARRAY_REF_ARRAY);
       PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
@@ -1275,6 +1300,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_STRUCT_REF:
       IPRINTF ("STRUCT_REF::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (struct, STRUCT_REF_STRUCT);
       PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
@@ -1283,6 +1309,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_OFFSET:
       IPRINTF ("OFFSET::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (magnitude, OFFSET_MAGNITUDE);
       PRINT_AST_IMM (unit, OFFSET_UNIT, "%d");
@@ -1291,6 +1318,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_CAST:
       IPRINTF ("CAST::\n");
 
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (cast_type, CAST_TYPE);
       PRINT_AST_SUBAST (exp, CAST_EXP);
