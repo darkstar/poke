@@ -234,7 +234,7 @@ expression:
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @2;
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '-' expression
         	{
