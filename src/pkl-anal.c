@@ -132,6 +132,8 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
   };
 
+
+
 /* Every expression, array and struct node should be annotated with a
    type, and the type's completeness should have been determined.  */
 

@@ -134,6 +134,8 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
   };
 
+
+
 /* SIZEOF nodes whose operand is a complete type should be replaced
    with an offset.  The type should be complete.  */
 

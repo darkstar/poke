@@ -426,6 +426,8 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
   };
 
+
+
 /* An array type is considered complete if the number of elements
    contained in the array is known, and it is constant.  */
 
@@ -493,7 +495,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
     }
 }
 PKL_PHASE_END_HANDLER
-
 
 struct pkl_phase pkl_phase_typify2 =
   {
