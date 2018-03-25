@@ -353,7 +353,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
   if (PKL_AST_TYPE_CODE (struct_type) != PKL_TYPE_STRUCT)
     {
       pkl_error (PKL_AST_LOC (astruct),
-                 "expected struct", stderr);
+                 "expected struct");
       payload->errors++;
       PKL_PASS_DONE;
     }
