@@ -21,10 +21,11 @@
 #include <assert.h>
 #include <jitter/jitter.h>
 
-#include "pvm.h"
+#include "pkl.h"
 #include "pkl-gen.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pvm.h"
 
 /* The following function is used to push pvm_val values to the PVM
    stack.  */
@@ -968,15 +969,24 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_noimpl)
 {
   pkl_ast_node node = PKL_PASS_NODE;
-  
-  fprintf (stderr, "internal compiler error: unhandled node in code generator: code=%d",
-           PKL_AST_CODE (node));
+
   if (PKL_AST_CODE (node) == PKL_AST_EXP)
-    fprintf (stderr, " opcode=%d", PKL_AST_EXP_CODE (node));
+    {
+      pkl_ice (PKL_AST_LOC (node),
+               "unhandled node in code generator: code=%d opcode=%d",
+               PKL_AST_CODE (node), PKL_AST_EXP_CODE (node));
+    }
   if (PKL_AST_CODE (node) == PKL_AST_TYPE)
-    fprintf (stderr, " typecode=%d", PKL_AST_TYPE_CODE (node));
-  fputc ('\n', stderr);
-      
+    {
+      pkl_ice (PKL_AST_LOC (node),
+               "unhandled node in code generator: code=%d typecode=%d",
+               PKL_AST_CODE (node), PKL_AST_TYPE_CODE (node));
+    }
+  else
+    pkl_ice (PKL_AST_LOC (node),
+             "unhandled node in code generator: code=%d",
+             PKL_AST_CODE (node));
+
   PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER

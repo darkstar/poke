@@ -42,8 +42,10 @@ int pkl_compile_buffer (pvm_program *prog, int what, char *buffer,
 
 int pkl_compile_file (pvm_program *prog, FILE *fd, const char *fname);
 
-/* Print an error message to the standard error.  */
+/* Diagnostic routines.  */
 
 void pkl_error (pkl_ast_loc loc, const char *fmt, ...);
+void pkl_warning (pkl_ast_loc loc, const char *fmt, ...);
+void pkl_ice (pkl_ast_loc loc, const char *fmt, ...);
 
 #endif /* ! PKL_H */

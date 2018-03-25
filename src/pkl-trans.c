@@ -19,6 +19,7 @@
 #include <config.h>
 #include <stdio.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 #include "pkl-trans.h"
@@ -152,8 +153,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
   if (PKL_AST_TYPE_COMPLETE (op)
       != PKL_AST_TYPE_COMPLETE_YES)
     {
-      fputs ("error: sizeof only works on complete types\n",
-             stderr);
+      pkl_error (PKL_AST_LOC (op),
+                 "sizeof only works on complete types");
       payload->errors++;
       PKL_PASS_DONE;
     }

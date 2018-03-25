@@ -190,6 +190,16 @@ struct pkl_ast_loc
   int last_column;
 };
 
+static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
+   = { 0, 0, 0, 0 };
+
+#define PKL_AST_LOC_VALID(L)                    \
+  (!((L).first_line == 0                        \
+     && (L).first_column == 0                   \
+     && (L).last_line == 0                      \
+     && (L).last_column == 0))
+
+
 typedef struct pkl_ast_loc pkl_ast_loc;
 
 struct pkl_ast_common

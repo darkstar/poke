@@ -194,9 +194,47 @@ pkl_error (pkl_ast_loc loc,
   va_list valist;
 
   va_start (valist, fmt);
-  fprintf (stderr, "%d:%d: ",
-           loc.first_line, loc.first_column);
+  if (PKL_AST_LOC_VALID (loc))
+    fprintf (stderr, "%d:%d: ",
+             loc.first_line, loc.first_column);
+  fputs ("error: ", stderr);
   vfprintf (stderr, fmt, valist);
   fputc ('\n', stderr);
+  va_end (valist);
+}
+
+
+void
+pkl_warning (pkl_ast_loc loc,
+             const char *fmt,
+             ...)
+{
+  va_list valist;
+
+  va_start (valist, fmt);
+  if (PKL_AST_LOC_VALID (loc))
+    fprintf (stderr, "%d:%d: ",
+             loc.first_line, loc.first_column);
+  fputs ("warning: ", stderr);
+  vfprintf (stderr, fmt, valist);
+  fputc ('\n', stderr);
+  va_end (valist);
+}
+
+void
+pkl_ice (pkl_ast_loc loc,
+         const char *fmt,
+         ...)
+{
+  va_list valist;
+
+  va_start (valist, fmt);
+  if (PKL_AST_LOC_VALID (loc))
+    fprintf (stderr, "%d:%d: ",
+             loc.first_line, loc.first_column);
+  fputs ("internal compiler error: ", stderr);
+  vfprintf (stderr, fmt, valist);
+  fputc ('\n', stderr);
+  fputs ("please report this to bug-poke@gnu.org\n", stderr);
   va_end (valist);
 }
