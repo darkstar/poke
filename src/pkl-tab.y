@@ -70,7 +70,7 @@ pkl_tab_error (YYLTYPE *llocp,
                struct pkl_parser *pkl_parser,
                char const *err)
 {
-    pkl_error (ASTLOC (*llocp), err);
+    pkl_error (ASTLOC (*llocp), "%s", err);
 }
 
 %}

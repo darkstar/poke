@@ -38,6 +38,7 @@
 
 #include <string.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 #include "pkl-typify.h"
@@ -138,7 +139,8 @@ PKL_PHASE_END_HANDLER
     PKL_PASS_DONE;                                                      \
                                                                         \
   error:                                                                \
-    fprintf (stderr, "error: invalid operands to expression\n");        \
+    pkl_error (PKL_AST_LOC (exp),                                       \
+               "invalid operands to expression");                       \
     payload->errors++;                                                  \
   }                                                                     \
   PKL_PHASE_END_HANDLER
@@ -226,8 +228,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
         type = PKL_AST_TYPE (initializer);
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
         {
-          fputs ("error: array initializer is of the wrong type\n",
-                 stderr);
+          pkl_error (PKL_AST_LOC (initializer),
+                     "array initializer is of the wrong type");
           payload->errors++;
           PKL_PASS_DONE;
         }        
@@ -263,8 +265,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_array))
       != PKL_TYPE_ARRAY)
     {
-      fputs ("error: operator to [] must be an array\n",
-             stderr);
+      pkl_error (PKL_AST_LOC (array_ref_array),
+                 "operator to [] must be an array");
       payload->errors++;
       PKL_PASS_DONE;
     }
@@ -272,8 +274,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_index))
       != PKL_TYPE_INTEGRAL)
     {
-      fputs ("error: array index should be an integer\n",
-             stderr);
+      pkl_error (PKL_AST_LOC (array_ref_index),
+                 "array index should be an integer");
       PKL_PASS_DONE;
     }
 
@@ -350,7 +352,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 
   if (PKL_AST_TYPE_CODE (struct_type) != PKL_TYPE_STRUCT)
     {
-      fputs ("error: expected struct\n", stderr);
+      pkl_error (PKL_AST_LOC (astruct),
+                 "expected struct", stderr);
       payload->errors++;
       PKL_PASS_DONE;
     }
@@ -372,8 +375,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 
   if (type == NULL)
     {
-      fputs ("error: referred field doesn't exist in struct\n",
-             stderr);
+      pkl_error (PKL_AST_LOC (field_name),
+                 "referred field doesn't exist in struct");
       payload->errors++;
       PKL_PASS_DONE;
     }
