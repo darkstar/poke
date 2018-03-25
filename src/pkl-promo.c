@@ -177,7 +177,7 @@ promote_operands_binary (pkl_ast ast,
 
  error:
   pkl_error (ast, PKL_AST_LOC (exp),
-             "invalid operands to expression");
+             "invalid operands in expression");
   return 0;
 }
 

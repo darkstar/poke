@@ -140,7 +140,7 @@ PKL_PHASE_END_HANDLER
                                                                         \
   error:                                                                \
     pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),                         \
-               "invalid operands to expression");                       \
+               "invalid operands in expression");                       \
     payload->errors++;                                                  \
     PKL_PASS_ERROR;                                                     \
   }                                                                     \
