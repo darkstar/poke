@@ -208,135 +208,138 @@ expression:
         | unary_operator expression %prec UNARY
           	{
                   $$ = pkl_ast_make_unary_exp ($1, $2);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @1;
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
                   $$ = pkl_ast_make_cast ($2, $4);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$).first_line = @1.first_line;
+                  PKL_AST_LOC ($$).first_column = @1.first_column;
+                  PKL_AST_LOC ($$).last_line = @3.last_line;
+                  PKL_AST_LOC ($$).last_column = @3.last_column;
                 }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @1;
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @1;
                 }
 	| SIZEOF '(' type_specifier ')' %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @1;
                 }
         | expression '+' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '-' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '*' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '/' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '%' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression SR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression EQ expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
 	| expression NE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '<' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '>' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression LE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
 	| expression GE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '|' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '^' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
 	| expression '&' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression AND expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($$) = @2;
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
