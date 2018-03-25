@@ -150,6 +150,7 @@ pkl_tab_error (YYLTYPE *llocp,
 program: program_elem_list
           	{
                   $$ = pkl_ast_make_program ($1);
+                  PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
         ;
@@ -373,11 +374,14 @@ primary:
 	  INTEGER
                 {
                   $$ = $1;
+                  PKL_AST_LOC ($$) = @$;
                 }
         | CHAR
         | STR
         | '(' expression ')'
-        	{ $$ = $2; }
+        	{
+                    $$ = $2;
+                }
         | primary '[' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_array_ref ($1, $3);

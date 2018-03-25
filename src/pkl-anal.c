@@ -132,7 +132,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_default)
 {
   if (!PKL_AST_LOC_VALID (PKL_AST_LOC (PKL_PASS_NODE)))
     {
-      pkl_ice (PKL_AST_NOLOC, "node has no location");
+      pkl_ice (PKL_AST_NOLOC, "node with code %d has no location",
+               PKL_AST_CODE (PKL_PASS_NODE));
       PKL_PASS_ERROR;
     }
 }

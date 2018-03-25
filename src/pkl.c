@@ -274,7 +274,7 @@ pkl_ice (pkl_ast_loc loc,
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
              loc.first_line, loc.first_column);
-  fputs ("internal compiler error: ", stderr);
+  fputs (RED REVERSE "internal compiler error: " NOATTR, stderr);
   vfprintf (stderr, fmt, valist);
   fputc ('\n', stderr);
   fputs ("Please report this error to bug-poke@gnu.org.\n", stderr);
