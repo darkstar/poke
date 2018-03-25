@@ -56,18 +56,18 @@
     }                                                                   \
   while (0)
 
-#define PKL_CALL_PHASES_ELSE                                            \
+#define PKL_CALL_PHASES_SINGLE(what)                                    \
   do                                                                    \
     {                                                                   \
       size_t i = 0;                                                     \
                                                                         \
       while (phases[i])                                                 \
         {                                                               \
-          if (phases[i]->else_handler)                                  \
+          if (phases[i]->what##_handler)                                \
             {                                                           \
               int restart;                                              \
               node                                                      \
-                = phases[i]->else_handler (toplevel,                    \
+                = phases[i]->what##_handler (toplevel,                  \
                                            ast,                         \
                                            node,                        \
                                            payloads[i],                 \
@@ -160,6 +160,12 @@ pkl_call_node_handlers (jmp_buf toplevel,
     PKL_CALL_PHASES (code, bf, node_code);
   else
     assert (0);
+
+  /* Call the phase handlers defined as default.  */
+  if (order == PKL_PASS_DEPTH_FIRST)
+    PKL_CALL_PHASES_SINGLE(default_df);
+  else if (order == PKL_PASS_DEPTH_FIRST)
+    PKL_CALL_PHASES_SINGLE(default_bf);
 
   return node;
 }
@@ -379,7 +385,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* If no handler has been invoked, call the default handler of the
      registered phases in case they are defined.  */
   if (handlers_used == 0)
-    PKL_CALL_PHASES_ELSE;
+    PKL_CALL_PHASES_SINGLE(else);
 
   /* If a new node was created to replace the incoming node, increase
      its reference counter.  This assumes that the node returned by

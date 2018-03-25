@@ -59,7 +59,13 @@
 
    A given phase can define handlers of both types: DF and BF.
 
-   There is also another handler that the user can install:
+   There are three additional handlers that the user can install:
+
+   - DEFAULT_BF_HANDLER is invoked for every node in the AST, after the
+     more particular ones, in breath-first order.
+
+   - DEFAULT_DF_HANDLER is invoked for every node in the SAT, after
+     the more particular ones, in depth-first order.
 
    - ELSE_HANDLER, if not NULL, is invoked for every node for which no
      other handler (BF or DF) has been invoked.
@@ -85,10 +91,12 @@ struct pkl_phase
 {
   pkl_phase_handler_fn else_handler;
 
+  pkl_phase_handler_fn default_df_handler;
   pkl_phase_handler_fn code_df_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_df_handlers[PKL_AST_OP_LAST];
   pkl_phase_handler_fn type_df_handlers[PKL_TYPE_NOTYPE];
 
+  pkl_phase_handler_fn default_bf_handler;
   pkl_phase_handler_fn code_bf_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_bf_handlers[PKL_AST_OP_LAST];
   pkl_phase_handler_fn type_bf_handlers[PKL_TYPE_NOTYPE];
@@ -102,6 +110,11 @@ typedef struct pkl_phase *pkl_phase;
 
 #define PKL_PHASE_ELSE_HANDLER(handler)      \
   .else_handler = handler
+
+#define PKL_PHASE_BF_DEFAULT_HANDLER(handler)   \
+  .default_bf_handler = handler
+#define PKL_PHASE_DF_DEFAULT_HANDLER(handler)   \
+  .default_df_handler = handler
 
 #define PKL_PHASE_BF_HANDLER(code, handler)     \
   .code_bf_handlers[code] = handler
