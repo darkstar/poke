@@ -61,8 +61,8 @@
 
    There is also another handler that the user can install:
 
-   - DEFAULT_HANDLER, if not NULL, is invoked for every node for which
-     no other handler (BF or DF) has been invoked.
+   - ELSE_HANDLER, if not NULL, is invoked for every node for which no
+     other handler (BF or DF) has been invoked.
 
    Note that if a given node class falls in several categories as
    implemented in the handlers tables, the more general handler will
@@ -71,7 +71,7 @@
    handler in `type_handlers' will be invoked first, followed by the
    handler in `code_handlers'.
 
-   If the default handler is NULL and no other handler is executed,
+   If the `else' handler is NULL and no other handler is executed,
    then no action is performed on a node other than traversing it.  */
 
 typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
@@ -83,7 +83,7 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
 
 struct pkl_phase
 {
-  pkl_phase_handler_fn default_handler;
+  pkl_phase_handler_fn else_handler;
 
   pkl_phase_handler_fn code_df_handlers[PKL_AST_LAST];
   pkl_phase_handler_fn op_df_handlers[PKL_AST_OP_LAST];
@@ -100,8 +100,8 @@ typedef struct pkl_phase *pkl_phase;
    in a `struct pkl_phase'.  This allows changing the structure layout
    without impacting the phase definitions.  */
 
-#define PKL_PHASE_DEFAULT_HANDLER(handler)      \
-  .default_handler = handler
+#define PKL_PHASE_ELSE_HANDLER(handler)      \
+  .else_handler = handler
 
 #define PKL_PHASE_BF_HANDLER(code, handler)     \
   .code_bf_handlers[code] = handler

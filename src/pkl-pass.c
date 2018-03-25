@@ -56,23 +56,23 @@
     }                                                                   \
   while (0)
 
-#define PKL_CALL_PHASES_DFL                                             \
+#define PKL_CALL_PHASES_ELSE                                            \
   do                                                                    \
     {                                                                   \
       size_t i = 0;                                                     \
                                                                         \
       while (phases[i])                                                 \
         {                                                               \
-          if (phases[i]->default_handler)                               \
+          if (phases[i]->else_handler)                                  \
             {                                                           \
               int restart;                                              \
               node                                                      \
-                = phases[i]->default_handler (toplevel,                 \
-                                              ast,                      \
-                                              node,                     \
-                                              payloads[i],              \
-                                              &restart,                 \
-                                              child_pos);               \
+                = phases[i]->else_handler (toplevel,                    \
+                                           ast,                         \
+                                           node,                        \
+                                           payloads[i],                 \
+                                           &restart,                    \
+                                           child_pos);                  \
                                                                         \
               if (restart)                                              \
                 {                                                       \
@@ -379,7 +379,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* If no handler has been invoked, call the default handler of the
      registered phases in case they are defined.  */
   if (handlers_used == 0)
-    PKL_CALL_PHASES_DFL;
+    PKL_CALL_PHASES_ELSE;
 
   /* If a new node was created to replace the incoming node, increase
      its reference counter.  This assumes that the node returned by
