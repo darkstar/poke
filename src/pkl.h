@@ -44,7 +44,7 @@ int pkl_compile_file (pvm_program *prog, FILE *fd, const char *fname);
 
 /* Diagnostic routines.  */
 
-void pkl_error (pkl_ast_loc loc, const char *fmt, ...);
+void pkl_error (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);
 void pkl_warning (pkl_ast_loc loc, const char *fmt, ...);
 void pkl_ice (pkl_ast_loc loc, const char *fmt, ...);
 

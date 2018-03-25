@@ -190,6 +190,8 @@ struct pkl_ast_loc
   int last_column;
 };
 
+typedef struct pkl_ast_loc pkl_ast_loc;
+
 static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
    = { 0, 0, 0, 0 };
 
@@ -198,9 +200,6 @@ static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
      && (L).first_column == 0                   \
      && (L).last_line == 0                      \
      && (L).last_column == 0))
-
-
-typedef struct pkl_ast_loc pkl_ast_loc;
 
 struct pkl_ast_common
 {
@@ -755,6 +754,8 @@ struct pkl_ast
 
   pkl_ast_node *stdtypes;
   pkl_ast_node stringtype;
+
+  char *buffer;
 };
 
 typedef struct pkl_ast *pkl_ast;

@@ -847,7 +847,8 @@ pkl_ast_free (pkl_ast ast)
     pkl_ast_node_free (ast->stdtypes[i]);
   free (ast->stdtypes);
   pkl_ast_node_free (ast->stringtype);
-  
+
+  free (ast->buffer);
   free (ast);
 }
 

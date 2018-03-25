@@ -77,9 +77,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
           if (strcmp (PKL_AST_IDENTIFIER_POINTER (ename),
                       PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
             {
-              pkl_error (PKL_AST_LOC (uname),
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (uname),
                          "duplicated name element in struct");
               payload->errors++;
+              PKL_PASS_ERROR;
               /* Do not report more duplicates in this struct.  */
               break;
             }
@@ -114,10 +115,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
               && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
                          PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
             {
-              pkl_error (PKL_AST_LOC (u),
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (u),
                          "duplicated element name in struct type spec");
               payload->errors++;
-              PKL_PASS_DONE;
+              PKL_PASS_ERROR;
             }
         }
     }
@@ -174,17 +175,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
   if (PKL_AST_TYPE_CODE (magnitude_type)
       != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_AST_LOC (magnitude_type),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (magnitude_type),
                  "expected integer expression in offset");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   if (type == NULL)
     {
       pkl_ice (PKL_AST_LOC (node), "node with no type");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   if (PKL_AST_TYPE_COMPLETE (type)
@@ -193,7 +194,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
       pkl_ice (PKL_AST_LOC (type),
                "type completeness is unknown");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 }
 PKL_PHASE_END_HANDLER

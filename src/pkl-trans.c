@@ -153,10 +153,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
   if (PKL_AST_TYPE_COMPLETE (op)
       != PKL_AST_TYPE_COMPLETE_YES)
     {
-      pkl_error (PKL_AST_LOC (op),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
                  "sizeof only works on complete types");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   {    

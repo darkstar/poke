@@ -103,7 +103,7 @@ pkl_compile_buffer (pvm_program *prog,
             &pkl_phase_anal1,
             &pkl_phase_typify1,
             &pkl_phase_promo,
-            &pkl_phase_fold,
+            /*            &pkl_phase_fold,*/
             &pkl_phase_typify2,
             &pkl_phase_trans2,
             &pkl_phase_anal2,
@@ -114,7 +114,7 @@ pkl_compile_buffer (pvm_program *prog,
             &anal1_payload,
             &typify1_payload,
             NULL, /* promo */
-            NULL, /* fold */
+            /*  NULL,*/ /* fold */
             &typify2_payload,
             &trans2_payload,
             &anal2_payload,
@@ -187,20 +187,56 @@ pkl_compile_file (pvm_program *prog,
 }
 
 void
-pkl_error (pkl_ast_loc loc,
+pkl_error (pkl_ast ast,
+           pkl_ast_loc loc,
            const char *fmt,
            ...)
 {
   va_list valist;
+  size_t i;
 
-  va_start (valist, fmt);
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
              loc.first_line, loc.first_column);
   fputs ("error: ", stderr);
+  va_start (valist, fmt);
   vfprintf (stderr, fmt, valist);
-  fputc ('\n', stderr);
   va_end (valist);
+  fputc ('\n', stderr);
+
+  /* XXX: make fancy output optional.  */
+  {
+    size_t cur_line = 1;
+    size_t cur_column = 1;
+    char *p = ast->buffer;
+
+    for (p = ast->buffer; *p != '\0'; ++p)
+      {
+        if (*p == '\n')
+          {
+            cur_line++;
+            cur_column = 1;
+          }
+        else
+          cur_column++;
+
+        if (cur_line >= loc.first_line
+            && cur_line <= loc.last_line)
+          {
+            /* Print until newline or end of string.  */
+            for (;*p != '\0' && *p != '\n'; ++p)
+              fputc (*p, stderr);
+            break;
+          }
+      }
+
+    fputc ('\n', stderr);
+    for (i = 1; i < loc.first_column; ++i)
+      fputc (' ', stderr);
+    for (; i < loc.last_column; ++i)
+      fputc ('~', stderr);
+    fputc ('\n', stderr);
+  }
 }
 
 

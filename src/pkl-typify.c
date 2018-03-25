@@ -139,9 +139,10 @@ PKL_PHASE_END_HANDLER
     PKL_PASS_DONE;                                                      \
                                                                         \
   error:                                                                \
-    pkl_error (PKL_AST_LOC (exp),                                       \
+    pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),                         \
                "invalid operands to expression");                       \
     payload->errors++;                                                  \
+    PKL_PASS_ERROR;                                                     \
   }                                                                     \
   PKL_PHASE_END_HANDLER
 
@@ -228,10 +229,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
         type = PKL_AST_TYPE (initializer);
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
         {
-          pkl_error (PKL_AST_LOC (initializer),
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (initializer),
                      "array initializer is of the wrong type");
           payload->errors++;
-          PKL_PASS_DONE;
+          PKL_PASS_ERROR;
         }        
     }
 
@@ -265,18 +266,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_array))
       != PKL_TYPE_ARRAY)
     {
-      pkl_error (PKL_AST_LOC (array_ref_array),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (array_ref_array),
                  "operator to [] must be an array");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_index))
       != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_AST_LOC (array_ref_index),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (array_ref_index),
                  "array index should be an integer");
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   type
@@ -352,10 +353,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 
   if (PKL_AST_TYPE_CODE (struct_type) != PKL_TYPE_STRUCT)
     {
-      pkl_error (PKL_AST_LOC (astruct),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (astruct),
                  "expected struct");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   /* Search for the referred field type.  */
@@ -375,10 +376,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 
   if (type == NULL)
     {
-      pkl_error (PKL_AST_LOC (field_name),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (field_name),
                  "referred field doesn't exist in struct");
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   PKL_AST_TYPE (struct_ref) = ASTREF (type);
@@ -485,7 +486,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
           = (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
              ? PKL_AST_TYPE_COMPLETE_YES
              : PKL_AST_TYPE_COMPLETE_NO);
-        printf ("JE: %d\n", PKL_AST_CODE (nelem));
         break;
       }
     default:

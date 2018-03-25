@@ -25,6 +25,11 @@
 %lex-param {void *scanner}
 %parse-param {struct pkl_parser *pkl_parser}
 
+%initial-action
+{
+    @$.first_line = @$.last_line = 1;
+    @$.first_column = @$.last_column = 1;
+};
 
 %{
 #include <config.h>
@@ -36,6 +41,8 @@
 #include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-parser.h" /* For struct pkl_parser.  */
+
+#define YYLTYPE pkl_ast_loc
 #define YYDEBUG 1
 #include "pkl-tab.h"
 #include "pkl-lex.h"
@@ -52,25 +59,12 @@
 
 /* Convert a YYLTYPE value into an AST location and return it.  */
 
-static inline struct pkl_ast_loc
-ASTLOC (YYLTYPE llocp)
-{
-  struct pkl_ast_loc loc;
-
-  loc.first_line = llocp.first_line;
-  loc.last_line = llocp.last_line;
-  loc.first_column = llocp.first_column;
-  loc.last_column = llocp.last_column;
-
-  return loc;
-}
-
 void
 pkl_tab_error (YYLTYPE *llocp,
                struct pkl_parser *pkl_parser,
                char const *err)
 {
-    pkl_error (ASTLOC (*llocp), "%s", err);
+    pkl_error (pkl_parser->ast, *llocp, "%s", err);
 }
 
 %}
@@ -214,135 +208,135 @@ expression:
         | unary_operator expression %prec UNARY
           	{
                   $$ = pkl_ast_make_unary_exp ($1, $2);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | '(' type_specifier ')' expression %prec UNARY
         	{
                   $$ = pkl_ast_make_cast ($2, $4);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | SIZEOF expression %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | SIZEOF type_specifier %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $2);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| SIZEOF '(' type_specifier ')' %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (PKL_AST_OP_SIZEOF, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '+' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_ADD,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @2;
                 }
         | expression '-' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SUB,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '*' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MUL,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '/' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_DIV,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '%' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_MOD,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SL,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression SR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_SR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression EQ expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_EQ,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| expression NE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_NE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '<' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LT,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '>' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GT,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression LE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_LE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| expression GE expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_GE,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '|' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_IOR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '^' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_XOR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| expression '&' expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_BAND,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression AND expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_AND,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (PKL_AST_OP_OR,
                                                 $1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
@@ -356,12 +350,12 @@ expression:
                     units = PKL_AST_OFFSET_UNIT_BYTES;
                   else
                     {
-                      pkl_error (ASTLOC(@3), "expected `b' or `B'");
+                      pkl_error (pkl_parser->ast, @3, "expected `b' or `B'");
                       YYERROR;
                     }
 
                   $$ = pkl_ast_make_offset ($2, units);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
@@ -374,6 +368,9 @@ unary_operator:
 
 primary:
 	  INTEGER
+                {
+                  $$ = $1;
+                }
         | CHAR
         | STR
         | '(' expression ')'
@@ -381,24 +378,24 @@ primary:
         | primary '[' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_array_ref ($1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | '[' array_initializer_list ']'
         	{
                     $$ = pkl_ast_make_array (0 /* nelem */,
                                              0 /* ninitializer */,
                                              $2);
-                    PKL_AST_LOC ($$) = ASTLOC (@$);
+                    PKL_AST_LOC ($$) = @$;
                 }
 	| '{' struct_elem_list '}'
         	{
                     $$ = pkl_ast_make_struct (0 /* nelem */, $2);
-                    PKL_AST_LOC ($$) = ASTLOC (@$);
+                    PKL_AST_LOC ($$) = @$;
                 }
         | primary '.' IDENTIFIER
         	{
                   $$ = pkl_ast_make_struct_ref ($1, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	;
 
@@ -416,12 +413,12 @@ struct_elem:
 	  expression
           	{
                   $$ = pkl_ast_make_struct_elem (NULL, $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | '.' IDENTIFIER '=' expression
 	        {
                   $$ = pkl_ast_make_struct_elem ($2, $4);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
@@ -438,13 +435,13 @@ array_initializer:
           	{
                   $$ = pkl_ast_make_array_initializer (PKL_AST_ARRAY_NOINDEX,
                                                        $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | '.' '[' INTEGER ']' '=' expression
         	{
                   $$ = pkl_ast_make_array_initializer (PKL_AST_INTEGER_VALUE ($3),
                                                        $6);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
@@ -454,12 +451,12 @@ type_specifier:
         | type_specifier '[' expression ']'
           	{
                   $$ = pkl_ast_make_array_type ($3, $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
 	| type_specifier '[' ']'
         	{
                   $$ = pkl_ast_make_array_type (NULL, $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | struct_type_specifier
         ;
@@ -469,12 +466,12 @@ struct_type_specifier:
 	  STRUCT '{' '}'
           	{
                   $$ = pkl_ast_make_struct_type (0, NULL);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | STRUCT '{' struct_elem_type_list '}'
         	{
                   $$ = pkl_ast_make_struct_type (0 /* nelem */, $3);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
@@ -488,12 +485,12 @@ struct_elem_type:
 	  type_specifier IDENTIFIER ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type ($2, $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | type_specifier ';'
         	{
                   $$ = pkl_ast_make_struct_elem_type (NULL, $1);
-                  PKL_AST_LOC ($$) = ASTLOC (@$);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 

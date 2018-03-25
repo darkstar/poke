@@ -176,7 +176,7 @@ promote_operands_binary (pkl_ast ast,
   return 1;
 
  error:
-  pkl_error (PKL_AST_LOC (exp),
+  pkl_error (ast, PKL_AST_LOC (exp),
              "invalid operands to expression");
   return 0;
 }
@@ -234,7 +234,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_bool)
   if (!promote_to_bool (PKL_PASS_AST, &op1, &restart1)
       || !promote_to_bool (PKL_PASS_AST, &op2, &restart2))
     {
-      pkl_error (PKL_AST_LOC (node),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
                  "operator requires boolean arguments");
       PKL_PASS_ERROR;
     }
@@ -258,7 +258,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_unary_bool)
 
   if (!promote_to_bool (PKL_PASS_AST, &op, &restart))
     {
-      pkl_error (PKL_AST_LOC (node),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
                  "operator requires a boolean argument");
       PKL_PASS_ERROR;
     }
@@ -280,7 +280,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_ref)
 
   if (!promote_to_ulong (PKL_PASS_AST, &index, &restart))
     {
-      pkl_error (PKL_AST_LOC (node),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
                  "an array subscript should be an integral value");
       PKL_PASS_ERROR;
     }
@@ -302,7 +302,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
 
   if (!promote_to_ulong (PKL_PASS_AST, &nelem, &restart))
     {
-      pkl_error (PKL_AST_LOC (node),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
                  "an array size should be an integral value");
       PKL_PASS_ERROR;
     }

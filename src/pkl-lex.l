@@ -26,7 +26,7 @@
 %option bison-bridge
 %option header-file="pkl-lex.h"
 %option bison-locations
-%option yylineno
+   /* %option yylineno */
 %option extra-type="struct pkl_parser *"
 
 %top {
@@ -42,6 +42,8 @@
 #include <assert.h>
 #include <pkl-ast.h>
 #include <pkl-parser.h>
+#define YYLTYPE pkl_ast_loc
+#define YYDEBUG 1
 #include <pkl-tab.h>
 #include "pk-cmd.h"
 #include "readline.h"
@@ -49,16 +51,32 @@
 # include <readline/history.h>
 #endif
 
-#define YY_USER_ACTION                          \
-  do                                            \
-    {                                           \
-      yyextra->nchars += yyleng;                \
+#define YY_USER_ACTION                                  \
+  do                                                    \
+    {                                                   \
+     int i;                                             \
+                                                        \
+     yylloc->first_line = yylloc->last_line;            \
+     yylloc->first_column = yylloc->last_column;        \
+                                                        \
+     for(i = 0; yytext[i] != '\0'; i++)                 \
+       {                                                \
+         if(yytext[i] == '\n')                          \
+           {                                            \
+             yylloc->last_line++;                       \
+             yylloc->last_column = 0;                   \
+           }                                            \
+         else                                           \
+           yylloc->last_column++;                       \
+       }                                                \
+                                                        \
+     yyextra->nchars += yyleng;                         \
     } while (0);
 
 %}
 
 NEWLINE            \n
-BLANK              [ \t\n]
+BLANK              [ \t]
 LETTER             [a-zA-Z]
 FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
 CHAR		   '(.|\\[n0t])'
@@ -76,12 +94,13 @@ D [0-9]
 
 %%
 
+{NEWLINE}	{ /* Ignore newlines.  */  }
 {BLANK}		{ /* Ignore whitespace.  */ }
 
 "/*" { BEGIN(C_COMMENT); }          
 <C_COMMENT>"*/" { BEGIN(INITIAL); } 
 <C_COMMENT>.    {  }                    
-<C_COMMENT>\n   {  }                   
+<C_COMMENT>\n   {  }
 
 "enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }

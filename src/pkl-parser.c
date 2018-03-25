@@ -201,6 +201,7 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
 
   /* XXX */
   /*  pkl_tab_debug = 1; */
+  parser->ast->buffer = xstrdup (buffer);
   ret = pkl_tab_parse (parser);
   *ast = parser->ast;
   if (end != NULL)
