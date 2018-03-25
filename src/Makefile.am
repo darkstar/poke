@@ -25,7 +25,8 @@ poke_SOURCES = poke.c poke.h \
                pkl.h pkl.c \
                pkl-ast.h pkl-ast.c \
                pkl-pass.h pkl-pass.c \
-               pkl-satan.c pkl-promo.c pkl-fold.c \
+               pkl-promo.h pkl-promo.c \
+               pkl-fold.h pkl-fold.c \
                pkl-typify.h pkl-typify.c \
 	       pkl-anal.h pkl-anal.c \
                pkl-trans.h pkl-trans.c \

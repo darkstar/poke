@@ -31,12 +31,8 @@
 #include "pkl-anal.h"
 #include "pkl-trans.h"
 #include "pkl-typify.h"
-
-/* Compiler passes and phases.  */
-
-extern struct pkl_phase satanize;  /* pkl-satan.c  */
-extern struct pkl_phase pkl_phase_promo; /* pkl-promo.c */
-extern struct pkl_phase pkl_phase_fold; /* pkl-fold.c */
+#include "pkl-promo.h"
+#include "pkl-fold.h"
 
 int
 pkl_compile_buffer (pvm_program *prog,
