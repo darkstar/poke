@@ -233,6 +233,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_HANDLER_UNIMPL (map);
 PKL_PHASE_HANDLER_UNIMPL (elemsof);
 PKL_PHASE_HANDLER_UNIMPL (typeof);
+PKL_PHASE_HANDLER_UNIMPL (sizeof);
 PKL_PHASE_HANDLER_UNIMPL (pos);
 PKL_PHASE_HANDLER_UNIMPL (neg);
 PKL_PHASE_HANDLER_UNIMPL (bnot);
@@ -569,6 +570,6 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (GE, ge), ENTRY (SCONC, sconc), ENTRY (MAP, map),
    ENTRY (ELEMSOF, elemsof), ENTRY (TYPEOF, typeof),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
-   ENTRY (NOT, not),
+   ENTRY (NOT, not), ENTRY (SIZEOF, sizeof),
 #undef ENTRY
   };
