@@ -25,8 +25,9 @@
 #include "pkl-anal.h"
 
 /* This file implements several analysis compiler phases, which can
-   raise errors and/or warnings but won't alter the structure of the
-   AST.  These phases are restartable.
+   raise errors and/or warnings, and update annotations in nodes, but
+   won't alter the structure of the AST.  These phases are
+   restartable.
 
    `anal1' is run immediately after trans1.
    `anal2' is run after constant folding and before gen.
