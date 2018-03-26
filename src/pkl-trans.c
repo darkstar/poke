@@ -185,9 +185,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
     PKL_AST_TYPE (offset) = ASTREF (offset_type);
   }
 
-  //  XXX: pkl_ast_node_free (node);
-
+  pkl_ast_node_free (PKL_PASS_NODE);
   PKL_PASS_NODE = offset;
+
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
