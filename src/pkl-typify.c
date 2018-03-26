@@ -468,10 +468,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_array)
   pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
 
-  PKL_AST_TYPE_COMPLETE (type)
-    = (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
-       ? PKL_AST_TYPE_COMPLETE_YES
-       : PKL_AST_TYPE_COMPLETE_NO);
+  int complete = PKL_AST_TYPE_COMPLETE_NO;
+
+  if (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
+      || (PKL_AST_CODE (nelem) == PKL_AST_EXP
+          && PKL_AST_EXP_CONSTANT (nelem) == PKL_AST_EXP_CONSTANT_YES))
+    complete = PKL_AST_TYPE_COMPLETE_YES;
+
+  PKL_AST_TYPE_COMPLETE (type) = complete;
 }
 PKL_PHASE_END_HANDLER
 
@@ -516,10 +520,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
       {
         pkl_ast_node nelem
           = PKL_AST_TYPE_A_NELEM (op);
-        PKL_AST_TYPE_COMPLETE (op)
-          = (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
-             ? PKL_AST_TYPE_COMPLETE_YES
-             : PKL_AST_TYPE_COMPLETE_NO);
+
+        int complete = PKL_AST_TYPE_COMPLETE_NO;
+
+        if (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
+            || (PKL_AST_CODE (nelem) == PKL_AST_EXP
+                && PKL_AST_EXP_CONSTANT (nelem) == PKL_AST_EXP_CONSTANT_YES))
+          complete = PKL_AST_TYPE_COMPLETE_YES;
+
+        PKL_AST_TYPE_COMPLETE (op) = complete;
         break;
       }
     default:

@@ -1197,6 +1197,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         PRINT_COMMON_FIELDS;
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
+        PRINT_AST_IMM (constant, EXP_CONSTANT, "%d");
         PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
         IPRINTF ("operands:\n");
