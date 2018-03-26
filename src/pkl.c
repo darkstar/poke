@@ -312,5 +312,5 @@ pkl_ice (pkl_ast ast,
   fputc ('\n', stderr);
   fprintf (stderr, "Important information has been dumped in %s.\n",
            tmpfile);
-  fputs ("Please report this error to bug-poke@gnu.org.\n", stderr);
+  fputs ("Please attach it to a bug report and send it to bug-poke@gnu.org.\n", stderr);
 }

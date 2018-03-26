@@ -93,11 +93,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of a binary operation ADD, SUB, MUL, DIV, MOD, SL, SR,
-   IOR, XOR and BAND is an integral type with the following
-   characteristics: if any of the operands is unsigned, the operation
-   is unsigned.  The width of the operation is the width of the widest
-   operand.  */
+/* When applied to integral arguments, the type of a binary operation
+   ADD, SUB, MUL, DIV, MOD, SL, SR, IOR, XOR and BAND is an integral
+   type with the following characteristics: if any of the operands is
+   unsigned, the operation is unsigned.  The width of the operation is
+   the width of the widest operand.
+
+   When applied to strings, the type of ADD is a string.
+
+   When applied to offsets, the type of ADD, SUB is an offset, whose
+   magnitude's type is calculated following the same rules than for
+   integrals.  The unit of the resulting offset is the common
+   denominator of the units of the operands.
+
+   When applied to offsets, the type of DIV is an integer, whose type
+   is calculated following the same rules than for integrals.
+
+   When applied to an offset and an integer, the type of MUL is an
+   offset, whose magnitude's type is calculated following the same
+   rules than for integrals.  The unit of the resulting offset is the
+   same than the unit of the operand.  */
 
 #define TYPIFY_BIN(OP)                                                  \
   PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_##OP)                         \
@@ -119,6 +134,7 @@ PKL_PHASE_END_HANDLER
     switch (PKL_AST_TYPE_CODE (t1))                                     \
       {                                                                 \
       CASE_STR                                                          \
+      CASE_OFFSET                                                       \
       case PKL_TYPE_INTEGRAL:                                           \
         {                                                               \
           int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                    \
@@ -146,21 +162,30 @@ PKL_PHASE_END_HANDLER
   }                                                                     \
   PKL_PHASE_END_HANDLER
 
-/* ADD and SUB accept both integral and string operands.  */
+/* ADD and SUB accept integral, string and offset operands.  */
 
 #define CASE_STR                                                        \
     case PKL_TYPE_STRING:                                               \
       type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
       break;
 
+#define CASE_OFFSET                             \
+  case PKL_TYPE_OFFSET:                         \
+  {                                             \
+    type = NULL;                                \
+    break;                                      \
+  }
+
 TYPIFY_BIN (add);
 TYPIFY_BIN (sub);
 
-/* But the following operations only accept integers, so define
-   CASE_STR to the empty string.  */
+/* The following operations only accept integers.  */
 
 #undef CASE_STR
 #define CASE_STR
+
+#undef CASE_OFFSET
+#define CASE_OFFSET
 
 TYPIFY_BIN (mul);
 TYPIFY_BIN (div);
