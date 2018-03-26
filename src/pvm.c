@@ -511,20 +511,20 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     }
   else if (PVM_IS_OFF (val))
     {
-      fprintf (out, "[");
+      fprintf (out, CYAN "[" NOATTR);
       pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base);
       switch (PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)))
         {
         case PVM_VAL_OFF_UNIT_BITS:
-          fprintf (out, " b");
+          fprintf (out, CYAN " b" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_BYTES:
-          fprintf (out, " B");
+          fprintf (out, CYAN " B" NOATTR);
           break;
         default:
           assert (0);
         }
-      fprintf (out, "]");
+      fprintf (out, CYAN "]" NOATTR);
     }
   else
     assert (0);

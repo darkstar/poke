@@ -174,11 +174,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
     /* Build an offset with that magnitude, and unit bits.  */
     offset = pkl_ast_make_offset (PKL_PASS_AST, magnitude,
                                   PKL_AST_OFFSET_UNIT_BITS);
+    PKL_AST_LOC (offset) = PKL_AST_LOC (node);
     offset_type = pkl_ast_make_offset_type (PKL_PASS_AST,
                                             magnitude_type,
                                             PKL_AST_OFFSET_UNIT_BITS);
+    PKL_AST_LOC (offset_type) = PKL_AST_LOC (node);
     PKL_AST_TYPE (offset) = ASTREF (offset_type);
   }
+
+  pkl_ast_node_free (node);
 
   PKL_PASS_NODE = offset;
   PKL_PASS_RESTART = 1;

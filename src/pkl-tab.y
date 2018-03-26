@@ -235,7 +235,7 @@ expression:
                 }
 	| SIZEOF '(' type_specifier ')' %prec UNARY
         	{
-                    $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
+                  $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
                 }
         | expression '+' expression

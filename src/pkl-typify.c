@@ -185,6 +185,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
     = pkl_ast_make_offset_type (PKL_PASS_AST,
                                 itype, PKL_AST_OFFSET_UNIT_BITS);
 
+  PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
@@ -202,6 +203,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
                                 magnitude_type,
                                 PKL_AST_OFFSET_UNIT (offset));
 
+  PKL_AST_LOC (type) = PKL_AST_LOC (offset);
   PKL_AST_TYPE (offset) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER

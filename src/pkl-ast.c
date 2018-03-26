@@ -1138,6 +1138,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
   do                                                            \
     {                                                           \
       IPRINTF ("uid: %" PRIu64 "\n", PKL_AST_UID (ast));        \
+      IPRINTF ("location: %d,%d-%d,%d\n",                       \
+               PKL_AST_LOC (ast).first_line,                    \
+               PKL_AST_LOC (ast).first_column,                  \
+               PKL_AST_LOC (ast).last_line,                     \
+               PKL_AST_LOC (ast).last_column);                  \
     }                                                           \
   while (0)
   
