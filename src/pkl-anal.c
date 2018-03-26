@@ -125,14 +125,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
 }
 PKL_PHASE_END_HANDLER
 
-/* Every node in the AST should have a valid location after
-   parsing.  */
+/* Every node in the AST should have a valid location after parsing.
+   This handler is used in both anal1 and anal2.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_default)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal_df_default)
 {
   if (!PKL_AST_LOC_VALID (PKL_AST_LOC (PKL_PASS_NODE)))
     {
-      pkl_ice (PKL_AST_NOLOC, "node #%" PRIu64 " with code %d has no location",
+      pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
+               "node #%" PRIu64 " with code %d has no location",
                PKL_AST_UID (PKL_PASS_NODE), PKL_AST_CODE (PKL_PASS_NODE));
       PKL_PASS_ERROR;
     }
@@ -144,7 +145,7 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
-   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal1_df_default),
+   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };
 
 
@@ -161,7 +162,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
 
   if (type == NULL)
     {
-      pkl_ice (PKL_AST_LOC (node), "node #%" PRIu64 " has no type",
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
+               "node #%" PRIu64 " has no type",
                PKL_AST_UID (node));
       payload->errors++;
       PKL_PASS_DONE;
@@ -170,7 +172,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
   if (PKL_AST_TYPE_COMPLETE (type)
       == PKL_AST_TYPE_COMPLETE_UNKNOWN)
     {
-      pkl_ice (PKL_AST_LOC (type),
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (type),
                "type completeness is unknown in node #%" PRIu64,
                PKL_AST_UID (node));
       payload->errors++;
@@ -203,7 +205,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
 
   if (type == NULL)
     {
-      pkl_ice (PKL_AST_LOC (node), "node #% " PRIu64 " has no type",
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
+               "node #% " PRIu64 " has no type",
                PKL_AST_UID (node));
       payload->errors++;
       PKL_PASS_ERROR;
@@ -212,7 +215,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
   if (PKL_AST_TYPE_COMPLETE (type)
       == PKL_AST_TYPE_COMPLETE_UNKNOWN)
     {
-      pkl_ice (PKL_AST_LOC (type),
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (type),
                "type completeness is unknown in node #%" PRIu64,
                PKL_AST_UID (node));
       payload->errors++;
@@ -228,4 +231,5 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
+   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };

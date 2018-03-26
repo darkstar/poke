@@ -20,6 +20,8 @@
 #include <gettext.h>
 #define _(str) gettext (str)
 #include <stdarg.h>
+#include <tmpdir.h>
+#include <tempname.h>
 
 #include "pk-term.h"
 
@@ -260,22 +262,55 @@ pkl_warning (pkl_ast_loc loc,
 }
 
 void
-pkl_ice (pkl_ast_loc loc,
+pkl_ice (pkl_ast ast,
+         pkl_ast_loc loc,
          const char *fmt,
          ...)
 {
   va_list valist;
+  char tmpfile[PATH_MAX];
 
   /* XXX: dump the AST plus additional details on the current state to
      a temporary file.  */
+  {
+    int des;
+    FILE *out;
 
-  va_start (valist, fmt);
+    if ((des = path_search (tmpfile, PATH_MAX, NULL, "poke", true) == -1)
+        || ((des = mkstemp (tmpfile)) == -1))
+      {
+        fputs ("internal error: determining a temporary file name\n",
+               stderr);
+        return;
+      }
+    
+    out = fdopen (des, "w");
+    if (out == NULL)
+      {
+        fprintf (stderr,
+                 "internal error: opening temporary file `%s'\n",
+                 tmpfile);
+        return;
+      }
+
+    fputs ("internal compiler error: ", out);
+    va_start (valist, fmt);
+    vfprintf (out, fmt, valist);
+    va_end (valist);
+    fputc ('\n', out);
+    pkl_ast_print (out, ast->ast);
+    fclose (out);
+  }
+
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
              loc.first_line, loc.first_column);
   fputs (RED REVERSE "internal compiler error: " NOATTR, stderr);
+  va_start (valist, fmt);
   vfprintf (stderr, fmt, valist);
-  fputc ('\n', stderr);
-  fputs ("Please report this error to bug-poke@gnu.org.\n", stderr);
   va_end (valist);
+  fputc ('\n', stderr);
+  fprintf (stderr, "Important information has been dumped in %s.\n",
+           tmpfile);
+  fputs ("Please report this error to bug-poke@gnu.org.\n", stderr);
 }

@@ -139,6 +139,8 @@ typedef union pkl_ast_node *pkl_ast_node;
 /* The `pkl_ast_common' struct defines fields which are common to
    every node in the AST, regardless of their type.
 
+   AST is a pointer to the `pkl_ast' structure containing this node.
+
    UID is an unique identifier that characterizes the node.  It is
    allocated when the node is created, and then never reused again.
 
@@ -172,6 +174,7 @@ typedef union pkl_ast_node *pkl_ast_node;
 
    There is no constructor defined for common nodes.  */
 
+#define PKL_AST_AST(AST) ((AST)->common.ast)
 #define PKL_AST_UID(AST) ((AST)->common.uid)
 #define PKL_AST_CHAIN(AST) ((AST)->common.chain)
 #define PKL_AST_TYPE(AST) ((AST)->common.type)
@@ -207,6 +210,7 @@ static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
 
 struct pkl_ast_common
 {
+  struct pkl_ast *ast;
   size_t uid;
   union pkl_ast_node *chain;
   union pkl_ast_node *type;
@@ -220,6 +224,9 @@ struct pkl_ast_common
 
 pkl_ast_node pkl_ast_chainon (pkl_ast_node ast1,
                               pkl_ast_node ast2);
+
+
+typedef struct pkl_ast *pkl_ast; /* Forward declaration. */
 
 /* PKL_AST_PROGRAM nodes represent PKL programs.
 
@@ -235,7 +242,8 @@ struct pkl_ast_program
   union pkl_ast_node *elems;
 };
 
-pkl_ast_node pkl_ast_make_program (pkl_ast_node declarations);
+pkl_ast_node pkl_ast_make_program (pkl_ast ast,
+                                   pkl_ast_node declarations);
 
 /* PKL_AST_IDENTIFIER nodes represent identifiers in PKL programs.
    
@@ -256,7 +264,8 @@ struct pkl_ast_identifier
   union pkl_ast_node *local_value;
 };
 
-pkl_ast_node pkl_ast_make_identifier (const char *str);
+pkl_ast_node pkl_ast_make_identifier (pkl_ast ast,
+                                      const char *str);
 
 /* PKL_AST_INTEGER nodes represent integer constants in poke programs.
 
@@ -270,7 +279,8 @@ struct pkl_ast_integer
   uint64_t value;
 };
 
-pkl_ast_node pkl_ast_make_integer (uint64_t value);
+pkl_ast_node pkl_ast_make_integer (pkl_ast ast,
+                                   uint64_t value);
 
 /* PKL_AST_STRING nodes represent string literals in PKL programs.
 
@@ -287,7 +297,8 @@ struct pkl_ast_string
   char *pointer;
 };
 
-pkl_ast_node pkl_ast_make_string (const char *str);
+pkl_ast_node pkl_ast_make_string (pkl_ast ast,
+                                  const char *str);
 
 /* PKL_AST_ARRAY nodes represent array literals.  Each array holds a
    sequence of elements, all of them having the same type.  There must
@@ -307,7 +318,8 @@ struct pkl_ast_array
   union pkl_ast_node *initializers;
 };
 
-pkl_ast_node pkl_ast_make_array (size_t nelem,
+pkl_ast_node pkl_ast_make_array (pkl_ast ast,
+                                 size_t nelem,
                                  size_t ninitializer,
                                  pkl_ast_node initializers);
 
@@ -328,7 +340,8 @@ struct pkl_ast_array_initializer
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_array_initializer (size_t index,
+pkl_ast_node pkl_ast_make_array_initializer (pkl_ast ast,
+                                             size_t index,
                                              pkl_ast_node exp);
 
 
@@ -345,7 +358,8 @@ struct pkl_ast_struct
   union pkl_ast_node *elems;
 };
 
-pkl_ast_node pkl_ast_make_struct (size_t nelem,
+pkl_ast_node pkl_ast_make_struct (pkl_ast ast,
+                                  size_t nelem,
                                   pkl_ast_node elems);
 
 /* PKL_AST_STRUCT_ELEM nodes represent elements in struct
@@ -362,7 +376,8 @@ struct pkl_ast_struct_elem
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_struct_elem (pkl_ast_node name,
+pkl_ast_node pkl_ast_make_struct_elem (pkl_ast ast,
+                                       pkl_ast_node name,
                                        pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
@@ -385,9 +400,11 @@ struct pkl_ast_exp
   union pkl_ast_node *operands[2];
 };
 
-pkl_ast_node pkl_ast_make_unary_exp (enum pkl_ast_op code,
+pkl_ast_node pkl_ast_make_unary_exp (pkl_ast ast,
+                                     enum pkl_ast_op code,
                                      pkl_ast_node op);
-pkl_ast_node pkl_ast_make_binary_exp (enum pkl_ast_op code,
+pkl_ast_node pkl_ast_make_binary_exp (pkl_ast ast,
+                                      enum pkl_ast_op code,
                                       pkl_ast_node op1,
                                       pkl_ast_node op2);
 
@@ -414,7 +431,8 @@ struct pkl_ast_cond_exp
   union pkl_ast_node *elseexp;
 };
 
-pkl_ast_node pkl_ast_make_cond_exp (pkl_ast_node cond,
+pkl_ast_node pkl_ast_make_cond_exp (pkl_ast ast,
+                                    pkl_ast_node cond,
                                     pkl_ast_node thenexp,
                                     pkl_ast_node elseexp);
 
@@ -440,7 +458,8 @@ struct pkl_ast_enumerator
   union pkl_ast_node *value;
 };
 
-pkl_ast_node pkl_ast_make_enumerator (pkl_ast_node identifier,
+pkl_ast_node pkl_ast_make_enumerator (pkl_ast ast,
+                                      pkl_ast_node identifier,
                                       pkl_ast_node value);
 
 /* PKL_AST_ENUM nodes represent enumerations, having semantics much
@@ -463,7 +482,8 @@ struct pkl_ast_enum
   union pkl_ast_node *values;
 };
 
-pkl_ast_node pkl_ast_make_enum (pkl_ast_node tag,
+pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
+                                pkl_ast_node tag,
                                 pkl_ast_node values);
 
 /* PKL_AST_LET nodes represent { } blocks that may contain
@@ -498,7 +518,8 @@ struct pkl_ast_array_ref
   union pkl_ast_node *index;
 };
 
-pkl_ast_node pkl_ast_make_array_ref (pkl_ast_node array,
+pkl_ast_node pkl_ast_make_array_ref (pkl_ast ast,
+                                     pkl_ast_node array,
                                      pkl_ast_node index);
 
 /* PKL_AST_STRUCT_REF nodes represent references to a struct
@@ -515,7 +536,8 @@ struct pkl_ast_struct_ref
   union pkl_ast_node *identifier;
 };
 
-pkl_ast_node pkl_ast_make_struct_ref (pkl_ast_node sct,
+pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
+                                      pkl_ast_node sct,
                                       pkl_ast_node identifier);
 
 /* PKL_AST_STRUCT_ELEM_TYPE nodes represent the element part of a
@@ -537,7 +559,8 @@ struct pkl_ast_struct_elem_type
   union pkl_ast_node *type;
 };
 
-pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast_node name,
+pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
+                                            pkl_ast_node name,
                                             pkl_ast_node type);
 
 /* PKL_AST_TYPE nodes represent types.
@@ -613,11 +636,11 @@ struct pkl_ast_type
   } val;
 };
 
-pkl_ast_node pkl_ast_make_integral_type (int signed_p, size_t size);
-pkl_ast_node pkl_ast_make_string_type (void);
-pkl_ast_node pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype);
-pkl_ast_node pkl_ast_make_struct_type (size_t nelem, pkl_ast_node elems);
-pkl_ast_node pkl_ast_make_offset_type (pkl_ast_node base_type, int unit);
+pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, int signed_p, size_t size);
+pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
+pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);
+pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, int unit);
 
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
@@ -673,7 +696,8 @@ struct pkl_ast_offset
   int unit;
 };
 
-pkl_ast_node pkl_ast_make_offset (pkl_ast_node magnitude, int unit);
+pkl_ast_node pkl_ast_make_offset (pkl_ast ast,
+                                  pkl_ast_node magnitude, int unit);
 
 /* PKL_AST_CAST nodes represent casts at the language level.
    
@@ -692,7 +716,8 @@ struct pkl_ast_cast
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_cast (pkl_ast_node type,
+pkl_ast_node pkl_ast_make_cast (pkl_ast ast,
+                                pkl_ast_node type,
                                 pkl_ast_node exp);
 
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
@@ -750,6 +775,7 @@ typedef pkl_ast_node pkl_hash[HASH_TABLE_SIZE];
 
 struct pkl_ast
 {
+  size_t uid;
   pkl_ast_node ast;
 
   pkl_hash ids_hash_table;
@@ -762,8 +788,6 @@ struct pkl_ast
 
   char *buffer;
 };
-
-typedef struct pkl_ast *pkl_ast;
 
 pkl_ast pkl_ast_init (void);
 void pkl_ast_free (pkl_ast ast);

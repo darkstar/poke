@@ -158,7 +158,8 @@ emul_ge (uint64_t op1, uint64_t op2)
         {                                                               \
           pkl_ast_node new;                                             \
                                                                         \
-          new = pkl_ast_make_integer (emul (PKL_AST_INTEGER_VALUE (op1), \
+          new = pkl_ast_make_integer (PKL_PASS_AST,                     \
+                                      emul (PKL_AST_INTEGER_VALUE (op1), \
                                             PKL_AST_INTEGER_VALUE (op2))); \
           PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
                                                                         \
@@ -178,7 +179,8 @@ emul_ge (uint64_t op1, uint64_t op2)
       if (PKL_AST_CODE (op1) == PKL_AST_STRING)                         \
         {                                                               \
           pkl_ast_node new;                                             \
-          new = pkl_ast_make_integer (emul (PKL_AST_STRING_POINTER (op1), \
+          new = pkl_ast_make_integer (PKL_PASS_AST,                     \
+                                      emul (PKL_AST_STRING_POINTER (op1), \
                                             PKL_AST_STRING_POINTER (op2))); \
           PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (op1));             \
                                                                         \
@@ -248,7 +250,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_cast)
       pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
       pkl_ast_node new;                                                 \
                                                                         \
-      new = pkl_ast_make_integer ((T) PKL_AST_INTEGER_VALUE (op1));     \
+      new = pkl_ast_make_integer (PKL_PASS_AST,                         \
+                                  (T) PKL_AST_INTEGER_VALUE (op1));     \
       PKL_AST_TYPE (new) = ASTREF (to_type);                            \
                                                                         \
       pkl_ast_node_free (PKL_PASS_NODE);                                \

@@ -182,8 +182,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
     = pkl_ast_get_integral_type (PKL_PASS_AST,
                                  64, 0);
   pkl_ast_node type
-    = pkl_ast_make_offset_type (itype,
-                                PKL_AST_OFFSET_UNIT_BITS);
+    = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                itype, PKL_AST_OFFSET_UNIT_BITS);
 
   PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
 }
@@ -198,7 +198,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
   pkl_ast_node magnitude_type
     = PKL_AST_TYPE (PKL_AST_OFFSET_MAGNITUDE (offset));
   pkl_ast_node type
-    = pkl_ast_make_offset_type (magnitude_type,
+    = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                magnitude_type,
                                 PKL_AST_OFFSET_UNIT (offset));
 
   PKL_AST_TYPE (offset) = ASTREF (type);
@@ -237,12 +238,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
     }
 
   /* Build the type of the array. */
-  array_nelem = pkl_ast_make_integer (PKL_AST_ARRAY_NELEM (array));
+  array_nelem = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_ARRAY_NELEM (array));
   array_nelem_type = pkl_ast_get_integral_type (PKL_PASS_AST,
                                                 64, 0);
   PKL_AST_TYPE (array_nelem) = ASTREF (array_nelem_type);
 
-  type = pkl_ast_make_array_type (array_nelem, type);
+  type = pkl_ast_make_array_type (PKL_PASS_AST,
+                                  array_nelem, type);
   PKL_AST_TYPE (array) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
@@ -307,7 +310,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
     }
 
   /* Build the type of the struct.  */
-  type = pkl_ast_make_struct_type (PKL_AST_STRUCT_NELEM (node),
+  type = pkl_ast_make_struct_type (PKL_PASS_AST,
+                                   PKL_AST_STRUCT_NELEM (node),
                                    struct_elem_types);
   PKL_AST_TYPE (node) = ASTREF (type);
 }
@@ -327,7 +331,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
     = PKL_AST_TYPE (struct_elem_exp);
   
   pkl_ast_node type
-    = pkl_ast_make_struct_elem_type (struct_elem_name,
+    = pkl_ast_make_struct_elem_type (PKL_PASS_AST,
+                                     struct_elem_name,
                                      struct_elem_exp_type);
 
   /* XXX: .y used a type dup for this.  why? */

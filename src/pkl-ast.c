@@ -38,17 +38,18 @@ pkl_ast_default_endian (void)
    of the node is initialized to zero.  */
   
 static pkl_ast_node
-pkl_ast_make_node (enum pkl_ast_code code)
+pkl_ast_make_node (pkl_ast ast,
+                   enum pkl_ast_code code)
 {
-  pkl_ast_node ast;
-  static size_t uid = 0;
+  pkl_ast_node node;
 
-  ast = xmalloc (sizeof (union pkl_ast_node));
-  memset (ast, 0, sizeof (union pkl_ast_node));
-  PKL_AST_CODE (ast) = code;
-  PKL_AST_UID (ast) = uid++;
+  node = xmalloc (sizeof (union pkl_ast_node));
+  memset (node, 0, sizeof (union pkl_ast_node));
+  PKL_AST_AST (node) = ast;
+  PKL_AST_CODE (node) = code;
+  PKL_AST_UID (node) = ast->uid++;
 
-  return ast;
+  return node;
 }
 
 /* Chain AST2 at the end of the tree node chain in AST1.  If AST1 is
@@ -75,9 +76,10 @@ pkl_ast_chainon (pkl_ast_node ast1, pkl_ast_node ast2)
 /* Build and return an AST node for an integer constant.  */
 
 pkl_ast_node 
-pkl_ast_make_integer (uint64_t value)
+pkl_ast_make_integer (pkl_ast ast,
+                      uint64_t value)
 {
-  pkl_ast_node new = pkl_ast_make_node (PKL_AST_INTEGER);
+  pkl_ast_node new = pkl_ast_make_node (ast, PKL_AST_INTEGER);
 
   PKL_AST_INTEGER_VALUE (new) = value;
   PKL_AST_LITERAL_P (new) = 1;
@@ -88,12 +90,13 @@ pkl_ast_make_integer (uint64_t value)
 /* Build and return an AST node for a string constant.  */
 
 pkl_ast_node 
-pkl_ast_make_string (const char *str)
+pkl_ast_make_string (pkl_ast ast,
+                     const char *str)
 {
-  pkl_ast_node new = pkl_ast_make_node (PKL_AST_STRING);
+  pkl_ast_node new = pkl_ast_make_node (ast, PKL_AST_STRING);
 
   assert (str);
-  
+
   PKL_AST_STRING_POINTER (new) = xstrdup (str);
   PKL_AST_STRING_LENGTH (new) = strlen (str);
   PKL_AST_LITERAL_P (new) = 1;
@@ -104,9 +107,10 @@ pkl_ast_make_string (const char *str)
 /* Build and return an AST node for an identifier.  */
 
 pkl_ast_node
-pkl_ast_make_identifier (const char *str)
+pkl_ast_make_identifier (pkl_ast ast,
+                         const char *str)
 {
-  pkl_ast_node id = pkl_ast_make_node (PKL_AST_IDENTIFIER);
+  pkl_ast_node id = pkl_ast_make_node (ast, PKL_AST_IDENTIFIER);
 
   PKL_AST_IDENTIFIER_POINTER (id) = xstrdup (str);
   PKL_AST_IDENTIFIER_LENGTH (id) = strlen (str);
@@ -117,10 +121,12 @@ pkl_ast_make_identifier (const char *str)
 /* Build and return an AST node for an enumerator.  */
 
 pkl_ast_node 
-pkl_ast_make_enumerator (pkl_ast_node identifier,
+pkl_ast_make_enumerator (pkl_ast ast,
+                         pkl_ast_node identifier,
                          pkl_ast_node value)
 {
-  pkl_ast_node enumerator = pkl_ast_make_node (PKL_AST_ENUMERATOR);
+  pkl_ast_node enumerator
+    = pkl_ast_make_node (ast, PKL_AST_ENUMERATOR);
 
   assert (identifier != NULL);
 
@@ -133,11 +139,13 @@ pkl_ast_make_enumerator (pkl_ast_node identifier,
 /* Build and return an AST node for a conditional expression.  */
 
 pkl_ast_node
-pkl_ast_make_cond_exp (pkl_ast_node cond,
+pkl_ast_make_cond_exp (pkl_ast ast,
+                       pkl_ast_node cond,
                        pkl_ast_node thenexp,
                        pkl_ast_node elseexp)
 {
-  pkl_ast_node cond_exp = pkl_ast_make_node (PKL_AST_COND_EXP);
+  pkl_ast_node cond_exp
+    = pkl_ast_make_node (ast, PKL_AST_COND_EXP);
 
   assert (cond && thenexp && elseexp);
 
@@ -154,11 +162,12 @@ pkl_ast_make_cond_exp (pkl_ast_node cond,
 /* Build and return an AST node for a binary expression.  */
 
 pkl_ast_node
-pkl_ast_make_binary_exp (enum pkl_ast_op code,
+pkl_ast_make_binary_exp (pkl_ast ast,
+                         enum pkl_ast_op code,
                          pkl_ast_node op1,
                          pkl_ast_node op2)
 {
-  pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
+  pkl_ast_node exp = pkl_ast_make_node (ast, PKL_AST_EXP);
 
   assert (op1 && op2);
 
@@ -176,10 +185,11 @@ pkl_ast_make_binary_exp (enum pkl_ast_op code,
 /* Build and return an AST node for an unary expression.  */
 
 pkl_ast_node
-pkl_ast_make_unary_exp (enum pkl_ast_op code,
+pkl_ast_make_unary_exp (pkl_ast ast,
+                        enum pkl_ast_op code,
                         pkl_ast_node op)
 {
-  pkl_ast_node exp = pkl_ast_make_node (PKL_AST_EXP);
+  pkl_ast_node exp = pkl_ast_make_node (ast, PKL_AST_EXP);
 
   PKL_AST_EXP_CODE (exp) = code;
   PKL_AST_EXP_NUMOPS (exp) = 1;
@@ -192,9 +202,10 @@ pkl_ast_make_unary_exp (enum pkl_ast_op code,
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
-pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
+pkl_ast_make_array_ref (pkl_ast ast,
+                        pkl_ast_node array, pkl_ast_node index)
 {
-  pkl_ast_node aref = pkl_ast_make_node (PKL_AST_ARRAY_REF);
+  pkl_ast_node aref = pkl_ast_make_node (ast, PKL_AST_ARRAY_REF);
 
   assert (array && index);
 
@@ -208,9 +219,10 @@ pkl_ast_make_array_ref (pkl_ast_node array, pkl_ast_node index)
 /* Build and return an AST node for a struct reference.  */
 
 pkl_ast_node
-pkl_ast_make_struct_ref (pkl_ast_node sct, pkl_ast_node identifier)
+pkl_ast_make_struct_ref (pkl_ast ast,
+                         pkl_ast_node sct, pkl_ast_node identifier)
 {
-  pkl_ast_node sref = pkl_ast_make_node (PKL_AST_STRUCT_REF);
+  pkl_ast_node sref = pkl_ast_make_node (ast, PKL_AST_STRUCT_REF);
 
   assert (sct && identifier);
 
@@ -223,9 +235,9 @@ pkl_ast_make_struct_ref (pkl_ast_node sct, pkl_ast_node identifier)
 /* Build and return type AST nodes.  */
 
 static pkl_ast_node
-pkl_ast_make_type (void)
+pkl_ast_make_type (pkl_ast ast)
 {
-  pkl_ast_node type = pkl_ast_make_node (PKL_AST_TYPE);
+  pkl_ast_node type = pkl_ast_make_node (ast, PKL_AST_TYPE);
 
   PKL_AST_TYPE_NAME (type) = NULL;
   PKL_AST_TYPE_COMPLETE (type)
@@ -234,9 +246,9 @@ pkl_ast_make_type (void)
 }
 
 pkl_ast_node
-pkl_ast_make_integral_type (int signed_p, size_t size)
+pkl_ast_make_integral_type (pkl_ast ast, int signed_p, size_t size)
 {
-  pkl_ast_node type = pkl_ast_make_type ();
+  pkl_ast_node type = pkl_ast_make_type (ast);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_INTEGRAL;
   PKL_AST_TYPE_COMPLETE (type)
@@ -247,9 +259,9 @@ pkl_ast_make_integral_type (int signed_p, size_t size)
 }
 
 pkl_ast_node
-pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype)
+pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype)
 {
-  pkl_ast_node type = pkl_ast_make_type ();
+  pkl_ast_node type = pkl_ast_make_type (ast);
 
   assert (etype);
 
@@ -261,9 +273,9 @@ pkl_ast_make_array_type (pkl_ast_node nelem, pkl_ast_node etype)
 }
 
 pkl_ast_node
-pkl_ast_make_string_type (void)
+pkl_ast_make_string_type (pkl_ast ast)
 {
-  pkl_ast_node type = pkl_ast_make_type ();
+  pkl_ast_node type = pkl_ast_make_type (ast);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRING;
   PKL_AST_TYPE_COMPLETE (type)
@@ -272,9 +284,9 @@ pkl_ast_make_string_type (void)
 }
 
 pkl_ast_node
-pkl_ast_make_offset_type (pkl_ast_node base_type, int unit)
+pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, int unit)
 {
-  pkl_ast_node type = pkl_ast_make_type ();
+  pkl_ast_node type = pkl_ast_make_type (ast);
 
   assert (base_type);
 
@@ -288,9 +300,10 @@ pkl_ast_make_offset_type (pkl_ast_node base_type, int unit)
 }
 
 pkl_ast_node
-pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
+pkl_ast_make_struct_type (pkl_ast ast,
+                          size_t nelem, pkl_ast_node struct_type_elems)
 {
-  pkl_ast_node type = pkl_ast_make_type ();
+  pkl_ast_node type = pkl_ast_make_type (ast);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_STRUCT;
   PKL_AST_TYPE_S_NELEM (type) = nelem;
@@ -301,11 +314,12 @@ pkl_ast_make_struct_type (size_t nelem, pkl_ast_node struct_type_elems)
 }
 
 pkl_ast_node
-pkl_ast_make_struct_elem_type (pkl_ast_node name,
+pkl_ast_make_struct_elem_type (pkl_ast ast,
+                               pkl_ast_node name,
                                pkl_ast_node type)
 {
   pkl_ast_node struct_type_elem
-    = pkl_ast_make_node (PKL_AST_STRUCT_ELEM_TYPE);
+    = pkl_ast_make_node (ast, PKL_AST_STRUCT_ELEM_TYPE);
 
   PKL_AST_STRUCT_ELEM_TYPE_NAME (struct_type_elem)
     = ASTREF (name);
@@ -320,7 +334,7 @@ pkl_ast_make_struct_elem_type (pkl_ast_node name,
 pkl_ast_node
 pkl_ast_dup_type (pkl_ast_node type)
 {
-  pkl_ast_node t, new = pkl_ast_make_type ();
+  pkl_ast_node t, new = pkl_ast_make_type (PKL_AST_AST (type));
   
   PKL_AST_TYPE_CODE (new) = PKL_AST_TYPE_CODE (type);
   PKL_AST_TYPE_COMPLETE (new) = PKL_AST_TYPE_COMPLETE (type);
@@ -349,10 +363,12 @@ pkl_ast_dup_type (pkl_ast_node type)
             = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
           pkl_ast_node new_struct_type_elem_name
             = (struct_type_elem_name
-               ? pkl_ast_make_identifier (PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
+               ? pkl_ast_make_identifier (PKL_AST_AST (new),
+                                          PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
                : NULL);
           pkl_ast_node struct_type_elem
-            = pkl_ast_make_struct_elem_type (new_struct_type_elem_name,
+            = pkl_ast_make_struct_elem_type (PKL_AST_AST (new),
+                                             new_struct_type_elem_name,
                                              pkl_ast_dup_type (struct_type_elem_type));
 
           PKL_AST_TYPE_S_ELEMS (new)
@@ -479,9 +495,11 @@ pkl_ast_sizeof_type (pkl_ast_node type)
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node
-pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values)
+pkl_ast_make_enum (pkl_ast ast,
+                   pkl_ast_node tag, pkl_ast_node values)
 {
-  pkl_ast_node enumeration = pkl_ast_make_node (PKL_AST_ENUM);
+  pkl_ast_node enumeration
+    = pkl_ast_make_node (ast, PKL_AST_ENUM);
 
   assert (tag && values);
 
@@ -494,10 +512,12 @@ pkl_ast_make_enum (pkl_ast_node tag, pkl_ast_node values)
 /* Build and return an AST node for an array.  */
 
 pkl_ast_node
-pkl_ast_make_array (size_t nelem, size_t ninitializer,
+pkl_ast_make_array (pkl_ast ast,
+                    size_t nelem, size_t ninitializer,
                     pkl_ast_node initializers)
 {
-  pkl_ast_node array = pkl_ast_make_node (PKL_AST_ARRAY);
+  pkl_ast_node array
+    = pkl_ast_make_node (ast, PKL_AST_ARRAY);
 
   PKL_AST_ARRAY_NELEM (array) = nelem;
   PKL_AST_ARRAY_NINITIALIZER (array) = ninitializer;
@@ -509,10 +529,11 @@ pkl_ast_make_array (size_t nelem, size_t ninitializer,
 /* Build and return an AST node for an array element.  */
 
 pkl_ast_node
-pkl_ast_make_array_initializer (size_t index, pkl_ast_node exp)
+pkl_ast_make_array_initializer (pkl_ast ast,
+                                size_t index, pkl_ast_node exp)
 {
   pkl_ast_node initializer
-    = pkl_ast_make_node (PKL_AST_ARRAY_INITIALIZER);
+    = pkl_ast_make_node (ast, PKL_AST_ARRAY_INITIALIZER);
 
   PKL_AST_ARRAY_INITIALIZER_INDEX (initializer) = index;
   PKL_AST_ARRAY_INITIALIZER_EXP (initializer) = ASTREF (exp);
@@ -523,10 +544,11 @@ pkl_ast_make_array_initializer (size_t index, pkl_ast_node exp)
 /* Build and return an AST node for a struct.  */
 
 pkl_ast_node
-pkl_ast_make_struct (size_t nelem,
+pkl_ast_make_struct (pkl_ast ast,
+                     size_t nelem,
                      pkl_ast_node elems)
 {
-  pkl_ast_node sct = pkl_ast_make_node (PKL_AST_STRUCT);
+  pkl_ast_node sct = pkl_ast_make_node (ast, PKL_AST_STRUCT);
 
   PKL_AST_STRUCT_NELEM (sct) = nelem;
   PKL_AST_STRUCT_ELEMS (sct) = ASTREF (elems);
@@ -537,10 +559,11 @@ pkl_ast_make_struct (size_t nelem,
 /* Build and return an AST node for a struct element.  */
 
 pkl_ast_node
-pkl_ast_make_struct_elem (pkl_ast_node name,
+pkl_ast_make_struct_elem (pkl_ast ast,
+                          pkl_ast_node name,
                           pkl_ast_node exp)
 {
-  pkl_ast_node elem = pkl_ast_make_node (PKL_AST_STRUCT_ELEM);
+  pkl_ast_node elem = pkl_ast_make_node (ast, PKL_AST_STRUCT_ELEM);
 
   if (name != NULL)
     PKL_AST_STRUCT_ELEM_NAME (elem) = ASTREF (name);
@@ -552,9 +575,10 @@ pkl_ast_make_struct_elem (pkl_ast_node name,
 /* Build and return an AST node for an offset construct.  */
 
 pkl_ast_node
-pkl_ast_make_offset (pkl_ast_node magnitude, int unit)
+pkl_ast_make_offset (pkl_ast ast,
+                     pkl_ast_node magnitude, int unit)
 {
-  pkl_ast_node offset = pkl_ast_make_node (PKL_AST_OFFSET);
+  pkl_ast_node offset = pkl_ast_make_node (ast, PKL_AST_OFFSET);
 
   assert (unit == PKL_AST_OFFSET_UNIT_BITS
           || unit == PKL_AST_OFFSET_UNIT_BYTES);
@@ -569,9 +593,10 @@ pkl_ast_make_offset (pkl_ast_node magnitude, int unit)
 /* Build and return an AST node for a cast.  */
 
 pkl_ast_node
-pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
+pkl_ast_make_cast (pkl_ast ast,
+                   pkl_ast_node type, pkl_ast_node exp)
 {
-  pkl_ast_node cast = pkl_ast_make_node (PKL_AST_CAST);
+  pkl_ast_node cast = pkl_ast_make_node (ast, PKL_AST_CAST);
 
   assert (type && exp);
 
@@ -584,9 +609,10 @@ pkl_ast_make_cast (pkl_ast_node type, pkl_ast_node exp)
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node
-pkl_ast_make_program (pkl_ast_node elems)
+pkl_ast_make_program (pkl_ast ast, pkl_ast_node elems)
 {
-  pkl_ast_node program = pkl_ast_make_node (PKL_AST_PROGRAM);
+  pkl_ast_node program
+    = pkl_ast_make_node (ast, PKL_AST_PROGRAM);
 
   PKL_AST_PROGRAM_ELEMS (program) = ASTREF (elems);
   return program;
@@ -799,14 +825,15 @@ pkl_ast_init (void)
   for (type = stditypes; type->code != PKL_TYPE_NOTYPE; type++)
     {
       pkl_ast_node t
-        = pkl_ast_make_integral_type (type->signed_p, type->size);
+        = pkl_ast_make_integral_type (ast,
+                                      type->signed_p, type->size);
       pkl_ast_register (ast, type->id, t);
       ast->stdtypes[type->code] = ASTREF (t);
     }
   ast->stdtypes[nentries - 1] = NULL;
   
   /* String type.  */
-  ast->stringtype = pkl_ast_make_string_type ();
+  ast->stringtype = pkl_ast_make_string_type (ast);
   ast->stringtype = ASTREF (ast->stringtype);
   pkl_ast_register (ast, "string", ast->stringtype);
 
@@ -904,7 +931,7 @@ pkl_ast_get_identifier (struct pkl_ast *ast,
 
   /* Create a new node for this identifier, and put it in the hash
      table.  */
-  id = pkl_ast_make_identifier (str);
+  id = pkl_ast_make_identifier (ast, str);
   PKL_AST_CHAIN2 (id) = ast->ids_hash_table[hash];
   ast->ids_hash_table[hash] = ASTREF (id);
 
@@ -941,7 +968,7 @@ pkl_ast_get_integral_type (pkl_ast ast, size_t size, int signed_p)
       ++i;
     }
 
-  return pkl_ast_make_integral_type (size, signed_p);
+  return pkl_ast_make_integral_type (ast, size, signed_p);
 }
 
 /* Register an AST node under the given NAME in the corresponding hash
@@ -1051,10 +1078,10 @@ pkl_ast_reverse (pkl_ast_node ast)
       int i;                                    \
       for (i = 0; i < indent; i++)              \
         if (indent >= 2 && i % 2 == 0)          \
-          printf ("|");                         \
+          fprintf (fd, "|");                    \
         else                                    \
-          printf (" ");                         \
-      printf (__VA_ARGS__);                     \
+          fprintf (fd, " ");                    \
+      fprintf (fd, __VA_ARGS__);                \
     } while (0)
 
 #define PRINT_AST_IMM(NAME,MACRO,FMT)                    \
