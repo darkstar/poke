@@ -469,6 +469,10 @@ array_initializer:
 
 type_specifier:
 	  TYPENAME
+                {
+                    $$ = $1;
+                    PKL_AST_LOC ($$) = @$;
+                }
         | type_specifier '[' expression ']'
           	{
                     $$ = pkl_ast_make_array_type (pkl_parser->ast, $3, $1);

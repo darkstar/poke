@@ -44,7 +44,7 @@ promote_to_integral (size_t size, int sign,
           || PKL_AST_TYPE_I_SIGNED (type) != sign)
         {
           pkl_ast_node desired_type
-            = pkl_ast_get_integral_type (ast, size, sign);
+            = pkl_ast_make_integral_type (ast, size, sign);
           pkl_ast_loc loc = PKL_AST_LOC (*a);
           
           *a = pkl_ast_make_cast (ast, desired_type, *a);
@@ -158,7 +158,7 @@ promote_operands_binary (pkl_ast ast,
   if (to_promote_a != NULL)
     {
       pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_a, sign_a);
+        = pkl_ast_make_integral_type (ast, size_a, sign_a);
       pkl_ast_loc loc = PKL_AST_LOC (a);
       
       a = pkl_ast_make_cast (ast, t, a);
@@ -172,7 +172,7 @@ promote_operands_binary (pkl_ast ast,
   if (to_promote_b != NULL)
     {
       pkl_ast_node t
-        = pkl_ast_get_integral_type (ast, size_b, sign_b);
+        = pkl_ast_make_integral_type (ast, size_b, sign_b);
       pkl_ast_loc loc = PKL_AST_LOC (b);
       
       b = pkl_ast_make_cast (ast, t, b);

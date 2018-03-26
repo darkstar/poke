@@ -257,7 +257,7 @@ D [0-9]
       width = 32;
   }
 
-  type = pkl_ast_get_integral_type (yyextra->ast, width, signed_p);
+  type = pkl_ast_make_integral_type (yyextra->ast, width, signed_p);
 
   yylval->ast = pkl_ast_make_integer (yyextra->ast, value);
   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
@@ -291,7 +291,7 @@ D [0-9]
    else
      value = yytext[1];
 
-   type = pkl_ast_get_integral_type (yyextra->ast, 8, 0);
+   type = pkl_ast_make_integral_type (yyextra->ast, 8, 0);
    PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_YES;
 
    yylval->ast = pkl_ast_make_integer (yyextra->ast, value);

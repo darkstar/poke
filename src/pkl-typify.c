@@ -62,7 +62,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
 {
   pkl_ast_node type
-    = pkl_ast_get_integral_type (PKL_PASS_AST, 32, 1);
+    = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
 
   PKL_AST_TYPE (PKL_PASS_NODE)
     = ASTREF (type);
@@ -127,7 +127,7 @@ PKL_PHASE_END_HANDLER
             = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)      \
                ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));  \
                                                                         \
-          type = pkl_ast_get_integral_type (PKL_PASS_AST, size, signed_p); \
+          type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p); \
           break;                                                        \
         }                                                               \
       default:                                                          \
@@ -179,7 +179,7 @@ TYPIFY_BIN (band);
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
 {
   pkl_ast_node itype
-    = pkl_ast_get_integral_type (PKL_PASS_AST,
+    = pkl_ast_make_integral_type (PKL_PASS_AST,
                                  64, 0);
   pkl_ast_node type
     = pkl_ast_make_offset_type (PKL_PASS_AST,
@@ -242,8 +242,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
   /* Build the type of the array. */
   array_nelem = pkl_ast_make_integer (PKL_PASS_AST,
                                       PKL_AST_ARRAY_NELEM (array));
-  array_nelem_type = pkl_ast_get_integral_type (PKL_PASS_AST,
-                                                64, 0);
+  array_nelem_type = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                 64, 0);
   PKL_AST_TYPE (array_nelem) = ASTREF (array_nelem_type);
 
   type = pkl_ast_make_array_type (PKL_PASS_AST,

@@ -636,7 +636,7 @@ struct pkl_ast_type
   } val;
 };
 
-pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, int signed_p, size_t size);
+pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);

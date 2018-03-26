@@ -246,7 +246,7 @@ pkl_ast_make_type (pkl_ast ast)
 }
 
 pkl_ast_node
-pkl_ast_make_integral_type (pkl_ast ast, int signed_p, size_t size)
+pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
 
@@ -294,7 +294,7 @@ pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, int unit)
   PKL_AST_TYPE_COMPLETE (type)
     = PKL_AST_TYPE_COMPLETE_YES;
   PKL_AST_TYPE_O_UNIT (type) = unit;
-  PKL_AST_TYPE_O_BASE_TYPE (type) = base_type;
+  PKL_AST_TYPE_O_BASE_TYPE (type) = ASTREF (base_type);
 
   return type;
 }
@@ -826,7 +826,7 @@ pkl_ast_init (void)
     {
       pkl_ast_node t
         = pkl_ast_make_integral_type (ast,
-                                      type->signed_p, type->size);
+                                      type->size, type->signed_p);
       pkl_ast_register (ast, type->id, t);
       ast->stdtypes[type->code] = ASTREF (t);
     }
