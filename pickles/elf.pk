@@ -34,11 +34,11 @@ deftype elf_sword = int32;
 deftype elf_half = uint16;
 
 deftype elf32_addr = uint32;
-deftype elf32_off = uint32;
+deftype elf32_off = offset<uint32,B>;
 deftype elf32_sword = uint32;
 
 deftype elf64_addr = uint64;
-deftype elf64_off = uint64;
+deftype elf64_off = offset<uint64,B>;
 deftype elf64_xword = uint64;
 deftype elf64_sword = int32;
 deftype elf64_sxword = int64;
@@ -1200,14 +1200,14 @@ deftype Elf_Shdr =
       struct
       {
         elf32_addr sh_addr;
-        offset<elf32_off,B> sh_offset;
+        elf32_off sh_offset;
         elf_word sh_size;
       } : class == ELFCLASS32;
 
       struct
       {
         elf64_addr sh_addr;
-        offset<elf64_off,B> sh_offset;
+        elf64_off sh_offset;
         elf64_xword sh_size;
       } : class == ELFCLASS64;
     };
