@@ -253,6 +253,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_cast)
       new = pkl_ast_make_integer (PKL_PASS_AST,                         \
                                   (T) PKL_AST_INTEGER_VALUE (op1));     \
       PKL_AST_TYPE (new) = ASTREF (to_type);                            \
+      PKL_AST_LOC (new) = PKL_AST_LOC (op1);                            \
                                                                         \
       pkl_ast_node_free (PKL_PASS_NODE);                                \
       PKL_PASS_NODE = new;                                              \
