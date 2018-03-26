@@ -257,8 +257,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
         type = PKL_AST_TYPE (initializer);
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (initializer),
-                     "array initializer is of the wrong type");
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (array),
+                     "array initializers should be of the same type");
           payload->errors++;
           PKL_PASS_ERROR;
         }        
