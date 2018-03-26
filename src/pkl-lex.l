@@ -308,7 +308,7 @@ D [0-9]
 
    /* XXX: handle escape characters.  */
 
-   type = pkl_ast_get_string_type (yyextra->ast);
+   type = pkl_ast_make_string_type (yyextra->ast);
 
    yylval->ast = pkl_ast_make_string (yyextra->ast, yytext + 1);
    PKL_AST_TYPE (yylval->ast) = ASTREF (type);

@@ -150,7 +150,7 @@ PKL_PHASE_END_HANDLER
 
 #define CASE_STR                                                        \
     case PKL_TYPE_STRING:                                               \
-      type = pkl_ast_get_string_type (PKL_PASS_AST);                    \
+      type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
       break;
 
 TYPIFY_BIN (add);
