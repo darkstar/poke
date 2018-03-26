@@ -1,0 +1,14 @@
+Hello there!  This file contains useful information to hack GNU poke.
+
+The bison parser in pkl-tab.y
+=============================
+
+The only purpose of the bison parser in pkl-tab.y is to do the
+syntactic analysis, build the first AST, and set the locations of the
+AST nodes.  Nothing else.  As we shall see below, any further analysis
+and transformations on the AST are performaed by the compiler phases,
+which are implemented elsewhere.
+
+Compiler Passes and Phases
+==========================
+
