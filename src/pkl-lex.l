@@ -177,7 +177,7 @@ D [0-9]
      }
    else
      {
-       yylval->ast = pkl_ast_get_identifier (yyextra->ast, yytext);
+       yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
        return IDENTIFIER;
      }
 }
