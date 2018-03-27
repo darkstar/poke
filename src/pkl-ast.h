@@ -335,13 +335,12 @@ struct pkl_ast_array_initializer
 {
   struct pkl_ast_common common;
 
-#define PKL_AST_ARRAY_NOINDEX ((size_t)-1)
-  size_t index;
+  union pkl_ast_node *index;
   union pkl_ast_node *exp;
 };
 
 pkl_ast_node pkl_ast_make_array_initializer (pkl_ast ast,
-                                             size_t index,
+                                             pkl_ast_node index,
                                              pkl_ast_node exp);
 
 

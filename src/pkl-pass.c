@@ -262,6 +262,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
                                              phases);
       break;
     case PKL_AST_ARRAY_INITIALIZER:
+      if (PKL_AST_ARRAY_INITIALIZER_INDEX (node))
+        PKL_AST_ARRAY_INITIALIZER_INDEX (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_ARRAY_INITIALIZER_INDEX (node), 0, payloads,
+                           phases);
       PKL_AST_ARRAY_INITIALIZER_EXP (node)
         = pkl_do_pass_1 (toplevel, ast,
                          PKL_AST_ARRAY_INITIALIZER_EXP (node), 0, payloads,

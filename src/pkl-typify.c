@@ -20,9 +20,9 @@
 
    `typify1' annotates expression nodes in the AST with their
    respective types, according to the rules documented in the handlers
-   below.  It also performs type-checking.  It relies on the lexer to
-   set the types for INTEGER, CHAR, STRING and other lexical entities,
-   and propagates that information up the AST.
+   below.  It also performs type-checking.  It relies on the lexer and
+   previous phases to set the types for INTEGER, CHAR, STRING and
+   other entities, and propagates that information up the AST.
 
    `typify2' determines which types are "complete" and annotates the
    type nodes accordingly, for EXP nodes whose type-completeness has

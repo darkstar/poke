@@ -530,12 +530,12 @@ pkl_ast_make_array (pkl_ast ast,
 
 pkl_ast_node
 pkl_ast_make_array_initializer (pkl_ast ast,
-                                size_t index, pkl_ast_node exp)
+                                pkl_ast_node index, pkl_ast_node exp)
 {
   pkl_ast_node initializer
     = pkl_ast_make_node (ast, PKL_AST_ARRAY_INITIALIZER);
 
-  PKL_AST_ARRAY_INITIALIZER_INDEX (initializer) = index;
+  PKL_AST_ARRAY_INITIALIZER_INDEX (initializer) = ASTREF (index);
   PKL_AST_ARRAY_INITIALIZER_EXP (initializer) = ASTREF (exp);
 
   return initializer;
@@ -751,6 +751,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       
     case PKL_AST_ARRAY_INITIALIZER:
 
+      pkl_ast_node_free (PKL_AST_ARRAY_INITIALIZER_INDEX (ast));
       pkl_ast_node_free (PKL_AST_ARRAY_INITIALIZER_EXP (ast));
       break;
 
@@ -1239,7 +1240,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("ARRAY_INITIALIZER::\n");
 
       PRINT_COMMON_FIELDS;
-      PRINT_AST_IMM (index, ARRAY_INITIALIZER_INDEX, "%zu");
+      PRINT_AST_SUBAST (index, ARRAY_INITIALIZER_INDEX);
       PRINT_AST_SUBAST (exp, ARRAY_INITIALIZER_EXP);
       break;
 

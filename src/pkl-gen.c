@@ -581,19 +581,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 PKL_PHASE_END_HANDLER
 
 /*
- * ARRAY_INITIALIZER
+ * | ARRAY_INITIALIZER_INDEX
  * | ARRAY_INITIALIZER_EXP
+ * ARRAY_INITIALIZER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_array_initializer)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_initializer)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_ast_node node = PKL_PASS_NODE;
-  pvm_val idx
-    = pvm_make_ulong (PKL_AST_ARRAY_INITIALIZER_INDEX (node));
-
-  pvm_push_val (payload->program, idx);
+  /* Nothing to do.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1003,7 +998,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_df_array_ref),
-   PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_bf_array_initializer),
+   PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_df_array_initializer),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
    PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_df_struct_ref),

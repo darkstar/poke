@@ -321,9 +321,40 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
 }
 PKL_PHASE_END_HANDLER
 
+/* Indexes in array initializers should be unsigned long.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_initializer)
+{
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node index = PKL_AST_ARRAY_INITIALIZER_INDEX (node);
+
+  /* Note that the index is optional.  */
+  if (index != NULL)
+    {
+      /* We can't use casts here, as array index initializers should
+         be INTEGER nodes, not expressions.  */
+
+      pkl_ast_node index_type = PKL_AST_TYPE (index);
+
+      if (PKL_AST_TYPE_CODE (index_type) != PKL_TYPE_INTEGRAL
+          || PKL_AST_TYPE_I_SIZE (index_type) != 64
+          || PKL_AST_TYPE_I_SIGNED (index_type) != 0)
+        {
+          pkl_ast_node_free (index_type);
+
+          index_type = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                   64, 0);
+          PKL_AST_TYPE (index) = ASTREF (index_type);
+          PKL_PASS_RESTART = 1;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_array_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_array_initializer),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_binary_int_str),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_binary_int_str),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_binary_int_str),

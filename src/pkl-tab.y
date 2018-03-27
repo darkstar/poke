@@ -454,14 +454,15 @@ array_initializer_list:
 array_initializer:
 	  expression
           	{
-                    $$ = pkl_ast_make_array_initializer (pkl_parser->ast, PKL_AST_ARRAY_NOINDEX,
-                                                         $1);
+                    $$ = pkl_ast_make_array_initializer (pkl_parser->ast,
+                                                         NULL, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
         | '.' '[' INTEGER ']' '=' expression
         	{
-                    $$ = pkl_ast_make_array_initializer (pkl_parser->ast, PKL_AST_INTEGER_VALUE ($3),
-                                                         $6);
+                    $$ = pkl_ast_make_array_initializer (pkl_parser->ast,
+                                                         $3, $6);
+                    PKL_AST_LOC ($3) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;

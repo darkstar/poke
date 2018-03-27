@@ -103,25 +103,54 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
        tmp;
        tmp = PKL_AST_CHAIN (tmp), ++ninitializer)
     {
-      size_t initializer_index = PKL_AST_ARRAY_INITIALIZER_INDEX (tmp);
+      pkl_ast_node initializer_index_node
+        = PKL_AST_ARRAY_INITIALIZER_INDEX (tmp);
+      size_t initializer_index;
       size_t elems_appended, effective_index;
-      
+
       /* Set the index of the initializer.  */
-      if (initializer_index == PKL_AST_ARRAY_NOINDEX)
+      if (initializer_index_node == NULL)
         {
-          effective_index = index;
+          pkl_ast_node initializer_index_type
+            = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+          
+          initializer_index_node
+            = pkl_ast_make_integer (PKL_PASS_AST, index);
+
+          PKL_AST_TYPE (initializer_index_node)
+            = ASTREF (initializer_index_type);
+          PKL_AST_LOC (initializer_index_node)
+            = PKL_AST_LOC (tmp);
+          
+          PKL_AST_ARRAY_INITIALIZER_INDEX (tmp)
+            = ASTREF (initializer_index_node);
+
+          PKL_PASS_RESTART = 1;
           elems_appended = 1;
         }
       else
         {
+          if (PKL_AST_CODE (initializer_index_node)
+              != PKL_AST_INTEGER)
+            {
+              pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
+                       "array initialize index should be an integer node");
+              PKL_PASS_ERROR;
+            }
+
+          initializer_index
+            = PKL_AST_INTEGER_VALUE (initializer_index_node);
+
           if (initializer_index < index)
             elems_appended = 0;
           else
             elems_appended = initializer_index - index + 1;
           effective_index = initializer_index;
+
+          PKL_AST_INTEGER_VALUE (initializer_index_node)
+            = effective_index;
         }
-      
-      PKL_AST_ARRAY_INITIALIZER_INDEX (tmp) = effective_index;
+          
       index += elems_appended;
       nelem += elems_appended;
     }
