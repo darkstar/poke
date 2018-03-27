@@ -976,7 +976,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_noimpl)
                "unhandled node #%" PRIu64 " with code %d opcode %d in code generator",
                PKL_AST_UID (node), PKL_AST_CODE (node), PKL_AST_EXP_CODE (node));
     }
-  if (PKL_AST_CODE (node) == PKL_AST_TYPE)
+  else if (PKL_AST_CODE (node) == PKL_AST_TYPE)
     {
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
                "unhandled node #%" PRIu64 " with code %d typecode %d in code generator",
