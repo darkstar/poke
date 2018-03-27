@@ -418,6 +418,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 }
 PKL_PHASE_END_HANDLER
 
+/* The array sizes in array type literals should be integer
+   expressions.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
+  pkl_ast_node nelem_type = PKL_AST_TYPE (nelem);
+
+  if (PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_INTEGRAL)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (nelem),
+                 "an array type size should be an integral value");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
@@ -431,7 +452,6 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
-
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_df_op_boolean),
@@ -441,7 +461,6 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify1_df_op_boolean),
-
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify1_df_add),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify1_df_sub),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify1_df_mul),
@@ -452,10 +471,11 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify1_df_ior),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify1_df_xor),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify1_df_band),
-
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_df_first_operand),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
+
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_df_type_array),
   };
 
 

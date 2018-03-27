@@ -289,8 +289,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_ref)
 
   if (!promote_to_ulong (PKL_PASS_AST, &index, &restart))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
-                 "an array subscript should be an integral value");
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
+               "couldn't promote array subscript");
       PKL_PASS_ERROR;
     }
 
@@ -311,8 +311,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
 
   if (!promote_to_ulong (PKL_PASS_AST, &nelem, &restart))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
-                 "an array size should be an integral value");
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
+               "couldn't promote array type size expression");
       PKL_PASS_ERROR;
     }
 
