@@ -416,6 +416,7 @@ primary:
         | primary '.' IDENTIFIER
         	{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($3) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
 	;
@@ -439,6 +440,7 @@ struct_elem:
         | '.' IDENTIFIER '=' expression
 	        {
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $2, $4);
+                    PKL_AST_LOC ($2) = @2;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
