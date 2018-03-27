@@ -29,7 +29,8 @@
    generally speaking, are not restartable.
 
    `trans1' is run immediately after parsing.
-   `trans2' is run before anal2.
+   `trans2' scans the AST and annotates nodes that are literals.
+   `trans3' is run before anal2.
 
   See the handlers below for detailed information about the specific
   transformations these phases perform.  */
@@ -126,104 +127,132 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* Annotate expression nodes to reflect whether they are constants.
-   Expressions having literals for operators are constant.
-   Expressions having only constant operators are constant.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_exp)
-{
-  pkl_ast_node exp = PKL_PASS_NODE;
-  int o, constant = PKL_AST_EXP_CONSTANT_YES;
- 
-  for (o = 0; o < PKL_AST_EXP_NUMOPS (exp); ++o)
-    {
-      pkl_ast_node op = PKL_AST_EXP_OPERAND (exp, o);
-
-      switch (PKL_AST_CODE (op))
-        {
-        case PKL_AST_INTEGER:
-        case PKL_AST_STRING:
-          /* Operand is always constant. */
-          break;
-        case PKL_AST_OFFSET:
-          {
-            /* The offset operand is constant if its magnitude is also
-               constant.  */
-            pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (op);
-            
-            constant = PKL_AST_EXP_CONSTANT (magnitude);
-            break;
-          }
-        case PKL_AST_ARRAY_REF:
-          op = PKL_AST_ARRAY_REF_ARRAY (op);
-          /* Fallthrough.  */
-        case PKL_AST_ARRAY:
-          {
-            /* The array operand is constant if all its initializers
-               are constant.  */
-            pkl_ast_node t;
-
-            for (t = PKL_AST_ARRAY_INITIALIZERS (op); t; t = PKL_AST_CHAIN (t))
-              {
-                pkl_ast_node array_initializer_exp
-                  = PKL_AST_ARRAY_INITIALIZER_EXP (t);
-
-                constant
-                  = PKL_AST_EXP_CONSTANT (array_initializer_exp);
-
-                if (constant != PKL_AST_EXP_CONSTANT_YES)
-                  break;
-              }
-            break;
-          }
-        case PKL_AST_STRUCT_REF:
-          op = PKL_AST_STRUCT_REF_STRUCT (op);
-          /* Fallthrough.  */
-        case PKL_AST_STRUCT:
-          {
-            /* The struct operand is constant if all its elements are
-               constant.  */
-            pkl_ast_node t;
-
-            for (t = PKL_AST_STRUCT_ELEMS (op); t; t = PKL_AST_CHAIN (t))
-              {
-                pkl_ast_node struct_elem_exp
-                  = PKL_AST_STRUCT_ELEM_EXP (t);
-
-                constant
-                  = PKL_AST_EXP_CONSTANT (struct_elem_exp);
-
-                if (constant != PKL_AST_EXP_CONSTANT_YES)
-                  break;
-              }
-            break;
-          }
-        case PKL_AST_CAST:
-          constant
-            = PKL_AST_EXP_CONSTANT (PKL_AST_CAST_EXP (op));
-          break;
-        case PKL_AST_EXP:
-          constant = PKL_AST_EXP_CONSTANT (op);
-          break;
-        default:
-          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (op),
-                   "unexpected code %d in node #%" PRIu64 " in expression",
-                   PKL_AST_CODE (op), PKL_AST_UID (op));
-          break;
-        }
-    }
-
-  PKL_AST_EXP_CONSTANT (exp) = constant;
-}
-PKL_PHASE_END_HANDLER
-
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans1_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_trans1_df_exp),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
+  };
+
+
+
+/* Annotate expression nodes to reflect whether they are literals.
+   Entities created by the lexer (INTEGER, STRING, etc) already have
+   this attribute set if needed.
+
+   Expressions having literals for operators are constant.
+   Expressions having only constant operators are constant.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_exp)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  int o, literal_p = 1;
+ 
+  for (o = 0; o < PKL_AST_EXP_NUMOPS (exp); ++o)
+    {
+      pkl_ast_node op = PKL_AST_EXP_OPERAND (exp, o);
+
+      literal_p &= PKL_AST_LITERAL_P (op);
+      if (!literal_p)
+        break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* An offset is a literal if its magnitude is also a literal.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_offset)
+{
+  pkl_ast_node magnitude
+    = PKL_AST_OFFSET_MAGNITUDE (PKL_PASS_NODE);
+
+  PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (magnitude);
+}
+PKL_PHASE_END_HANDLER
+
+/* An array is a literal if all its initializers are literal.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_array)
+{
+  int literal_p = 1;
+  pkl_ast_node t, array = PKL_PASS_NODE;
+
+  for (t = PKL_AST_ARRAY_INITIALIZERS (array); t;
+       t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node array_initializer_exp
+        = PKL_AST_ARRAY_INITIALIZER_EXP (t);
+      
+      literal_p &= PKL_AST_LITERAL_P (array_initializer_exp);
+      if (!literal_p)
+        break;
+    }
+
+  PKL_AST_LITERAL_P (array) = literal_p;
+}
+PKL_PHASE_END_HANDLER
+
+/* An array ref is a literal if the referred array element is also a
+   literal.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_array_ref)
+{
+  pkl_ast_node array = PKL_AST_ARRAY_REF_ARRAY (PKL_PASS_NODE);
+  PKL_AST_LITERAL_P (PKL_PASS_NODE)  = PKL_AST_LITERAL_P (array);
+}
+PKL_PHASE_END_HANDLER
+
+/* A struct is a literal if all its element values are literals.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_struct)
+{
+  pkl_ast_node t;
+  int literal_p = 1;
+  
+  for (t = PKL_AST_STRUCT_ELEMS (PKL_PASS_NODE); t;
+       t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node struct_elem_exp = PKL_AST_STRUCT_ELEM_EXP (t);
+
+      literal_p &= PKL_AST_LITERAL_P (struct_elem_exp);
+      if (!literal_p)
+        break;
+    }
+
+  PKL_AST_LITERAL_P (PKL_PASS_NODE) = literal_p;
+}
+PKL_PHASE_END_HANDLER
+
+/* A struct ref is a literal if the value of the referred element is
+   also a literal.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_struct_ref)
+{
+  pkl_ast_node stct = PKL_AST_STRUCT_REF_STRUCT (PKL_PASS_NODE);
+  PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (stct);
+}
+PKL_PHASE_END_HANDLER
+
+/* A cast is considered a literal if the value of the referred element
+   is also a literal.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_cast)
+{
+  PKL_AST_LITERAL_P (PKL_PASS_NODE)
+    = PKL_AST_LITERAL_P (PKL_AST_CAST_EXP (PKL_PASS_NODE));
+}
+PKL_PHASE_END_HANDLER
+
+struct pkl_phase pkl_phase_trans2 =
+  {
+   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_trans2_df_exp),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans2_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans2_df_array),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_trans2_df_array_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans2_df_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_trans2_df_struct_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_trans2_df_cast),
   };
 
 
@@ -231,7 +260,7 @@ struct pkl_phase pkl_phase_trans1 =
 /* SIZEOF nodes whose operand is a complete type should be replaced
    with an offset.  The type should be complete.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_op_sizeof)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -284,8 +313,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
-struct pkl_phase pkl_phase_trans2 =
+struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans2_df_op_sizeof),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_df_op_sizeof),
   };

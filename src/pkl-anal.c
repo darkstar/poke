@@ -141,27 +141,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_df_default)
 }
 PKL_PHASE_END_HANDLER
 
-/* Every expression node should be annotated with a `constant'
-   attribute.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_exp)
-{
-  if (PKL_AST_EXP_CONSTANT (PKL_PASS_NODE)
-      == PKL_AST_EXP_CONSTANT_UNKNOWN)
-    {
-      pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
-               "expression node #%" PRIu64 " has no `constant' set",
-               PKL_AST_UID (PKL_PASS_NODE));
-      PKL_PASS_ERROR;
-    }
-}
-PKL_PHASE_END_HANDLER
-
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal1_df_exp),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
    PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };

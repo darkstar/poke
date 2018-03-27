@@ -389,19 +389,13 @@ pkl_ast_node pkl_ast_make_struct_elem (pkl_ast ast,
    expressions and another for binary expressions.  */
 
 #define PKL_AST_EXP_CODE(AST) ((AST)->exp.code)
-#define PKL_AST_EXP_CONSTANT(AST) ((AST)->exp.constant)
 #define PKL_AST_EXP_NUMOPS(AST) ((AST)->exp.numops)
 #define PKL_AST_EXP_OPERAND(AST, I) ((AST)->exp.operands[(I)])
-
-#define PKL_AST_EXP_CONSTANT_UNKNOWN 0
-#define PKL_AST_EXP_CONSTANT_YES 1
-#define PKL_AST_EXP_CONSTANT_NO 2
 
 struct pkl_ast_exp
 {
   struct pkl_ast_common common;
   enum pkl_ast_op code;
-  int constant;
   uint8_t numops : 8;
   union pkl_ast_node *operands[2];
 };

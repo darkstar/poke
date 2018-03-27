@@ -470,9 +470,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_array)
 
   int complete = PKL_AST_TYPE_COMPLETE_NO;
 
-  if (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
-      || (PKL_AST_CODE (nelem) == PKL_AST_EXP
-          && PKL_AST_EXP_CONSTANT (nelem) == PKL_AST_EXP_CONSTANT_YES))
+  if (PKL_AST_LITERAL_P (nelem))
     complete = PKL_AST_TYPE_COMPLETE_YES;
 
   PKL_AST_TYPE_COMPLETE (type) = complete;
@@ -523,9 +521,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
 
         int complete = PKL_AST_TYPE_COMPLETE_NO;
 
-        if (PKL_AST_CODE (nelem) == PKL_AST_INTEGER
-            || (PKL_AST_CODE (nelem) == PKL_AST_EXP
-                && PKL_AST_EXP_CONSTANT (nelem) == PKL_AST_EXP_CONSTANT_YES))
+        if (PKL_AST_LITERAL_P (nelem))
           complete = PKL_AST_TYPE_COMPLETE_YES;
 
         PKL_AST_TYPE_COMPLETE (op) = complete;

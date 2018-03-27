@@ -31,5 +31,6 @@ typedef struct pkl_trans_payload *pkl_trans_payload;
 
 extern struct pkl_phase pkl_phase_trans1;
 extern struct pkl_phase pkl_phase_trans2;
+extern struct pkl_phase pkl_phase_trans3;
 
 #endif /* PKL_TRANS_H */

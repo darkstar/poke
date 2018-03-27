@@ -49,6 +49,7 @@ pkl_compile_buffer (pvm_program *prog,
 
   struct pkl_trans_payload trans1_payload = { 0 };
   struct pkl_trans_payload trans2_payload = { 0 };
+  struct pkl_trans_payload trans3_payload = { 0 };
 
   struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_typify_payload typify2_payload = { 0 };
@@ -103,9 +104,10 @@ pkl_compile_buffer (pvm_program *prog,
             &pkl_phase_anal1,
             &pkl_phase_typify1,
             &pkl_phase_promo,
+            &pkl_phase_trans2,
             /*            &pkl_phase_fold,*/
             &pkl_phase_typify2,
-            &pkl_phase_trans2,
+            &pkl_phase_trans3,
             &pkl_phase_anal2,
             NULL,
           };
@@ -114,9 +116,10 @@ pkl_compile_buffer (pvm_program *prog,
             &anal1_payload,
             &typify1_payload,
             NULL, /* promo */
+            &trans2_payload,
             /*  NULL,*/ /* fold */
             &typify2_payload,
-            &trans2_payload,
+            &trans3_payload,
             &anal2_payload,
           };
 
@@ -131,6 +134,7 @@ pkl_compile_buffer (pvm_program *prog,
 
       if (trans1_payload.errors > 0
           || trans2_payload.errors > 0
+          || trans3_payload.errors > 0
           || anal1_payload.errors > 0
           || anal2_payload.errors > 0
           || typify1_payload.errors > 0
