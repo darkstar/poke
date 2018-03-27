@@ -28,15 +28,22 @@
 /* This file implements several transformation compiler phases which,
    generally speaking, are not restartable.
 
-   `trans1' is run immediately after parsing.
+   `trans1' finishes ARRAY, STRUCT and TYPE_STRUCT nodes by
+            determining its number of elements and characteristics.
+            It should be executed right after parsing.
+
    `trans2' scans the AST and annotates nodes that are literals.
-   `trans3' is run before anal2.
+            Henceforth any other phase relying on this information
+            should be executed after trans2.
 
-  See the handlers below for detailed information about the specific
-  transformations these phases perform.  */
+   `trans3' handles nodes that can be replaced for something else at
+            compilation-time: SIZEOF for complete types.  This phase
+            is intended to be executed short before code generation.
 
-/* The following handler is used in both trans1 and tran2 and
-   initializes the phase payload.  */
+   See the handlers below for details.  */
+
+/* The following handler is used in all trans phases and initializes
+   the phase payload.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans_bf_program)
 {
@@ -246,6 +253,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans2 =
   {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_trans2_df_exp),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans2_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans2_df_array),

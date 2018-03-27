@@ -1,5 +1,12 @@
 Hello there!  This file contains useful information to hack GNU poke.
 
+Source Files
+============
+
+The pkl-* files conform the Poke Compiler.
+poke.[ch] and pkl-* conform the poke program.
+pvm* files conform the Poke Virtual Machine.
+
 The bison parser in pkl-tab.y
 =============================
 
@@ -12,21 +19,22 @@ which are implemented elsewhere.
 Compiler Passes and Phases
 ==========================
 
-These are the phases currently implemented in the poke compiler:
+These are the phases currently implemented in the poke compiler (the
+phases marked with a * are optional):
 
     [parser]
     trans1     Transformation phase 1.
     anal1      Analysis phase 1.
     typify1    Type analysis and transformation 1.
     promo      Operand promotion phase.
-    fold       Constant folding.
-    typify2    Type analysis and transformation 2.
     trans2     Transformation phase 2.
+  * fold       Constant folding.
+    typify2    Type analysis and transformation 2.
+    trans3     Transformation phase 3.
     anal2      Analysis phase 2.
     gen        Code generation.
 
 The phases above are organized in two passes:
 
-    Pass1: trans1 anal1 typify1 promo fold typify2 trans2 anal2
+    Pass1: trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
     Pass2: gen
-    
