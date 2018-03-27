@@ -127,7 +127,7 @@ pkl_compile_buffer (pvm_program *prog,
       void *backend_payloads[] = { &gen_payload };
 
       /* XXX */
-      /* pkl_ast_print (stdout, ast->ast); */
+      /* pkl_ast_print (stdout, ast->ast);*/
       
       if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
         goto error;
@@ -142,7 +142,7 @@ pkl_compile_buffer (pvm_program *prog,
         goto error;
 
       /* XXX */
-      /* pkl_ast_print (stdout, ast->ast); */
+      pkl_ast_print (stdout, ast->ast);
       
       if (!pkl_do_pass (ast, backend_phases, backend_payloads))
         goto error;
