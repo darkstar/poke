@@ -23,6 +23,7 @@
 #define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
+#include "pk-term.h"
 #include "pk-cmd.h"
 
 /* Escape sequences for changing text attributes on the terminal.  */
@@ -98,7 +99,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
                    ? '.'
                    : isprint (c) ? c : '?');
               
-              printf ("%02x", c + 0u);
+              printf (GREEN "%02x" NOATTR, c + 0u);
             }
 
           if (i & 0x1)
@@ -106,7 +107,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
         }
       
       if (i)
-        puts (string);
+        printf ("%s%s%s\n", KYEL, string, KNONE);
     }
   /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
 
