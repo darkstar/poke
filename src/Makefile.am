@@ -34,7 +34,6 @@ poke_SOURCES = poke.c poke.h \
                pkl-gen.h pkl-gen.c \
                pkl-parser.h pkl-parser.c \
                pvm.h pvm.c \
-               pvm-bind.h pvm-bind.c \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c
@@ -42,7 +41,7 @@ AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
-poke_CFLAGS = -Wall $(BDW_GC_CFLAGS)
+poke_CFLAGS = -Wall -Werror $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE) $(BDW_GC_LIBS)
 poke_LDFLAGS =
