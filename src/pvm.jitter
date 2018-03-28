@@ -76,14 +76,14 @@ printer-c
     void
     pvm_literal_printer_hi (FILE *out, jitter_uint hi)
     {
-      fprintf (out, "%%hi(0x%x)", hi);
+      fprintf (out, "%%hi(0x%lx)", hi);
       printer_hi = hi; /* This sucks */
     }
 
     void
     pvm_literal_printer_lo (FILE *out, jitter_uint lo)
     {
-      fprintf (out, "%%lo(0x%x) (", lo);
+      fprintf (out, "%%lo(0x%lx) (", lo);
       pvm_print_val (out,
                     ((pvm_val) printer_hi << 32) | lo,
                     10);
