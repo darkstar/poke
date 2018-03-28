@@ -26,6 +26,8 @@
 %option bison-bridge
 %option header-file="pkl-lex.h"
 %option bison-locations
+%option noinput
+%option nounput
    /* %option yylineno */
 %option extra-type="struct pkl_parser *"
 
