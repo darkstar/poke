@@ -73,7 +73,7 @@
    Note that if a given node class falls in several categories as
    implemented in the handlers tables, the more general handler will
    be executed first, followed by the more particular handlers.  For
-   example, for a PKL_AST_TYPE node with cype code PKL_TYPE_ARRAY, the
+   example, for a PKL_AST_TYPE node with type code PKL_TYPE_ARRAY, the
    handler in `type_handlers' will be invoked first, followed by the
    handler in `code_handlers'.
 
