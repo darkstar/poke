@@ -16,6 +16,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
-load_lib ../lib/poke.exp
+set test addi
+poke_test_cmd "print 3 + 4\n" "7"
 
-poke_test "--version" {.*GNU poke [0-9]+.[0-9]+.*} "getting poke version"
+
+# Promotion of operands
+
+set test addl
+poke_test_cmd "print 3L + 4L\n" "7L"
+
+set test promoaddil
+poke_test_cmd "print 3 + 4L\n" "7L"
+
+set test promoaddli
+poke_test_cmd "print 3L + 4\n" "7L"
+
+# Arrays
+
+set test simplearray
+poke_test_cmd "print \[0,1,2\]\n" "\[0,1,2\]"
+
+set test arrayref
+poke_test_cmd "print \[0,1,2\]\[1\]\n" "1"

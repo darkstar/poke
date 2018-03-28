@@ -34,49 +34,66 @@ if ![info exists POKE] {
     set POKE ${objdir}/../src/poke
 }
 
-# poke_run -- run poke with the given options and return its output.
+# prompt is the poke prompt to expect from the program.  As this can
+# change we can put it in a variable that can be easily modified later.
 
-proc poke_run {options} {
-
-
-    return $output
+if ![info exists prompt] then {
+    set poke_prompt "\\(poke\\)"
 }
 
-# poke_test OPTIONS PATTERN [MESSAGE] -- run GNU poke with the given
-# options, and try to match its standard output with the given regexp.
-# If it does not match then the test is failed and a proper diagnostic
-# message is printed to the standard output.
-#
-# Returns:
-#    1 if the test failed,
-#    0 if the test passes,
-#   -1 if there was an internal error.
+set timeout 3
 
-proc poke_test {args} {
+#
+# poke_exit -- exit poke and cleanup
+#
+proc poke_exit {} {
+    send "exit\n"
+}
+
+
+proc poke_version {} {}
+
+proc poke_start {} {
     global POKE
+    global poke_prompt
+    global spawn_id
+
+    spawn $POKE
+    expect {
+        -re "$poke_prompt $" { }
+        timeout { perror "Failed to spawn $POKE (timeout)"; exit 1 }
+    }
+}
+
+proc poke_test_cmd {cmd pattern} {
+    global poke_prompt
+    global spawn_id
     global test
 
-    # Get the arguments.  MESSAGE is optional.  If it is not specified
-    # then we use the options as the message.
-    if [llength $args]>2 then {
-	set message [lindex $args 2]
-    } else {
-	set message "poke [lindex $args 0]"
-    }
-    set options [lindex $args 0]
-    set pattern [lindex $args 1]
-
-    # Run poke with the given options and test the result.
-    eval spawn $POKE $options
+    poke_start
+    
+    send $cmd
     expect {
-        -re "^$pattern\(\r?\n\)?$" {
-            pass $message
-        } 
-        default {
-            fail $message
+        -ex "internal compiler error" {
+            fail "$test (ICE)"
+        }
+        -re "error:" {
+            fail "$test (compilation error)"
+        }
+        -re "warning:" {
+            fail "$test (compilation warning)"
+        }
+
+        -re "\r\n$pattern\r\n$poke_prompt $" { pass "$test" }
+
+        -re "$poke_prompt $" {
+            fail "$test (bad match)"
+        }
+        
+        timeout {
+        fail "$test (timeout)"
         }
     }
-    catch close
 
-    return 0
+    poke_exit
 }
