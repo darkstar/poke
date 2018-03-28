@@ -35,7 +35,7 @@
    `analf' is run in the backend pass, right before gen.  Its main
    purpose is to determine that every node that is traversed
    optionally in do_pass but that is required by the code generator
-   exits.  This avoids the codegen to generate invalid code silently.
+   exists.  This avoids the codegen to generate invalid code silently.
 
    See the handlers below for detailed information about what these
    phases check for.  */
