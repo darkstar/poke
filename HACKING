@@ -128,9 +128,10 @@ phases marked with a * are optional):
     typify2    Type analysis and transformation 2.
     trans3     Transformation phase 3.
     anal2      Analysis phase 2.
+    analf      Analysis final phase.
     gen        Code generation.
 
 The phases above are organized in two passes:
 
     Pass1: trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
-    Pass2: gen
+    Pass2: analf gen

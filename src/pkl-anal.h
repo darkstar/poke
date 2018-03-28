@@ -31,5 +31,6 @@ typedef struct pkl_anal_payload *pkl_anal_payload;
 
 extern struct pkl_phase pkl_phase_anal1;
 extern struct pkl_phase pkl_phase_anal2;
+extern struct pkl_phase pkl_phase_analf;
 
 #endif /* PKL_ANAL_H */

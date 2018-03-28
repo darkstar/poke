@@ -46,6 +46,7 @@ pkl_compile_buffer (pvm_program *prog,
 
   struct pkl_anal_payload anal1_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
+  struct pkl_anal_payload analf_payload = { 0 };
 
   struct pkl_trans_payload trans1_payload = { 0 };
   struct pkl_trans_payload trans2_payload = { 0 };
@@ -64,89 +65,67 @@ pkl_compile_buffer (pvm_program *prog,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  if (0) /* Multi-pass.  */
-    {
-      struct pkl_phase *anal1_pass[] = { &pkl_phase_anal1, NULL };
-      void *anal1_payloads[] = { &anal1_payload };
-      struct pkl_phase *promo_pass[] = { &pkl_phase_promo, NULL };
-      struct pkl_phase *fold_pass[] =  { &pkl_phase_fold, NULL };
-      struct pkl_phase *gen_pass[] = { &pkl_phase_gen, NULL };
-      void *gen_payloads[] = { &gen_payload };
+  {
+    struct pkl_phase *frontend_phases[]
+      = { &pkl_phase_trans1,
+          &pkl_phase_anal1,
+          &pkl_phase_typify1,
+          &pkl_phase_promo,
+          &pkl_phase_trans2,
+          /*            &pkl_phase_fold,*/
+          &pkl_phase_typify2,
+          &pkl_phase_trans3,
+          &pkl_phase_anal2,
+          NULL,
+        };
 
+    void *frontend_payloads[]
+      = { &trans1_payload,
+          &anal1_payload,
+          &typify1_payload,
+          NULL, /* promo */
+          &trans2_payload,
+          /*  NULL,*/ /* fold */
+          &typify2_payload,
+          &trans3_payload,
+          &anal2_payload,
+        };
 
-      pkl_ast_print (stdout, ast->ast);
+    struct pkl_phase *backend_phases[]
+      = { &pkl_phase_analf,
+          &pkl_phase_gen,
+          NULL
+        };
 
-      fprintf (stdout, "===========  ANALYZING 1 ======\n");
-      if (!pkl_do_pass (ast, anal1_pass, anal1_payloads))
-        goto error;
+    void *backend_payloads[]
+      = { &analf_payload,
+          &gen_payload
+        };
 
-      if (anal1_payload.errors > 0)
-        goto error;
-
-      fprintf (stdout, "===========  PROMOTING ======\n");
-      if (!pkl_do_pass (ast, promo_pass, NULL))
-        goto error;
-      pkl_ast_print (stdout, ast->ast);
+    /* XXX */
+    /* pkl_ast_print (stdout, ast->ast);*/
       
-      fprintf (stdout, "===========  CONSTANT FOLDING ======\n");
-      if (!pkl_do_pass (ast, fold_pass, NULL))
-        goto error;
-      pkl_ast_print (stdout, ast->ast);
+    if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
+      goto error;
+    
+    if (trans1_payload.errors > 0
+        || trans2_payload.errors > 0
+        || trans3_payload.errors > 0
+        || anal1_payload.errors > 0
+        || anal2_payload.errors > 0
+        || typify1_payload.errors > 0
+        || typify2_payload.errors > 0)
+      goto error;
 
-      fprintf (stdout, "===========  GENERATING ======\n");
-      if (!pkl_do_pass (ast, gen_pass, gen_payloads))
-        goto error;
-    }
-  else
-    {
-      struct pkl_phase *frontend_phases[]
-        = { &pkl_phase_trans1,
-            &pkl_phase_anal1,
-            &pkl_phase_typify1,
-            &pkl_phase_promo,
-            &pkl_phase_trans2,
-            /*            &pkl_phase_fold,*/
-            &pkl_phase_typify2,
-            &pkl_phase_trans3,
-            &pkl_phase_anal2,
-            NULL,
-          };
-      void *frontend_payloads[]
-        = { &trans1_payload,
-            &anal1_payload,
-            &typify1_payload,
-            NULL, /* promo */
-            &trans2_payload,
-            /*  NULL,*/ /* fold */
-            &typify2_payload,
-            &trans3_payload,
-            &anal2_payload,
-          };
-
-      struct pkl_phase *backend_phases[] = { &pkl_phase_gen, NULL };
-      void *backend_payloads[] = { &gen_payload };
-
-      /* XXX */
-      /* pkl_ast_print (stdout, ast->ast);*/
+    /* XXX */
+    /* pkl_ast_print (stdout, ast->ast); */
       
-      if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
-        goto error;
+    if (!pkl_do_pass (ast, backend_phases, backend_payloads))
+      goto error;
 
-      if (trans1_payload.errors > 0
-          || trans2_payload.errors > 0
-          || trans3_payload.errors > 0
-          || anal1_payload.errors > 0
-          || anal2_payload.errors > 0
-          || typify1_payload.errors > 0
-          || typify2_payload.errors > 0)
-        goto error;
-
-      /* XXX */
-      /* pkl_ast_print (stdout, ast->ast); */
-      
-      if (!pkl_do_pass (ast, backend_phases, backend_payloads))
-        goto error;
-    }
+    if (analf_payload.errors > 0)
+      goto error;
+  }
 
   pkl_ast_free (ast);
 

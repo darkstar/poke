@@ -30,7 +30,12 @@
    restartable.
 
    `anal1' is run immediately after trans1.
-   `anal2' is run after constant folding and before gen.
+   `anal2' is run after constant folding.
+
+   `analf' is run in the backend pass, right before gen.  Its main
+   purpose is to determine that every node that is traversed
+   optionally in do_pass but that is required by the code generator
+   exits.  This avoids the codegen to generate invalid code silently.
 
    See the handlers below for detailed information about what these
    phases check for.  */
@@ -233,4 +238,27 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
    PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
+  };
+
+
+
+/* Make sure that every array initializer features an index at this
+   point.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_array_initializer)
+{
+  if (!PKL_AST_ARRAY_INITIALIZER_INDEX (PKL_PASS_NODE))
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
+               "array initializer node #%" PRIu64 " has no index",
+               PKL_AST_UID (PKL_PASS_NODE));
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+struct pkl_phase pkl_phase_analf =
+  {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_analf_df_array_initializer),
   };
