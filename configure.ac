@@ -88,8 +88,7 @@ AC_CONFIG_FILES(Makefile
                 src/Makefile
                 doc/Makefile
                 po/Makefile.in
-                testsuite/Makefile
-                testsuite/poke.base/Makefile)
+                testsuite/Makefile)
 AC_OUTPUT
 
 dnl End of configure.ac

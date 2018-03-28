@@ -1,4 +1,4 @@
-# base.exp - Basic tests for GNU poke.
+# pkl.exp - Compiler tests for poke
 #
 #   Copyright (C) 2018 Jose E. Marchesi
 #
@@ -18,7 +18,6 @@
 
 set test addi
 poke_test_cmd "print 3 + 4\n" "7"
-
 
 # Promotion of operands
 
