@@ -72,15 +72,15 @@ proc poke_test_cmd {cmd pattern} {
 
     poke_start
     
-    send $cmd
+    send "$cmd\n"
     expect {
         -ex "internal compiler error" {
             fail "$test (ICE)"
         }
-        -re "error:" {
+        -re "\[0-9\]+:\[0-9\]+: error:" {
             fail "$test (compilation error)"
         }
-        -re "warning:" {
+        -re "\[0-9\]+:\[0-9\]+: warning:" {
             fail "$test (compilation warning)"
         }
 
