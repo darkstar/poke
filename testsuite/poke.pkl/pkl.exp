@@ -55,3 +55,16 @@ poke_test_cmd "print \[0,1,2\]" {\[0,1,2\]}
 
 set test arrayref
 poke_test_cmd "print \[0,1,2\]\[1\]" "1"
+
+# Offsets
+
+set test offsetB
+poke_test_cmd "print \[12 B\]" {\[12 B\]}
+
+set test offsetb
+poke_test_cmd "print \[12 b\]" {\[12 b\]}
+
+set test offset_exp
+poke_test_cmd "print \[1 + 3 B\]" {\[4 B\]}
+
+
