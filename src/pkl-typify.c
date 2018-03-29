@@ -267,12 +267,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
   /* Build the type of the array. */
   array_nelem = pkl_ast_make_integer (PKL_PASS_AST,
                                       PKL_AST_ARRAY_NELEM (array));
+  PKL_AST_LOC (array_nelem) = PKL_AST_LOC (PKL_PASS_NODE);
+
   array_nelem_type = pkl_ast_make_integral_type (PKL_PASS_AST,
                                                  64, 0);
+  PKL_AST_LOC (array_nelem_type) = PKL_AST_LOC (PKL_PASS_NODE);
+  
   PKL_AST_TYPE (array_nelem) = ASTREF (array_nelem_type);
 
   type = pkl_ast_make_array_type (PKL_PASS_AST,
                                   array_nelem, type);
+  PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
+  
   PKL_AST_TYPE (array) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER

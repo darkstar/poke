@@ -379,16 +379,19 @@ primary:
                 {
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
                 }
         | CHAR
                 {
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
                 }
         | STR
                 {
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
                 } 
         | '(' expression ')'
         	{
@@ -417,6 +420,7 @@ primary:
         	{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($3) = @3;
+                    PKL_AST_LOC (PKL_AST_TYPE ($3)) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
 	;
@@ -441,6 +445,7 @@ struct_elem:
 	        {
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $2, $4);
                     PKL_AST_LOC ($2) = @2;
+                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
@@ -465,6 +470,7 @@ array_initializer:
                     $$ = pkl_ast_make_array_initializer (pkl_parser->ast,
                                                          $3, $6);
                     PKL_AST_LOC ($3) = @3;
+                    PKL_AST_LOC (PKL_AST_TYPE ($3)) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
@@ -514,6 +520,8 @@ struct_elem_type:
           	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
                     PKL_AST_LOC ($$) = @$;
+                    PKL_AST_LOC ($2) = @2;
+                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                 }
         | type_specifier ';'
         	{
