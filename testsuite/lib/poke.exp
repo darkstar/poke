@@ -58,7 +58,7 @@ proc poke_start {} {
     global poke_prompt
     global spawn_id
 
-    send_user "Executing $POKE --quiet"
+    #send_user "Executing $POKE --quiet\n"
     
     spawn $POKE --quiet
     expect {
