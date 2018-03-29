@@ -56,6 +56,17 @@ poke_test_cmd "print \[0,1,2\]" {\[0,1,2\]}
 set test arrayref
 poke_test_cmd "print \[0,1,2\]\[1\]" "1"
 
+# Sizeof TYPE
+
+set test sizeofint
+poke_test_cmd "print sizeof int" {\[32UL b\]}
+
+set test sizeoflong
+poke_test_cmd "print sizeof long" {\[64UL b\]}
+
+set test sizeofarraytype
+poke_test_cmd "print sizeof int\[2\]" {\[64UL b\]}
+
 # Offsets
 
 set test offsetB
