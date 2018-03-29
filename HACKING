@@ -103,6 +103,22 @@ Commands:
 - src/pk-print.c
 - src/pk-vm.c
 
+Test Suite
+----------
+
+Target-specific dejagnu configuration:
+
+- testsuite/config/default.exp
+- testsuite/config/unix.exp
+
+Utilities to be used in poke tests:
+
+- testsuite/lib/poke.exp
+
+Compiler testsuite:
+
+- poke.pkl/pkl.exp
+
 The bison parser in pkl-tab.y
 =============================
 
