@@ -41,6 +41,12 @@
 
 int poke_interactive_p;
 
+/* The following global indicates whether poke should be as terse as
+   possible in its output.  This is useful when running poke from
+   other programs.  */
+
+int poke_quiet_p;
+
 /* This is used by commands to indicate the repl that it must
    exit.  */
 
@@ -52,13 +58,15 @@ int poke_exit_code;
 enum
 {
   HELP_ARG,
-  VERSION_ARG
+  VERSION_ARG,
+  QUIET_ARG,
 };
 
 static const struct option long_options[] =
 {
   {"help", no_argument, NULL, HELP_ARG},
   {"version", no_argument, NULL, VERSION_ARG},
+  {"quiet", no_argument, NULL, QUIET_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -79,6 +87,7 @@ Interactive editor for binary files.\n"), stdout);
   /* TRANSLATORS: --help output, gnunity arguments.
      no-wrap */
   fputs (_("\
+      --quiet                         be as terse as possible.\n\
       --help                          print a help message and exit.\n\
       --version                       show version and exit.\n"),
          stdout);
@@ -154,6 +163,9 @@ parse_args (int argc, char *argv[])
           pk_print_version ();
           exit (EXIT_SUCCESS);
           break;
+        case QUIET_ARG:
+          poke_quiet_p = 1;
+          break;
         default:
           exit (EXIT_FAILURE);
         }
@@ -175,8 +187,11 @@ parse_args (int argc, char *argv[])
 static void
 repl ()
 {
-  pk_print_version ();
-  puts ("");
+  if (!poke_quiet_p)
+    {
+      pk_print_version ();
+      puts ("");
+    }
 
   while (!poke_exit_p)
     {
