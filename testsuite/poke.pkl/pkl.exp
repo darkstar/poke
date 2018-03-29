@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
-# Integers
+# Integers and operations
 
 set test addii
 poke_test_cmd "print 3 + 4" "7"
@@ -39,8 +39,14 @@ poke_test_cmd "print 3h + 4" "7"
 set test addih
 poke_test_cmd "print 3 + 4h" "7"
 
-set test addhh
-poke_test_cmd "print 3h + 4h" "7H"
+set test addbb
+poke_test_cmd "print 3b + 4b" "7B"
+
+set test addbi
+poke_test_cmd "print 3b + 4" "7"
+
+set test addib
+poke_test_cmd "print 3 + 4b" "7"
 
 # Arrays
 
