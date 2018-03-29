@@ -58,7 +58,9 @@ proc poke_start {} {
     global poke_prompt
     global spawn_id
 
-    spawn $POKE
+    send_user "Executing $POKE --quiet"
+    
+    spawn $POKE --quiet
     expect {
         -re "$poke_prompt $" { }
         timeout { perror "Failed to spawn $POKE (timeout)"; exit 1 }

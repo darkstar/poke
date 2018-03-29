@@ -40,7 +40,7 @@ set test addih
 poke_test_cmd "print 3 + 4h" "7"
 
 set test addhh
-poke_test_cmd "print 3 + 4h" "7H"
+poke_test_cmd "print 3h + 4h" "7H"
 
 # Arrays
 
