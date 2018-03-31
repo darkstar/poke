@@ -58,25 +58,28 @@ poke_test_cmd "print \[0,1,2\]\[1\]" "1"
 
 # Sizeof TYPE
 
-set test sizeofint
+set test sizeof-type-int
 poke_test_cmd "print sizeof int" {\[32UL b\]}
 
-set test sizeoflong
+set test sizeof-type-long
 poke_test_cmd "print sizeof long" {\[64UL b\]}
 
-set test sizeofarraytypeul
+set test sizeof-array-type-ul
 poke_test_cmd "print sizeof int\[2UL\]" {\[64UL b\]}
 
-set test sizeofarraytype
+set test sizeof-array-type
 poke_test_cmd "print sizeof int\[2\]" {\[64UL b\]}
 
-set test sizeofarrayarray
+set test sizeof-array-of-array-type
 poke_test_cmd "print sizeof int\[2\]\[2\]" {\[128UL b\]}
 
-set test sizeofstructempty
+set test sizeof-array-of-struct
+poke_test_cmd "print sizeof struct {int;int;}\[2\]" {\[128UL b\]}
+
+set test sizeof-struct-empty
 poke_test_cmd "print sizeof struct {}" {\[0UL b\]}
 
-set test sizeofstruct
+set test sizeof-struct
 poke_test_cmd "print sizeof struct { int; long; }" {\[96UL b\]}
 
 set test sizeof-struct-with-struct
