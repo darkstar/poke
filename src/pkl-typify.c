@@ -369,7 +369,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
                                      struct_elem_name,
                                      struct_elem_exp_type);
 
-  /* XXX: .y used a type dup for this.  why? */
   PKL_AST_TYPE (struct_elem) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
