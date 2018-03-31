@@ -455,7 +455,7 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
   pkl_ast_node res_type
     = pkl_ast_make_integral_type (ast, 64, 0);
   PKL_AST_LOC (res_type) = PKL_AST_LOC (type);
-  
+
   /* This function should only be called on complete types.  */
   assert (PKL_AST_TYPE_COMPLETE (type)
           == PKL_AST_TYPE_COMPLETE_YES);

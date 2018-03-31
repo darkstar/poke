@@ -228,7 +228,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
                                 magnitude_type,
                                 PKL_AST_OFFSET_UNIT (offset));
 
-  printf ("YYY %p\n", magnitude_type);
   PKL_AST_LOC (type) = PKL_AST_LOC (offset);
   PKL_AST_TYPE (offset) = ASTREF (type);
 }
@@ -279,8 +278,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
   type = pkl_ast_make_array_type (PKL_PASS_AST,
                                   array_nelem, type);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
-  
   PKL_AST_TYPE (array) = ASTREF (type);
+
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -490,9 +490,9 @@ struct pkl_phase pkl_phase_typify1 =
 /* An array type is considered complete if the number of elements
    contained in the array is known, and it is constant.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_array)
 {
-  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
+  pkl_ast_node type = PKL_PASS_NODE;
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
 
   int complete = PKL_AST_TYPE_COMPLETE_NO;
@@ -508,10 +508,9 @@ PKL_PHASE_END_HANDLER
    complete.  XXX: for the time being only simple structs are
    supported, which are always complete.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_struct)
 {
-  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
-  PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_YES;
+  PKL_AST_TYPE_COMPLETE (PKL_PASS_NODE) = PKL_AST_TYPE_COMPLETE_YES;
 }
 PKL_PHASE_END_HANDLER
 
@@ -563,7 +562,7 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify2_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify2_df_struct),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type_array),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type_struct),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),
   };

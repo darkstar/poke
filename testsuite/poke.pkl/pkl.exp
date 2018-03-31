@@ -70,6 +70,9 @@ poke_test_cmd "print sizeof int\[2UL\]" {\[64UL b\]}
 set test sizeofarraytype
 poke_test_cmd "print sizeof int\[2\]" {\[64UL b\]}
 
+set test sizeofarrayarray
+poke_test_cmd "print sizeof int\[2\]\[2\]" {\[128UL b\]}
+
 set test sizeofstructempty
 poke_test_cmd "print sizeof struct {}" {\[0UL b\]}
 
@@ -78,7 +81,11 @@ poke_test_cmd "print sizeof struct { int; long; }" {\[96UL b\]}
 
 set test sizeof-struct-with-struct
 poke_test_cmd "print sizeof struct {int; struct {int;int;};}" \
-    {\[92UL b\]}
+    {\[96UL b\]}
+
+set test sizeof-struct-with-struct-2
+poke_test_cmd "print sizeof struct {int; struct {int;int;long;};}" \
+    {\[160UL b\]}
 
 # Offsets
 
