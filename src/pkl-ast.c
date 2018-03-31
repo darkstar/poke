@@ -445,9 +445,17 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
   return 1;
 }
 
-size_t
-pkl_ast_sizeof_type (pkl_ast_node type)
+/* Build and return an expression that computes the size of TYPE in
+   bits, as an unsigned 64-bit value.  */
+
+pkl_ast_node
+pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
 {
+  pkl_ast_node res;
+  pkl_ast_node res_type
+    = pkl_ast_make_integral_type (ast, 64, 0);
+  PKL_AST_LOC (res_type) = PKL_AST_LOC (type);
+  
   /* This function should only be called on complete types.  */
   assert (PKL_AST_TYPE_COMPLETE (type)
           == PKL_AST_TYPE_COMPLETE_YES);
@@ -455,41 +463,55 @@ pkl_ast_sizeof_type (pkl_ast_node type)
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
-      return PKL_AST_TYPE_I_SIZE (type);
-      break;
+      {
+        res = pkl_ast_make_integer (ast, PKL_AST_TYPE_I_SIZE (type));
+        PKL_AST_LOC (res) = PKL_AST_LOC (type);
+        PKL_AST_TYPE (res) = ASTREF (res_type);
+        break;
+      }
     case PKL_TYPE_ARRAY:
       {
-        pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (type);
-        pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
-
-        return PKL_AST_INTEGER_VALUE (nelem)
-          * pkl_ast_sizeof_type (etype);
+        pkl_ast_node sizeof_etype
+          = pkl_ast_sizeof_type (ast,
+                                 PKL_AST_TYPE_A_ETYPE (type));
+        res= pkl_ast_make_binary_exp (ast, PKL_AST_OP_MUL,
+                                      PKL_AST_TYPE_A_NELEM (type),
+                                      sizeof_etype);
+        PKL_AST_LOC (res) = PKL_AST_LOC (type);
+        PKL_AST_TYPE (res) = ASTREF (res_type);
         break;
       }
     case PKL_TYPE_STRUCT:
       {
         pkl_ast_node t;
-        size_t size = 0;
+
+        res = pkl_ast_make_integer (ast, 0);
+        PKL_AST_TYPE (res) = ASTREF (res_type);
+        PKL_AST_LOC (res) = PKL_AST_LOC (type);
 
         for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
           {
             pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
-            size += pkl_ast_sizeof_type (elem_type);
+
+            res = pkl_ast_make_binary_exp (ast, PKL_AST_OP_ADD,
+                                           res,
+                                           pkl_ast_sizeof_type (ast, elem_type));
+            PKL_AST_TYPE (res) = ASTREF (res_type);
+            PKL_AST_LOC (res) = PKL_AST_LOC (type);
           }
 
-        return size;
         break;
       }
     case PKL_TYPE_OFFSET:
-      return pkl_ast_sizeof_type (PKL_AST_TYPE_O_BASE_TYPE (type));
+      return pkl_ast_sizeof_type (ast, PKL_AST_TYPE_O_BASE_TYPE (type));
       break;
     case PKL_TYPE_STRING:
     default:
+      assert (0);
       break;
     }
 
-  assert (0);
-  return 0;
+  return res;
 }
 
 /* Build and return an AST node for an enum.  */
@@ -1139,6 +1161,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
   do                                                            \
     {                                                           \
       IPRINTF ("uid: %" PRIu64 "\n", PKL_AST_UID (ast));        \
+      IPRINTF ("refcount: %d\n", PKL_AST_REFCOUNT (ast));\
       IPRINTF ("location: %d,%d-%d,%d\n",                       \
                PKL_AST_LOC (ast).first_line,                    \
                PKL_AST_LOC (ast).first_column,                  \

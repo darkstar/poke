@@ -228,6 +228,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
                                 magnitude_type,
                                 PKL_AST_OFFSET_UNIT (offset));
 
+  printf ("YYY %p\n", magnitude_type);
   PKL_AST_LOC (type) = PKL_AST_LOC (offset);
   PKL_AST_TYPE (offset) = ASTREF (type);
 }
@@ -514,7 +515,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_struct)
 }
 PKL_PHASE_END_HANDLER
 
-/* Determine the completeness of the type associated with a TYPEOF
+/* Determine the completeness of the type associated with a SIZEOF
    (TYPE).  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
@@ -523,7 +524,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
     = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
 
   if (PKL_AST_CODE (op) != PKL_AST_TYPE)
-    /* This is a TYPEOF (VALUE).  Nothing to do.  */
+    /* This is a SIZEOF (VALUE).  Nothing to do.  */
     PKL_PASS_DONE;
 
   /* XXX: the logic in this switch is duplicated from the other rules.

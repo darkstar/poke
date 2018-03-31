@@ -103,7 +103,7 @@ pkl_compile_buffer (pvm_program *prog,
         };
 
     /* XXX */
-    /* pkl_ast_print (stdout, ast->ast);*/
+    /* pkl_ast_print (stdout, ast->ast); */
       
     if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
       goto error;

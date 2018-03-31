@@ -210,7 +210,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_int)
 PKL_PHASE_END_HANDLER
 
 /* Handler for binary operations whose operands should be both either
-   integral values of the same szie and signedness, or string
+   integral values of the same size and signedness, or string
    values.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_int_str)
