@@ -182,7 +182,7 @@ typedef struct pkl_phase *pkl_phase;
                             pkl_ast_node _node, void *_payload,         \
                             int *_restart, size_t _child_pos)           \
   {                                                                     \
-  printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node));      \
+  /* printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node)); */   \
      PKL_PASS_RESTART = 0;
 
 #define PKL_PHASE_END_HANDLER                        \
