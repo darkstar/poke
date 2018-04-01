@@ -486,17 +486,17 @@ type_specifier:
         | INTCONSTR INTEGER '>'
                 {
                     /* XXX: $3 can be any expresion!.  */
-                    assert (PKL_AST_CODE ($2) == PKL_AST_INTEGER);
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2), 1 /* signed */);
+                    ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
         | UINTCONSTR INTEGER '>'
                 {
                     /* XXX: $3 can be any expresion!.  */
-                    assert (PKL_AST_CODE ($2) == PKL_AST_INTEGER);
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2), 0 /* signed */);
+                    ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
         | type_specifier '[' expression ']'
