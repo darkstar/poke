@@ -85,7 +85,7 @@ typedef uint64_t pvm_val;
    Bits marked with `x' are unused and should be always 0.  */
 
 #define PVM_VAL_INT_SIZE(V) (((int) (((V) >> 3) & 0x1f)) + 1)
-#define PVM_VAL_INT(V) (((int32_t) ((V) >> 32))                 \
+#define PVM_VAL_INT(V) (((int32_t) ((V) >> 32))                \
                         << (32 - PVM_VAL_INT_SIZE ((V)))       \
                         >> (32 - PVM_VAL_INT_SIZE ((V))))
 
@@ -104,20 +104,20 @@ pvm_val pvm_make_uint (uint32_t value, int size);
    [0]   vvvv vvvv vvvv vvvv vvvv vvvv vvvv vvvv
                                            bits         
                                            ----         
-   [1]   xxxx xxxx xxxx xxxx xxxx xxxx xxxb bbbb
+   [1]   xxxx xxxx xxxx xxxx xxxx xxxx xxbb bbbb
 
-   BITS+33 is the size of the integral value in bits, from 0 to 31.
+   BITS+1 is the size of the integral value in bits, from 0 to 63.
 
    VAL is the value of the integer, sign- or zero-extended to 64 bits.
    Bits marked with `x' are unused.  */
 
-#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 1)
 #define PVM_VAL_LONG(V) ((((int64_t *) (V))[0])                 \
                          << (64 - PVM_VAL_LONG_SIZE ((V)))      \
                          >> (64 - PVM_VAL_LONG_SIZE ((V))))
 
 
-#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 1)
 #define PVM_VAL_ULONG(V) (((uint64_t *) (V))[0] & (1 << (PVM_VAL_ULONG_SIZE ((V)))))
 
 pvm_val pvm_make_long (int64_t value, int size);

@@ -80,7 +80,9 @@ pvm_make_long (int64_t value, int size)
   uint8_t tag = PVM_VAL_TAG_LONG;
       
   ll[0] = value;
-  ll[1] = (size - 33) & 0x1f;
+  ll[1] = (size - 1) & 0x3f;
+  printf ("ll[0] = %ld\n", ll[0]);
+  printf ("ll[1] = 0x%lx\n", ll[1]);
   return ((uint64_t) (uintptr_t) ll) | tag;
 }
 
@@ -91,7 +93,7 @@ pvm_make_ulong (uint64_t value, int size)
   uint8_t tag = PVM_VAL_TAG_ULONG;
       
   ll[0] = value;
-  ll[1] = (size - 33) & 0x1f;
+  ll[1] = (size - 1) & 0x3f;
   return ((uint64_t) (uintptr_t) ll) | tag;
 }
 
@@ -363,13 +365,36 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   if (val == PVM_NULL)
     fprintf (out, "null");
   else if (PVM_IS_LONG (val))
-    fprintf (out, GREEN "%" PRIi64 "L" NOATTR, PVM_VAL_LONG (val));
+    {
+      if (PVM_VAL_LONG_SIZE (val) == 64)
+        fprintf (out, GREEN "%" PRIi64 "L" NOATTR, PVM_VAL_LONG (val));
+      else
+        fprintf (out, GREEN "(int<%d>) %" PRIi64 NOATTR,
+                 PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
+    }
   else if (PVM_IS_INT (val))
-    fprintf (out, GREEN "%d" NOATTR, PVM_VAL_INT (val));
+    {
+      if (PVM_VAL_INT_SIZE (val) == 32)
+        fprintf (out, GREEN "%d" NOATTR, PVM_VAL_INT (val));
+      else
+        fprintf (out, GREEN "(int<%d>) %d" NOATTR,
+                 PVM_VAL_INT_SIZE (val), PVM_VAL_INT (val));
+    }
   else if (PVM_IS_ULONG (val))
-    fprintf (out, GREEN "%" PRIu64 "UL" NOATTR, PVM_VAL_ULONG (val));
+    {
+      if (PVM_VAL_ULONG_SIZE (val) == 64)
+        fprintf (out, GREEN "%" PRIu64 "UL" NOATTR, PVM_VAL_ULONG (val));
+      else
+        fprintf (out, GREEN "(int<%d>) %" PRIu64 NOATTR,
+                 PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
+    }
   else if (PVM_IS_UINT (val))
-    fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
+    {
+      if (PVM_VAL_UINT_SIZE (val) == 32)
+        fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
+      fprintf (out, GREEN "(int<%d>) %u" NOATTR,
+                 PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
+    }
   else if (PVM_IS_STR (val))
     fprintf (out, BROWN "\"%s\"" NOATTR, PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))

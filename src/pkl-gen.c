@@ -155,7 +155,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
   size = PKL_AST_TYPE_I_SIZE (type);
   value = PKL_AST_INTEGER_VALUE (integer);
 
-  if (size & ~0x1f)
+  if ((size - 1) & ~0x1f)
     {
       if (PKL_AST_TYPE_I_SIGNED (type))
         val = pvm_make_long (value, size);
@@ -289,9 +289,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
                         pvm_make_int ((int32_t) to_type_size, 32));
           
           /* Now push the proper conversion instruction.  */
-          if (from_type_size & ~0x1f)
+          if ((from_type_size - 1) & ~0x1f)
             {
-              if (to_type_size & ~0x1f)
+              if ((to_type_size - 1) & ~0x1f)
                 {
                   if (from_type_sign && from_type_sign)
                     /* From pvm_long to pvm_long  */
@@ -324,7 +324,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
             }
           else
             {
-              if (to_type_size & ~0x1f)
+              if ((to_type_size - 1) & ~0x1f)
                 {
                   if (from_type_sign && from_type_sign)
                     /* From pvm_int to pvm_long  */
@@ -625,7 +625,7 @@ PKL_PHASE_END_HANDLER
     uint64_t size = PKL_AST_TYPE_I_SIZE (type);         \
     int signed_p = PKL_AST_TYPE_I_SIGNED (type);        \
                                                         \
-    if (size & ~0x1f)                                   \
+    if ((size - 1) & ~0x1f)                              \
       {                                                 \
         if (signed_p)                                   \
           PVM_APPEND_INSTRUCTION (program, insn##l);    \
