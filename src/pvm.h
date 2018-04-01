@@ -90,14 +90,20 @@ typedef uint64_t pvm_val;
                         >> (32 - PVM_VAL_INT_SIZE ((V))))
 
 #define PVM_VAL_UINT_SIZE(V) (((int) (((V) >> 3) & 0x1f)) + 1)
-#define PVM_VAL_UINT(V) (((uint32_t) ((V) >> 32)) & (1 << (PVM_VAL_UINT_SIZE ((V)))))
+#define PVM_VAL_UINT(V) (((uint32_t) ((V) >> 32)) & \
+                         ((1 << (PVM_VAL_UINT_SIZE ((V)))) - 1))
 
 
 pvm_val pvm_make_int (int32_t value, int size);
 pvm_val pvm_make_uint (uint32_t value, int size);
 
-/* Long integers, wider than 32-bit and up to 64-bit, are boxed.  The
-   pointer points to a pair of 64-bit words:
+/* Long integers, wider than 32-bit and up to 64-bit, are boxed.  A
+   pointer
+                                             ttt
+                                             ---
+         pppp pppp pppp pppp pppp pppp pppp pttt
+
+   points to a pair of 64-bit words:
 
                            val
                            ---
@@ -121,7 +127,7 @@ pvm_val pvm_make_uint (uint32_t value, int size);
 
 #define PVM_VAL_ULONG_SIZE(V) (_PVM_VAL_LONG_ULONG_SIZE (V))
 #define PVM_VAL_ULONG(V) (_PVM_VAL_LONG_ULONG_VAL ((V)) \
-                          & (1 << (PVM_VAL_ULONG_SIZE ((V)) - 1)))
+                          & ((1 << (PVM_VAL_ULONG_SIZE ((V)))) - 1))
 
 pvm_val pvm_make_long (int64_t value, int size);
 pvm_val pvm_make_ulong (uint64_t value, int size);
