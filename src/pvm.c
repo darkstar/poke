@@ -364,7 +364,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     fprintf (out, "null");
   else if (PVM_IS_LONG (val))
     {
-      if (PVM_VAL_LONG_SIZE (val) == 64)
+      int size = PVM_VAL_LONG_SIZE (val);
+
+      if (size == 64)
         fprintf (out, GREEN "%" PRIi64 "L" NOATTR, PVM_VAL_LONG (val));
       else
         fprintf (out, GREEN "(int<%d>) %" PRIi64 NOATTR,
@@ -372,8 +374,14 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     }
   else if (PVM_IS_INT (val))
     {
-      if (PVM_VAL_INT_SIZE (val) == 32)
+      int size = PVM_VAL_INT_SIZE (val);
+
+      if (size == 32)
         fprintf (out, GREEN "%d" NOATTR, PVM_VAL_INT (val));
+      else if (size == 16)
+        fprintf (out, GREEN "%dH" NOATTR, PVM_VAL_INT (val));
+      else if (size == 8)
+        fprintf (out, GREEN "%dB" NOATTR, PVM_VAL_INT (val));
       else
         fprintf (out, GREEN "(int<%d>) %d" NOATTR,
                  PVM_VAL_INT_SIZE (val), PVM_VAL_INT (val));
@@ -388,10 +396,16 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     }
   else if (PVM_IS_UINT (val))
     {
-      if (PVM_VAL_UINT_SIZE (val) == 32)
+      int size = PVM_VAL_UINT_SIZE (val);
+
+      if (size == 32)
         fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
+      else if (size == 16)
+        fprintf (out, GREEN "%uUH" NOATTR, PVM_VAL_UINT (val));
+      else if (size == 8)
+        fprintf (out, GREEN "%uUB" NOATTR, PVM_VAL_UINT (val));
       else
-        fprintf (out, GREEN "(int<%d>) %u" NOATTR,
+        fprintf (out, GREEN "(uint<%d>) %u" NOATTR,
                  PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
     }
   else if (PVM_IS_STR (val))
@@ -522,7 +536,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, CYAN " B" NOATTR);
           break;
         default:
-          assert (0);
+          fprintf (out, CYAN " %" PRIu64 NOATTR,
+                   PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
+          break;
         }
       fprintf (out, CYAN "]" NOATTR);
     }

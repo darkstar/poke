@@ -1083,11 +1083,9 @@ end
 instruction itoi (?n pvm_literal_printer_cast) # INT -> INT
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_int (val << (32 - fsize) >> (32 - tsize), tsize);
+    JITTER_TOP_STACK () = pvm_make_int (val, tsize);
   end
 end
 
@@ -1096,41 +1094,34 @@ instruction itou (?n pvm_literal_printer_cast) # INT -> UINT
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_uint (((uint32_t) val) & ((1 << tsize) - 1), tsize);
+    JITTER_TOP_STACK () = pvm_make_uint ((uint32_t) val, tsize);
   end
 end
 
 instruction itol (?n pvm_literal_printer_cast) # INT -> LONG
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_long (((int64_t) val) << (64 - fsize) >> (64 - fsize), tsize);
+    JITTER_TOP_STACK () = pvm_make_long ((int64_t) val, tsize);
   end
 end
 
 instruction itolu (?n pvm_literal_printer_cast) # INT -> ULONG
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_ulong (((uint64_t) val) & ((1 << fsize) - 1), tsize);
+    JITTER_TOP_STACK () = pvm_make_ulong ((uint64_t) val, tsize);
   end
 end
 
 instruction utoi (?n pvm_literal_printer_cast) # UINT -> INT
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_int (((int32_t) val) << (32 - fsize) >> (32 - tsize), tsize);
+    JITTER_TOP_STACK () = pvm_make_int ((int32_t) val, tsize);
   end
 end
 
@@ -1139,19 +1130,16 @@ instruction utou (?n pvm_literal_printer_cast) # UINT -> UINT
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_uint (val & ((1 << tsize) - 1), tsize);
+    JITTER_TOP_STACK () = pvm_make_uint (val, tsize);
   end
 end
 
 instruction utol (?n pvm_literal_printer_cast) # UINT -> LONG
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_long (((int64_t) val) << (64 - fsize) >> (64 - tsize), tsize);
+    JITTER_TOP_STACK () = pvm_make_long ((int64_t) val, tsize);
   end
 end
 
@@ -1160,41 +1148,34 @@ instruction utolu (?n pvm_literal_printer_cast) # UINT -> ULONG
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_ulong (((uint64_t) val) & ((1 << tsize) - 1), tsize);
+    JITTER_TOP_STACK () = pvm_make_ulong ((uint64_t) val, tsize);
   end
 end
 
 instruction ltoi (?n pvm_literal_printer_cast) # LONG -> INT
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_int ((int32_t) (val << (64 - fsize) >> (64 - tsize)), tsize);
+    JITTER_TOP_STACK () = pvm_make_int ((int32_t) val, tsize);
   end
 end
 
 instruction ltou (?n pvm_literal_printer_cast) # LONG -> UINT
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_uint ((uint32_t) (val << (64 - fsize) >> (64 - tsize)), tsize);
+    JITTER_TOP_STACK () = pvm_make_uint ((uint32_t) val, tsize);
   end
 end
 
 instruction ltol (?n pvm_literal_printer_cast) # LONG -> LONG
   code
     jitter_uint tsize = JITTER_ARGN0;
-    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_long (val << (64 - fsize) >> (64 - tsize), tsize);
+    JITTER_TOP_STACK () = pvm_make_long (val, tsize);
   end
 end
 
@@ -1203,8 +1184,7 @@ instruction ltolu (?n pvm_literal_printer_cast) # LONG -> ULONG
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_ulong (((uint64_t) val) & ((1 << tsize) - 1), tsize);
+    JITTER_TOP_STACK () = pvm_make_ulong ((uint64_t) val, tsize);
   end
 end
 
@@ -1213,8 +1193,7 @@ instruction lutoi (?n pvm_literal_printer_cast) # ULONG -> INT
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_int ((int32_t) (val & ((1 << tsize) - 1)), tsize);
+    JITTER_TOP_STACK () = pvm_make_int ((int32_t) val, tsize);
   end
 end
 
@@ -1223,8 +1202,7 @@ instruction lutou (?n pvm_literal_printer_cast) # ULONG -> UINT
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_uint ((uint32_t) (val & ((1 << tsize) - 1)), tsize);
+    JITTER_TOP_STACK () = pvm_make_uint ((uint32_t) val, tsize);
   end
 end
 
@@ -1233,8 +1211,7 @@ instruction lutol (?n pvm_literal_printer_cast) # ULONG -> LONG
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_long ((int64_t) (val & ((1 << tsize) - 1)), tsize);
+    JITTER_TOP_STACK () = pvm_make_long ((int64_t) val, tsize);
   end
 end
 
@@ -1243,8 +1220,7 @@ instruction lutolu (?n pvm_literal_printer_cast) # ULONG -> ULONG
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
-    JITTER_TOP_STACK ()
-      = pvm_make_ulong ((int64_t) (val & ((1 << tsize) - 1)), tsize);
+    JITTER_TOP_STACK () = pvm_make_ulong (val, tsize);
   end
 end
 

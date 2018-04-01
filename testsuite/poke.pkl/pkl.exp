@@ -16,7 +16,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+# Integers.
+
+set test inth
+poke_test_cmd "print 6h" {6H}
+
+set test int16
+poke_test_cmd "print (int<16>) 6" {6H}
+
+set test uinth
+poke_test_cmd "print 6hu" {6UH}
+
+set test uint16
+poke_test_cmd "print (uint<16>) 6" {6UH}
+
+
 # Conversions.
+
+set test int-to-int1-0
+poke_test_cmd "print (int<1>) 0" {\(int<1>\) 0}
+
+set test int-to-uint1-0
+poke_test_cmd "print (uint<1>) 0" {\(uint<1>\) 0}
 
 set test i32toi32
 poke_test_cmd "print (int) 1" "1"
@@ -30,7 +51,10 @@ poke_test_cmd "print (long) 1" "1L"
 set test i32tou64
 poke_test_cmd "print (uint64) 1" "1UL"
 
-# Integers and operations
+set test u2addi5
+poke_test_cmd "print (uint<2>) 1 + (int<5>) 2" {\(uint<5>\) 3}
+
+# Operations
 
 set test addii
 poke_test_cmd "print 3 + 4" "7"
