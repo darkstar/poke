@@ -50,7 +50,6 @@ end
 early-c
   code
 #   include <string.h>
-# define PVM_MAX(a,b) ((a) > (b) ? (a) : (b))
   end
 end
 
@@ -216,12 +215,15 @@ end
 ## Operators instructions.
 
 # Integer arithmetic.
+#
+# The following instructions assume that both operands have the same
+# size in bits.
 
 instruction addi () # INT INT -> INT
   code
 #define F(res, a, b)                                                     \
-  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_INT (a) + PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_INT_SIZE (a);                                     \
+    res = pvm_make_int (PVM_VAL_INT (a) + PVM_VAL_INT (b), size);        \
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -231,8 +233,8 @@ end
 instruction addiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
-    res = pvm_make_uint ((PVM_VAL_UINT (a) + PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_uint (PVM_VAL_UINT (a) + PVM_VAL_UINT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -242,8 +244,8 @@ end
 instruction addl () # LONG LONG -> LONG
   code
 #define F(res, a, b)                                                       \
-  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
-    res = pvm_make_long ((PVM_VAL_LONG (a) + PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) + PVM_VAL_LONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -253,8 +255,8 @@ end
 instruction addlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -264,8 +266,8 @@ end
 instruction subi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_INT (a) - PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) - PVM_VAL_INT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -275,8 +277,8 @@ end
 instruction subiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
-    res = pvm_make_uint ((PVM_VAL_UINT (a) - PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_uint (PVM_VAL_UINT (a) - PVM_VAL_UINT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -286,8 +288,8 @@ end
 instruction subl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
-    res = pvm_make_long ((PVM_VAL_LONG (a) - PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) - PVM_VAL_LONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -297,8 +299,8 @@ end
 instruction sublu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -308,8 +310,8 @@ end
 instruction muli () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_INT (a) * PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) * PVM_VAL_INT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -319,8 +321,8 @@ end
 instruction muliu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
-    res = pvm_make_uint ((PVM_VAL_UINT (a) * PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_uint (PVM_VAL_UINT (a) * PVM_VAL_UINT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -330,8 +332,8 @@ end
 instruction mull () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
-    res = pvm_make_long ((PVM_VAL_LONG (a) * PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) * PVM_VAL_LONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -341,8 +343,8 @@ end
 instruction mullu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -352,8 +354,8 @@ end
 instruction divi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_INT (a) / PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -363,8 +365,8 @@ end
 instruction diviu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
-    res = pvm_make_uint ((PVM_VAL_UINT (a) / PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -374,8 +376,8 @@ end
 instruction divl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
-    res = pvm_make_long ((PVM_VAL_LONG (a) / PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -385,8 +387,8 @@ end
 instruction divlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -396,8 +398,8 @@ end
 instruction modi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_INT (a) % PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -407,8 +409,8 @@ end
 instruction modiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
-    res = pvm_make_int ((PVM_VAL_UINT (a) % PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -418,8 +420,8 @@ end
 instruction modl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
-    res = pvm_make_long ((PVM_VAL_LONG (a) % PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -429,8 +431,8 @@ end
 instruction modlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  { int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -441,7 +443,7 @@ instruction negi () # INT -> INT
   code
     int size = PVM_VAL_INT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_int ((- PVM_VAL_INT (JITTER_TOP_STACK())) & size, size);
+      = pvm_make_int (- PVM_VAL_INT (JITTER_TOP_STACK()), size);
   end
 end
 
@@ -449,7 +451,7 @@ instruction negiu () # UINT -> UINT
   code
     int size = PVM_VAL_UINT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_uint ((uint32_t) (- PVM_VAL_INT (JITTER_TOP_STACK())) & size, size);
+      = pvm_make_uint ((uint32_t) (- PVM_VAL_INT (JITTER_TOP_STACK())), size);
   end
 end
 
@@ -457,7 +459,7 @@ instruction negl () # LONG -> LONG
   code
     int size = PVM_VAL_LONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_long ((- PVM_VAL_LONG (JITTER_TOP_STACK())) & size, size);
+      = pvm_make_long (- PVM_VAL_LONG (JITTER_TOP_STACK()), size);
   end
 end
 
@@ -465,7 +467,7 @@ instruction neglu () # LONG -> LONG
   code
     int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_ulong ((uint64_t) (- PVM_VAL_ULONG (JITTER_TOP_STACK())) & size, size);
+      = pvm_make_ulong ((uint64_t) (- PVM_VAL_ULONG (JITTER_TOP_STACK())), size);
   end
 end
 
@@ -474,7 +476,7 @@ end
 instruction eqi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) == PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) == PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -483,7 +485,7 @@ end
 instruction eqiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) == PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) == PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -492,7 +494,7 @@ end
 instruction eql () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) == PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) == PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -501,7 +503,7 @@ end
 instruction eqlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) == PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) == PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -510,7 +512,7 @@ end
 instruction nei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) != PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) != PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -519,7 +521,7 @@ end
 instruction neiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) != PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) != PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -528,7 +530,7 @@ end
 instruction nel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) != PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) != PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -537,7 +539,7 @@ end
 instruction nelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) != PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) != PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -546,7 +548,7 @@ end
 instruction eqs () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) == 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) == 0, 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -555,7 +557,7 @@ end
 instruction nes () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) != 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) != 0, 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -566,7 +568,7 @@ end
 instruction lti () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) < PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) < PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -575,7 +577,7 @@ end
 instruction ltiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) < PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) < PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -584,7 +586,7 @@ end
 instruction ltl () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) < PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) < PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -593,7 +595,7 @@ end
 instruction ltlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -602,7 +604,7 @@ end
 instruction lei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) <= PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) <= PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -611,7 +613,7 @@ end
 instruction leiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) <= PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) <= PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -620,7 +622,7 @@ end
 instruction lel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) <= PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) <= PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -629,7 +631,7 @@ end
 instruction lelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) <= PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) <= PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -638,7 +640,7 @@ end
 instruction gti () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) > PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) > PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -647,7 +649,7 @@ end
 instruction gtiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) > PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) > PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -656,7 +658,7 @@ end
 instruction gtl () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) > PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) > PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -665,7 +667,7 @@ end
 instruction gtlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -674,7 +676,7 @@ end
 instruction gei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) >= PVM_VAL_INT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_INT (a) >= PVM_VAL_INT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -683,7 +685,7 @@ end
 instruction geiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) >= PVM_VAL_UINT (b), 31); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) >= PVM_VAL_UINT (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -692,7 +694,7 @@ end
 instruction gel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) >= PVM_VAL_LONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) >= PVM_VAL_LONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -701,7 +703,7 @@ end
 instruction gelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) >= PVM_VAL_ULONG (b), 31); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) >= PVM_VAL_ULONG (b), 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -710,7 +712,7 @@ end
 instruction lts () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) < 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) < 0, 32); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -719,7 +721,7 @@ end
 instruction gts () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) > 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) > 0, 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -728,7 +730,7 @@ end
 instruction ges () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) >= 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) >= 0, 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -737,7 +739,7 @@ end
 instruction les () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) <= 0, 31); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) <= 0, 32); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -766,8 +768,9 @@ end
 instruction and () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) && PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { res = pvm_make_int ((PVM_VAL_INT (a) && PVM_VAL_INT (b)), 32);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -775,8 +778,9 @@ end
 instruction or () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) || PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { res = pvm_make_int ((PVM_VAL_INT (a) || PVM_VAL_INT (b)), 32);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -784,7 +788,7 @@ end
 instruction not () # INT -> INT
   code
     JITTER_TOP_STACK()
-      = pvm_make_int (! PVM_VAL_INT(JITTER_TOP_STACK()));
+      = pvm_make_int (! PVM_VAL_INT(JITTER_TOP_STACK()), 32);
   end
 end
 
@@ -793,8 +797,10 @@ end
 instruction bxori () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) ^ PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_INT_SIZE (a);                             \
+    res = pvm_make_int (PVM_VAL_INT (a) ^ PVM_VAL_INT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -802,8 +808,10 @@ end
 instruction bxoriu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) ^ PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_UINT_SIZE (a);                                     \
+    res = pvm_make_uint (PVM_VAL_UINT (a) ^ PVM_VAL_UINT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -811,8 +819,10 @@ end
 instruction bxorl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) ^ PVM_VAL_LONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_LONG_SIZE (a);                                     \
+    res = pvm_make_long (PVM_VAL_LONG (a) ^ PVM_VAL_LONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -820,8 +830,10 @@ end
 instruction bxorlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) ^ PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
+    res = pvm_make_long (PVM_VAL_ULONG (a) ^ PVM_VAL_ULONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -829,8 +841,10 @@ end
 instruction bori () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) | PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_INT_SIZE (a);                                     \
+    res = pvm_make_int (PVM_VAL_INT (a) | PVM_VAL_INT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -838,8 +852,10 @@ end
 instruction boriu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) | PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_UINT_SIZE (a);                                     \
+    res = pvm_make_uint (PVM_VAL_UINT (a) | PVM_VAL_UINT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -847,8 +863,10 @@ end
 instruction borl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) | PVM_VAL_LONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_LONG_SIZE (a);                                     \
+    res = pvm_make_long (PVM_VAL_LONG (a) | PVM_VAL_LONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -856,8 +874,10 @@ end
 instruction borlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) | PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
+    res = pvm_make_long (PVM_VAL_ULONG (a) | PVM_VAL_ULONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -865,8 +885,10 @@ end
 instruction bandi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) & PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_INT_SIZE (a);                                     \
+    res = pvm_make_int (PVM_VAL_INT (a) & PVM_VAL_INT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -874,8 +896,10 @@ end
 instruction bandiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) & PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_UINT_SIZE (a);                                     \
+    res = pvm_make_uint (PVM_VAL_UINT (a) & PVM_VAL_UINT (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -883,8 +907,10 @@ end
 instruction bandl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) & PVM_VAL_LONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_LONG_SIZE (a);                                     \
+    res = pvm_make_long (PVM_VAL_LONG (a) & PVM_VAL_LONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -892,33 +918,39 @@ end
 instruction bandlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) & PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) & PVM_VAL_ULONG (b), size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
 instruction bnoti () # INT -> INT
   code
-    JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()));
+    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
+    JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()), size);
   end
 end
 
 instruction bnotiu () # UINT -> UINT
   code
-    JITTER_TOP_STACK() = pvm_make_uint (~PVM_VAL_UINT (JITTER_TOP_STACK()));
+    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
+    JITTER_TOP_STACK() = pvm_make_uint (~PVM_VAL_UINT (JITTER_TOP_STACK()), size);
   end
 end
 
 instruction bnotl () # LONG -> LONG
   code
-    JITTER_TOP_STACK() = pvm_make_long (~PVM_VAL_LONG (JITTER_TOP_STACK()));
+    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
+    JITTER_TOP_STACK() = pvm_make_long (~PVM_VAL_LONG (JITTER_TOP_STACK()), size);
   end
 end
 
 instruction bnotlu () # ULONG -> ULONG
   code
-   JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()));
+   int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
+   JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()), size);
   end
 end
 
