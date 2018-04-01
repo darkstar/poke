@@ -113,10 +113,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
         {
           pkl_ast_node initializer_index_type
             = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+          PKL_AST_LOC (initializer_index_type)
+            = PKL_AST_LOC (tmp);
+
           
           initializer_index_node
             = pkl_ast_make_integer (PKL_PASS_AST, index);
-
           PKL_AST_TYPE (initializer_index_node)
             = ASTREF (initializer_index_type);
           PKL_AST_LOC (initializer_index_node)

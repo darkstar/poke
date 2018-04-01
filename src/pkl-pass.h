@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <setjmp.h>
 #include <inttypes.h>
+#include <stdarg.h>
 #include "pkl-ast.h"
 
 /* A `pass' is a complete run over a given AST.  A `phase' is an
@@ -86,7 +87,8 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast_node node,
                                               void *payload,
                                               int *restart,
-                                              size_t child_pos);
+                                              size_t child_pos,
+                                              pkl_ast_node parent);
 
 struct pkl_phase
 {
@@ -143,6 +145,10 @@ typedef struct pkl_phase *pkl_phase;
    PKL_PASS_NODE expands to an l-value holding the pkl_ast_node for
    the node being processed.
 
+   PKL_PASS_PARENT expands to an l-value holding the pkl_ast_node for
+   the parent of the node being processed.  This is NULL for the
+   top-level node in the AST.
+
    PKL_PASS_CHILD_POS expands to an l-value holding the position (zero
    based) of the node being processed in the parent's node chain.  If
    the node is not part of a chain, this holds 0.
@@ -167,6 +173,7 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_PAYLOAD _payload
 #define PKL_PASS_AST _ast
 #define PKL_PASS_NODE _node
+#define PKL_PASS_PARENT _parent
 #define PKL_PASS_RESTART (*_restart)
 #define PKL_PASS_CHILD_POS _child_pos
 #define PKL_PASS_DONE do { goto _exit; } while (0)
@@ -180,7 +187,8 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PHASE_BEGIN_HANDLER(name)                                   \
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
                             pkl_ast_node _node, void *_payload,         \
-                            int *_restart, size_t _child_pos)           \
+                            int *_restart, size_t _child_pos,           \
+                            pkl_ast_node _parent)                       \
   {                                                                     \
   /* printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node)); */   \
      PKL_PASS_RESTART = 0;
@@ -191,6 +199,40 @@ typedef struct pkl_phase *pkl_phase;
 _exit:                                               \
    return PKL_PASS_NODE;                             \
   }
+
+/* The PKL_PHASE_PARENT, PKL_PHASE_PARENT_OP and PKL_PHASE_PARENT_TYPE
+   macros can be used in the prologue of a handler in order to delimit
+   its execution to the case where the current node is a child of a
+   node of the given node code/operation code/type code.  */
+
+static inline int
+pkl_phase_parent_in (pkl_ast_node parent,
+                     int nc, ...)
+{
+  va_list valist;
+  int i;
+
+  if (parent == NULL)
+    /* This happens with the top-level node of the AST.  */
+    return 0;
+
+  va_start (valist, nc);
+  for (i = 0; i < nc; i++)
+    {
+      int code = va_arg (valist, int);
+      if (PKL_AST_CODE (parent) == code)
+        return 1;
+    }
+  va_end (valist);
+
+  return 0;
+}
+
+#define PKL_PHASE_PARENT(NP,...)                                        \
+  if (!pkl_phase_parent_in (PKL_PASS_PARENT, (NP), __VA_ARGS__))        \
+    {                                                                   \
+      goto _exit;                                                       \
+    }
 
 /* Traverse AST in a depth-first fashion, applying the provided phases
    (or transformations) in sequence to each AST node.

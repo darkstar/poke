@@ -50,6 +50,7 @@ promote_to_integral (size_t size, int sign,
           *a = pkl_ast_make_cast (ast, desired_type, *a);
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
           PKL_AST_LOC (*a) = loc;
+          PKL_AST_LOC (desired_type) = loc;
           ASTREF (*a);
           *restart = 1;
         }
@@ -164,6 +165,7 @@ promote_operands_binary (pkl_ast ast,
       a = pkl_ast_make_cast (ast, t, a);
       PKL_AST_TYPE (a) = ASTREF (t);
       PKL_AST_LOC (a) = loc;
+      PKL_AST_LOC (t) = loc;
       PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (a);
 
       *restart = 1;
@@ -178,6 +180,7 @@ promote_operands_binary (pkl_ast ast,
       b = pkl_ast_make_cast (ast, t, b);
       PKL_AST_TYPE (b) = ASTREF (t);
       PKL_AST_LOC (b) = loc;
+      PKL_AST_LOC (t) = loc;
       PKL_AST_EXP_OPERAND (exp, 1) = ASTREF (b);
       *restart =1;
     }
@@ -345,6 +348,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_array_initializer)
           index_type = pkl_ast_make_integral_type (PKL_PASS_AST,
                                                    64, 0);
           PKL_AST_TYPE (index) = ASTREF (index_type);
+          PKL_AST_LOC (index_type) = PKL_AST_LOC (node);
           PKL_PASS_RESTART = 1;
         }
     }

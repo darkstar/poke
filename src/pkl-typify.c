@@ -66,6 +66,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
 
   PKL_AST_TYPE (PKL_PASS_NODE)
     = ASTREF (type);
+  PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
 }
 PKL_PHASE_END_HANDLER
 
@@ -144,6 +145,7 @@ PKL_PHASE_END_HANDLER
                ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));  \
                                                                         \
           type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p); \
+          PKL_AST_LOC (type) = PKL_AST_LOC (exp);                       \
           break;                                                        \
         }                                                               \
       default:                                                          \
@@ -167,6 +169,7 @@ PKL_PHASE_END_HANDLER
 #define CASE_STR                                                        \
     case PKL_TYPE_STRING:                                               \
       type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
+      PKL_AST_LOC (exp) = PKL_AST_LOC (PKL_PASS_NODE);                  \
       break;
 
 #define CASE_OFFSET                             \
@@ -210,6 +213,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
     = pkl_ast_make_offset_type (PKL_PASS_AST,
                                 itype, PKL_AST_OFFSET_UNIT_BITS);
 
+  PKL_AST_LOC (itype) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
 }
@@ -347,6 +351,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),
                                    struct_elem_types);
+  PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
@@ -369,6 +374,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
                                      struct_elem_name,
                                      struct_elem_exp_type);
 
+  PKL_AST_LOC (type) = PKL_AST_LOC (struct_elem);
   PKL_AST_TYPE (struct_elem) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER

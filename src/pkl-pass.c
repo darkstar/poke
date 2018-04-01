@@ -37,7 +37,8 @@
                                                                   node, \
                                                                   payloads[i], \
                                                                   &restart, \
-                                                                  child_pos);    \
+                                                                  child_pos,\
+                                                                  parent); \
               *handlers_used += 1;                                      \
                                                                         \
               if (restart)                                              \
@@ -45,6 +46,7 @@
                   /* Restart the subtree with the rest of the phases. */ \
                   node = pkl_do_pass_1 (toplevel, ast, node,            \
                                         child_pos,                      \
+                                        parent,                         \
                                         payloads + i + 1,               \
                                         phases + i + 1);                \
                   /* goto restart */                                    \
@@ -68,17 +70,19 @@
               int restart;                                              \
               node                                                      \
                 = phases[i]->what##_handler (toplevel,                  \
-                                           ast,                         \
-                                           node,                        \
-                                           payloads[i],                 \
-                                           &restart,                    \
-                                           child_pos);                  \
+                                             ast,                       \
+                                             node,                      \
+                                             payloads[i],               \
+                                             &restart,                  \
+                                             child_pos,                 \
+                                             parent);                   \
                                                                         \
               if (restart)                                              \
                 {                                                       \
                   /* Restart the subtree with the rest of the phases. */ \
                   node = pkl_do_pass_1 (toplevel, ast, node,            \
                                         child_pos,                      \
+                                        parent,                         \
                                         payloads + i + 1,               \
                                         phases + i + 1);                \
                   /* goto restart */                                    \
@@ -95,6 +99,7 @@ static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
                                    pkl_ast ast,
                                    pkl_ast_node node,
                                    size_t child_pos,
+                                   pkl_ast_node parent,
                                    void *payloads[], struct pkl_phase *phases[]);
 
 
@@ -109,6 +114,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
                         struct pkl_phase *phases[],
                         int *handlers_used,
                         size_t child_pos,
+                        pkl_ast_node parent,
                         int order)
 {
   int node_code = PKL_AST_CODE (node);
@@ -181,8 +187,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
       /* Process first element in the chain.  */                \
       elem = (CHAIN);                                           \
       next = PKL_AST_CHAIN (elem);                              \
-      CHAIN = pkl_do_pass_1 (toplevel, ast, elem, cpos++,       \
-                             payloads, phases);                 \
+      CHAIN = pkl_do_pass_1 (toplevel, ast, elem, cpos++, node,         \
+                             payloads, phases);                         \
       last = (CHAIN);                                           \
       elem = next;                                              \
                                                                 \
@@ -194,6 +200,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
                                                 ast,            \
                                                 elem,           \
                                                 cpos++,         \
+                                                node,           \
                                                 payloads,       \
                                                 phases);        \
           last = PKL_AST_CHAIN (last);                          \
@@ -206,6 +213,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
                pkl_ast ast,
                pkl_ast_node node,
                size_t child_pos,
+               pkl_ast_node parent,
                void *payloads[], struct pkl_phase *phases[])
 {
   pkl_ast_node node_orig = node;
@@ -218,23 +226,29 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
   /* Call the breadth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
-                                 &handlers_used, child_pos,
+                                 &handlers_used, child_pos, parent,
                                  PKL_PASS_BREADTH_FIRST);
 
   /* Process child nodes.  */
+  if (PKL_AST_TYPE (node))
+    PKL_AST_TYPE (node)
+      = pkl_do_pass_1 (toplevel, ast,
+                       PKL_AST_TYPE (node), 0, node,
+                       payloads, phases);
+
   switch (node_code)
     {
     case PKL_AST_EXP:
       {
         PKL_AST_EXP_OPERAND (node, 0)
           = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_EXP_OPERAND (node, 0), 0, payloads,
-                           phases);
+                           PKL_AST_EXP_OPERAND (node, 0), 0, node,
+                           payloads, phases);
         if (PKL_AST_EXP_NUMOPS (node) == 2)
           PKL_AST_EXP_OPERAND (node, 1)
             = pkl_do_pass_1 (toplevel, ast,
-                             PKL_AST_EXP_OPERAND (node, 1), 0, payloads,
-                             phases);
+                             PKL_AST_EXP_OPERAND (node, 1), 0, node,
+                             payloads, phases);
         break;
       }
     case PKL_AST_PROGRAM:
@@ -243,44 +257,40 @@ pkl_do_pass_1 (jmp_buf toplevel,
     case PKL_AST_COND_EXP:
       PKL_AST_COND_EXP_COND (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_COND_EXP_COND (node), 0, payloads,
-                         phases);
+                         PKL_AST_COND_EXP_COND (node), 0, node,
+                         payloads, phases);
       PKL_AST_COND_EXP_THENEXP (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_COND_EXP_THENEXP (node), 0, payloads,
-                         phases);
+                         PKL_AST_COND_EXP_THENEXP (node), 0, node,
+                         payloads, phases);
       PKL_AST_COND_EXP_ELSEEXP (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_COND_EXP_ELSEEXP (node), 0, payloads,
-                         phases);
+                         PKL_AST_COND_EXP_ELSEEXP (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_ARRAY:
       PKL_PASS_CHAIN (PKL_AST_ARRAY_INITIALIZERS (node));
-      if (PKL_AST_TYPE (node))
-        PKL_AST_TYPE (node) = pkl_do_pass_1 (toplevel, ast,
-                                             PKL_AST_TYPE (node), 0, payloads,
-                                             phases);
       break;
     case PKL_AST_ARRAY_INITIALIZER:
       if (PKL_AST_ARRAY_INITIALIZER_INDEX (node))
         PKL_AST_ARRAY_INITIALIZER_INDEX (node)
           = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_ARRAY_INITIALIZER_INDEX (node), 0, payloads,
-                           phases);
+                           PKL_AST_ARRAY_INITIALIZER_INDEX (node), 0, node,
+                           payloads, phases);
       PKL_AST_ARRAY_INITIALIZER_EXP (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_ARRAY_INITIALIZER_EXP (node), 0, payloads,
-                         phases);
+                         PKL_AST_ARRAY_INITIALIZER_EXP (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_ARRAY_REF:
       PKL_AST_ARRAY_REF_ARRAY (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_ARRAY_REF_ARRAY (node), 0, payloads,
-                         phases);
+                         PKL_AST_ARRAY_REF_ARRAY (node), 0, node,
+                         payloads, phases);
       PKL_AST_ARRAY_REF_INDEX (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_ARRAY_REF_INDEX (node), 0, payloads,
-                         phases);
+                         PKL_AST_ARRAY_REF_INDEX (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_STRUCT:
       PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (node));
@@ -289,38 +299,34 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_STRUCT_ELEM_NAME (node))
         PKL_AST_STRUCT_ELEM_NAME (node)
           = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_STRUCT_ELEM_NAME (node), 0, payloads,
-                           phases);
+                           PKL_AST_STRUCT_ELEM_NAME (node), 0, node,
+                           payloads, phases);
       PKL_AST_STRUCT_ELEM_EXP (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_ELEM_EXP (node), 0, payloads,
-                         phases);
+                         PKL_AST_STRUCT_ELEM_EXP (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_STRUCT_REF:
       PKL_AST_STRUCT_REF_STRUCT (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_REF_STRUCT (node), 0, payloads,
-                         phases);
+                         PKL_AST_STRUCT_REF_STRUCT (node), 0, node,
+                         payloads, phases);
       PKL_AST_STRUCT_REF_IDENTIFIER (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_REF_IDENTIFIER (node), 0, payloads,
-                         phases);
+                         PKL_AST_STRUCT_REF_IDENTIFIER (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_OFFSET:
-      if (PKL_AST_TYPE (node))
-        PKL_AST_TYPE (node) = pkl_do_pass_1 (toplevel, ast,
-                                             PKL_AST_TYPE (node), 0, payloads,
-                                             phases);
       PKL_AST_OFFSET_MAGNITUDE (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_OFFSET_MAGNITUDE (node), 0, payloads,
-                         phases);
+                         PKL_AST_OFFSET_MAGNITUDE (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_CAST:
       PKL_AST_CAST_EXP (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_CAST_EXP (node), 0, payloads,
-                         phases);
+                         PKL_AST_CAST_EXP (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_TYPE:
       {
@@ -329,25 +335,25 @@ pkl_do_pass_1 (jmp_buf toplevel,
           case PKL_TYPE_ARRAY:
             PKL_AST_TYPE_A_ETYPE (node)
               = pkl_do_pass_1 (toplevel, ast,
-                               PKL_AST_TYPE_A_ETYPE (node), 0, payloads,
-                               phases);
+                               PKL_AST_TYPE_A_ETYPE (node), 0, node,
+                               payloads, phases);
             PKL_AST_TYPE_A_NELEM (node)
               = pkl_do_pass_1 (toplevel, ast,
-                               PKL_AST_TYPE_A_NELEM (node), 0, payloads,
-                               phases);
+                               PKL_AST_TYPE_A_NELEM (node), 0, node,
+                               payloads, phases);
             break;
           case PKL_TYPE_STRUCT:
             if (PKL_AST_TYPE_S_ELEMS (node))
               PKL_AST_TYPE_S_ELEMS (node)
                 = pkl_do_pass_1 (toplevel, ast,
-                                 PKL_AST_TYPE_S_ELEMS (node), 0, payloads,
-                                 phases);
+                                 PKL_AST_TYPE_S_ELEMS (node), 0, node,
+                                 payloads, phases);
             break;
           case PKL_TYPE_OFFSET:
             PKL_AST_TYPE_O_BASE_TYPE (node)
               = pkl_do_pass_1 (toplevel, ast,
-                               PKL_AST_TYPE_O_BASE_TYPE (node), 0, payloads,
-                               phases);
+                               PKL_AST_TYPE_O_BASE_TYPE (node), 0, node,
+                               payloads, phases);
             break;
           case PKL_TYPE_INTEGRAL:
           case PKL_TYPE_STRING:
@@ -363,12 +369,12 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_STRUCT_ELEM_TYPE_NAME (node))
         PKL_AST_STRUCT_ELEM_TYPE_NAME (node)
           = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_STRUCT_ELEM_TYPE_NAME (node), 0, payloads,
-                           phases);
+                           PKL_AST_STRUCT_ELEM_TYPE_NAME (node), 0, node,
+                           payloads, phases);
       PKL_AST_STRUCT_ELEM_TYPE_TYPE (node)
         = pkl_do_pass_1 (toplevel, ast,
-                         PKL_AST_STRUCT_ELEM_TYPE_TYPE (node), 0, payloads,
-                         phases);
+                         PKL_AST_STRUCT_ELEM_TYPE_TYPE (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_INTEGER:
     case PKL_AST_STRING:
@@ -385,7 +391,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
   /* Call the depth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
-                                 &handlers_used, child_pos,
+                                 &handlers_used, child_pos, parent,
                                  PKL_PASS_DEPTH_FIRST);
 
   /* If no handler has been invoked, call the default handler of the
@@ -412,8 +418,8 @@ pkl_do_pass (pkl_ast ast,
   switch (setjmp (toplevel))
     {
     case 0:
-      ast->ast = pkl_do_pass_1 (toplevel, ast, ast->ast, 0, payloads,
-                                phases);
+      ast->ast = pkl_do_pass_1 (toplevel, ast, ast->ast, 0, NULL /* parent */,
+                                payloads, phases);
       break;
     case 1:
       /* Non-error non-local exit.  */

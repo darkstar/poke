@@ -593,9 +593,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_initializer)
 PKL_PHASE_END_HANDLER
 
 /*
+ *  | ARRAY_TYPE
  *  | ARRAY_INITIALIZER
  *  | ...
- *  | ARRAY_TYPE
  *  ARRAY
  */
 
@@ -684,10 +684,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct_ref)
 PKL_PHASE_END_HANDLER
 
 /*
- * TYPE_INTEGRAL
+ * (PKL_AST_ARRAY | PKL_AST_OFFSET | PKL_AST_TYPE
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | TYPE_INTEGRAL
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -705,12 +712,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
 PKL_PHASE_END_HANDLER
 
 /*
- * | ETYPE
- * | NELEM
- * TYPE_ARRAY
+ * (PKL_AST_ARRAY | PKL_AST_OFFSET | PKL_AST_TYPE
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | | ETYPE
+ * | | NELEM
+ * | TYPE_ARRAY
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -720,10 +734,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
 PKL_PHASE_END_HANDLER
 
 /*
- * TYPE_STRING
+ * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | TYPE_STRING
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -733,11 +754,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
 PKL_PHASE_END_HANDLER
 
 /*
- * | BASE_TYPE
- * TYPE_OFFSET
+ * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | | BASE_TYPE
+ * | TYPE_OFFSET
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -750,12 +778,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
 PKL_PHASE_END_HANDLER
 
 /*
- * | STRUCT_TYPE_ELEM
- * | ...
- * TYPE_STRUCT
+ * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | | STRUCT_TYPE_ELEM
+ * | | ...
+ * | TYPE_STRUCT
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
  pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
@@ -768,12 +803,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * STRUCT_TYPE_ELEM
- * | [STRUCT_TYPE_ELEM_NAME]
- * | STRUCT_TYPE_ELEM_TYPE
+ * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
+ *  PKL_AST_STRUCT_ELEM_TYPE)
+ * | STRUCT_TYPE_ELEM
+ * | | [STRUCT_TYPE_ELEM_NAME]
+ * | | STRUCT_TYPE_ELEM_TYPE
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_type_elem)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
