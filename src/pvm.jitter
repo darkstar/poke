@@ -1080,6 +1080,7 @@ instruction itoi () # INT SIZE(INT) -> INT
   { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_int (va << (32 - vb) >> (32 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1087,8 +1088,9 @@ instruction itou () # INT SIZE(INT) -> UINT
   code
 #define F(res, a, b)   \
   { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1), vb); }
+    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1098,6 +1100,7 @@ instruction itol () # INT SIZE(INT) -> LONG
   { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_long (((int64_t) va) << (64 - vb) >> (64 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1105,8 +1108,9 @@ instruction itolu () # INT SIZE(INT) -> ULONG
   code
 #define F(res, a, b)   \
   { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong ((uint64_t) va) & (1 << (vb - 1)), vb); }
+    res = pvm_make_ulong (((uint64_t) va) & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1116,6 +1120,7 @@ instruction utoi () # UINT SIZE(INT) -> INT
   { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_int (((int32_t) va) << (32 - vb) >> (32 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1125,6 +1130,7 @@ instruction utou () # UINT SIZE(INT) -> UINT
   { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1134,6 +1140,7 @@ instruction utol () # UINT SIZE(INT) -> LONG
   { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_long (((int64_t) va) << (64 - vb) >> (64 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1141,8 +1148,9 @@ instruction utolu () # INT SIZE(INT) -> ULONG
   code
 #define F(res, a, b)   \
   { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong ((uint64_t) va) & (1 << (vb - 1)), vb); }
+    res = pvm_make_ulong (((uint64_t) va) & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1152,6 +1160,7 @@ instruction ltoi () # LONG SIZE(INT) -> INT
   { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_int (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1159,8 +1168,9 @@ instruction ltou () # LONG SIZE(INT) -> UINT
   code
 #define F(res, a, b)   \
   { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1), vb); }
+    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1170,6 +1180,7 @@ instruction ltol () # LONG SIZE(INT) -> LONG
   { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_long (va << (64 - vb) >> (64 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1179,6 +1190,7 @@ instruction ltolu () # LONG SIZE(INT) -> ULONG
   { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_ulong (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1188,6 +1200,7 @@ instruction lutoi () # ULONG SIZE(INT) -> INT
   { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_int (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1195,8 +1208,9 @@ instruction lutou () # ULONG SIZE(INT) -> UINT
   code
 #define F(res, a, b)   \
   { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1), vb); }
+    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1206,6 +1220,7 @@ instruction lutol () # ULONG SIZE(INT) -> LONG
   { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_long (va << (64 - vb) >> (64 - vb), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1215,6 +1230,7 @@ instruction lutolu () # ULONG SIZE(INT) -> ULONG
   { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
     res = pvm_make_ulong (va & (1 << (vb - 1)), vb); }
   JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
