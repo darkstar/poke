@@ -100,6 +100,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token SIZEOF
 %token ASSERT
 %token ERR
+%token INTCONSTR UINTCONSTR
 
 /* Operator tokens and their precedences, in ascending order.  */
 
@@ -480,6 +481,22 @@ type_specifier:
 	  TYPENAME
                 {
                     $$ = $1;
+                    PKL_AST_LOC ($$) = @$;
+                }
+        | INTCONSTR INTEGER '>'
+                {
+                    /* XXX: $3 can be any expresion!.  */
+                    assert (PKL_AST_CODE ($2) == PKL_AST_INTEGER);
+                    $$ = pkl_ast_make_integral_type (pkl_parser->ast,
+                                                     PKL_AST_INTEGER_VALUE ($2), 1 /* signed */);
+                    PKL_AST_LOC ($$) = @$;
+                }
+        | UINTCONSTR INTEGER '>'
+                {
+                    /* XXX: $3 can be any expresion!.  */
+                    assert (PKL_AST_CODE ($2) == PKL_AST_INTEGER);
+                    $$ = pkl_ast_make_integral_type (pkl_parser->ast,
+                                                     PKL_AST_INTEGER_VALUE ($2), 0 /* signed */);
                     PKL_AST_LOC ($$) = @$;
                 }
         | type_specifier '[' expression ']'

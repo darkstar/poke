@@ -120,6 +120,9 @@ D [0-9]
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
 
+"uint<"         { return UINTCONSTR; }
+"int<"          { return INTCONSTR; }
+
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
 "%="		{ return MODA; }
