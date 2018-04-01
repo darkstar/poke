@@ -89,7 +89,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
   
   pvm_append_symbolic_label (program, "Ldivzero");
   
-  val = pvm_make_int (PVM_EXIT_EDIVZ);
+  val = pvm_make_int (PVM_EXIT_EDIVZ, 32);
   pvm_push_val (program, val);
   
   PVM_APPEND_INSTRUCTION (program, ba);
@@ -97,7 +97,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
   
   pvm_append_symbolic_label (program, "Lerror");
   
-  val = pvm_make_int (PVM_EXIT_ERROR);
+  val = pvm_make_int (PVM_EXIT_ERROR, 32);
   pvm_push_val (program, val);
   
   pvm_append_symbolic_label (program, "Lexit");
@@ -125,7 +125,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
   pvm_val val;
 
   /* Standard epilogue.  */
-  val = pvm_make_int (PVM_EXIT_OK);
+  val = pvm_make_int (PVM_EXIT_OK, 32);
   pvm_push_val (program, val);
     
   PVM_APPEND_INSTRUCTION (program, ba);
@@ -145,46 +145,31 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
   pkl_ast_node integer = PKL_PASS_NODE;
   pkl_ast_node type;
   pvm_val val;
+  int size;
+  uint64_t value;
 
   type = PKL_AST_TYPE (integer);
   assert (type != NULL
           && PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL);
 
-  switch (PKL_AST_TYPE_I_SIZE (type))
+  size = PKL_AST_TYPE_I_SIZE (type);
+  value = PKL_AST_INTEGER_VALUE (integer);
+
+  if (size & ~0x1f)
     {
-    case 64:
       if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_long (PKL_AST_INTEGER_VALUE (integer));
+        val = pvm_make_long (value, size);
       else
-        val = pvm_make_ulong (PKL_AST_INTEGER_VALUE (integer));
-      break;
-
-    case 32:
-      if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_int (PKL_AST_INTEGER_VALUE (integer));
-      else
-        val = pvm_make_uint (PKL_AST_INTEGER_VALUE (integer));
-      break;
-
-    case 16:
-      if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_half (PKL_AST_INTEGER_VALUE (integer));
-      else
-        val = pvm_make_uhalf (PKL_AST_INTEGER_VALUE (integer));
-      break;
-
-    case 8:
-      if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_byte (PKL_AST_INTEGER_VALUE (integer));
-      else
-        val = pvm_make_ubyte (PKL_AST_INTEGER_VALUE (integer));
-      break;
-
-    default:
-      assert (0);
-      break;
+        val = pvm_make_ulong (value, size);
     }
-
+  else
+    {
+      if (PKL_AST_TYPE_I_SIGNED (type))
+        val = pvm_make_int (value, size);
+      else
+        val = pvm_make_uint (value, size);
+    }
+  
   pvm_push_val (payload->program, val);
 }
 PKL_PHASE_END_HANDLER
@@ -245,10 +230,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_offset)
   switch (PKL_AST_OFFSET_UNIT (node))
     {
     case PKL_AST_OFFSET_UNIT_BITS:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS);
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64);
       break;
     case PKL_AST_OFFSET_UNIT_BYTES:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES);
+      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64);
       break;
     default:
       /* Invalid unit. */
@@ -607,10 +592,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
   pkl_ast_node node = PKL_PASS_NODE;
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_ARRAY_NELEM (node)));
+                pvm_make_ulong (PKL_AST_ARRAY_NELEM (node), 64));
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (node)));
+                pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (node), 64));
 
   PVM_APPEND_INSTRUCTION (program, mka);
 }
@@ -644,7 +629,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
   pvm_program program = payload->program;
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE)));
+                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 64));
 
   PVM_APPEND_INSTRUCTION (program, mksct);
 }
@@ -702,10 +687,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
   pkl_ast_node node = PKL_PASS_NODE;
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node)));
+                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node), 64));
 
   pvm_push_val (program,
-                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node)));
+                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 32));
   
   PVM_APPEND_INSTRUCTION (program, mktyi);
 }
@@ -772,7 +757,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
   pvm_program program = payload->program;
   int unit = PKL_AST_TYPE_O_UNIT (PKL_PASS_NODE);
 
-  pvm_push_val (program, pvm_make_ulong (unit));
+  pvm_push_val (program, pvm_make_ulong (unit, 64));
   PVM_APPEND_INSTRUCTION (program, mktyo);
 }
 PKL_PHASE_END_HANDLER
@@ -797,7 +782,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
  pvm_program program = payload->program;
 
  pvm_push_val (program,
-               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE)));
+               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
  PVM_APPEND_INSTRUCTION (program, mktysct);
 }
 PKL_PHASE_END_HANDLER

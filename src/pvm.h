@@ -27,10 +27,8 @@
 /* The pvm_val opaque type implements values that are native to the
    poke virtual machine:
 
-   - Signed ("bytes") and unsigned ("ubytes") 8-bit integers.
-   - Signed ("halfs") and unsigned ("uhalfs") 16-bit integers.
-   - Signed ("ints") and unsigned ("uints") 32-bit integers.
-   - Signed ("longs") and unsigned ("ulongs") 64-bit integers.
+   - Integers up to 32-bit.
+   - Long integers wider than 32-bit.
    - Strings.
    - Arrays.
    - Structs.
@@ -38,10 +36,17 @@
 
    It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
-   the virtual machine.  The 32-bit integers are unboxed.  64-bit
-   integers, strings, arrays and structs are boxed.  Both boxed and
-   unboxed values are manipulated by the PVM users using the same API,
-   defined below in this header file.  */
+   the virtual machine.
+
+   Small integers up to 32-bit are unboxed:
+
+              val           sign      bits  tag
+              ---           ----      ----  ---
+      vvvv vvvv vvvv vvvv | sxxx xxxb bbbb bttt
+
+   Integers wider than 64-bit, strings, arrays and structs are boxed.
+   Both boxed and unboxed values are manipulated by the PVM users
+   using the same API, defined below in this header file.  */
 
 typedef uint64_t pvm_val;
 
@@ -51,51 +56,71 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG(V) ((V) & 0x7)
 
 #define PVM_VAL_TAG_INT   0x0
-#define PVM_VAL_TAG_BYTE  0x1
-#define PVM_VAL_TAG_UBYTE 0x2
-#define PVM_VAL_TAG_HALF  0x3
-#define PVM_VAL_TAG_UHALF 0x4
-#define PVM_VAL_TAG_UINT  0x5
+#define PVM_VAL_TAG_UINT  0x1
+#define PVM_VAL_TAG_LONG  0x2
+#define PVM_VAL_TAG_ULONG 0x3
+#define PVM_VAL_TAG_BIG   0x4
+#define PVM_VAL_TAG_UBIG  0x5
 #define PVM_VAL_TAG_BOX   0x6
 /* Note that there is no tag 0x7.  It is used to implement PVM_NULL
    below.  */
 /* Note also that the tags below are stored in the box, not in
    PVM_VAL_TAG.  See below in this file.  */
-#define PVM_VAL_TAG_LONG  0x8
-#define PVM_VAL_TAG_ULONG 0x9
-#define PVM_VAL_TAG_STR   0xa
-#define PVM_VAL_TAG_ARR   0xb
-#define PVM_VAL_TAG_SCT   0xc
-#define PVM_VAL_TAG_TYP   0xd
-#define PVM_VAL_TAG_MAP   0xe
-#define PVM_VAL_TAG_OFF   0xf
+#define PVM_VAL_TAG_STR 0x8
+#define PVM_VAL_TAG_OFF 0x9
+#define PVM_VAL_TAG_ARR 0xa
+#define PVM_VAL_TAG_SCT 0xb
+#define PVM_VAL_TAG_TYP 0xc
+#define PVM_VAL_TAG_MAP 0xd
 
-/* 8-bit integers (both signed and unsigned) are encoded in the bits
-   10..3 of pvm_val.  */
+/* Integers up to 32-bit are unboxed and encoded the following way:
 
-#define PVM_VAL_BYTE(V) ((int8_t) ((V) >> 3))
-#define PVM_VAL_UBYTE(V) ((uint8_t) ((V) >> 3))
+              val                   bits  tag
+              ---                   ----  ---
+      vvvv vvvv vvvv vvvv xxxx xxxx bbbb bttt
 
-pvm_val pvm_make_byte (int8_t value);
-pvm_val pvm_make_ubyte (uint8_t value);
+   BITS+1 is the size of the integral value in bits, from 0 to 31.
 
-/* 16-bit integers (both signed and unsigned) are encoded in the bits
-   18..3 of pvm_val.  */
+   VAL is the value of the integer, sign- or zero-extended to 32 bits.
+   Bits marked with `x' are unused and should be always 0.  */
 
-#define PVM_VAL_HALF(V) ((int16_t) ((V) >> 3))
-#define PVM_VAL_UHALF(V) ((int16_t) ((V) >> 3))
+#define PVM_VAL_INT(V) ((int32_t) ((V) >> 32))
+#define PVM_VAL_INT_SIZE(V) ((int) (((V) >> 3) & 0x1f))
 
-pvm_val pvm_make_half (int16_t value);
-pvm_val pvm_make_uhalf (uint16_t value);
+#define PVM_VAL_UINT(V) ((uint32_t) ((V) >> 32))
+#define PVM_VAL_UINT_SIZE(V) ((int) (((V) >> 3) & 0x1f))
 
-/* 32-bit integers (both signed and unsigned) are encoded in the bits
-   34..3 bits of pvm_val.  */
+pvm_val pvm_make_int (int32_t value, int size);
+pvm_val pvm_make_uint (uint32_t value, int size);
 
-#define PVM_VAL_INT(V) ((int32_t) ((V) >> 3))
-#define PVM_VAL_UINT(V) ((uint32_t) ((V) >> 3))
+/* Long integers, wider than 32-bit and up to 64-bit, are boxed.  The
+   pointer points to a pair of 64-bit words:
 
-pvm_val pvm_make_int (int32_t value);
-pvm_val pvm_make_uint (uint32_t value);
+                           val
+                           ---
+   [0]   vvvv vvvv vvvv vvvv vvvv vvvv vvvv vvvv
+                                           bits         
+                                           ----         
+   [1]   xxxx xxxx xxxx xxxx xxxx xxxx xxxb bbbb
+
+   BITS+33 is the size of the integral value in bits, from 0 to 31.
+
+   VAL is the value of the integer, sign- or zero-extended to 64 bits.
+   Bits marked with `x' are unused.  */
+
+#define PVM_VAL_LONG(V) (((int64_t *) (V))[0])
+#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+
+#define PVM_VAL_ULONG(V) (((uint64_t *) (V))[0])
+#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+
+pvm_val pvm_make_long (int64_t value, int size);
+pvm_val pvm_make_ulong (uint64_t value, int size);
+
+/* Big integers, wider than 64-bit, are boxed.  They are implemented
+   using the GNU mp library.  */
+
+/* XXX: implement big integers.  */
 
 /* A pointer to a boxed value is encoded in the most significative 61
    bits of pvm_val (32 bits for 32-bit hosts).  Note that this assumes
@@ -112,8 +137,6 @@ pvm_val pvm_make_uint (uint32_t value);
    type `pvm_val_box'.  */
 
 #define PVM_VAL_BOX_TAG(B) ((B)->tag)
-#define PVM_VAL_BOX_LONG(B) ((B)->v.l)
-#define PVM_VAL_BOX_ULONG(B) ((B)->v.ul)
 #define PVM_VAL_BOX_STR(B) ((B)->v.string)
 #define PVM_VAL_BOX_ARR(B) ((B)->v.array)
 #define PVM_VAL_BOX_SCT(B) ((B)->v.sct)
@@ -126,8 +149,6 @@ struct pvm_val_box
   uint8_t tag;
   union
   {
-    int64_t l;
-    uint64_t ul;
     char *string;
     struct pvm_array *array;
     struct pvm_struct *sct;
@@ -139,15 +160,7 @@ struct pvm_val_box
 
 typedef struct pvm_val_box *pvm_val_box;
 
-/* 64-bit integers (both signed and unsigned) are boxed.  */
-
-#define PVM_VAL_LONG(V) (PVM_VAL_BOX_LONG (PVM_VAL_BOX ((V))))
-#define PVM_VAL_ULONG(V) (PVM_VAL_BOX_ULONG (PVM_VAL_BOX ((V))))
-
-pvm_val pvm_make_long (int64_t value);
-pvm_val pvm_make_ulong (uint64_t value);
-
-/* Strings are also boxed.  */
+/* Strings are boxed.  */
 
 #define PVM_VAL_STR(V) (PVM_VAL_BOX_STR (PVM_VAL_BOX ((V))))
 
@@ -319,21 +332,10 @@ pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
 
 /* Public interface.  */
 
-#define PVM_IS_BYTE(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_BYTE)
-#define PVM_IS_UBYTE(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_UBYTE)
-#define PVM_IS_HALF(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_HALF)
-#define PVM_IS_UHALF(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_UHALF)
 #define PVM_IS_INT(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_INT)
 #define PVM_IS_UINT(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_UINT)
-#define PVM_IS_LONG(V)                                                  \
-  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_LONG)
-#define PVM_IS_ULONG(V)                                                 \
-  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ULONG)
-#define PVM_IS_ULONG(V)                                                 \
-  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_ULONG)
+#define PVM_IS_LONG(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_LONG)
+#define PVM_IS_ULONG(V) (PVM_VAL_TAG(V) == PVM_VAL_TAG_ULONG)
 #define PVM_IS_STR(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_STR)
@@ -355,17 +357,11 @@ pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
 
 
 #define PVM_IS_INTEGRAL(V)                                      \
-  (PVM_IS_BYTE(V) || PVM_IS_UBYTE(V)                            \
-   || PVM_IS_HALF(V) || PVM_IS_UHALF(V)                         \
-   || PVM_IS_INT(V) || PVM_IS_UINT(V)                           \
-   || PVM_IS_LONG(V) || PVM_IS_ULONG(V))
+  (PVM_IS_INT (V) || PVM_IS_UINT (V)                            \
+   || PVM_IS_LONG (V) || PVM_IS_ULONG (V))
 
 #define PVM_VAL_INTEGRAL(V)                      \
-  (PVM_IS_BYTE ((V)) ? PVM_VAL_BYTE ((V))        \
-   : PVM_IS_UBYTE ((V)) ? PVM_VAL_UBYTE ((V))    \
-   : PVM_IS_HALF ((V)) ? PVM_VAL_HALF ((V))      \
-   : PVM_IS_UHALF ((V)) ? PVM_VAL_UHALF ((V))    \
-   : PVM_IS_INT ((V)) ? PVM_VAL_INT ((V))        \
+  (PVM_IS_INT ((V)) ? PVM_VAL_INT ((V))          \
    : PVM_IS_UINT ((V)) ? PVM_VAL_UINT ((V))      \
    : PVM_IS_LONG ((V)) ? PVM_VAL_LONG ((V))      \
    : PVM_IS_ULONG ((V)) ? PVM_VAL_ULONG ((V))    \
