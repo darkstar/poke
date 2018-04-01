@@ -509,18 +509,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* A struct type is considered complete if all of its fields are
-   complete.  XXX: for the time being only simple structs are
-   supported, which are always complete.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_struct)
-{
-  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
-  PKL_AST_TYPE_COMPLETE (type) = PKL_AST_TYPE_COMPLETE_YES;
-}
-PKL_PHASE_END_HANDLER
-
-
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_struct)
 {
   PKL_AST_TYPE_COMPLETE (PKL_PASS_NODE) = PKL_AST_TYPE_COMPLETE_YES;
@@ -575,7 +563,6 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify2_df_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type_array),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type_struct),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),
