@@ -1002,7 +1002,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_ELSE_HANDLER (pkl_gen_noimpl),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER_VALUE, pkl_gen_df_integer),
+   PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
