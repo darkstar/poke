@@ -485,7 +485,7 @@ type_specifier:
                 }
         | INTCONSTR INTEGER '>'
                 {
-                    /* XXX: $3 can be any expresion!.  */
+                    /* XXX: $3 can be any expression!.  */
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2), 1 /* signed */);
                     ASTREF ($2); pkl_ast_node_free ($2);
@@ -493,7 +493,7 @@ type_specifier:
                 }
         | UINTCONSTR INTEGER '>'
                 {
-                    /* XXX: $3 can be any expresion!.  */
+                    /* XXX: $3 can be any expression!.  */
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2), 0 /* signed */);
                     ASTREF ($2); pkl_ast_node_free ($2);
