@@ -111,14 +111,17 @@ pvm_val pvm_make_uint (uint32_t value, int size);
    VAL is the value of the integer, sign- or zero-extended to 64 bits.
    Bits marked with `x' are unused.  */
 
-#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 1)
-#define PVM_VAL_LONG(V) ((((int64_t *) (V))[0])                 \
+#define _PVM_VAL_LONG_ULONG_VAL(V) (((int64_t *) ((((uintptr_t) V) & ~0x7)))[0])
+#define _PVM_VAL_LONG_ULONG_SIZE(V) ((int) (((int64_t *) ((((uintptr_t) V) & ~0x7)))[1]) + 1)
+
+#define PVM_VAL_LONG_SIZE(V) (_PVM_VAL_LONG_ULONG_SIZE (V))
+#define PVM_VAL_LONG(V) (_PVM_VAL_LONG_ULONG_VAL ((V))           \
                          << (64 - PVM_VAL_LONG_SIZE ((V)))      \
                          >> (64 - PVM_VAL_LONG_SIZE ((V))))
 
-
-#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 1)
-#define PVM_VAL_ULONG(V) (((uint64_t *) (V))[0] & (1 << (PVM_VAL_ULONG_SIZE ((V)))))
+#define PVM_VAL_ULONG_SIZE(V) (_PVM_VAL_LONG_ULONG_SIZE (V))
+#define PVM_VAL_ULONG(V) (_PVM_VAL_LONG_ULONG_VAL ((V)) \
+                          & (1 << (PVM_VAL_ULONG_SIZE ((V)) - 1)))
 
 pvm_val pvm_make_long (int64_t value, int size);
 pvm_val pvm_make_ulong (uint64_t value, int size);

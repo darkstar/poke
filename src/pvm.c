@@ -73,28 +73,26 @@ pvm_make_uint (uint32_t value, int size)
           | PVM_VAL_TAG_UINT);
 }
 
-pvm_val
-pvm_make_long (int64_t value, int size)
+static inline pvm_val
+pvm_make_long_ulong (int64_t value, int size, int tag)
 {
   uint64_t *ll = GC_MALLOC (sizeof (uint64_t) * 2);
-  uint8_t tag = PVM_VAL_TAG_LONG;
       
   ll[0] = value;
   ll[1] = (size - 1) & 0x3f;
-  printf ("ll[0] = %ld\n", ll[0]);
-  printf ("ll[1] = 0x%lx\n", ll[1]);
   return ((uint64_t) (uintptr_t) ll) | tag;
+}
+
+pvm_val
+pvm_make_long (int64_t value, int size)
+{
+  return pvm_make_long_ulong (value, size, PVM_VAL_TAG_LONG);
 }
 
 pvm_val
 pvm_make_ulong (uint64_t value, int size)
 {
-  uint64_t *ll = GC_MALLOC (sizeof (uint64_t) * 2);
-  uint8_t tag = PVM_VAL_TAG_ULONG;
-      
-  ll[0] = value;
-  ll[1] = (size - 1) & 0x3f;
-  return ((uint64_t) (uintptr_t) ll) | tag;
+  return pvm_make_long_ulong (value, size, PVM_VAL_TAG_ULONG);
 }
 
 static pvm_val_box
@@ -392,7 +390,8 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     {
       if (PVM_VAL_UINT_SIZE (val) == 32)
         fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
-      fprintf (out, GREEN "(int<%d>) %u" NOATTR,
+      else
+        fprintf (out, GREEN "(int<%d>) %u" NOATTR,
                  PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
     }
   else if (PVM_IS_STR (val))
