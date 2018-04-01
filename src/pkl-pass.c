@@ -344,10 +344,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
             break;
           case PKL_TYPE_STRUCT:
             if (PKL_AST_TYPE_S_ELEMS (node))
-              PKL_AST_TYPE_S_ELEMS (node)
-                = pkl_do_pass_1 (toplevel, ast,
-                                 PKL_AST_TYPE_S_ELEMS (node), 0, node,
-                                 payloads, phases);
+              PKL_PASS_CHAIN (PKL_AST_TYPE_S_ELEMS (node));
             break;
           case PKL_TYPE_OFFSET:
             PKL_AST_TYPE_O_BASE_TYPE (node)
