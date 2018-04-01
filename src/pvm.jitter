@@ -50,6 +50,7 @@ end
 early-c
   code
 #   include <string.h>
+# define PVM_MAX(a,b) ((a) > (b) ? (a) : (b))
   end
 end
 
@@ -216,56 +217,13 @@ end
 
 # Integer arithmetic.
 
-# XXX: one of the references A or B may be lost when assigning to RES
-#      depending on TOS or no TOS.  So refcounts must be decremented
-#      in both A and B.
-
-# XXX: value preserving vs sign preserving?
-#      C standardized in value preserving, with promotions.
-#      Java avoids this problem by not having unsigned types.. the fuckers :D
-#      But we need unsigned types.
-
-instruction addb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) + PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction addbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) + PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction addh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) + PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction addhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) + PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
 instruction addi () # INT INT -> INT
   code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) + PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+#define F(res, a, b)                                                     \
+  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_INT (a) + PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -273,17 +231,21 @@ end
 instruction addiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) + PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
+    res = pvm_make_uint ((PVM_VAL_UINT (a) + PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
 instruction addl () # LONG LONG -> LONG
   code
-#define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) + PVM_VAL_LONG (b)); }
-    JITTER_BINARY_STACK(F);
+#define F(res, a, b)                                                       \
+  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
+    res = pvm_make_long ((PVM_VAL_LONG (a) + PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -291,44 +253,10 @@ end
 instruction addlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction subb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) - PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction subbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) - PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction subh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) - PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction subhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) - PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
+  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -336,8 +264,10 @@ end
 instruction subi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) - PVM_VAL_INT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_INT (a) - PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -345,8 +275,10 @@ end
 instruction subiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) - PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
+  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
+    res = pvm_make_uint ((PVM_VAL_UINT (a) - PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -354,8 +286,10 @@ end
 instruction subl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) - PVM_VAL_LONG (b)); }
-    JITTER_BINARY_STACK(F);
+  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
+    res = pvm_make_long ((PVM_VAL_LONG (a) - PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  }
+  JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -363,43 +297,9 @@ end
 instruction sublu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction mulb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) * PVM_VAL_BYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction mulbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) * PVM_VAL_UBYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction mulh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) * PVM_VAL_HALF (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction mulhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) * PVM_VAL_UHALF (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -408,7 +308,9 @@ end
 instruction muli () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) * PVM_VAL_INT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_INT (a) * PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -417,7 +319,9 @@ end
 instruction muliu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) * PVM_VAL_UINT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
+    res = pvm_make_uint ((PVM_VAL_UINT (a) * PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -426,7 +330,9 @@ end
 instruction mull () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) * PVM_VAL_LONG (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
+    res = pvm_make_long ((PVM_VAL_LONG (a) * PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -435,43 +341,9 @@ end
 instruction mullu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction divb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) / PVM_VAL_BYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction divbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) / PVM_VAL_UBYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction divh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) / PVM_VAL_HALF (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction divhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) / PVM_VAL_UHALF (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -480,7 +352,9 @@ end
 instruction divi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_INT (a) / PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -489,7 +363,9 @@ end
 instruction diviu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
+    res = pvm_make_uint ((PVM_VAL_UINT (a) / PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -498,7 +374,9 @@ end
 instruction divl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
+    res = pvm_make_long ((PVM_VAL_LONG (a) / PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -507,43 +385,9 @@ end
 instruction divlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction modb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) % PVM_VAL_BYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction modbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) % PVM_VAL_UBYTE (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction modh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) % PVM_VAL_HALF (b)); }
-  JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction modhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) % PVM_VAL_UHALF (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -552,7 +396,9 @@ end
 instruction modi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_INT_SIZE (a), PVM_VAL_INT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_INT (a) % PVM_VAL_INT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -561,7 +407,9 @@ end
 instruction modiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { res = pvm_make_uint (PVM_VAL_UINT (a) % PVM_VAL_UINT (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_UINT_SIZE (a), PVM_VAL_UINT_SIZE (b)); \
+    res = pvm_make_int ((PVM_VAL_UINT (a) % PVM_VAL_UINT (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -570,7 +418,9 @@ end
 instruction modl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_LONG_SIZE (a), PVM_VAL_LONG_SIZE (b)); \
+    res = pvm_make_long ((PVM_VAL_LONG (a) % PVM_VAL_LONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -579,110 +429,52 @@ end
 instruction modlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b)); }
+  { int max_size = PVM_MAX (PVM_VAL_ULONG_SIZE (a), PVM_VAL_ULONG_SIZE (b)); \
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b)) & (1 << max_size), max_size);\
+  }
   JITTER_BINARY_STACK(F);
 #undef F
   end
 end
 
-instruction negb () # BYTE -> BYTE
-  code
-    JITTER_TOP_STACK()
-      = pvm_make_byte (- PVM_VAL_BYTE (JITTER_TOP_STACK()));
-  end
-end
-
-instruction negbu () # UBYTE -> UBYTE
-  code
-    JITTER_TOP_STACK()
-      = pvm_make_ubyte (- PVM_VAL_UBYTE (JITTER_TOP_STACK()));
-  end
-end
-
-instruction negh () # HALF -> HALF
-  code
-    JITTER_TOP_STACK()
-      = pvm_make_half (- PVM_VAL_HALF (JITTER_TOP_STACK()));
-  end
-end
-
-instruction neghu () # UHALF -> UHALF
-  code
-    JITTER_TOP_STACK()
-      = pvm_make_uhalf (- PVM_VAL_UHALF (JITTER_TOP_STACK()));
-  end
-end
-
 instruction negi () # INT -> INT
   code
+    int size = PVM_VAL_INT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_int (- PVM_VAL_INT (JITTER_TOP_STACK()));
+      = pvm_make_int ((- PVM_VAL_INT (JITTER_TOP_STACK())) & size, size);
   end
 end
 
 instruction negiu () # UINT -> UINT
   code
+    int size = PVM_VAL_UINT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_uint ((uint32_t) -PVM_VAL_UINT (JITTER_TOP_STACK()));
+      = pvm_make_uint ((uint32_t) (- PVM_VAL_INT (JITTER_TOP_STACK())) & size, size);
   end
 end
 
 instruction negl () # LONG -> LONG
   code
+    int size = PVM_VAL_LONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_long (- PVM_VAL_LONG (JITTER_TOP_STACK()));
+      = pvm_make_long ((- PVM_VAL_LONG (JITTER_TOP_STACK())) & size, size);
   end
 end
 
 instruction neglu () # LONG -> LONG
   code
+    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
-      = pvm_make_ulong ((uint64_t) -PVM_VAL_ULONG (JITTER_TOP_STACK()));
+      = pvm_make_ulong ((uint64_t) (- PVM_VAL_ULONG (JITTER_TOP_STACK())) & size, size);
   end
 end
 
-# Equality/inequality.
-
-instruction eqb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) == PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction eqbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) == PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction eqh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) == PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction eqhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) == PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
+# Equality/inequality
 
 instruction eqi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) == PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) == PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -691,7 +483,7 @@ end
 instruction eqiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) == PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) == PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -700,7 +492,7 @@ end
 instruction eql () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) == PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) == PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -709,43 +501,7 @@ end
 instruction eqlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) == PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction neb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) != PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction nebu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) != PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction neh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) != PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction nehu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) != PVM_VAL_UHALF (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) == PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -754,7 +510,7 @@ end
 instruction nei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) != PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) != PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -763,7 +519,7 @@ end
 instruction neiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) != PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) != PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -772,7 +528,7 @@ end
 instruction nel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) != PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) != PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -781,7 +537,7 @@ end
 instruction nelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) != PVM_VAL_ULONG (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) != PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -790,7 +546,7 @@ end
 instruction eqs () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) == 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) == 0, 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -799,7 +555,7 @@ end
 instruction nes () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) != 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) != 0, 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -807,46 +563,10 @@ end
 
 # Comparison instructions.
 
-instruction ltb () # BYTE BYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_BYTE (a) < PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction ltbu () # UBYTE UBYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UBYTE (a) < PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction lth () # HALF HALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_HALF (a) < PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction lthu () # UHALF UHALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UHALF (a) < PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
 instruction lti () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) < PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) < PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -855,7 +575,7 @@ end
 instruction ltiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) < PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) < PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -864,7 +584,7 @@ end
 instruction ltl () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) < PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) < PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -873,43 +593,7 @@ end
 instruction ltlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction leb () # BYTE BYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_BYTE (a) <= PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction lebu () # UBYTE UBYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UBYTE (a) <= PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction leh () # HALF HALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_HALF (a) <= PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction lehu () # UHALF UHALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UHALF (a) <= PVM_VAL_UHALF (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -918,7 +602,7 @@ end
 instruction lei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) <= PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) <= PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -927,7 +611,7 @@ end
 instruction leiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) <= PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) <= PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -936,7 +620,7 @@ end
 instruction lel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) <= PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) <= PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -945,44 +629,8 @@ end
 instruction lelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) <= PVM_VAL_ULONG (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) <= PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-instruction gtb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) > PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction gtbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) > PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction gth () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) > PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction gthu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) > PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
 #undef F
   end
 end
@@ -990,7 +638,7 @@ end
 instruction gti () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) > PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) > PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -999,7 +647,7 @@ end
 instruction gtiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) > PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) > PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1008,7 +656,7 @@ end
 instruction gtl () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) > PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) > PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1017,43 +665,7 @@ end
 instruction gtlu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction geb () # BYTE BYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_BYTE (a) >= PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction gebu () # UBYTE UBYTE -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UBYTE (a) >= PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction geh () # HALF HALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_HALF (a) >= PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction gehu () # UHALF UHALF -> INT
-  code
-#define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UHALF (a) >= PVM_VAL_UHALF (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1062,7 +674,7 @@ end
 instruction gei () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_INT (a) >= PVM_VAL_INT (b)); }
+  { res = pvm_make_int (PVM_VAL_INT (a) >= PVM_VAL_INT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1071,7 +683,7 @@ end
 instruction geiu () # UINT UINT -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_UINT (a) >= PVM_VAL_UINT (b)); }
+  { res = pvm_make_int (PVM_VAL_UINT (a) >= PVM_VAL_UINT (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1080,7 +692,7 @@ end
 instruction gel () # LONG LONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_LONG (a) >= PVM_VAL_LONG (b)); }
+  { res = pvm_make_int (PVM_VAL_LONG (a) >= PVM_VAL_LONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1089,7 +701,7 @@ end
 instruction gelu () # ULONG ULONG -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (PVM_VAL_ULONG (a) >= PVM_VAL_ULONG (b)); }
+  { res = pvm_make_int (PVM_VAL_ULONG (a) >= PVM_VAL_ULONG (b), 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1098,7 +710,7 @@ end
 instruction lts () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) < 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) < 0, 31); }
     JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -1107,7 +719,7 @@ end
 instruction gts () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) > 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) > 0, 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1116,7 +728,7 @@ end
 instruction ges () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) >= 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) >= 0, 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1125,7 +737,7 @@ end
 instruction les () # STR STR -> INT
   code
 #define F(res, a, b) \
-  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) <= 0); }
+  { res = pvm_make_int (strcmp (PVM_VAL_STR (a), PVM_VAL_STR (b)) <= 0, 31); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1178,42 +790,6 @@ end
 
 # Bitwise operators.
 
-instruction bxorb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) ^ PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bxorbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) ^ PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bxorh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) ^ PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bxorhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) ^ PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
 instruction bxori () # INT INT -> INT
   code
 #define F(res, a, b) \
@@ -1245,42 +821,6 @@ instruction bxorlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
   { res = pvm_make_ulong (PVM_VAL_ULONG (a) ^ PVM_VAL_ULONG (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction borb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) | PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction borbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) | PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction borh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) | PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction borhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) | PVM_VAL_UHALF (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1322,42 +862,6 @@ instruction borlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction bandb () # BYTE BYTE -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) & PVM_VAL_BYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bandbu () # UBYTE UBYTE -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) & PVM_VAL_UBYTE (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bandh () # HALF HALF -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) & PVM_VAL_HALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bandhu () # UHALF UHALF -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) & PVM_VAL_UHALF (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
 instruction bandi () # INT INT -> INT
   code
 #define F(res, a, b) \
@@ -1394,30 +898,6 @@ instruction bandlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction bnotb () # BYTE -> BYTE
-  code
-    JITTER_TOP_STACK() = pvm_make_byte (~PVM_VAL_BYTE (JITTER_TOP_STACK()));
-  end
-end
-
-instruction bnotbu () # UBYTE -> UBYTE
-  code
-    JITTER_TOP_STACK() = pvm_make_ubyte (~PVM_VAL_UBYTE (JITTER_TOP_STACK()));
-  end
-end
-
-instruction bnoth () # HALF -> HALF
-  code
-    JITTER_TOP_STACK() = pvm_make_half (~PVM_VAL_HALF (JITTER_TOP_STACK()));
-  end
-end
-
-instruction bnothu () # UHALF -> UHALF
-  code
-    JITTER_TOP_STACK() = pvm_make_uhalf (~PVM_VAL_UHALF (JITTER_TOP_STACK()));
-  end
-end
-
 instruction bnoti () # INT -> INT
   code
     JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()));
@@ -1439,42 +919,6 @@ end
 instruction bnotlu () # ULONG -> ULONG
   code
    JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()));
-  end
-end
-
-instruction bslb () # BYTE UINT -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) << PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bslbu () # UBYTE UINT -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) << PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bslh () # HALF UINT -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) << PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bslhu () # UHALF UINT -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) << PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
   end
 end
 
@@ -1509,42 +953,6 @@ instruction bsllu () # ULONG UINT -> ULONG
   code
 #define F(res, a, b) \
   { res = pvm_make_ulong (PVM_VAL_ULONG (a) << PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bsrb () # BYTE UINT -> BYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_byte (PVM_VAL_BYTE (a) >> PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bsrbu () # UBYTE UINT -> UBYTE
-  code
-#define F(res, a, b) \
-  { res = pvm_make_ubyte (PVM_VAL_UBYTE (a) >> PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bsrh () # HALF UINT -> HALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_half (PVM_VAL_HALF (a) >> PVM_VAL_UINT (b)); }
-    JITTER_BINARY_STACK(F);
-#undef F
-  end
-end
-
-instruction bsrhu () # UHALF UINT -> UHALF
-  code
-#define F(res, a, b) \
-  { res = pvm_make_uhalf (PVM_VAL_UHALF (a) >> PVM_VAL_UINT (b)); }
     JITTER_BINARY_STACK(F);
 #undef F
   end

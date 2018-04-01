@@ -80,7 +80,7 @@ pvm_make_long (int64_t value, int size)
   uint8_t tag = PVM_VAL_TAG_LONG;
       
   ll[0] = value;
-  ll[1] = (size - 33) & 0x1f;
+  ll[1] = (size - 32) & 0x1f;
   return ((uint64_t) (uintptr_t) ll) | tag;
 }
 
@@ -91,7 +91,7 @@ pvm_make_ulong (uint64_t value, int size)
   uint8_t tag = PVM_VAL_TAG_ULONG;
       
   ll[0] = value;
-  ll[1] = (size - 33) & 0x1f;
+  ll[1] = (size - 32) & 0x1f;
   return ((uint64_t) (uintptr_t) ll) | tag;
 }
 
@@ -251,7 +251,7 @@ pvm_elemsof (pvm_val val)
   else if (PVM_IS_SCT (val))
     return PVM_VAL_SCT_NELEM (val);
   else
-    return pvm_make_ulong (1, 64);
+    return pvm_make_ulong (1, 63);
 }
 
 pvm_val
@@ -259,20 +259,20 @@ pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_INT (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
-                            pvm_make_int (PVM_VAL_INT_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+                            pvm_make_int (PVM_VAL_INT_SIZE (val), 31),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 63));
   else if (PVM_IS_UINT (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
-                            pvm_make_int (PVM_VAL_UINT_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+                            pvm_make_int (PVM_VAL_UINT_SIZE (val), 31),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 63));
   else if (PVM_IS_LONG (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
-                            pvm_make_int (PVM_VAL_LONG_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+                            pvm_make_int (PVM_VAL_LONG_SIZE (val), 31),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 63));
   else if (PVM_IS_ULONG (val))
     return pvm_make_offset (pvm_make_integral_type (32, 1),
-                            pvm_make_int (PVM_VAL_ULONG_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+                            pvm_make_int (PVM_VAL_ULONG_SIZE (val), 31),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 63));
   else if (PVM_IS_STR (val))
     {
       size_t size = strlen (PVM_VAL_STR (val)) + 1;
@@ -280,7 +280,7 @@ pvm_sizeof (pvm_val val)
       /* Calculate the minimum storage needed to store the length.  */
       return pvm_make_offset (pvm_make_integral_type (64, 1),
                               pvm_make_long (size, 64),
-                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 63));
     }
   else if (PVM_IS_ARR (val))
     {

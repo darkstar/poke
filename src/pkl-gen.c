@@ -89,7 +89,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
   
   pvm_append_symbolic_label (program, "Ldivzero");
   
-  val = pvm_make_int (PVM_EXIT_EDIVZ, 32);
+  val = pvm_make_int (PVM_EXIT_EDIVZ, 31);
   pvm_push_val (program, val);
   
   PVM_APPEND_INSTRUCTION (program, ba);
@@ -97,7 +97,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
   
   pvm_append_symbolic_label (program, "Lerror");
   
-  val = pvm_make_int (PVM_EXIT_ERROR, 32);
+  val = pvm_make_int (PVM_EXIT_ERROR, 31);
   pvm_push_val (program, val);
   
   pvm_append_symbolic_label (program, "Lexit");
@@ -125,7 +125,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
   pvm_val val;
 
   /* Standard epilogue.  */
-  val = pvm_make_int (PVM_EXIT_OK, 32);
+  val = pvm_make_int (PVM_EXIT_OK, 31);
   pvm_push_val (program, val);
     
   PVM_APPEND_INSTRUCTION (program, ba);
@@ -629,7 +629,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
   pvm_program program = payload->program;
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 64));
+                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 63));
 
   PVM_APPEND_INSTRUCTION (program, mksct);
 }
@@ -687,10 +687,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
   pkl_ast_node node = PKL_PASS_NODE;
 
   pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node), 64));
+                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node), 63));
 
   pvm_push_val (program,
-                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 32));
+                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 31));
   
   PVM_APPEND_INSTRUCTION (program, mktyi);
 }
@@ -757,7 +757,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
   pvm_program program = payload->program;
   int unit = PKL_AST_TYPE_O_UNIT (PKL_PASS_NODE);
 
-  pvm_push_val (program, pvm_make_ulong (unit, 64));
+  pvm_push_val (program, pvm_make_ulong (unit, 63));
   PVM_APPEND_INSTRUCTION (program, mktyo);
 }
 PKL_PHASE_END_HANDLER
@@ -782,7 +782,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
  pvm_program program = payload->program;
 
  pvm_push_val (program,
-               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
+               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 63));
  PVM_APPEND_INSTRUCTION (program, mktysct);
 }
 PKL_PHASE_END_HANDLER
@@ -825,37 +825,21 @@ PKL_PHASE_END_HANDLER
     uint64_t size = PKL_AST_TYPE_I_SIZE (type);         \
     int signed_p = PKL_AST_TYPE_I_SIGNED (type);        \
                                                         \
-    switch (size)                                       \
+    if (size & ~0x1f)                                   \
       {                                                 \
-      case 8:                                           \
-        if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, insn##b);    \
-        else                                            \
-          PVM_APPEND_INSTRUCTION (program, insn##bu);   \
-        break;                                          \
-                                                        \
-      case 16:                                          \
-        if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, insn##h);    \
-        else                                            \
-          PVM_APPEND_INSTRUCTION (program, insn##hu);   \
-        break;                                          \
-                                                        \
-      case 32:                                          \
-        if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, insn##i);    \
-        else                                            \
-          PVM_APPEND_INSTRUCTION (program, insn##iu);   \
-        break;                                          \
-                                                        \
-      case 64:                                          \
         if (signed_p)                                   \
           PVM_APPEND_INSTRUCTION (program, insn##l);    \
         else                                            \
           PVM_APPEND_INSTRUCTION (program, insn##lu);   \
-        break;                                          \
+        }                                               \
+    else                                                \
+      {                                                 \
+        if (signed_p)                                   \
+          PVM_APPEND_INSTRUCTION (program, insn##i);    \
+        else                                            \
+          PVM_APPEND_INSTRUCTION (program, insn##iu);   \
       }                                                 \
-  }
+    }
   
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {

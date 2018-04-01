@@ -109,10 +109,10 @@ pvm_val pvm_make_uint (uint32_t value, int size);
    Bits marked with `x' are unused.  */
 
 #define PVM_VAL_LONG(V) (((int64_t *) (V))[0])
-#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+#define PVM_VAL_LONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 32)
 
 #define PVM_VAL_ULONG(V) (((uint64_t *) (V))[0])
-#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 33)
+#define PVM_VAL_ULONG_SIZE(V) (((int) ((int64_t *) (V))[1]) + 32)
 
 pvm_val pvm_make_long (int64_t value, int size);
 pvm_val pvm_make_ulong (uint64_t value, int size);
