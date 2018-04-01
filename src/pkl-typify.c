@@ -63,10 +63,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
 {
   pkl_ast_node type
     = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
-
-  PKL_AST_TYPE (PKL_PASS_NODE)
-    = ASTREF (type);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
+
+  PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
 }
 PKL_PHASE_END_HANDLER
 
@@ -76,8 +75,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_first_operand)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
-  pkl_ast_node type
-    = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (exp, 0));
+  pkl_ast_node type = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (exp, 0));
   
   PKL_AST_TYPE (exp) = ASTREF (type);
 }
