@@ -283,17 +283,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
         /* Wheee, nothing to do.  */
         PKL_PASS_DONE;
       else
-        {
-          /* First, push the target size.  */
-          pvm_push_val (program,
-                        pvm_make_int ((int32_t) to_type_size, 32));
-          
+        {          
           /* Now push the proper conversion instruction.  */
           if ((from_type_size - 1) & ~0x1f)
             {
               if ((to_type_size - 1) & ~0x1f)
                 {
-                  if (from_type_sign && from_type_sign)
+                  if (from_type_sign && to_type_sign)
                     /* From pvm_long to pvm_long  */
                     PVM_APPEND_INSTRUCTION (program, ltol);
                   else if (from_type_sign && !to_type_sign)
@@ -326,7 +322,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
             {
               if ((to_type_size - 1) & ~0x1f)
                 {
-                  if (from_type_sign && from_type_sign)
+                  if (from_type_sign && to_type_sign)
                     /* From pvm_int to pvm_long  */
                     PVM_APPEND_INSTRUCTION (program, itol);
                   else if (from_type_sign && !to_type_sign)
@@ -341,7 +337,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
                 }
               else
                 {
-                  if (from_type_sign && from_type_sign)
+                  if (from_type_sign && to_type_sign)
                     /* From pvm_int to pvm_int  */
                     PVM_APPEND_INSTRUCTION (program, itoi);
                   else if (from_type_sign && !to_type_sign)
@@ -355,6 +351,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
                     PVM_APPEND_INSTRUCTION (program, utou);
                 }
             }
+
+          /* And its argument.  */
+          pvm_append_unsigned_literal_parameter (program,
+                                                 (jitter_uint) to_type_size);
         }
     }
   else

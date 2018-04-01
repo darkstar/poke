@@ -16,6 +16,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+# Conversions.
+
+set test i32toi32
+poke_test_cmd "print (int) 1" "1"
+
+set test i32tou32
+poke_test_cmd "print (uint32) 1" "1U"
+
+set test i32toi64
+poke_test_cmd "print (long) 1" "1L"
+
+set test i32tou64
+poke_test_cmd "print (uint64) 1" "1UL"
+
 # Integers and operations
 
 set test addii

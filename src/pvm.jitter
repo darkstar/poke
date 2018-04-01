@@ -68,6 +68,12 @@ end
 printer-c
   code
     void
+    pvm_literal_printer_cast (FILE *out, jitter_uint val)
+    {
+      fprintf (out, "%" JITTER_PRIu, val);
+    }
+
+    void
     pvm_literal_printer (FILE *out, jitter_uint val)
     {
       pvm_print_val (out, (pvm_val) val, 10);
@@ -1074,163 +1080,171 @@ end
 
 ## Conversion instructions.
 
-instruction itoi () # INT SIZE(INT) -> INT
+instruction itoi (?n pvm_literal_printer_cast) # INT -> INT
   code
-#define F(res, a, b)   \
-  { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_int (va << (32 - vb) >> (32 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_int (val << (32 - fsize) >> (32 - tsize), tsize);
   end
 end
 
-instruction itou () # INT SIZE(INT) -> UINT
+instruction itou (?n pvm_literal_printer_cast) # INT -> UINT
   code
-#define F(res, a, b)   \
-  { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_uint (((uint32_t) val) & ((1 << tsize) - 1), tsize);
   end
 end
 
-instruction itol () # INT SIZE(INT) -> LONG
+instruction itol (?n pvm_literal_printer_cast) # INT -> LONG
   code
-#define F(res, a, b)   \
-  { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_long (((int64_t) va) << (64 - vb) >> (64 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_long (((int64_t) val) << (64 - fsize) >> (64 - fsize), tsize);
   end
 end
 
-instruction itolu () # INT SIZE(INT) -> ULONG
+instruction itolu (?n pvm_literal_printer_cast) # INT -> ULONG
   code
-#define F(res, a, b)   \
-  { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong (((uint64_t) va) & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_ulong (((uint64_t) val) & ((1 << fsize) - 1), tsize);
   end
 end
 
-instruction utoi () # UINT SIZE(INT) -> INT
+instruction utoi (?n pvm_literal_printer_cast) # UINT -> INT
   code
-#define F(res, a, b)   \
-  { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_int (((int32_t) va) << (32 - vb) >> (32 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_int (((int32_t) val) << (32 - fsize) >> (32 - tsize), tsize);
   end
 end
 
-instruction utou () # UINT SIZE(INT) -> UINT
+instruction utou (?n pvm_literal_printer_cast) # UINT -> UINT
   code
-#define F(res, a, b)   \
-  { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_uint (val & ((1 << tsize) - 1), tsize);
   end
 end
 
-instruction utol () # UINT SIZE(INT) -> LONG
+instruction utol (?n pvm_literal_printer_cast) # UINT -> LONG
   code
-#define F(res, a, b)   \
-  { uint32_t va = PVM_VAL_UINT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_long (((int64_t) va) << (64 - vb) >> (64 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_long (((int64_t) val) << (64 - fsize) >> (64 - tsize), tsize);
   end
 end
 
-instruction utolu () # INT SIZE(INT) -> ULONG
+instruction utolu (?n pvm_literal_printer_cast) # UINT -> ULONG
   code
-#define F(res, a, b)   \
-  { int32_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong (((uint64_t) va) & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_ulong (((uint64_t) val) & ((1 << tsize) - 1), tsize);
   end
 end
 
-instruction ltoi () # LONG SIZE(INT) -> INT
+instruction ltoi (?n pvm_literal_printer_cast) # LONG -> INT
   code
-#define F(res, a, b)   \
-  { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_int (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_int ((int32_t) (val << (64 - fsize) >> (64 - tsize)), tsize);
   end
 end
 
-instruction ltou () # LONG SIZE(INT) -> UINT
+instruction ltou (?n pvm_literal_printer_cast) # LONG -> UINT
   code
-#define F(res, a, b)   \
-  { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_uint ((uint32_t) (val << (64 - fsize) >> (64 - tsize)), tsize);
   end
 end
 
-instruction ltol () # LONG SIZE(INT) -> LONG
+instruction ltol (?n pvm_literal_printer_cast) # LONG -> LONG
   code
-#define F(res, a, b)   \
-  { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_long (va << (64 - vb) >> (64 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int32_t fsize = PVM_VAL_INT_SIZE (JITTER_TOP_STACK ());
+    int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_long (val << (64 - fsize) >> (64 - tsize), tsize);
   end
 end
 
-instruction ltolu () # LONG SIZE(INT) -> ULONG
+instruction ltolu (?n pvm_literal_printer_cast) # LONG -> ULONG
   code
-#define F(res, a, b)   \
-  { int64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_ulong (((uint64_t) val) & ((1 << tsize) - 1), tsize);
   end
 end
 
-instruction lutoi () # ULONG SIZE(INT) -> INT
+instruction lutoi (?n pvm_literal_printer_cast) # ULONG -> INT
   code
-#define F(res, a, b)   \
-  { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_int (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_int ((int32_t) (val & ((1 << tsize) - 1)), tsize);
   end
 end
 
-instruction lutou () # ULONG SIZE(INT) -> UINT
+instruction lutou (?n pvm_literal_printer_cast) # ULONG -> UINT
   code
-#define F(res, a, b)   \
-  { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_uint (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_uint ((uint32_t) (val & ((1 << tsize) - 1)), tsize);
   end
 end
 
-instruction lutol () # ULONG SIZE(INT) -> LONG
+instruction lutol (?n pvm_literal_printer_cast) # ULONG -> LONG
   code
-#define F(res, a, b)   \
-  { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_long (va << (64 - vb) >> (64 - vb), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_long ((int64_t) (val & ((1 << tsize) - 1)), tsize);
   end
 end
 
-instruction lutolu () # ULONG SIZE(INT) -> ULONG
+instruction lutolu (?n pvm_literal_printer_cast) # ULONG -> ULONG
   code
-#define F(res, a, b)   \
-  { uint64_t va = PVM_VAL_INT (a); int32_t vb = PVM_VAL_INT (b);\
-    res = pvm_make_ulong (va & (1 << (vb - 1)), vb); }
-  JITTER_BINARY_STACK (F);
-#undef F
+    jitter_uint tsize = JITTER_ARGN0;
+    uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
+
+    JITTER_TOP_STACK ()
+      = pvm_make_ulong ((int64_t) (val & ((1 << tsize) - 1)), tsize);
   end
 end
 
