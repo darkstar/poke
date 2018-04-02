@@ -229,12 +229,18 @@ pkl_do_pass_1 (jmp_buf toplevel,
                                  &handlers_used, child_pos, parent,
                                  PKL_PASS_BREADTH_FIRST);
 
-  /* Process child nodes.  */
-  if (PKL_AST_TYPE (node))
-    PKL_AST_TYPE (node)
-      = pkl_do_pass_1 (toplevel, ast,
-                       PKL_AST_TYPE (node), 0, node,
-                       payloads, phases);
+  if (PKL_AST_CODE (node) == PKL_AST_OFFSET)
+    /* XXX: remove this UGLY hack and also the pkl_gen_bf_offset
+       handler in pkl-gen.c.  */;
+  else
+    {
+      /* Process child nodes.  */
+      if (PKL_AST_TYPE (node))
+        PKL_AST_TYPE (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_TYPE (node), 0, node,
+                           payloads, phases);
+    }
 
   switch (node_code)
     {

@@ -210,6 +210,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
+/* XXX: remove this UGLY hack and fix the passes instead.
+ *
+ * OFFSET
+ * | BASE_TYPE
+ * | MAGNITUDE
+ * | UNIT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_offset)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+  pkl_ast_node offset = PKL_PASS_NODE;
+  pkl_ast_node offset_type = PKL_AST_TYPE (offset);
+  pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
+
+  assert (PKL_AST_TYPE_CODE (base_type) == PKL_TYPE_INTEGRAL);
+
+  pvm_push_val (program,
+                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (base_type), 64));
+
+  pvm_push_val (program,
+                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (base_type), 32));
+  
+  PVM_APPEND_INSTRUCTION (program, mktyi);
+}
+PKL_PHASE_END_HANDLER
+
 /*
  * | TYPE
  * | MAGNITUDE
@@ -867,6 +896,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
+   PKL_PHASE_BF_HANDLER (PKL_AST_OFFSET, pkl_gen_bf_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
