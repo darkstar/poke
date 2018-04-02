@@ -211,7 +211,7 @@ static struct pkl_ast_loc PKL_AST_NOLOC __attribute__((unused))
 struct pkl_ast_common
 {
   struct pkl_ast *ast;
-  size_t uid;
+  uint64_t uid;
   union pkl_ast_node *chain;
   union pkl_ast_node *type;
   union pkl_ast_node *chain2;
