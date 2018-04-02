@@ -143,7 +143,6 @@ PKL_PHASE_END_HANDLER
                ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));  \
                                                                         \
           type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p); \
-          PKL_AST_LOC (type) = PKL_AST_LOC (exp);                       \
           break;                                                        \
         }                                                               \
       default:                                                          \
@@ -151,6 +150,7 @@ PKL_PHASE_END_HANDLER
         break;                                                          \
       }                                                                 \
                                                                         \
+    PKL_AST_LOC (type) = PKL_AST_LOC (exp);                             \
     PKL_AST_TYPE (exp) = ASTREF (type);                                 \
     PKL_PASS_DONE;                                                      \
                                                                         \
@@ -162,40 +162,69 @@ PKL_PHASE_END_HANDLER
   }                                                                     \
   PKL_PHASE_END_HANDLER
 
-/* ADD and SUB accept integral, string and offset operands.  */
-
-#define CASE_STR                                                        \
-    case PKL_TYPE_STRING:                                               \
-      type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
-      PKL_AST_LOC (exp) = PKL_AST_LOC (PKL_PASS_NODE);                  \
-      break;
-
-#define CASE_OFFSET                             \
-  case PKL_TYPE_OFFSET:                         \
-  {                                             \
-    type = NULL;                                \
-    break;                                      \
-  }
-
-TYPIFY_BIN (add);
-TYPIFY_BIN (sub);
-
 /* The following operations only accept integers.  */
 
-#undef CASE_STR
 #define CASE_STR
-
-#undef CASE_OFFSET
 #define CASE_OFFSET
 
 TYPIFY_BIN (mul);
-TYPIFY_BIN (div);
-TYPIFY_BIN (mod);
 TYPIFY_BIN (sl);
 TYPIFY_BIN (sr);
 TYPIFY_BIN (ior);
 TYPIFY_BIN (xor);
 TYPIFY_BIN (band);
+
+
+/* DIV and MOD accept integral and offset operands.  */
+
+#undef CASE_OFFSET
+#define CASE_OFFSET                                                     \
+  case PKL_TYPE_OFFSET:                                                 \
+  {                                                                     \
+    pkl_ast_node base_type_1 = PKL_AST_TYPE_O_BASE_TYPE (t1);           \
+    pkl_ast_node base_type_2 = PKL_AST_TYPE_O_BASE_TYPE (t2);           \
+                                                                        \
+    assert (PKL_AST_TYPE_CODE (base_type_1) == PKL_TYPE_INTEGRAL        \
+            && PKL_AST_TYPE_CODE (base_type_2) == PKL_TYPE_INTEGRAL);   \
+                                                                        \
+    if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_DIV)                       \
+      {                                                                 \
+        size_t base_type_1_size = PKL_AST_TYPE_I_SIZE (base_type_1);    \
+        size_t base_type_2_size = PKL_AST_TYPE_I_SIZE (base_type_2);    \
+        int base_type_1_signed = PKL_AST_TYPE_I_SIGNED (base_type_1);   \
+        int base_type_2_signed = PKL_AST_TYPE_I_SIGNED (base_type_2);   \
+                                                                        \
+        int signed_p = (base_type_1_signed && base_type_2_signed);      \
+        int size = (base_type_1_size > base_type_2_size                 \
+                    ? base_type_1_size : base_type_2_size);             \
+                                                                        \
+        type = pkl_ast_make_integral_type (PKL_PASS_AST,                \
+                                           size, signed_p);             \
+      }                                                                 \
+    else if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_MOD)                  \
+      {                                                                 \
+        type = pkl_ast_make_offset_type (PKL_PASS_AST,                  \
+                                         base_type_1,                   \
+                                         PKL_AST_TYPE_O_UNIT (t2));     \
+      }                                                                 \
+    else                                                                \
+      assert (0);                                                       \
+    break;                                                              \
+  }
+
+TYPIFY_BIN (div);
+TYPIFY_BIN (mod);
+
+/* ADD and SUB accept integral, string and offset operands.  */
+
+#undef CASE_STR
+#define CASE_STR                                                        \
+    case PKL_TYPE_STRING:                                               \
+      type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
+      break;
+
+TYPIFY_BIN (add);
+TYPIFY_BIN (sub);
 
 #undef TYPIFY_BIN
 

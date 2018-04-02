@@ -68,6 +68,12 @@ poke_test_cmd "print 3 + 4L" "7L"
 set test addli
 poke_test_cmd "print 3L + 4" "7L"
 
+set test divii
+poke_test_cmd "print 10 / 5" "2"
+
+set test divil
+poke_test_cmd "print 10 / 5L" "2L"
+
 # Arrays
 
 set test simplearray

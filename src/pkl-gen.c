@@ -602,25 +602,27 @@ PKL_PHASE_END_HANDLER
  */
 
 #define INTEGRAL_EXP(insn)                              \
-  {                                                     \
-    uint64_t size = PKL_AST_TYPE_I_SIZE (type);         \
-    int signed_p = PKL_AST_TYPE_I_SIGNED (type);        \
+  do                                                    \
+    {                                                   \
+      uint64_t size = PKL_AST_TYPE_I_SIZE (type);       \
+      int signed_p = PKL_AST_TYPE_I_SIGNED (type);      \
                                                         \
-    if ((size - 1) & ~0x1f)                              \
-      {                                                 \
-        if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, insn##l);    \
-        else                                            \
-          PVM_APPEND_INSTRUCTION (program, insn##lu);   \
+      if ((size - 1) & ~0x1f)                           \
+        {                                               \
+          if (signed_p)                                 \
+            PVM_APPEND_INSTRUCTION (program, insn##l);  \
+          else                                          \
+            PVM_APPEND_INSTRUCTION (program, insn##lu); \
         }                                               \
-    else                                                \
-      {                                                 \
-        if (signed_p)                                   \
-          PVM_APPEND_INSTRUCTION (program, insn##i);    \
-        else                                            \
-          PVM_APPEND_INSTRUCTION (program, insn##iu);   \
-      }                                                 \
-    }
+      else                                              \
+        {                                               \
+          if (signed_p)                                 \
+            PVM_APPEND_INSTRUCTION (program, insn##i);  \
+          else                                          \
+            PVM_APPEND_INSTRUCTION (program, insn##iu); \
+        }                                               \
+    }                                                   \
+  while (0)
   
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {
@@ -646,23 +648,81 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pvm_program program = payload->program;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+
+  if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
+    PVM_APPEND_INSTRUCTION (program, boz);
+  else
+    PVM_APPEND_INSTRUCTION (program, bz);
+      
+  pvm_append_symbolic_label_parameter (program,
+                                       "Ldivzero");
+
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      {        
+        if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
+          INTEGRAL_EXP (divo);
+        else
+          INTEGRAL_EXP (div);
+        break;
+      }
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pvm_program program = payload->program;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+
+  if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
+    PVM_APPEND_INSTRUCTION (program, boz);
+  else
+    PVM_APPEND_INSTRUCTION (program, bz);
+  pvm_append_symbolic_label_parameter (program,
+                                       "Ldivzero");
+
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      INTEGRAL_EXP (mod);
+      break;
+    case PKL_TYPE_OFFSET:
+      INTEGRAL_EXP (modo);
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 #define BIN_INTEGRAL_EXP_HANDLER(op,insn)                       \
   PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)                  \
   {                                                             \
     pkl_gen_payload payload                                     \
       = (pkl_gen_payload) PKL_PASS_PAYLOAD;                     \
     pkl_ast_node node = PKL_PASS_NODE;                          \
-    int opcode = PKL_AST_EXP_CODE (node);                       \
     pvm_program program = payload->program;                     \
     pkl_ast_node type = PKL_AST_TYPE (node);                    \
-                                                                \
-    if (opcode == PKL_AST_OP_DIV                                \
-        || opcode == PKL_AST_OP_MOD)                            \
-      {                                                         \
-        PVM_APPEND_INSTRUCTION (program, bz);                   \
-        pvm_append_symbolic_label_parameter (program,           \
-                                             "Ldivzero");       \
-      }                                                         \
                                                                 \
     switch (PKL_AST_TYPE_CODE (type))                           \
       {                                                         \
@@ -678,8 +738,6 @@ PKL_PHASE_END_HANDLER
 
 BIN_INTEGRAL_EXP_HANDLER (sub, sub);
 BIN_INTEGRAL_EXP_HANDLER (mul, mul);
-BIN_INTEGRAL_EXP_HANDLER (div, div);
-BIN_INTEGRAL_EXP_HANDLER (mod, mod);
 BIN_INTEGRAL_EXP_HANDLER (band, band);
 BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
 BIN_INTEGRAL_EXP_HANDLER (neg, neg);
