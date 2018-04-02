@@ -1115,7 +1115,7 @@ instruction modol () # OFF OFF -> LONG
     int64_t va = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (a)); \
     int64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_offset (base_type,                       \
-                           pvm_make_long ((va * ua) % (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_long (va % (vb * ub / ua), PVM_VAL_ULONG (size)), \
                            PVM_VAL_OFF_UNIT (a));           \
   }
   JITTER_BINARY_STACK (F);
@@ -1133,7 +1133,7 @@ instruction modolu () # OFF(ULONG) OFF(ULONG) -> ULONG
     uint64_t va = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (a)); \
     uint64_t vb = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_offset (base_type,                       \
-                           pvm_make_ulong ((va * ua) % (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_ulong (va % (vb * ub / ua), PVM_VAL_ULONG (size)), \
                            PVM_VAL_OFF_UNIT (a));           \
   }
   JITTER_BINARY_STACK (F);
@@ -1151,7 +1151,7 @@ instruction modoi () # OFF(INT) OFF(INT) -> INT
     int32_t va = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (a)); \
     int32_t vb = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_offset (base_type,                       \
-                           pvm_make_int ((va * ua) % (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_int (va % (vb * ub / ua), PVM_VAL_ULONG (size)), \
                            PVM_VAL_OFF_UNIT (a));           \
   }
   JITTER_BINARY_STACK (F);
@@ -1169,7 +1169,7 @@ instruction modoiu () # OFF(UINT) OFF(UINT) -> UINT
     uint32_t va = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (a)); \
     uint32_t vb = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_offset (base_type,                       \
-                           pvm_make_uint ((va * ua) % (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_uint (va % (vb * ub / ua), PVM_VAL_ULONG (size)), \
                            PVM_VAL_OFF_UNIT (a));           \
   }
   JITTER_BINARY_STACK (F);
