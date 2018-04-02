@@ -623,7 +623,31 @@ PKL_PHASE_END_HANDLER
         }                                               \
     }                                                   \
   while (0)
-  
+
+#define OFFSET_EXP(insn)                                \
+  do                                                    \
+    {                                                   \
+  pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);\
+      uint64_t size = PKL_AST_TYPE_I_SIZE (base_type);  \
+      int signed_p = PKL_AST_TYPE_I_SIGNED (base_type); \
+                                                        \
+      if ((size - 1) & ~0x1f)                           \
+        {                                               \
+          if (signed_p)                                 \
+            PVM_APPEND_INSTRUCTION (program, insn##l);  \
+          else                                          \
+            PVM_APPEND_INSTRUCTION (program, insn##lu); \
+        }                                               \
+      else                                              \
+        {                                               \
+          if (signed_p)                                 \
+            PVM_APPEND_INSTRUCTION (program, insn##i);  \
+          else                                          \
+            PVM_APPEND_INSTRUCTION (program, insn##iu); \
+        }                                               \
+    }                                                   \
+  while (0)
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {
   pkl_gen_payload payload
@@ -706,7 +730,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
       INTEGRAL_EXP (mod);
       break;
     case PKL_TYPE_OFFSET:
-      INTEGRAL_EXP (modo);
+      OFFSET_EXP (modo);
       break;
     default:
       assert (0);

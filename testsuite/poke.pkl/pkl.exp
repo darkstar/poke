@@ -168,3 +168,6 @@ poke_test_cmd "print \[3 struct {uint8; uint8\[1023\];}\]" \
 
 set test offset-ints-in-longs
 poke_test_cmd "print \[20 long\]/\[int\]" "40"
+
+set test offset-mod-then-div
+poke_test_cmd "print \[10 bit\]%\[byte\]/\[bit\]" "2"

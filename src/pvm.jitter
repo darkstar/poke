@@ -1052,8 +1052,8 @@ instruction divol () # OFF(LONG) OFF(LONG) -> LONG
     pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
     uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
     uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
-    uint64_t va = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (a)); \
-    uint64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
+    int64_t va = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (a)); \
+    int64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_long ((va * ua) / (vb * ub), size); }
   JITTER_BINARY_STACK (F);
 #undef F
@@ -1097,8 +1097,8 @@ instruction divoiu () # OFF OFF -> UINT
     pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
     uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
     uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
-    uint32_t va = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (a)); \
-    uint32_t vb = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (b)); \
+    uint32_t va = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (a)); \
+    uint32_t vb = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_uint ((va * ua) / (vb * ub), size); }
   JITTER_BINARY_STACK (F);
 #undef F
@@ -1107,21 +1107,73 @@ end
 
 instruction modol () # OFF OFF -> LONG
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    int64_t va = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (a)); \
+    int64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_long ((va * ua) % (vb * ub), size), \
+                           PVM_VAL_OFF_UNIT (a));           \
+  }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
-instruction modolu () # OFF OFF -> ULONG
+instruction modolu () # OFF(ULONG) OFF(ULONG) -> ULONG
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    uint64_t va = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (a)); \
+    uint64_t vb = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_ulong ((va * ua) % (vb * ub), size), \
+                           PVM_VAL_OFF_UNIT (a));           \
+  }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
-instruction modoi () # OFF OFF -> INT
+instruction modoi () # OFF(INT) OFF(INT) -> INT
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    int32_t va = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (a)); \
+    int32_t vb = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_int ((va * ua) % (vb * ub), size), \
+                           PVM_VAL_OFF_UNIT (a));           \
+  }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
-instruction modoiu () # OFF OFF -> UINT
+instruction modoiu () # OFF(UINT) OFF(UINT) -> UINT
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    uint32_t va = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (a)); \
+    uint32_t vb = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_uint ((va * ua) % (vb * ub), size), \
+                           PVM_VAL_OFF_UNIT (a));           \
+  }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
@@ -1143,8 +1195,8 @@ end
 instruction boz (?f) # Branch if offset zero top.
   code
     /* XXX DO SOMETHING */
-    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_TOP_STACK()),
-                                JITTER_ARGF0);
+//    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_TOP_STACK()),
+//                                JITTER_ARGF0);
   end
 end
 
