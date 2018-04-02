@@ -204,6 +204,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
       else if (strcmp (id_pointer, "Mb") == 0)
         units = pkl_ast_make_integer (PKL_PASS_AST,
                                       PKL_AST_OFFSET_UNIT_MEGABITS);
+      else if (strcmp (id_pointer, "MB") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_MEGABYTES);
       else if (strcmp (id_pointer, "Gb") == 0)
         units = pkl_ast_make_integer (PKL_PASS_AST,
                                       PKL_AST_OFFSET_UNIT_GIGABITS);

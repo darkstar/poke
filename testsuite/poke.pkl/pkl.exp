@@ -129,3 +129,21 @@ poke_test_cmd "print \[12 b\]" {\[12 b\]}
 set test offset_exp
 poke_test_cmd "print \[1 + 3 B\]" {\[4 B\]}
 
+set test offset_Kb
+poke_test_cmd "print \[12 Kb\]" {\[12 Kb\]}
+
+set test offset_KB
+poke_test_cmd "print \[12 KB\]" {\[12 KB\]}
+
+set test offset_Mb
+poke_test_cmd "print \[12 Mb\]" {\[12 Mb\]}
+
+set test offset_MB
+poke_test_cmd "print \[12 MB\]" {\[12 MB\]}
+
+set test offset_array
+poke_test_cmd "print \[3 uint8\[1024\]\]" {\[3 KB\]}
+
+set test offset_struct
+poke_test_cmd "print \[3 struct {uint8; uint8\[1023\];}\]" \
+    {\[3 KB\]}
