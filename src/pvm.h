@@ -28,7 +28,7 @@
    poke virtual machine:
 
    - Integers up to 32-bit.
-   - Long integers wider than 32-bit.
+   - Long integers wider than 32-bit up to 64-bit.
    - Strings.
    - Arrays.
    - Structs.
