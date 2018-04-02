@@ -118,6 +118,12 @@ set test sizeof-struct-with-intconstr
 poke_test_cmd "print sizeof struct {int<5> foo; int<6> bar; int<7> baz;}" \
     {\[18UL b\]}
 
+set test sizeof-offset-type
+poke_test_cmd "print sizeof offset<int,B>" {\[32UL b\]}
+
+set test sizeof-offset-type-2
+poke_test_cmd "print sizeof offset<int<5>,B>" {\[5UL b\]}
+
 # Offsets
 
 set test offsetB

@@ -200,6 +200,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
 }
 PKL_PHASE_END_HANDLER
 
+/* At this point offset types can have an identifier expressing its
+   units.  This handler replaces the identifier with a suitable unit
+   factor.  If the identifier is invalid, then an error is raised.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_offset)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node offset_type = PKL_PASS_NODE;
+  pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (offset_type);
+
+  if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
+    {
+      pkl_ast_node new_unit
+        = pkl_ast_id_to_offset_unit (PKL_PASS_AST, unit);
+
+      if (!new_unit)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+                     "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+
+      PKL_AST_TYPE_O_UNIT (offset_type) = ASTREF (new_unit);
+      pkl_ast_node_free (unit);
+      PKL_PASS_RESTART = 1;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
@@ -207,6 +239,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans1_df_offset),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_df_type_offset),
   };
 
 
