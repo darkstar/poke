@@ -100,7 +100,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token SIZEOF
 %token ASSERT
 %token ERR
-%token INTCONSTR UINTCONSTR
+%token INTCONSTR UINTCONSTR OFFSETCONSTR
 
 /* Operator tokens and their precedences, in ascending order.  */
 
@@ -491,6 +491,21 @@ type_specifier:
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2), 0 /* signed */);
                     ASTREF ($2); pkl_ast_node_free ($2);
+                    PKL_AST_LOC ($$) = @$;
+                }
+        | OFFSETCONSTR type_specifier ',' INTEGER '>'
+                {
+                    /* XXX: $4 can be any expression!.  */
+                    $$ = pkl_ast_make_offset_type (pkl_parser->ast,
+                                                   $2, $4);
+                    PKL_AST_LOC ($4) = @4;
+                    PKL_AST_LOC ($$) = @$;
+                }
+        | OFFSETCONSTR type_specifier ',' IDENTIFIER '>'
+                {
+                    $$ = pkl_ast_make_offset_type (pkl_parser->ast,
+                                                   $2, $4);
+                    PKL_AST_LOC ($4) = @4;
                     PKL_AST_LOC ($$) = @$;
                 }
         | type_specifier '[' expression ']'

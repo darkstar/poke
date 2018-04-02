@@ -704,6 +704,9 @@ pkl_ast_node pkl_ast_make_offset (pkl_ast ast,
                                   pkl_ast_node magnitude,
                                   pkl_ast_node unit);
 
+pkl_ast_node pkl_ast_id_to_offset_unit (pkl_ast ast,
+                                        pkl_ast_node id);
+
 /* PKL_AST_CAST nodes represent casts at the language level.
    
    TYPE is the target type in the case.

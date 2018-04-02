@@ -182,35 +182,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
 
   if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
     {
-      const char *id_pointer = PKL_AST_IDENTIFIER_POINTER (unit);
-      pkl_ast_node units = NULL;
+      pkl_ast_node new_unit
+        = pkl_ast_id_to_offset_unit (PKL_PASS_AST, unit);
 
-      pkl_ast_node units_type
-        = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
-      PKL_AST_LOC (units_type) = PKL_AST_LOC (unit);
-      
-      if (strcmp (id_pointer, "b") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_BITS);
-      else if (strcmp (id_pointer, "B") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_BYTES);
-      else if (strcmp (id_pointer, "Kb") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_KILOBITS);
-      else if (strcmp (id_pointer, "KB") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_KILOBYTES);
-      else if (strcmp (id_pointer, "Mb") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_MEGABITS);
-      else if (strcmp (id_pointer, "MB") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_MEGABYTES);
-      else if (strcmp (id_pointer, "Gb") == 0)
-        units = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_OFFSET_UNIT_GIGABITS);
-      else
+      if (!new_unit)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
                      "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
@@ -218,10 +193,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
           PKL_PASS_ERROR;
         }
 
-      PKL_AST_LOC (units) = PKL_AST_LOC (unit);
-      PKL_AST_TYPE (units) = ASTREF (units_type);
-      PKL_AST_OFFSET_UNIT (offset) = ASTREF (units);
-
+      PKL_AST_OFFSET_UNIT (offset) = ASTREF (new_unit);
       pkl_ast_node_free (unit);
       PKL_PASS_RESTART = 1;
     }

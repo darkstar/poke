@@ -613,6 +613,46 @@ pkl_ast_make_offset (pkl_ast ast,
   return offset;
 }
 
+/* Get an identifier with the name of a predefined offset unit (like
+   b, B, Kb, etc) and return an integral expression evaluating to its
+   number of bits.  If the identifier doesn't identify a predefined
+   offset unit, return NULL.  */
+
+pkl_ast_node
+pkl_ast_id_to_offset_unit (pkl_ast ast, pkl_ast_node id)
+{
+  pkl_ast_node unit, unit_type;
+  size_t factor = 0;
+  const char *id_pointer = PKL_AST_IDENTIFIER_POINTER (id);
+
+  if (strcmp (id_pointer, "b") == 0)
+    factor = PKL_AST_OFFSET_UNIT_BITS;
+  else if (strcmp (id_pointer, "B") == 0)
+    factor = PKL_AST_OFFSET_UNIT_BYTES;
+  else if (strcmp (id_pointer, "Kb") == 0)
+    factor = PKL_AST_OFFSET_UNIT_KILOBITS;
+  else if (strcmp (id_pointer, "KB") == 0)
+    factor =  PKL_AST_OFFSET_UNIT_KILOBYTES;
+  else if (strcmp (id_pointer, "Mb") == 0)
+    factor = PKL_AST_OFFSET_UNIT_MEGABITS;
+  else if (strcmp (id_pointer, "MB") == 0)
+    factor = PKL_AST_OFFSET_UNIT_MEGABYTES;
+  else if (strcmp (id_pointer, "Gb") == 0)
+    factor = PKL_AST_OFFSET_UNIT_GIGABITS;
+  else
+    /* Invalid offset unit.  */
+    return NULL;
+
+  unit_type = pkl_ast_make_integral_type (ast, 64, 0);
+  PKL_AST_LOC (unit_type) = PKL_AST_LOC (id);
+
+  unit = pkl_ast_make_integer (ast, factor);
+  PKL_AST_LOC (unit) = PKL_AST_LOC (id);
+  PKL_AST_TYPE (unit) = ASTREF (unit_type);
+
+  return unit;
+}
+
 /* Build and return an AST node for a cast.  */
 
 pkl_ast_node

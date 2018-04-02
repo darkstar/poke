@@ -122,6 +122,7 @@ D [0-9]
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }
+"offset<"       { return OFFSETCONSTR; }
 
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
