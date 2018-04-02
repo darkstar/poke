@@ -710,13 +710,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
+#if 0  
   if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
     PVM_APPEND_INSTRUCTION (program, boz);
   else
     PVM_APPEND_INSTRUCTION (program, bz);
-      
+  
   pvm_append_symbolic_label_parameter (program,
                                        "Ldivzero");
+#endif
 
   switch (PKL_AST_TYPE_CODE (type))
     {

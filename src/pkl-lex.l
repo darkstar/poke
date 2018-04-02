@@ -87,7 +87,7 @@ HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
 OCTCST             0[0-9][0-9_]*
 DECCST             [0-9][0-9_]*
-IS		   ((u|U)|(u|U)?(l|L|b|B|h|H)|(l|L|b|B|h|H)(u|U))
+IS		   ((u|U)|(u|U)?(l|L|b|B|h|H|n|N)|(l|L|b|B|h|H|n|N)(u|U))
 
 L [a-zA-Z_]
 D [0-9]
@@ -247,6 +247,9 @@ D [0-9]
   else  if (*end == 'b' || *end == 'B'
       || ((*end != '\0') && ((*(end + 1) == 'b' || *(end + 1) == 'B'))))
     width = 8;
+  else if (*end == 'n' || *end == 'N'
+      || ((*end != '\0') && ((*(end + 1) == 'n' || *(end + 1) == 'N'))))
+    width = 4;
 
   /* If not specified with the 'l' or 'L' suffix, the type of the
      integer constant is the smallest signed or unsigned integer

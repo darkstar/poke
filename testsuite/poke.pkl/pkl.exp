@@ -18,6 +18,9 @@
 
 # Integers.
 
+set test intn
+poke_test_cmd "print 6n" {6N}
+
 set test inth
 poke_test_cmd "print 6h" {6H}
 

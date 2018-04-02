@@ -313,7 +313,7 @@ pvm_sizeof (pvm_val val)
       switch (PVM_VAL_TYP_CODE (val))
         {
         case PVM_TYPE_INTEGRAL:
-          return PVM_VAL_TYP_I_SIZE (val) / 8;
+          return PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (val)) / 8;
           break;
         default:
           assert (0);
@@ -382,6 +382,8 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         fprintf (out, GREEN "%dH" NOATTR, PVM_VAL_INT (val));
       else if (size == 8)
         fprintf (out, GREEN "%dB" NOATTR, PVM_VAL_INT (val));
+      else if (size == 4)
+        fprintf (out, GREEN "%dN" NOATTR, PVM_VAL_INT (val));
       else
         fprintf (out, GREEN "(int<%d>) %d" NOATTR,
                  PVM_VAL_INT_SIZE (val), PVM_VAL_INT (val));
@@ -404,6 +406,8 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         fprintf (out, GREEN "%uUH" NOATTR, PVM_VAL_UINT (val));
       else if (size == 8)
         fprintf (out, GREEN "%uUB" NOATTR, PVM_VAL_UINT (val));
+      else if (size == 4)
+        fprintf (out, GREEN "%uUN" NOATTR, PVM_VAL_UINT (val));
       else
         fprintf (out, GREEN "(uint<%d>) %u" NOATTR,
                  PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
@@ -450,10 +454,10 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         {
         case PVM_TYPE_INTEGRAL:
           {
-            if (!PVM_VAL_TYP_I_SIGNED (val))
+            if (!(PVM_VAL_UINT (PVM_VAL_TYP_I_SIGNED (val))))
               fprintf (out, "u");
             
-            switch (PVM_VAL_TYP_I_SIZE (val))
+            switch (PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (val)))
               {
               case 8: fprintf (out, "int8"); break;
               case 16: fprintf (out, "int16"); break;
