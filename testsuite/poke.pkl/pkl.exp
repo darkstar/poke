@@ -132,6 +132,12 @@ poke_test_cmd "print sizeof offset<int<5>,B>" {\[5UL b\]}
 
 # Offsets
 
+set test offset-bit-no-magnitude
+poke_test_cmd "print \[bit\]" {\[1 b\]}
+
+set test offset-int-no-magnitude
+poke_test_cmd "print \[int\]" {\[1 32\]}
+
 set test offsetB
 poke_test_cmd "print \[12 B\]" {\[12 B\]}
 
@@ -159,3 +165,6 @@ poke_test_cmd "print \[3 uint8\[1024\]\]" {\[3 KB\]}
 set test offset_struct
 poke_test_cmd "print \[3 struct {uint8; uint8\[1023\];}\]" \
     {\[3 KB\]}
+
+set test offset-ints-in-longs
+poke_test_cmd "print \[20 long\]/\[int\]" "40"

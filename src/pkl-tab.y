@@ -360,6 +360,11 @@ expression:
                     $$ = pkl_ast_make_offset (pkl_parser->ast, $2, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
+        |  '[' type_specifier ']'
+                {
+                    $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $2);
+                    PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 unary_operator:

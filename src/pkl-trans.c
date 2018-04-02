@@ -170,7 +170,10 @@ PKL_PHASE_END_HANDLER
 /* At this point offsets can have either an identifier or a type name
    expressing its unit.  This handler takes care of the first case,
    replacing the identifier with a suitable unit factor.  If the
-   identifier is invalid, then an error is raised.  */
+   identifier is invalid, then an error is raised.
+   
+   Also, if the magnitude of the offset wasn't specified then it
+   defaults to 1. */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
 {
@@ -179,6 +182,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
 
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node unit = PKL_AST_OFFSET_UNIT (offset);
+
+  if (PKL_AST_OFFSET_MAGNITUDE (offset) == NULL)
+    {
+      pkl_ast_node magnitude_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
+      pkl_ast_node magnitude
+        = pkl_ast_make_integer (PKL_PASS_AST, 1);
+
+      PKL_AST_LOC (magnitude_type) = PKL_AST_LOC (offset);
+      PKL_AST_LOC (magnitude) = PKL_AST_LOC (offset);
+      PKL_AST_TYPE (magnitude) = ASTREF (magnitude_type);
+
+      PKL_AST_OFFSET_MAGNITUDE (offset) = ASTREF (magnitude);
+      PKL_PASS_RESTART = 1;
+    }
 
   if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
     {
