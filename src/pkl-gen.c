@@ -486,10 +486,9 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
-  PKL_PHASE_PARENT (4,
+  PKL_PHASE_PARENT (3,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
@@ -558,9 +557,8 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
-  PKL_PHASE_PARENT (3,
+  PKL_PHASE_PARENT (2,
                     PKL_AST_ARRAY,
-                    PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
@@ -692,6 +690,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
       break;
     case PKL_TYPE_STRING:
       PVM_APPEND_INSTRUCTION (program, sconc);
+      break;
+    case PKL_TYPE_OFFSET:
+      INTEGRAL_EXP (addo);
       break;
     default:
       assert (0);

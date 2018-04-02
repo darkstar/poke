@@ -1045,6 +1045,38 @@ end
 # The following instructions assume that the base types of the offset
 # operands have the same size in bits.
 
+instruction addol () # OFF(LONG) OFF(LONG) -> OFF(LONG)
+  code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_TYP_I_SIZE (base_type); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    int64_t va = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (a)); \
+    int64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_long ((va * ua) + (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_uint (PVM_VAL_OFF_UNIT_BITS, 32)); }
+  JITTER_BINARY_STACK (F);
+#undef F
+  end
+end
+
+instruction addolu () # OFF(ULONG) OFF(ULONG) -> OFF(ULONG)
+  code
+  end
+end
+
+instruction addoi () # OFF(INT) OFF(INT) -> OFF(INT)
+  code
+  end
+end
+
+instruction addoiu () # OFF(UINT) OFF(UINT) -> OFF(UINT)
+  code
+  end
+end
+
 instruction divol () # OFF(LONG) OFF(LONG) -> LONG
   code
 #define F(res, a, b)                               \
