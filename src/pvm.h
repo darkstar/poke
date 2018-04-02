@@ -36,17 +36,7 @@
 
    It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
-   the virtual machine.
-
-   Small integers up to 32-bit are unboxed:
-
-              val           sign      bits  tag
-              ---           ----      ----  ---
-      vvvv vvvv vvvv vvvv | sxxx xxxb bbbb bttt
-
-   Integers wider than 64-bit, strings, arrays and structs are boxed.
-   Both boxed and unboxed values are manipulated by the PVM users
-   using the same API, defined below in this header file.  */
+   the virtual machine.  */
 
 typedef uint64_t pvm_val;
 
