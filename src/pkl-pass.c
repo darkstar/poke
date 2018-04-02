@@ -321,6 +321,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
         = pkl_do_pass_1 (toplevel, ast,
                          PKL_AST_OFFSET_MAGNITUDE (node), 0, node,
                          payloads, phases);
+      PKL_AST_OFFSET_UNIT (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_OFFSET_UNIT (node), 0, node,
+                         payloads, phases);
       break;
     case PKL_AST_CAST:
       PKL_AST_CAST_EXP (node)
@@ -337,10 +341,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
               = pkl_do_pass_1 (toplevel, ast,
                                PKL_AST_TYPE_A_ETYPE (node), 0, node,
                                payloads, phases);
-            PKL_AST_TYPE_A_NELEM (node)
-              = pkl_do_pass_1 (toplevel, ast,
-                               PKL_AST_TYPE_A_NELEM (node), 0, node,
-                               payloads, phases);
+            if (PKL_AST_TYPE_A_NELEM (node))
+              PKL_AST_TYPE_A_NELEM (node)
+                = pkl_do_pass_1 (toplevel, ast,
+                                 PKL_AST_TYPE_A_NELEM (node), 0, node,
+                                 payloads, phases);
             break;
           case PKL_TYPE_STRUCT:
             if (PKL_AST_TYPE_S_ELEMS (node))
@@ -350,6 +355,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
             PKL_AST_TYPE_O_BASE_TYPE (node)
               = pkl_do_pass_1 (toplevel, ast,
                                PKL_AST_TYPE_O_BASE_TYPE (node), 0, node,
+                               payloads, phases);
+            PKL_AST_TYPE_O_UNIT (node)
+              = pkl_do_pass_1 (toplevel, ast,
+                               PKL_AST_TYPE_O_UNIT (node), 0, node,
                                payloads, phases);
             break;
           case PKL_TYPE_INTEGRAL:

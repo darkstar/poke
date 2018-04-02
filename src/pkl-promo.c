@@ -312,6 +312,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_type_array)
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (node);
 
+  if (nelem == NULL)
+    /* This array type hasn't a number of elements.  Be done.  */
+    PKL_PASS_DONE;
+
   if (!promote_to_ulong (PKL_PASS_AST, &nelem, &restart))
     {
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),

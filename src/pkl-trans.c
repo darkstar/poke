@@ -30,7 +30,9 @@
 
    `trans1' finishes ARRAY, STRUCT and TYPE_STRUCT nodes by
             determining its number of elements and characteristics.
-            It should be executed right after parsing.
+            It also finishes OFFSET nodes by replacing certain unit
+            identifiers with factors.  It should be executed right
+            after parsing.
 
    `trans2' scans the AST and annotates nodes that are literals.
             Henceforth any other phase relying on this information
@@ -165,11 +167,70 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
 }
 PKL_PHASE_END_HANDLER
 
+/* At this point offsets can have either an identifier or a type name
+   expressing its unit.  This handler takes care of the first case,
+   replacing the identifier with a suitable unit factor.  If the
+   identifier is invalid, then an error is raised.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node offset = PKL_PASS_NODE;
+  pkl_ast_node unit = PKL_AST_OFFSET_UNIT (offset);
+
+  if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
+    {
+      const char *id_pointer = PKL_AST_IDENTIFIER_POINTER (unit);
+      pkl_ast_node units = NULL;
+
+      pkl_ast_node units_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_LOC (units_type) = PKL_AST_LOC (unit);
+      
+      if (strcmp (id_pointer, "b") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_BITS);
+      else if (strcmp (id_pointer, "B") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_BYTES);
+      else if (strcmp (id_pointer, "Kb") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_KILOBITS);
+      else if (strcmp (id_pointer, "KB") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_KILOBYTES);
+      else if (strcmp (id_pointer, "Mb") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_MEGABITS);
+      else if (strcmp (id_pointer, "Gb") == 0)
+        units = pkl_ast_make_integer (PKL_PASS_AST,
+                                      PKL_AST_OFFSET_UNIT_GIGABITS);
+      else
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+                     "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+
+      PKL_AST_LOC (units) = PKL_AST_LOC (unit);
+      PKL_AST_TYPE (units) = ASTREF (units_type);
+      PKL_AST_OFFSET_UNIT (offset) = ASTREF (units);
+
+      pkl_ast_node_free (unit);
+      PKL_PASS_RESTART = 1;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans1_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans1_df_offset),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
   };
 
@@ -306,7 +367,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_op_sizeof)
 
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node op = PKL_AST_EXP_OPERAND (node, 0);
-  pkl_ast_node offset, offset_type;
+  pkl_ast_node offset, offset_type, unit, unit_type;
 
   if (PKL_AST_CODE (op) != PKL_AST_TYPE)
     /* This is a TYPEOF (VALUE).  Nothing to do.  */
@@ -330,12 +391,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_op_sizeof)
     PKL_AST_LOC (PKL_AST_TYPE (magnitude)) = PKL_AST_LOC (node);
   
     /* Build an offset with that magnitude, and unit bits.  */
-    offset = pkl_ast_make_offset (PKL_PASS_AST, magnitude,
-                                  PKL_AST_OFFSET_UNIT_BITS);
+    unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+    PKL_AST_LOC (unit_type) = PKL_AST_LOC (node);
+
+    unit = pkl_ast_make_integer (PKL_PASS_AST, PKL_AST_OFFSET_UNIT_BITS);
+    PKL_AST_LOC (unit) = PKL_AST_LOC (node);
+    PKL_AST_TYPE (unit) = ASTREF (unit_type);
+    
+    offset = pkl_ast_make_offset (PKL_PASS_AST, magnitude, unit);
+
     PKL_AST_LOC (offset) = PKL_AST_LOC (node);
     offset_type = pkl_ast_make_offset_type (PKL_PASS_AST,
                                             PKL_AST_TYPE (magnitude),
-                                            PKL_AST_OFFSET_UNIT_BITS);
+                                            unit);
     PKL_AST_LOC (offset_type) = PKL_AST_LOC (node);
     PKL_AST_TYPE (offset) = ASTREF (offset_type);
   }
@@ -346,8 +414,48 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
+/* In OFFSET nodes whose units are types, these should be replaced
+   with an expression that calculates their size.  This only works
+   with complete types.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_offset)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node offset = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_OFFSET_UNIT (offset);
+  pkl_ast_node unit;
+
+  if (PKL_AST_CODE (type) != PKL_AST_TYPE)
+    /* The unit of this offset is not a type.  Nothing to do.  */
+    PKL_PASS_DONE;
+
+  if (PKL_AST_TYPE_COMPLETE (type) != PKL_AST_TYPE_COMPLETE_YES)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
+                 "offsets only work on complete types");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* Calculate the size of the complete type in bytes and put it in
+     an integer node.  */
+  unit = pkl_ast_sizeof_type (PKL_PASS_AST, type);
+  PKL_AST_LOC (unit) = PKL_AST_LOC (type);
+  PKL_AST_LOC (PKL_AST_TYPE (unit)) = PKL_AST_LOC (type);
+
+  /* Replace the unit type with this expression.  */
+  PKL_AST_OFFSET_UNIT (offset) = ASTREF (unit);
+  pkl_ast_node_free (type);
+
+  PKL_PASS_RESTART = 1;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans3_df_offset),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_df_op_sizeof),
   };

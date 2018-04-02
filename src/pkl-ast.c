@@ -284,16 +284,18 @@ pkl_ast_make_string_type (pkl_ast ast)
 }
 
 pkl_ast_node
-pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, int unit)
+pkl_ast_make_offset_type (pkl_ast ast,
+                          pkl_ast_node base_type,
+                          pkl_ast_node unit)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
 
-  assert (base_type);
+  assert (base_type && unit);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_OFFSET;
   PKL_AST_TYPE_COMPLETE (type)
     = PKL_AST_TYPE_COMPLETE_YES;
-  PKL_AST_TYPE_O_UNIT (type) = unit;
+  PKL_AST_TYPE_O_UNIT (type) = ASTREF (unit);
   PKL_AST_TYPE_O_BASE_TYPE (type) = ASTREF (base_type);
 
   return type;
@@ -598,16 +600,15 @@ pkl_ast_make_struct_elem (pkl_ast ast,
 
 pkl_ast_node
 pkl_ast_make_offset (pkl_ast ast,
-                     pkl_ast_node magnitude, int unit)
+                     pkl_ast_node magnitude, pkl_ast_node unit)
 {
   pkl_ast_node offset = pkl_ast_make_node (ast, PKL_AST_OFFSET);
 
-  assert (unit == PKL_AST_OFFSET_UNIT_BITS
-          || unit == PKL_AST_OFFSET_UNIT_BYTES);
+  assert (unit);
   
   if (magnitude != NULL)
     PKL_AST_OFFSET_MAGNITUDE (offset) = ASTREF (magnitude);
-  PKL_AST_OFFSET_UNIT (offset) = unit;
+  PKL_AST_OFFSET_UNIT (offset) = ASTREF (unit);
 
   return offset;
 }
@@ -790,6 +791,7 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_OFFSET:
 
       pkl_ast_node_free (PKL_AST_OFFSET_MAGNITUDE (ast));
+      pkl_ast_node_free (PKL_AST_OFFSET_UNIT (ast));
       break;
 
     case PKL_AST_CAST:
@@ -1328,7 +1330,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           break;
         case PKL_TYPE_OFFSET:
           PRINT_AST_SUBAST (base_type, TYPE_O_BASE_TYPE);
-          PRINT_AST_IMM (unit, TYPE_O_UNIT, "%d");
+          PRINT_AST_SUBAST (unit, TYPE_O_UNIT);
           break;
         case PKL_TYPE_STRING:
         default:
@@ -1368,7 +1370,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (magnitude, OFFSET_MAGNITUDE);
-      PRINT_AST_IMM (unit, OFFSET_UNIT, "%d");
+      PRINT_AST_SUBAST (unit, OFFSET_UNIT);
       break;
 
     case PKL_AST_CAST:

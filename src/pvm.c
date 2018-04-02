@@ -485,6 +485,21 @@ pvm_print_val (FILE *out, pvm_val val, int base)
             case PVM_VAL_OFF_UNIT_BYTES:
               fputc ('B', out);
               break;
+            case PVM_VAL_OFF_UNIT_KILOBITS:
+              fputs ("Kb", out);
+              break;
+            case PVM_VAL_OFF_UNIT_KILOBYTES:
+              fputs ("KB", out);
+              break;
+            case PVM_VAL_OFF_UNIT_MEGABITS:
+              fputs ("Mb", out);
+              break;
+            case PVM_VAL_OFF_UNIT_MEGABYTES:
+              fputs ("MB", out);
+              break;
+            case PVM_VAL_OFF_UNIT_GIGABITS:
+              fputs ("Gb", out);
+              break;
             default:
               assert (0);
             }
@@ -534,6 +549,21 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           break;
         case PVM_VAL_OFF_UNIT_BYTES:
           fprintf (out, CYAN " B" NOATTR);
+          break;
+        case PVM_VAL_OFF_UNIT_KILOBITS:
+          fprintf (out, CYAN " Kb" NOATTR);
+          break;
+        case PVM_VAL_OFF_UNIT_KILOBYTES:
+          fprintf (out, CYAN " KB" NOATTR);
+          break;
+        case PVM_VAL_OFF_UNIT_MEGABITS:
+          fprintf (out, CYAN " Mb" NOATTR);
+          break;
+        case PVM_VAL_OFF_UNIT_MEGABYTES:
+          fprintf (out, CYAN " MB" NOATTR);
+          break;
+        case PVM_VAL_OFF_UNIT_GIGABITS:
+          fprintf (out, CYAN " Gb" NOATTR);
           break;
         default:
           fprintf (out, CYAN " %" PRIu64 NOATTR,

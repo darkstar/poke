@@ -628,7 +628,7 @@ struct pkl_ast_type
 
     struct
     {
-      int unit;
+      union pkl_ast_node *unit;
       union pkl_ast_node *base_type;
     } off;
     
@@ -639,7 +639,7 @@ pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);
-pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, int unit);
+pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
 
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
@@ -684,19 +684,25 @@ struct pkl_ast_decl
 #define PKL_AST_OFFSET_MAGNITUDE(AST) ((AST)->offset.magnitude)
 #define PKL_AST_OFFSET_UNIT(AST) ((AST)->offset.unit)
 
-#define PKL_AST_OFFSET_UNIT_BITS 0
-#define PKL_AST_OFFSET_UNIT_BYTES 1
+#define PKL_AST_OFFSET_UNIT_BITS 1
+#define PKL_AST_OFFSET_UNIT_BYTES 8
+#define PKL_AST_OFFSET_UNIT_KILOBITS (1024 * PKL_AST_OFFSET_UNIT_BITS)
+#define PKL_AST_OFFSET_UNIT_KILOBYTES (1024 * PKL_AST_OFFSET_UNIT_BYTES)
+#define PKL_AST_OFFSET_UNIT_MEGABITS (1024 * PKL_AST_OFFSET_UNIT_KILOBITS)
+#define PKL_AST_OFFSET_UNIT_MEGABYTES (1024 * PKL_AST_OFFSET_UNIT_KILOBYTES)
+#define PKL_AST_OFFSET_UNIT_GIGABITS (1024 * PKL_AST_OFFSET_UNIT_MEGABITS)
 
 struct pkl_ast_offset
 {
   struct pkl_ast_common common;
 
   union pkl_ast_node *magnitude;
-  int unit;
+  union pkl_ast_node *unit;
 };
 
 pkl_ast_node pkl_ast_make_offset (pkl_ast ast,
-                                  pkl_ast_node magnitude, int unit);
+                                  pkl_ast_node magnitude,
+                                  pkl_ast_node unit);
 
 /* PKL_AST_CAST nodes represent casts at the language level.
    

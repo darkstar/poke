@@ -206,11 +206,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
 {
   pkl_ast_node itype
     = pkl_ast_make_integral_type (PKL_PASS_AST,
-                                 64, 0);
+                                  64, 0);
+  pkl_ast_node unit
+    = pkl_ast_make_integer (PKL_PASS_AST, PKL_AST_OFFSET_UNIT_BITS);
+    
   pkl_ast_node type
-    = pkl_ast_make_offset_type (PKL_PASS_AST,
-                                itype, PKL_AST_OFFSET_UNIT_BITS);
+    = pkl_ast_make_offset_type (PKL_PASS_AST, itype, unit);
 
+  PKL_AST_TYPE (unit) = ASTREF (itype);
+  PKL_AST_LOC (unit) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_LOC (itype) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (type);
@@ -428,8 +432,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
 }
 PKL_PHASE_END_HANDLER
 
-/* The array sizes in array type literals should be integer
-   expressions.  */
+/* The array sizes in array type literals, if present, should be
+   integer expressions.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
 {
@@ -437,8 +441,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
-  pkl_ast_node nelem_type = PKL_AST_TYPE (nelem);
+  pkl_ast_node nelem_type;
 
+  if (nelem == NULL)
+    /* This array type hasn't a number of elements.  Be done.  */
+    PKL_PASS_DONE;
+
+  nelem_type = PKL_AST_TYPE (nelem);
   if (PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_INTEGRAL)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (nelem),
@@ -500,7 +509,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_array)
 
   int complete = PKL_AST_TYPE_COMPLETE_NO;
 
-  if (PKL_AST_LITERAL_P (nelem))
+  if (nelem && PKL_AST_LITERAL_P (nelem))
     complete = PKL_AST_TYPE_COMPLETE_YES;
 
   PKL_AST_TYPE_COMPLETE (type) = complete;
@@ -546,7 +555,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
 
         int complete = PKL_AST_TYPE_COMPLETE_NO;
 
-        if (PKL_AST_LITERAL_P (nelem))
+        if (nelem && PKL_AST_LITERAL_P (nelem))
           complete = PKL_AST_TYPE_COMPLETE_YES;
 
         PKL_AST_TYPE_COMPLETE (op) = complete;

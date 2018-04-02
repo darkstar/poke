@@ -351,20 +351,14 @@ expression:
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
 	| '[' expression IDENTIFIER ']'
         	{
-                  int units;
-                  
-                  if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "b") == 0)
-                    units = PKL_AST_OFFSET_UNIT_BITS;
-                  else if (strcmp (PKL_AST_IDENTIFIER_POINTER ($3), "B") == 0)
-                    units = PKL_AST_OFFSET_UNIT_BYTES;
-                  else
-                    {
-                      pkl_error (pkl_parser->ast, @3, "expected `b' or `B'");
-                      YYERROR;
-                    }
-
-                  $$ = pkl_ast_make_offset (pkl_parser->ast, $2, units);
+                  $$ = pkl_ast_make_offset (pkl_parser->ast, $2, $3);
+                  PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
+                }
+	|  '[' expression type_specifier ']'
+		{
+                    $$ = pkl_ast_make_offset (pkl_parser->ast, $2, $3);
+                    PKL_AST_LOC ($$) = @$;
                 }
         ;
 

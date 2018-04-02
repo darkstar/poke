@@ -210,12 +210,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
-/* XXX: make offsets to have a child unit which is a 
- *      PKL_AST_INTEGER of type 64U.  A compiler phase should
- *      extract that from (complete) types whenever needed.
- *
+/*
  * | TYPE
  * | MAGNITUDE
+ * | UNIT
  * OFFSET
  */
 
@@ -223,24 +221,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_offset)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_ast_node node = PKL_PASS_NODE;
   pvm_program program = payload->program;
-  pvm_val val;
 
-  switch (PKL_AST_OFFSET_UNIT (node))
-    {
-    case PKL_AST_OFFSET_UNIT_BITS:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64);
-      break;
-    case PKL_AST_OFFSET_UNIT_BYTES:
-      val = pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64);
-      break;
-    default:
-      /* Invalid unit. */
-      assert (0);
-    }
-
-  pvm_push_val (program, val);
   PVM_APPEND_INSTRUCTION (program, mko);
 }
 PKL_PHASE_END_HANDLER
@@ -542,6 +524,7 @@ PKL_PHASE_END_HANDLER
  * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
  *  PKL_AST_STRUCT_ELEM_TYPE)
  * | | BASE_TYPE
+ * | | UNIT
  * | TYPE_OFFSET
  */
 
@@ -555,9 +538,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pvm_program program = payload->program;
-  int unit = PKL_AST_TYPE_O_UNIT (PKL_PASS_NODE);
 
-  pvm_push_val (program, pvm_make_ulong (unit, 64));
   PVM_APPEND_INSTRUCTION (program, mktyo);
 }
 PKL_PHASE_END_HANDLER
