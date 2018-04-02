@@ -538,6 +538,8 @@ struct_elem_type:
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
                     PKL_AST_LOC ($$) = @$;
                     PKL_AST_LOC ($2) = @2;
+                    PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
+                    ASTREF (PKL_AST_TYPE ($2));
                     PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                 }
         | type_specifier ';'

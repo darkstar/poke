@@ -114,6 +114,10 @@ set test sizeof-struct-with-array
 poke_test_cmd "print sizeof struct {int; int\[5\]; int\[3\];}" \
     {\[288UL b\]}
 
+set test sizeof-struct-with-intconstr
+poke_test_cmd "print sizeof struct {int<5> foo; int<6> bar; int<7> baz;}" \
+    {\[18UL b\]}
+
 # Offsets
 
 set test offsetB
