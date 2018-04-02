@@ -1145,7 +1145,7 @@ instruction modoi () # OFF(INT) OFF(INT) -> INT
   code
 #define F(res, a, b)                               \
   { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
-    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
     uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
     uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
     int32_t va = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (a)); \
@@ -1163,7 +1163,7 @@ instruction modoiu () # OFF(UINT) OFF(UINT) -> UINT
   code
 #define F(res, a, b)                               \
   { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
-    pvm_val size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
+    uint64_t size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (base_type)); \
     uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
     uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
     uint32_t va = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (a)); \

@@ -26,6 +26,7 @@
    integral types use their size and signedness.  */
 
 PKL_DEF_TYPE (PKL_TYPE_BIT, "bit", 1, 0)
+PKL_DEF_TYPE (PKL_TYPE_NIBBLE, "nibble", 4, 0)
 PKL_DEF_TYPE (PKL_TYPE_CHAR, "char", 8, 0)
 PKL_DEF_TYPE (PKL_TYPE_BYTE, "byte", 8, 0)
 PKL_DEF_TYPE (PKL_TYPE_UINT8, "uint8", 8, 0)
