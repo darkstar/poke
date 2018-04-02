@@ -284,8 +284,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
   pvm_program program = payload->program;
   pkl_ast_node node = PKL_PASS_NODE;
 
-  /* XXX: rewrite this crap.  */
-
   pkl_ast_node exp;
   pkl_ast_node to_type;
   pkl_ast_node from_type;
