@@ -957,7 +957,7 @@ deftype elf_rel =
           elf_word r_info;
           struct
           {
-            bit<24> r_sym;
+            uint<24> r_sym;
             elf_r_type<uint8> (mach) r_type;
           };
         };
@@ -971,7 +971,7 @@ deftype elf_rel =
           elf64_xword r_info;
           struct
           {
-            bit<32> r_sym;
+            uint<32> r_sym;
             elf_r_type<uint32> (mach) r_type;
           };
         };
@@ -994,7 +994,7 @@ deftype elf_rela =
           elf_word r_info;
           struct
           {
-            bit<24> r_sym;
+            uint<24> r_sym;
             elf_r_type<uint8> (mach) r_type;
           };
         };
@@ -1008,7 +1008,7 @@ deftype elf_rela =
           elf64_xword r_info;
           struct
           {
-            bit<32> int r_sym;
+            uint<32> int r_sym;
             elf_r_type<uint32> (mach) r_type;
           };
         };
@@ -1299,8 +1299,8 @@ deftype elf_sym =
         uint32 st_info;
         struct
         {
-          elf_sym_binding<bit<28>> st_bind;
-          elf_st_type<bit<4>> (mach) st_type;
+          elf_sym_binding<uint<28> > st_bind;
+          elf_st_type<uint<4> > (mach) st_type;
         };
       };
 
@@ -1309,8 +1309,8 @@ deftype elf_sym =
         byte st_other;
         struct
         {
-          elf_sym_visibility<bit<3>> st_visibility;
-          bit<5>;
+          elf_sym_visibility<uint<3> > st_visibility;
+          uint<5>;
         };
       };
       
@@ -1326,8 +1326,8 @@ deftype elf_sym =
         uint64 st_info;
         struct
         {
-          elf_sym_binding<bit<60>> st_bind;
-          elf_st_type<bit<4>> (mach) st_type;
+          elf_sym_binding<uint<60> > st_bind;
+          elf_st_type<uint<4> > (mach) st_type;
         };
       };
 
@@ -1336,8 +1336,8 @@ deftype elf_sym =
         byte st_other;
         struct
         {
-          elf_sym_visibility<bit<3>> st_visibility;
-          bit<5>;
+          elf_sym_visibility<uint<3> > st_visibility;
+          uint<5>;
         };
       };
 

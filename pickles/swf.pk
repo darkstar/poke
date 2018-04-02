@@ -19,11 +19,11 @@
 deftype swf_rect =
   struct
   {
-    bit<5> n;
-    bit<n> xmin;
-    bit<n> xmax;
-    bit<n> ymin;
-    bit<n> ymax;
+    uint<5> n;
+    uint<n> xmin;
+    uint<n> xmax;
+    uint<n> ymin;
+    uint<n> ymax;
   };
 
 /*

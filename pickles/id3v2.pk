@@ -28,10 +28,10 @@ deftype id3v2_hdr =
 
     struct
     {
-      bit<1> unsynchronisation_used;
-      bit<1> extended_hdr_present;
-      bit<1> experimental_tag;
-      bit<5>;
+      uint<1> unsynchronisation_used;
+      uint<1> extended_hdr_present;
+      uint<1> experimental_tag;
+      uint<5>;
     } flags;
 
     uint8[4] size : (size[0] < 0x80
@@ -48,8 +48,8 @@ defytpe id3v2_ext_hdr =
 
     struct
     {
-      bit<1> flag_crc_present;
-      bit<15>;
+      uint<1> flag_crc_present;
+      uint<15>;
     };
 
     uint32 padding_sz;
@@ -66,14 +66,14 @@ deftype id3v2_frame =
 
     struct
     {
-      bit<1> tag_alter_preserv;
-      bit<1> file_alter_preserv;
-      bit<1> read_only_frame;
-      bit<5>;
-      bit<1> compressed_frame;
-      bit<1> encrypted_frame;
-      bit<1> group_member_frame;
-      bit<5>;
+      uint<1> tag_alter_preserv;
+      uint<1> file_alter_preserv;
+      uint<1> read_only_frame;
+      uint<5>;
+      uint<1> compressed_frame;
+      uint<1> encrypted_frame;
+      uint<1> group_member_frame;
+      uint<5>;
     } flags;
 
     union

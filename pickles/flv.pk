@@ -96,10 +96,10 @@ deftype flv_audio =
     deftype sound_props =
     struct
       {
-        flv_sound_format<bit<4>> format;
-        flv_sound_rate<bit<2>> rate;
-        flv_sound_size<bit<1>> size;
-        flv_sound_type<bit<1>> type;
+        flv_sound_format<uint<4> > format;
+        flv_sound_rate<uint<2> > rate;
+        flv_sound_size<uint<1> > size;
+        flv_sound_type<uint<1> > type;
       };
     
     struct

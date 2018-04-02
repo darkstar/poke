@@ -26,19 +26,19 @@ deftype mp3_frame_hdr =
   {
     struct
     {
-      bit<12> frame_sync;
-      bit<1> mpeg_id;
-      bit<1> layer_id;
-      bit<1> protection_bit;
-      bit<4> bitrate_index;
-      bit<2> frequency_index;
-      bit<1> padding_bit;
-      bit<1> private_bit;
-      bit<2> channel_mode;
-      bit<2> mode_extension;
-      bit<1> copyright;
-      bit<1> original;
-      bit<2> emphasis;
+      uint<12> frame_sync;
+      uint<1> mpeg_id;
+      uint<1> layer_id;
+      uint<1> protection_bit;
+      uint<4> bitrate_index;
+      uint<2> frequency_index;
+      uint<1> padding_bit;
+      uint<1> private_bit;
+      uint<2> channel_mode;
+      uint<2> mode_extension;
+      uint<1> copyright;
+      uint<1> original;
+      uint<2> emphasis;
     } : (frame_sync >= 0xffe /* Note this distinguishes frames from
                                 id3v1 tags.  */
          && layer_id != 0
