@@ -88,7 +88,8 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               void *payload,
                                               int *restart,
                                               size_t child_pos,
-                                              pkl_ast_node parent);
+                                              pkl_ast_node parent,
+                                              int *dobreak);
 
 struct pkl_phase
 {
@@ -156,6 +157,9 @@ typedef struct pkl_phase *pkl_phase;
    PKL_PASS_DONE finishes the execution of the node handler.  This is
    equivalent to reaching the end of the handler body.
 
+   PKL_PASS_BREAK causes the pass manager to not process the children
+   of the current node.  This should only be used in a BF handler.
+
    PKL_PASS_RESTART expands to an l-value that should be set to 1 if
    the handler modifies its subtree structure in any way, either
    creating new nodes or removing existing nodes.  This makes the pass
@@ -176,7 +180,9 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_PARENT _parent
 #define PKL_PASS_RESTART (*_restart)
 #define PKL_PASS_CHILD_POS _child_pos
+
 #define PKL_PASS_DONE do { goto _exit; } while (0)
+#define PKL_PASS_BREAK do { *_dobreak = 1; goto _exit; } while (0)
 
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
@@ -188,7 +194,7 @@ typedef struct pkl_phase *pkl_phase;
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
                             pkl_ast_node _node, void *_payload,         \
                             int *_restart, size_t _child_pos,           \
-                            pkl_ast_node _parent)                       \
+                            pkl_ast_node _parent, int *_dobreak)        \
   {                                                                     \
   /* printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node)); */   \
      PKL_PASS_RESTART = 0;

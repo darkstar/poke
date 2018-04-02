@@ -210,9 +210,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
-/* XXX: remove this UGLY hack and fix the passes instead.
- *
- * OFFSET
+/* OFFSET
  * | BASE_TYPE
  * | MAGNITUDE
  * | UNIT
@@ -227,6 +225,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_offset)
   pkl_ast_node offset_type = PKL_AST_TYPE (offset);
   pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
 
+  /* We should generate the base type associated with the offset type,
+     not the offset type itself.  This relies on the BF handler for
+     type offsets below, that does a PASS_BREAK.  */
+  
   assert (PKL_AST_TYPE_CODE (base_type) == PKL_TYPE_INTEGRAL);
 
   pvm_push_val (program,
@@ -236,6 +238,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_offset)
                 pvm_make_uint (PKL_AST_TYPE_I_SIGNED (base_type), 32));
   
   PVM_APPEND_INSTRUCTION (program, mktyi);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * TYPE_OFFSET
+ * | BASE_TYPE
+ * | UNIT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type_offset)
+{
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -486,9 +500,10 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
-  PKL_PHASE_PARENT (3,
+  PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
@@ -548,6 +563,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
 }
 PKL_PHASE_END_HANDLER
 
+#if 0
 /*
  * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
  *  PKL_AST_STRUCT_ELEM_TYPE)
@@ -557,8 +573,10 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
-  PKL_PHASE_PARENT (2,
+  PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_gen_payload payload
@@ -568,6 +586,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
   PVM_APPEND_INSTRUCTION (program, mktyo);
 }
 PKL_PHASE_END_HANDLER
+#endif
 
 /*
  * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
@@ -932,6 +951,6 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_df_type_offset),
+   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
   };

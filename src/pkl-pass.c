@@ -38,8 +38,11 @@
                                                                   payloads[i], \
                                                                   &restart, \
                                                                   child_pos,\
-                                                                  parent); \
+                                                                  parent,\
+                                                                  &dobreak);    \
               *handlers_used += 1;                                      \
+              if (dobreak)                                              \
+                goto _exit;                                             \
                                                                         \
               if (restart)                                              \
                 {                                                       \
@@ -75,7 +78,10 @@
                                              payloads[i],               \
                                              &restart,                  \
                                              child_pos,                 \
-                                             parent);                   \
+                                             parent,                    \
+                                             &dobreak);                 \
+              if (dobreak)                                              \
+                goto _exit;                                             \
                                                                         \
               if (restart)                                              \
                 {                                                       \
@@ -115,9 +121,11 @@ pkl_call_node_handlers (jmp_buf toplevel,
                         int *handlers_used,
                         size_t child_pos,
                         pkl_ast_node parent,
+                        int *_dobreak,
                         int order)
 {
   int node_code = PKL_AST_CODE (node);
+  int dobreak = 0;
 
   /* Call the handlers defined for specific opcodes in the given
      order.  */
@@ -173,6 +181,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
   else if (order == PKL_PASS_DEPTH_FIRST)
     PKL_CALL_PHASES_SINGLE(default_bf);
 
+ _exit:
+  *_dobreak = dobreak;
   return node;
 }
 
@@ -219,6 +229,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   pkl_ast_node node_orig = node;
   int node_code = PKL_AST_CODE (node);
   int handlers_used = 0;
+  int dobreak = 0;
 
   /* If there are no passes then there is nothing to do. */
   if (phases == NULL)
@@ -226,21 +237,17 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
   /* Call the breadth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
-                                 &handlers_used, child_pos, parent,
+                                 &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_BREADTH_FIRST);
+  if (dobreak)
+    goto _exit;
 
-  if (PKL_AST_CODE (node) == PKL_AST_OFFSET)
-    /* XXX: remove this UGLY hack and also the pkl_gen_bf_offset
-       handler in pkl-gen.c.  */;
-  else
-    {
-      /* Process child nodes.  */
-      if (PKL_AST_TYPE (node))
-        PKL_AST_TYPE (node)
-          = pkl_do_pass_1 (toplevel, ast,
-                           PKL_AST_TYPE (node), 0, node,
-                           payloads, phases);
-    }
+  /* Process child nodes.  */
+  if (PKL_AST_TYPE (node))
+    PKL_AST_TYPE (node)
+      = pkl_do_pass_1 (toplevel, ast,
+                       PKL_AST_TYPE (node), 0, node,
+                       payloads, phases);
 
   switch (node_code)
     {
@@ -404,7 +411,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
   /* Call the depth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
-                                 &handlers_used, child_pos, parent,
+                                 &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_DEPTH_FIRST);
 
   /* If no handler has been invoked, call the default handler of the
@@ -418,7 +425,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
      AST structure).  */
   if (node != node_orig)
     ASTREF (node);
-  
+
+ _exit:
   return node;
 }
 
