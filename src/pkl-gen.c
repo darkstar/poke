@@ -382,8 +382,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
         }
     }
   else
-    /* XXX: handle casts to structs and arrays.  For structs, reorder
-       fields.  */
+    /* XXX: handle casts to offsets, structs and arrays.  For structs,
+       reorder fields.  */
     assert (0);
 
 }
