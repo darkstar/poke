@@ -627,6 +627,8 @@ pkl_ast_id_to_offset_unit (pkl_ast ast, pkl_ast_node id)
 
   if (strcmp (id_pointer, "b") == 0)
     factor = PKL_AST_OFFSET_UNIT_BITS;
+  else if (strcmp (id_pointer, "N") == 0)
+    factor = PKL_AST_OFFSET_UNIT_NIBBLES;
   else if (strcmp (id_pointer, "B") == 0)
     factor = PKL_AST_OFFSET_UNIT_BYTES;
   else if (strcmp (id_pointer, "Kb") == 0)

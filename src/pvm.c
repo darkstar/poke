@@ -551,6 +551,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         case PVM_VAL_OFF_UNIT_BITS:
           fprintf (out, CYAN " b" NOATTR);
           break;
+        case PVM_VAL_OFF_UNIT_NIBBLES:
+          fprintf (out, CYAN " N" NOATTR);
+          break;
         case PVM_VAL_OFF_UNIT_BYTES:
           fprintf (out, CYAN " B" NOATTR);
           break;

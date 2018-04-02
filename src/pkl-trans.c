@@ -206,7 +206,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
       if (!new_unit)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
-                     "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
+                     "expected `b', `N', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
           payload->errors++;
           PKL_PASS_ERROR;
         }

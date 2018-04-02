@@ -176,4 +176,4 @@ set test offset-mod-then-div
 poke_test_cmd "print \[10 bit\]%\[byte\]/\[bit\]" "2"
 
 set test offset-mod-nibble
-poke_test_cmd "print \[3 nibble\]%\[byte\]" {\[1 4\]}
+poke_test_cmd "print \[3 nibble\]%\[byte\]" {\[1 N\]}
