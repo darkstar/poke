@@ -237,6 +237,7 @@ TYPIFY_BIN (mod);
       = (PKL_AST_TYPE_I_SIZE (base_type_1) > PKL_AST_TYPE_I_SIZE (base_type_2) \
          ? PKL_AST_TYPE_I_SIZE (base_type_1) : PKL_AST_TYPE_I_SIZE (base_type_2)); \
                                                                         \
+                                                                        \
     pkl_ast_node base_type                                              \
       = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p);      \
     PKL_AST_LOC (base_type) = PKL_AST_LOC (exp);                        \

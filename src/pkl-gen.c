@@ -227,7 +227,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_offset)
 
   /* We should generate the base type associated with the offset type,
      not the offset type itself.  This relies on the BF handler for
-     type offsets below, that does a PASS_BREAK.  */
+     type offsets below, that does a PASS_BREAK to prevent generating
+     the full thing.  */
   
   assert (PKL_AST_TYPE_CODE (base_type) == PKL_TYPE_INTEGRAL);
 
@@ -672,7 +673,7 @@ PKL_PHASE_END_HANDLER
 #define OFFSET_EXP(insn)                                \
   do                                                    \
     {                                                   \
-  pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);\
+      pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type); \
       uint64_t size = PKL_AST_TYPE_I_SIZE (base_type);  \
       int signed_p = PKL_AST_TYPE_I_SIGNED (base_type); \
                                                         \
@@ -711,7 +712,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
       PVM_APPEND_INSTRUCTION (program, sconc);
       break;
     case PKL_TYPE_OFFSET:
-      INTEGRAL_EXP (addo);
+      OFFSET_EXP (addo);
       break;
     default:
       assert (0);
@@ -917,6 +918,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
    PKL_PHASE_BF_HANDLER (PKL_AST_OFFSET, pkl_gen_bf_offset),
+   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
@@ -951,6 +953,5 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
-   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
   };

@@ -177,3 +177,15 @@ poke_test_cmd "print \[10 bit\]%\[byte\]/\[bit\]" "2"
 
 set test offset-mod-nibble
 poke_test_cmd "print \[3 nibble\]%\[byte\]" {\[1 N\]}
+
+set test offset-add-ii
+poke_test_cmd "print \[1 b\] + \[2 b\]" {\[3 b\]}
+
+set test offset-add-iuiu
+poke_test_cmd "print \[1U b\] + \[2U b\]" {\[3U b\]}
+
+set test offset-add-ll
+poke_test_cmd "print \[1L b\] + \[2L b\]" {\[3L b\]}
+
+set test offset-add-lulu
+poke_test_cmd "print \[1UL b\] + \[2UL b\]" {\[3UL b\]}

@@ -1056,7 +1056,7 @@ instruction addol () # OFF(LONG) OFF(LONG) -> OFF(LONG)
     int64_t vb = PVM_VAL_LONG (PVM_VAL_OFF_MAGNITUDE (b)); \
     res = pvm_make_offset (base_type,                       \
                            pvm_make_long ((va * ua) + (vb * ub), PVM_VAL_ULONG (size)), \
-                           pvm_make_uint (PVM_VAL_OFF_UNIT_BITS, 32)); }
+                           pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32)); }
   JITTER_BINARY_STACK (F);
 #undef F
   end
@@ -1064,16 +1064,52 @@ end
 
 instruction addolu () # OFF(ULONG) OFF(ULONG) -> OFF(ULONG)
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_TYP_I_SIZE (base_type); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    uint64_t va = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (a)); \
+    uint64_t vb = PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_ulong ((va * ua) + (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32)); }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
 instruction addoi () # OFF(INT) OFF(INT) -> OFF(INT)
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_TYP_I_SIZE (base_type); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    int32_t va = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (a)); \
+    int32_t vb = PVM_VAL_INT (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_int ((va * ua) + (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32)); }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
 instruction addoiu () # OFF(UINT) OFF(UINT) -> OFF(UINT)
   code
+#define F(res, a, b)                               \
+  { pvm_val base_type = PVM_VAL_OFF_BASE_TYPE (a); \
+    pvm_val size = PVM_VAL_TYP_I_SIZE (base_type); \
+    uint64_t ua = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (a)); \
+    uint64_t ub = PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (b)); \
+    uint32_t va = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (a)); \
+    uint32_t vb = PVM_VAL_UINT (PVM_VAL_OFF_MAGNITUDE (b)); \
+    res = pvm_make_offset (base_type,                       \
+                           pvm_make_uint ((va * ua) + (vb * ub), PVM_VAL_ULONG (size)), \
+                           pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32)); }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
