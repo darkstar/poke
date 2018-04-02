@@ -71,6 +71,18 @@ poke_test_cmd "print 3 + 4L" "7L"
 set test addli
 poke_test_cmd "print 3L + 4" "7L"
 
+set test subii
+poke_test_cmd "print 3 - 4" "-1"
+
+set test subll
+poke_test_cmd "print 3L - 4L" "-1L"
+
+set test subil
+poke_test_cmd "print 3 - 4L" "-1L"
+
+set test subli
+poke_test_cmd "print 3L - 4" "-1L"
+
 set test divii
 poke_test_cmd "print 10 / 5" "2"
 
@@ -189,3 +201,15 @@ poke_test_cmd "print \[1L b\] + \[2L b\]" {\[3L b\]}
 
 set test offset-add-lulu
 poke_test_cmd "print \[1UL b\] + \[2UL b\]" {\[3UL b\]}
+
+set test offset-sub-ii
+poke_test_cmd "print \[1 b\] - \[2 b\]" {\[-1 b\]}
+
+set test offset-sub-iuiu
+poke_test_cmd "print \[2U b\] - \[1U b\]" {\[1U b\]}
+
+set test offset-sub-ll
+poke_test_cmd "print \[1L b\] - \[2L b\]" {\[-1L b\]}
+
+set test offset-sub-lulu
+poke_test_cmd "print \[10UL b\] - \[2UL b\]" {\[8UL b\]}

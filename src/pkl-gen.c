@@ -721,6 +721,34 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      INTEGRAL_EXP (sub);
+      break;
+    case PKL_TYPE_STRING:
+      PVM_APPEND_INSTRUCTION (program, sconc);
+      break;
+    case PKL_TYPE_OFFSET:
+      OFFSET_EXP (subo);
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 {
   pkl_gen_payload payload
@@ -809,7 +837,6 @@ PKL_PHASE_END_HANDLER
   }                                                             \
   PKL_PHASE_END_HANDLER
 
-BIN_INTEGRAL_EXP_HANDLER (sub, sub);
 BIN_INTEGRAL_EXP_HANDLER (mul, mul);
 BIN_INTEGRAL_EXP_HANDLER (band, band);
 BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
