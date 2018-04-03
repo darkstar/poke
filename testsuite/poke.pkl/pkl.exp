@@ -57,6 +57,9 @@ poke_test_cmd "print (uint64) 1" "1UL"
 set test u2addi5
 poke_test_cmd "print (uint<2>) 1 + (int<5>) 2" {\(uint<5>\) 3}
 
+set test offset-to-offset-1
+poke_test_cmd "print (offset<uint16,B>) \[1024 b\]" {\[128UH B\]}
+
 # Operations
 
 set test addii
