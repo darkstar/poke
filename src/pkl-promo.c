@@ -62,8 +62,7 @@ promote_integral (pkl_ast ast,
   return 0;
 }
 
-/* Handler for binary operations whose operands should be both
-   integral values of the same size and signedness.  */
+/* Handler for binary operations.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary)
 {
@@ -71,11 +70,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary)
 
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (exp);
-  size_t size = PKL_AST_TYPE_I_SIZE (type);
-  int sign = PKL_AST_TYPE_I_SIGNED (type);
 
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
-    {  
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+      
       if (!promote_integral (PKL_PASS_AST, size, sign,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1)
           || !promote_integral (PKL_PASS_AST, size, sign,
@@ -92,42 +92,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary)
 }
 PKL_PHASE_END_HANDLER
 
-/* Handler for binary operations whose operands should be both boolean
-   values.  */
+/* Handler for unary operations.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_binary_bool)
-{
-  int restart1, restart2;
-  pkl_ast_node node = PKL_PASS_NODE;
-  
-  if (!promote_integral (PKL_PASS_AST, 32, 1,
-                         &PKL_AST_EXP_OPERAND (node, 0), &restart1)
-      || !promote_integral (PKL_PASS_AST, 32, 1,
-                            &PKL_AST_EXP_OPERAND (node, 1), &restart2))
-    {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
-                 "operator requires boolean arguments");
-      PKL_PASS_ERROR;
-    }
-
-  PKL_PASS_RESTART = restart1 || restart2;
-}
-PKL_PHASE_END_HANDLER
-
-/* Handler for unary operations whose operand should be a boolean
-   value.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_unary_bool)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_unary)
 {
   int restart;
-  pkl_ast_node node = PKL_PASS_NODE;
 
-  if (!promote_integral (PKL_PASS_AST, 32, 1,
-                         &PKL_AST_EXP_OPERAND (node, 0), &restart))
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
-                 "operator requires a boolean argument");
-      PKL_PASS_ERROR;
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      if (!promote_integral (PKL_PASS_AST, size, sign,
+                             &PKL_AST_EXP_OPERAND (node, 0), &restart))
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
+                     "operator requires a boolean argument");
+          PKL_PASS_ERROR;
+        }
     }
 
   PKL_PASS_RESTART = restart;
@@ -229,8 +214,8 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_binary_bool),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_binary_bool),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_unary_bool),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_unary),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_type_array),
   };

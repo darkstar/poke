@@ -89,6 +89,54 @@ poke_test_cmd "print 10 / 5" "2"
 set test divil
 poke_test_cmd "print 10 / 5L" "2L"
 
+set test noti0
+poke_test_cmd "print !0" "1"
+
+set test noti1
+poke_test_cmd "print !1" "0"
+
+set test noti24
+poke_test_cmd "print !24" "0"
+
+set test notl0
+poke_test_cmd "print !0L" "1"
+
+set test andii-0
+poke_test_cmd "print 0 && 0" "0"
+
+set test andii-1
+poke_test_cmd "print 0 && 1" "0"
+
+set test andii-2
+poke_test_cmd "print 1 && 0" "0"
+
+set test andii-3
+poke_test_cmd "print 1 && 1" "1"
+
+set test andil-0
+poke_test_cmd "print 0 && 0L" "0"
+
+set test andil-1
+poke_test_cmd "print 0 && 12L" "0"
+
+set test andil-2
+poke_test_cmd "print 1 && 0L" "0"
+
+set test andil-3
+poke_test_cmd "print 1 && 1L" "1"
+
+set test andli-0
+poke_test_cmd "print 0L && 0" "0"
+
+set test andi-1
+poke_test_cmd "print 12L && 0" "0"
+
+set test andi-2
+poke_test_cmd "print 100L && 0L" "0"
+
+set test andi-3
+poke_test_cmd "print 23UL && 1L" "1"
+
 # Arrays
 
 set test simplearray
