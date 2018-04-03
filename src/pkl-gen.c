@@ -408,20 +408,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       pvm_push_val (program,
                     pvm_make_uint (PKL_AST_TYPE_I_SIGNED (to_base_type), 32));
       PVM_APPEND_INSTRUCTION (program, mktyi);
+
       PVM_APPEND_INSTRUCTION (program, swap);
 
-      /* Get the magnitude of the offset and cast it to the new base
-         type.  */
+      /* Get the magnitude of the offset, cast it to the new base type
+         and convert to new unit.  */
 
       PVM_APPEND_INSTRUCTION (program, ogetm);
       append_int_cast (program, from_base_type, to_base_type);
+      /* XXX: magnitude * new unit / old unit  */
+
       PVM_APPEND_INSTRUCTION (program, swap);
 
       /* Push the new unit.  */
-      printf ("XXX %d\n", PKL_AST_CODE (to_base_unit));
       assert (PKL_AST_CODE (to_base_unit) == PKL_AST_INTEGER);
       append_integer (program, to_base_unit);
 
+      PVM_APPEND_INSTRUCTION (program, swap);
+      PVM_APPEND_INSTRUCTION (program, drop);
+
+      PVM_APPEND_INSTRUCTION (program, mko);
     }
   else
     /* XXX: handle casts to structs and arrays.  For structs,

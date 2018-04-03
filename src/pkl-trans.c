@@ -479,9 +479,47 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_offset)
 }
 PKL_PHASE_END_HANDLER
 
+/* Ditto for offset types.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_offset_type)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node type = PKL_PASS_NODE;
+  pkl_ast_node unit_type = PKL_AST_TYPE_O_UNIT (type);
+  pkl_ast_node unit;
+
+  if (PKL_AST_CODE (unit_type) != PKL_AST_TYPE)
+    /* The unit of this offset is not a type.  Nothing to do.  */
+    PKL_PASS_DONE;
+
+  if (PKL_AST_TYPE_COMPLETE (unit_type) != PKL_AST_TYPE_COMPLETE_YES)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit_type),
+                 "offset types only work on complete types");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* Calculate the size of the complete type in bytes and put it in
+     an integer node.  */
+  unit = pkl_ast_sizeof_type (PKL_PASS_AST, unit_type);
+  PKL_AST_LOC (unit) = PKL_AST_LOC (unit_type);
+  PKL_AST_LOC (PKL_AST_TYPE (unit)) = PKL_AST_LOC (unit_type);
+
+  /* Replace the unit type with this expression.  */
+  PKL_AST_TYPE_O_UNIT (type) = ASTREF (unit);
+  pkl_ast_node_free (unit_type);
+
+  PKL_PASS_RESTART = 1;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans3_df_offset),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans3_df_offset_type),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_df_op_sizeof),
   };

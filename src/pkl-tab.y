@@ -507,6 +507,14 @@ type_specifier:
                     PKL_AST_LOC (PKL_AST_TYPE ($4)) = @4;
                     PKL_AST_LOC ($$) = @$;
                 }
+        | OFFSETCONSTR type_specifier ',' type_specifier '>'
+                {
+                    /* XXX: $4 can be any expression!.  */
+                    $$ = pkl_ast_make_offset_type (pkl_parser->ast,
+                                                   $2, $4);
+                    PKL_AST_LOC ($$) = @$;
+                }
+
         | OFFSETCONSTR type_specifier ',' IDENTIFIER '>'
                 {
                     $$ = pkl_ast_make_offset_type (pkl_parser->ast,
