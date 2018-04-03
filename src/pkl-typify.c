@@ -186,9 +186,6 @@ TYPIFY_BIN (band);
     pkl_ast_node base_type_1 = PKL_AST_TYPE_O_BASE_TYPE (t1);           \
     pkl_ast_node base_type_2 = PKL_AST_TYPE_O_BASE_TYPE (t2);           \
                                                                         \
-    assert (PKL_AST_TYPE_CODE (base_type_1) == PKL_TYPE_INTEGRAL        \
-            && PKL_AST_TYPE_CODE (base_type_2) == PKL_TYPE_INTEGRAL);   \
-                                                                        \
     if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_DIV)                       \
       {                                                                 \
         size_t base_type_1_size = PKL_AST_TYPE_I_SIZE (base_type_1);    \
