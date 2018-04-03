@@ -169,6 +169,14 @@ instruction push (?Rnl pvm_literal_printer)
   end
 end
 
+instruction swap ()
+  code
+    pvm_val tmp = JITTER_UNDER_TOP_STACK ();
+    JITTER_UNDER_TOP_STACK () = JITTER_TOP_STACK ();
+    JITTER_TOP_STACK () = tmp;
+  end
+end
+
 instruction pushhi (?Rnl pvm_literal_printer_hi)
   code
      jitter_state_runtime.push_hi
@@ -1628,6 +1636,24 @@ instruction mko () # TYP EXP ULONG -> OFF
 
     JITTER_TOP_STACK () =
       pvm_make_offset (base_type, magnitude, unit);
+  end
+end
+
+instruction ogetm () # OFF -> OFF (INT|LONG|UINT|ULONG)
+  code
+    JITTER_PUSH_STACK (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ogetu () # OFF -> OFF UINT
+  code
+    JITTER_PUSH_STACK (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction ogetbt () # OFF -> OFF BT
+  code
+    JITTER_PUSH_STACK (PVM_VAL_OFF_BASE_TYPE (JITTER_TOP_STACK ()));
   end
 end
 

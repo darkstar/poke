@@ -137,12 +137,10 @@ PKL_PHASE_END_HANDLER
  * INTEGER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
+static void
+append_integer (pvm_program program,
+                pkl_ast_node integer)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_ast_node integer = PKL_PASS_NODE;
   pkl_ast_node type;
   pvm_val val;
   int size;
@@ -170,7 +168,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
         val = pvm_make_uint (value, size);
     }
   
-  pvm_push_val (payload->program, val);
+  pvm_push_val (program, val);
+}
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  append_integer (payload->program, PKL_PASS_NODE);
 }
 PKL_PHASE_END_HANDLER
 
@@ -276,6 +282,97 @@ PKL_PHASE_END_HANDLER
  * CAST
  */
 
+static void
+append_int_cast (pvm_program program,
+                 pkl_ast_node from_type,
+                 pkl_ast_node to_type)
+{
+  size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
+  int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
+      
+  size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
+  int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
+  
+  if (from_type_size == to_type_size
+      && from_type_sign == to_type_sign)
+    /* Wheee, nothing to do.  */
+    return;
+  else
+    {          
+      /* Push the proper conversion instruction.  */
+      if ((from_type_size - 1) & ~0x1f)
+        {
+          if ((to_type_size - 1) & ~0x1f)
+            {
+              if (from_type_sign && to_type_sign)
+                /* From pvm_long to pvm_long  */
+                PVM_APPEND_INSTRUCTION (program, ltol);
+              else if (from_type_sign && !to_type_sign)
+                /* From pvm_long to pvm_ulong */
+                PVM_APPEND_INSTRUCTION (program, ltolu);
+              else if (!from_type_sign && to_type_sign)
+                /* From pvm_ulong to pvm_long */
+                PVM_APPEND_INSTRUCTION (program, lutol);
+              else
+                /* From pvm_ulong to pvm_ulong */
+                PVM_APPEND_INSTRUCTION (program, lutolu);
+            }
+          else
+            {
+              if (from_type_sign && to_type_sign)
+                /* From pvm_long to pvm_int  */
+                PVM_APPEND_INSTRUCTION (program, ltoi);
+              else if (from_type_sign && !to_type_sign)
+                /* From pvm_long to pvm_uint */
+                PVM_APPEND_INSTRUCTION (program, ltou);
+              else if (!from_type_sign && to_type_sign)
+                /* From pvm_ulong to pvm_int */
+                PVM_APPEND_INSTRUCTION (program, lutoi);
+              else
+                /* From pvm_ulong to pvm_uint */
+                PVM_APPEND_INSTRUCTION (program, lutou);
+            }
+        }
+      else
+        {
+          if ((to_type_size - 1) & ~0x1f)
+            {
+              if (from_type_sign && to_type_sign)
+                /* From pvm_int to pvm_long  */
+                PVM_APPEND_INSTRUCTION (program, itol);
+              else if (from_type_sign && !to_type_sign)
+                /* From pvm_int to pvm_ulong */
+                PVM_APPEND_INSTRUCTION (program, itolu);
+              else if (!from_type_sign && to_type_sign)
+                /* From pvm_uint to pvm_long */
+                PVM_APPEND_INSTRUCTION (program, utol);
+              else
+                /* From pvm_uint to pvm_ulong */
+                PVM_APPEND_INSTRUCTION (program, utolu);
+            }
+          else
+            {
+              if (from_type_sign && to_type_sign)
+                /* From pvm_int to pvm_int  */
+                PVM_APPEND_INSTRUCTION (program, itoi);
+              else if (from_type_sign && !to_type_sign)
+                /* From pvm_int to pvm_uint */
+                PVM_APPEND_INSTRUCTION (program, itou);
+              else if (!from_type_sign && to_type_sign)
+                /* From pvm_uint to pvm_int */
+                PVM_APPEND_INSTRUCTION (program, utoi);
+              else
+                /* From pvm_uint to pvm_uint */
+                PVM_APPEND_INSTRUCTION (program, utou);
+            }
+        }
+
+      /* And its argument.  */
+      pvm_append_unsigned_literal_parameter (program,
+                                             (jitter_uint) to_type_size);
+    }
+}
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 {
   pkl_gen_payload payload
@@ -296,93 +393,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
     {
-      size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
-      int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
-      
-      size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
-      int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
+      append_int_cast (program, from_type, to_type);
+    }
+  else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
+           && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
+      pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
+      pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
 
-      if (from_type_size == to_type_size
-          && from_type_sign == to_type_sign)
-        /* Wheee, nothing to do.  */
-        PKL_PASS_DONE;
-      else
-        {          
-          /* Now push the proper conversion instruction.  */
-          if ((from_type_size - 1) & ~0x1f)
-            {
-              if ((to_type_size - 1) & ~0x1f)
-                {
-                  if (from_type_sign && to_type_sign)
-                    /* From pvm_long to pvm_long  */
-                    PVM_APPEND_INSTRUCTION (program, ltol);
-                  else if (from_type_sign && !to_type_sign)
-                    /* From pvm_long to pvm_ulong */
-                    PVM_APPEND_INSTRUCTION (program, ltolu);
-                  else if (!from_type_sign && to_type_sign)
-                    /* From pvm_ulong to pvm_long */
-                    PVM_APPEND_INSTRUCTION (program, lutol);
-                  else
-                    /* From pvm_ulong to pvm_ulong */
-                    PVM_APPEND_INSTRUCTION (program, lutolu);
-                }
-              else
-                {
-                  if (from_type_sign && to_type_sign)
-                    /* From pvm_long to pvm_int  */
-                    PVM_APPEND_INSTRUCTION (program, ltoi);
-                  else if (from_type_sign && !to_type_sign)
-                    /* From pvm_long to pvm_uint */
-                    PVM_APPEND_INSTRUCTION (program, ltou);
-                  else if (!from_type_sign && to_type_sign)
-                    /* From pvm_ulong to pvm_int */
-                    PVM_APPEND_INSTRUCTION (program, lutoi);
-                  else
-                    /* From pvm_ulong to pvm_uint */
-                    PVM_APPEND_INSTRUCTION (program, lutou);
-                }
-            }
-          else
-            {
-              if ((to_type_size - 1) & ~0x1f)
-                {
-                  if (from_type_sign && to_type_sign)
-                    /* From pvm_int to pvm_long  */
-                    PVM_APPEND_INSTRUCTION (program, itol);
-                  else if (from_type_sign && !to_type_sign)
-                    /* From pvm_int to pvm_ulong */
-                    PVM_APPEND_INSTRUCTION (program, itolu);
-                  else if (!from_type_sign && to_type_sign)
-                    /* From pvm_uint to pvm_long */
-                    PVM_APPEND_INSTRUCTION (program, utol);
-                  else
-                    /* From pvm_uint to pvm_ulong */
-                    PVM_APPEND_INSTRUCTION (program, utolu);
-                }
-              else
-                {
-                  if (from_type_sign && to_type_sign)
-                    /* From pvm_int to pvm_int  */
-                    PVM_APPEND_INSTRUCTION (program, itoi);
-                  else if (from_type_sign && !to_type_sign)
-                    /* From pvm_int to pvm_uint */
-                    PVM_APPEND_INSTRUCTION (program, itou);
-                  else if (!from_type_sign && to_type_sign)
-                    /* From pvm_uint to pvm_int */
-                    PVM_APPEND_INSTRUCTION (program, utoi);
-                  else
-                    /* From pvm_uint to pvm_uint */
-                    PVM_APPEND_INSTRUCTION (program, utou);
-                }
-            }
+      /* Push the new base type.  */
+      pvm_push_val (program,
+                    pvm_make_ulong (PKL_AST_TYPE_I_SIZE (to_base_type), 64));
+      pvm_push_val (program,
+                    pvm_make_uint (PKL_AST_TYPE_I_SIGNED (to_base_type), 32));
+      PVM_APPEND_INSTRUCTION (program, mktyi);
+      PVM_APPEND_INSTRUCTION (program, swap);
 
-          /* And its argument.  */
-          pvm_append_unsigned_literal_parameter (program,
-                                                 (jitter_uint) to_type_size);
-        }
+      /* Get the magnitude of the offset and cast it to the new base
+         type.  */
+
+      PVM_APPEND_INSTRUCTION (program, ogetm);
+      append_int_cast (program, from_base_type, to_base_type);
+      PVM_APPEND_INSTRUCTION (program, swap);
+
+      /* Push the new unit.  */
+      printf ("XXX %d\n", PKL_AST_CODE (to_base_unit));
+      assert (PKL_AST_CODE (to_base_unit) == PKL_AST_INTEGER);
+      append_integer (program, to_base_unit);
+
     }
   else
-    /* XXX: handle casts to offsets, structs and arrays.  For structs,
+    /* XXX: handle casts to structs and arrays.  For structs,
        reorder fields.  */
     assert (0);
 
