@@ -196,8 +196,6 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_array_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_array_initializer),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_binary),
@@ -217,5 +215,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_unary),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_array_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_array_initializer),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_type_array),
   };
