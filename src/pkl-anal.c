@@ -53,7 +53,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
-/* In struct literals, make sure that the names of it's elements are
+/* In struct literals, make sure that the names of its elements are
    unique in the structure.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)

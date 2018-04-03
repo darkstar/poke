@@ -26,7 +26,7 @@
 
 
 /* This file implements several transformation compiler phases which,
-   generally speaking, are not restartable.
+   generally speaking, are restartable.
 
    `trans1' finishes ARRAY, STRUCT and TYPE_STRUCT nodes by
             determining its number of elements and characteristics.

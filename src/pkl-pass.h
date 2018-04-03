@@ -32,7 +32,7 @@
    in the AST.  One pass may integrate several phases.
 
    Implementing a phase involves defining a struct pkl_phase variable
-   and filling it up.  A pkl_hase struct contains:
+   and filling it up.  A pkl_phase struct contains:
 
    - CODE_DF_HANDLERS is a table indexed by node codes, which must be
      values in the `pkl_ast_code' enumeration defined in pkl-ast.h.
@@ -163,16 +163,16 @@ typedef struct pkl_phase *pkl_phase;
    PKL_PASS_RESTART expands to an l-value that should be set to 1 if
    the handler modifies its subtree structure in any way, either
    creating new nodes or removing existing nodes.  This makes the pass
-   machinery to do the right thing (hopefully.)  By default its value
-   is 0.  This macro should _not_ be used as an r-value.
+   machinery do the right thing (hopefully.)  By default its value is
+   0.  This macro should _not_ be used as an r-value.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
 
    PKL_PASS_ERROR can be used in order to interrupt the execution of
    the compiler pass, making `pkl_do_pass' to return an error code.
-   Please make sure to any node you create unless they are linked to
-   the AST.  Otherwise you will leak memory.  */
+   Please make sure to delete any node you create unless they are
+   linked to the AST.  Otherwise you will leak memory.  */
 
 #define PKL_PASS_PAYLOAD _payload
 #define PKL_PASS_AST _ast
