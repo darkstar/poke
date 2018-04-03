@@ -437,7 +437,8 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
         break;
       }
     case PKL_TYPE_OFFSET:
-      /* Fallthrough.  */
+      assert (0); /* XXX */
+      break;
     case PKL_TYPE_STRING:
       /* Fallthrough.  */
     default:
