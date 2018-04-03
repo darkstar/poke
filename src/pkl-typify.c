@@ -262,6 +262,8 @@ TYPIFY_BIN (mod);
 TYPIFY_BIN (add);
 TYPIFY_BIN (sub);
 
+#undef CASE_STR
+#undef CAST_OFFSET
 #undef TYPIFY_BIN
 
 /* The type of a SIZEOF operation is an offset type with an unsigned
