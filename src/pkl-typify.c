@@ -43,6 +43,9 @@
 #include "pkl-pass.h"
 #include "pkl-typify.h"
 
+/* Note the following macro evaluates the arguments twice!  */
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+
 /* The following handler is used in both `typify1' and `typify2'.  It
    initializes the payload.  */
 
@@ -138,9 +141,8 @@ PKL_PHASE_END_HANDLER
         {                                                               \
           int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                    \
                           && PKL_AST_TYPE_I_SIGNED (t2));               \
-          int size                                                      \
-            = (PKL_AST_TYPE_I_SIZE (t1) > PKL_AST_TYPE_I_SIZE (t2)      \
-               ? PKL_AST_TYPE_I_SIZE (t1) : PKL_AST_TYPE_I_SIZE (t2));  \
+          int size = MAX (PKL_AST_TYPE_I_SIZE (t1),                     \
+                          PKL_AST_TYPE_I_SIZE (t2));                    \
                                                                         \
           type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p); \
           break;                                                        \
@@ -195,8 +197,7 @@ TYPIFY_BIN (band);
         int base_type_2_signed = PKL_AST_TYPE_I_SIGNED (base_type_2);   \
                                                                         \
         int signed_p = (base_type_1_signed && base_type_2_signed);      \
-        int size = (base_type_1_size > base_type_2_size                 \
-                    ? base_type_1_size : base_type_2_size);             \
+        int size = MAX (base_type_1_size, base_type_2_size);            \
                                                                         \
         type = pkl_ast_make_integral_type (PKL_PASS_AST,                \
                                            size, signed_p);             \
