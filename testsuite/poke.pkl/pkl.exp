@@ -279,3 +279,6 @@ poke_test_cmd "print \[1L b\] - \[2L b\]" {\[-1L b\]}
 
 set test offset-sub-lulu
 poke_test_cmd "print \[10UL b\] - \[2UL b\]" {\[8UL b\]}
+
+set test offset-sub-promo
+poke_test_cmd "print \[(int<7>) 2 B\] - \[(int<2>) 1 b\]" {\[\(int<7>\) 15 b\]}
