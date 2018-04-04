@@ -37,9 +37,11 @@
                                                                   node, \
                                                                   payloads[i], \
                                                                   &restart, \
-                                                                  child_pos,\
-                                                                  parent,\
-                                                                  &dobreak);    \
+                                                                  child_pos, \
+                                                                  parent, \
+                                                                  &dobreak, \
+                                                                  payloads, \
+                                                                  phases);    \
               *handlers_used += 1;                                      \
               if (dobreak)                                              \
                 goto _exit;                                             \
@@ -79,7 +81,9 @@
                                              &restart,                  \
                                              child_pos,                 \
                                              parent,                    \
-                                             &dobreak);                 \
+                                             &dobreak,                  \
+                                             payloads,                  \
+                                             phases);                   \
               if (dobreak)                                              \
                 goto _exit;                                             \
                                                                         \
@@ -435,15 +439,15 @@ pkl_do_pass_1 (jmp_buf toplevel,
 }
 
 int
-pkl_do_pass (pkl_ast ast,
-             struct pkl_phase *phases[], void *payloads[])
+pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
+                struct pkl_phase *phases[], void *payloads[])
 {
   jmp_buf toplevel;
 
   switch (setjmp (toplevel))
     {
     case 0:
-      ast->ast = pkl_do_pass_1 (toplevel, ast, ast->ast, 0, NULL /* parent */,
+      ast->ast = pkl_do_pass_1 (toplevel, ast, node, 0, NULL /* parent */,
                                 payloads, phases);
       break;
     case 1:
@@ -456,4 +460,11 @@ pkl_do_pass (pkl_ast ast,
     }
 
   return 1;
+}
+
+int
+pkl_do_pass (pkl_ast ast,
+             struct pkl_phase *phases[], void *payloads[])
+{
+  return pkl_do_subpass (ast, ast->ast, phases, payloads);
 }

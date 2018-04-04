@@ -82,6 +82,8 @@
    If the `else' handler is NULL and no other handler is executed,
    then no action is performed on a node other than traversing it.  */
 
+struct pkl_phase; /* Forward declaration.  */
+
 typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast ast,
                                               pkl_ast_node node,
@@ -89,7 +91,9 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               int *restart,
                                               size_t child_pos,
                                               pkl_ast_node parent,
-                                              int *dobreak);
+                                              int *dobreak,
+                                              void *payloads[],
+                                              struct pkl_phase *phases[]);
 
 struct pkl_phase
 {
@@ -165,6 +169,10 @@ typedef struct pkl_phase *pkl_phase;
    creating new nodes or removing existing nodes.  This makes the pass
    machinery do the right thing (hopefully.)  By default its value is
    0.  This macro should _not_ be used as an r-value.
+
+   PKL_PASS_SUBPASS (NODE) starts a subpass that processes NODE.  If
+   the execution of the subpass returns an error, the expansion of
+   this macro calls PKL_PASS_ERROR.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
@@ -181,6 +189,17 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_RESTART (*_restart)
 #define PKL_PASS_CHILD_POS _child_pos
 
+#define PKL_PASS_SUBPASS(NODE)                      \
+  do                                                \
+    {                                               \
+      if (pkl_do_subpass (PKL_PASS_AST,             \
+                          (NODE),                   \
+                          _phases,                  \
+                          _payloads) == 2)          \
+        PKL_PASS_ERROR;                             \
+    }                                               \
+  while (0)
+
 #define PKL_PASS_DONE do { goto _exit; } while (0)
 #define PKL_PASS_BREAK do { *_dobreak = 1; goto _exit; } while (0)
 
@@ -194,7 +213,9 @@ typedef struct pkl_phase *pkl_phase;
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
                             pkl_ast_node _node, void *_payload,         \
                             int *_restart, size_t _child_pos,           \
-                            pkl_ast_node _parent, int *_dobreak)        \
+                            pkl_ast_node _parent, int *_dobreak,        \
+                            void *_payloads[],                          \
+                            struct pkl_phase *_phases[])                \
   {                                                                     \
   /* printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node)); */   \
      PKL_PASS_RESTART = 0;
@@ -259,5 +280,11 @@ pkl_phase_parent_in (pkl_ast_node parent,
 
 int pkl_do_pass (pkl_ast ast,
                  struct pkl_phase *phases[], void *payloads[]);
+
+/* The following function is to be used by the PKL_PASS_SUBPASS macro
+   defined above.  */
+
+int pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
+                    struct pkl_phase *phases[], void *payloads[]);
 
 #endif /* PKL_PASS_H  */

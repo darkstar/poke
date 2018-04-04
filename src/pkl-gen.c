@@ -429,11 +429,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       PVM_APPEND_INSTRUCTION (program, ogetm);
       append_int_cast (program, from_base_type, to_base_type);
-      append_integer (program, from_base_unit);
+      PKL_PASS_SUBPASS (from_base_unit);
       append_int_cast (program, from_base_unit_type, to_base_type);
       /* XXX push mul */
       PVM_APPEND_INSTRUCTION (program, muliu);
-      append_integer (program, to_base_unit);
+      PKL_PASS_SUBPASS (to_base_unit);
       append_int_cast (program, to_base_unit_type, to_base_type);
       /* XXX push div */
       PVM_APPEND_INSTRUCTION (program, diviu);
@@ -441,9 +441,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       /* Push the new unit.  */
       /* XXX: the unit is an expression!  */
-      /*      PKL_PASS_SUBPASS (to_base_unit); */
-      assert (PKL_AST_CODE (to_base_unit) == PKL_AST_INTEGER);
-      append_integer (program, to_base_unit);
+      PKL_PASS_SUBPASS (to_base_unit);
+      /*      assert (PKL_AST_CODE (to_base_unit) == PKL_AST_INTEGER); */
+      /*      append_integer (program, to_base_unit); */
       PVM_APPEND_INSTRUCTION (program, swap);
 
       /* Get rid of the original offset.  */
