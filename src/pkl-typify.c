@@ -92,6 +92,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
   
   PKL_AST_TYPE (cast) = ASTREF (type);
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -391,6 +392,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
   type
     = PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (array_ref_array));
   PKL_AST_TYPE (array_ref) = ASTREF (type);
+
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -420,6 +423,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
                                    struct_elem_types);
   PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -443,6 +447,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
 
   PKL_AST_LOC (type) = PKL_AST_LOC (struct_elem);
   PKL_AST_TYPE (struct_elem) = ASTREF (type);
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -494,6 +499,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
     }
 
   PKL_AST_TYPE (struct_ref) = ASTREF (type);
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -520,6 +526,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
