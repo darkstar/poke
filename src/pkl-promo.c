@@ -172,8 +172,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
 }
 PKL_PHASE_END_HANDLER
 
-/* Addition and subtraction are defined on the following
-   configurations of operands and result types:
+/* Addition, subtraction, multiplication and modulus are defined on
+   the following configurations of operands and result types:
 
       INTEGRAL / INTEGRAL -> INTEGRAL
       OFFSET   / OFFSET   -> OFFSET
@@ -185,7 +185,7 @@ PKL_PHASE_END_HANDLER
    operands are promoted to match the type of the magnitude type of
    the result offset, if needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mul_mod)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (exp);
@@ -398,8 +398,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_binary),
@@ -408,8 +406,10 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_unary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub_mul_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub_mul_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_op_add_sub_mul_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_op_add_sub_mul_mod),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_df_op_div),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_df_array_ref),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_df_array_initializer),
