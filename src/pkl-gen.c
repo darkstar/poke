@@ -465,6 +465,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       append_int_op (program, "mul", to_base_type);
       PKL_PASS_SUBPASS (to_base_unit);
       append_int_cast (program, to_base_unit_type, to_base_type);
+      /* XXX: generate proper bz for to_base_type.  */
+      PVM_APPEND_INSTRUCTION (program, bz);
+      pvm_append_symbolic_label_parameter (program,
+                                           "Ldivzero");
       append_int_op (program, "div", to_base_type);
       PVM_APPEND_INSTRUCTION (program, swap);
 
@@ -808,6 +812,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
+  /* XXX: generate proper bz[o] for to_base_type.  */
   if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
     PVM_APPEND_INSTRUCTION (program, boz);
   else
@@ -843,6 +848,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
+  /* XXX: generate proper bz[o] for to_base_type.  */
   if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
     PVM_APPEND_INSTRUCTION (program, boz);
   else
