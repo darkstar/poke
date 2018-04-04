@@ -195,15 +195,24 @@ instruction nip ()
   end
 end
 
-instruction dup ()
+instruction dup () # A -> A
   code
     JITTER_DUP_STACK ();
   end
 end
 
-instruction rot ()
+instruction rot () # A B C -> B C A
   code
-  
+   pvm_val a, b, c;
+
+   c = JITTER_TOP_STACK ();
+   JITTER_DROP_STACK ();
+   b = JITTER_TOP_STACK ();
+   a = JITTER_UNDER_TOP_STACK ();
+
+   JITTER_UNDER_TOP_STACK () = b;
+   JITTER_TOP_STACK () = c;
+   JITTER_PUSH_STACK (a);
   end
 end
 
