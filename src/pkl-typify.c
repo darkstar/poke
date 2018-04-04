@@ -300,6 +300,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
 
   PKL_AST_LOC (type) = PKL_AST_LOC (offset);
   PKL_AST_TYPE (offset) = ASTREF (type);
+  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
