@@ -441,6 +441,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       /* Push the new unit.  */
       /* XXX: the unit is an expression!  */
+      /*      PKL_PASS_SUBPASS (to_base_unit); */
       assert (PKL_AST_CODE (to_base_unit) == PKL_AST_INTEGER);
       append_integer (program, to_base_unit);
       PVM_APPEND_INSTRUCTION (program, swap);
