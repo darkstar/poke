@@ -227,31 +227,29 @@ append_int_op (pvm_program program, const char *op, pkl_ast_node type)
    Given an offset in the stack, generate code to push its magnitude
    converted to unit TO_UNIT.  */
 
-static void
-append_ogetm_in_unit (pvm_program program,
-                      pkl_ast_node base_type,
-                      pkl_ast_node unit_type,
-                      pkl_ast_node to_unit)
-{
-  /* Dup the offset.  */
-  PVM_APPEND_INSTRUCTION (program, dup);
-
-  /* Get magnitude and unit.  */
-  PVM_APPEND_INSTRUCTION (program, ogetm);
-  PVM_APPEND_INSTRUCTION (program, swap);
-  PVM_APPEND_INSTRUCTION (program, ogetu);
-  append_int_cast (program, unit_type, to_unit);
-  PVM_APPEND_INSTRUCTION (program, nip);
-  
-  /* (magnitude * unit) / res_unit */
-  append_int_op (program, "mul", base_type);
-  PKL_PASS_SUBPASS (to_unit);
-  append_int_cast (program, unit_type, base_type);
-  append_int_op (program, "bz", base_type);
-  pvm_append_symbolic_label_parameter (program,
-                                       "Ldivzero");
-  append_int_op (program, "div", base_type);
-}
+#define OGETM_IN_UNIT(program, base_type, unit_type, to_unit)   \
+  do                                                            \
+    {                                                           \
+      /* Dup the offset.  */                                    \
+      PVM_APPEND_INSTRUCTION (program, dup);                    \
+                                                                \
+      /* Get magnitude and unit.  */                            \
+      PVM_APPEND_INSTRUCTION (program, ogetm);                  \
+      PVM_APPEND_INSTRUCTION (program, swap);                   \
+      PVM_APPEND_INSTRUCTION (program, ogetu);                  \
+      append_int_cast (program, unit_type, base_type);          \
+      PVM_APPEND_INSTRUCTION (program, nip);                    \
+                                                                \
+      /* (magnitude * unit) / res_unit */                       \
+      append_int_op (program, "mul", base_type);                \
+      PKL_PASS_SUBPASS (to_unit);                               \
+      append_int_cast (program, unit_type, base_type);          \
+      append_int_op (program, "bz", base_type);                 \
+      pvm_append_symbolic_label_parameter (program,             \
+                                           "Ldivzero");         \
+      append_int_op (program, "div", base_type);                \
+    }                                                           \
+  while (0)
 
 /***** Generation phase handlers  *****/
 
@@ -756,10 +754,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
       break;
     case PKL_TYPE_OFFSET:
       {
-        /* At this point the types of the magnitudes in both offset
-           operands is the same, so there is no need to conver
-           them.  */
-
         /* Calculate the magnitude of the new offset, which is the
            addition of both magnitudes, once normalized to bits.
            Since addition is commutative we can process OFF2 first and
@@ -769,42 +763,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
         pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
         pkl_ast_node unit_type = PKL_AST_TYPE (res_unit); /* This is always 64,0 */
 
-        /* Get magnitude and unit and get rid of offset2 */
-        PVM_APPEND_INSTRUCTION (program, ogetm);
-        PVM_APPEND_INSTRUCTION (program, swap);
-        PVM_APPEND_INSTRUCTION (program, ogetu);
-        append_int_cast (program, unit_type, base_type);
+        OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
         PVM_APPEND_INSTRUCTION (program, nip);
-
-        /* (magnitude * unit) / res_unit */
-        append_int_op (program, "mul", base_type);
-        PKL_PASS_SUBPASS (res_unit);
-        append_int_cast (program, unit_type, base_type);
-        append_int_op (program, "bz", base_type);
-        pvm_append_symbolic_label_parameter (program,
-                                             "Ldivzero");
-        append_int_op (program, "div", base_type);
-        
         PVM_APPEND_INSTRUCTION (program, swap);
-
-        /* Get magnitude and unit and get rid of offset1 */
-        PVM_APPEND_INSTRUCTION (program, ogetm);
-        PVM_APPEND_INSTRUCTION (program, swap);
-        PVM_APPEND_INSTRUCTION (program, ogetu);
-        append_int_cast (program, unit_type, base_type);
+        OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
         PVM_APPEND_INSTRUCTION (program, nip);
-
-        /* (magnitude * unit) / res_unit */
-        append_int_op (program, "mul", base_type);
-        PKL_PASS_SUBPASS (res_unit);
-        append_int_cast (program, unit_type, base_type);
-        append_int_op (program, "bz", base_type);
-        pvm_append_symbolic_label_parameter (program,
-                                             "Ldivzero");
-        append_int_op (program, "div", base_type);
-
-        /* Create the result offset.  */
         append_int_op (program, "add", base_type);
+
         PKL_PASS_SUBPASS (res_unit);
         PVM_APPEND_INSTRUCTION (program, mko);
       }

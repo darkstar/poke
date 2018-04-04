@@ -197,6 +197,7 @@ end
 
 instruction dup ()
   code
+    JITTER_DUP_STACK ();
   end
 end
 
