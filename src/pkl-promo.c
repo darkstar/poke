@@ -216,7 +216,6 @@ PKL_PHASE_END_HANDLER
    In the I -> I ocnfiguration, the type of the operand is promoted to
    match the type of the result, if needed.  */
 
-
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_unary)
 {
   int restart;
