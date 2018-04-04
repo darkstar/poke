@@ -242,7 +242,7 @@ TYPIFY_BIN (mod);
                                                                         \
     /* Use bits for now.  */                                            \
     pkl_ast_node unit_type                                              \
-      = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 0);               \
+      = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);               \
     PKL_AST_LOC (unit_type) = PKL_AST_LOC (exp);                        \
                                                                         \
     pkl_ast_node unit                                                   \

@@ -195,6 +195,17 @@ instruction nip ()
   end
 end
 
+instruction dup ()
+  code
+  end
+end
+
+instruction rot ()
+  code
+  
+  end
+end
+
 instruction pushhi (?Rnl pvm_literal_printer_hi)
   code
      jitter_state_runtime.push_hi
