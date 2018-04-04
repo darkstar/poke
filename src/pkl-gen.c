@@ -345,38 +345,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 }
 PKL_PHASE_END_HANDLER
 
-/* OFFSET
- * | BASE_TYPE
- * | MAGNITUDE
- * | UNIT
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_offset)
-{
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pvm_program program = payload->program;
-  pkl_ast_node offset = PKL_PASS_NODE;
-  pkl_ast_node offset_type = PKL_AST_TYPE (offset);
-  pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
-
-  /* We should generate the base type associated with the offset type,
-     not the offset type itself.  This relies on the BF handler for
-     type offsets below, that does a PASS_BREAK to prevent generating
-     the full thing.  */
-  
-  assert (PKL_AST_TYPE_CODE (base_type) == PKL_TYPE_INTEGRAL);
-
-  pvm_push_val (program,
-                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (base_type), 64));
-
-  pvm_push_val (program,
-                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (base_type), 32));
-  
-  PVM_APPEND_INSTRUCTION (program, mktyi);
-}
-PKL_PHASE_END_HANDLER
-
 /*
  * TYPE_OFFSET
  * | BASE_TYPE
@@ -385,6 +353,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type_offset)
 {
+  /* We do not need to generate code for the offset type.  */
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
@@ -443,17 +412,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
       pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
       pkl_ast_node to_base_unit_type = PKL_AST_TYPE (to_base_unit);
-
-      /* XXX: do not do unneeded operations.  */
-
-      /* Push the new base type.  XXX remove this once mko is modified
-         to not get the superfluous base type.  */
-      pvm_push_val (program,
-                    pvm_make_ulong (PKL_AST_TYPE_I_SIZE (to_base_type), 64));
-      pvm_push_val (program,
-                    pvm_make_uint (PKL_AST_TYPE_I_SIGNED (to_base_type), 32));
-      PVM_APPEND_INSTRUCTION (program, mktyi);
-      PVM_APPEND_INSTRUCTION (program, swap);
 
       /* Get the magnitude of the offset, cast it to the new base type
          and convert to new unit.  */
@@ -766,8 +724,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
       PVM_APPEND_INSTRUCTION (program, sconc);
       break;
     case PKL_TYPE_OFFSET:
-      append_int_op (program, "addo",
-                     PKL_AST_TYPE_O_BASE_TYPE (type));
+      {
+        append_int_op (program, "addo",
+                       PKL_AST_TYPE_O_BASE_TYPE (type));
+      }
       break;
     default:
       assert (0);
@@ -817,14 +777,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 
   if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
     {
-      pkl_ast_node op2_base_type
-        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
+      //      pkl_ast_node op2_base_type
+      //        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
       
-      PVM_APPEND_INSTRUCTION (program, ogetm);
-      append_int_op (program, "bz", op2_base_type);
-      pvm_append_symbolic_label_parameter (program,
-                                           "Ldivzero");
-      PVM_APPEND_INSTRUCTION (program, drop); 
+      //      PVM_APPEND_INSTRUCTION (program, ogetm);
+      //      append_int_op (program, "bz", op2_base_type);
+      //      pvm_append_symbolic_label_parameter (program,
+      //                                           "Ldivzero");
+      //      PVM_APPEND_INSTRUCTION (program, drop); 
    }
   else
     {
@@ -1021,7 +981,6 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
    PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
-   PKL_PHASE_BF_HANDLER (PKL_AST_OFFSET, pkl_gen_bf_offset),
    PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),

@@ -1645,18 +1645,13 @@ end
 
 ## Offset instructions.
 
-instruction mko () # TYP EXP ULONG -> OFF
+instruction mko () # EXP ULONG -> OFF
   code
-    pvm_val unit, base_type, magnitude;
-
-    unit = JITTER_TOP_STACK ();
-    magnitude = JITTER_UNDER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-    JITTER_DROP_STACK ();
-    base_type = JITTER_TOP_STACK ();
-
-    JITTER_TOP_STACK () =
-      pvm_make_offset (base_type, magnitude, unit);
+#define F(res, a, b)                           \
+  { pvm_val base_type = pvm_typeof (a);        \
+    res = pvm_make_offset (base_type, a, b); }
+  JITTER_BINARY_STACK(F);
+#undef F
   end
 end
 
