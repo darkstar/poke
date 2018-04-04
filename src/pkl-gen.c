@@ -457,18 +457,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       /* Get the magnitude of the offset, cast it to the new base type
          and convert to new unit.  */
-
       PVM_APPEND_INSTRUCTION (program, ogetm);
       append_int_cast (program, from_base_type, to_base_type);
+
       PKL_PASS_SUBPASS (from_base_unit);
       append_int_cast (program, from_base_unit_type, to_base_type);
+
       append_int_op (program, "mul", to_base_type);
+
       PKL_PASS_SUBPASS (to_base_unit);
       append_int_cast (program, to_base_unit_type, to_base_type);
+
       /* XXX: generate proper bz for to_base_type.  */
       PVM_APPEND_INSTRUCTION (program, bz);
       pvm_append_symbolic_label_parameter (program,
                                            "Ldivzero");
+
       append_int_op (program, "div", to_base_type);
       PVM_APPEND_INSTRUCTION (program, swap);
 
