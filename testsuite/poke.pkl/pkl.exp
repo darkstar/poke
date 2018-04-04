@@ -66,6 +66,9 @@ poke_test_cmd "print (offset<uint16,byte\[1\]>) \[1024 b\]" {\[128UH B\]}
 set test offset-to-offset-3
 poke_test_cmd "print (offset<uint16,byte\[2\]>) \[1024 b\]" {\[64UH 16\]}
 
+set test offset-to-offset-4
+poke_test_cmd "print (offset<int,B>) \[1 long]" {\[8 B\]}
+
 # Operations
 
 set test addii

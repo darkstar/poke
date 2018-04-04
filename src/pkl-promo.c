@@ -157,8 +157,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
 
         PKL_PASS_RESTART = restart1 || restart2;
         break;
-
-        break;
       }
     default:
       goto error;
