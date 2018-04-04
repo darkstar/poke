@@ -83,7 +83,7 @@ promote_offset (pkl_ast ast,
           pkl_ast_node desired_type
             = pkl_ast_make_offset_type (ast, base_type, unit);
           pkl_ast_loc loc = PKL_AST_LOC (*a);
-          
+
           *a = pkl_ast_make_cast (ast, desired_type, *a);
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
           PKL_AST_LOC (*a) = loc;
@@ -171,6 +171,80 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
   PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
+
+/* Addition and subtraction are defined on the following
+   configurations of operands and result types:
+
+      INTEGRAL / INTEGRAL -> INTEGRAL
+      OFFSET   / OFFSET   -> OFFSET
+
+   In the I / I -> I configuration, the types of the operands are
+   promoted to match the type of the result, if needed.
+
+   In the O / O -> O configuration, the magnitude types of the offset
+   operands are promoted to match the type of the magnitude type of
+   the result offset, if needed.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (exp);
+  size_t size = PKL_AST_TYPE_I_SIZE (type);
+  int sign = PKL_AST_TYPE_I_SIGNED (type);
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+        
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      {
+        int restart1, restart2;
+
+        if (!promote_integral (PKL_PASS_AST, size, sign,
+                               &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
+          goto error;
+
+        if (!promote_integral (PKL_PASS_AST, size, sign,
+                               &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
+          goto error;
+
+        PKL_PASS_RESTART = restart1 || restart2;
+        break;
+      }
+    case PKL_TYPE_OFFSET:
+      {
+        int restart1, restart2;
+        pkl_ast_node exp_base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+        
+        if (!promote_offset (PKL_PASS_AST,
+                             exp_base_type, PKL_AST_TYPE_O_UNIT (op1_type),
+                             &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
+          goto error;
+
+        if (!promote_offset (PKL_PASS_AST,
+                             exp_base_type, PKL_AST_TYPE_O_UNIT (op2_type),
+                             &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
+          goto error;
+
+        PKL_PASS_RESTART = restart1 || restart2;
+        break;
+      }
+    default:
+      goto error;
+    }
+
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+           "couldn't promote operands of expression #%" PRIu64,
+           PKL_AST_UID (exp));
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
 
 /* The rest of the binary operations are defined on the following
    configurations of operands and result types:
@@ -318,14 +392,12 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_binary),
@@ -336,6 +408,8 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_unary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_df_op_div),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_df_array_ref),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_df_array_initializer),

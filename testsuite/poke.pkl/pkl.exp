@@ -266,7 +266,7 @@ set test offset-add-lulu
 poke_test_cmd "print \[1UL b\] + \[2UL b\]" {\[3UL b\]}
 
 set test offset-add-promo
-poke_test_cmd "print \[(int<7>) 2 B\] + \[(int<2>) 1 b\]" {\[(int<7>) 17 b\]}
+poke_test_cmd "print \[(int<7>) 2 B\] + \[(int<2>) 1 b\]" {\[\(int<7>\) 17 b\]}
 
 set test offset-sub-ii
 poke_test_cmd "print \[1 b\] - \[2 b\]" {\[-1 b\]}
