@@ -462,11 +462,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       append_int_cast (program, from_base_type, to_base_type);
       PKL_PASS_SUBPASS (from_base_unit);
       append_int_cast (program, from_base_unit_type, to_base_type);
-      /* XXX push mul */
       append_int_op (program, "mul", to_base_type);
       PKL_PASS_SUBPASS (to_base_unit);
       append_int_cast (program, to_base_unit_type, to_base_type);
-      /* XXX push div */
       append_int_op (program, "div", to_base_type);
       PVM_APPEND_INSTRUCTION (program, swap);
 
