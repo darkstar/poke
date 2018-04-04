@@ -21,6 +21,8 @@ vm
   tos-stack "pvm_val" "stack"
 end
 
+
+
 ## Register classes.
 
 register-class r 5
@@ -28,6 +30,8 @@ register-class r 5
     union jitter_word
   end
 end
+
+
 
 ## Functions and globals to wrap.
 
@@ -38,6 +42,8 @@ end
 #wrapped-globals
 #  pvm_printf_format_string
 #end
+
+
 
 ## Embedded C code.
 
@@ -99,6 +105,8 @@ printer-c
   end
 end
 
+
+
 ## PVM state.
 
 state-struct-backing-c
@@ -127,6 +135,8 @@ state-finalization-c
   end
 end
 
+
+
 ## VM instructions
 
 instruction exit ()
@@ -148,6 +158,8 @@ instruction exit ()
     JITTER_EXIT ();
   end
 end
+
+
 
 ## Miscellaneous Instructions
 
@@ -174,6 +186,12 @@ instruction swap ()
     pvm_val tmp = JITTER_UNDER_TOP_STACK ();
     JITTER_UNDER_TOP_STACK () = JITTER_TOP_STACK ();
     JITTER_TOP_STACK () = tmp;
+  end
+end
+
+instruction nip ()
+  code
+    JITTER_NIP_STACK();
   end
 end
 
@@ -225,6 +243,8 @@ instruction sel () # VAL -> ULONG
     JITTER_TOP_STACK () = pvm_elemsof (JITTER_TOP_STACK ());
   end
 end
+
+
 
 ## Operators instructions.
 
@@ -1321,6 +1341,8 @@ instruction modoiu () # OFF(UINT) OFF(UINT) -> UINT
   end
 end
 
+
+
 ## Branches
 
 instruction ba (?f) # Branch always.
@@ -1367,6 +1389,8 @@ instruction bntut (?n,?f) # Branch if not type undertop.
                                  JITTER_ARGF1);
   end
 end
+
+
 
 ## Conversion instructions.
 
@@ -1514,6 +1538,8 @@ instruction lutolu (?n pvm_literal_printer_cast) # ULONG -> ULONG
   end
 end
 
+
+
 ## Array instructions.
 
 # TYP [IDX VAL]... ULONG(ninitializer) ULONG(nelem) -> ARR
@@ -1578,6 +1604,8 @@ instruction alen () # ARR -> ULONG
   end
 end
 
+
+
 ## Struct instructions.
 
 instruction mksct () # [STR VAL]... ULONG -> SCT
@@ -1622,6 +1650,8 @@ instruction sctref () # SCT STR -> VAL
   end
 end
 
+
+
 ## Offset instructions.
 
 instruction mko () # TYP EXP ULONG -> OFF
@@ -1656,6 +1686,8 @@ instruction ogetbt () # OFF -> OFF BT
     JITTER_PUSH_STACK (PVM_VAL_OFF_BASE_TYPE (JITTER_TOP_STACK ()));
   end
 end
+
+
 
 ## Type related instructions.
 
@@ -1748,4 +1780,14 @@ end
 instruction poke () # MAP VAL -> _
   code
   end
+end
+
+
+
+## Peephole optimizations
+
+rule swap-drop-to-nip rewrite
+  swap; drop
+into
+  nip
 end
