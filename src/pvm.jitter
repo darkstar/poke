@@ -1070,6 +1070,8 @@ end
 
 # Offsets arithmetic
 #
+# XXX: remove these.
+#
 # The following instructions assume that the base types of the offset
 # operands have the same size in bits.
 

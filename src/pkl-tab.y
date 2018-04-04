@@ -498,6 +498,13 @@ type_specifier:
                     ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
+        | OFFSETCONSTR type_specifier ',' IDENTIFIER '>'
+                {
+                    $$ = pkl_ast_make_offset_type (pkl_parser->ast,
+                                                   $2, $4);
+                    PKL_AST_LOC ($4) = @4;
+                    PKL_AST_LOC ($$) = @$;
+                }
         | OFFSETCONSTR type_specifier ',' type_specifier '>'
                 {
                     /* XXX: $4 can be any expression!.  */
@@ -506,13 +513,6 @@ type_specifier:
                     PKL_AST_LOC ($$) = @$;
                 }
 
-        | OFFSETCONSTR type_specifier ',' IDENTIFIER '>'
-                {
-                    $$ = pkl_ast_make_offset_type (pkl_parser->ast,
-                                                   $2, $4);
-                    PKL_AST_LOC ($4) = @4;
-                    PKL_AST_LOC ($$) = @$;
-                }
         | type_specifier '[' expression ']'
           	{
                     $$ = pkl_ast_make_array_type (pkl_parser->ast, $3, $1);
