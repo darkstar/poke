@@ -151,3 +151,12 @@ The phases above are organized in two passes:
 
     Pass1: trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
     Pass2: analf gen
+
+Debugging Poke
+==============
+
+In order to use the GDB pretty-printers and other goodies, source the
+poke-gdb.scm file from your debugger:
+
+(gdb) source gdb/poke-gdb.scm
+
