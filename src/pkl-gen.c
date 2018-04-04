@@ -799,8 +799,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
       PVM_APPEND_INSTRUCTION (program, sconc);
       break;
     case PKL_TYPE_OFFSET:
-      append_int_op (program, "subo",
-                     PKL_AST_TYPE_O_BASE_TYPE (type));
+      {
+        /* Calculate the magnitude of the new offset, which is the
+           addition of both magnitudes, once normalized to bits. */
+
+        PVM_APPEND_INSTRUCTION (program, swap);
+
+        pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+        pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
+        pkl_ast_node unit_type = PKL_AST_TYPE (res_unit); /* This is always 64,0 */
+
+        OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
+        PVM_APPEND_INSTRUCTION (program, nip);
+        PVM_APPEND_INSTRUCTION (program, swap);
+        OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
+        PVM_APPEND_INSTRUCTION (program, nip);
+        append_int_op (program, "sub", base_type);
+
+        PKL_PASS_SUBPASS (res_unit);
+        PVM_APPEND_INSTRUCTION (program, mko);
+      }
       break;
     default:
       assert (0);
