@@ -813,23 +813,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
   pkl_ast_node node = PKL_PASS_NODE;
   pvm_program program = payload->program;
   pkl_ast_node type = PKL_AST_TYPE (node);
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
-  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 0);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
 
-  /* XXX: generate proper bz[o] for to_base_type.  */
-  if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
-    PVM_APPEND_INSTRUCTION (program, boz);
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node op2_base_type
+        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
+      
+      PVM_APPEND_INSTRUCTION (program, ogetm);
+      append_int_op (program, "bz", op2_base_type);
+      pvm_append_symbolic_label_parameter (program,
+                                           "Ldivzero");
+      PVM_APPEND_INSTRUCTION (program, drop); 
+   }
   else
-    append_int_op (program, "bz", op1_type);
-  
-  pvm_append_symbolic_label_parameter (program,
-                                       "Ldivzero");
+    {
+      append_int_op (program, "bz", op2_type);
+      pvm_append_symbolic_label_parameter (program,
+                                           "Ldivzero");
+    }
 
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
-      {        
-        if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
+      {
+        if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
           append_int_op (program, "divo", type);
         else
           append_int_op (program, "div", type);
@@ -849,16 +858,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
   pkl_ast_node node = PKL_PASS_NODE;
   pvm_program program = payload->program;
   pkl_ast_node type = PKL_AST_TYPE (node);
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
-  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
 
-  /* XXX: generate proper bz[o] for to_base_type.  */
-  if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
-    PVM_APPEND_INSTRUCTION (program, boz);
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node op2_base_type
+        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
+
+      PVM_APPEND_INSTRUCTION (program, ogetm);
+      append_int_op (program, "bz", op2_base_type);
+      pvm_append_symbolic_label_parameter (program,
+                                           "Ldivzero");
+      PVM_APPEND_INSTRUCTION (program, drop);
+    }
   else
-    append_int_op (program, "bz", op1_type);
-  pvm_append_symbolic_label_parameter (program,
-                                       "Ldivzero");
+    {
+      append_int_op (program, "bz", op2_type);
+      pvm_append_symbolic_label_parameter (program,
+                                           "Ldivzero");
+    }
 
   switch (PKL_AST_TYPE_CODE (type))
     {
