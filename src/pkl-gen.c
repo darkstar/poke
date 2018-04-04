@@ -801,13 +801,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
     case PKL_TYPE_OFFSET:
       {
         /* Calculate the magnitude of the new offset, which is the
-           addition of both magnitudes, once normalized to bits. */
-
-        PVM_APPEND_INSTRUCTION (program, swap);
+           subtraction of both magnitudes, once normalized to bits. */
 
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
         pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
         pkl_ast_node unit_type = PKL_AST_TYPE (res_unit); /* This is always 64,0 */
+
+        PVM_APPEND_INSTRUCTION (program, swap);
 
         OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
         PVM_APPEND_INSTRUCTION (program, nip);
@@ -861,7 +861,31 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
     case PKL_TYPE_INTEGRAL:
       {
         if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
-          append_int_op (program, "divo", type);
+          {
+            /* Calculate the resulting integral value, which is the
+               division of both magnitudes, once normalized to
+               bits. */
+
+            pkl_ast_node unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+            pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
+            PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
+
+            PVM_APPEND_INSTRUCTION (program, swap);
+
+            OGETM_IN_UNIT (program, type, unit_type, unit_bits);
+            PVM_APPEND_INSTRUCTION (program, nip);
+            PVM_APPEND_INSTRUCTION (program, swap);
+            OGETM_IN_UNIT (program, type, unit_type, unit_bits);
+            PVM_APPEND_INSTRUCTION (program, nip);
+
+            append_int_op (program, "bz", type);
+            pvm_append_symbolic_label_parameter (program,
+                                                 "Ldivzero");
+
+            append_int_op (program, "div", type);
+
+            ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
+          }
         else
           append_int_op (program, "div", type);
         break;
