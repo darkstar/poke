@@ -468,7 +468,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       PKL_PASS_SUBPASS (to_base_unit);
       append_int_cast (program, to_base_unit_type, to_base_type);
 
-      /* XXX: generate proper bz for to_base_type.  */
       append_int_op (program, "bz", to_base_type);
       pvm_append_symbolic_label_parameter (program,
                                            "Ldivzero");
