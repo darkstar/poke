@@ -1353,18 +1353,38 @@ instruction ba (?f) # Branch always.
   end
 end
 
-instruction bz (?f) # Branch if zero top.
+instruction bzi (?f)
   code
-    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_TOP_STACK()),
-                                JITTER_ARGF0);
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (tmp), JITTER_ARGF0);
   end
 end
 
-instruction boz (?f) # Branch if offset zero top.
+instruction bziu (?f)
   code
-    /* XXX DO SOMETHING */
-//    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_TOP_STACK()),
-//                                JITTER_ARGF0);
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_UINT (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction bzl (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_LONG (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction bzlu (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_ULONG (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction boz (?f) # XXX to delete
+  code
+    JITTER_BRANCH_FAST_IF_ZERO (PVM_VAL_INT (JITTER_UNDER_TOP_STACK()),
+                                JITTER_ARGF0);
   end
 end
 
