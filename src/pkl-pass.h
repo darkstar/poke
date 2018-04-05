@@ -45,7 +45,7 @@
      in pkl-ops.def.  For example, PKL_AST_OP_ADD.  It maps codes to
      pkl_phase_handler_fn functions.
 
-   - TYPE_DF_HANDLERS a table is indexed by type codes, which must be
+   - TYPE_DF_HANDLERS is a table indexed by type codes, which must be
      values in the `pkl_ast_type_code' enumeration defined in
      pkl-ast.h. For example, PKL_TYPE_STRING.  It maps codes to
      pkl_phase_handler_fn functions.
