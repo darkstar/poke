@@ -1511,7 +1511,7 @@ instruction typof () # VAL -> TYP
   end
 end
 
-# Instructions to access the IO space: mapping.
+# IO instructions
 
 instruction mkm () # TYP ULONG -> MAP
   code
