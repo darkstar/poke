@@ -783,6 +783,74 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pvm_program program = payload->program;
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      append_int_op (program, "mul", type);
+      break;
+    case PKL_TYPE_STRING:
+      PVM_APPEND_INSTRUCTION (program, sconc);
+      break;
+    case PKL_TYPE_OFFSET:
+      {       
+        pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+        pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
+        pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+        pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+        int op1_type_code = PKL_AST_TYPE_CODE (op1_type);
+        int op2_type_code = PKL_AST_TYPE_CODE (op2_type);
+
+        pkl_ast_node offset_type, offset_unit, base_type;
+        pkl_ast_node offset_op = NULL;
+
+        /* The operation is commutative, so there is no need to swap
+           the arguments.  */
+
+        if (op2_type_code == PKL_TYPE_OFFSET)
+          {
+            PVM_APPEND_INSTRUCTION (program, ogetm);
+            PVM_APPEND_INSTRUCTION (program, nip);
+
+            offset_op = op2;
+          }
+
+        PVM_APPEND_INSTRUCTION (program, swap);
+
+        if (op1_type_code == PKL_TYPE_OFFSET)
+          {
+            PVM_APPEND_INSTRUCTION (program, ogetm);
+            PVM_APPEND_INSTRUCTION (program, nip);
+
+            offset_op = op1;
+          }
+
+        assert (offset_op != NULL);
+        offset_type = PKL_AST_TYPE (offset_op);
+        offset_unit = PKL_AST_TYPE_O_UNIT (offset_type);
+        base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
+          
+        append_int_op (program, "mul", base_type);
+          
+        PKL_PASS_SUBPASS (offset_unit);
+        PVM_APPEND_INSTRUCTION (program, mko);
+      }
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 {
   pkl_gen_payload payload
@@ -943,7 +1011,6 @@ PKL_PHASE_END_HANDLER
   }                                                             \
   PKL_PHASE_END_HANDLER
 
-BIN_INTEGRAL_EXP_HANDLER (mul, mul);
 BIN_INTEGRAL_EXP_HANDLER (band, band);
 BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
 BIN_INTEGRAL_EXP_HANDLER (neg, neg);

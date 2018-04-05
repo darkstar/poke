@@ -113,6 +113,15 @@ poke_test_cmd "print 3 - 4L" "-1L"
 set test subli
 poke_test_cmd "print 3L - 4" "-1L"
 
+set test mulol-ub
+poke_test_cmd "print \[2L b\] * 3UB" {\[6UL b\]}
+
+set test mulbyte
+poke_test_cmd "print \[2L B\] * 4" {\[8L B\]}
+
+set test mulneg
+poke_test_cmd "print \[-2 int\] * 3" {\[-6 32\]}
+
 set test divii
 poke_test_cmd "print 10 / 5" "2"
 

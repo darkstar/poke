@@ -276,6 +276,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
+  int exp_type_code = PKL_AST_TYPE_CODE (exp_type);
   int i;
 
   for (i = 0; i < 2; ++i)
@@ -286,9 +287,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
 
       if (PKL_AST_TYPE_CODE (op_type) == PKL_TYPE_INTEGRAL)
         {
-          size_t size = PKL_AST_TYPE_I_SIZE (exp_type);
-          int sign = PKL_AST_TYPE_I_SIGNED  (exp_type);
-          
+          size_t size;
+          int sign;
+
+          if (exp_type_code == PKL_TYPE_INTEGRAL)
+            {
+              size = PKL_AST_TYPE_I_SIZE (exp_type);
+              sign = PKL_AST_TYPE_I_SIGNED  (exp_type);
+            }
+          else
+            {
+              pkl_ast_node exp_base_type
+                = PKL_AST_TYPE_O_BASE_TYPE (exp_type);
+
+              size = PKL_AST_TYPE_I_SIZE (exp_base_type);
+              sign = PKL_AST_TYPE_I_SIGNED (exp_base_type);
+            }
+
           if (!promote_integral (PKL_PASS_AST, size, sign,
                                  &PKL_AST_EXP_OPERAND (exp, i), &restart))
             goto error;
