@@ -126,7 +126,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
         
   /* Note we discriminate on the first operand type in order to
-     distinguish between configuration.  */
+     distinguish between configurations.  */
   switch (PKL_AST_TYPE_CODE (op1_type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -176,7 +176,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
 PKL_PHASE_END_HANDLER
 
 /* Addition, subtraction and modulus are defined on the following
-   configurations of operands and result types:
+   configurations of operand and result types:
 
       INTEGRAL x INTEGRAL -> INTEGRAL
       OFFSET   x OFFSET   -> OFFSET
@@ -259,7 +259,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
 PKL_PHASE_END_HANDLER
 
 /* Multiplication is defined on the following configurations of
-   operands and result types:
+   operand and result types:
 
       INTEGRAL x INTEGRAL -> INTEGRAL
       OFFSET   x INTEGRAL -> OFFSET
@@ -337,7 +337,7 @@ PKL_PHASE_END_HANDLER
 
 
 /* The relational operations are defined on the following
-   confiurations of operands and result types:
+   confiurations of operand and result types:
 
            INTEGRAL x INTEGRAL -> BOOL
            STRING   x STRING   -> BOOL
@@ -440,7 +440,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_rela)
 PKL_PHASE_END_HANDLER
 
 /* The rest of the binary operations are defined on the following
-   configurations of operands and result types:
+   configurations of operand and result types:
 
        INTEGRAL OP INTEGRAL -> INTEGRAL.
 
@@ -476,7 +476,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_binary)
 PKL_PHASE_END_HANDLER
 
 /* All the unary operations are defined on the following
-   configurations of operands and result types:
+   configurations of operand and result types:
 
                     INTEGRAL -> INTEGRAL
 
