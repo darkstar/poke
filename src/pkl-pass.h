@@ -64,7 +64,7 @@
    There are three additional handlers that the user can install:
 
    - DEFAULT_BF_HANDLER is invoked for every node in the AST, after the
-     more particular ones, in breath-first order.
+     more particular ones, in breadth-first order.
 
    - DEFAULT_DF_HANDLER is invoked for every node in the SAT, after
      the more particular ones, in depth-first order.
