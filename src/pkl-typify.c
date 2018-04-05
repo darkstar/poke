@@ -31,7 +31,6 @@
    if complete if its size in bits can be determined at compile-time,
    and that size is constant.  Note that not-complete types are legal
    poke entities, but certain operations are not allowed on them.
-   Note that this phase should be run after constant-folding.
 */
 
 #include <config.h>
