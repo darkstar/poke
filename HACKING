@@ -119,6 +119,13 @@ Compiler testsuite:
 
 - poke.pkl/pkl.exp
 
+Other Stuff
+-----------
+
+GDB extensions to debug poke:
+
+- etc/poke-gdb.scm
+
 The bison parser in pkl-tab.y
 =============================
 
@@ -171,5 +178,5 @@ In order to use the GDB pretty-printers and other goodies brought to
 you courtesy of the poke hackers, just source the poke-gdb.scm file
 from your debugger:
 
-(gdb) source gdb/poke-gdb.scm
+(gdb) source etc/poke-gdb.scm
 
