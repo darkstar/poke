@@ -445,7 +445,6 @@ struct_elem:
 	        {
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $2, $4);
                     PKL_AST_LOC ($2) = @2;
-                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;

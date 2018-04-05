@@ -115,9 +115,13 @@
                       (pp-pvm-val (value-field offset "magnitude"))
                       (pp-pvm-val (value-field offset "unit")))))
            ((#xa) ;; PVM_VAL_TAG_ARR
-            "ARRAY")
+            (let* ((array (value-dereference (value-field (value-field pvm-box "v")
+                                                          "array"))))
+              array))
            ((#xb) ;; PVM_VAL_TAG_SCT
-            "STRUCT")
+            (let* ((struct (value-dereference (value-field (value-field pvm-box "v")
+                                                           "sct"))))
+              sct))
            ((#xc) ;; PVM_VAL_TAG_TYP
             "TYPE")
            ((#xd) ;; PVM_VAL_TAG_MAP
