@@ -172,7 +172,6 @@ append_int_op (pvm_program program, const char *op, pkl_ast_node type)
         strcat (insn, "iu");
     }
 
-  /* XXX Use PVM_APPEND_INSTRUCTION_ID instead.  */
   pvm_append_instruction_name (program, insn);
   free (insn);
 }
