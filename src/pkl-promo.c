@@ -338,7 +338,7 @@ PKL_PHASE_END_HANDLER
 
 
 /* The relational operations are defined on the following
-   confiurations of operand and result types:
+   configurations of operand and result types:
 
            INTEGRAL x INTEGRAL -> BOOL
            STRING   x STRING   -> BOOL
@@ -354,7 +354,7 @@ PKL_PHASE_END_HANDLER
    No operand promotion is performed in the the S x S -> S
    configuration.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_rela)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_rela)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
@@ -448,7 +448,7 @@ PKL_PHASE_END_HANDLER
    In the I OP I -> I configuration, the types of the operands are
    promoted to match the type of the result, if needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_binary)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_binary)
 {
   int restart1, restart2;
 
@@ -484,7 +484,7 @@ PKL_PHASE_END_HANDLER
    In the I -> I ocnfiguration, the type of the operand is promoted to
    match the type of the result, if needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_unary)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_unary)
 {
   int restart;
 
@@ -587,20 +587,20 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_unary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_op_unary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub_mod),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub_mod),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_op_add_sub_mod),
