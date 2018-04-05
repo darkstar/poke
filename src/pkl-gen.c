@@ -1033,7 +1033,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
         PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
 
         /* Equality and inequality are commutative, so we can save an
-           instruction.  */
+           instruction here.  */
         if (exp_code != PKL_AST_OP_EQ && exp_code != PKL_AST_OP_NE)
           PVM_APPEND_INSTRUCTION (program, swap);
         
