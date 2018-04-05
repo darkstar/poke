@@ -16,6 +16,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
+poke_start
+
 # Integers.
 
 set test intn
@@ -370,3 +372,5 @@ poke_test_cmd "print \[20 b\] <= \[11 b\]" "0"
 
 set test offset-le-false-2
 poke_test_cmd "print \[9 b\] <= \[1 B\]" "0"
+
+poke_exit

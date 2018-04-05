@@ -72,8 +72,6 @@ proc poke_test_cmd {cmd pattern} {
     global spawn_id
     global test
 
-    poke_start
-    
     send "$cmd\n"
     expect {
         -ex "internal compiler error" {
@@ -96,6 +94,4 @@ proc poke_test_cmd {cmd pattern} {
         fail "$test (timeout)"
         }
     }
-
-    poke_exit
 }
