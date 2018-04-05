@@ -258,6 +258,69 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
 }
 PKL_PHASE_END_HANDLER
 
+/* Multiplication is defined on the following configurations of
+   operands and result types:
+
+      INTEGRAL x INTEGRAL -> INTEGRAL
+      OFFSET   x INTEGRAL -> OFFSET
+      INTEGRAL x OFFSET   -> OFFSET
+
+   In the I x I -> I configuration, the types of the operands are
+   promoted to match the type of the result, if needed.
+
+   In the O x I -> O and I x O -> O configurations, both the type of
+   the integral operand and the base type of the offset operand are
+   promotd to match the base type of the offset result.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node exp_type = PKL_AST_TYPE (exp);
+  int i;
+
+  for (i = 0; i < 2; ++i)
+    {
+      pkl_ast_node op = PKL_AST_EXP_OPERAND (exp, i);
+      pkl_ast_node op_type = PKL_AST_TYPE (op);
+      int restart;
+
+      if (PKL_AST_TYPE_CODE (op_type) == PKL_TYPE_INTEGRAL)
+        {
+          size_t size = PKL_AST_TYPE_I_SIZE (exp_type);
+          int sign = PKL_AST_TYPE_I_SIGNED  (exp_type);
+          
+          if (!promote_integral (PKL_PASS_AST, size, sign,
+                                 &PKL_AST_EXP_OPERAND (exp, i), &restart))
+            goto error;
+
+          PKL_PASS_RESTART = restart;
+        }
+      else if (PKL_AST_TYPE_CODE (op_type) == PKL_TYPE_OFFSET)
+        {
+          pkl_ast_node exp_base_type = PKL_AST_TYPE_O_BASE_TYPE (exp_type);
+        
+          if (!promote_offset (PKL_PASS_AST,
+                               exp_base_type, PKL_AST_TYPE_O_UNIT (op_type),
+                               &PKL_AST_EXP_OPERAND (exp, i), &restart))
+            goto error;
+
+          PKL_PASS_RESTART = restart;
+        }
+      else
+        assert (0);
+    }
+
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+           "couldn't promote operands of expression #%" PRIu64,
+           PKL_AST_UID (exp));
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
+
 /* The relational operations are defined on the following
    confiurations of operands and result types:
 
@@ -366,7 +429,7 @@ PKL_PHASE_END_HANDLER
 
        INTEGRAL OP INTEGRAL -> INTEGRAL.
 
-   In the I OP I -> I ocnfiguration, the types of the operands are
+   In the I OP I -> I configuration, the types of the operands are
    promoted to match the type of the result, if needed.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_binary)
@@ -521,11 +584,11 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_unary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub_mod),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub_mod),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_op_add_sub_mod),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_op_mul),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_df_op_div),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_df_array_ref),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_df_array_initializer),
