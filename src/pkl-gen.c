@@ -61,7 +61,8 @@ pvm_push_val (pvm_program program, pvm_val val)
 #endif
 }
 
-/* Generate code for pushing INTEGER to program.  */
+/* Generate code for pushing an integer node in the given PVM
+   program.  */
 
 static void
 append_integer (pvm_program program,
