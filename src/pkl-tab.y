@@ -420,7 +420,6 @@ primary:
         	{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($3) = @3;
-                    PKL_AST_LOC (PKL_AST_TYPE ($3)) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
 	;
