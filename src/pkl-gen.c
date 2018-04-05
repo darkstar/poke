@@ -40,7 +40,7 @@ pvm_push_val (pvm_program program, pvm_val val)
 #else
   /* Use the push-hi and push-lo instructions, to overcome jitter's
      limitation of only accepting a jitter_uint value as a literal
-     argument, which is 32-bit long in 32-bit hosts.  */
+     argument, whose size is 32-bit in 32-bit hosts.  */
 
   if (val & ~0xffffffffLL)
     {
