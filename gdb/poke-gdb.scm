@@ -55,9 +55,25 @@
                                           (lookup-type "uint32_t")))))
             (format #f "(pvm:uint<~a>) ~a" uint-size uint-val)))
          ((#x2) ;; PVM_VAL_TAG_LONG
-          (let ((long-size #t)
-                (long-val #t))
-            (format #f "(pvm:int<~a>) ~a" long-size long-val)))
+          (let* ((long-ulong-val (value-subscript
+                                  (value-cast
+                                   (value-logand (value-cast value (lookup-type "uintptr_t"))
+                                                 (value-lognot #x7))
+                                   (type-pointer (lookup-type "int64_t")))
+                                  0))
+                 (long-size (value-add
+                             (value-subscript
+                              (value-cast
+                               (value-logand (value-cast value (lookup-type "uintptr_t"))
+                                             (value-lognot #x7))
+                               (type-pointer (lookup-type "int64_t")))
+                              1)
+                             1))
+                 (long-val (value-rsh (value-lsh
+                                       long-ulong-val
+                                       (value-sub 64 long-size))
+                                      (value-sub 64 long-size))))
+            (format #f "(pvm:long<~a>) ~a" long-size long-val)))
          ((#x3) ;; PVM_VAL_TAG_ULONG
           (let* ((long-ulong-val (value-subscript
                                   (value-cast
@@ -65,19 +81,25 @@
                                                  (value-lognot #x7))
                                    (type-pointer (lookup-type "int64_t")))
                                   0))
-                 (ulong-size (make-value 64))
-                 (ulong-val (logand
+                 (ulong-size (value-add
+                              (value-subscript
+                                  (value-cast
+                                   (value-logand (value-cast value (lookup-type "uintptr_t"))
+                                                 (value-lognot #x7))
+                                   (type-pointer (lookup-type "int64_t")))
+                                  1)
+                              1))
+                 (ulong-val (value-logand
                              long-ulong-val
-                             (value-cast
-                                          (value-lognot
+                             (value-cast (value-lognot
+                                          (value-lsh
                                            (value-lsh
-                                            (value-lsh
-                                             (value-lognot
-                                              (value-cast (make-value 0)
-                                                          (lookup-type "unsigned long long")))
-                                             (value-sub ulong-size 1))  
-                                            (make-value 1)))
-                                          (lookup-type "uint64_t")))))
+                                            (value-lognot
+                                             (value-cast (make-value 0)
+                                                         (lookup-type "unsigned long long")))
+                                            (value-sub ulong-size 1))  
+                                           (make-value 1)))
+                                         (lookup-type "uint64_t")))))
             (format #f "(pvm:ulong<~a>) ~a" ulong-size ulong-val)))
          ((#x6) ;; PVM_VAL_TAG_BOX
           (let ((pvm_ptr (value-cast (value-rsh value 3)
