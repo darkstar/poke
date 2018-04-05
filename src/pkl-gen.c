@@ -783,7 +783,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
 }
 PKL_PHASE_END_HANDLER
 
-
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 {
   pkl_gen_payload payload
@@ -969,37 +968,88 @@ LOGIC_EXP_HANDLER (not);
 
 #undef LOGIC_EXP_HANDLER
 
-#define RELA_EXP_HANDLER(op)                            \
-  PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
-  {                                                     \
-    pkl_gen_payload payload                             \
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;             \
-                                                        \
-    pvm_program program = payload->program;             \
-    pkl_ast_node node = PKL_PASS_NODE;                  \
-    pkl_ast_node type = PKL_AST_TYPE (node);            \
-                                                        \
-    switch (PKL_AST_TYPE_CODE (type))                   \
-      {                                                 \
-      case PKL_TYPE_INTEGRAL:                           \
-        append_int_op (program, #op, type);             \
-        break;                                          \
-      case PKL_TYPE_STRING:                             \
-        PVM_APPEND_INSTRUCTION (program, op##s);        \
-        break;                                          \
-      default:                                          \
-        assert (0);                                     \
-        break;                                          \
-      }                                                 \
-  }                                                     \
-  PKL_PHASE_END_HANDLER
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-RELA_EXP_HANDLER (eq);
-RELA_EXP_HANDLER (ne);
-RELA_EXP_HANDLER (lt);
-RELA_EXP_HANDLER (le);
-RELA_EXP_HANDLER (gt);
-RELA_EXP_HANDLER (ge);
+  pvm_program program = payload->program;
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+
+  const char *int_insn, *str_insn, *off_insn;
+
+  switch (PKL_AST_EXP_CODE (exp))
+    {
+    case PKL_AST_OP_EQ:
+      int_insn = off_insn = "eq";
+      str_insn = "eqs";
+      break;
+    case PKL_AST_OP_NE:
+      int_insn = off_insn = "ne";
+      str_insn = "nes";
+      break;
+    case PKL_AST_OP_LT:
+      int_insn = off_insn = "lt";
+      str_insn = "lts";
+      break;
+    case PKL_AST_OP_GT:
+      int_insn = off_insn = "gt";
+      str_insn = "gts";
+      break;
+    case PKL_AST_OP_LE:
+      int_insn = off_insn = "le";
+      str_insn = "les";
+      break;
+    case PKL_AST_OP_GE:
+      int_insn = off_insn = "ge";
+      str_insn = "ges";
+      break;
+    default:
+      assert (0);
+      break;
+    }
+
+  switch (PKL_AST_TYPE_CODE (op1_type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      append_int_op (program, int_insn, op1_type);
+      break;
+    case PKL_TYPE_STRING:
+      pvm_append_instruction_name (program, str_insn);
+      break;
+    case PKL_TYPE_OFFSET:
+      {
+        /* Calculate the resulting integral value, which is the
+           comparison of both magnitudes, once normalized to bits.
+           Note that at this point the magnitude types of both offset
+           operands are the same.  */
+
+        pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
+        pkl_ast_node unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
+        PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
+
+        PVM_APPEND_INSTRUCTION (program, swap);
+        
+        OGETM_IN_UNIT (program, base_type, unit_type, unit_bits);
+        PVM_APPEND_INSTRUCTION (program, nip);
+        PVM_APPEND_INSTRUCTION (program, swap);
+        OGETM_IN_UNIT (program, base_type, unit_type, unit_bits);
+        PVM_APPEND_INSTRUCTION (program, nip);
+
+        append_int_op (program, off_insn, base_type);
+
+        ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
+      }
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
 
 #undef RELA_EXP_HANDLER
 
@@ -1075,12 +1125,12 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_gen_df_op_and),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_gen_df_op_or),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_gen_df_op_not),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_gen_df_op_eq),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_gen_df_op_ne),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_gen_df_op_lt),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_gen_df_op_le),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_df_op_gt),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_df_op_ge),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_gen_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_gen_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_gen_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_gen_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_df_op_rela),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_gen_df_op_sizeof),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
