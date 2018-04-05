@@ -98,7 +98,8 @@ append_integer (pvm_program program,
   pvm_push_val (program, val);
 }
 
-/* Generate code to convert a value from FROM_TYPE to TO_TYPE.  */
+/* Generate code to convert an integer value from FROM_TYPE to
+   TO_TYPE.  Both types should be integral types.  */
 
 static void
 append_int_cast (pvm_program program,
@@ -137,13 +138,10 @@ append_int_cast (pvm_program program,
       if (!to_type_sign)
         strcat (insn, "u");
 
-      /* XXX Use PVM_APPEND_INSTRUCTION_ID instead.  */
       pvm_append_instruction_name (program, insn);
-      free (insn);
-      
-      /* And its argument.  */
       pvm_append_unsigned_literal_parameter (program,
                                              (jitter_uint) to_type_size);
+      free (insn);
     }
 }
 
