@@ -168,20 +168,22 @@ instruction nop ()
   end
 end
 
-instruction drop ()
+## Stack manipulation instructions
+
+instruction drop () # A -> _
   code
     JITTER_DROP_STACK();
   end
 end
 
-instruction push (?Rnl pvm_literal_printer)
+instruction push (?Rnl pvm_literal_printer) # _ -> A
   code
     pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
   end
 end
 
-instruction swap ()
+instruction swap () # A B -> B A
   code
     pvm_val tmp = JITTER_UNDER_TOP_STACK ();
     JITTER_UNDER_TOP_STACK () = JITTER_TOP_STACK ();
@@ -189,13 +191,13 @@ instruction swap ()
   end
 end
 
-instruction nip ()
+instruction nip () # A B -> B
   code
     JITTER_NIP_STACK();
   end
 end
 
-instruction dup () # A -> A
+instruction dup () # A -> A A
   code
     JITTER_DUP_STACK ();
   end
@@ -213,6 +215,21 @@ instruction rot () # A B C -> B C A
    JITTER_UNDER_TOP_STACK () = b;
    JITTER_TOP_STACK () = c;
    JITTER_PUSH_STACK (a);
+  end
+end
+
+instruction nrot () # A B C -> C A B
+  code
+   pvm_val a, b, c;
+
+   c = JITTER_TOP_STACK ();
+   JITTER_DROP_STACK ();
+   b = JITTER_TOP_STACK ();
+   a = JITTER_UNDER_TOP_STACK ();
+
+   JITTER_UNDER_TOP_STACK () = c;
+   JITTER_TOP_STACK () = a;
+   JITTER_PUSH_STACK (b);
   end
 end
 
@@ -1522,4 +1539,10 @@ rule swap-drop-to-nip rewrite
   swap; drop
 into
   nip
+end
+
+rule rot-rot-to-nrot rewrite
+  rot; rot
+into
+  nrot
 end
