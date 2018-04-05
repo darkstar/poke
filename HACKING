@@ -155,8 +155,21 @@ The phases above are organized in two passes:
 Debugging Poke
 ==============
 
-In order to use the GDB pretty-printers and other goodies, source the
-poke-gdb.scm file from your debugger:
+Building with Debugging support
+-------------------------------
+
+Configure the sources with --enable-debug.
+
+This will:
+1. Use a threaded jitter dispatching model.
+2. Build the sources with -O0 -g3.
+
+Using GDB extensions
+--------------------
+
+In order to use the GDB pretty-printers and other goodies brought to
+you courtesy of the poke hackers, just source the poke-gdb.scm file
+from your debugger:
 
 (gdb) source gdb/poke-gdb.scm
 
