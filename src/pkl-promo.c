@@ -336,7 +336,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
 }
 PKL_PHASE_END_HANDLER
 
-
 /* The relational operations are defined on the following
    configurations of operand and result types:
 
