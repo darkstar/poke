@@ -66,7 +66,7 @@
    - DEFAULT_BF_HANDLER is invoked for every node in the AST, after the
      more particular ones, in breadth-first order.
 
-   - DEFAULT_DF_HANDLER is invoked for every node in the SAT, after
+   - DEFAULT_DF_HANDLER is invoked for every node in the AST, after
      the more particular ones, in depth-first order.
 
    - ELSE_HANDLER, if not NULL, is invoked for every node for which no
