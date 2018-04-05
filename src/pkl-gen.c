@@ -904,6 +904,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
   pkl_ast_node node = PKL_PASS_NODE;
   pvm_program program = payload->program;
   pkl_ast_node type = PKL_AST_TYPE (node);
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
 
@@ -931,8 +933,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
       append_int_op (program, "mod", type);
       break;
     case PKL_TYPE_OFFSET:
-      append_int_op (program, "modo",
-                     PKL_AST_TYPE_O_BASE_TYPE (type));
+      {
+        /* Calculate the magnitude of the new offset, which is the
+           modulus of both magnitudes, the second argument converted
+           to first's units.  */
+
+        pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+        pkl_ast_node op1_unit = PKL_AST_TYPE_O_UNIT (op1_type);
+        pkl_ast_node unit_type = PKL_AST_TYPE (op1_unit); /* This is always 64,0 */
+
+        PVM_APPEND_INSTRUCTION (program, swap);
+
+        PVM_APPEND_INSTRUCTION (program, ogetm);
+        PVM_APPEND_INSTRUCTION (program, nip);
+        PVM_APPEND_INSTRUCTION (program, swap);
+        OGETM_IN_UNIT (program, base_type, unit_type, op1_unit);
+        PVM_APPEND_INSTRUCTION (program, nip);
+
+        append_int_op (program, "bz", base_type);
+        pvm_append_symbolic_label_parameter (program,
+                                             "Ldivzero");
+
+        append_int_op (program, "mod", base_type);
+
+        PKL_PASS_SUBPASS (op1_unit);
+        PVM_APPEND_INSTRUCTION (program, mko);
+      }
       break;
     default:
       assert (0);
