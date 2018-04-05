@@ -139,7 +139,8 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PHASE_DF_TYPE_HANDLER(code,handler) \
   .type_df_handlers[code] = handler
 
-/* The following macros are to be used in node handlers.
+/* The following macros are available to be used in the body of a node
+   handler:
 
    PKL_PASS_PAYLOAD expands to an l-value holding the data pointer
    passed to `pkl_do_pass'.
@@ -207,7 +208,18 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
 
 /* The following macros should be used in order to define phase
-   handlers.  */
+   handlers, like follows:
+
+   PKL_PHASE_BEGIN_HANDLER (handler_name)
+      ... handler prologue ...
+   {
+      ... handler body ...
+   }
+   PKL_PHASE_END_HANDLER
+
+   Only certain macros should be used as the handler prologue.  See
+   below.  The handler body contains your C code.  Reaching the end of
+   the body finishes the execution of the handler.  */
 
 #define PKL_PHASE_BEGIN_HANDLER(name)                                   \
   static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
