@@ -58,9 +58,76 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of an unary operation NOT or a binary operation EQ, NE,
-   LT, GT, LE, GE, AND and OR is a boolean encoded as a 32-bit signed
-   integer type.  */
+/* The type of a NOT is a boolean encoded as a 32-bit signed integer,
+   and the type of its sole operand sould be suitable to be promoted
+   to a boolean, i.e. it is an integral value.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_not)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node op = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+  pkl_ast_node op_type = PKL_AST_TYPE (op);
+
+  if (PKL_AST_TYPE_CODE (op_type) != PKL_TYPE_INTEGRAL)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
+                 "invalid operand to NOT");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+  else
+    {
+      pkl_ast_node exp_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 2);
+
+      PKL_AST_LOC (exp_type) = PKL_AST_LOC (PKL_PASS_NODE);
+      PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (exp_type);
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* The type of the relational operations EQ, NE, LT, GT, LE and GE is
+   a boolean encoded as a 32-bit signed integer type.  Their operands
+   should be either both integral types, or strings, or offsets.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_rela)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  int op1_type_code = PKL_AST_TYPE_CODE (op1_type);
+
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+  int op2_type_code = PKL_AST_TYPE_CODE (op2_type);
+
+  if (op1_type_code == op2_type_code
+      && (op1_type_code == PKL_TYPE_INTEGRAL
+          || op1_type_code == PKL_TYPE_STRING
+          || op1_type_code == PKL_TYPE_OFFSET))
+    {
+      pkl_ast_node exp_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 2);
+
+      PKL_AST_LOC (exp_type) = PKL_AST_LOC (PKL_PASS_NODE);
+      PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (exp_type);
+    }
+  else
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (PKL_PASS_NODE),
+                 "invalid operands to relational operator");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* The type of a binary operation EQ, NE, LT, GT, LE, GE, AND and OR
+   is a boolean encoded as a 32-bit signed integer type.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
 {
@@ -544,13 +611,13 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_df_op_boolean),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_not),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify1_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify1_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify1_df_op_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_df_op_rela),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify1_df_op_boolean),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify1_df_add),

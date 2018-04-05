@@ -33,6 +33,22 @@ poke_test_cmd "print 6hu" {6UH}
 set test uint16
 poke_test_cmd "print (uint<16>) 6" {6UH}
 
+# Strings
+
+set test str-cat
+poke_test_cmd {print "foo" + "bar"} {"foobar"}
+
+set test str-eq-true
+poke_test_cmd {print "foo" == "foo"} {1}
+
+set test str-eq-false
+poke_test_cmd {print "foo" == "fooo"} {0}
+
+set test str-ne-false
+poke_test_cmd {print "foo" != "foo"} {0}
+
+set test str-ne-true
+poke_test_cmd {print "foo" != "fooo"} {1}
 
 # Conversions.
 

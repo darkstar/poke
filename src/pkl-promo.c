@@ -26,6 +26,9 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
+/* Note the following macro evaluates the arguments twice!  */
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+
 /* Promote a given node A to an integral type of width SIZE and sign
    SIGN, if possible.  Put the resulting node in A.  Return 1 if the
    promotion was successful, 0 otherwise.  */
@@ -175,13 +178,13 @@ PKL_PHASE_END_HANDLER
 /* Addition, subtraction and modulus are defined on the following
    configurations of operands and result types:
 
-      INTEGRAL / INTEGRAL -> INTEGRAL
-      OFFSET   / OFFSET   -> OFFSET
+      INTEGRAL x INTEGRAL -> INTEGRAL
+      OFFSET   x OFFSET   -> OFFSET
 
-   In the I / I -> I configuration, the types of the operands are
+   In the I x I -> I configuration, the types of the operands are
    promoted to match the type of the result, if needed.
 
-   In the O / O -> O configuration, the magnitude types of the offset
+   In the O x O -> O configuration, the magnitude types of the offset
    operands are promoted to match the type of the magnitude type of
    the result offset, if needed.  */
 
@@ -245,6 +248,108 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
 }
 PKL_PHASE_END_HANDLER
 
+/* The relational operations are defined on the following
+   confiurations of operands and result types:
+
+           INTEGRAL x INTEGRAL -> BOOL
+           STRING   x STRING   -> BOOL
+           OFFSET   x OFFSET   -> BOOL
+          
+   In the I x I -> I configuration, the types of the operands are
+   promoted in a way both operands end having the same type, following
+   the language's promotion rules.
+
+   The same logic is applied to the magnitudes of the offset operands
+   in the O x O -> O configuration.
+
+   No operand promotion is performed in the the S x S -> S
+   configuration.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_rela)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+
+  if (PKL_AST_TYPE_CODE (op1_type) != PKL_AST_TYPE_CODE (op2_type))
+    goto error;
+        
+  switch (PKL_AST_TYPE_CODE (op1_type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      {
+        int restart1, restart2;
+
+        size_t size = MAX (PKL_AST_TYPE_I_SIZE (op1_type),
+                           PKL_AST_TYPE_I_SIZE (op2_type));
+        int sign = (PKL_AST_TYPE_I_SIGNED (op1_type)
+                    && PKL_AST_TYPE_I_SIGNED (op2_type));
+
+
+        if (!promote_integral (PKL_PASS_AST, size, sign,
+                               &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
+          goto error;
+
+        if (!promote_integral (PKL_PASS_AST, size, sign,
+                               &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
+          goto error;
+
+        PKL_PASS_RESTART = restart1 || restart2;
+        break;
+      }
+    case PKL_TYPE_OFFSET:
+      {
+        int restart1, restart2;
+
+        pkl_ast_node op1_base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
+        pkl_ast_node op2_base_type = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
+
+        size_t size = MAX (PKL_AST_TYPE_I_SIZE (op1_base_type),
+                           PKL_AST_TYPE_I_SIZE (op2_base_type));
+        int sign = (PKL_AST_TYPE_I_SIGNED (op1_base_type)
+                    && PKL_AST_TYPE_I_SIGNED (op2_base_type));
+
+        pkl_ast_node to_type =
+          pkl_ast_make_integral_type (PKL_PASS_AST, size, sign);
+        PKL_AST_LOC (to_type) = PKL_AST_LOC (PKL_PASS_NODE);
+        
+        if (!promote_offset (PKL_PASS_AST,
+                             to_type, PKL_AST_TYPE_O_UNIT (op1_type),
+                             &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
+          goto error;
+
+        if (!promote_offset (PKL_PASS_AST,
+                             to_type, PKL_AST_TYPE_O_UNIT (op2_type),
+                             &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
+          goto error;
+
+        if (!restart1 && !restart2)
+          {
+            ASTREF (to_type);
+            pkl_ast_node_free (to_type);
+          }
+
+        PKL_PASS_RESTART = restart1 || restart2;
+        break;
+        case PKL_TYPE_STRING:
+          /* Nothing to do.  */
+          break;
+      }
+    default:
+      goto error;
+    }
+
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+           "couldn't promote operands of expression #%" PRIu64,
+           PKL_AST_UID (exp));
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
 
 /* The rest of the binary operations are defined on the following
    configurations of operands and result types:
@@ -305,8 +410,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_unary)
       if (!promote_integral (PKL_PASS_AST, size, sign,
                              &PKL_AST_EXP_OPERAND (node, 0), &restart))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (node),
-                     "operator requires a boolean argument");
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
+                   "couldn't promote operands of expression #%" PRIu64,
+                   PKL_AST_UID (node));
           PKL_PASS_ERROR;
         }
     }
@@ -392,12 +498,12 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_rela),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_rela),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_binary),
