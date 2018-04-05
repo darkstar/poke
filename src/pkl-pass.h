@@ -172,8 +172,8 @@ typedef struct pkl_phase *pkl_phase;
    0.  This macro should _not_ be used as an r-value.
 
    PKL_PASS_SUBPASS (NODE) starts a subpass that processes the subtree
-   starting at NODE.  If the execution of the subpass returns an
-   error, the expansion of this macro calls PKL_PASS_ERROR.
+   starting at NODE.  If the execution of the subpass returns an error
+   then the expansion of this macro calls PKL_PASS_ERROR.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass.
