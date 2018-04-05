@@ -102,9 +102,27 @@
                                          (lookup-type "uint64_t")))))
             (format #f "(pvm:ulong<~a>) ~a" ulong-size ulong-val)))
          ((#x6) ;; PVM_VAL_TAG_BOX
-          (let ((pvm_ptr (value-cast (value-rsh value 3)
-                                     (lookup-type "pvm_val_box"))))
-            "A BOX"))
+          (let* ((pvm-box-ptr (value-cast (value-logand
+                                          (value-cast value
+                                                      (lookup-type "uintptr_t"))
+                                          (value-lognot #x7))
+                                          (lookup-type "pvm_val_box")))
+                 (pvm-box-tag (value-field (value-dereference pvm-box-ptr) "tag")))
+            (case (value->integer pvm-box-tag)
+              ((#x8) ;; PVM_VAL_TAG_STR
+               "STRING")
+              ((#x9) ;; PVM_VAL_TAG_OFF
+               "OFFSET")
+              ((#xa) ;; PVM_VAL_TAG_ARR
+               "ARRAY")
+              ((#xb) ;; PVM_VAL_TAG_SCT
+               "STRUCT")
+              ((#xc) ;; PVM_VAL_TAG_TYP
+               "TYPE")
+              ((#xd) ;; PVM_VAL_TAG_MAP
+               "MAP")
+              (else
+               "Unknown PVM_VAL_BOX tag"))))
          ((#x7) ;; PVM_NULL
           "PVM_NULL")
          (else
