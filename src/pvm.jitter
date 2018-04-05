@@ -1140,7 +1140,7 @@ instruction itoi (?n pvm_literal_printer_cast) # INT -> INT
   end
 end
 
-instruction itou (?n pvm_literal_printer_cast) # INT -> UINT
+instruction itoiu (?n pvm_literal_printer_cast) # INT -> UINT
   code
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
@@ -1167,7 +1167,7 @@ instruction itolu (?n pvm_literal_printer_cast) # INT -> ULONG
   end
 end
 
-instruction utoi (?n pvm_literal_printer_cast) # UINT -> INT
+instruction iutoi (?n pvm_literal_printer_cast) # UINT -> INT
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1176,7 +1176,7 @@ instruction utoi (?n pvm_literal_printer_cast) # UINT -> INT
   end
 end
 
-instruction utou (?n pvm_literal_printer_cast) # UINT -> UINT
+instruction iutoiu (?n pvm_literal_printer_cast) # UINT -> UINT
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1185,7 +1185,7 @@ instruction utou (?n pvm_literal_printer_cast) # UINT -> UINT
   end
 end
 
-instruction utol (?n pvm_literal_printer_cast) # UINT -> LONG
+instruction iutol (?n pvm_literal_printer_cast) # UINT -> LONG
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1194,7 +1194,7 @@ instruction utol (?n pvm_literal_printer_cast) # UINT -> LONG
   end
 end
 
-instruction utolu (?n pvm_literal_printer_cast) # UINT -> ULONG
+instruction iutolu (?n pvm_literal_printer_cast) # UINT -> ULONG
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1212,7 +1212,7 @@ instruction ltoi (?n pvm_literal_printer_cast) # LONG -> INT
   end
 end
 
-instruction ltou (?n pvm_literal_printer_cast) # LONG -> UINT
+instruction ltoiu (?n pvm_literal_printer_cast) # LONG -> UINT
   code
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
@@ -1248,7 +1248,7 @@ instruction lutoi (?n pvm_literal_printer_cast) # ULONG -> INT
   end
 end
 
-instruction lutou (?n pvm_literal_printer_cast) # ULONG -> UINT
+instruction lutoiu (?n pvm_literal_printer_cast) # ULONG -> UINT
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());

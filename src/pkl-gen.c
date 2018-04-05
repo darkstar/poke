@@ -115,75 +115,31 @@ append_int_cast (pvm_program program,
     /* Wheee, nothing to do.  */
     return;
   else
-    {          
-      /* Push the proper conversion instruction.  */
-      if ((from_type_size - 1) & ~0x1f)
-        {
-          if ((to_type_size - 1) & ~0x1f)
-            {
-              if (from_type_sign && to_type_sign)
-                /* From pvm_long to pvm_long  */
-                PVM_APPEND_INSTRUCTION (program, ltol);
-              else if (from_type_sign && !to_type_sign)
-                /* From pvm_long to pvm_ulong */
-                PVM_APPEND_INSTRUCTION (program, ltolu);
-              else if (!from_type_sign && to_type_sign)
-                /* From pvm_ulong to pvm_long */
-                PVM_APPEND_INSTRUCTION (program, lutol);
-              else
-                /* From pvm_ulong to pvm_ulong */
-                PVM_APPEND_INSTRUCTION (program, lutolu);
-            }
-          else
-            {
-              if (from_type_sign && to_type_sign)
-                /* From pvm_long to pvm_int  */
-                PVM_APPEND_INSTRUCTION (program, ltoi);
-              else if (from_type_sign && !to_type_sign)
-                /* From pvm_long to pvm_uint */
-                PVM_APPEND_INSTRUCTION (program, ltou);
-              else if (!from_type_sign && to_type_sign)
-                /* From pvm_ulong to pvm_int */
-                PVM_APPEND_INSTRUCTION (program, lutoi);
-              else
-                /* From pvm_ulong to pvm_uint */
-                PVM_APPEND_INSTRUCTION (program, lutou);
-            }
-        }
-      else
-        {
-          if ((to_type_size - 1) & ~0x1f)
-            {
-              if (from_type_sign && to_type_sign)
-                /* From pvm_int to pvm_long  */
-                PVM_APPEND_INSTRUCTION (program, itol);
-              else if (from_type_sign && !to_type_sign)
-                /* From pvm_int to pvm_ulong */
-                PVM_APPEND_INSTRUCTION (program, itolu);
-              else if (!from_type_sign && to_type_sign)
-                /* From pvm_uint to pvm_long */
-                PVM_APPEND_INSTRUCTION (program, utol);
-              else
-                /* From pvm_uint to pvm_ulong */
-                PVM_APPEND_INSTRUCTION (program, utolu);
-            }
-          else
-            {
-              if (from_type_sign && to_type_sign)
-                /* From pvm_int to pvm_int  */
-                PVM_APPEND_INSTRUCTION (program, itoi);
-              else if (from_type_sign && !to_type_sign)
-                /* From pvm_int to pvm_uint */
-                PVM_APPEND_INSTRUCTION (program, itou);
-              else if (!from_type_sign && to_type_sign)
-                /* From pvm_uint to pvm_int */
-                PVM_APPEND_INSTRUCTION (program, utoi);
-              else
-                /* From pvm_uint to pvm_uint */
-                PVM_APPEND_INSTRUCTION (program, utou);
-            }
-        }
+    {
+      char *insn = xmalloc (1024);
 
+      if ((from_type_size - 1) & ~0x1f)
+        strcpy (insn, "l");
+      else
+        strcpy (insn, "i");
+
+      if (!from_type_sign)
+        strcat (insn, "u");
+
+      strcat (insn, "to");
+
+      if ((to_type_size - 1) & ~0x1f)
+        strcat (insn, "l");
+      else
+        strcat (insn, "i");
+
+      if (!to_type_sign)
+        strcat (insn, "u");
+
+      /* XXX Use PVM_APPEND_INSTRUCTION_ID instead.  */
+      pvm_append_instruction_name (program, insn);
+      free (insn);
+      
       /* And its argument.  */
       pvm_append_unsigned_literal_parameter (program,
                                              (jitter_uint) to_type_size);
