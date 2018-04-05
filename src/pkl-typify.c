@@ -204,7 +204,7 @@ PKL_PHASE_END_HANDLER
       {                                                                 \
       CASE_STR                                                          \
       CASE_OFFSET                                                       \
-      CASE_INTEGRAL                                                    \
+      CASE_INTEGRAL                                                     \
       default:                                                          \
         goto error;                                                     \
         break;                                                          \
