@@ -270,7 +270,7 @@ PKL_PHASE_END_HANDLER
 
    In the O x I -> O and I x O -> O configurations, both the type of
    the integral operand and the base type of the offset operand are
-   promotd to match the base type of the offset result.  */
+   promoted to match the base type of the offset result.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
 {
