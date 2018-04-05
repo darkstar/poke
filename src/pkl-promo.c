@@ -186,7 +186,13 @@ PKL_PHASE_END_HANDLER
 
    In the O x O -> O configuration, the magnitude types of the offset
    operands are promoted to match the type of the magnitude type of
-   the result offset, if needed.  */
+   the result offset, if needed.
+
+   Also, addition is used to concatenate strings:
+
+      STRING x STRING -> STRING
+
+   In this configuration no promotions are done.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
 {
@@ -234,6 +240,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
         PKL_PASS_RESTART = restart1 || restart2;
         break;
       }
+    case PKL_TYPE_STRING:
+      if (PKL_AST_EXP_CODE (exp) != PKL_AST_OP_ADD)
+        goto error;
+      break;
     default:
       goto error;
     }
