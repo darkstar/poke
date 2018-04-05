@@ -205,16 +205,7 @@ PKL_PHASE_END_HANDLER
       {                                                                 \
       CASE_STR                                                          \
       CASE_OFFSET                                                       \
-      case PKL_TYPE_INTEGRAL:                                           \
-        {                                                               \
-          int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                    \
-                          && PKL_AST_TYPE_I_SIGNED (t2));               \
-          int size = MAX (PKL_AST_TYPE_I_SIZE (t1),                     \
-                          PKL_AST_TYPE_I_SIZE (t2));                    \
-                                                                        \
-          type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p); \
-          break;                                                        \
-        }                                                               \
+      CASE_INTEGRAL                                                    \
       default:                                                          \
         goto error;                                                     \
         break;                                                          \
@@ -234,10 +225,21 @@ PKL_PHASE_END_HANDLER
 
 /* The following operations only accept integers.  */
 
+#define CASE_INTEGRAL                           \
+  case PKL_TYPE_INTEGRAL:                                               \
+  {                                                                     \
+    int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                          \
+                    && PKL_AST_TYPE_I_SIGNED (t2));                     \
+    int size = MAX (PKL_AST_TYPE_I_SIZE (t1),                           \
+                    PKL_AST_TYPE_I_SIZE (t2));                          \
+                                                                        \
+    type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p);   \
+    break;                                                              \
+  }
+
 #define CASE_STR
 #define CASE_OFFSET
 
-TYPIFY_BIN (mul);
 TYPIFY_BIN (sl);
 TYPIFY_BIN (sr);
 TYPIFY_BIN (ior);
@@ -300,8 +302,8 @@ TYPIFY_BIN (mod);
     int signed_p = (PKL_AST_TYPE_I_SIGNED (base_type_1)                 \
                     && PKL_AST_TYPE_I_SIGNED (base_type_2));            \
     int size                                                            \
-      = (PKL_AST_TYPE_I_SIZE (base_type_1) > PKL_AST_TYPE_I_SIZE (base_type_2) \
-         ? PKL_AST_TYPE_I_SIZE (base_type_1) : PKL_AST_TYPE_I_SIZE (base_type_2)); \
+      = MAX (PKL_AST_TYPE_I_SIZE (base_type_1),                         \
+             PKL_AST_TYPE_I_SIZE (base_type_2));                        \
                                                                         \
     pkl_ast_node base_type                                              \
       = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p);      \
@@ -327,6 +329,94 @@ TYPIFY_BIN (mod);
 TYPIFY_BIN (add);
 TYPIFY_BIN (sub);
 
+/* MUL accepts integral, string and offset operands.  We can't use
+   TYPIFY_BIN here because it relies on a different logic to determine
+   the result type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_mul)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+    
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);
+  pkl_ast_node t2 = PKL_AST_TYPE (op2);
+  int t1_code = PKL_AST_TYPE_CODE (t1);
+  int t2_code = PKL_AST_TYPE_CODE (t2);
+
+    
+  pkl_ast_node type;
+
+  if (t1_code == PKL_TYPE_OFFSET || t2_code == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node offset_type;
+      pkl_ast_node int_type;
+      pkl_ast_node offset_base_type;
+      int signed_p;
+      size_t size;
+
+      /* One operand must be an offset, the other one an integral */
+
+      if (t1_code == PKL_TYPE_INTEGRAL && t2_code == PKL_TYPE_OFFSET)
+        {
+          offset_type = t2;
+          int_type = t1;
+        }
+      else if (t1_code == PKL_TYPE_OFFSET && t2_code == PKL_TYPE_INTEGRAL)
+        {
+          offset_type = t1;
+          int_type = t2;
+        }
+      else
+        goto error;
+
+      offset_base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
+
+      /* Promotion rules work like in integral operations.  */
+      signed_p = (PKL_AST_TYPE_I_SIGNED (offset_base_type)
+                  && PKL_AST_TYPE_I_SIGNED (int_type));
+      size = MAX (PKL_AST_TYPE_I_SIZE (offset_base_type),
+                  PKL_AST_TYPE_I_SIZE (int_type));
+
+      pkl_ast_node res_base_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p);
+      PKL_AST_LOC (res_base_type) = PKL_AST_LOC (exp);
+
+      /* The unit of the result is the unit of the offset operand */
+      type = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                       res_base_type,
+                                       PKL_AST_TYPE_O_UNIT (offset_type));
+    }
+  else
+    {
+      if (PKL_AST_TYPE_CODE (t1) != PKL_AST_TYPE_CODE (t2))
+        goto error;
+
+      switch (PKL_AST_TYPE_CODE (t1))
+        {
+          CASE_STR
+            CASE_INTEGRAL        
+        default:
+          goto error;
+          break;
+        }
+    }
+
+  PKL_AST_LOC (type) = PKL_AST_LOC (exp);
+  PKL_AST_TYPE (exp) = ASTREF (type);
+  PKL_PASS_DONE;
+
+ error:
+  pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+             "invalid operands in expression");
+  payload->errors++;
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
+#undef CASE_INTEGRAL
 #undef CASE_STR
 #undef CAST_OFFSET
 #undef TYPIFY_BIN
