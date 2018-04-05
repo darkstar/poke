@@ -975,12 +975,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
 
   pvm_program program = payload->program;
   pkl_ast_node exp = PKL_PASS_NODE;
+  int exp_code = PKL_AST_EXP_CODE (exp);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
   const char *int_insn, *str_insn, *off_insn;
 
-  switch (PKL_AST_EXP_CODE (exp))
+  switch (exp_code)
     {
     case PKL_AST_OP_EQ:
       int_insn = off_insn = "eq";
@@ -1031,7 +1032,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
         pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
         PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
 
-        PVM_APPEND_INSTRUCTION (program, swap);
+        /* Equality and inequality are commutative, so we can save an
+           instruction.  */
+        if (exp_code != PKL_AST_OP_EQ && exp_code != PKL_AST_OP_NE)
+          PVM_APPEND_INSTRUCTION (program, swap);
         
         OGETM_IN_UNIT (program, base_type, unit_type, unit_bits);
         PVM_APPEND_INSTRUCTION (program, nip);
