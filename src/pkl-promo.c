@@ -281,9 +281,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
 
   for (i = 0; i < 2; ++i)
     {
+      int restart;
+
       pkl_ast_node op = PKL_AST_EXP_OPERAND (exp, i);
       pkl_ast_node op_type = PKL_AST_TYPE (op);
-      int restart;
 
       if (PKL_AST_TYPE_CODE (op_type) == PKL_TYPE_INTEGRAL)
         {
