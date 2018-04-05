@@ -176,7 +176,7 @@ typedef struct pkl_phase *pkl_phase;
    then the expansion of this macro calls PKL_PASS_ERROR.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
-   the compiler pass.
+   the compiler pass, making `pkl_do_pass' to return a non-error code.
 
    PKL_PASS_ERROR can be used in order to interrupt the execution of
    the compiler pass, making `pkl_do_pass' to return an error code.
