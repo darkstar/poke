@@ -388,7 +388,7 @@ set test struct-1
 poke_test_cmd "print {}" "{}"
 
 set test struct-2
-poke_test-cmd "print {1,2}" "{1, 2}"
+poke_test_cmd "print {1,2}" {\{1, 2\}}
 
 set test struct-ref-1
 poke_test_cmd "print {.fo=10}.fo" "10"
