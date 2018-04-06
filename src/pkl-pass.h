@@ -282,7 +282,8 @@ pkl_phase_parent_in (pkl_ast_node parent,
 
    PAYLOADS is an array of pointers to payloads, which will be passed
    to the node handlers occupying the same position in the PHASES
-   array.
+   array.  There should be as much payloads as phases, and it is not
+   needed to terminate this array with NULL.
 
    Running several phases in parallel in the same pass is good for
    performance.  However, there is an important consideration: if a
