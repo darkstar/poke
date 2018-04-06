@@ -254,8 +254,9 @@ pkl_phase_parent_in (pkl_ast_node parent,
   int i;
 
   if (parent == NULL)
-    /* This happens with the top-level node of the AST.  */
-    return 0;
+    /* This happens with the top-level node of the AST, or th
+       top-level node of a subpass.  */
+    return 1;
 
   va_start (valist, nc);
   for (i = 0; i < nc; i++)

@@ -319,7 +319,6 @@ pvm_sizeof (pvm_val val)
       size_t size;
       
       /* XXX */
-      assert (0);
       switch (PVM_VAL_TYP_CODE (val))
         {
         case PVM_TYPE_INTEGRAL:

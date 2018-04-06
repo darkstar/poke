@@ -371,8 +371,13 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type)
 {
-  /* Do not generate code for PLK_AST_TYPE (STRUCT).  */
-  if (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRUCT)
+  /* Avoid generating type nodes in certain circumstances.  */
+  if (PKL_PASS_PARENT
+      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRUCT
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_INTEGER
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRING
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_OFFSET
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_MAP))
     PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
@@ -483,7 +488,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 PKL_PHASE_END_HANDLER
 
 /*
- * | MAP_TYPE
  * | MAP_OFFSET
  * MAP
  */
@@ -520,23 +524,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * Algorithm used when the number of elements of the array are
          * specified:
          *
+         *                   # offset
          * 00    push etype  # etype atype
          * 01    push atype  # etype atype
          * 02    tyagetn     # etype atype nelems
          * 03 .L1:
          * 04    dup         # etype atype nelems nelems
-         * 05    tyagett     # etype atype nelems nelems etype
-         * 06    siz         # etype atype nelems nelems esize  (siz should return bits)
-         * 07    mullu       # etype atype nelems idx
-         * 08    dup         # etype atype nelems idx idx
-         * 09    push 1UL    # etype atype nelems idx idx 1UL
-         * 10    mko         # etype atype nelems idx off
+         * 05    push etype  # etype atype nelems nelems etype
+         * 06    siz         # etype atype nelems nelems offset
+         * 061   ogetm       # etype atype nelems nelems offset magnitude
+         * 062   swap        # etype atype nelems nelems magnitude offset
+         * 063   ogetu       # etype atype nelems nelems magnitude offset unit
+         * 064   swap        # etype atype nelems nelems magnitude unit offset
+         * 064   drop        # etype atype nelems nelems magnitude unit
+         * 065   mullu       # etype atype nelems nelems esize
+         * 07    mullu       # etype atype nelems eoff
+         *       push map_offset # etype atype nelems eoff map_offset
+         *       ogetm
+         *       swap
+         *       ogetu
+         *       swap
+         *       drop
+         *       mullu       # etype atype nelems eoff moff
+         *       addlu       # etype atype nelems aeoff
+         * 08    dup         # etype atype nelems aeoff aeoff
+         * 09    push 1UL    # etype atype nelems aeoff aeoff 1UL
+         * 10    mko         # etype atype nelems aeoff off
          *    #if ETYPE is simple
-         * 11    peek        # etype atype nelems idx val
+         * 11    peek        # etype atype nelems aeoff val
          *    #else
-         * 12    push etype  # etype atype nelems idx off etype
-         * 13    swap        # etype atype nelems idx etype off
-         * 14    mkm         # etype atype nelems idx map
+         * 12    push etype  # etype atype nelems aeoff off etype
+         * 13    swap        # etype atype nelems aeoff etype off
+         * 14    mkm         # etype atype nelems aeoff map
          *    #endif
          * 15    rot         # etype nelems idx val/map atype
          * 16    rot         # etype idx val/map atype nelems
@@ -544,7 +563,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * 18    sublu       # etype idx val/map atype (nelems-1)
          * 19    bnzlu L1
          * 20    drop        # etype [idx val/map]... atype
-         * 21    tyagetn     # etype [idx val/map]... atype nelems
+         * 21    push array_nelems # etype [idx val/map]... atype nelems
          * 22    nip         # etype [idx val/map]... nelems
          * 23    dup         # etype [idx val/map]... nelems nelems
          * 24    mka         # array
@@ -560,8 +579,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
 
         /* 04 */
         PVM_APPEND_INSTRUCTION (program, dup);
-        PVM_APPEND_INSTRUCTION (program, tyagett);
-        PVM_APPEND_INSTRUCTION (program, siz); /* xxx: make sure siz returns an ulong<64> */
+        PKL_PASS_SUBPASS (array_elem_type);
+        PVM_APPEND_INSTRUCTION (program, siz);
+        PVM_APPEND_INSTRUCTION (program, ogetm);
+        PVM_APPEND_INSTRUCTION (program, swap);
+        PVM_APPEND_INSTRUCTION (program, ogetu);
+        PVM_APPEND_INSTRUCTION (program, swap);
+        PVM_APPEND_INSTRUCTION (program, drop);
+        PVM_APPEND_INSTRUCTION (program, mullu);
+
+        /* 07 */
         PVM_APPEND_INSTRUCTION (program, mullu);
         /* 08 */
         PVM_APPEND_INSTRUCTION (program, dup);
@@ -599,7 +626,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
 
         /* 20 */
         PVM_APPEND_INSTRUCTION (program, drop);
-        PVM_APPEND_INSTRUCTION (program, tyagetn);
+        //        PVM_APPEND_INSTRUCTION (program, tyagetn);
+        PKL_PASS_SUBPASS (array_nelems);
         PVM_APPEND_INSTRUCTION (program, nip);
         PVM_APPEND_INSTRUCTION (program, dup);
 
