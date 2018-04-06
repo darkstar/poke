@@ -498,12 +498,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
       break;
     case PKL_TYPE_ARRAY:
       {
+#if 0
         pkl_ast_node array_elem_type = PKL_AST_TYPE_A_ETYPE (map_type);
         pkl_ast_node array_nelems = PKL_AST_TYPE_A_NELEM (map_type);
+        jitter_label loop_label = jitter_fresh_label (program);
 
         assert (array_nelems != NULL); /* XXX implement foo[] arrays
                                           later.  */
-        
+#endif        
         /* 
          * Algorithm used when the number of elements of the array are
          * specified:
@@ -530,7 +532,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * 16    rot         # etype idx val/map atype nelems
          * 17    push 1      # etype idx val/map atype nelems 1
          * 18    sublu       # etype idx val/map atype (nelems-1)
-         * 19    bnz L1
+         * 19    bnzlu L1
          * 20    drop        # etype [idx val/map]... atype
          * 21    tyagetn     # etype [idx val/map]... atype nelems
          * 22    nip         # etype [idx val/map]... nelems
@@ -538,12 +540,63 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * 24    mka         # array
          */
 
+#if 0
         /* 00 */
         PKL_PASS_SUBPASS (array_elem_type);
         PKL_PASS_SUBPASS (map_type);
         PVM_APPEND_INSTRUCTION (program, tyagetn);
 
+        /* 03 */
+        pvm_append_label (program, loop_label);
+
+        /* 04 */
+        PVM_APPEND_INSTRUCTION (program, dup);
+        PVM_APPEND_INSTRUCTION (program, tyagett);
+        PVM_APPEND_INSTRUCTION (program, siz); /* xxx: make sure siz returns an ulong<64> */
+        PVM_APPEND_INSTRUCTION (program, mullu);
+        /* 08 */
+        PVM_APPEND_INSTRUCTION (program, dup);
+        pvm_push_val (program, pvm_make_ulong (1, 64));
+        PVM_APPEND_INSTRUCTION (program, mko);
+
+        switch (PKL_AST_TYPE_CODE (array_elem_type))
+          {
+          case PKL_TYPE_INTEGRAL:
+          case PKL_TYPE_STRING:
+          case PKL_TYPE_OFFSET:
+            /* 11 */
+            append_peek (program, array_elem_type);
+            break;
+          case PKL_TYPE_ARRAY:
+          case PKL_TYPE_STRUCT:
+            /* 12 */
+            PKL_PASS_SUBPASS (array_elem_type);
+            PVM_APPEND_INSTRUCTION (program, swap);
+            PVM_APPEND_INSTRUCTION (program, mkm);
+            break;
+          default:
+            assert (0); /* XXX turns this into an ICE */
+          }
+
+        /* 15 */
+        PVM_APPEND_INSTRUCTION (program, rot);
+        PVM_APPEND_INSTRUCTION (program, rot);
+        pvm_push_val (program, pvm_make_ulong (1, 64));
+        PVM_APPEND_INSTRUCTION (program, sublu);
+
+        /* 19 */
+        PVM_APPEND_INSTRUCTION (program, bnzlu);
+        pvm_append_label_parameter (program, loop_label);
+
+        /* 20 */
+        PVM_APPEND_INSTRUCTION (program, drop);
+        PVM_APPEND_INSTRUCTION (program, tyagetn);
+        PVM_APPEND_INSTRUCTION (program, nip);
+        PVM_APPEND_INSTRUCTION (program, dup);
+
+        /* 24 */
         PVM_APPEND_INSTRUCTION (program, mka);
+#endif        
         break;
       }
     case PKL_TYPE_STRUCT:

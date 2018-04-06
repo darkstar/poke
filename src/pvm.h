@@ -335,7 +335,7 @@ struct pvm_off
 
 typedef struct pvm_off *pvm_off;
 
-pvm_val pvm_make_offset (pvm_val base_type, pvm_val magnitude, pvm_val unit);
+pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
@@ -405,7 +405,7 @@ void pvm_shutdown (void);
 enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
 const char *pvm_error (enum pvm_exit_code code);
 
-/* Return the size of VAL in bytes.  */
+/* Return an offset with the size of VAL.  */
 pvm_val pvm_sizeof (pvm_val val);
 
 /* For arrays and structs, return the number of elements stored.

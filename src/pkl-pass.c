@@ -269,7 +269,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
         break;
       }
     case PKL_AST_PROGRAM:
-      PKL_PASS_CHAIN (PKL_AST_PROGRAM_ELEMS (node));
+      if (PKL_AST_PROGRAM_ELEMS (node))
+        PKL_PASS_CHAIN (PKL_AST_PROGRAM_ELEMS (node));
       break;
     case PKL_AST_COND_EXP:
       PKL_AST_COND_EXP_COND (node)
@@ -310,7 +311,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
                          payloads, phases);
       break;
     case PKL_AST_STRUCT:
-      PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (node));
+      if (PKL_AST_STRUCT_ELEMS (node))
+        PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (node));
       break;
     case PKL_AST_STRUCT_ELEM:
       if (PKL_AST_STRUCT_ELEM_NAME (node))

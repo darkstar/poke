@@ -1410,9 +1410,8 @@ end
 
 instruction mko () # EXP ULONG -> OFF
   code
-#define F(res, a, b)                           \
-  { pvm_val base_type = pvm_typeof (a);        \
-    res = pvm_make_offset (base_type, a, b); }
+#define F(res, a, b) \
+  { res = pvm_make_offset (a, b); }
   JITTER_BINARY_STACK(F);
 #undef F
   end

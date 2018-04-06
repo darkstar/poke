@@ -258,34 +258,23 @@ pvm_val
 pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_INT (val))
-    return pvm_make_offset (pvm_make_integral_type (pvm_make_ulong (32, 64),
-                                                    pvm_make_uint (1, 32)),
-                            pvm_make_int (PVM_VAL_INT_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+    return pvm_make_offset (pvm_make_ulong (PVM_VAL_INT_SIZE (val), 64),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
   else if (PVM_IS_UINT (val))
-    return pvm_make_offset (pvm_make_integral_type (pvm_make_ulong (32, 64),
-                                                    pvm_make_uint (1, 32)),
-                            pvm_make_int (PVM_VAL_UINT_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+    return pvm_make_offset (pvm_make_ulong (PVM_VAL_UINT_SIZE (val), 64),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
   else if (PVM_IS_LONG (val))
-    return pvm_make_offset (pvm_make_integral_type (pvm_make_ulong (32, 64),
-                                                    pvm_make_uint (1, 32)),
-                            pvm_make_int (PVM_VAL_LONG_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+    return pvm_make_offset (pvm_make_ulong (PVM_VAL_LONG_SIZE (val), 64),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
   else if (PVM_IS_ULONG (val))
-    return pvm_make_offset (pvm_make_integral_type (pvm_make_ulong (32, 64),
-                                                    pvm_make_uint (1, 32)),
-                            pvm_make_int (PVM_VAL_ULONG_SIZE (val), 32),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+    return pvm_make_offset (pvm_make_ulong (PVM_VAL_ULONG_SIZE (val), 64),
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
   else if (PVM_IS_STR (val))
     {
       size_t size = strlen (PVM_VAL_STR (val)) + 1;
 
-      /* Calculate the minimum storage needed to store the length.  */
-      return pvm_make_offset (pvm_make_integral_type (pvm_make_ulong (64, 64),
-                                                      pvm_make_uint (1, 32)),
-                              pvm_make_long (size, 64),
-                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BYTES, 64));
+      return pvm_make_offset (pvm_make_ulong (size, 64),
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
     }
   else if (PVM_IS_ARR (val))
     {
@@ -295,9 +284,15 @@ pvm_sizeof (pvm_val val)
 
       size = 0;
       for (i = 0; i < nelem; ++i)
-        size += pvm_sizeof (PVM_VAL_ARR_ELEM (val, i));
+        {
+          pvm_val off = pvm_sizeof (PVM_VAL_ARR_ELEM (val, i));
 
-      return size;
+          size += (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (off))
+                   * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (off)));
+        }
+
+      return pvm_make_offset (pvm_make_ulong (size, 64),
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
     }
   else if (PVM_IS_SCT (val))
     {
@@ -307,22 +302,35 @@ pvm_sizeof (pvm_val val)
 
       size = 0;
       for (i = 0; i < nelem; ++i)
-        size += pvm_sizeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
+        {
+          pvm_val off = pvm_sizeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
 
-      return size;
+          size += (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (off))
+                   * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (off)));
+        }
+
+      return pvm_make_offset (pvm_make_ulong (size, 64),
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
     }
   else if (PVM_IS_OFF (val))
     return pvm_sizeof (PVM_VAL_OFF_BASE_TYPE (val));
   else if (PVM_IS_TYP (val))
     {
+      size_t size;
+      
+      /* XXX */
+      assert (0);
       switch (PVM_VAL_TYP_CODE (val))
         {
         case PVM_TYPE_INTEGRAL:
-          return PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (val)) / 8;
+          size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (val));
           break;
         default:
           assert (0);
         };
+
+      return pvm_make_offset (pvm_make_ulong (size, 64),
+                              pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
     }
   
   assert (0);
@@ -653,13 +661,12 @@ pvm_make_map (pvm_val type, pvm_val offset)
 }
 
 pvm_val
-pvm_make_offset (pvm_val base_type,
-                 pvm_val magnitude, pvm_val unit)
+pvm_make_offset (pvm_val magnitude, pvm_val unit)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_OFF);
   pvm_off off = GC_MALLOC (sizeof (struct pvm_off));
 
-  off->base_type = base_type;
+  off->base_type = pvm_typeof (magnitude);
   off->magnitude = magnitude;
   off->unit = unit;
 
