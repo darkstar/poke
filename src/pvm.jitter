@@ -1521,12 +1521,12 @@ instruction mkm () # TYP ULONG -> MAP
   end
 end
 
-instruction peek () # MAP -> VAL
+instruction peek () # MAP -> MAP VAL
   code
   end
 end
 
-instruction poke () # MAP VAL -> _
+instruction poke () # MAP VAL -> MAP
   code
   end
 end
