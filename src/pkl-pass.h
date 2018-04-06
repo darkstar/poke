@@ -288,7 +288,8 @@ pkl_phase_parent_in (pkl_ast_node parent,
    Running several phases in parallel in the same pass is good for
    performance.  However, there is an important consideration: if a
    phase requires to process each AST nodes just once, no restarting
-   phases must precede it in a pass.
+   phases must precede it in the pass.  This is the case of the code
+   generation pass, for example.
 
    Return 0 if some error occurred during the pass execution.  Return
    1 otherwise.  */
