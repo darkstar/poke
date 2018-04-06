@@ -1441,7 +1441,7 @@ instruction mko () # EXP ULONG -> OFF
   code
 #define F(res, a, b) \
   { res = pvm_make_offset (a, b); }
-  JITTER_BINARY_STACK(F);
+  JITTER_BINARY_STACK (F);
 #undef F
   end
 end
@@ -1461,6 +1461,19 @@ end
 instruction ogetbt () # OFF -> OFF BT
   code
     JITTER_PUSH_STACK (PVM_VAL_OFF_BASE_TYPE (JITTER_TOP_STACK ()));
+  end
+end
+
+
+
+## Map instructions
+
+instruction mkm () # TYP OFF -> MAP
+  code
+#define F(res, a, b) \
+  { res = pvm_make_map (a, b); }
+  JITTER_BINARY_STACK (F);
+#undef F
   end
 end
 
