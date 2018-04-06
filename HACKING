@@ -126,6 +126,10 @@ GDB extensions to debug poke:
 
 - etc/poke-gdb.scm
 
+Make using valgrind in poke a sane experience:
+
+- etc/boehm-gc.suppressions
+
 The bison parser in pkl-tab.y
 =============================
 
@@ -180,3 +184,20 @@ from your debugger:
 
 (gdb) source etc/poke-gdb.scm
 
+Valgrind and Poke
+-----------------
+
+The PVM uses the Boehm conservative garbage collector in order to
+manage the memory used by the VM values.  Other parts of poke, such as
+the PKL compiler, manage their own memory.
+
+Valgrind gets easily confused by the GCs tampering with the stack, and
+emits a lot of spurious warnings.  Fortunately it is possible to tell
+memcheck to omit these warnings: the file etc/boehm-gc.suppresions
+contains a list of suppresions.
+
+Invoke valgrind with --suppressions=etc/boehm-gc.suppressions
+
+If despite using the suppressions file you see some spurious warning,
+please use --gen-suppressions=yes and add the new suppessions to
+boehm-gc.suppressions.
