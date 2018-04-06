@@ -98,6 +98,43 @@ append_integer (pvm_program program,
   pvm_push_val (program, val);
 }
 
+/* Generate code for a peek operation to TYPE, which should be a
+   simple type, i.e. integral or string  */
+
+static void
+append_peek (pvm_program program, pkl_ast_node type)
+{
+  char insn[1024];
+  int type_code = PKL_AST_TYPE_CODE (type);
+
+  strcpy (insn, "peek");
+  if (type_code == PKL_TYPE_INTEGRAL)
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      if ((size - 1) & ~0x1f)
+        strcat (insn, "l");
+      else
+        strcat (insn, "i");
+
+      if (!sign)
+        strcat (insn, "u");
+
+      pvm_append_instruction_name (program, insn);
+      pvm_append_unsigned_literal_parameter (program,
+                                             (jitter_uint) size);
+    }
+  else if (type_code == PKL_TYPE_STRING)
+    {
+      strcat (insn, "s");
+
+      pvm_append_instruction_name (program, insn);
+    }
+  else
+    assert (0); /* XXX turn this into an ICE.  */
+}
+
 /* Generate code to convert an integer value from FROM_TYPE to
    TO_TYPE.  Both types should be integral types.  */
 
@@ -430,6 +467,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
        reorder fields.  */
     assert (0);
 
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | MAP_TYPE
+ * | MAP_OFFSET
+ * MAP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pvm_program program = payload->program;
+
+  pkl_ast_node map = PKL_PASS_NODE;
+  pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
+
+  switch (PKL_AST_TYPE_CODE (map_type))
+    {
+    case PKL_TYPE_INTEGRAL:
+    case PKL_TYPE_STRING:
+      append_peek (program, map_type);
+      break;
+    case PKL_TYPE_OFFSET:
+      append_peek (program, PKL_AST_TYPE_O_BASE_TYPE (map_type));
+      PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (map_type));
+      PVM_APPEND_INSTRUCTION (program, mko);
+      break;
+    case PKL_TYPE_ARRAY:
+    case PKL_TYPE_STRUCT:
+    default:
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
+               "unhandled node type in codegen for node map #%" PRIu64,
+               PKL_AST_UID (map));
+      break;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1171,6 +1245,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),
+   PKL_PHASE_DF_HANDLER (PKL_AST_MAP, pkl_gen_df_map),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_df_array_ref),
    PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_df_array_initializer),
