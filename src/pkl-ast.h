@@ -49,6 +49,7 @@ enum pkl_ast_code
   PKL_AST_STRUCT_REF,
   PKL_AST_OFFSET,
   PKL_AST_CAST,
+  PKL_AST_MAP,
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
@@ -730,6 +731,27 @@ pkl_ast_node pkl_ast_make_cast (pkl_ast ast,
                                 pkl_ast_node type,
                                 pkl_ast_node exp);
 
+/* PKL_AST_MAP nodes represent maps, i.e. the mapping of some type at
+   some offset in IO space.
+
+   TYPE is the mapped type.
+   OFFSET is the offset in IO space where the TYPE is mapped.  */
+
+#define PKL_AST_MAP_TYPE(AST) ((AST)->map.type)
+#define PKL_AST_MAP_OFFSET(AST) ((AST)->map.offset)
+
+struct pkl_ast_map
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *type;
+  union pkl_ast_node *offset;
+};
+
+pkl_ast_node pkl_ast_make_map (pkl_ast ast,
+                               pkl_ast_node type,
+                               pkl_ast_node offset);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -751,6 +773,7 @@ union pkl_ast_node
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_offset offset;
   struct pkl_ast_cast cast;
+  struct pkl_ast_map map;
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;
