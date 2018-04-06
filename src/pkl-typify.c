@@ -728,8 +728,7 @@ struct pkl_phase pkl_phase_typify1 =
 
 
 
-/* An array type is considered complete if the number of elements
-   contained in the array is known, and it is constant.  */
+/* Determine the completeness of a type node.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type)
 {
