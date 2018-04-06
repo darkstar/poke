@@ -685,11 +685,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of a map is the type of the mapped value.  The expression
+   in a map should be an offset.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_map)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node map = PKL_PASS_NODE;
+  pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
+  pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
+  pkl_ast_node map_offset_type = PKL_AST_TYPE (map_offset);
+
+  if (PKL_AST_TYPE_CODE (map_offset_type) != PKL_TYPE_OFFSET)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (map_offset),
+                 "invalid offset in map");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  PKL_AST_TYPE (map) = ASTREF (map_type);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
 
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify1_df_cast),
+   PKL_PHASE_DF_HANDLER (PKL_AST_MAP, pkl_typify1_df_map),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify1_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify1_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_df_array_ref),

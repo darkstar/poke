@@ -422,6 +422,11 @@ primary:
                     PKL_AST_LOC ($3) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
+        | type_specifier '@' expression
+                {
+                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($$) = @$;
+                }
 	;
 
 struct_elem_list:
