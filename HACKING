@@ -200,5 +200,10 @@ contains a list of suppresions.
 Invoke valgrind with --suppressions=etc/boehm-gc.suppressions
 
 If despite using the suppressions file you see some spurious warning,
-please use --gen-suppressions=yes and add the new suppessions to
-boehm-gc.suppressions.
+please use:
+
+$ valgrind --tool=memcheck --gen-suppressions=all --log-file=raw.log
+
+Then process raw.log with the etc/parse-valgrind-suppressions.sh
+script, wilcard the result as much as you can, and append the results
+to etc/boehm-gc.suppressions.
