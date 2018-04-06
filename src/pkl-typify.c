@@ -565,7 +565,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
   for (t = PKL_AST_STRUCT_ELEMS (node); t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node struct_elem_type
-        =  PKL_AST_TYPE (t);
+        =  pkl_ast_make_struct_elem_type (PKL_PASS_AST,
+                                          PKL_AST_STRUCT_ELEM_NAME (t),
+                                          PKL_AST_TYPE (t));
+      PKL_AST_LOC (struct_elem_type) = PKL_AST_LOC (t);
 
       struct_elem_types = pkl_ast_chainon (struct_elem_types,
                                            ASTREF (struct_elem_type));
@@ -628,8 +631,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
       pkl_ast_node struct_elem_type_name
         = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
       
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (struct_elem_type_name),
-                  PKL_AST_IDENTIFIER_POINTER (field_name)) == 0)
+      if (struct_elem_type_name
+          && strcmp (PKL_AST_IDENTIFIER_POINTER (struct_elem_type_name),
+                     PKL_AST_IDENTIFIER_POINTER (field_name)) == 0)
         {
           type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
           break;

@@ -1432,6 +1432,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           break;
         case PKL_TYPE_STRUCT:
           PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%zu");
+          IPRINTF ("elems:\n");
           PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
           break;
         case PKL_TYPE_OFFSET:
