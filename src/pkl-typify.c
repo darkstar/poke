@@ -587,20 +587,12 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
 {
   pkl_ast_node struct_elem = PKL_PASS_NODE;
-  pkl_ast_node struct_elem_name
-    = PKL_AST_STRUCT_ELEM_NAME (struct_elem);
   pkl_ast_node struct_elem_exp
     = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
   pkl_ast_node struct_elem_exp_type
     = PKL_AST_TYPE (struct_elem_exp);
   
-  pkl_ast_node type
-    = pkl_ast_make_struct_elem_type (PKL_PASS_AST,
-                                     struct_elem_name,
-                                     struct_elem_exp_type);
-
-  PKL_AST_LOC (type) = PKL_AST_LOC (struct_elem);
-  PKL_AST_TYPE (struct_elem) = ASTREF (type);
+  PKL_AST_TYPE (struct_elem) = ASTREF (struct_elem_exp_type);
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
