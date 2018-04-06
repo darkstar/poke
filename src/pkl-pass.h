@@ -275,8 +275,8 @@ pkl_phase_parent_in (pkl_ast_node parent,
       goto _exit;                                                       \
     }
 
-/* Traverse AST in a depth-first fashion, applying the provided phases
-   (or transformations) in sequence to each AST node.
+/* Traverse the given AST, applying the provided phases (or
+   transformations) in sequence to each AST node.
    
    PHASES is a NULL-terminated array of pointers to node handlers.
 
