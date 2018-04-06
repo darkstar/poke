@@ -224,7 +224,7 @@ PKL_PHASE_END_HANDLER
 
 /* The following operations only accept integers.  */
 
-#define CASE_INTEGRAL                           \
+#define CASE_INTEGRAL                                                   \
   case PKL_TYPE_INTEGRAL:                                               \
   {                                                                     \
     int signed_p = (PKL_AST_TYPE_I_SIGNED (t1)                          \
@@ -356,8 +356,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_mul)
       int signed_p;
       size_t size;
 
-      /* One operand must be an offset, the other one an integral */
-
+      /* One operand must be an offset, the other an integral */
       if (t1_code == PKL_TYPE_INTEGRAL && t2_code == PKL_TYPE_OFFSET)
         {
           offset_type = t2;
@@ -469,14 +468,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
-  /* Check that the types of all the array elements are the same, and
-     derive the type of the array from the first of them.  */
-
   pkl_ast_node array = PKL_PASS_NODE;
   pkl_ast_node initializers = PKL_AST_ARRAY_INITIALIZERS (array);
   
   pkl_ast_node tmp, type = NULL, array_nelem, array_nelem_type;
 
+  /* Check that the types of all the array elements are the same, and
+     derive the type of the array from the first of them.  */
   for (tmp = initializers; tmp; tmp = PKL_AST_CHAIN (tmp))
     {
       pkl_ast_node initializer = PKL_AST_ARRAY_INITIALIZER_EXP (tmp);
