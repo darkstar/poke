@@ -497,6 +497,55 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
       PVM_APPEND_INSTRUCTION (program, mko);
       break;
     case PKL_TYPE_ARRAY:
+      {
+        pkl_ast_node array_elem_type = PKL_AST_TYPE_A_ETYPE (map_type);
+        pkl_ast_node array_nelems = PKL_AST_TYPE_A_NELEM (map_type);
+
+        assert (array_nelems != NULL); /* XXX implement foo[] arrays
+                                          later.  */
+        
+        /* 
+         * Algorithm used when the number of elements of the array are
+         * specified:
+         *
+         * 00    push etype  # etype atype
+         * 01    push atype  # etype atype
+         * 02    tyagetn     # etype atype nelems
+         * 03 .L1:
+         * 04    dup         # etype atype nelems nelems
+         * 05    tyagett     # etype atype nelems nelems etype
+         * 06    siz         # etype atype nelems nelems esize  (siz should return bits)
+         * 07    mullu       # etype atype nelems idx
+         * 08    dup         # etype atype nelems idx idx
+         * 09    push 1UL    # etype atype nelems idx idx 1UL
+         * 10    mko         # etype atype nelems idx off
+         *    #if ETYPE is simple
+         * 11    peek        # etype atype nelems idx val
+         *    #else
+         * 12    push etype  # etype atype nelems idx off etype
+         * 13    swap        # etype atype nelems idx etype off
+         * 14    mkm         # etype atype nelems idx map
+         *    #endif
+         * 15    rot         # etype nelems idx val/map atype
+         * 16    rot         # etype idx val/map atype nelems
+         * 17    push 1      # etype idx val/map atype nelems 1
+         * 18    sublu       # etype idx val/map atype (nelems-1)
+         * 19    bnz L1
+         * 20    drop        # etype [idx val/map]... atype
+         * 21    tyagetn     # etype [idx val/map]... atype nelems
+         * 22    nip         # etype [idx val/map]... nelems
+         * 23    dup         # etype [idx val/map]... nelems nelems
+         * 24    mka         # array
+         */
+
+        /* 00 */
+        PKL_PASS_SUBPASS (array_elem_type);
+        PKL_PASS_SUBPASS (map_type);
+        PVM_APPEND_INSTRUCTION (program, tyagetn);
+
+        PVM_APPEND_INSTRUCTION (program, mka);
+        break;
+      }
     case PKL_TYPE_STRUCT:
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),

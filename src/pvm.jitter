@@ -1296,7 +1296,7 @@ end
 
 ## Array instructions.
 
-# TYP [IDX VAL]... ULONG(ninitializer) ULONG(nelem) -> ARR
+# TYP [IDX VAL]... ULONG(nelem) ULONG(ninitializer) -> ARR
 instruction mka ()
   code
     size_t i;
@@ -1440,6 +1440,8 @@ end
 
 ## Type related instructions.
 
+# Integral types
+
 instruction mktyi () # ULONG UINT -> TYP
   code
     pvm_val size = JITTER_UNDER_TOP_STACK ();
@@ -1450,11 +1452,15 @@ instruction mktyi () # ULONG UINT -> TYP
   end
 end
 
+# String types
+
 instruction mktys () # _ -> TYP
   code
     JITTER_PUSH_STACK (pvm_make_string_type ());
   end
 end
+
+# Offset types
 
 instruction mktyo () # TYP INT -> TYP
   code
@@ -1465,11 +1471,15 @@ instruction mktyo () # TYP INT -> TYP
   end
 end
 
+# Map types
+
 instruction mktym () # _ -> TYP
   code
     JITTER_PUSH_STACK (pvm_make_map_type ());
   end
 end
+
+# Array types
 
 instruction mktya () # TYP ULONG -> TYP
   code
@@ -1478,6 +1488,20 @@ instruction mktya () # TYP ULONG -> TYP
 #undef F
   end
 end
+
+instruction tyagetn () # TYP -> TYP TYP
+  code
+    JITTER_PUSH_STACK (PVM_VAL_TYP_A_NELEM (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction tyagett () # TYP -> TYP TYP
+  code
+    JITTER_PUSH_STACK (PVM_VAL_TYP_A_ETYPE (JITTER_TOP_STACK ()));
+  end
+end
+
+# Struct types
 
 instruction mktysct () # [STRING TYP]... NLONG -> TYP
   code
