@@ -763,36 +763,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
     /* This is a SIZEOF (VALUE).  Nothing to do.  */
     PKL_PASS_DONE;
 
-  /* XXX: the logic in this switch is duplicated from the other rules.
-     Abstract it in a single function.  */
-  switch (PKL_AST_TYPE_CODE (op))
-    {
-    case PKL_TYPE_INTEGRAL:
-    case PKL_TYPE_OFFSET:
-    case PKL_TYPE_STRUCT: /* XXX: this will change.  */
-      PKL_AST_TYPE_COMPLETE (op)
-        = PKL_AST_TYPE_COMPLETE_YES;
-      break;
-    case PKL_TYPE_STRING:
-      PKL_AST_TYPE_COMPLETE (op)
-        = PKL_AST_TYPE_COMPLETE_NO;
-      break;
-    case PKL_TYPE_ARRAY:
-      {
-        pkl_ast_node nelem
-          = PKL_AST_TYPE_A_NELEM (op);
-
-        int complete = PKL_AST_TYPE_COMPLETE_NO;
-
-        if (nelem && PKL_AST_LITERAL_P (nelem))
-          complete = PKL_AST_TYPE_COMPLETE_YES;
-
-        PKL_AST_TYPE_COMPLETE (op) = complete;
-        break;
-      }
-    default:
-      break;
-    }
+  PKL_AST_TYPE_COMPLETE (op) = pkl_ast_type_is_complete (op);
 }
 PKL_PHASE_END_HANDLER
 
