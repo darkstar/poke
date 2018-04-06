@@ -731,23 +731,10 @@ struct pkl_phase pkl_phase_typify1 =
 /* An array type is considered complete if the number of elements
    contained in the array is known, and it is constant.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type)
 {
   pkl_ast_node type = PKL_PASS_NODE;
-  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
-
-  int complete = PKL_AST_TYPE_COMPLETE_NO;
-
-  if (nelem && PKL_AST_LITERAL_P (nelem))
-    complete = PKL_AST_TYPE_COMPLETE_YES;
-
-  PKL_AST_TYPE_COMPLETE (type) = complete;
-}
-PKL_PHASE_END_HANDLER
-
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type_struct)
-{
-  PKL_AST_TYPE_COMPLETE (PKL_PASS_NODE) = PKL_AST_TYPE_COMPLETE_YES;
+  PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
 }
 PKL_PHASE_END_HANDLER
 
@@ -770,7 +757,7 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type_array),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type_struct),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type),
+   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),
   };
