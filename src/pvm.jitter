@@ -1513,21 +1513,38 @@ end
 
 # IO instructions
 
-instruction mkm () # TYP ULONG -> MAP
+instruction peeki (?n) # OFF -> INT
   code
-#define F(res, a, b) { res = pvm_make_map (a, b); }
-    JITTER_BINARY_STACK (F);  
-#undef F
+    /* XXX: use IO  */
+    JITTER_TOP_STACK () = pvm_make_int (0, JITTER_ARGN0);
   end
 end
 
-instruction peek () # MAP -> MAP VAL
+instruction peekiu (?n) # OFF -> UINT
   code
+    /* XXX: use IO  */
+    JITTER_TOP_STACK () = pvm_make_uint (0, JITTER_ARGN0);
   end
 end
 
-instruction poke () # MAP VAL -> MAP
+instruction peekl (?n) # OFF -> LONG
   code
+    /* XXX: use IO  */
+    JITTER_TOP_STACK () = pvm_make_long (0, JITTER_ARGN0);
+  end
+end
+
+instruction peeklu (?n) # OFF -> ULONG
+  code
+    /* XXX: use IO  */
+    JITTER_TOP_STACK () = pvm_make_ulong (0, JITTER_ARGN0);
+  end
+end
+
+instruction peeks () # OFF -> STR
+  code
+    /* XXX: use IO  */
+    JITTER_TOP_STACK () = pvm_make_string ("");
   end
 end
 
