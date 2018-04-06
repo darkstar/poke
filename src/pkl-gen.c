@@ -510,14 +510,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
       break;
     case PKL_TYPE_ARRAY:
       {
-#if 0
         pkl_ast_node array_elem_type = PKL_AST_TYPE_A_ETYPE (map_type);
         pkl_ast_node array_nelems = PKL_AST_TYPE_A_NELEM (map_type);
         jitter_label loop_label = jitter_fresh_label (program);
 
         assert (array_nelems != NULL); /* XXX implement foo[] arrays
                                           later.  */
-#endif        
         /* 
          * Algorithm used when the number of elements of the array are
          * specified:
@@ -552,7 +550,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * 24    mka         # array
          */
 
-#if 0
         /* 00 */
         PKL_PASS_SUBPASS (array_elem_type);
         PKL_PASS_SUBPASS (map_type);
@@ -608,7 +605,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
 
         /* 24 */
         PVM_APPEND_INSTRUCTION (program, mka);
-#endif        
         break;
       }
     case PKL_TYPE_STRUCT:

@@ -1144,6 +1144,35 @@ instruction bzlu (?f)
   end
 end
 
+instruction bnzi (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_NONZERO (PVM_VAL_INT (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction bnziu (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_NONZERO (PVM_VAL_UINT (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction bnzl (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_NONZERO (PVM_VAL_LONG (tmp), JITTER_ARGF0);
+  end
+end
+
+instruction bnzlu (?f)
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_NONZERO (PVM_VAL_ULONG (tmp), JITTER_ARGF0);
+  end
+end
+
+
 
 
 ## Conversion instructions.
