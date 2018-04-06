@@ -517,6 +517,47 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
   return res;
 }
 
+/* Return PKL_AST_TYPE_COMPLETE_YES if the given TYPE is a complete
+   type.  Return PKL_AST_TYPE_COMPLETE_NO otherwise.  This function
+   assumes that the children of TYPE have correct completeness
+   annotations.  */
+
+int
+pkl_ast_type_is_complete (pkl_ast_node type)
+{
+  int complete = PKL_AST_TYPE_COMPLETE_UNKNOWN;
+  
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+      /* Integral, offset and struct types are always complete.  */
+    case PKL_TYPE_INTEGRAL:
+    case PKL_TYPE_OFFSET:
+    case PKL_TYPE_STRUCT:
+      complete = PKL_AST_TYPE_COMPLETE_YES;
+      break;
+      /* String types are never complete.  */
+    case PKL_TYPE_STRING:
+      complete = PKL_AST_TYPE_COMPLETE_NO;
+      break;
+      /* Array types are complete if the number of elements in the
+         array are specified and it is a literal expression.  */
+    case PKL_TYPE_ARRAY:
+      {
+        pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
+
+        if (nelem && PKL_AST_LITERAL_P (nelem))
+          complete = PKL_AST_TYPE_COMPLETE_YES;
+        else
+          complete = PKL_AST_TYPE_COMPLETE_NO;
+      }
+    default:
+      break;
+    }
+
+  assert (complete != PKL_AST_TYPE_COMPLETE_UNKNOWN);
+  return complete;
+}
+
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node

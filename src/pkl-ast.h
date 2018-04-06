@@ -644,6 +644,7 @@ pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 pkl_ast_node pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type);
+int pkl_ast_type_is_complete (pkl_ast_node type);
 
 /* PKL_AST_DECL nodes represent the declaration of a named entity:
    function, type, variable....
