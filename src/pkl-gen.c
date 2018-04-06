@@ -366,6 +366,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 PKL_PHASE_END_HANDLER
 
 /*
+ * TYPE
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type)
+{
+  /* Do not generate code for PLK_AST_TYPE (STRUCT).  */
+  if (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRUCT)
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * TYPE_OFFSET
  * | BASE_TYPE
  * | UNIT
@@ -1339,6 +1351,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   {
+   PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
