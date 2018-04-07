@@ -527,7 +527,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
          * XXX: a base register for peek instructions? g0
          *         JITTERLISPVM_APPEND_REGISTER_PARAMETER (p, g(class), register_arg/number?);
          *         The prologue should set a [0 b] to the base register.
-         * XXX: and a scratch register: g1
+         * XXX: and a loop control register: g1
          *
          * Algorithm used when the number of elements of the array are
          * specified:
