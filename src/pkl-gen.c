@@ -521,10 +521,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
         assert (array_nelems != NULL); /* XXX implement foo[] arrays
                                           later.  */
         /* 
+         * XXX: macro-assembler in pkl-asm.c, with support for loops,
+         *      conditionals, operations on complex types, etc.
+         *
+         * XXX: a base register for peek instructions? g0
+         *         JITTERLISPVM_APPEND_REGISTER_PARAMETER (p, g(class), register_arg/number?);
+         *         The prologue should set a [0 b] to the base register.
+         * XXX: and a scratch register: g1
+         *
          * Algorithm used when the number of elements of the array are
          * specified:
          *
-         *                   # offset
+         *       (save current base_offset in the stack) # map_off base_off
+         *       swap # base_off map_off
+         *       (put top of stack in base register) # base_off
+         *
          * 00    push etype  # etype atype
          * 01    push atype  # etype atype
          * 02    tyagetn     # etype atype nelems
@@ -616,7 +627,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
 
         /* 15 */
         PVM_APPEND_INSTRUCTION (program, rot);
-        PVM_APPEND_INSTRUCTION (program, rot);
+        //        PVM_APPEND_INSTRUCTION (program, rot);
         pvm_push_val (program, pvm_make_ulong (1, 64));
         PVM_APPEND_INSTRUCTION (program, sublu);
 

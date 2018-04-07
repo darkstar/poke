@@ -25,7 +25,7 @@ end
 
 ## Register classes.
 
-register-class r 5
+register-class r 2
   code
     union jitter_word
   end
@@ -372,6 +372,7 @@ instruction sublu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
+      printf ("SUBLU %lu - %lu = %lu\n", PVM_VAL_ULONG (a), PVM_VAL_ULONG (b), PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b));\
     res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
@@ -416,6 +417,7 @@ instruction mullu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
+    printf ("MULLU %lu * %lu = %lu\n", PVM_VAL_ULONG (a), PVM_VAL_ULONG (b), PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b));\
     res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
@@ -1580,35 +1582,35 @@ end
 
 instruction peeki (?n) # OFF -> INT
   code
-    /* XXX: use IO  */
+    /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_int (0, JITTER_ARGN0);
   end
 end
 
 instruction peekiu (?n) # OFF -> UINT
   code
-    /* XXX: use IO  */
+    /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_uint (0, JITTER_ARGN0);
   end
 end
 
 instruction peekl (?n) # OFF -> LONG
   code
-    /* XXX: use IO  */
+    /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_long (0, JITTER_ARGN0);
   end
 end
 
 instruction peeklu (?n) # OFF -> ULONG
   code
-    /* XXX: use IO  */
+    /* XXX: use IO  and a base register */
     JITTER_TOP_STACK () = pvm_make_ulong (0, JITTER_ARGN0);
   end
 end
 
 instruction peeks () # OFF -> STR
   code
-    /* XXX: use IO  */
+    /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_string ("");
   end
 end
