@@ -387,8 +387,8 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
   if (insn < PKL_INSN_MACRO)
     {
-      /* This is a normal instruction.  Process its arguments and
-         append it to the jitter program.  */
+      /* This is a PVM instruction.  Process its arguments and append
+         it to the jitter program.  */
 
       const char *insn_name = insn_names[insn];
       const char *p;
