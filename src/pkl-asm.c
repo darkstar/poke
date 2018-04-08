@@ -25,8 +25,8 @@
 #include "pkl-asm.h"
 
 /* In order to allow nested multi-function macros, like conditionals
-   and loops, the assembler supports the notion of "nest levels".  For
-   example, consider the following conditional nested in a loop:
+   and loops, the assembler supports the notion of "nesting levels".
+   For example, consider the following conditional code:
 
       ... top-level ...
 
