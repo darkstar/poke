@@ -329,7 +329,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
   pkl_asm_insn (pasm, PKL_INSN_NIP);
 
-  /* (magnitude * unit) / res_unit */
+  /* (magnitude * from_unit) / to_unit */
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
   PKL_PASS_SUBPASS (to_unit); /* XXX shit */
   pvm_asm_int (pasm, PKL_INSN_NTON, unit_type, base_type);
