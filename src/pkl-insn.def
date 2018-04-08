@@ -35,15 +35,54 @@
 
    Macros don't have instruction names.  */
 
+
+/* Stack manipulation instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_PUSH, "v", "push")
+PKL_DEF_INSN (PKL_INSN_DROP, "", "drop")
+PKL_DEF_INSN (PKL_INSN_SWAP, "", "swap")
+PKL_DEF_INSN (PKL_INSN_NIP, "", "nip")
+PKL_DEF_INSN (PKL_INSN_DUP, "", "dup")
+PKL_DEF_INSN (PKL_INSN_ROT, "", "rot")
+PKL_DEF_INSN (PKL_INSN_NROT, "", "nrot")
+
+/* Integer arithmetic instructions.  */
+
 PKL_DEF_INSN (PKL_INSN_ADDI, "", "addi")
 PKL_DEF_INSN (PKL_INSN_ADDIU, "", "addiu")
 PKL_DEF_INSN (PKL_INSN_ADDL, "", "addl")
 PKL_DEF_INSN (PKL_INSN_ADDLU, "", "addlu")
+
+PKL_DEF_INSN (PKL_INSN_SUBI, "", "subi")
+PKL_DEF_INSN (PKL_INSN_SUBIU, "", "subiu")
+PKL_DEF_INSN (PKL_INSN_SUBL, "", "subl")
+PKL_DEF_INSN (PKL_INSN_SUBLU, "", "sublu")
+
+PKL_DEF_INSN (PKL_INSN_MULI, "", "muli")
+PKL_DEF_INSN (PKL_INSN_MULIU, "", "muliu")
+PKL_DEF_INSN (PKL_INSN_MULL, "", "mull")
+PKL_DEF_INSN (PKL_INSN_MULLU, "", "mullu")
+
+PKL_DEF_INSN (PKL_INSN_DIVI, "", "divi")
+PKL_DEF_INSN (PKL_INSN_DIVIU, "", "diviu")
+PKL_DEF_INSN (PKL_INSN_DIVL, "", "divl")
+PKL_DEF_INSN (PKL_INSN_DIVLU, "", "divlu")
+
+PKL_DEF_INSN (PKL_INSN_MODI, "", "modi")
+PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
+PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
+PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
+
+
+/* IO instructions.  */
+
 PKL_DEF_INSN (PKL_INSN_PEEKI, "", "peeki")
 PKL_DEF_INSN (PKL_INSN_PEEKIU, "", "peekiu")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "", "peekl")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
+
+/* Conversion instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_ITOI, "n", "itoi")
 PKL_DEF_INSN (PKL_INSN_ITOIU, "n", "itoiu")
@@ -65,7 +104,9 @@ PKL_DEF_INSN (PKL_INSN_LUTOIU, "n", "lutoiu")
 PKL_DEF_INSN (PKL_INSN_LUTOL, "n", "lutol")
 PKL_DEF_INSN (PKL_INSN_LUTOLU, "n", "lutol")
 
+/* Miscellaneous instructions.  */
 
+PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
