@@ -32,29 +32,38 @@
 
 /* Instructions.  */
 
-#define PKL_DEF_INSN(SYM, ARGS) SYM,
 enum pkl_asm_insn
 {
-#include "pkl-insn.def"
-};
+#define PKL_DEF_INSN(SYM, ARGS) SYM,
+#define PKL_DEF_MINSN(SYM, ARGS)
+#  include "pkl-insn.def"
 #undef PKL_DEF_INSN
+#undef PKL_DEF_MINSN
 
-/* The following struct defines the state of an assembler
-   instance.  */
-
-struct pkl_asm
-{
-  /* PVM program being assembled.  */
-  pvm_program program;
-  /* Number of instructions assembled in the program.  */
-  size_t insns_added;
+ PKL_INSN_MACRO, /* This separates "real" PVM instructions from
+                    macro-instructions.  PKL_INSN_MACRO should never
+                    be passed to pkl_asm_insn.  */
+ 
+#define PKL_DEF_INSN(SYM, ARGS)
+#define PKL_DEF_MINSN(SYM, ARGS) SYM,
+#  include "pkl-insn.def"
+#undef PKL_DEF_INSN
+#undef PKL_DEF_MINSN
 };
+
+
+/* Opaque data structure for an assembler instance.  The struct is
+   defined in pkl-asm.c.  */
 
 typedef struct pkl_asm *pkl_asm;
 
 /* Create and return a new assembler instance.  */
 
 pkl_asm pkl_asm_new (void);
+
+/* Get the program created by an assembler instance.  */
+
+pvm_program pkl_asm_get_program (pkl_asm pasm);
 
 /* Destroy an assembler instance, freeing all used resources.  */
 

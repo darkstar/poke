@@ -22,3 +22,13 @@
 #include "pvm.h"
 #include "pkl-asm.h"
 
+/* The following struct defines the state of an assembler
+   instance.  */
+
+struct pkl_asm
+{
+  /* PVM program being assembled.  */
+  pvm_program program;
+  /* Number of instructions assembled in the program.  */
+  size_t insns_added;
+};
