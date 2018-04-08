@@ -332,7 +332,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   /* (magnitude * unit) / res_unit */
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
   PKL_PASS_SUBPASS (to_unit); /* XXX shit */
-  append_int_cast (program, unit_type, base_type);
+  pvm_asm_int (pasm, PKL_INSN_NTON, unit_type, base_type);
   append_int_op (program, "bz", base_type);
   pvm_append_symbolic_label_parameter (program,
                                        "Ldivzero");
