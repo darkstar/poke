@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* PKL_DEF_INSN defines an instruction, or a macro-instruction.
+/* This file contains the definition of the instructions known to the
+   poke macro-assembler.
+
+   PKL_DEF_INSN defines an instruction, or a macro-instruction.
 
    The first column is the code for the instruction.
 
@@ -121,10 +124,10 @@ PKL_DEF_INSN (PKL_INSN_TYPOF, "", "typof")
 
 /* IO instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_PEEKI, "", "peeki")
-PKL_DEF_INSN (PKL_INSN_PEEKIU, "", "peekiu")
-PKL_DEF_INSN (PKL_INSN_PEEKL, "", "peekl")
-PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
+PKL_DEF_INSN (PKL_INSN_PEEKI, "n", "peeki")
+PKL_DEF_INSN (PKL_INSN_PEEKIU, "n", "peekiu")
+PKL_DEF_INSN (PKL_INSN_PEEKL, "n", "peekl")
+PKL_DEF_INSN (PKL_INSN_PEEKLU, "n", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
 
 /* Miscellaneous instructions.  */
@@ -136,7 +139,7 @@ PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
    macro instructions, and it should not be assembled.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
-PKL_DEF_INSN (PKL_INSN_NTON, "a", "")
+PKL_DEF_INSN (PKL_INSN_NTON, "aa", "")
 PKL_DEF_INSN (PKL_INSN_OGETMU, "aaa", "")
 PKL_DEF_INSN (PKL_INSN_ADD, "a", "")
 PKL_DEF_INSN (PKL_INSN_SUB, "a", "")

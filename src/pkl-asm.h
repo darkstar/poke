@@ -66,24 +66,24 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
 
 /* Conditionals.
  *
- *  pkl_asm_if (asm, EXP);
+ *  pkl_asm_if (pasm, EXP);
  *
  *  ... then body ...
  *
- *  pkl_asm_else (asm);
+ *  pkl_asm_else (pasm);
  *
  *  ... else body ...
  *
- *  pkl_asm_endif (asm);
+ *  pkl_asm_endif (pasm);
  */
 
 /* Loops.
  *
- * pkl_asm_dotimes (asm, EXP);
+ * pkl_asm_dotimes (pasm, EXP)
  *
  * ... loop body ...
  *
- * pkl_asm_enddotimes (asm);
+ * pkl_asm_enddotimes (pasm);
  */
 
 #endif /* PKL_ASM_H */
