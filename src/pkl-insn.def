@@ -40,6 +40,7 @@ PKL_DEF_INSN (PKL_INSN_PEEKIU, "")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "")
+PKL_DEF_INSN (PKL_INSN_NOTE, "v")
 
 /* Next, the macro-instructions.  */
 

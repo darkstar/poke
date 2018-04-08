@@ -168,6 +168,13 @@ instruction nop ()
   end
 end
 
+instruction note (?n)
+  code
+  end
+end
+
+
+
 ## Stack manipulation instructions
 
 instruction drop () # A -> _
