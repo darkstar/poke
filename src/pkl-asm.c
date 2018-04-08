@@ -220,6 +220,28 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
   else
     {
       /* This is a macro-instruction.  Dispatch to the corresponding
-         macro handler.  */
+         macro-instruction handler.  */
+
+      switch (insn)
+        {
+        case PKL_INSN_OGETMU:
+          assert (0); /* XXX */
+          break;
+        case PKL_INSN_ADD:
+          assert (0); /* XXX */
+          break;
+        case PKL_INSN_MUL:
+          assert (0); /* XXX */
+          break;
+        case PKL_INSN_DIV:
+          assert (0); /* XXX */
+          break;
+        case PKL_INSN_PEEK:
+          assert (0); /* XXX */
+          break;
+        case PKL_INSN_MACRO:
+        default:
+          assert (0);
+        }
     }
 }
