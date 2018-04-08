@@ -199,17 +199,23 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             case 'v':
               {
                 pvm_val val = va_arg (valist, pvm_val);
-
                 pkl_asm_push_val (pasm->program, val);
                 break;
               }
             case 'a':
+              assert (0); /* XXX */
               break;
             case 'l':
-              break;
+              {
+                jitter_label label = va_arg (valist, jitter_label);
+                pvm_append_label (pasm->program, label);
+                break;
+              }
             case 'i':
+              assert (0); /* XXX */
               break;
             case 'r':
+              assert (0); /* XXX */
               break;
             }
         }
@@ -217,8 +223,8 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
     }
   else if (insn > PKL_INSN_MACRO)
     {
-      /* This is a macro-instruction.  Process its arguments and
-         dispatch to the corresponding macro handler.  */
+      /* This is a macro-instruction.  Dispatch to the corresponding
+         macro handler.  */
     }
   else
     assert (0);
