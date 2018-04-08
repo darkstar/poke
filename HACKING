@@ -58,6 +58,11 @@ Operands promotion phase:
 - src/pkl-promo.c
 - src/pkl-promo.h
 
+Macro-assembler:
+
+- src/pkl-asm.c
+- src/pkl-asm.h
+
 Poke Virtual Machine
 --------------------
 
