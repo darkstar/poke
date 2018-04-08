@@ -316,13 +316,11 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
                      pkl_ast_node base_type,
                      pkl_ast_node unit_type)
 {
-  /* Dup the offset.  */
+  /* Stack: OFF TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_DUP);
 
   /* Stack: TOUNIT OFF OFF */
-
-  /* Get magnitude and unit.  */
   pkl_asm_insn (pasm, PKL_INSN_OGETM);
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_OGETU);
@@ -331,8 +329,10 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 
   /* Stack: TOUNIT OFF MAGNITUDE UNIT */
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
+
   /* Stack: TOUNIT OFF (MAGNITUDE*UNIT) */
   pkl_asm_insn (pasm, PKL_INSN_ROT);
+
   /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
   /*  append_int_op (pasm->program, "bz", base_type); XXX */
