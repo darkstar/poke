@@ -306,15 +306,14 @@ pkl_asm_insn_intop (pkl_asm pasm,
 }
 
 #if 0
-/* Macro-instruction: OGETMU base_type, unit_type
+/* Macro-instruction: OGETMC base_type, unit_type
    Stack: OFFSET UNIT -> OFFSET CONVERTED_MAGNITUDE
 
    Given an offset and an unit in the stack, generate code to push its
    magnitude converted to the given unit.  */
 
-
 static void
-pkl_asm_insn_ogetmu (pkl_asm pasm,
+pkl_asm_insn_ogetmc (pkl_asm pasm,
                      pkl_ast_node base_type,
                      pkl_ast_node unit_type)
 {
@@ -485,19 +484,17 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
 #if 0
-        case PKL_INSN_OGETMU:
+        case PKL_INSN_OGETMC:
           {
             pkl_ast_node base_type;
             pkl_ast_node unit_type;
-            pkl_ast_node to_unit;
 
             va_start (valist, insn);
             base_type = va_arg (valist, pkl_ast_node);
             unit_type = va_arg (valist, pkl_ast_node);
-            to_unit = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_ogetmu (pasm, base_type, unit_type, to_unit);
+            pkl_asm_insn_ogetmc (pasm, base_type, unit_type);
             break;
           }
 #endif
