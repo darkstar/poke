@@ -27,7 +27,7 @@
    `v' is for a pvm_val.
    `a' is for a pkl_ast_node.
    `l' is for a label.
-   `i' is for an integer.
+   `n' is for an immediate.
    `r' is for register.
 
    The third column is the instruction name, as defined in pvm.jitter.
@@ -44,12 +44,35 @@ PKL_DEF_INSN (PKL_INSN_PEEKIU, "", "peekiu")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "", "peekl")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
+
+PKL_DEF_INSN (PKL_INSN_ITOI, "n", "itoi")
+PKL_DEF_INSN (PKL_INSN_ITOIU, "n", "itoiu")
+PKL_DEF_INSN (PKL_INSN_ITOL, "n", "itol")
+PKL_DEF_INSN (PKL_INSN_ITOLU, "n", "itolu")
+
+PKL_DEF_INSN (PKL_INSN_IUTOI, "n", "iutoi")
+PKL_DEF_INSN (PKL_INSN_IUTOIU, "n", "iutoiu")
+PKL_DEF_INSN (PKL_INSN_IUTOL, "n", "iutol")
+PKL_DEF_INSN (PKL_INSN_IUTOLU, "n", "iutolu")
+
+PKL_DEF_INSN (PKL_INSN_LTOI, "n", "ltoi")
+PKL_DEF_INSN (PKL_INSN_LTOIU, "n", "ltoiu")
+PKL_DEF_INSN (PKL_INSN_LTOL, "n", "ltol")
+PKL_DEF_INSN (PKL_INSN_LTOLU, "n", "ltolu")
+
+PKL_DEF_INSN (PKL_INSN_LUTOI, "n", "lutoi")
+PKL_DEF_INSN (PKL_INSN_LUTOIU, "n", "lutoiu")
+PKL_DEF_INSN (PKL_INSN_LUTOL, "n", "lutol")
+PKL_DEF_INSN (PKL_INSN_LUTOLU, "n", "lutol")
+
+
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
    macro instructions, and it should not be assembled.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
+PKL_DEF_INSN (PKL_INSN_NTON, "a", "")
 PKL_DEF_INSN (PKL_INSN_OGETMU, "aaa", "")
 PKL_DEF_INSN (PKL_INSN_ADD, "a", "")
 PKL_DEF_INSN (PKL_INSN_SUB, "a", "")

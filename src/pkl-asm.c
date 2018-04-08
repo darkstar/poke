@@ -131,6 +131,102 @@ pkl_asm_push_val (pvm_program program, pvm_val val)
 #endif
 }
 
+/* Macro-instruction: NTON from_type, to_type
+   Stack: VAL(from_type) -> VAL(to_type)
+
+   Generate code to convert an integer value from FROM_TYPE to
+   TO_TYPE.  Both types should be integral types.  */
+
+static void
+pkl_asm_insn_nton  (pkl_asm pasm,
+                    pkl_ast_node from_type,
+                    pkl_ast_node to_type)
+{
+  size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
+  int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
+      
+  size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
+  int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
+  
+  if (from_type_size == to_type_size
+      && from_type_sign == to_type_sign)
+    /* Wheee, nothing to do.  */
+    return;
+  else
+    {
+      static int cast_table[2][2][2][2] =
+        {
+         {
+          {
+           {PKL_INSN_LTOL, PKL_INSN_LTOI},
+           {PKL_INSN_LTOLU, PKL_INSN_LTOIU}
+          },
+          {
+           {PKL_INSN_LUTOL, PKL_INSN_LUTOI},
+           {PKL_INSN_LUTOLU, PKL_INSN_LUTOIU}
+          },
+         },
+         {
+          {
+           {PKL_INSN_ITOL, PKL_INSN_ITOI},
+           {PKL_INSN_ITOLU, PKL_INSN_ITOIU}
+          },
+          {
+           {PKL_INSN_IUTOL, PKL_INSN_IUTOI},
+           {PKL_INSN_IUTOLU, PKL_INSN_IUTOIU}
+          },
+         }
+        };
+
+      int fl = ((from_type_size - 1) & ~0x1f);
+      int fs = from_type_sign;
+      int tl = ((to_type_size - 1) & ~0x1f);
+      int ts = to_type_sign;
+         
+      pkl_asm_insn (pasm,
+                    cast_table [fl][tl][fs][ts],
+                    (jitter_uint) to_type_size);
+    }
+}
+
+#if 0
+/* Macro-instruction: OGETMU base_type, unit_type, to_unit
+   Stack: OFFSET -> OFFSET CONVERTED_MAGNITUDE
+
+   Given an offset in the stack, generate code to push its magnitude
+   converted to unit TO_UNIT.  */
+
+
+static void
+pkl_asm_insn_ogetmu (pkl_asm pasm,
+                     pkl_ast_node base_type,
+                     pkl_ast_node unit_type,
+                     pkl_ast_node to_unit)
+{
+  pvm_program program = pasm->program;
+  
+  /* Dup the offset.  */
+  pkl_asm_insn (pasm, PKL_INSN_DUP);
+
+  /* Get magnitude and unit.  */
+  pkl_asm_insn (pasm, PKL_INSN_OGETM);
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);
+  pkl_asm_insn (pasm, PKL_INSN_OGETU);
+  pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+  /* (magnitude * unit) / res_unit */
+  pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
+  PKL_PASS_SUBPASS (to_unit); /* XXX shit */
+  append_int_cast (program, unit_type, base_type);
+  append_int_op (program, "bz", base_type);
+  pvm_append_symbolic_label_parameter (program,
+                                       "Ldivzero");
+  append_int_op (program, "div", base_type);
+}
+
+#endif
+
 /* The functions below are documented in pkl-asm.h.  */
 
 pkl_asm
@@ -224,9 +320,36 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
       switch (insn)
         {
+        case PKL_INSN_NTON:
+          {
+            pkl_ast_node from_type;
+            pkl_ast_node to_type;
+
+            va_start (valist, insn);
+            from_type = va_arg (valist, pkl_ast_node);
+            to_type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_nton (pasm, from_type, to_type);
+            break;
+          }
+#if 0
         case PKL_INSN_OGETMU:
-          assert (0); /* XXX */
-          break;
+          {
+            pkl_ast_node base_type;
+            pkl_ast_node unit_type;
+            pkl_ast_node to_unit;
+
+            va_start (valist, insn);
+            base_type = va_arg (valist, pkl_ast_node);
+            unit_type = va_arg (valist, pkl_ast_node);
+            to_unit = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_ogetmu (pasm, base_type, unit_type, to_unit);
+            break;
+          }
+#endif
         case PKL_INSN_ADD:
           assert (0); /* XXX */
           break;
