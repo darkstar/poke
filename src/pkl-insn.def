@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* PKL_DEF_INSN defines a PVM instruction.
+/* PKL_DEF_INSN defines an instruction, or a macro-instruction.
 
    The first column is the code for the instruction.
 
@@ -32,7 +32,8 @@
 
    The third column is the instruction name, as defined in pvm.jitter.
    However, beware jitter's name mangling!
-*/
+
+   Macros don't have instruction names.  */
 
 PKL_DEF_INSN (PKL_INSN_ADDI, "", "addi")
 PKL_DEF_INSN (PKL_INSN_ADDIU, "", "addiu")
@@ -45,20 +46,16 @@ PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 
-/* PKL_DEF_MACRO_INSN defines a macro-instruction.
+/* The purpose of PKL_INSN_MACRO is to mark the beginning of
+   macros.  */
+PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
-   The first column is the code for the macro-instruction.
-
-   The second column is a string describing the macro-instruction
-   arguments.  See the documentation for PKL_DEF_INSN above for a
-   description.  */
-
-PKL_DEF_MACRO_INSN (PKL_INSN_OGETMU, "aaa")
-PKL_DEF_MACRO_INSN (PKL_INSN_ADD, "a")
-PKL_DEF_MACRO_INSN (PKL_INSN_SUB, "a")
-PKL_DEF_MACRO_INSN (PKL_INSN_MUL, "a")
-PKL_DEF_MACRO_INSN (PKL_INSN_DIV, "a")
-PKL_DEF_MACRO_INSN (PKL_INSN_PEEK, "a")
+PKL_DEF_INSN (PKL_INSN_OGETMU, "aaa", "")
+PKL_DEF_INSN (PKL_INSN_ADD, "a", "")
+PKL_DEF_INSN (PKL_INSN_SUB, "a", "")
+PKL_DEF_INSN (PKL_INSN_MUL, "a", "")
+PKL_DEF_INSN (PKL_INSN_DIV, "a", "")
+PKL_DEF_INSN (PKL_INSN_PEEK, "a", "")
 
 /*
 Local variables:

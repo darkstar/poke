@@ -162,19 +162,15 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
   static const char *insn_names[] =
     {
 #define PKL_DEF_INSN(SYM, ARGS, NAME) NAME,
-#define PKL_DEF_MACRO_INSN(SYM, ARGS)
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
-#undef PKL_DEF_MACRO_INSN
     };
 
   static const char *insn_args[] =
     {
 #define PKL_DEF_INSN(SYM, ARGS, NAME) ARGS,
-#define PKL_DEF_MACRO_INSN(SYM, ARGS) ARGS,
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
-#undef PKL_DEF_MACRO_INSN
     };    
 
   va_list valist;
@@ -221,11 +217,9 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         }
       va_end (valist);
     }
-  else if (insn > PKL_INSN_MACRO)
+  else
     {
       /* This is a macro-instruction.  Dispatch to the corresponding
          macro handler.  */
     }
-  else
-    assert (0);
 }
