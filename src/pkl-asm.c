@@ -17,18 +17,101 @@
  */
 
 #include <config.h>
+#include <xalloc.h>
 
 #include "pkl.h"
 #include "pvm.h"
 #include "pkl-asm.h"
 
-/* The following struct defines the state of an assembler
-   instance.  */
+/* In order to allow nested multi-function macros, like conditionals
+   and loops, the assembler supports the notion of "nest levels".  For
+   example, consider the following conditional nested in a loop:
+
+      ... top-level ...
+
+      pkl_asm_dotimes (pasm, exp);
+      {
+         ... level-1 ...
+   
+         pkl_asm_if (pasm, exp);
+         {
+            ... level-2 ...
+         }
+         pkl_asm_end_if (pasm);
+      }
+      pkl_asm_end_dotimes (pasm);
+
+   Levels are stacked and managed using the `pkl_asm_pushlevel' and
+   `pkl_asm_poplevel' functions defined below.
+
+   CURRENT_ENV identifies what kind of instruction created the level.
+   This can be either PKL_ASM_ENV_NULL, PKL_ASM_ENV_CONDITIONAL or
+   PKL_ASM_ENV_LOOP.  PKL_ASM_ENV_NULL should only be used at the
+   top-level.
+
+   UP is the link to the previous level, and it is NULL at the
+   top-level.  */
+
+#define PKL_ASM_ENV_NULL 0
+#define PKL_ASM_ENV_CONDITIONAL 1
+#define PKL_ASM_ENV_LOOP 2
+
+struct pkl_asm_level
+{
+  enum pkl_asm_insn current_env;
+  struct pkl_asm_level *up;
+};
+
+/* An assembler instance.
+
+   PROGRAM is the PVM program being assembled.
+   LEVEL is a pointer to the top of a stack of levels.  */
 
 struct pkl_asm
 {
-  /* PVM program being assembled.  */
   pvm_program program;
-  /* Number of instructions assembled in the program.  */
-  size_t insns_added;
+  struct pkl_asm_level *level;
 };
+
+void
+pkl_asm_pushlevel (pkl_asm pasm, int env)
+{
+  struct pkl_asm_level *level
+    = xmalloc (sizeof (struct pkl_asm_level));
+
+  memset (level, 0, sizeof (struct pkl_asm_level));
+  level->up = pasm->level;
+  pasm->level = level;
+}
+
+void
+pkl_asm_poplevel (pkl_asm pasm)
+{
+  struct pkl_asm_level *level = pasm->level;
+
+  pasm->level = level->up;
+  free (level);
+}
+
+pkl_asm
+pkl_asm_new ()
+{
+  pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
+
+  memset (pasm, 0, sizeof (struct pkl_asm));
+
+  pkl_asm_pushlevel (pasm, PKL_INSN_NULL);
+  return pasm;
+}
+
+pvm_program
+pkl_asm_get_program (pkl_asm pasm)
+{
+  return pasm->program;
+}
+
+void
+pkl_asm_free (pkl_asm pasm)
+{
+  free (pasm);
+}

@@ -30,10 +30,13 @@
 /* The macro-assembler provides constants, enumerations, C macros and
    functions to make it easier to program the Poke Virtual Machine.  */
 
-/* Instructions.  */
+/* The user of the assembler refers to specific instructions using the
+   PKL_INSN_* symbols defined below.  See the file pkl-insn.def for
+   detailed information on the supported instructions.  */
 
 enum pkl_asm_insn
 {
+ PKL_INSN_NULL,
 #define PKL_DEF_INSN(SYM, ARGS) SYM,
 #define PKL_DEF_MINSN(SYM, ARGS)
 #  include "pkl-insn.def"
