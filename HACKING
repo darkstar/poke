@@ -62,6 +62,7 @@ Macro-assembler:
 
 - src/pkl-asm.c
 - src/pkl-asm.h
+- src/pkl-insn.def
 
 Poke Virtual Machine
 --------------------

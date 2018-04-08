@@ -24,23 +24,24 @@
 
    `v' is for a pvm_val.
    `a' is for a pkl_ast_node.
+   `i' is for an integer.
    `r' is for register.
 */
 
 /* First, the real PVM instructions.  */
 
-PKL_DEF_INSN (PKL_ASM_INSN_ADDI, "")
-PKL_DEF_INSN (PKL_ASM_INSN_ADDIU, "")
-PKL_DEF_INSN (PKL_ASM_INSN_ADDL, "")
-PKL_DEF_INSN (PKL_ASM_INSN_ADDLU, "")
+PKL_DEF_INSN (PKL_INSN_ADDI, "")
+PKL_DEF_INSN (PKL_INSN_ADDIU, "")
+PKL_DEF_INSN (PKL_INSN_ADDL, "")
+PKL_DEF_INSN (PKL_INSN_ADDLU, "")
 
 /* Next, the macro-instructions.  */
 
-PKL_DEF_INSN (PKL_ASM_INSN_OGETMINUNIT, "")
-PKL_DEF_INSN (PKL_ASM_INSN_ADD_OFFSET, "")
-PKL_DEF_INSN (PKL_ASM_INSN_SUB_OFFSET, "")
-PKL_DEF_INSN (PKL_ASM_INSN_MUL_OFFSET, "")
-PKL_DEF_INSN (PKL_ASM_INSN_DIV_OFFSET, "")
+PKL_DEF_INSN (PKL_INSN_OGETMU, "aaa")
+PKL_DEF_INSN (PKL_INSN_ADD_OFFSET, "")
+PKL_DEF_INSN (PKL_INSN_SUB_OFFSET, "")
+PKL_DEF_INSN (PKL_INSN_MUL_OFFSET, "")
+PKL_DEF_INSN (PKL_INSN_DIV_OFFSET, "")
 
 /*
 Local variables:
