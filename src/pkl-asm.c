@@ -20,5 +20,5 @@
 
 #include "pkl.h"
 #include "pvm.h"
-#include "pkl-asm.c"
+#include "pkl-asm.h"
 

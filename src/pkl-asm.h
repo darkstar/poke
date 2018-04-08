@@ -20,6 +20,7 @@
 #define PKL_ASM_H
 
 #include <config.h>
+#include <stdarg.h>
 #include <jitter/jitter.h>
 
 #include "pkl-gen.h"
@@ -29,40 +30,66 @@
 /* The macro-assembler provides constants, enumerations, C macros and
    functions to make it easier to program the Poke Virtual Machine.  */
 
-typedef struct pkl_asm *pkl_asm; /* This struct is defined in
-                                    pkl-asm.c */
-
 /* Instructions.  */
 
+#define PKL_DEF_INSN(SYM, ARGS) SYM,
 enum pkl_asm_insn
 {
- /* Real PVM instructions.  */
- PKL_ASM_INSN_ADDI,
- PKL_ASM_INSN_ADDIU,
- PKL_ASM_INSN_ADDL,
- PKL_ASM_INSN_ADDLU,
- /* Macro-instructions follow.  */
- PKL_ASM_INSN_ADD_OFFSET,
- PKL_ASM_INSN_SUB_OFFSET,
- PKL_ASM_INSN_MUL_OFFSET,
- PKL_ASM_INSN_DIV_OFFSET,
+#include "pkl-insn.def"
+};
+#undef PKL_DEF_INSN
+
+/* The following struct defines the state of an assembler
+   instance.  */
+
+struct pkl_asm
+{
+  /* PVM program being assembled.  */
+  pvm_program program;
+
+  /* Number of instructions assembled in the program.  */
+  size_t insns_added;
 };
 
-/* The following function inserts the given instruction.  */
+typedef struct pkl_asm *pkl_asm;
 
-void pkl_asm_insn (pkl_asm asm, enum pkl_asm insn);
+/* Create and return a new assembler instance.  PROGRAM is a PVM
+   program that may be partially assembled.  */
+
+pkl_asm pkl_asm_new (pvm_program program);
+
+/* Destroy an assembler instance, freeing all used resources.  */
+
+void pkl_asm_free (pkl_asm pasm);
+
+/* Assemble an instruction INSN and append it to the program being
+   assembled in PASM.  If the instruction takes any argument, they
+   follow after INSN.  */
+
+void pkl_asm_insn (pkl_asm pasm,
+                   enum pkl_asm_insn insn,
+                   ... /* args */);
 
 /* Conditionals.
  *
  *  pkl_asm_if (asm, EXP);
  *
- *  ...
+ *  ... then body ...
  *
  *  pkl_asm_else (asm);
  *
- *  ...
+ *  ... else body ...
  *
  *  pkl_asm_endif (asm);
+ */
+
+/* Loops.
+ *
+ * pkl_asm_dotimes (asm, EXP);
+ *
+ * ... loop body ...
+ *
+ * pkl_asm_enddotimes (asm);
  */
 
 #endif /* PKL_ASM_H */

@@ -1,0 +1,49 @@
+/* pkl-insn.def - Poke macro-assembler instructions.  */
+
+/* Copyright (C) 2018 Jose E. Marchesi */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* The first column is the code for the instruction.
+
+   The second column is a string describing the instruction arguments.
+   If the instruction takes no arguments, this should be the empty
+   string.  Each argument is identified by a letter:
+
+   `v' is for a pvm_val.
+   `a' is for a pkl_ast_node.
+   `r' is for register.
+*/
+
+/* First, the real PVM instructions.  */
+
+PKL_DEF_INSN (PKL_ASM_INSN_ADDI, "")
+PKL_DEF_INSN (PKL_ASM_INSN_ADDIU, "")
+PKL_DEF_INSN (PKL_ASM_INSN_ADDL, "")
+PKL_DEF_INSN (PKL_ASM_INSN_ADDLU, "")
+
+/* Next, the macro-instructions.  */
+
+PKL_DEF_INSN (PKL_ASM_INSN_OGETMINUNIT, "")
+PKL_DEF_INSN (PKL_ASM_INSN_ADD_OFFSET, "")
+PKL_DEF_INSN (PKL_ASM_INSN_SUB_OFFSET, "")
+PKL_DEF_INSN (PKL_ASM_INSN_MUL_OFFSET, "")
+PKL_DEF_INSN (PKL_ASM_INSN_DIV_OFFSET, "")
+
+/*
+Local variables:
+mode:c
+End:
+*/
