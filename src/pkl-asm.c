@@ -101,7 +101,7 @@ pkl_asm_new ()
 
   memset (pasm, 0, sizeof (struct pkl_asm));
 
-  pkl_asm_pushlevel (pasm, PKL_INSN_NULL);
+  pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
   return pasm;
 }
 
@@ -120,6 +120,31 @@ pkl_asm_free (pkl_asm pasm)
 void
 pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 {
-  
+  static const char *insn_names[] =
+    {
+#define PKL_DEF_INSN(SYM, ARGS, NAME) NAME,
+#define PKL_DEF_MACRO_INSN(SYM, ARGS)
+#  include "pkl-insn.def"
+#undef PKL_DEF_INSN
+#undef PKL_DEF_MACRO_INSN
+    };
 
+  //  va_list valist;
+
+  if (insn < PKL_INSN_MACRO)
+    {
+      /* This is a normal instruction.  Process its arguments and
+         append it to the jitter program.  */
+
+      const char *insn_name = insn_names[insn];
+
+      pvm_append_instruction_name (pasm->program, insn_name);
+    }
+  else if (insn > PKL_INSN_MACRO)
+    {
+      /* This is a macro-instruction.  Process its arguments and
+         dispach to the corresponding macro handler.  */
+    }
+  else
+    assert (0);
 }

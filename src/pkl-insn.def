@@ -16,7 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* The first column is the code for the instruction.
+/* PKL_DEF_INSN defines a PVM instruction.
+
+   The first column is the code for the instruction.
 
    The second column is a string describing the instruction arguments.
    If the instruction takes no arguments, this should be the empty
@@ -27,29 +29,36 @@
    `l' is for a label.
    `i' is for an integer.
    `r' is for register.
+
+   The third column is the instruction name, as defined in pvm.jitter.
+   However, beware jitter's name mangling!
 */
 
-/* First, the real PVM instructions.  */
+PKL_DEF_INSN (PKL_INSN_ADDI, "", "addi")
+PKL_DEF_INSN (PKL_INSN_ADDIU, "", "addiu")
+PKL_DEF_INSN (PKL_INSN_ADDL, "", "addl")
+PKL_DEF_INSN (PKL_INSN_ADDLU, "", "addlu")
+PKL_DEF_INSN (PKL_INSN_PEEKI, "", "peeki")
+PKL_DEF_INSN (PKL_INSN_PEEKIU, "", "peekiu")
+PKL_DEF_INSN (PKL_INSN_PEEKL, "", "peekl")
+PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
+PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
+PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 
-PKL_DEF_INSN (PKL_INSN_ADDI, "")
-PKL_DEF_INSN (PKL_INSN_ADDIU, "")
-PKL_DEF_INSN (PKL_INSN_ADDL, "")
-PKL_DEF_INSN (PKL_INSN_ADDLU, "")
-PKL_DEF_INSN (PKL_INSN_PEEKI, "")
-PKL_DEF_INSN (PKL_INSN_PEEKIU, "")
-PKL_DEF_INSN (PKL_INSN_PEEKL, "")
-PKL_DEF_INSN (PKL_INSN_PEEKLU, "")
-PKL_DEF_INSN (PKL_INSN_PEEKS, "")
-PKL_DEF_INSN (PKL_INSN_NOTE, "v")
+/* PKL_DEF_MACRO_INSN defines a macro-instruction.
 
-/* Next, the macro-instructions.  */
+   The first column is the code for the macro-instruction.
 
-PKL_DEF_MINSN (PKL_INSN_OGETMU, "aaa")
-PKL_DEF_MINSN (PKL_INSN_ADD, "a")
-PKL_DEF_MINSN (PKL_INSN_SUB, "a")
-PKL_DEF_MINSN (PKL_INSN_MUL, "a")
-PKL_DEF_MINSN (PKL_INSN_DIV, "a")
-PKL_DEF_MINSN (PKL_INSN_PEEK, "a")
+   The second column is a string describing the macro-instruction
+   arguments.  See the documentation for PKL_DEF_INSN above for a
+   description.  */
+
+PKL_DEF_MACRO_INSN (PKL_INSN_OGETMU, "aaa")
+PKL_DEF_MACRO_INSN (PKL_INSN_ADD, "a")
+PKL_DEF_MACRO_INSN (PKL_INSN_SUB, "a")
+PKL_DEF_MACRO_INSN (PKL_INSN_MUL, "a")
+PKL_DEF_MACRO_INSN (PKL_INSN_DIV, "a")
+PKL_DEF_MACRO_INSN (PKL_INSN_PEEK, "a")
 
 /*
 Local variables:

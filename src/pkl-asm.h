@@ -36,22 +36,21 @@
 
 enum pkl_asm_insn
 {
- PKL_INSN_NULL,
-#define PKL_DEF_INSN(SYM, ARGS) SYM,
-#define PKL_DEF_MINSN(SYM, ARGS)
+#define PKL_DEF_INSN(SYM, ARGS, NAME) SYM,
+#define PKL_DEF_MACRO_INSN(SYM, ARGS)
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
-#undef PKL_DEF_MINSN
+#undef PKL_DEF_MACRO_INSN
 
  PKL_INSN_MACRO, /* This separates "real" PVM instructions from
                     macro-instructions.  PKL_INSN_MACRO should never
                     be passed to pkl_asm_insn.  */
  
-#define PKL_DEF_INSN(SYM, ARGS)
-#define PKL_DEF_MINSN(SYM, ARGS) SYM,
+#define PKL_DEF_INSN(SYM, ARGS, NAME)
+#define PKL_DEF_MACRO_INSN(SYM, ARGS) SYM,
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
-#undef PKL_DEF_MINSN
+#undef PKL_DEF_MACRO_INSN
 };
 
 
