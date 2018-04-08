@@ -59,17 +59,16 @@ enum pkl_asm_insn
 
 typedef struct pkl_asm *pkl_asm;
 
-/* Create and return a new assembler instance.  */
+/* Assembler instances are created and freed using `pkl_asm_new' and
+   `pkl_asm_free' respectively.  */
 
 pkl_asm pkl_asm_new (void);
+void pkl_asm_free (pkl_asm pasm);
 
-/* Get the program created by an assembler instance.  */
+/* The following functions provide access to information managed by an
+   assembler instance.  */
 
 pvm_program pkl_asm_get_program (pkl_asm pasm);
-
-/* Destroy an assembler instance, freeing all used resources.  */
-
-void pkl_asm_free (pkl_asm pasm);
 
 /* Assemble an instruction INSN and append it to the program being
    assembled in PASM.  If the instruction takes any argument, they

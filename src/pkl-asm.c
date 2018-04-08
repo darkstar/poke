@@ -74,6 +74,8 @@ struct pkl_asm
   struct pkl_asm_level *level;
 };
 
+/* Push a new level to PASM's level stack with ENV.  */
+
 static void
 pkl_asm_pushlevel (pkl_asm pasm, int env)
 {
@@ -85,6 +87,8 @@ pkl_asm_pushlevel (pkl_asm pasm, int env)
   pasm->level = level;
 }
 
+/* Pop the innermost level from PASM's level stack.  */
+
 static void __attribute__((unused))
 pkl_asm_poplevel (pkl_asm pasm)
 {
@@ -93,6 +97,41 @@ pkl_asm_poplevel (pkl_asm pasm)
   pasm->level = level->parent;
   free (level);
 }
+
+/* Append instructions to PROGRAM to push VAL into the stack.  */
+
+static inline void
+pkl_asm_push_val (pvm_program program, pvm_val val)
+{
+#if __WORDSIZE == 64
+  PVM_APPEND_INSTRUCTION (program, push);
+  pvm_append_unsigned_literal_parameter (program,
+                                         (jitter_uint) val);
+#else
+  /* Use the push-hi and push-lo instructions, to overcome jitter's
+     limitation of only accepting a jitter_uint value as a literal
+     argument, whose size is 32-bit in 32-bit hosts.  */
+
+  if (val & ~0xffffffffLL)
+    {
+      PVM_APPEND_INSTRUCTION (program, pushhi);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val >> 32)));
+
+      PVM_APPEND_INSTRUCTION (program, pushlo);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val & 0xffffffff)));
+    }
+  else
+    {
+      PVM_APPEND_INSTRUCTION (program, push32);
+      pvm_append_unsigned_literal_parameter (program,
+                                             ((jitter_uint) (val & 0xffffffff)));
+    }
+#endif
+}
+
+/* The functions below are documented in pkl-asm.h.  */
 
 pkl_asm
 pkl_asm_new ()
@@ -129,7 +168,16 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 #undef PKL_DEF_MACRO_INSN
     };
 
-  //  va_list valist;
+  static const char *insn_args[] =
+    {
+#define PKL_DEF_INSN(SYM, ARGS, NAME) ARGS,
+#define PKL_DEF_MACRO_INSN(SYM, ARGS) ARGS,
+#  include "pkl-insn.def"
+#undef PKL_DEF_INSN
+#undef PKL_DEF_MACRO_INSN
+    };    
+
+  va_list valist;
 
   if (insn < PKL_INSN_MACRO)
     {
@@ -137,13 +185,40 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
          append it to the jitter program.  */
 
       const char *insn_name = insn_names[insn];
+      const char *p;
 
       pvm_append_instruction_name (pasm->program, insn_name);
+
+      va_start (valist, insn);
+      for (p = insn_args[insn]; *p != '\0'; ++p)
+        {
+          char arg_class = *p;
+          
+          switch (arg_class)
+            {
+            case 'v':
+              {
+                pvm_val val = va_arg (valist, pvm_val);
+
+                pkl_asm_push_val (pasm->program, val);
+                break;
+              }
+            case 'a':
+              break;
+            case 'l':
+              break;
+            case 'i':
+              break;
+            case 'r':
+              break;
+            }
+        }
+      va_end (valist);
     }
   else if (insn > PKL_INSN_MACRO)
     {
       /* This is a macro-instruction.  Process its arguments and
-         dispach to the corresponding macro handler.  */
+         dispatch to the corresponding macro handler.  */
     }
   else
     assert (0);
