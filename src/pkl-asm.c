@@ -18,6 +18,7 @@
 
 #include <config.h>
 #include <xalloc.h>
+#include <stdarg.h>
 
 #include "pkl.h"
 #include "pvm.h"
@@ -49,8 +50,8 @@
    PKL_ASM_ENV_LOOP.  PKL_ASM_ENV_NULL should only be used at the
    top-level.
 
-   UP is the link to the previous level, and it is NULL at the
-   top-level.  */
+   PARENT is the parent level, i.e. the level containing this one.
+   This is NULL at the top-level.  */
 
 #define PKL_ASM_ENV_NULL 0
 #define PKL_ASM_ENV_CONDITIONAL 1
@@ -59,7 +60,7 @@
 struct pkl_asm_level
 {
   enum pkl_asm_insn current_env;
-  struct pkl_asm_level *up;
+  struct pkl_asm_level *parent;
 };
 
 /* An assembler instance.
@@ -73,23 +74,23 @@ struct pkl_asm
   struct pkl_asm_level *level;
 };
 
-void
+static void
 pkl_asm_pushlevel (pkl_asm pasm, int env)
 {
   struct pkl_asm_level *level
     = xmalloc (sizeof (struct pkl_asm_level));
 
   memset (level, 0, sizeof (struct pkl_asm_level));
-  level->up = pasm->level;
+  level->parent = pasm->level;
   pasm->level = level;
 }
 
-void
+static void __attribute__((unused))
 pkl_asm_poplevel (pkl_asm pasm)
 {
   struct pkl_asm_level *level = pasm->level;
 
-  pasm->level = level->up;
+  pasm->level = level->parent;
   free (level);
 }
 
@@ -114,4 +115,11 @@ void
 pkl_asm_free (pkl_asm pasm)
 {
   free (pasm);
+}
+
+void
+pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
+{
+  
+
 }
