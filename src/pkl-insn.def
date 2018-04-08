@@ -46,6 +46,28 @@ PKL_DEF_INSN (PKL_INSN_DUP, "", "dup")
 PKL_DEF_INSN (PKL_INSN_ROT, "", "rot")
 PKL_DEF_INSN (PKL_INSN_NROT, "", "nrot")
 
+/* Conversion instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_ITOI, "n", "itoi")
+PKL_DEF_INSN (PKL_INSN_ITOIU, "n", "itoiu")
+PKL_DEF_INSN (PKL_INSN_ITOL, "n", "itol")
+PKL_DEF_INSN (PKL_INSN_ITOLU, "n", "itolu")
+
+PKL_DEF_INSN (PKL_INSN_IUTOI, "n", "iutoi")
+PKL_DEF_INSN (PKL_INSN_IUTOIU, "n", "iutoiu")
+PKL_DEF_INSN (PKL_INSN_IUTOL, "n", "iutol")
+PKL_DEF_INSN (PKL_INSN_IUTOLU, "n", "iutolu")
+
+PKL_DEF_INSN (PKL_INSN_LTOI, "n", "ltoi")
+PKL_DEF_INSN (PKL_INSN_LTOIU, "n", "ltoiu")
+PKL_DEF_INSN (PKL_INSN_LTOL, "n", "ltol")
+PKL_DEF_INSN (PKL_INSN_LTOLU, "n", "ltolu")
+
+PKL_DEF_INSN (PKL_INSN_LUTOI, "n", "lutoi")
+PKL_DEF_INSN (PKL_INSN_LUTOIU, "n", "lutoiu")
+PKL_DEF_INSN (PKL_INSN_LUTOL, "n", "lutol")
+PKL_DEF_INSN (PKL_INSN_LUTOLU, "n", "lutol")
+
 /* Integer arithmetic instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_ADDI, "", "addi")
@@ -73,6 +95,29 @@ PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
 PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
 PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
 
+/* String related instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_SCONC, "", "sconc")
+
+/* Offset related instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_MKO, "", "mko")
+PKL_DEF_INSN (PKL_INSN_OGETM, "", "ogetm")
+PKL_DEF_INSN (PKL_INSN_OGETU, "", "ogetu")
+PKL_DEF_INSN (PKL_INSN_OGETBT, "", "ogetbt")
+
+/* Type related instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_MKTYI, "", "mktyi")
+PKL_DEF_INSN (PKL_INSN_MKTYS, "", "mktys")
+PKL_DEF_INSN (PKL_INSN_MKTYO, "", "mktyo")
+PKL_DEF_INSN (PKL_INSN_MKTYSCT, "", "mktysct")
+
+PKL_DEF_INSN (PKL_INSN_MKTYA, "", "mktya")
+PKL_DEF_INSN (PKL_INSN_TYAGETN, "", "tyagetn")
+PKL_DEF_INSN (PKL_INSN_TYAGETT, "", "tyagett")
+
+PKL_DEF_INSN (PKL_INSN_TYPOF, "", "typof")
 
 /* IO instructions.  */
 
@@ -81,28 +126,6 @@ PKL_DEF_INSN (PKL_INSN_PEEKIU, "", "peekiu")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "", "peekl")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
-
-/* Conversion instructions.  */
-
-PKL_DEF_INSN (PKL_INSN_ITOI, "n", "itoi")
-PKL_DEF_INSN (PKL_INSN_ITOIU, "n", "itoiu")
-PKL_DEF_INSN (PKL_INSN_ITOL, "n", "itol")
-PKL_DEF_INSN (PKL_INSN_ITOLU, "n", "itolu")
-
-PKL_DEF_INSN (PKL_INSN_IUTOI, "n", "iutoi")
-PKL_DEF_INSN (PKL_INSN_IUTOIU, "n", "iutoiu")
-PKL_DEF_INSN (PKL_INSN_IUTOL, "n", "iutol")
-PKL_DEF_INSN (PKL_INSN_IUTOLU, "n", "iutolu")
-
-PKL_DEF_INSN (PKL_INSN_LTOI, "n", "ltoi")
-PKL_DEF_INSN (PKL_INSN_LTOIU, "n", "ltoiu")
-PKL_DEF_INSN (PKL_INSN_LTOL, "n", "ltol")
-PKL_DEF_INSN (PKL_INSN_LTOLU, "n", "ltolu")
-
-PKL_DEF_INSN (PKL_INSN_LUTOI, "n", "lutoi")
-PKL_DEF_INSN (PKL_INSN_LUTOIU, "n", "lutoiu")
-PKL_DEF_INSN (PKL_INSN_LUTOL, "n", "lutol")
-PKL_DEF_INSN (PKL_INSN_LUTOLU, "n", "lutol")
 
 /* Miscellaneous instructions.  */
 
