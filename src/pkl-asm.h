@@ -53,10 +53,9 @@ struct pkl_asm
 
 typedef struct pkl_asm *pkl_asm;
 
-/* Create and return a new assembler instance.  PROGRAM is a PVM
-   program that may be partially assembled.  */
+/* Create and return a new assembler instance.  */
 
-pkl_asm pkl_asm_new (pvm_program program);
+pkl_asm pkl_asm_new (void);
 
 /* Destroy an assembler instance, freeing all used resources.  */
 
