@@ -224,6 +224,87 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
     assert (0);
 }
 
+/* Macro-instruction: ADD type
+   Stack: VAL VAL -> VAL
+   
+   Macro-instruction: SUB type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: MUL type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: DIV type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: MOD type
+   Stack: VAL VAL -> VAL
+
+   Generate code for performing addition, subtraction, multiplication,
+   division and remainder to integral operands.  INSN identifies the
+   operation to perform, and TYPE the type of the operands and the
+   result.  */
+
+static void
+pkl_asm_insn_intop (pkl_asm pasm,
+                    enum pkl_asm_insn insn,
+                    pkl_ast_node type)
+{
+  static int add_table[2][2] =
+    {
+     { PKL_INSN_ADDLU, PKL_INSN_ADDL },
+     { PKL_INSN_ADDIU, PKL_INSN_ADDI },
+    };
+
+  static int sub_table[2][2] =
+    {
+     { PKL_INSN_SUBLU, PKL_INSN_SUBL },
+     { PKL_INSN_SUBIU, PKL_INSN_SUBI },
+    };
+
+  static int mul_table[2][2] =
+    {
+     { PKL_INSN_MULLU, PKL_INSN_MULL },
+     { PKL_INSN_MULIU, PKL_INSN_MULI },
+    };
+
+  static int div_table[2][2] =
+    {
+     { PKL_INSN_DIVLU, PKL_INSN_DIVL },
+     { PKL_INSN_DIVIU, PKL_INSN_DIVI },
+    };
+
+  static int mod_table[2][2] =
+    {
+     { PKL_INSN_MODLU, PKL_INSN_MODL },
+     { PKL_INSN_MODIU, PKL_INSN_MODI },
+    };
+
+  uint64_t size = PKL_AST_TYPE_I_SIZE (type);
+  int signed_p = PKL_AST_TYPE_I_SIGNED (type);
+  int tl = ((size - 1) & ~0x1f);
+
+  switch (insn)
+    {
+    case PKL_INSN_ADD:
+      pkl_asm_insn (pasm, add_table[tl][signed_p]);
+      break;
+    case PKL_INSN_SUB:
+      pkl_asm_insn (pasm, sub_table[tl][signed_p]);
+      break;
+    case PKL_INSN_MUL:
+      pkl_asm_insn (pasm, mul_table[tl][signed_p]);
+      break;
+    case PKL_INSN_DIV:
+      pkl_asm_insn (pasm, div_table[tl][signed_p]);
+      break;
+    case PKL_INSN_MOD:
+      pkl_asm_insn (pasm, mod_table[tl][signed_p]);
+      break;
+    default:
+      assert (0);
+    }
+}
+
 #if 0
 /* Macro-instruction: OGETMU base_type, unit_type, to_unit
    Stack: OFFSET -> OFFSET CONVERTED_MAGNITUDE
@@ -385,6 +466,25 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_peek (pasm, peek_type);
             break;
           }
+        case PKL_INSN_ADD:
+          /* Fallthrough.  */
+        case PKL_INSN_SUB:
+          /* Fallthrough.  */
+        case PKL_INSN_MUL:
+          /* Fallthrough.  */
+        case PKL_INSN_DIV:
+          /* Fallthrough.  */
+        case PKL_INSN_MOD:
+          {
+            pkl_ast_node type;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_intop (pasm, insn, type);
+            break;
+          }
 #if 0
         case PKL_INSN_OGETMU:
           {
@@ -402,15 +502,6 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
 #endif
-        case PKL_INSN_ADD:
-          assert (0); /* XXX */
-          break;
-        case PKL_INSN_MUL:
-          assert (0); /* XXX */
-          break;
-        case PKL_INSN_DIV:
-          assert (0); /* XXX */
-          break;
         case PKL_INSN_MACRO:
         default:
           assert (0);
