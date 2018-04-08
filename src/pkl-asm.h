@@ -46,7 +46,6 @@ struct pkl_asm
 {
   /* PVM program being assembled.  */
   pvm_program program;
-
   /* Number of instructions assembled in the program.  */
   size_t insns_added;
 };
@@ -65,9 +64,7 @@ void pkl_asm_free (pkl_asm pasm);
    assembled in PASM.  If the instruction takes any argument, they
    follow after INSN.  */
 
-void pkl_asm_insn (pkl_asm pasm,
-                   enum pkl_asm_insn insn,
-                   ... /* args */);
+void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
 
 /* Conditionals.
  *

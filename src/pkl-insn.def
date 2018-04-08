@@ -24,6 +24,7 @@
 
    `v' is for a pvm_val.
    `a' is for a pkl_ast_node.
+   `l' is for a label.
    `i' is for an integer.
    `r' is for register.
 */
@@ -34,14 +35,20 @@ PKL_DEF_INSN (PKL_INSN_ADDI, "")
 PKL_DEF_INSN (PKL_INSN_ADDIU, "")
 PKL_DEF_INSN (PKL_INSN_ADDL, "")
 PKL_DEF_INSN (PKL_INSN_ADDLU, "")
+PKL_DEF_INSN (PKL_INSN_PEEKI, "")
+PKL_DEF_INSN (PKL_INSN_PEEKIU, "")
+PKL_DEF_INSN (PKL_INSN_PEEKL, "")
+PKL_DEF_INSN (PKL_INSN_PEEKLU, "")
+PKL_DEF_INSN (PKL_INSN_PEEKS, "")
 
 /* Next, the macro-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_OGETMU, "aaa")
-PKL_DEF_INSN (PKL_INSN_ADD_OFFSET, "")
-PKL_DEF_INSN (PKL_INSN_SUB_OFFSET, "")
-PKL_DEF_INSN (PKL_INSN_MUL_OFFSET, "")
-PKL_DEF_INSN (PKL_INSN_DIV_OFFSET, "")
+PKL_DEF_INSN (PKL_INSN_ADD, "a")
+PKL_DEF_INSN (PKL_INSN_SUB, "a")
+PKL_DEF_INSN (PKL_INSN_MUL, "a")
+PKL_DEF_INSN (PKL_INSN_DIV, "a")
+PKL_DEF_INSN (PKL_INSN_PEEK, "a")
 
 /*
 Local variables:
