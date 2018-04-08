@@ -305,7 +305,6 @@ pkl_asm_insn_intop (pkl_asm pasm,
     }
 }
 
-#if 0
 /* Macro-instruction: OGETMC base_type, unit_type
    Stack: OFFSET UNIT -> OFFSET CONVERTED_MAGNITUDE
 
@@ -317,10 +316,11 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
                      pkl_ast_node base_type,
                      pkl_ast_node unit_type)
 {
-  pvm_program program = pasm->program;
-  
   /* Dup the offset.  */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_DUP);
+
+  /* Stack: TOUNIT OFF OFF */
 
   /* Get magnitude and unit.  */
   pkl_asm_insn (pasm, PKL_INSN_OGETM);
@@ -329,17 +329,17 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
   pkl_asm_insn (pasm, PKL_INSN_NIP);
 
-  /* (magnitude * from_unit) / to_unit */
+  /* Stack: TOUNIT OFF MAGNITUDE UNIT */
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
-  PKL_PASS_SUBPASS (to_unit); /* XXX shit */
-  pvm_asm_int (pasm, PKL_INSN_NTON, unit_type, base_type);
-  append_int_op (program, "bz", base_type);
-  pvm_append_symbolic_label_parameter (program,
-                                       "Ldivzero");
+  /* Stack: TOUNIT OFF (MAGNITUDE*UNIT) */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+  /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
+  pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
+  /*  append_int_op (pasm->program, "bz", base_type); XXX */
+  /*  pvm_append_symbolic_label_parameter (program,
+      "Ldivzero"); */
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
 }
-
-#endif
 
 /* The functions below are documented in pkl-asm.h.  */
 
@@ -438,6 +438,9 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       /* This is a macro-instruction.  Dispatch to the corresponding
          macro-instruction handler.  */
 
+      /* XXX: emit a begin macro note if the assembler is in debugging
+         mode.  */
+      
       switch (insn)
         {
         case PKL_INSN_NTON:
@@ -483,7 +486,6 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_intop (pasm, insn, type);
             break;
           }
-#if 0
         case PKL_INSN_OGETMC:
           {
             pkl_ast_node base_type;
@@ -497,10 +499,12 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_ogetmc (pasm, base_type, unit_type);
             break;
           }
-#endif
         case PKL_INSN_MACRO:
         default:
           assert (0);
         }
+
+      /* XXX: emit an end-macro note if the assembler is in debugging
+         mode.  */
     }
 }
