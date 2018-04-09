@@ -49,7 +49,7 @@ typedef struct pkl_asm *pkl_asm;
 /* Create a new instance of an assembler.  This initializes a new
    program.  */
 
-pkl_asm pkl_asm_new (void);
+pkl_asm pkl_asm_new (pkl_ast ast);
 
 /* Finish the assembly of the current program and return it.  This
    function frees all resources used by the assembler instance, and

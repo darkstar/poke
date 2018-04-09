@@ -100,6 +100,46 @@ PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
 PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
 PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
 
+/* Comparison instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_EQI, "", "eqi")
+PKL_DEF_INSN (PKL_INSN_EQIU, "", "eqiu")
+PKL_DEF_INSN (PKL_INSN_EQL, "", "eql")
+PKL_DEF_INSN (PKL_INSN_EQLU, "", "eqlu")
+
+PKL_DEF_INSN (PKL_INSN_NEI, "", "nei")
+PKL_DEF_INSN (PKL_INSN_NEIU, "", "neiu")
+PKL_DEF_INSN (PKL_INSN_NEL, "", "nel")
+PKL_DEF_INSN (PKL_INSN_NELU, "", "nelu")
+
+PKL_DEF_INSN (PKL_INSN_EQS, "", "eqs")
+PKL_DEF_INSN (PKL_INSN_NES, "", "nes")
+
+PKL_DEF_INSN (PKL_INSN_LTI, "", "lti")
+PKL_DEF_INSN (PKL_INSN_LTIU, "", "ltiu")
+PKL_DEF_INSN (PKL_INSN_LTL, "", "ltl")
+PKL_DEF_INSN (PKL_INSN_LTLU, "", "ltlu")
+
+PKL_DEF_INSN (PKL_INSN_LEI, "", "lei")
+PKL_DEF_INSN (PKL_INSN_LEIU, "", "leiu")
+PKL_DEF_INSN (PKL_INSN_LEL, "", "lel")
+PKL_DEF_INSN (PKL_INSN_LELU, "", "lelu")
+
+PKL_DEF_INSN (PKL_INSN_GTI, "", "gti")
+PKL_DEF_INSN (PKL_INSN_GTIU, "", "gtiu")
+PKL_DEF_INSN (PKL_INSN_GTL, "", "gtl")
+PKL_DEF_INSN (PKL_INSN_GTLU, "", "gtlu")
+
+PKL_DEF_INSN (PKL_INSN_GEI, "", "gei")
+PKL_DEF_INSN (PKL_INSN_GEIU, "", "geiu")
+PKL_DEF_INSN (PKL_INSN_GEL, "", "gel")
+PKL_DEF_INSN (PKL_INSN_GELU, "", "gelu")
+
+PKL_DEF_INSN (PKL_INSN_LTS, "", "lts")
+PKL_DEF_INSN (PKL_INSN_GTS, "", "gts")
+PKL_DEF_INSN (PKL_INSN_GES, "", "ges")
+PKL_DEF_INSN (PKL_INSN_LES, "", "les")
+
 /* String related instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SCONC, "", "sconc")
@@ -167,7 +207,7 @@ PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
 PKL_DEF_INSN (PKL_INSN_NTON, "aa", "")
-PKL_DEF_INSN (PKL_INSN_OGETMC, "aa", "")
+PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "")
 PKL_DEF_INSN (PKL_INSN_ADD, "a", "")
 PKL_DEF_INSN (PKL_INSN_SUB, "a", "")
 PKL_DEF_INSN (PKL_INSN_MUL, "a", "")
@@ -175,7 +215,14 @@ PKL_DEF_INSN (PKL_INSN_DIV, "a", "")
 PKL_DEF_INSN (PKL_INSN_MOD, "a", "")
 PKL_DEF_INSN (PKL_INSN_PEEK, "a", "")
 PKL_DEF_INSN (PKL_INSN_BZ, "al", "")
-PKL_DEF_INSN (PKL_INSN_BNZ, "al", "")  
+PKL_DEF_INSN (PKL_INSN_BNZ, "al", "")
+
+PKL_DEF_INSN (PKL_INSN_EQ, "a", "")
+PKL_DEF_INSN (PKL_INSN_NE, "a", "")
+PKL_DEF_INSN (PKL_INSN_LT, "a", "")
+PKL_DEF_INSN (PKL_INSN_GT, "a", "")
+PKL_DEF_INSN (PKL_INSN_GE, "a", "")
+PKL_DEF_INSN (PKL_INSN_LE, "a", "")
 
 /*
 Local variables:

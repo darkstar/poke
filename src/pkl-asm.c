@@ -66,11 +66,15 @@ struct pkl_asm_level
 /* An assembler instance.
 
    PROGRAM is the PVM program being assembled.
+   AST is for creating ast nodes whenever needed.
+   UNIT_TYPE is an AST type for an offset unit.
    LEVEL is a pointer to the top of a stack of levels.  */
 
 struct pkl_asm
 {
   pvm_program program;
+  pkl_ast ast;
+  pkl_ast_node unit_type;
   struct pkl_asm_level *level;
 };
 
@@ -312,7 +316,7 @@ pkl_asm_insn_intop (pkl_asm pasm,
     }
 }
 
-/* Macro-instruction: OGETMC base_type, unit_type
+/* Macro-instruction: OGETMC base_type
    Stack: OFFSET UNIT -> OFFSET CONVERTED_MAGNITUDE
 
    Given an offset and an unit in the stack, generate code to push its
@@ -320,8 +324,7 @@ pkl_asm_insn_intop (pkl_asm pasm,
 
 static void
 pkl_asm_insn_ogetmc (pkl_asm pasm,
-                     pkl_ast_node base_type,
-                     pkl_ast_node unit_type)
+                     pkl_ast_node base_type)
 {
   /* Stack: OFF TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
@@ -331,7 +334,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_OGETM);
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_OGETU);
-  pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
+  pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
   pkl_asm_insn (pasm, PKL_INSN_NIP);
 
   /* Stack: TOUNIT OFF MAGNITUDE UNIT */
@@ -341,7 +344,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_ROT);
 
   /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
-  pkl_asm_insn (pasm, PKL_INSN_NTON, unit_type, base_type);
+  pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
   /*  append_int_op (pasm->program, "bz", base_type); XXX */
   /*  pvm_append_symbolic_label_parameter (program,
       "Ldivzero"); */
@@ -402,7 +405,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
    program.  */
 
 pkl_asm
-pkl_asm_new ()
+pkl_asm_new (pkl_ast ast)
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
   pvm_program program;
@@ -435,6 +438,10 @@ pkl_asm_new ()
   /* XXX: note end prologue  */
 
   pasm->program = program;
+  pasm->ast = ast;
+  pasm->unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+    
   return pasm;
 }
 
@@ -458,6 +465,7 @@ pkl_asm_finish (pkl_asm pasm)
 
   /* Free the assembler instance and return the assembled program to
      the user.  */
+  ASTREF (pasm->unit_type); pkl_ast_node_free (pasm->unit_type);
   free (pasm);
   return program;
 }
