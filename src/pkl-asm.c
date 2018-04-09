@@ -17,12 +17,16 @@
  */
 
 #include <config.h>
+
 #include <xalloc.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <jitter/jitter.h>
 
 #include "pkl.h"
-#include "pvm.h"
 #include "pkl-asm.h"
+#include "pvm.h"
+
 
 /* In order to allow nested multi-function macros, like conditionals
    and loops, the assembler supports the notion of "nesting levels".
@@ -448,7 +452,7 @@ pkl_asm_new (pkl_ast ast)
   
   /* Standard prologue.  */
   PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_apppend_label_parameter (program, pasm->start_label);
+  pvm_append_label_parameter (program, pasm->start_label);
   
   pvm_append_label (program, pasm->divzero_label);
   
@@ -662,14 +666,12 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_OGETMC:
           {
             pkl_ast_node base_type;
-            pkl_ast_node unit_type;
 
             va_start (valist, insn);
             base_type = va_arg (valist, pkl_ast_node);
-            unit_type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_ogetmc (pasm, base_type, unit_type);
+            pkl_asm_insn_ogetmc (pasm, base_type);
             break;
           }
         case PKL_INSN_MACRO:

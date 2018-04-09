@@ -23,7 +23,6 @@
 #include <stdarg.h>
 #include <jitter/jitter.h>
 
-#include "pkl-gen.h"
 #include "pkl-ast.h"
 #include "pvm.h"
 

@@ -23,9 +23,9 @@
 
 #include <stdlib.h>
 
-#include <jitter/jitter.h>
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-asm.h"
 #include "pkl-asm.h"
 #include "pvm.h"
 

@@ -941,34 +941,42 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
 }
 PKL_PHASE_END_HANDLER
 
-#define BIN_INTEGRAL_EXP_HANDLER(op,insn)                       \
-  PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)                  \
-  {                                                             \
-    pkl_gen_payload payload                                     \
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;                     \
-    pkl_ast_node node = PKL_PASS_NODE;                          \
-    pvm_program program = payload->program;                     \
-    pkl_ast_node type = PKL_AST_TYPE (node);                    \
-                                                                \
-    switch (PKL_AST_TYPE_CODE (type))                           \
-      {                                                         \
-      case PKL_TYPE_INTEGRAL:                                   \
-        append_int_op (program, #insn, type);                   \
-        break;                                                  \
-      default:                                                  \
-        assert (0);                                             \
-        break;                                                  \
-      }                                                         \
-  }                                                             \
-  PKL_PHASE_END_HANDLER
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_intexp)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_asm pasm = payload->pasm;
 
-BIN_INTEGRAL_EXP_HANDLER (band, band);
-BIN_INTEGRAL_EXP_HANDLER (bnot, bnot);
-BIN_INTEGRAL_EXP_HANDLER (neg, neg);
-BIN_INTEGRAL_EXP_HANDLER (ior, bor);
-BIN_INTEGRAL_EXP_HANDLER (xor, bxor);
-BIN_INTEGRAL_EXP_HANDLER (sl, bsl);
-BIN_INTEGRAL_EXP_HANDLER (sr, bsr);
+  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (node);
+
+  enum pkl_asm_insn insn;
+
+  switch (PKL_AST_EXP_CODE (node))
+    {
+    case PKL_AST_OP_BAND: insn = PKL_INSN_BAND; break;
+    case PKL_AST_OP_BNOT: insn = PKL_INSN_BNOT; break;
+    case PKL_AST_OP_NEG: insn = PKL_INSN_NEG; break;
+    case PKL_AST_OP_IOR: insn = PKL_INSN_BOR; break;
+    case PKL_AST_OP_XOR: insn = PKL_INSN_BXOR; break;
+    case PKL_AST_OP_SL: insn = PKL_INSN_SL; break;
+    case PKL_AST_OP_SR: insn = PKL_INSN_SR; break;
+    default:
+      assert (0);
+      break;
+    }
+          
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      pkl_asm_insn (pasm, insn, type);
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
 {
@@ -1130,13 +1138,13 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_df_op_sub),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_df_op_mul),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_gen_df_op_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_gen_df_op_band),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_gen_df_op_bnot),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_gen_df_op_neg),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_gen_df_op_ior),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_gen_df_op_xor),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_gen_df_op_sl),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_gen_df_op_sr),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_gen_df_op_intexp),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_gen_df_op_intexp),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_gen_df_op_div),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_gen_df_op_and),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_gen_df_op_or),
