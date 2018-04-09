@@ -236,14 +236,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       PKL_PASS_SUBPASS (to_base_unit);
       pkl_asm_insn (pasm, PKL_INSN_NTON, to_base_unit_type, to_base_type);
 
-      /* XXX not needed, as DIV and MOD macro-instructions check for
-         0.  */
-#if 0
-      append_int_op (program, "bz", to_base_type);
-      pvm_append_symbolic_label_parameter (program,
-                                           "Ldivzero");
-#endif
-
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
@@ -859,26 +851,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
 
-  /* XXX: not needed since the DIV and MOD macro-instructions check
-     for zero.  */
-#if 0
-  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
-    {
-      pkl_ast_node op2_base_type
-        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
-
-      pkl_asm_insn (pasm, PKL_INSN_OGETM);
-      pkl_asm_insn (pasm, PKL_INSN_BZ,
-                    op2_base_type, pkl_asm_divzero_label (pasm));
-      pkl_asm_insn (pasm, PKL_INSN_DROP);
-   }
-  else
-    {
-      pkl_asm_insn (pasm, PKL_INSN_BZ,
-                    op2_type, pkl_asm_divzero_label (pasm));
-    }
-#endif  
-
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -903,13 +875,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
             pkl_asm_insn (pasm, PKL_INSN_OGETMC, type);
             pkl_asm_insn (pasm, PKL_INSN_NIP);
 
-            /* XXX: not needed, as DIV and MOD macro-instructions
-               check for zero.  */
-#if 0
-            append_int_op (program, "bz", type);
-            pvm_append_symbolic_label_parameter (program,
-                                                 "Ldivzero");
-#endif            
             pkl_asm_insn (pasm, PKL_INSN_DIV, type);
 
             ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
@@ -936,31 +901,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
-#if 0
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
-  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
-#endif
-
-  /* XXX not needed since the DIV and MOD macro-instructions check for
-     zero.  */
-#if 0  
-  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
-    {
-      pkl_ast_node op2_base_type
-        = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
-
-      pkl_asm_insn (pasm, PKL_INSN_OGETM);
-      pkl_asm_insn (pasm, PKL_INSN_BZ,
-                    op2_base_type, pkl_asm_divzero_label (pasm));
-      pkl_asm_insn (pasm, PKL_INSN_DROP);
-    }
-  else
-    {
-      pkl_asm_insn (pasm, PKL_INSN_BZ,
-                    op2_type, pkl_asm_divzero_label (pasm));
-    }
-#endif
-
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -983,14 +923,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
         PKL_PASS_SUBPASS (op1_unit);
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
-
-        /* XXX: not needed since DIV and MOD macro-instructions check
-           for zero.  */
-#if 0
-        append_int_op (program, "bz", base_type);
-        pvm_append_symbolic_label_parameter (program,
-                                             "Ldivzero");
-#endif        
 
         pkl_asm_insn (pasm, PKL_INSN_MOD, base_type);
 

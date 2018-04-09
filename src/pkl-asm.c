@@ -66,16 +66,34 @@ struct pkl_asm_level
 /* An assembler instance.
 
    PROGRAM is the PVM program being assembled.
+   LEVEL is a pointer to the top of a stack of levels.
+
    AST is for creating ast nodes whenever needed.
    UNIT_TYPE is an AST type for an offset unit.
-   LEVEL is a pointer to the top of a stack of levels.  */
+
+   START_LABEL marks the beginning of the user code.
+
+   DIVZERO_LABEL marks the division-by-zero error handler defined in
+   the standard prologue.
+
+   ERROR_LABEL marks the generic error handler defined in the standard
+   prologue.
+
+   EXIT_LABEL marks the return handler defined in the standard
+   prologue.  */
 
 struct pkl_asm
 {
   pvm_program program;
+  struct pkl_asm_level *level;
+
   pkl_ast ast;
   pkl_ast_node unit_type;
-  struct pkl_asm_level *level;
+
+  jitter_label start_label;
+  jitter_label divzero_label;
+  jitter_label error_label;
+  jitter_label exit_label;
 };
 
 /* Push a new level to PASM's level stack with ENV.  */
@@ -305,10 +323,16 @@ pkl_asm_insn_intop (pkl_asm pasm,
       pkl_asm_insn (pasm, mul_table[tl][signed_p]);
       break;
     case PKL_INSN_DIV:
-      pkl_asm_insn (pasm, div_table[tl][signed_p]);
-      break;
+      /* Fallthrough.  */
     case PKL_INSN_MOD:
-      pkl_asm_insn (pasm, mod_table[tl][signed_p]);
+
+      pkl_asm_insn (pasm, PKL_INSN_BZ, type,
+                    pasm->divzero_label);
+      
+      if (insn == PKL_INSN_DIV)
+        pkl_asm_insn (pasm, div_table[tl][signed_p]);
+      else
+        pkl_asm_insn (pasm, mod_table[tl][signed_p]);
       
       break;
     default:
@@ -345,9 +369,6 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 
   /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
-  /*  append_int_op (pasm->program, "bz", base_type); XXX */
-  /*  pvm_append_symbolic_label_parameter (program,
-      "Ldivzero"); */
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
 }
 
@@ -411,36 +432,40 @@ pkl_asm_new (pkl_ast ast)
   pvm_program program;
 
   memset (pasm, 0, sizeof (struct pkl_asm));
-  program = pvm_make_program ();
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
+
+  pasm->ast = ast;
+  pasm->unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+
+  program = pvm_make_program ();
+  pasm->start_label = jitter_fresh_label (program);
+  pasm->divzero_label = jitter_fresh_label (program);
+  pasm->error_label = jitter_fresh_label (program);
+  pasm->exit_label = jitter_fresh_label (program);
 
   /* XXX: note begin prologue */
   
   /* Standard prologue.  */
   PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program,
-                                       "Lstart");
+  pvm_apppend_label_parameter (program, pasm->start_label);
   
-  pvm_append_symbolic_label (program, "Ldivzero");
+  pvm_append_label (program, pasm->divzero_label);
   
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_EDIVZ, 32));
 
   PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lexit");
-  pvm_append_symbolic_label (program, "Lerror");
+  pvm_append_label_parameter (program, pasm->exit_label);
+  pvm_append_label (program, pasm->error_label);
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
   
-  pvm_append_symbolic_label (program, "Lexit");
+  pvm_append_label (program, pasm->exit_label);
   PVM_APPEND_INSTRUCTION (program, exit);
   
-  pvm_append_symbolic_label (program, "Lstart");
+  pvm_append_label (program, pasm->start_label);
 
   /* XXX: note end prologue  */
-
   pasm->program = program;
-  pasm->ast = ast;
-  pasm->unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
     
   return pasm;
 }
