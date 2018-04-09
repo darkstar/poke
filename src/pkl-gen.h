@@ -26,12 +26,13 @@
 #include <jitter/jitter.h>
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-asm.h"
 #include "pvm.h"
 
 struct pkl_gen_payload
 {
+  pkl_asm pasm;
   pvm_program program;
-  size_t label;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;

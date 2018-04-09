@@ -485,7 +485,21 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
   va_list valist;
 
-  if (insn < PKL_INSN_MACRO)
+  if (insn == PKL_INSN_PUSH)
+    {
+      /* We handle PUSH as a special case, due to some jitter
+         limitations.  See the docstring for `pkl_asm_push_val'
+         above.  */
+
+      pvm_val val;
+
+      va_start (valist, insn);
+      val = va_arg (valist, pvm_val);
+      va_end (valist);
+
+      pkl_asm_push_val (pasm->program, val);
+    }
+  else if (insn < PKL_INSN_MACRO)
     {
       /* This is a PVM instruction.  Process its arguments and append
          it to the jitter program.  */

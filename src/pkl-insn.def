@@ -111,6 +111,16 @@ PKL_DEF_INSN (PKL_INSN_OGETM, "", "ogetm")
 PKL_DEF_INSN (PKL_INSN_OGETU, "", "ogetu")
 PKL_DEF_INSN (PKL_INSN_OGETBT, "", "ogetbt")
 
+/* Array related instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_MKA, "", "mka")
+PKL_DEF_INSN (PKL_INSN_AREF, "", "aref")
+
+/* Struct related instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_MKSCT, "", "mksct")
+PKL_DEF_INSN (PKL_INSN_SREF, "", "sref")
+
 /* Type related instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKTYI, "", "mktyi")
@@ -150,6 +160,7 @@ PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
 
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
+PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
    macro instructions, and it should not be assembled.  */

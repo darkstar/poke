@@ -173,6 +173,12 @@ instruction note (?n)
   end
 end
 
+instruction siz () # VAL -> ULONG
+  code
+    JITTER_TOP_STACK () = pvm_sizeof (JITTER_TOP_STACK ());
+  end
+end
+
 
 
 ## Stack manipulation instructions
@@ -274,12 +280,6 @@ end
 instruction setr (!R)
   code
     JITTER_ARGN0 = JITTER_TOP_STACK();
-  end
-end
-
-instruction siz () # VAL -> ULONG
-  code
-    JITTER_TOP_STACK () = pvm_sizeof (JITTER_TOP_STACK ());
   end
 end
 
@@ -1431,7 +1431,7 @@ instruction sctset () # SCT VAL STR -> SCT
   end
 end
 
-instruction sctref () # SCT STR -> VAL
+instruction sref () # SCT STR -> VAL
   code
 #define F(res, a, b) { res = pvm_ref_struct (a, b); }
     JITTER_BINARY_STACK (F);  

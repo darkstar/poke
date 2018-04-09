@@ -25,78 +25,8 @@
 #include "pkl-gen.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-asm.h"
 #include "pvm.h"
-
-/* The following function is used to push pvm_val values to the PVM
-   stack.  */
-
-static inline void
-pvm_push_val (pvm_program program, pvm_val val)
-{
-#if __WORDSIZE == 64
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_unsigned_literal_parameter (program,
-                                         (jitter_uint) val);
-#else
-  /* Use the push-hi and push-lo instructions, to overcome jitter's
-     limitation of only accepting a jitter_uint value as a literal
-     argument, whose size is 32-bit in 32-bit hosts.  */
-
-  if (val & ~0xffffffffLL)
-    {
-      PVM_APPEND_INSTRUCTION (program, pushhi);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val >> 32)));
-
-      PVM_APPEND_INSTRUCTION (program, pushlo);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val & 0xffffffff)));
-    }
-  else
-    {
-      PVM_APPEND_INSTRUCTION (program, push32);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val & 0xffffffff)));
-    }
-#endif
-}
-
-/* Generate code for pushing an integer node in the given PVM
-   program.  */
-
-static void
-append_integer (pvm_program program,
-                pkl_ast_node integer)
-{
-  pkl_ast_node type;
-  pvm_val val;
-  int size;
-  uint64_t value;
-
-  type = PKL_AST_TYPE (integer);
-  assert (type != NULL
-          && PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL);
-
-  size = PKL_AST_TYPE_I_SIZE (type);
-  value = PKL_AST_INTEGER_VALUE (integer);
-
-  if ((size - 1) & ~0x1f)
-    {
-      if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_long (value, size);
-      else
-        val = pvm_make_ulong (value, size);
-    }
-  else
-    {
-      if (PKL_AST_TYPE_I_SIGNED (type))
-        val = pvm_make_int (value, size);
-      else
-        val = pvm_make_uint (value, size);
-    }
-  
-  pvm_push_val (program, val);
-}
 
 /* Generate code for a peek operation to TYPE, which should be a
    simple type, i.e. integral or string  */
@@ -258,39 +188,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  pvm_val val;
-  pvm_program program;
-  size_t label;
-  
-  program = pvm_make_program ();
-  label = 0;
-
-  /* Standard prologue.  */
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program,
-                                       "Lstart");
-  
-  pvm_append_symbolic_label (program, "Ldivzero");
-  
-  val = pvm_make_int (PVM_EXIT_EDIVZ, 32);
-  pvm_push_val (program, val);
-  
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lexit");
-  
-  pvm_append_symbolic_label (program, "Lerror");
-  
-  val = pvm_make_int (PVM_EXIT_ERROR, 32);
-  pvm_push_val (program, val);
-  
-  pvm_append_symbolic_label (program, "Lexit");
-  PVM_APPEND_INSTRUCTION (program, exit);
-  
-  pvm_append_symbolic_label (program, "Lstart");
-
-  /* Initialize payload.  */
-  payload->program = program;
-  payload->label = label;
+  payload->pasm = pkl_asm_new ();
 }
 PKL_PHASE_END_HANDLER
 
@@ -304,15 +202,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  struct pvm_program *program = payload->program;
-  pvm_val val;
 
-  /* Standard epilogue.  */
-  val = pvm_make_int (PVM_EXIT_OK, 32);
-  pvm_push_val (program, val);
-    
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lexit");
+  payload->program = pkl_asm_finish (payload->pasm);
 }
 PKL_PHASE_END_HANDLER
 
@@ -325,7 +216,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  append_integer (payload->program, PKL_PASS_NODE);
+  pkl_ast_node integer = PKL_PASS_NODE;
+  pkl_ast_node type;
+  pvm_val val;
+  int size;
+  uint64_t value;
+
+  type = PKL_AST_TYPE (integer);
+  assert (type != NULL
+          && PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL);
+
+  size = PKL_AST_TYPE_I_SIZE (type);
+  value = PKL_AST_INTEGER_VALUE (integer);
+
+  if ((size - 1) & ~0x1f)
+    {
+      if (PKL_AST_TYPE_I_SIGNED (type))
+        val = pvm_make_long (value, size);
+      else
+        val = pvm_make_ulong (value, size);
+    }
+  else
+    {
+      if (PKL_AST_TYPE_I_SIGNED (type))
+        val = pvm_make_int (value, size);
+      else
+        val = pvm_make_uint (value, size);
+    }
+  
+  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -344,7 +263,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_identifier)
   pvm_val val
     = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (identifier));
 
-  pvm_push_val (payload->program, val);
+  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -361,7 +280,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
   pvm_val val
     = pvm_make_string (PKL_AST_STRING_POINTER (string));
 
-  pvm_push_val (payload->program, val);
+  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -514,6 +433,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
       break;
     case PKL_TYPE_ARRAY:
       {
+        assert (0);
+#if 0        
         pkl_ast_node array_elem_type = PKL_AST_TYPE_A_ETYPE (map_type);
         pkl_ast_node array_nelems = PKL_AST_TYPE_A_NELEM (map_type);
         jitter_label loop_label = jitter_fresh_label (program);
@@ -645,6 +566,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
         /* 24 */
         PVM_APPEND_INSTRUCTION (program, mka);
         break;
+#endif        
       }
     case PKL_TYPE_STRUCT:
     default:
@@ -679,16 +601,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node node = PKL_PASS_NODE;
 
-  pvm_push_val (program,
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_ARRAY_NELEM (node), 64));
 
-  pvm_push_val (program,
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (node), 64));
 
-  PVM_APPEND_INSTRUCTION (program, mka);
+  pkl_asm_insn (pasm, PKL_INSN_MKA);
 }
 PKL_PHASE_END_HANDLER
 
@@ -703,7 +625,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_ref)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  PVM_APPEND_INSTRUCTION (payload->program, aref);
+  pkl_asm_insn (payload->pasm, PKL_INSN_AREF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -717,12 +639,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pvm_program program = payload->program;
+  pvm_program pasm = payload->pasm;
 
-  pvm_push_val (program,
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 64));
 
-  PVM_APPEND_INSTRUCTION (program, mksct);
+  pkl_asm_insn (pasm, PKL_INSN_MKSCT);
 }
 PKL_PHASE_END_HANDLER
 
@@ -740,7 +662,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
   /* If the struct initializer doesn't include a name, generate a null
      value as expected by the mksct instruction.  */
   if (!PKL_AST_STRUCT_ELEM_NAME (PKL_PASS_NODE))
-    pvm_push_val (payload->program, PVM_NULL);
+    pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -755,7 +677,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct_ref)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  PVM_APPEND_INSTRUCTION (payload->program, sctref);
+  pkl_asm_insn (payload->pasm, PKL_INSN_SREF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -774,16 +696,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pvm_program program = payload->program;
+  pvm_program pasm = payload->pasm;
   pkl_ast_node node = PKL_PASS_NODE;
 
-  pvm_push_val (program,
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node), 64));
 
-  pvm_push_val (program,
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 32));
-  
-  PVM_APPEND_INSTRUCTION (program, mktyi);
+
+  pkl_asm_insn (pasm, PKL_INSN_MKTYI);
 }
 PKL_PHASE_END_HANDLER
 
@@ -805,7 +727,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  PVM_APPEND_INSTRUCTION (payload->program, mktya);
+  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYA);
 }
 PKL_PHASE_END_HANDLER
 
@@ -825,7 +747,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  PVM_APPEND_INSTRUCTION (payload->program, mktys);
+  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYS);
 }
 PKL_PHASE_END_HANDLER
 
@@ -847,9 +769,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pvm_program program = payload->program;
 
-  PVM_APPEND_INSTRUCTION (program, mktyo);
+  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYO);
 }
 PKL_PHASE_END_HANDLER
 #endif
@@ -871,11 +792,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
 {
  pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
- pvm_program program = payload->program;
+ pvm_program pasm = payload->pasm;
 
- pvm_push_val (program,
+ pkl_asm_insn (pasm, PKL_INSN_PUSH,
                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
- PVM_APPEND_INSTRUCTION (program, mktysct);
+ pkl_asm_insn (pasm, PKL_INSN_MKTYSCT);
 }
 PKL_PHASE_END_HANDLER
 
@@ -900,7 +821,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem_type)
   /* If the struct type element doesn't include a name, generate a
      null value as expected by the mktysct instruction.  */
   if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
-    pvm_push_val (payload->program, PVM_NULL);
+    pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -917,7 +838,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -927,7 +848,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
       append_int_op (program, "add", type);
       break;
     case PKL_TYPE_STRING:
-      PVM_APPEND_INSTRUCTION (program, sconc);
+      pkl_asm_insn (pasm, PKL_INSN_SCONC);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -941,14 +862,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
         pkl_ast_node unit_type = PKL_AST_TYPE (res_unit); /* This is always 64,0 */
 
         OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
-        PVM_APPEND_INSTRUCTION (program, nip);
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
         OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
-        PVM_APPEND_INSTRUCTION (program, nip);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
         append_int_op (program, "add", base_type);
 
         PKL_PASS_SUBPASS (res_unit);
-        PVM_APPEND_INSTRUCTION (program, mko);
+        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:
@@ -963,7 +884,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -971,9 +892,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
     {
     case PKL_TYPE_INTEGRAL:
       append_int_op (program, "sub", type);
-      break;
-    case PKL_TYPE_STRING:
-      PVM_APPEND_INSTRUCTION (program, sconc);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -984,17 +902,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
         pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
         pkl_ast_node unit_type = PKL_AST_TYPE (res_unit); /* This is always 64,0 */
 
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
         OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
-        PVM_APPEND_INSTRUCTION (program, nip);
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
         OGETM_IN_UNIT (program, base_type, unit_type, res_unit);
-        PVM_APPEND_INSTRUCTION (program, nip);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
         append_int_op (program, "sub", base_type);
 
         PKL_PASS_SUBPASS (res_unit);
-        PVM_APPEND_INSTRUCTION (program, mko);
+        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:
@@ -1009,7 +927,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -1017,9 +935,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
     {
     case PKL_TYPE_INTEGRAL:
       append_int_op (program, "mul", type);
-      break;
-    case PKL_TYPE_STRING:
-      PVM_APPEND_INSTRUCTION (program, sconc);
       break;
     case PKL_TYPE_OFFSET:
       {       
@@ -1038,8 +953,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
 
         if (op2_type_code == PKL_TYPE_OFFSET)
           {
-            PVM_APPEND_INSTRUCTION (program, ogetm);
-            PVM_APPEND_INSTRUCTION (program, nip);
+            pkl_asm_insn (pasm, PKL_INSN_OGETM);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             offset_op = op2;
           }
@@ -1048,8 +963,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
 
         if (op1_type_code == PKL_TYPE_OFFSET)
           {
-            PVM_APPEND_INSTRUCTION (program, ogetm);
-            PVM_APPEND_INSTRUCTION (program, nip);
+            pkl_asm_insn (pasm, PKL_INSN_OGETM);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             offset_op = op1;
           }
@@ -1062,7 +977,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
         append_int_op (program, "mul", base_type);
           
         PKL_PASS_SUBPASS (offset_unit);
-        PVM_APPEND_INSTRUCTION (program, mko);
+        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:
@@ -1076,8 +991,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 {
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
   pkl_ast_node node = PKL_PASS_NODE;
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node type = PKL_AST_TYPE (node);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
@@ -1086,12 +1002,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
     {
       pkl_ast_node op2_base_type
         = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
-      
-      PVM_APPEND_INSTRUCTION (program, ogetm);
+
+      pkl_asm_insn (pasm, PKL_INSN_OGETM);
       append_int_op (program, "bz", op2_base_type);
       pvm_append_symbolic_label_parameter (program,
                                            "Ldivzero");
-      PVM_APPEND_INSTRUCTION (program, drop); 
+      pkl_asm_insn (pasm, PKL_INSN_DROP);
    }
   else
     {
@@ -1114,13 +1030,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
             pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
             PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
 
-            PVM_APPEND_INSTRUCTION (program, swap);
+            pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
             OGETM_IN_UNIT (program, type, unit_type, unit_bits);
-            PVM_APPEND_INSTRUCTION (program, nip);
-            PVM_APPEND_INSTRUCTION (program, swap);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
+            pkl_asm_insn (pasm, PKL_INSN_SWAP);
             OGETM_IN_UNIT (program, type, unit_type, unit_bits);
-            PVM_APPEND_INSTRUCTION (program, nip);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             append_int_op (program, "bz", type);
             pvm_append_symbolic_label_parameter (program,
@@ -1146,7 +1062,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
   pkl_gen_payload payload
     = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node node = PKL_PASS_NODE;
-  pvm_program program = payload->program;
+
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node type = PKL_AST_TYPE (node);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
@@ -1158,11 +1075,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
       pkl_ast_node op2_base_type
         = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
 
-      PVM_APPEND_INSTRUCTION (program, ogetm);
+      pkl_asm_insn (pasm, PKL_INSN_OGETM);
       append_int_op (program, "bz", op2_base_type);
       pvm_append_symbolic_label_parameter (program,
                                            "Ldivzero");
-      PVM_APPEND_INSTRUCTION (program, drop);
+      pkl_asm_insn (pasm, PKL_INSN_DROP);
     }
   else
     {
@@ -1186,13 +1103,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
         pkl_ast_node op1_unit = PKL_AST_TYPE_O_UNIT (op1_type);
         pkl_ast_node unit_type = PKL_AST_TYPE (op1_unit); /* This is always 64,0 */
 
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
-        PVM_APPEND_INSTRUCTION (program, ogetm);
-        PVM_APPEND_INSTRUCTION (program, nip);
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_OGETM);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
         OGETM_IN_UNIT (program, base_type, unit_type, op1_unit);
-        PVM_APPEND_INSTRUCTION (program, nip);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         append_int_op (program, "bz", base_type);
         pvm_append_symbolic_label_parameter (program,
@@ -1201,7 +1118,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
         append_int_op (program, "mod", base_type);
 
         PKL_PASS_SUBPASS (op1_unit);
-        PVM_APPEND_INSTRUCTION (program, mko);
+        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:
@@ -1261,7 +1178,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
   pkl_gen_payload payload
       = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  pvm_program program = payload->program;
+  pkl_asm pasm = payload->pasm;
   pkl_ast_node exp = PKL_PASS_NODE;
   int exp_code = PKL_AST_EXP_CODE (exp);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
@@ -1323,13 +1240,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
         /* Equality and inequality are commutative, so we can save an
            instruction here.  */
         if (exp_code != PKL_AST_OP_EQ && exp_code != PKL_AST_OP_NE)
-          PVM_APPEND_INSTRUCTION (program, swap);
+          pkl_asm_insn (pasm, PKL_INSN_SWAP);
         
         OGETM_IN_UNIT (program, base_type, unit_type, unit_bits);
-        PVM_APPEND_INSTRUCTION (program, nip);
-        PVM_APPEND_INSTRUCTION (program, swap);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
         OGETM_IN_UNIT (program, base_type, unit_type, unit_bits);
-        PVM_APPEND_INSTRUCTION (program, nip);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         append_int_op (program, off_insn, base_type);
 
@@ -1350,7 +1267,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sizeof)
   pkl_gen_payload payload
       = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-  PVM_APPEND_INSTRUCTION (payload->program, siz);
+  pkl_asm_insn (payload->pasm, PKL_INSN_SIZ);
 }
 PKL_PHASE_END_HANDLER
 
