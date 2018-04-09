@@ -173,7 +173,7 @@ pkl_asm_insn_nton  (pkl_asm pasm,
           },
           {
            {PKL_INSN_LUTOLU, PKL_INSN_LUTOL},
-           {PKL_INSN_LTOUL, PKL_INSN_LTOL}
+           {PKL_INSN_LTOLU, PKL_INSN_LTOL}
           },
          }
         };

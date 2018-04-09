@@ -77,13 +77,27 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
  *  pkl_asm_endif (pasm);
  */
 
-/* Loops.
+/* For loop:
  *
- * pkl_asm_dotimes (pasm, EXP)
+ * pkl_asm_dotimes (pasm, INTEGER)
+ *
+ * pkl_asm_loop (pasm);
  *
  * ... loop body ...
  *
- * pkl_asm_enddotimes (pasm);
+ * pkl_asm_end_loop (pasm);
+ *
+ * While loop:
+ *
+ * pkl_asm_while (pasm);
+ * 
+ *   ... condition ...
+ *
+ * pkl_asm_loop (pasm);
+ *
+ *   ... loop body ...
+ * 
+ * pkl_asm_end_loop (pasm);
  */
 
 #endif /* PKL_ASM_H */
