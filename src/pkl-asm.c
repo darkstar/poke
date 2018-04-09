@@ -571,7 +571,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             case 'l':
               {
                 jitter_label label = va_arg (valist, jitter_label);
-                pvm_append_label (pasm->program, label);
+                pvm_append_label_parameter (pasm->program, label);
                 break;
               }
             case 'i':
