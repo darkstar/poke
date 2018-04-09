@@ -354,10 +354,32 @@ pkl_asm
 pkl_asm_new ()
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
+  pvm_program program;
 
   memset (pasm, 0, sizeof (struct pkl_asm));
-
+  program = pvm_make_program ();
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
+
+  /* Standard prologue.  */
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program,
+                                       "Lstart");
+  
+  pvm_append_symbolic_label (program, "Ldivzero");
+  
+  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_EDIVZ, 32));
+
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lexit");
+  pvm_append_symbolic_label (program, "Lerror");
+  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
+  
+  pvm_append_symbolic_label (program, "Lexit");
+  PVM_APPEND_INSTRUCTION (program, exit);
+  
+  pvm_append_symbolic_label (program, "Lstart");
+
+  pasm->program = program;
   return pasm;
 }
 
@@ -368,8 +390,18 @@ pkl_asm_get_program (pkl_asm pasm)
 }
 
 void
-pkl_asm_free (pkl_asm pasm)
+pkl_asm_finish (pkl_asm pasm)
 {
+  pvm_program program = pasm->program;
+
+  /* Standard epilogue.  */
+  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
+    
+  PVM_APPEND_INSTRUCTION (program, ba);
+  pvm_append_symbolic_label_parameter (program, "Lexit");
+
+  /* Free the assembler instance, but leave program untouched for the
+     user.  */
   free (pasm);
 }
 

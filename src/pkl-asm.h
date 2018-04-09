@@ -48,10 +48,10 @@ enum pkl_asm_insn
 typedef struct pkl_asm *pkl_asm;
 
 /* Assembler instances are created and freed using `pkl_asm_new' and
-   `pkl_asm_free' respectively.  */
+   `pkl_asm_finish' respectively.  */
 
 pkl_asm pkl_asm_new (void);
-void pkl_asm_free (pkl_asm pasm);
+void pkl_asm_finish (pkl_asm pasm);
 
 /* The following functions provide access to information managed by an
    assembler instance.  */
