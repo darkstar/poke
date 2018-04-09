@@ -158,22 +158,22 @@ pkl_asm_insn_nton  (pkl_asm pasm,
         {
          {
           {
-           {PKL_INSN_LTOLU, PKL_INSN_LTOIU},
-           {PKL_INSN_LTOL, PKL_INSN_LTOI}
+           {PKL_INSN_IUTOIU, PKL_INSN_IUTOI},
+           {PKL_INSN_ITOIU, PKL_INSN_ITOI}
           },
           {
-           {PKL_INSN_LUTOLU, PKL_INSN_LUTOIU},
-           {PKL_INSN_LUTOL, PKL_INSN_LUTOI}
+           {PKL_INSN_IUTOLU, PKL_INSN_IUTOL},
+           {PKL_INSN_ITOLU, PKL_INSN_ITOL}
           },
          },
          {
           {
-           {PKL_INSN_ITOLU, PKL_INSN_ITOIU},
-           {PKL_INSN_ITOL, PKL_INSN_ITOI}
+           {PKL_INSN_LUTOLU, PKL_INSN_LUTOI},
+           {PKL_INSN_LTOIU, PKL_INSN_LTOI}
           },
           {
-           {PKL_INSN_IUTOLU, PKL_INSN_IUTOIU},
-           {PKL_INSN_IUTOL, PKL_INSN_IUTOI}
+           {PKL_INSN_LUTOLU, PKL_INSN_LUTOL},
+           {PKL_INSN_LTOUL, PKL_INSN_LTOL}
           },
          }
         };
