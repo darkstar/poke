@@ -348,6 +348,56 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
 }
 
+/* Macro-instruction: BZ type, label
+   Stack: _ -> _
+
+   Branch to LABEL if the integer value of type TYPE at the top of the
+   stack is zero.  */
+
+static void
+pkl_asm_insn_bz (pkl_asm pasm,
+                 pkl_ast_node type,
+                 jitter_label label)
+{
+  static int bz_table[2][2] =
+    {
+     {PKL_INSN_BZIU, PKL_INSN_BZI},
+     {PKL_INSN_BZLU, PKL_INSN_BZL}
+    };
+
+  size_t size = PKL_AST_TYPE_I_SIZE (type);
+  int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+  int tl = ((size - 1) & ~0x1f);
+
+  pkl_asm_insn (pasm, bz_table[tl][sign], label);
+}
+
+/* Macro-instruction: BNZ type, label
+   Stack: _ -> _
+
+   Branch to LABEL if the integer value of type TYPE at the top of the
+   stack is not zero.  */
+
+static void
+pkl_asm_insn_bnz (pkl_asm pasm,
+                  pkl_ast_node type,
+                  jitter_label label)
+{
+  static int bnz_table[2][2] =
+    {
+     {PKL_INSN_BNZIU, PKL_INSN_BNZI},
+     {PKL_INSN_BNZLU, PKL_INSN_BNZL}
+    };
+
+  size_t size = PKL_AST_TYPE_I_SIZE (type);
+  int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+  int tl = ((size - 1) & ~0x1f);
+
+  pkl_asm_insn (pasm, bnz_table[tl][sign], label);
+}
+
 /* Create a new instance of an assembler.  This initializes a new
    program.  */
 
@@ -515,6 +565,32 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_peek (pasm, peek_type);
+            break;
+          }
+        case PKL_INSN_BZ:
+          {
+            pkl_ast_node type;
+            jitter_label label;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            label = va_arg (valist, jitter_label);
+            va_end (valist);
+
+            pkl_asm_insn_bz (pasm, type, label);
+            break;
+          }
+        case PKL_INSN_BNZ:
+          {
+            pkl_ast_node type;
+            jitter_label label;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            label = va_arg (valist, jitter_label);
+            va_end (valist);
+
+            pkl_asm_insn_bnz (pasm, type, label);
             break;
           }
         case PKL_INSN_ADD:

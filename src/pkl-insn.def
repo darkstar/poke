@@ -124,6 +124,20 @@ PKL_DEF_INSN (PKL_INSN_TYAGETT, "", "tyagett")
 
 PKL_DEF_INSN (PKL_INSN_TYPOF, "", "typof")
 
+/* Branch instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_BA, "l", "ba")
+
+PKL_DEF_INSN (PKL_INSN_BZI, "l", "bzi")
+PKL_DEF_INSN (PKL_INSN_BZIU, "l", "bziu")
+PKL_DEF_INSN (PKL_INSN_BZL, "l", "bzl")
+PKL_DEF_INSN (PKL_INSN_BZLU, "l", "bzlu")
+
+PKL_DEF_INSN (PKL_INSN_BNZI, "l", "bnzi")
+PKL_DEF_INSN (PKL_INSN_BNZIU, "l", "bnziu")
+PKL_DEF_INSN (PKL_INSN_BNZL, "l", "bnzl")
+PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
+
 /* IO instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_PEEKI, "n", "peeki")
@@ -149,6 +163,8 @@ PKL_DEF_INSN (PKL_INSN_MUL, "a", "")
 PKL_DEF_INSN (PKL_INSN_DIV, "a", "")
 PKL_DEF_INSN (PKL_INSN_MOD, "a", "")
 PKL_DEF_INSN (PKL_INSN_PEEK, "a", "")
+PKL_DEF_INSN (PKL_INSN_BZ, "al", "")
+PKL_DEF_INSN (PKL_INSN_BNZ, "al", "")  
 
 /*
 Local variables:
