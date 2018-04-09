@@ -1,4 +1,4 @@
-/* pkl-asm.h - Macro-assembler for the Poke Virtual Machine.  */
+/* pkl-asm.h - Macro-assembler for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -98,6 +98,24 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
  *   ... loop body ...
  * 
  * pkl_asm_end_loop (pasm);
+ */
+
+/* Assembler directives:
+ *
+ * pkl_asm_note (pasm, STR);
+ * pkl_asm_loc (pasm, LOC);
+ *
+ * XXX: how to use pretty-printers in jitter in order to print
+ * directives like:
+ *
+ * .note "foobar"      Does nothing.
+ * .loc lb,le,cb,ce    Updates the current location in the PVM.
+ *                     Used for debugging and error reporting.
+ *
+ * instead of using instructions like:
+ *
+ *       note "foobar"
+ *       loc lb,le,cb,ce
  */
 
 #endif /* PKL_ASM_H */
