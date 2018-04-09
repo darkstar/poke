@@ -41,16 +41,21 @@ enum pkl_asm_insn
 #undef PKL_DEF_INSN
 };
 
-
 /* Opaque data structure for an assembler instance.  The struct is
    defined in pkl-asm.c.  */
 
 typedef struct pkl_asm *pkl_asm;
 
-/* Assembler instances are created and freed using `pkl_asm_new' and
-   `pkl_asm_finish' respectively.  */
+/* Create a new instance of an assembler.  This initializes a new
+   program.  */
 
 pkl_asm pkl_asm_new (void);
+
+/* Finish the assembly of the current program and return it.  This
+   function frees all resources used by the assembler instance, and
+   `pkl_asm_new' should be called again in order to assemble another
+   program.  */
+
 pvm_program pkl_asm_finish (pkl_asm pasm);
 
 /* Assemble an instruction INSN and append it to the program being
