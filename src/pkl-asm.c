@@ -156,22 +156,28 @@ pkl_asm_insn_nton  (pkl_asm pasm,
     {
       static int cast_table[2][2][2][2] =
         {
+         /* Source is int.  */
          {
+          /* Destination is int.  */
           {
            {PKL_INSN_IUTOIU, PKL_INSN_IUTOI},
            {PKL_INSN_ITOIU, PKL_INSN_ITOI}
           },
+          /* Destination is long. */
           {
            {PKL_INSN_IUTOLU, PKL_INSN_IUTOL},
            {PKL_INSN_ITOLU, PKL_INSN_ITOL}
           },
          },
+         /* Source is long.  */
          {
+          /* Destination is int.  */
           {
            {PKL_INSN_LUTOLU, PKL_INSN_LUTOI},
            {PKL_INSN_LTOIU, PKL_INSN_LTOI}
           },
           {
+           /* Destination is long.  */
            {PKL_INSN_LUTOLU, PKL_INSN_LUTOL},
            {PKL_INSN_LTOLU, PKL_INSN_LTOL}
           },
@@ -207,8 +213,8 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
 
       static int peek_table[2][2] =
         {
-         {PKL_INSN_PEEKL, PKL_INSN_PEEKLU},
-         {PKL_INSN_PEEKI, PKL_INSN_PEEKIU}
+         {PKL_INSN_PEEKIU, PKL_INSN_PEEKI},
+         {PKL_INSN_PEEKLU, PKL_INSN_PEEKL}
         };
 
       int tl = ((size - 1) & ~0x1f);
@@ -251,32 +257,32 @@ pkl_asm_insn_intop (pkl_asm pasm,
 {
   static int add_table[2][2] =
     {
-     { PKL_INSN_ADDLU, PKL_INSN_ADDL },
      { PKL_INSN_ADDIU, PKL_INSN_ADDI },
+     { PKL_INSN_ADDLU, PKL_INSN_ADDL },
     };
 
   static int sub_table[2][2] =
     {
-     { PKL_INSN_SUBLU, PKL_INSN_SUBL },
      { PKL_INSN_SUBIU, PKL_INSN_SUBI },
+     { PKL_INSN_SUBLU, PKL_INSN_SUBL },
     };
 
   static int mul_table[2][2] =
     {
-     { PKL_INSN_MULLU, PKL_INSN_MULL },
      { PKL_INSN_MULIU, PKL_INSN_MULI },
+     { PKL_INSN_MULLU, PKL_INSN_MULL },
     };
 
   static int div_table[2][2] =
     {
-     { PKL_INSN_DIVLU, PKL_INSN_DIVL },
      { PKL_INSN_DIVIU, PKL_INSN_DIVI },
+     { PKL_INSN_DIVLU, PKL_INSN_DIVL },
     };
 
   static int mod_table[2][2] =
     {
-     { PKL_INSN_MODLU, PKL_INSN_MODL },
      { PKL_INSN_MODIU, PKL_INSN_MODI },
+     { PKL_INSN_MODLU, PKL_INSN_MODL },
     };
 
   uint64_t size = PKL_AST_TYPE_I_SIZE (type);
@@ -299,6 +305,7 @@ pkl_asm_insn_intop (pkl_asm pasm,
       break;
     case PKL_INSN_MOD:
       pkl_asm_insn (pasm, mod_table[tl][signed_p]);
+      
       break;
     default:
       assert (0);
