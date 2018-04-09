@@ -210,7 +210,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
     {
-      pkl_asm_insn (pasm, PKL_INSN_NTON, from_type, to_type);
+      pkl_asm_insn (pasm, PKL_INSN_NTON,
+                    from_type, to_type);
     }
   else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
@@ -226,15 +227,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
       /* Get the magnitude of the offset, cast it to the new base type
          and convert to new unit.  */
       pkl_asm_insn (pasm, PKL_INSN_OGETM);
-      pkl_asm_insn (pasm, PKL_INSN_NTON, from_base_type, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NTON,
+                    from_base_type, to_base_type);
 
       PKL_PASS_SUBPASS (from_base_unit);
-      pkl_asm_insn (pasm, PKL_INSN_NTON, from_base_unit_type, to_base_unit_type);
+      pkl_asm_insn (pasm, PKL_INSN_NTON,
+                    from_base_unit_type, to_base_unit_type);
 
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
 
       PKL_PASS_SUBPASS (to_base_unit);
-      pkl_asm_insn (pasm, PKL_INSN_NTON, to_base_unit_type, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NTON,
+                    to_base_unit_type, to_base_type);
 
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_SWAP);
