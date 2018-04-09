@@ -185,23 +185,23 @@ PKL_DEF_INSN (PKL_INSN_GTS, "", "gts")
 PKL_DEF_INSN (PKL_INSN_GES, "", "ges")
 PKL_DEF_INSN (PKL_INSN_LES, "", "les")
 
-/* String related instructions.  */
+/* String instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SCONC, "", "sconc")
 
-/* Offset related instructions.  */
+/* Offset instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKO, "", "mko")
 PKL_DEF_INSN (PKL_INSN_OGETM, "", "ogetm")
 PKL_DEF_INSN (PKL_INSN_OGETU, "", "ogetu")
 PKL_DEF_INSN (PKL_INSN_OGETBT, "", "ogetbt")
 
-/* Array related instructions.  */
+/* Array instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKA, "", "mka")
 PKL_DEF_INSN (PKL_INSN_AREF, "", "aref")
 
-/* Struct related instructions.  */
+/* Struct instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKSCT, "", "mksct")
 PKL_DEF_INSN (PKL_INSN_SREF, "", "sref")
