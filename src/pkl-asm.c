@@ -210,9 +210,9 @@ pkl_asm_insn_nton  (pkl_asm pasm,
          }
         };
 
-      int fl = ((from_type_size - 1) & ~0x1f);
+      int fl = !!((from_type_size - 1) & ~0x1f);
       int fs = from_type_sign;
-      int tl = ((to_type_size - 1) & ~0x1f);
+      int tl = !!((to_type_size - 1) & ~0x1f);
       int ts = to_type_sign;
          
       pkl_asm_insn (pasm,
@@ -243,7 +243,7 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
          {PKL_INSN_PEEKLU, PKL_INSN_PEEKL}
         };
 
-      int tl = ((size - 1) & ~0x1f);
+      int tl = !!((size - 1) & ~0x1f);
 
       pkl_asm_insn (pasm, peek_table[tl][sign],
                     (jitter_uint) size);
@@ -313,7 +313,7 @@ pkl_asm_insn_intop (pkl_asm pasm,
 
   uint64_t size = PKL_AST_TYPE_I_SIZE (type);
   int signed_p = PKL_AST_TYPE_I_SIGNED (type);
-  int tl = ((size - 1) & ~0x1f);
+  int tl = !!((size - 1) & ~0x1f);
 
   switch (insn)
     {
@@ -396,7 +396,7 @@ pkl_asm_insn_bz (pkl_asm pasm,
   size_t size = PKL_AST_TYPE_I_SIZE (type);
   int sign = PKL_AST_TYPE_I_SIGNED (type);
 
-  int tl = ((size - 1) & ~0x1f);
+  int tl = !!((size - 1) & ~0x1f);
 
   pkl_asm_insn (pasm, bz_table[tl][sign], label);
 }
@@ -421,7 +421,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
   size_t size = PKL_AST_TYPE_I_SIZE (type);
   int sign = PKL_AST_TYPE_I_SIGNED (type);
 
-  int tl = ((size - 1) & ~0x1f);
+  int tl = !!((size - 1) & ~0x1f);
 
   pkl_asm_insn (pasm, bnz_table[tl][sign], label);
 }
@@ -489,7 +489,7 @@ pkl_asm_finish (pkl_asm pasm)
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
     
   PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_symbolic_label_parameter (program, "Lexit");
+  pvm_append_label_parameter (program, pasm->exit_label);
   /* XXX: note end epilogue.  */
 
   /* Free the assembler instance and return the assembled program to
