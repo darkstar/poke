@@ -100,6 +100,12 @@ PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
 PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
 PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
 
+/* Relational instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_AND, "", "and")
+PKL_DEF_INSN (PKL_INSN_OR, "", "or")
+PKL_DEF_INSN (PKL_INSN_NOT, "", "not")
+  
 /* Comparison instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_EQI, "", "eqi")

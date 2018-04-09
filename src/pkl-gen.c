@@ -970,21 +970,32 @@ BIN_INTEGRAL_EXP_HANDLER (xor, bxor);
 BIN_INTEGRAL_EXP_HANDLER (sl, bsl);
 BIN_INTEGRAL_EXP_HANDLER (sr, bsr);
 
-#define LOGIC_EXP_HANDLER(op)                           \
-  PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_##op)          \
-  {                                                     \
-    pkl_gen_payload payload                             \
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;             \
-                                                        \
-    PVM_APPEND_INSTRUCTION (payload->program, op);      \
-  }                                                     \
-  PKL_PHASE_END_HANDLER
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
 
-LOGIC_EXP_HANDLER (and);
-LOGIC_EXP_HANDLER (or);
-LOGIC_EXP_HANDLER (not);
+  pkl_asm_insn (payload->pasm, PKL_INSN_AND);
+}
+PKL_PHASE_END_HANDLER
 
-#undef LOGIC_EXP_HANDLER
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_or)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pkl_asm_insn (payload->pasm, PKL_INSN_OR);
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_not)
+{
+  pkl_gen_payload payload
+      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+
+  pkl_asm_insn (payload->pasm, PKL_INSN_NOT);
+}
+PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
 {
