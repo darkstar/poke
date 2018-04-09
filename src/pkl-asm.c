@@ -361,6 +361,8 @@ pkl_asm_new ()
   program = pvm_make_program ();
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
 
+  /* XXX: note begin prologue */
+  
   /* Standard prologue.  */
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_symbolic_label_parameter (program,
@@ -380,6 +382,8 @@ pkl_asm_new ()
   
   pvm_append_symbolic_label (program, "Lstart");
 
+  /* XXX: note end prologue  */
+
   pasm->program = program;
   return pasm;
 }
@@ -394,11 +398,13 @@ pkl_asm_finish (pkl_asm pasm)
 {
   pvm_program program = pasm->program;
 
+  /* XXX: note begin epilogue. */
   /* Standard epilogue.  */
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
     
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_symbolic_label_parameter (program, "Lexit");
+  /* XXX: note end epilogue.  */
 
   /* Free the assembler instance and return the assembled program to
      the user.  */
