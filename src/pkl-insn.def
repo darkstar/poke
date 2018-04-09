@@ -28,10 +28,12 @@
    string.  Each argument is identified by a letter:
 
    `v' is for a pvm_val.
-   `a' is for a pkl_ast_node.
    `l' is for a label.
    `n' is for an immediate.
    `r' is for register.
+
+   `a' is for a pkl_ast_node.
+       This kind of arguments are only valid in macro-instructions.
 
    The third column is the instruction name, as defined in pvm.jitter.
    However, beware jitter's name mangling!
