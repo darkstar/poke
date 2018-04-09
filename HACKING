@@ -137,17 +137,48 @@ Make using valgrind in poke a sane experience:
 
 - etc/boehm-gc.suppressions
 
+The Poke Compiler
+=================
+
+Compiler Overview
+-----------------
+
+            /--------\
+            | source |
+            \---+----/
+                |
+                v
+        +-----------------+
+        |      Parser     |
+        +-----------------+
+        |  analysis and   |
+        | transformation  |
+        |     phases      |
+        +-----------------+    
+        | code generation |
+        |      phase      |
+        +-----------------+
+        | Macro assembler |
+        +-----------------+
+                |
+                v
+           /---------\
+           | program |
+           \---------/
+
 The bison parser in pkl-tab.y
-=============================
+-----------------------------
 
 The only purpose of the bison parser in pkl-tab.y is to do the
-syntactic analysis, build the first AST, and set the locations of the
-AST nodes.  Nothing else.  As we shall see below, any further analysis
-and transformations on the AST are performaed by the compiler phases,
-which are implemented elsewhere.
+syntactic analysis, build the initial AST, and set the locations of
+the AST nodes.  Nothing else.  As we shall see below, any further
+analysis and transformations on the AST are performed by the compiler
+phases, which are implemented elsewhere.  This helps a lot to keep the
+parser code clean and easy to read, and also eases changing the
+syntactic structure of poke programs.
 
 Compiler Passes and Phases
-==========================
+--------------------------
 
 These are the phases currently implemented in the poke compiler (the
 phases marked with a * are optional):
