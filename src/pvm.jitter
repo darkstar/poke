@@ -379,7 +379,6 @@ instruction sublu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
-      printf ("SUBLU %lu - %lu = %lu\n", PVM_VAL_ULONG (a), PVM_VAL_ULONG (b), PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b));\
     res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
@@ -424,7 +423,6 @@ instruction mullu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
-    printf ("MULLU %lu * %lu = %lu\n", PVM_VAL_ULONG (a), PVM_VAL_ULONG (b), PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b));\
     res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b), size);\
   }
   JITTER_BINARY_STACK(F);
