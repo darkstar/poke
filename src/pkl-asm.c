@@ -348,7 +348,8 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
 }
 
-/* The functions below are documented in pkl-asm.h.  */
+/* Create a new instance of an assembler.  This initializes a new
+   program.  */
 
 pkl_asm
 pkl_asm_new ()
@@ -383,6 +384,11 @@ pkl_asm_new ()
   return pasm;
 }
 
+/* Finish the assembly of the current program and return it.  This
+   function frees all resources used by the assembler instance, and
+   `pkl_asm_new' should be called again in order to assemble another
+   program.  */
+
 pvm_program
 pkl_asm_finish (pkl_asm pasm)
 {
@@ -399,6 +405,10 @@ pkl_asm_finish (pkl_asm pasm)
   free (pasm);
   return program;
 }
+
+/* Assemble an instruction INSN and append it to the program being
+   assembled in PASM.  If the instruction takes any argument, they
+   follow after INSN.  */
 
 void
 pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
