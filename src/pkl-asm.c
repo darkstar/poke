@@ -384,12 +384,6 @@ pkl_asm_new ()
 }
 
 pvm_program
-pkl_asm_get_program (pkl_asm pasm)
-{
-  return pasm->program;
-}
-
-void
 pkl_asm_finish (pkl_asm pasm)
 {
   pvm_program program = pasm->program;
@@ -400,9 +394,10 @@ pkl_asm_finish (pkl_asm pasm)
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_symbolic_label_parameter (program, "Lexit");
 
-  /* Free the assembler instance, but leave program untouched for the
-     user.  */
+  /* Free the assembler instance and return the assembled program to
+     the user.  */
   free (pasm);
+  return program;
 }
 
 void
