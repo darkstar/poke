@@ -226,6 +226,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       /* Get the magnitude of the offset, cast it to the new base type
          and convert to new unit.  */
+      /* XXX: use OGETMC here.  */
       pkl_asm_insn (pasm, PKL_INSN_OGETM);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     from_base_type, to_base_type);

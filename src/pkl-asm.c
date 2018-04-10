@@ -27,7 +27,6 @@
 #include "pkl-asm.h"
 #include "pvm.h"
 
-
 /* In order to allow nested multi-function macros, like conditionals
    and loops, the assembler supports the notion of "nesting levels".
    For example, consider the following conditional code:
