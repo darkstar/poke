@@ -650,6 +650,8 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, CYAN " Gb" NOATTR);
           break;
         default:
+          /* XXX: print here the name of the base type of the
+             offset.  */
           fprintf (out, CYAN " %" PRIu64 NOATTR,
                    PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
           break;
