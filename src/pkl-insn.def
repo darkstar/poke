@@ -35,11 +35,11 @@
    `a' is for a pkl_ast_node.
        This kind of arguments are only valid in macro-instructions.
 
-   The third column is the instruction name, as defined in pvm.jitter.
-   However, beware jitter's name mangling!
+   For PVM instructions, the third column is the instruction name as
+   defined in pvm.jitter.  However, beware jitter's name mangling.
 
-   Macros don't have instruction names.  */
-
+   For macro-instructions, the third column is the name of the macro,
+   to be used for debugging purposes.  */
 
 /* Stack manipulation instructions.  */
 
@@ -251,33 +251,33 @@ PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
    macro instructions, and it should not be assembled.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
-PKL_DEF_INSN (PKL_INSN_NTON, "aa", "")
-PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "")
+PKL_DEF_INSN (PKL_INSN_NTON, "aa", "nton")
+PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")
 
-PKL_DEF_INSN (PKL_INSN_NEG, "a", "")
-PKL_DEF_INSN (PKL_INSN_ADD, "a", "")
-PKL_DEF_INSN (PKL_INSN_SUB, "a", "")
-PKL_DEF_INSN (PKL_INSN_MUL, "a", "")
-PKL_DEF_INSN (PKL_INSN_DIV, "a", "")
-PKL_DEF_INSN (PKL_INSN_MOD, "a", "")
-PKL_DEF_INSN (PKL_INSN_PEEK, "a", "")
-PKL_DEF_INSN (PKL_INSN_BZ, "al", "")
-PKL_DEF_INSN (PKL_INSN_BNZ, "al", "")
+PKL_DEF_INSN (PKL_INSN_NEG, "a", "neg")
+PKL_DEF_INSN (PKL_INSN_ADD, "a", "add")
+PKL_DEF_INSN (PKL_INSN_SUB, "a", "sub")
+PKL_DEF_INSN (PKL_INSN_MUL, "a", "mul")
+PKL_DEF_INSN (PKL_INSN_DIV, "a", "div")
+PKL_DEF_INSN (PKL_INSN_MOD, "a", "mod")
+PKL_DEF_INSN (PKL_INSN_PEEK, "a", "peek")
+PKL_DEF_INSN (PKL_INSN_BZ, "al", "bz")
+PKL_DEF_INSN (PKL_INSN_BNZ, "al", "bnz")
 
-PKL_DEF_INSN (PKL_INSN_EQ, "a", "")
-PKL_DEF_INSN (PKL_INSN_NE, "a", "")
-PKL_DEF_INSN (PKL_INSN_LT, "a", "")
-PKL_DEF_INSN (PKL_INSN_GT, "a", "")
-PKL_DEF_INSN (PKL_INSN_GE, "a", "")
-PKL_DEF_INSN (PKL_INSN_LE, "a", "")
+PKL_DEF_INSN (PKL_INSN_EQ, "a", "eq")
+PKL_DEF_INSN (PKL_INSN_NE, "a", "ne")
+PKL_DEF_INSN (PKL_INSN_LT, "a", "lt")
+PKL_DEF_INSN (PKL_INSN_GT, "a", "gt")
+PKL_DEF_INSN (PKL_INSN_GE, "a", "ge")
+PKL_DEF_INSN (PKL_INSN_LE, "a", "le")
 
-PKL_DEF_INSN (PKL_INSN_SL, "a", "")
-PKL_DEF_INSN (PKL_INSN_SR, "a", "")
+PKL_DEF_INSN (PKL_INSN_SL, "a", "sl")
+PKL_DEF_INSN (PKL_INSN_SR, "a", "sr")
 
-PKL_DEF_INSN (PKL_INSN_BNOT, "a", "")
-PKL_DEF_INSN (PKL_INSN_BAND, "a", "")
-PKL_DEF_INSN (PKL_INSN_BOR, "a", "")
-PKL_DEF_INSN (PKL_INSN_BXOR, "a", "")
+PKL_DEF_INSN (PKL_INSN_BNOT, "a", "bnot")
+PKL_DEF_INSN (PKL_INSN_BAND, "a", "band")
+PKL_DEF_INSN (PKL_INSN_BOR, "a", "bor")
+PKL_DEF_INSN (PKL_INSN_BXOR, "a", "bxor")
 
 /*
 Local variables:
