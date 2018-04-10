@@ -577,8 +577,6 @@ pkl_asm_new (pkl_ast ast)
   pasm->error_label = jitter_fresh_label (program);
   pasm->exit_label = jitter_fresh_label (program);
 
-  /* XXX: note begin prologue */
-  
   /* Standard prologue.  */
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_label_parameter (program, pasm->start_label);
@@ -597,7 +595,6 @@ pkl_asm_new (pkl_ast ast)
   
   pvm_append_label (program, pasm->start_label);
 
-  /* XXX: note end prologue  */
   pasm->program = program;
     
   return pasm;
@@ -613,13 +610,11 @@ pkl_asm_finish (pkl_asm pasm)
 {
   pvm_program program = pasm->program;
 
-  /* XXX: note begin epilogue. */
   /* Standard epilogue.  */
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
     
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_label_parameter (program, pasm->exit_label);
-  /* XXX: note end epilogue.  */
 
   /* Free the assembler instance and return the assembled program to
      the user.  */
