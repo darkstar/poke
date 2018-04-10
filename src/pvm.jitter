@@ -168,7 +168,7 @@ instruction nop ()
   end
 end
 
-instruction note (?n)
+instruction note (?n pvm_literal_printer)
   code
   end
 end

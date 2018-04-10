@@ -685,7 +685,9 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             case 'v':
               {
                 pvm_val val = va_arg (valist, pvm_val);
-                pkl_asm_push_val (pasm->program, val);
+                /* XXX: this doesn't work in 32-bit  */
+                pvm_append_unsigned_literal_parameter (pasm->program,
+                                                       (jitter_uint) val);
                 break;
               }
             case 'n':
@@ -718,9 +720,15 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       /* This is a macro-instruction.  Dispatch to the corresponding
          macro-instruction handler.  */
 
-      /* XXX: emit a begin macro note if the assembler is in debugging
-         mode.  */
-      
+      const char *note_prefix = "MACRO ";
+      const char *macro_name = insn_names[insn];
+      char *note = xmalloc (strlen (note_prefix) + strlen (macro_name)
+                            + 1);
+
+      strcpy (note, note_prefix);
+      strcat (note, macro_name);
+
+      pkl_asm_note (pasm, note);
       switch (insn)
         {
         case PKL_INSN_NTON:
@@ -843,8 +851,8 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           assert (0);
         }
 
-      /* XXX: emit an end-macro note if the assembler is in debugging
-         mode.  */
+      pkl_asm_note (pasm, "END MACRO");
+      free (note);
     }
 }
 
@@ -853,5 +861,9 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 void
 pkl_asm_note (pkl_asm pasm, const char *str)
 {
+  /* XXX: this doesn't work in 32-bit because of jitter's inability to
+     pass 64-bit pointers as arguments to instructions in 32-bit.  */
+#if __WORDSIZE == 64
   pkl_asm_insn (pasm, PKL_INSN_NOTE, pvm_make_string (str));
+#endif
 }
