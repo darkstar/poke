@@ -232,7 +232,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 
       PKL_PASS_SUBPASS (from_base_unit);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
-                    from_base_unit_type, to_base_unit_type);
+                    from_base_unit_type, to_base_type);
 
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
 
