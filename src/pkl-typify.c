@@ -163,10 +163,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
 PKL_PHASE_END_HANDLER
 
 /* When applied to integral arguments, the type of a binary operation
-   ADD, SUB, MUL, DIV, MOD, SL, SR, IOR, XOR and BAND is an integral
-   type with the following characteristics: if any of the operands is
-   unsigned, the operation is unsigned.  The width of the operation is
-   the width of the widest operand.
+   SL and SR is an integral type with the same characteristics than
+   the type of the value being shifted, i.e. the first operand.
+
+   When applied to integral arguments, the type of a binary operation
+   ADD, SUB, MUL, DIV, MOD, IOR, XOR and BAND is an integral type with
+   the following characteristics: if any of the operands is unsigned,
+   the operation is unsigned.  The width of the operation is the width
+   of the widest operand.
 
    When applied to strings, the type of ADD is a string.
 
@@ -224,6 +228,23 @@ PKL_PHASE_END_HANDLER
 
 /* The following operations only accept integers.  */
 
+#define CASE_STR
+#define CASE_OFFSET
+
+#define CASE_INTEGRAL                                                   \
+  case PKL_TYPE_INTEGRAL:                                               \
+  {                                                                     \
+    int signed_p = PKL_AST_TYPE_I_SIGNED (t1);                          \
+    int size = PKL_AST_TYPE_I_SIZE (t1);                                \
+                                                                        \
+    type = pkl_ast_make_integral_type (PKL_PASS_AST, size, signed_p);   \
+    break;                                                              \
+  }
+
+TYPIFY_BIN (sl);
+TYPIFY_BIN (sr);
+
+#undef CASE_INTEGRAL
 #define CASE_INTEGRAL                                                   \
   case PKL_TYPE_INTEGRAL:                                               \
   {                                                                     \
@@ -236,15 +257,9 @@ PKL_PHASE_END_HANDLER
     break;                                                              \
   }
 
-#define CASE_STR
-#define CASE_OFFSET
-
-TYPIFY_BIN (sl);
-TYPIFY_BIN (sr);
 TYPIFY_BIN (ior);
 TYPIFY_BIN (xor);
 TYPIFY_BIN (band);
-
 
 /* DIV, MOD and SUB accept integral and offset operands.  */
 
