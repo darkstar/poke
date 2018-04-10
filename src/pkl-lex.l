@@ -85,7 +85,7 @@ CHAR		   '(.|\\[n0t])'
 STRING             \"([^"]|\\(.|\n))*\"
 HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
-OCTCST             0[0-9][0-9_]*
+OCTCST             0[oO][0-9_]*
 DECCST             [0-9][0-9_]*
 IS		   ((u|U)|(u|U)?(l|L|b|B|h|H|n|N)|(l|L|b|B|h|H|n|N)(u|U))
 
@@ -222,10 +222,10 @@ D [0-9]
       base = 2;
       offset = 2;
     }
-    else if (isdigit (yytext[1]))
+    else if (yytext[1] == 'o' || yytext[1] == 'O')
     {
       base = 8;
-      offset = 1;
+      offset = 2;
     }
   }
 

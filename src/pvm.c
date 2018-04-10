@@ -382,20 +382,20 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   switch (base)
     {
     case 8:
-      long64_fmt = "%" PRIo64 "L";
-      long_fmt = "(int<%d>) %" PRIo64;
-      ulong64_fmt = "%" PRIo64 "UL";
-      ulong_fmt = "(uint<%d>) %" PRIo64; 
-      int32_fmt = "%" PRIo32;
-      int16_fmt = "%" PRIo32 "H";
-      int8_fmt = "%" PRIo32 "B";
-      int4_fmt = "%" PRIo32 "N";
-      int_fmt = "(int<%d>) %" PRIo32;
-      uint32_fmt = "%" PRIo32;
-      uint16_fmt = "%" PRIo32 "UH";
-      uint8_fmt = "%" PRIo32 "UB";
-      uint4_fmt = "%" PRIo32 "UN";
-      uint_fmt = "(uint<%d>) %" PRIo32;
+      long64_fmt = "0o%" PRIo64 "L";
+      long_fmt = "(int<%d>) 0o%" PRIo64;
+      ulong64_fmt = "0o%" PRIo64 "UL";
+      ulong_fmt = "(uint<%d>) 0o%" PRIo64; 
+      int32_fmt = "0o%" PRIo32;
+      int16_fmt = "0o%" PRIo32 "H";
+      int8_fmt = "0o%" PRIo32 "B";
+      int4_fmt = "0o%" PRIo32 "N";
+      int_fmt = "(int<%d>) 0o%" PRIo32;
+      uint32_fmt = "0o%" PRIo32;
+      uint16_fmt = "0o%" PRIo32 "UH";
+      uint8_fmt = "0o%" PRIo32 "UB";
+      uint4_fmt = "0o%" PRIo32 "UN";
+      uint_fmt = "(uint<%d>) 0o%" PRIo32;
       break;
     case 10:
       long64_fmt = "%" PRIi64 "L";
