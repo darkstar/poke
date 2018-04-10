@@ -391,7 +391,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int8_fmt = "0o%" PRIo32 "B";
       int4_fmt = "0o%" PRIo32 "N";
       int_fmt = "(int<%d>) 0o%" PRIo32;
-      uint32_fmt = "0o%" PRIo32;
+      uint32_fmt = "0o%" PRIo32 "U";
       uint16_fmt = "0o%" PRIo32 "UH";
       uint8_fmt = "0o%" PRIo32 "UB";
       uint4_fmt = "0o%" PRIo32 "UN";
@@ -407,7 +407,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int8_fmt = "%" PRIi32 "B";
       int4_fmt = "%" PRIi32 "N";
       int_fmt = "(int<%d>) %" PRIi32;
-      uint32_fmt = "%" PRIu32;
+      uint32_fmt = "%" PRIu32 "U";
       uint16_fmt = "%" PRIu32 "UH";
       uint8_fmt = "%" PRIu32 "UB";
       uint4_fmt = "%" PRIu32 "UN";
@@ -423,7 +423,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int8_fmt = "0x%" PRIx32 "B";
       int4_fmt = "0x%" PRIx32 "N";
       int_fmt = "(int<%d>) 0x%" PRIx32;
-      uint32_fmt = "0x%" PRIx32;
+      uint32_fmt = "0x%" PRIx32 "U";
       uint16_fmt = "0x%" PRIx32 "UH";
       uint8_fmt = "0x%" PRIx32 "UB";
       uint4_fmt = "0x%" PRIx32 "UN";
