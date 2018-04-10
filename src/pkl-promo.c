@@ -439,6 +439,44 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_rela)
 }
 PKL_PHASE_END_HANDLER
 
+/* The bit shift operations are defined on the following
+   configurations of operand and result types:
+
+           INTEGRAL x INTEGRAL(32,0) -> INTEGRAL
+
+   In this configuration, the type of the first operand is promoted to
+   match the type of the result.  The type of the second operand is
+   promoted to an unsigned 32-bit integral type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_bshift)
+{
+  int restart1, restart2;
+
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_TYPE (exp);
+
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+      
+      if (!promote_integral (PKL_PASS_AST, size, sign,
+                             &PKL_AST_EXP_OPERAND (exp, 0), &restart1)
+          || !promote_integral (PKL_PASS_AST, 32, 0,
+                                &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
+        {
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                   "couldn't promote operands of expression #%" PRIu64,
+                   PKL_AST_UID (exp));
+          PKL_PASS_ERROR;
+        }
+
+      PKL_PASS_RESTART = restart1 || restart2;
+    }
+
+}
+PKL_PHASE_END_HANDLER
+
 /* The rest of the binary operations are defined on the following
    configurations of operand and result types:
 
@@ -592,8 +630,8 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_op_rela),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_op_rela),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_op_binary),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_op_bshift),
+   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_op_bshift),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_op_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_df_op_binary),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_df_op_binary),

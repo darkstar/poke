@@ -246,7 +246,7 @@ TYPIFY_BIN (xor);
 TYPIFY_BIN (band);
 
 
-/* DIV and MOD accept integral and offset operands.  */
+/* DIV, MOD and SUB accept integral and offset operands.  */
 
 #undef CASE_OFFSET
 #define CASE_OFFSET                                                     \
@@ -282,13 +282,7 @@ TYPIFY_BIN (band);
 TYPIFY_BIN (div);
 TYPIFY_BIN (mod);
 
-/* ADD and SUB accept integral, string and offset operands.  */
-
-#undef CASE_STR
-#define CASE_STR                                                        \
-    case PKL_TYPE_STRING:                                               \
-      type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
-      break;
+/* SUB accepts integrals and offsets.  */
 
 #undef CASE_OFFSET
 #define CASE_OFFSET                                                     \
@@ -325,8 +319,17 @@ TYPIFY_BIN (mod);
     break;                                                              \
   }
 
-TYPIFY_BIN (add);
 TYPIFY_BIN (sub);
+
+/* ADD accepts integral, string and offset operands.  */
+
+#undef CASE_STR
+#define CASE_STR                                                        \
+    case PKL_TYPE_STRING:                                               \
+      type = pkl_ast_make_string_type (PKL_PASS_AST);                   \
+      break;
+
+TYPIFY_BIN (add);
 
 /* MUL accepts integral, string and offset operands.  We can't use
    TYPIFY_BIN here because it relies on a different logic to determine
