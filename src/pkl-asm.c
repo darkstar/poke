@@ -576,27 +576,30 @@ pkl_asm_new (pkl_ast ast)
   pasm->divzero_label = jitter_fresh_label (program);
   pasm->error_label = jitter_fresh_label (program);
   pasm->exit_label = jitter_fresh_label (program);
+  pasm->program = program;
 
   /* Standard prologue.  */
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_label_parameter (program, pasm->start_label);
+  pkl_asm_note (pasm, "#begin prologue");
+
+  /* XXX: initialize the base register to [0 b].  */
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
   
   pvm_append_label (program, pasm->divzero_label);
-  
-  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_EDIVZ, 32));
 
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_label_parameter (program, pasm->exit_label);
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                pvm_make_int (PVM_EXIT_EDIVZ, 32));
+
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->exit_label);
   pvm_append_label (program, pasm->error_label);
-  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
+
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                pvm_make_int (PVM_EXIT_ERROR, 32));
   
   pvm_append_label (program, pasm->exit_label);
-  PVM_APPEND_INSTRUCTION (program, exit);
-  
+  pkl_asm_insn (pasm, PKL_INSN_EXIT);
   pvm_append_label (program, pasm->start_label);
+  pkl_asm_note (pasm, "#end prologue");
 
-  pasm->program = program;
-    
   return pasm;
 }
 
@@ -611,10 +614,12 @@ pkl_asm_finish (pkl_asm pasm)
   pvm_program program = pasm->program;
 
   /* Standard epilogue.  */
+  pkl_asm_note (pasm, "#begin epilogue");
   pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
     
   PVM_APPEND_INSTRUCTION (program, ba);
   pvm_append_label_parameter (program, pasm->exit_label);
+  pkl_asm_note (pasm, "#end epilogue");
 
   /* Free the assembler instance and return the assembled program to
      the user.  */
@@ -715,15 +720,21 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       /* This is a macro-instruction.  Dispatch to the corresponding
          macro-instruction handler.  */
 
-      const char *note_prefix = "#begin ";
+      const char *note_begin_prefix = "#begin ";
+      const char *note_end_prefix = "#end ";
       const char *macro_name = insn_names[insn];
-      char *note = xmalloc (strlen (note_prefix) + strlen (macro_name)
-                            + 1);
+      char *note_begin = xmalloc (strlen (note_begin_prefix)
+                                  + strlen (macro_name) + 1);
+      char *note_end = xmalloc (strlen (note_end_prefix)
+                                + strlen (macro_name) + 1);
 
-      strcpy (note, note_prefix);
-      strcat (note, macro_name);
+      strcpy (note_begin, note_begin_prefix);
+      strcat (note_begin, macro_name);
 
-      pkl_asm_note (pasm, note);
+      strcpy (note_end, note_end_prefix);
+      strcat (note_end, macro_name);
+
+      pkl_asm_note (pasm, note_begin);
       switch (insn)
         {
         case PKL_INSN_NTON:
@@ -846,8 +857,9 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           assert (0);
         }
 
-      pkl_asm_note (pasm, "#end");
-      free (note);
+      pkl_asm_note (pasm, note_end);
+      free (note_begin);
+      free (note_end);
     }
 }
 

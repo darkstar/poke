@@ -247,6 +247,10 @@ PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
 
+/* VM instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_EXIT, "", "exit")
+
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
    macro instructions, and it should not be assembled.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
