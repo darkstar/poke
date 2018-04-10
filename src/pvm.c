@@ -372,6 +372,71 @@ pvm_error (enum pvm_exit_code code)
 void
 pvm_print_val (FILE *out, pvm_val val, int base)
 {
+  const char *long64_fmt, *long_fmt;
+  const char *ulong64_fmt, *ulong_fmt; 
+  const char *int32_fmt, *int16_fmt, *int8_fmt, *int4_fmt, *int_fmt;
+  const char *uint32_fmt, *uint16_fmt, *uint8_fmt, *uint4_fmt, *uint_fmt;
+
+  /* Select the appropriate formatting templates for the given
+     base.  */
+  switch (base)
+    {
+    case 8:
+      long64_fmt = "%" PRIo64 "L";
+      long_fmt = "(int<%d>) %" PRIo64;
+      ulong64_fmt = "%" PRIo64 "UL";
+      ulong_fmt = "(uint<%d>) %" PRIo64; 
+      int32_fmt = "%" PRIo32;
+      int16_fmt = "%" PRIo32 "H";
+      int8_fmt = "%" PRIo32 "B";
+      int4_fmt = "%" PRIo32 "N";
+      int_fmt = "(int<%d>) %" PRIo32;
+      uint32_fmt = "%" PRIo32;
+      uint16_fmt = "%" PRIo32 "UH";
+      uint8_fmt = "%" PRIo32 "UB";
+      uint4_fmt = "%" PRIo32 "UN";
+      uint_fmt = "(uint<%d>) %" PRIo32;
+      break;
+    case 10:
+      long64_fmt = "%" PRIi64 "L";
+      long_fmt = "(int<%d>) %" PRIi64;
+      ulong64_fmt = "%" PRIu64 "UL";
+      ulong_fmt = "(uint<%d>) %" PRIu64; 
+      int32_fmt = "%" PRIi32;
+      int16_fmt = "%" PRIi32 "H";
+      int8_fmt = "%" PRIi32 "B";
+      int4_fmt = "%" PRIi32 "N";
+      int_fmt = "(int<%d>) %" PRIi32;
+      uint32_fmt = "%" PRIu32;
+      uint16_fmt = "%" PRIu32 "UH";
+      uint8_fmt = "%" PRIu32 "UB";
+      uint4_fmt = "%" PRIu32 "UN";
+      uint_fmt = "(uint<%d>) %" PRIu32;
+      break;
+    case 16:
+      long64_fmt = "0x%" PRIx64 "L";
+      long_fmt = "(int<%d>) %" PRIx64;
+      ulong64_fmt = "0x%" PRIx64 "UL";
+      ulong_fmt = "(uint<%d>) %" PRIx64; 
+      int32_fmt = "0x%" PRIx32;
+      int16_fmt = "0x%" PRIx32 "H";
+      int8_fmt = "0x%" PRIx32 "B";
+      int4_fmt = "0x%" PRIx32 "N";
+      int_fmt = "(int<%d>) 0x%" PRIx32;
+      uint32_fmt = "0x%" PRIx32;
+      uint16_fmt = "0x%" PRIx32 "UH";
+      uint8_fmt = "0x%" PRIx32 "UB";
+      uint4_fmt = "0x%" PRIx32 "UN";
+      uint_fmt = "(uint<%d>) 0x%" PRIo32;
+      break;
+    case 2:
+    default:
+      /* XXX: handle binary.  */
+      assert (0);
+      break;
+    }
+
+  /* And print out the value in the given stream..  */
   if (val == PVM_NULL)
     fprintf (out, "null");
   else if (PVM_IS_LONG (val))
@@ -379,9 +444,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int size = PVM_VAL_LONG_SIZE (val);
 
       if (size == 64)
-        fprintf (out, GREEN "%" PRIi64 "L" NOATTR, PVM_VAL_LONG (val));
+        fprintf (out, long64_fmt, PVM_VAL_LONG (val));
       else
-        fprintf (out, GREEN "(int<%d>) %" PRIi64 NOATTR,
+        fprintf (out, long_fmt,
                  PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
     }
   else if (PVM_IS_INT (val))
@@ -389,23 +454,23 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int size = PVM_VAL_INT_SIZE (val);
 
       if (size == 32)
-        fprintf (out, GREEN "%d" NOATTR, PVM_VAL_INT (val));
+        fprintf (out, int32_fmt, PVM_VAL_INT (val));
       else if (size == 16)
-        fprintf (out, GREEN "%dH" NOATTR, PVM_VAL_INT (val));
+        fprintf (out, int16_fmt, PVM_VAL_INT (val));
       else if (size == 8)
-        fprintf (out, GREEN "%dB" NOATTR, PVM_VAL_INT (val));
+        fprintf (out, int8_fmt, PVM_VAL_INT (val));
       else if (size == 4)
-        fprintf (out, GREEN "%dN" NOATTR, PVM_VAL_INT (val));
+        fprintf (out, int4_fmt, PVM_VAL_INT (val));
       else
-        fprintf (out, GREEN "(int<%d>) %d" NOATTR,
+        fprintf (out, int_fmt,
                  PVM_VAL_INT_SIZE (val), PVM_VAL_INT (val));
     }
   else if (PVM_IS_ULONG (val))
     {
       if (PVM_VAL_ULONG_SIZE (val) == 64)
-        fprintf (out, GREEN "%" PRIu64 "UL" NOATTR, PVM_VAL_ULONG (val));
+        fprintf (out, ulong64_fmt, PVM_VAL_ULONG (val));
       else
-        fprintf (out, GREEN "(int<%d>) %" PRIu64 NOATTR,
+        fprintf (out, ulong_fmt,
                  PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
     }
   else if (PVM_IS_UINT (val))
@@ -413,19 +478,19 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       int size = PVM_VAL_UINT_SIZE (val);
 
       if (size == 32)
-        fprintf (out, GREEN "%uU" NOATTR, PVM_VAL_UINT (val));
+        fprintf (out, uint32_fmt, PVM_VAL_UINT (val));
       else if (size == 16)
-        fprintf (out, GREEN "%uUH" NOATTR, PVM_VAL_UINT (val));
+        fprintf (out, uint16_fmt, PVM_VAL_UINT (val));
       else if (size == 8)
-        fprintf (out, GREEN "%uUB" NOATTR, PVM_VAL_UINT (val));
+        fprintf (out, uint8_fmt, PVM_VAL_UINT (val));
       else if (size == 4)
-        fprintf (out, GREEN "%uUN" NOATTR, PVM_VAL_UINT (val));
+        fprintf (out, uint4_fmt, PVM_VAL_UINT (val));
       else
-        fprintf (out, GREEN "(uint<%d>) %u" NOATTR,
+        fprintf (out, uint_fmt,
                  PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
     }
   else if (PVM_IS_STR (val))
-    fprintf (out, BROWN "\"%s\"" NOATTR, PVM_VAL_STR (val));
+    fprintf (out, "\"%s\"" , PVM_VAL_STR (val));
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, idx;
