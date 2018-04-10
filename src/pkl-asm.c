@@ -356,7 +356,6 @@ pkl_asm_insn_intop (pkl_asm pasm,
       pkl_asm_insn (pasm, mul_table[tl][signed_p]);
       break;
     case PKL_INSN_DIV:
-      /* Fallthrough.  */
     case PKL_INSN_MOD:
 
       pkl_asm_insn (pasm, PKL_INSN_BZ, type,
@@ -787,27 +786,16 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_NEG:
-          /* Fallthrough.  */
         case PKL_INSN_ADD:
-          /* Fallthrough.  */
         case PKL_INSN_SUB:
-          /* Fallthrough.  */
         case PKL_INSN_MUL:
-          /* Fallthrough.  */
         case PKL_INSN_DIV:
-          /* Fallthrough.  */
         case PKL_INSN_MOD:
-          /* Fallthrough.  */
         case PKL_INSN_BNOT:
-          /* Fallthrough.  */
         case PKL_INSN_BAND:
-          /* Fallthrough.  */
         case PKL_INSN_BOR:
-          /* Fallthrough.  */
         case PKL_INSN_BXOR:
-          /* Falltrhough.  */
         case PKL_INSN_SL:
-          /* Fallthrough.  */
         case PKL_INSN_SR:
           {
             pkl_ast_node type;
@@ -820,15 +808,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_EQ:
-          /* Fallthrough.  */
         case PKL_INSN_NE:
-          /* Fallthrough.  */
         case PKL_INSN_LT:
-          /* Fallthrough.  */
         case PKL_INSN_GT:
-          /* Fallthrough.  */
         case PKL_INSN_GE:
-          /* Fallthrough.  */
         case PKL_INSN_LE:
           {
             pkl_ast_node type;
