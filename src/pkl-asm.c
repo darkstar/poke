@@ -214,7 +214,7 @@ pkl_asm_insn_nton  (pkl_asm pasm,
       int fs = from_type_sign;
       int tl = !!((to_type_size - 1) & ~0x1f);
       int ts = to_type_sign;
-         
+
       pkl_asm_insn (pasm,
                     cast_table [fl][tl][fs][ts],
                     (jitter_uint) to_type_size);
@@ -273,11 +273,29 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
 
    Macro-instruction: MOD type
    Stack: VAL VAL -> VAL
+   
+   Macro-instruction: BNOT type
+   Stack: VAL -> VAL
+
+   Macro-instruction: BAND type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: BOR type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: BXOR type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: SL type
+   Stack: VAL VAL -> VAL
+
+   Macro-instruction: SR type
+   Stack: VAL VAL -> VAL
 
    Generate code for performing negation, addition, subtraction,
-   multiplication, division and remainder to integral operands.  INSN
-   identifies the operation to perform, and TYPE the type of the
-   operands and the result.  */
+   multiplication, division, remainder and bit shift to integral
+   operands.  INSN identifies the operation to perform, and TYPE the
+   type of the operands and the result.  */
 
 static void
 pkl_asm_insn_intop (pkl_asm pasm,
@@ -320,6 +338,42 @@ pkl_asm_insn_intop (pkl_asm pasm,
      { PKL_INSN_MODLU, PKL_INSN_MODL },
     };
 
+  static int bnot_table[2][2] =
+    {
+     { PKL_INSN_BNOTIU, PKL_INSN_BNOTI },
+     { PKL_INSN_BNOTLU, PKL_INSN_BNOTL },
+    };
+
+  static int band_table[2][2] =
+    {
+     { PKL_INSN_BANDIU, PKL_INSN_BANDI },
+     { PKL_INSN_BANDLU, PKL_INSN_BANDL },
+    };
+
+  static int bor_table[2][2] =
+    {
+     { PKL_INSN_BORIU, PKL_INSN_BORI },
+     { PKL_INSN_BORLU, PKL_INSN_BORL },
+    };
+
+  static int bxor_table[2][2] =
+    {
+     { PKL_INSN_BXORIU, PKL_INSN_BXORI },
+     { PKL_INSN_BXORLU, PKL_INSN_BXORL },
+    };
+
+  static int sl_table[2][2] =
+    {
+     { PKL_INSN_SLIU, PKL_INSN_SLI },
+     { PKL_INSN_SLLU, PKL_INSN_SLL },
+    };
+
+  static int sr_table[2][2] =
+    {
+     { PKL_INSN_SRIU, PKL_INSN_SRI },
+     { PKL_INSN_SRLU, PKL_INSN_SRL },
+    };
+
   uint64_t size = PKL_AST_TYPE_I_SIZE (type);
   int signed_p = PKL_AST_TYPE_I_SIGNED (type);
   int tl = !!((size - 1) & ~0x1f);
@@ -350,6 +404,24 @@ pkl_asm_insn_intop (pkl_asm pasm,
       else
         pkl_asm_insn (pasm, mod_table[tl][signed_p]);
       
+      break;
+    case PKL_INSN_BNOT:
+      pkl_asm_insn (pasm, bnot_table[tl][signed_p]);
+      break;
+    case PKL_INSN_BAND:
+      pkl_asm_insn (pasm, band_table[tl][signed_p]);
+      break;
+    case PKL_INSN_BOR:
+      pkl_asm_insn (pasm, bor_table[tl][signed_p]);
+      break;
+    case PKL_INSN_BXOR:
+      pkl_asm_insn (pasm, bxor_table[tl][signed_p]);
+      break;
+    case PKL_INSN_SL:
+      pkl_asm_insn (pasm, sl_table[tl][signed_p]);
+      break;
+    case PKL_INSN_SR:
+      pkl_asm_insn (pasm, sr_table[tl][signed_p]);
       break;
     default:
       assert (0);
@@ -773,6 +845,18 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_DIV:
           /* Fallthrough.  */
         case PKL_INSN_MOD:
+          /* Fallthrough.  */
+        case PKL_INSN_BNOT:
+          /* Fallthrough.  */
+        case PKL_INSN_BAND:
+          /* Fallthrough.  */
+        case PKL_INSN_BOR:
+          /* Fallthrough.  */
+        case PKL_INSN_BXOR:
+          /* Falltrhough.  */
+        case PKL_INSN_SL:
+          /* Fallthrough.  */
+        case PKL_INSN_SR:
           {
             pkl_ast_node type;
 
@@ -802,21 +886,6 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_cmp (pasm, insn, type);
-            break;
-          }
-        case PKL_INSN_SL:
-          /* Fallthrough.  */
-        case PKL_INSN_SR:
-          {
-            assert (0);
-            break;
-          }
-        case PKL_INSN_BNOT:
-        case PKL_INSN_BAND:
-        case PKL_INSN_BOR:
-        case PKL_INSN_BXOR:
-          {
-            assert (0);
             break;
           }
         case PKL_INSN_OGETMC:

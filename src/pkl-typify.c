@@ -79,7 +79,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_not)
   else
     {
       pkl_ast_node exp_type
-        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 2);
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
 
       PKL_AST_LOC (exp_type) = PKL_AST_LOC (PKL_PASS_NODE);
       PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (exp_type);
@@ -110,7 +110,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_rela)
           || op1_type_code == PKL_TYPE_OFFSET))
     {
       pkl_ast_node exp_type
-        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 2);
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
 
       PKL_AST_LOC (exp_type) = PKL_AST_LOC (PKL_PASS_NODE);
       PKL_AST_TYPE (PKL_PASS_NODE) = ASTREF (exp_type);

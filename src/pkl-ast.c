@@ -250,6 +250,8 @@ pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
 
+  assert (signed_p == 0 || signed_p == 1);
+
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_INTEGRAL;
   PKL_AST_TYPE_COMPLETE (type)
     = PKL_AST_TYPE_COMPLETE_YES;
