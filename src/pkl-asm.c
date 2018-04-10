@@ -344,6 +344,112 @@ pkl_asm_insn_intop (pkl_asm pasm,
     }
 }
 
+/* Macro-instruction: EQ type
+   Stack: VAL VAL -> INT
+
+   Macro-instruction: NE type
+   Stack: VAL VAL -> INT
+ 
+   Macro-instruction: LT type
+   Stack VAL VAL -> INT
+ 
+   Macro-instruction: GT type
+   Stack VAL VAL -> INT
+
+   Macro-instruction: GE type
+   Stack VAL VAL -> INT
+
+   Macro-instruction: LE type
+   Stack VAL VAL -> INT
+
+   Generate code for perfoming a comparison operation, to either
+   integral or string operands.  INSN identifies the operation to
+   perform, and TYPE the type of the operands.  */
+
+static void
+pkl_asm_insn_cmp (pkl_asm pasm,
+                  enum pkl_asm_insn insn,
+                  pkl_ast_node type)
+{
+  enum pkl_asm_insn oinsn;
+  
+  /* Decide what instruction to assembly.  */
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING)
+    {
+      switch (insn)
+        {
+        case PKL_INSN_EQ: oinsn = PKL_INSN_EQS; break;
+        case PKL_INSN_NE: oinsn = PKL_INSN_NES; break;
+        case PKL_INSN_LT: oinsn = PKL_INSN_LTS; break;
+        case PKL_INSN_GT: oinsn = PKL_INSN_GTS; break;
+        case PKL_INSN_GE: oinsn = PKL_INSN_GES; break;
+        case PKL_INSN_LE: oinsn = PKL_INSN_LES; break;
+        default:
+          assert (0);
+        }
+    }
+  else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
+    {
+      static int eq_table[2][2] =
+        {
+         { PKL_INSN_EQIU, PKL_INSN_EQI },
+         { PKL_INSN_EQLU, PKL_INSN_EQL }
+        };
+      
+      static int ne_table[2][2] =
+        {
+         { PKL_INSN_NEIU, PKL_INSN_NEI },
+         { PKL_INSN_NELU, PKL_INSN_NEL }
+        };
+      
+      static int lt_table[2][2] =
+        {
+         { PKL_INSN_LTIU, PKL_INSN_LTI },
+         { PKL_INSN_LTLU, PKL_INSN_LTL }
+        };
+      
+      static int gt_table[2][2] =
+        {
+         { PKL_INSN_GTIU, PKL_INSN_GTI },
+         { PKL_INSN_GTLU, PKL_INSN_GTL }
+        };
+      
+      static int ge_table[2][2] =
+        {
+         { PKL_INSN_GEIU, PKL_INSN_GEI },
+         { PKL_INSN_GELU, PKL_INSN_GEL }
+        };
+      
+      static int le_table[2][2] =
+        {
+         { PKL_INSN_LEIU, PKL_INSN_LEI },
+         { PKL_INSN_LELU, PKL_INSN_LEL }
+        };
+
+      uint64_t size = PKL_AST_TYPE_I_SIZE (type);
+      int signed_p = PKL_AST_TYPE_I_SIGNED (type);
+      int tl = !!((size - 1) & ~0x1f);
+
+      switch (insn)
+        {
+        case PKL_INSN_EQ: oinsn = eq_table[tl][signed_p]; break;
+        case PKL_INSN_NE: oinsn = ne_table[tl][signed_p]; break;
+        case PKL_INSN_LT: oinsn = lt_table[tl][signed_p]; break;
+        case PKL_INSN_GT: oinsn = gt_table[tl][signed_p]; break;
+        case PKL_INSN_GE: oinsn = ge_table[tl][signed_p]; break;
+        case PKL_INSN_LE: oinsn = le_table[tl][signed_p]; break;
+        default:
+          assert (0);
+          break;
+        }
+    }
+  else
+    assert (0);
+
+  /* Assembly the instruction.  */
+  pkl_asm_insn (pasm, oinsn);
+}
+
 /* Macro-instruction: OGETMC base_type
    Stack: OFFSET UNIT -> OFFSET CONVERTED_MAGNITUDE
 
@@ -661,6 +767,42 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_intop (pasm, insn, type);
+            break;
+          }
+        case PKL_INSN_EQ:
+          /* Fallthrough.  */
+        case PKL_INSN_NE:
+          /* Fallthrough.  */
+        case PKL_INSN_LT:
+          /* Fallthrough.  */
+        case PKL_INSN_GT:
+          /* Fallthrough.  */
+        case PKL_INSN_GE:
+          /* Fallthrough.  */
+        case PKL_INSN_LE:
+          {
+            pkl_ast_node type;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_cmp (pasm, insn, type);
+            break;
+          }
+        case PKL_INSN_SL:
+          /* Fallthrough.  */
+        case PKL_INSN_SR:
+          {
+            assert (0);
+            break;
+          }
+        case PKL_INSN_BNOT:
+        case PKL_INSN_BAND:
+        case PKL_INSN_BOR:
+        case PKL_INSN_BXOR:
+          {
+            assert (0);
             break;
           }
         case PKL_INSN_OGETMC:
