@@ -847,3 +847,11 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
          mode.  */
     }
 }
+
+/* Emit a .note directive with STR as its contents.  */
+
+void
+pkl_asm_note (pkl_asm pasm, const char *str)
+{
+  pkl_asm_insn (pasm, PKL_INSN_NOTE, pvm_make_string (str));
+}

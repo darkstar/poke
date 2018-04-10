@@ -117,4 +117,6 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
  *       loc lb,le,cb,ce
  */
 
+void pkl_asm_note (pkl_asm pasm, const char *str);
+
 #endif /* PKL_ASM_H */
