@@ -199,7 +199,7 @@ pkl_asm_insn_nton  (pkl_asm pasm,
          {
           /* Destination is int.  */
           {
-           {PKL_INSN_LUTOLU, PKL_INSN_LUTOI},
+           {PKL_INSN_LUTOIU, PKL_INSN_LUTOI},
            {PKL_INSN_LTOIU, PKL_INSN_LTOI}
           },
           {
@@ -256,7 +256,10 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
     assert (0);
 }
 
-/* Macro-instruction: ADD type
+/* Macro-instruction: NEG type
+   Stack: VAL -> VAL
+
+   Macro-instruction: ADD type
    Stack: VAL VAL -> VAL
    
    Macro-instruction: SUB type
@@ -271,16 +274,22 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
    Macro-instruction: MOD type
    Stack: VAL VAL -> VAL
 
-   Generate code for performing addition, subtraction, multiplication,
-   division and remainder to integral operands.  INSN identifies the
-   operation to perform, and TYPE the type of the operands and the
-   result.  */
+   Generate code for performing negation, addition, subtraction,
+   multiplication, division and remainder to integral operands.  INSN
+   identifies the operation to perform, and TYPE the type of the
+   operands and the result.  */
 
 static void
 pkl_asm_insn_intop (pkl_asm pasm,
                     enum pkl_asm_insn insn,
                     pkl_ast_node type)
 {
+  static int neg_table[2][2] =
+    {
+     { PKL_INSN_NEGIU, PKL_INSN_NEGI },
+     { PKL_INSN_NEGLU, PKL_INSN_NEGL },
+    };
+  
   static int add_table[2][2] =
     {
      { PKL_INSN_ADDIU, PKL_INSN_ADDI },
@@ -317,6 +326,9 @@ pkl_asm_insn_intop (pkl_asm pasm,
 
   switch (insn)
     {
+    case PKL_INSN_NEG:
+      pkl_asm_insn (pasm, neg_table[tl][signed_p]);
+      break;
     case PKL_INSN_ADD:
       pkl_asm_insn (pasm, add_table[tl][signed_p]);
       break;
@@ -750,6 +762,8 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_bnz (pasm, type, label);
             break;
           }
+        case PKL_INSN_NEG:
+          /* Fallthrough.  */
         case PKL_INSN_ADD:
           /* Fallthrough.  */
         case PKL_INSN_SUB:
