@@ -720,7 +720,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       /* This is a macro-instruction.  Dispatch to the corresponding
          macro-instruction handler.  */
 
-      const char *note_prefix = "MACRO ";
+      const char *note_prefix = "#begin ";
       const char *macro_name = insn_names[insn];
       char *note = xmalloc (strlen (note_prefix) + strlen (macro_name)
                             + 1);
@@ -851,7 +851,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           assert (0);
         }
 
-      pkl_asm_note (pasm, "END MACRO");
+      pkl_asm_note (pasm, "#end");
       free (note);
     }
 }
