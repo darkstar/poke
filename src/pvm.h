@@ -84,6 +84,8 @@ typedef uint64_t pvm_val;
                          & ((uint32_t) (~( ((~0ul) << ((PVM_VAL_UINT_SIZE ((V)))-1)) << 1 ))))
 
 
+#define PVM_MAX_UINT(size) ((1U << (size)) - 1)
+
 pvm_val pvm_make_int (int32_t value, int size);
 pvm_val pvm_make_uint (uint32_t value, int size);
 
@@ -118,6 +120,8 @@ pvm_val pvm_make_uint (uint32_t value, int size);
 #define PVM_VAL_ULONG_SIZE(V) (_PVM_VAL_LONG_ULONG_SIZE (V))
 #define PVM_VAL_ULONG(V) (_PVM_VAL_LONG_ULONG_VAL ((V))                 \
                           & ((uint64_t) (~( ((~0ull) << ((PVM_VAL_ULONG_SIZE ((V)))-1)) << 1 ))))
+
+#define PVM_MAX_ULONG(size) ((1LU << (size)) - 1)
 
 pvm_val pvm_make_long (int64_t value, int size);
 pvm_val pvm_make_ulong (uint64_t value, int size);

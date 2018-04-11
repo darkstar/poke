@@ -185,6 +185,27 @@ poke_test_cmd "print/x 1 << 3" "0x8"
 set test sl-3
 poke_test_cmd "print/x 1 << 31" "0x80000000"
 
+set test sl-4
+poke_test_cmd "print 1 << 32" "1"
+
+set test sl-5
+poke_test_cmd "print 1 << 33" "2"
+
+set test sl-6
+poke_test_cmd "print (uint<4>) 1 << 1" "2UN"
+
+set test sl-7
+poke_test_cmd "print (uint<4>) 1 << 2" "4UN"
+
+set test sl-8
+poke_test_cmd "print (uint<4>) 1 << 3" "8UN"
+
+set test sl-9
+poke_test_cmd "print (uint<4>) 1 << 4" "1UN"
+
+set test sl-10
+poke_test_cmd "print (uint<4>) 1 << 5" "2UN"
+
 # Arrays
 
 set test simplearray

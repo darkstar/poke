@@ -1047,7 +1047,8 @@ instruction bsliu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint (PVM_VAL_UINT (a) << PVM_VAL_UINT (b), size); }
+    res = pvm_make_uint ((PVM_VAL_UINT (a) << PVM_VAL_UINT (b))           \
+                         % PVM_MAX_UINT (size), size); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
@@ -1067,7 +1068,8 @@ instruction bsllu () # ULONG UINT -> ULONG
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) << PVM_VAL_UINT (b), size); }
+    res = pvm_make_ulong ((PVM_VAL_ULONG (a) << PVM_VAL_UINT (b))          \
+                          % PVM_MAX_ULONG (size), size); }
     JITTER_BINARY_STACK(F);
 #undef F
   end
