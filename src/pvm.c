@@ -452,18 +452,19 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   else if (PVM_IS_INT (val))
     {
       int size = PVM_VAL_INT_SIZE (val);
+      int intval = PVM_VAL_INT (val);
 
       if (size == 32)
-        fprintf (out, int32_fmt, PVM_VAL_INT (val));
+        fprintf (out, int32_fmt, intval);
       else if (size == 16)
-        fprintf (out, int16_fmt, PVM_VAL_INT (val));
+        fprintf (out, int16_fmt, intval);
       else if (size == 8)
-        fprintf (out, int8_fmt, PVM_VAL_INT (val));
+        fprintf (out, int8_fmt, intval);
       else if (size == 4)
-        fprintf (out, int4_fmt, PVM_VAL_INT (val));
+        fprintf (out, int4_fmt, intval);
       else
         fprintf (out, int_fmt,
-                 PVM_VAL_INT_SIZE (val), PVM_VAL_INT (val));
+                 PVM_VAL_INT_SIZE (val), intval);
     }
   else if (PVM_IS_ULONG (val))
     {

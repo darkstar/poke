@@ -35,6 +35,12 @@ poke_test_cmd "print 6hu" {6UH}
 set test uint16
 poke_test_cmd "print (uint<16>) 6" {6UH}
 
+set test intx-1
+poke_test_cmd "print/x (uint<4>) -1" {0xfUN}
+
+set test intx-2
+poke_test_cmd "print/x (int<4>) -1" {0xfN}
+
 # Strings
 
 set test str-cat
