@@ -206,6 +206,9 @@ poke_test_cmd "print (uint<4>) 1 << 4" "1UN"
 set test sl-10
 poke_test_cmd "print (uint<4>) 1 << 5" "2UN"
 
+set test sl-11
+poke_test_cmd "print (uint<34>) 1 << 34" {\(uint<34>\) 1}
+
 # Arrays
 
 set test simplearray
