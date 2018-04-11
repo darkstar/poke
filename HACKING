@@ -133,7 +133,7 @@ GDB extensions to debug poke:
 
 - etc/poke-gdb.scm
 
-Make using valgrind in poke a sane experience:
+Use valgrind in poke in a saner way with the:
 
 - etc/boehm-gc.suppressions
 
