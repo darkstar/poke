@@ -442,29 +442,42 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   else if (PVM_IS_LONG (val))
     {
       int size = PVM_VAL_LONG_SIZE (val);
+      int64_t longval = PVM_VAL_LONG (val);
+      uint64_t ulongval;
 
       if (size == 64)
-        fprintf (out, long64_fmt, PVM_VAL_LONG (val));
+        ulongval = (uint64_t) longval;
+      else
+        ulongval = (uint64_t) longval & ((((uint64_t) 1) << size) - 1);
+
+      if (size == 64)
+        fprintf (out, long64_fmt, base == 10 ? longval : ulongval);
       else
         fprintf (out, long_fmt,
-                 PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
+                 PVM_VAL_LONG_SIZE (val), base == 10 ? longval : ulongval);
     }
   else if (PVM_IS_INT (val))
     {
       int size = PVM_VAL_INT_SIZE (val);
-      int intval = PVM_VAL_INT (val);
+      int32_t intval = PVM_VAL_INT (val);
+      uint32_t uintval;
 
       if (size == 32)
-        fprintf (out, int32_fmt, intval);
+        uintval = (uint32_t) intval;
+      else
+        uintval = (uint32_t) intval & ((((uint32_t) 1) << size) - 1);
+
+      if (size == 32)
+        fprintf (out, int32_fmt, base == 10 ? intval : uintval);
       else if (size == 16)
-        fprintf (out, int16_fmt, intval);
+        fprintf (out, int16_fmt, base == 10 ? intval : uintval);
       else if (size == 8)
-        fprintf (out, int8_fmt, intval);
+        fprintf (out, int8_fmt, base == 10 ? intval : uintval);
       else if (size == 4)
-        fprintf (out, int4_fmt, intval);
+        fprintf (out, int4_fmt, base == 10 ? intval : uintval);
       else
         fprintf (out, int_fmt,
-                 PVM_VAL_INT_SIZE (val), intval);
+                 PVM_VAL_INT_SIZE (val), base == 10 ? intval : uintval);
     }
   else if (PVM_IS_ULONG (val))
     {
