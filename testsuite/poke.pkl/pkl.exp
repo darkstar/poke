@@ -47,6 +47,12 @@ poke_test_cmd "print/o (uint<3>) -1" {\(uint<3>\) 0o7}
 set test into-2
 poke_test_cmd "print/o (int<3>) -1" {\(uint<3>\) 0o7}
 
+set test intb-1
+poke_test_cmd "print/b (uint<4>) -1" {0b1111}
+
+set test intb-2
+poke_test_cmd "print/b (int<4>) -1" {0b1111}
+
 # Strings
 
 set test str-cat
