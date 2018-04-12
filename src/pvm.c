@@ -377,6 +377,10 @@ pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
 {
   char b[65];
 
+  if (size != 64 && size != 32 && size != 16 && size != 8
+      && size != 4)
+    fprintf (out, "(%sint<%d>) ", sign ? "" : "u", size);
+
   for (int z = 0; z < 64; z++) {
     b[size-1-z] = ((val >> z) & 0x1) + '0';
   }
@@ -385,17 +389,32 @@ pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
 
   fprintf (out, "0b%s", b);
 
-  if (!sign)
-    fputc ('U', out);
-  
   if (size == 64)
-    fputc ('L', out);
+    {
+      if (!sign)
+        fputc ('U', out);
+      fputc ('L', out);
+    }
   else if (size == 16)
-    fputc ('H', out);
+    {
+      if (!sign)
+        fputc ('U', out);
+      fputc ('H', out);
+    }
   else if (size == 8)
-    fputc ('B', out);
+    {
+      if (!sign)
+        fputc ('U', out);
+      fputc ('B', out);
+    }
   else if (size == 4)
-    fputc ('N', out);
+    {
+      {
+        if (!sign)
+          fputc ('U', out);
+      }
+      fputc ('N', out);
+    }
 }
 
 void
