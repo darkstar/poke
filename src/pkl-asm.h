@@ -40,6 +40,13 @@ enum pkl_asm_insn
 #undef PKL_DEF_INSN
 };
 
+/* Enumeration with machine registers. */
+
+enum pkl_asm_reg
+{
+ /* XXX: fill me.  */
+};
+
 /* Opaque data structure for an assembler instance.  The struct is
    defined in pkl-asm.c.  */
 
@@ -97,6 +104,17 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
  *   ... loop body ...
  * 
  * pkl_asm_end_loop (pasm);
+ */
+
+/* Call and return instruction:
+ *
+ *  pkl_asm_insn (pasm, PKL_INSN_CALL, label);
+ *
+ * Internally based on push return address then ba.
+ *
+ *  pkl_asm_insn (pasm, PKL_INSN_RET, label);
+ *
+ * Internally based on pop the return address and ba.
  */
 
 /* Assembler directives:
