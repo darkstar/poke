@@ -384,7 +384,6 @@ pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
   for (int z = 0; z < 64; z++) {
     b[size-1-z] = ((val >> z) & 0x1) + '0';
   }
-
   b[size] = '\0';
 
   fprintf (out, "0b%s", b);
