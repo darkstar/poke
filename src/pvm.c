@@ -381,7 +381,7 @@ pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
       && size != 4)
     fprintf (out, "(%sint<%d>) ", sign ? "" : "u", size);
 
-  for (int z = 0; z < 64; z++) {
+  for (int z = 0; z < size; z++) {
     b[size-1-z] = ((val >> z) & 0x1) + '0';
   }
   b[size] = '\0';
