@@ -87,7 +87,7 @@ HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
 OCTCST             0[oO][0-9_]*
 DECCST             [0-9][0-9_]*
-IS		   ((u|U)|(u|U)?(l|L|b|B|h|H|n|N)|(l|L|b|B|h|H|n|N)(u|U))
+IS		   ((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))
 
 L [a-zA-Z_]
 D [0-9]
@@ -244,8 +244,7 @@ D [0-9]
   else  if (*end == 'h' || *end == 'H'
       || ((*end != '\0') && ((*(end + 1) == 'h' || *(end + 1) == 'H'))))
     width = 16;
-  else  if (*end == 'b' || *end == 'B'
-      || ((*end != '\0') && ((*(end + 1) == 'b' || *(end + 1) == 'B'))))
+  else  if (*end == 'B' || ((*end != '\0') && *(end + 1) == 'B'))
     width = 8;
   else if (*end == 'n' || *end == 'N'
       || ((*end != '\0') && ((*(end + 1) == 'n' || *(end + 1) == 'N'))))
