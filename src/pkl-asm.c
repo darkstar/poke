@@ -579,7 +579,9 @@ pkl_asm_new (pkl_ast ast)
   /* Standard prologue.  */
   pkl_asm_note (pasm, "#begin prologue");
 
-  /* XXX: initialize the base register to [0 b].  */
+  /* XXX: initialize the base register to [0 b] and other PVM
+     registers.  */
+  
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
   
   pvm_append_label (program, pasm->divzero_label);

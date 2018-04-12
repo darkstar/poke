@@ -44,6 +44,7 @@ enum pkl_asm_insn
 
 enum pkl_asm_reg
 {
+ PKL_REG_FOO,
  /* XXX: fill me.  */
 };
 
