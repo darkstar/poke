@@ -369,6 +369,35 @@ pvm_error (enum pvm_exit_code code)
   return pvm_error_strings[code];
 }
 
+/* XXX use similar printers for hexadecimal and octal, so we can use
+   _'s */
+
+static void
+pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
+{
+  char b[65];
+
+  for (int z = 0; z < 64; z++) {
+    b[size-1-z] = ((val >> z) & 0x1) + '0';
+  }
+
+  b[size + 1] = '\0';
+
+  fprintf (out, "0b%s", b);
+
+  if (!sign)
+    fputc ('U', out);
+  
+  if (size == 64)
+    fputc ('L', out);
+  else if (size == 16)
+    fputc ('H', out);
+  else if (size == 8)
+    fputc ('B', out);
+  else if (size == 4)
+    fputc ('N', out);
+}
+
 void
 pvm_print_val (FILE *out, pvm_val val, int base)
 {
@@ -430,6 +459,23 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       uint_fmt = "(uint<%d>) 0x%" PRIo32;
       break;
     case 2:
+      /* This base doesn't use printf's formatting strings, but its
+         own printer.  */
+      long64_fmt = "";
+      long_fmt = "";
+      ulong64_fmt = "";
+      ulong_fmt = "";
+      int32_fmt = "";
+      int16_fmt = "";
+      int8_fmt = "";
+      int4_fmt = "";
+      int_fmt = "";
+      uint32_fmt = "";
+      uint16_fmt = "";
+      uint8_fmt = "";
+      uint4_fmt = "";
+      uint_fmt = "";
+      break;
     default:
       /* XXX: handle binary.  */
       assert (0);
@@ -450,11 +496,16 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       else
         ulongval = (uint64_t) longval & ((((uint64_t) 1) << size) - 1);
 
-      if (size == 64)
-        fprintf (out, long64_fmt, base == 10 ? longval : ulongval);
+      if (base == 2)
+        pvm_print_binary (out, ulongval, size, 1);
       else
-        fprintf (out, long_fmt,
-                 PVM_VAL_LONG_SIZE (val), base == 10 ? longval : ulongval);
+        {
+          if (size == 64)
+            fprintf (out, long64_fmt, base == 10 ? longval : ulongval);
+          else
+            fprintf (out, long_fmt,
+                     PVM_VAL_LONG_SIZE (val), base == 10 ? longval : ulongval);
+        }
     }
   else if (PVM_IS_INT (val))
     {
@@ -467,41 +518,60 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       else
         uintval = (uint32_t) intval & ((((uint32_t) 1) << size) - 1);
 
-      if (size == 32)
-        fprintf (out, int32_fmt, base == 10 ? intval : uintval);
-      else if (size == 16)
-        fprintf (out, int16_fmt, base == 10 ? intval : uintval);
-      else if (size == 8)
-        fprintf (out, int8_fmt, base == 10 ? intval : uintval);
-      else if (size == 4)
-        fprintf (out, int4_fmt, base == 10 ? intval : uintval);
+      if (base == 2)
+        pvm_print_binary (out, (uint64_t) uintval, size, 1);
       else
-        fprintf (out, int_fmt,
-                 PVM_VAL_INT_SIZE (val), base == 10 ? intval : uintval);
+        {
+          if (size == 32)
+            fprintf (out, int32_fmt, base == 10 ? intval : uintval);
+          else if (size == 16)
+            fprintf (out, int16_fmt, base == 10 ? intval : uintval);
+          else if (size == 8)
+            fprintf (out, int8_fmt, base == 10 ? intval : uintval);
+          else if (size == 4)
+            fprintf (out, int4_fmt, base == 10 ? intval : uintval);
+          else
+            fprintf (out, int_fmt,
+                     PVM_VAL_INT_SIZE (val), base == 10 ? intval : uintval);
+        }
     }
   else if (PVM_IS_ULONG (val))
     {
-      if (PVM_VAL_ULONG_SIZE (val) == 64)
-        fprintf (out, ulong64_fmt, PVM_VAL_ULONG (val));
+      int size = PVM_VAL_ULONG_SIZE (val);
+      uint64_t ulongval = PVM_VAL_ULONG (val);
+      
+      if (base == 2)
+        pvm_print_binary (out, ulongval, size, 0);
       else
-        fprintf (out, ulong_fmt,
-                 PVM_VAL_LONG_SIZE (val), PVM_VAL_LONG (val));
+        {
+          if (size == 64)
+            fprintf (out, ulong64_fmt, ulongval);
+          else
+            fprintf (out, ulong_fmt,
+                     PVM_VAL_LONG_SIZE (val), ulongval);
+        }
     }
   else if (PVM_IS_UINT (val))
     {
       int size = PVM_VAL_UINT_SIZE (val);
+      uint32_t uintval = PVM_VAL_UINT (val);
 
-      if (size == 32)
-        fprintf (out, uint32_fmt, PVM_VAL_UINT (val));
-      else if (size == 16)
-        fprintf (out, uint16_fmt, PVM_VAL_UINT (val));
-      else if (size == 8)
-        fprintf (out, uint8_fmt, PVM_VAL_UINT (val));
-      else if (size == 4)
-        fprintf (out, uint4_fmt, PVM_VAL_UINT (val));
+      if (base == 2)
+        pvm_print_binary (out, uintval, size, 0);
       else
-        fprintf (out, uint_fmt,
-                 PVM_VAL_UINT_SIZE (val), PVM_VAL_UINT (val));
+        {
+          if (size == 32)
+            fprintf (out, uint32_fmt, uintval);
+          else if (size == 16)
+            fprintf (out, uint16_fmt, uintval);
+          else if (size == 8)
+            fprintf (out, uint8_fmt, uintval);
+          else if (size == 4)
+            fprintf (out, uint4_fmt, uintval);
+          else
+            fprintf (out, uint_fmt,
+                     PVM_VAL_UINT_SIZE (val), uintval);
+        }
     }
   else if (PVM_IS_STR (val))
     fprintf (out, "\"%s\"" , PVM_VAL_STR (val));

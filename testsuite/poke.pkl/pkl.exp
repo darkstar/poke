@@ -45,13 +45,13 @@ set test into-1
 poke_test_cmd "print/o (uint<3>) -1" {\(uint<3>\) 0o7}
 
 set test into-2
-poke_test_cmd "print/o (int<3>) -1" {\(uint<3>\) 0o7}
+poke_test_cmd "print/o (int<3>) -1" {\(int<3>\) 0o7}
 
 set test intb-1
-poke_test_cmd "print/b (uint<4>) -1" {0b1111}
+poke_test_cmd "print/b (uint<4>) -1" {0b1111UN}
 
 set test intb-2
-poke_test_cmd "print/b (int<4>) -1" {0b1111}
+poke_test_cmd "print/b (int<4>) -1" {0b1111N}
 
 # Strings
 
