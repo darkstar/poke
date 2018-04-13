@@ -288,9 +288,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
       pkl_asm_insn (pasm, PKL_INSN_MKO);
       break;
     case PKL_TYPE_ARRAY:
-      /* XXX: call to the std function std_map_array.  */
+      /* XXX: call to the std function std_map_array.  Error if we are
+         bootstrapping and this operation is not yet available.  */
     case PKL_TYPE_STRUCT:
-      /* XXX: call to the std function std_map_struct.  */
+      /* XXX: call to the std function std_map_struct.  Error if we
+         are bootstrapping and this operation is not yet
+         available.  */
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,
