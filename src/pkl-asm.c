@@ -579,6 +579,8 @@ pkl_asm_new (pkl_ast ast)
   /* Standard prologue.  */
   pkl_asm_note (pasm, "#begin prologue");
 
+  /* XXX: Compile here the contents of pkl-std.pk, with the standard
+     functions.  */
   /* XXX: initialize the base register to [0 b] and other PVM
      registers.  */
   
