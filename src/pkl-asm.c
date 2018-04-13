@@ -581,6 +581,8 @@ pkl_asm_new (pkl_ast ast)
 
   /* XXX: Compile here the contents of pkl-std.pk, with the standard
      functions.  */
+  /* XXX: move this assembly to asm() statements in pkl-prolog.pk and
+     pkl-epilog.pk.  */
   /* XXX: initialize the base register to [0 b] and other PVM
      registers.  */
   
