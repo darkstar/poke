@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* XXX: document here the special rules for the code in this file.
+
+   - Use a `_' prefix for every declaration.
+   - No array, struct operators.  */
+
 /* Find the greatest common divisor of two integrals A and B using the
    Euclidean algorithm.  */
 
