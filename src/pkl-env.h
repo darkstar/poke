@@ -39,28 +39,31 @@
    run-time environments that will happen at run-time when a given
    lambda is created.
 
-   For details on this technique, see the Wizard Book (SICP) section
-   3.2, "The Environment model of Evaluation".  */
+   For more details on this technique, see the Wizard Book (SICP)
+   section 3.2, "The Environment model of Evaluation".  */
 
-/* Each frame contains a list of variables, which in effect are
-   PKL_AST_IDENTIFIER nodes.  (XXX: we also need types!.)
+/* An environment consists on a stack of frames, each frame containing
+   a list of variables, which in effect are PKL_AST_IDENTIFIER nodes.
+   (XXX: we also need types!.)
 
    There are no values bound to these variables, as values are not
    generally available at compile-time.
 
    VARS is a pointer to the first of such identifiers, or NULL if the
    frame is empty.  The identifier nodes are chained through CHAIN2.
-   Note that a given variable can only be linked by one frame.
+   Note that a given variable can only be linked by one frame.  When
+   an identifier node is pushed to a frame, a type is also speicfied
+   and installed in PKL_AST_IDENTIFIER_TYPE.
 
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */
 
-#define PKL_FRAME_VARS(F) ((F)->vars)
-#define PKL_FRAME_UP(F) ((F)->up)
+#define PKL_ENV_VARS(F) ((F)->vars)
+#define PKL_ENV_UP(F) ((F)->up)
 
 struct pkl_env
 {
-  union pkl_ast_node *vars;
+  pkl_ast_node vars;
   struct pkl_env *up;
 };
 
@@ -84,15 +87,18 @@ pkl_env pkl_env_pop_frame (pkl_env env);
 /* Search in the environment ENV for a binding for IDENTIFIER, and put
    the lexical address of the first match in BACK and OVER.
 
-   BACK is the number of frames back the variable is located.
+   BACK is the number of frames back the variable is located.  It is
+   0-based.
 
    OVER indicates its position in the list of variables in the
-   resulting frame.
+   resulting frame.  It is 0-based.
 
-   Return 1 if a binding was found for the free variable IDENTIFIER.
-   0 otherwise.  */
+   Return the result identifier node if a binding was found for the
+   free variable IDENTIFIER.  NULL otherwise.  The purpose of
+   returning the identifier is for the client to have access to the
+   associated type.  */
 
-int pkl_env_lookup (pkl_env env, pkl_ast_node identifier,
-                    int *back, int *over);
+pkl_ast_node pkl_env_lookup (pkl_env env, pkl_ast_node identifier,
+                             int *back, int *over);
 
 #endif /* !PKL_ENV_H  */
