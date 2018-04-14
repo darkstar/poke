@@ -1,4 +1,4 @@
-/* pkl-env.c - Compile-time environments for Poke.  */
+/* pkl-env.c - Compile-time lexical environments for Poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
