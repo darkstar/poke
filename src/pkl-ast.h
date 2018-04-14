@@ -58,7 +58,6 @@ enum pkl_ast_code
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
   /* Statements.  */
-  PKL_AST_LET,
   PKL_AST_LAST
 };
 
@@ -491,21 +490,6 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
                                 pkl_ast_node tag,
                                 pkl_ast_node values);
 
-/* PKL_AST_LET nodes represent { } blocks that may contain
-   declarations.
-
-   BODY is a list of statements (*_STMT nodes) and declarations
-   (*_DECL nodes).
-
-   SUPERCONTEXT points to the containing declaration scope.  */
-
-struct pkl_ast_let
-{
-  struct pkl_ast_common common;
-  union pkl_ast_node *body;
-  union pkl_ast_node *supercontext;
-};
-
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
    BASE must point to a PKL_AST_ARRAY node.
@@ -783,7 +767,6 @@ union pkl_ast_node
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
   /* Statements.  */
-  struct pkl_ast_let let;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.
