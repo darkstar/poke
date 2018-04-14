@@ -27,18 +27,26 @@
    compile-time environment.  This structure keeps track of which
    variables will be at which position in which frames in the run-time
    environment when a particular variable-access operation is
-   executed.
+   executed.  Conceptually, the compile-time environment is a list of
+   "frames", each containing a list of variables.
 
-   The compile-time environment is a list of "frames", each containing
-   a list of variables.  There are of course no values bound to these
-   variables, as values are not generally available at compile-time.
-
-   The main purpose of the data structure is to aid in the
+   The purpose of building this data structure is to aid in the
    determination of lexical addresses in variable references and
-   assignments.  */
+   assignments.  Lexical addresses are known at-compile time, and
+   avoid the need of performing expensive lookups at run-time.
+
+   The compile-time environment effectively mimics the corresponding
+   run-time environments that will happen at run-time when a given
+   lambda is created.
+
+   For details on this technique, see the Wizard Book (SICP) section
+   3.2, "The Environment model of Evaluation".  */
 
 /* Each frame contains a list of variables, which in effect are
    PKL_AST_IDENTIFIER nodes.  (XXX: we also need types!.)
+
+   There are no values bound to these variables, as values are not
+   generally available at compile-time.
 
    VARS is a pointer to the first of such identifiers, or NULL if the
    frame is empty.  The identifier nodes are chained through CHAIN2.
