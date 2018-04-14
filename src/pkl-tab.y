@@ -570,29 +570,15 @@ struct_elem_type:
  */
 
 /*
-pushlevel:
-         * This rule is used below in order to set a new current
-            binding level that will be in effect for subsequent
-            reductions of declarations.  *
-	  %empty
-		{
-                  push_level ();
-                  $$ = pkl_parser->current_block;
-                  pkl_parser->current_block
-                    = pkl_ast_make_let (* supercontext * $$, * body * NULL);
-                }
-	;
-
 compstmt:
 	  '{' '}'
-          	{ $$ = pkl_ast_make_compound_stmt (NULL); }
-        | '{' pushlevel stmt_list '}'
+          	{
+                  $$ = pkl_ast_make_compound_stmt (NULL);
+                }
+        | '{' stmt_list '}'
         	{
-                  $$ = pkl_parser->current_block; 
-                  PKL_AST_LET_BODY ($$, $3);
-                  pop_level ();
-                  * XXX: build a compound instead of a let if
-                     stmt_list doesn't contain any declaration.  *
+                  $$ = pkl_ast_make_compound_stmt ($2);
+
                 }
         ;
 
@@ -605,7 +591,7 @@ stmt_list:
 stmt:
 	  compstmt
         | IDENTIFIER '=' expression ';'
-          	{ $$ = pkl_ast_make_assign_stmt ($1, $3); }
+          	{ $$ = pkl_ast_make_ass_stmt ($1, $3); }
         ;
 */
           
@@ -613,25 +599,22 @@ stmt:
  * Declarations.
  */
 
-/* decl.c:  start_decl, finish_decl
-  
-   Identifiers have a local value and a global value.  */
-
 /*
 declaration:
 	  declaration_specifiers ';'
         ;
 
 declaration_specifiers:
-          typedef_specifier
+          type_specifier
        	| struct_specifier
         | enum_specifier 
+        | function_specifier
         ;
 
 */
 
 /*
- * Typedefs
+ * Type definitions
  */
 
 /*
