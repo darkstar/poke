@@ -16,12 +16,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-defun _gdc (int<*> a, int<*> b) : int<*>
+/* Find the greatest common divisor of two integrals A and B using the
+   Euclidean algorithm.  */
+
+defun _gcd (int<*> a, int<*> b) : int<*>
 {
   if (b == 0)
     return a;
   else
-    return _gdc (a % b);
+    return _gcd (a % b);
 }
 
 /*
