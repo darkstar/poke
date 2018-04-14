@@ -58,34 +58,41 @@
 #define PKL_FRAME_VARS(F) ((F)->vars)
 #define PKL_FRAME_UP(F) ((F)->up)
 
-struct pkl_frame
+struct pkl_env
 {
   union pkl_ast_node *vars;
   struct pkl_env *up;
 };
 
-typedef struct pkl_frame *pkl_frame;
+typedef struct pkl_env *pkl_env;
 
-/* Make FRAME the immediately enclosing frame of NEW_FRAME and return
-   NEW-FRAME.  */
+/* Get an empty environment.  */
 
-pkl_frame pkl_frame_push (pkl_frame frame, pkl_frame new_frame);
+pkl_env pkl_env_new (void);
 
-/* Dispose FRAME and return its immediately enclosing frame.  The
-   returned value is NULL if FRAME is the top-level frame.  */
+/* Make a new frame for the variable list VARS and stack it in the
+   environment ENV.  */
 
-pkl_frame pkl_frame_pop (pkl_frame frame);
+pkl_env pkl_env_push_frame (pkl_env env, pkl_ast_node vars);
 
-/* Search in the environment starting at FRAME and put the lexical
-   address corresponding to the inner-most binding of IDENTIFIER in
-   BACK and OVER.  BACK is the number of frames back the variable is
-   located, and OVER indicates its position in the list of variables
-   in the resulting frame.
+/* Pop a frame from environment ENV and dispose it, then return the
+   resulting environment.  Return NULL if ENV only contains the
+   top-level frame.  */
+
+pkl_env pkl_env_pop_frame (pkl_env env);
+
+/* Search in the environment ENV for a binding for IDENTIFIER, and put
+   the lexical address of the first match in BACK and OVER.
+
+   BACK is the number of frames back the variable is located.
+
+   OVER indicates its position in the list of variables in the
+   resulting frame.
 
    Return 1 if a binding was found for the free variable IDENTIFIER.
    0 otherwise.  */
 
-int pkl_frame_lookup (pkl_frame frame, pkl_ast_node identifier,
-                      int *back, int *over);
+int pkl_env_lookup (pkl_env env, pkl_ast_node identifier,
+                    int *back, int *over);
 
 #endif /* !PKL_ENV_H  */
