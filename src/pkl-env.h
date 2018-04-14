@@ -19,7 +19,6 @@
 #ifndef PKL_ENV_H
 #define PKL_ENV_H
 
-
 #include <config.h>
 #include "pkl-ast.h"
 
@@ -28,42 +27,46 @@
    variables will be at which position in which frames in the run-time
    environment when a particular variable-access operation is
    executed.  Conceptually, the compile-time environment is a list of
-   "frames", each containing a list of variables.
+   "frames", each containing a list of declarations of variables,
+   types and functions.
 
-   The purpose of building this data structure is to aid in the
-   determination of lexical addresses in variable references and
-   assignments.  Lexical addresses are known at-compile time, and
-   avoid the need of performing expensive lookups at run-time.
+   The purpose of building this data structure is twofold:
+   - When the parser finds a name, its meaning (particularly its type)
+     can be found by searching the environment from the current frame
+     out to the global one.
 
-   The compile-time environment effectively mimics the corresponding
-   run-time environments that will happen at run-time when a given
-   lambda is created.
+   - To aid in the determination of lexical addresses in variable
+     references and assignments.  Lexical addresses are known
+     at-compile time, and avoid the need of performing expensive
+     lookups at run-time.
 
-   For more details on this technique, see the Wizard Book (SICP)
-   section 3.2, "The Environment model of Evaluation".  */
+     The compile-time environment effectively mimics the corresponding
+     run-time environments that will happen at run-time when a given
+     lambda is created.
+
+     For more details on this technique, see the Wizard Book (SICP)
+     section 3.2, "The Environment model of Evaluation".  */
 
 /* An environment consists on a stack of frames, each frame containing
-   a list of variables, which in effect are PKL_AST_IDENTIFIER nodes.
-   (XXX: we also need types!.)
+   a list of declarations, which in effect are PKL_AST_DECL nodes.
 
    There are no values bound to these variables, as values are not
    generally available at compile-time.
 
-   VARS is a pointer to the first of such identifiers, or NULL if the
-   frame is empty.  The identifier nodes are chained through CHAIN2.
-   Note that a given variable can only be linked by one frame.  When
-   an identifier node is pushed to a frame, a type is also speicfied
-   and installed in PKL_AST_IDENTIFIER_TYPE.
+   DECLS is a pointer to the first of such declarations, or NULL if
+   the frame is empty.  The declaration nodes are chained through
+   CHAIN2.  Note that a given variable can only be linked by one
+   frame.
 
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */
 
-#define PKL_ENV_VARS(F) ((F)->vars)
+#define PKL_ENV_DECLS(F) ((F)->decls)
 #define PKL_ENV_UP(F) ((F)->up)
 
 struct pkl_env
 {
-  pkl_ast_node vars;
+  pkl_ast_node decls;
   struct pkl_env *up;
 };
 
@@ -73,10 +76,10 @@ typedef struct pkl_env *pkl_env;
 
 pkl_env pkl_env_new (void);
 
-/* Make a new frame for the variable list VARS and stack it in the
+/* Make a new frame for the variable list DECLS and stack it in the
    environment ENV.  */
 
-pkl_env pkl_env_push_frame (pkl_env env, pkl_ast_node vars);
+pkl_env pkl_env_push_frame (pkl_env env, pkl_ast_node decls);
 
 /* Pop a frame from environment ENV and dispose it, then return the
    resulting environment.  Return NULL if ENV only contains the
@@ -84,18 +87,18 @@ pkl_env pkl_env_push_frame (pkl_env env, pkl_ast_node vars);
 
 pkl_env pkl_env_pop_frame (pkl_env env);
 
-/* Search in the environment ENV for a binding for IDENTIFIER, and put
-   the lexical address of the first match in BACK and OVER.
+/* Search in the environment ENV for a declaration for IDENTIFIER, and
+   put the lexical address of the first match in BACK and OVER.
 
-   BACK is the number of frames back the variable is located.  It is
-   0-based.
+   BACK is the number of frames back the declaration is located.  It
+   is 0-based.
 
-   OVER indicates its position in the list of variables in the
+   OVER indicates its position in the list of declarations in the
    resulting frame.  It is 0-based.
 
-   Return the result identifier node if a binding was found for the
-   free variable IDENTIFIER.  NULL otherwise.  The purpose of
-   returning the identifier is for the client to have access to the
+   Return the result declaration node if a declaration was found for
+   the free variable IDENTIFIER.  NULL otherwise.  The main purpose of
+   returning the declaration is for the client to have access to the
    associated type.  */
 
 pkl_ast_node pkl_env_lookup (pkl_env env, pkl_ast_node identifier,

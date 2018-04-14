@@ -249,20 +249,25 @@ pkl_ast_node pkl_ast_make_program (pkl_ast ast,
 /* PKL_AST_IDENTIFIER nodes represent identifiers in PKL programs.
    
    POINTER must point to a NULL-terminated string.
-   LENGTH contains the size in bytes of the identifier.  */
+
+   LENGTH contains the size in bytes of the identifier
+
+   BACK and OVER conform the lexical address to find the storage of
+   the entity represented by the identifier.  See pkl-env.h for a
+   description of these.  */
 
 #define PKL_AST_IDENTIFIER_LENGTH(AST) ((AST)->identifier.length)
 #define PKL_AST_IDENTIFIER_POINTER(AST) ((AST)->identifier.pointer)
-#define PKL_AST_IDENTIFIER_GLOBAL_VALUE(AST) ((AST)->identifier.global_value)
-#define PKL_AST_IDENTIFIER_LOCAL_VALUE(AST) ((AST)->identifier.local_value)
+#define PKL_AST_IDENTIFIER_BACK(AST) ((AST)->identifier.back)
+#define PKL_AST_IDENTIFIER_OVER(AST) ((AST)->identifier.over)
 
 struct pkl_ast_identifier
 {
   struct pkl_ast_common common;
   size_t length;
   char *pointer;
-  union pkl_ast_node *global_value;
-  union pkl_ast_node *local_value;
+  int back;
+  int over;
 };
 
 pkl_ast_node pkl_ast_make_identifier (pkl_ast ast,
@@ -658,14 +663,11 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    INITIAL is the initial value of the entity, if any.  The initial
    value is optional for variables and constants if an explicit type
    was used in the declaration.  Initial values are mandatory for
-   functions and type declarations.
-
-   CONTEXT points to XXX.  */
+   functions and type declarations.  */
 
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
 #define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
-#define PKL_AST_DECL_CONTEXT(AST) ((AST)->decl.context)
 
 struct pkl_ast_decl
 {
@@ -674,7 +676,6 @@ struct pkl_ast_decl
   union pkl_ast_node *name;
   union pkl_ast_node *type;
   union pkl_ast_node *initial;
-  union pkl_ast_node *context;
 };
 
 /* PKL_AST_OFFSET nodes represent poke object constructions.

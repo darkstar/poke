@@ -34,11 +34,11 @@ pkl_env_new ()
 }
 
 pkl_env
-pkl_env_push_frame (pkl_env env, pkl_ast_node vars)
+pkl_env_push_frame (pkl_env env, pkl_ast_node decls)
 {
   pkl_env new = pkl_env_new ();
 
-  PKL_ENV_VARS (env) = ASTREF (vars);
+  PKL_ENV_DECLS (env) = ASTREF (decls);
   PKL_ENV_UP (env) = env;
   return new;
 }
@@ -46,14 +46,14 @@ pkl_env_push_frame (pkl_env env, pkl_ast_node vars)
 pkl_env
 pkl_env_pop_frame (pkl_env env)
 {
-  pkl_ast_node vars, bind, next;
+  pkl_ast_node decl, next;
   pkl_env up = PKL_ENV_UP (env);
+  pkl_ast_node decls = PKL_ENV_DECLS (env);
 
-  vars = PKL_ENV_VARS (env);
-  for (bind = vars; bind; bind = next)
+  for (decl = decls; decl; decl = next)
     {
-      next = PKL_AST_CHAIN2 (bind);
-      pkl_ast_node_free (bind);
+      next = PKL_AST_CHAIN2 (decl);
+      pkl_ast_node_free (decl);
     }
   
   free (env);
@@ -68,23 +68,25 @@ pkl_env_lookup_1 (pkl_env env, pkl_ast_node identifier,
     return NULL;
   else
     {
-      pkl_ast_node vars = PKL_ENV_VARS (env);
-      pkl_ast_node bind, next;
-      int num_var = 0;
+      pkl_ast_node decls = PKL_ENV_DECLS (env);
+      pkl_ast_node decl, next;
+      int num_decl = 0;
  
-      for (bind = vars; bind; bind = next)
+      for (decl = decls; decl; decl = next)
         {
-          next = PKL_AST_CHAIN2 (bind);
+          pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
+
+          next = PKL_AST_CHAIN2 (decl);
 
           if (strcmp (PKL_AST_IDENTIFIER_POINTER (identifier),
-                      PKL_AST_IDENTIFIER_POINTER (bind)) == 0)
+                      PKL_AST_IDENTIFIER_POINTER (decl_name)) == 0)
             {
               *back = num_frame;
-              *over = num_var;
-              return bind;
+              *over = num_decl;
+              return decl;
             }
 
-          num_var++;
+          num_decl++;
         }
     }      
 

@@ -27,66 +27,6 @@
 #include "pkl-tab.h"
 #include "pkl-lex.h"
 
-pkl_bind_level
-pkl_bind_level_new (void)
-{
-  pkl_bind_level bl = xmalloc (sizeof (struct pkl_bind_level));
-  memset (bl, 0, sizeof (struct pkl_bind_level));
-
-  return bl;
-}
-
-
-void
-pkl_push_level (struct pkl_parser *parser)
-{
-  pkl_bind_level new = pkl_bind_level_new ();
-
-  PKL_BIND_LEVEL_PARENT (new) = parser->current_bind_level;
-  parser->current_bind_level = new;
-}
-
-void
-pkl_pop_level (struct pkl_parser *parser)
-{
-  pkl_ast_node t;
-  pkl_bind_level current_bind_level;
-
-  current_bind_level = parser->current_bind_level;
-  
-  /* The local variables of this level do not have any meaning
-     anymore.  */
-  for (t = PKL_BIND_LEVEL_NAMES (current_bind_level);
-       t;
-       t = PKL_AST_CHAIN (t))
-    PKL_AST_IDENTIFIER_LOCAL_VALUE (PKL_AST_DECL_NAME (t)) = 0;
-
-#if 0  
-  /* Outer names are not shadowed anymore.  */
-  for (t = PKL_BIND_LEVEL_SHADOWED (current_bind_level);
-       t;
-       t = PKL_AST_CHAIN (t))
-    PKL_AST_IDENTIFIER_LOCAL_VALUE (PKL_AST_PURPOSE (t)) = PKL_AST_VALUE (t);
-#endif
-
-  /* If the level being exited is the top-level of a function, match
-     all goto statements with their labels.  */
-
-  /* XXX: but this doesn't work for poke, since we allow nested
-     functions.  */
-
-  if (PKL_BIND_LEVEL_PARENT (current_bind_level)
-      == parser->global_bind_level)
-    {
-      
-    }
-
-  /* Pop the current level.  */
-  parser->current_bind_level
-    = PKL_BIND_LEVEL_PARENT (current_bind_level);
-  free (current_bind_level);
-}
-
 /* Allocate and initialize a parser.  */
 
 static struct pkl_parser *
@@ -105,9 +45,6 @@ pkl_parser_init (void)
   parser->filename = NULL;
   parser->nchars = 0;
 
-  /* Create the global binding level.  */
-  parser->global_bind_level = pkl_bind_level_new ();
-
   return parser;
 }
 
@@ -116,17 +53,8 @@ pkl_parser_init (void)
 void
 pkl_parser_free (struct pkl_parser *parser)
 {
-  pkl_bind_level l, n;
-  
   pkl_tab_lex_destroy (parser->scanner);
   free (parser->filename);
-
-  for (l = parser->current_bind_level; l; l = n)
-    {
-      n = PKL_BIND_LEVEL_PARENT (l);
-      free (l);
-    }
-  free (parser->global_bind_level);
 
   free (parser);
 
