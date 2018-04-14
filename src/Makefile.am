@@ -24,6 +24,7 @@ poke_SOURCES = poke.c poke.h \
                pk-print.c \
                pkl.h pkl.c \
                pkl-ast.h pkl-ast.c \
+               pkl-env.h pkl-env.c \
                pkl-pass.h pkl-pass.c \
                pkl-promo.h pkl-promo.c \
                pkl-fold.h pkl-fold.c \
