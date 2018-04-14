@@ -64,6 +64,28 @@ struct pkl_frame
   struct pkl_env *up;
 };
 
-typedef struct pkl_env *pkl_env;
+typedef struct pkl_frame *pkl_frame;
+
+/* Make FRAME the immediately enclosing frame of NEW_FRAME and return
+   NEW-FRAME.  */
+
+pkl_frame pkl_frame_push (pkl_frame frame, pkl_frame new_frame);
+
+/* Dispose FRAME and return its immediately enclosing frame.  The
+   returned value is NULL if FRAME is the top-level frame.  */
+
+pkl_frame pkl_frame_pop (pkl_frame frame);
+
+/* Search in the environment starting at FRAME and put the lexical
+   address corresponding to the inner-most binding of IDENTIFIER in
+   BACK and OVER.  BACK is the number of frames back the variable is
+   located, and OVER indicates its position in the list of variables
+   in the resulting frame.
+
+   Return 1 if a binding was found for the free variable IDENTIFIER.
+   0 otherwise.  */
+
+int pkl_frame_lookup (pkl_frame frame, pkl_ast_node identifier,
+                      int *back, int *over);
 
 #endif /* !PKL_ENV_H  */
