@@ -1484,7 +1484,7 @@ deftype Elf_Section =
     elf_sym(mach, class)[nents] symtab
       : shdr.sh_type == SHT_SYMTAB;
 
-    byte[shdr.sh_size] strtab
+    Elf64_off[shdr.sh_size] strtab
       : (shdr.sh_size > 0 && shdr.sh_type == SHT_STRTAB
          && warn_nofail_if (strtab[0] == '\0' && strtab[shdr.sh_size - 1] == '\0'));
 
@@ -1527,6 +1527,18 @@ deftype Elf_Section =
   
     elf32_word[nents] symtab_shndx
       : shdr.sh_type == SHT_SYMTAB_SHNDX;
+
+    /* Functions.  */
+
+    defun name ()
+    {
+      /* The name of a section is stored in a string table which is
+         itself stored in a section in the file.  Find it.  */
+      
+      for (s in shdr)
+        if (s is strtab)
+          return (string @ s.strtab[shdr.sh_name]);
+    };
   };
 
 deftype elf_segment =
@@ -1575,18 +1587,6 @@ deftype Elf =
     elf_segment (ehdr.e_machine,
                  edhr.e_ident.ei_class,
                  phdr[segments$index]) [ehdr.e_phnum] segments;
-
-    /* Functions.  */
-
-    defun section_name (Elf_Shdr shdr)
-    {
-      /* The name of a section is stored in a string table which is itself
-         stored in a section in the file.  Find it.  */
-      
-      for (s in shdr)
-        if (s is strtab)
-          return (string @ &s.strtab[shdr.sh_name]);
-    };
   };
 
 /*
