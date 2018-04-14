@@ -151,7 +151,7 @@ typedef union pkl_ast_node *pkl_ast_node;
    CHAIN is used to form sibling relationships in the tree.
 
    CHAIN2 is used to link nodes together in containers, such as hash
-   table buckets.
+   table buckets, and frames.
 
    The `pkl_ast_chainon' utility function is provided in order to
    confortably add elements to a list of nodes.  It operates on CHAIN,
