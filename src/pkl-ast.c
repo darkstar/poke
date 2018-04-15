@@ -744,6 +744,41 @@ pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts)
   return comp_stmt;
 }
 
+/* Build and return an AST node for an assignment statement.  */
+
+pkl_ast_node
+pkl_ast_make_ass_stmt (pkl_ast ast, pkl_ast_node lvalue,
+                       pkl_ast_node exp)
+{
+  pkl_ast_node ass_stmt = pkl_ast_make_node (ast,
+                                             PKL_AST_ASS_STMT);
+
+  assert (lvalue && exp);
+
+  PKL_AST_ASS_STMT_LVALUE (ass_stmt) = ASTREF (lvalue);
+  PKL_AST_ASS_STMT_EXP (ass_stmt) = ASTREF (exp);
+
+  return ass_stmt;
+}
+
+/* Build and return an AST node for a conditional statement.  */
+
+pkl_ast_node
+pkl_ast_make_if_stmt (pkl_ast ast, pkl_ast_node exp,
+                      pkl_ast_node then_stmt, pkl_ast_node else_stmt)
+{
+  pkl_ast_node if_stmt = pkl_ast_make_node (ast, PKL_AST_IF_STMT);
+
+  assert (exp && then_stmt);
+
+  PKL_AST_IF_STMT_EXP (if_stmt) = ASTREF (exp);
+  PKL_AST_IF_STMT_THEN_STMT (if_stmt) = ASTREF (then_stmt);
+  if (else_stmt)
+    PKL_AST_IF_STMT_ELSE_STMT (if_stmt) = ASTREF (else_stmt);
+
+  return if_stmt;
+}
+
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node
@@ -929,6 +964,19 @@ pkl_ast_node_free (pkl_ast_node ast)
           pkl_ast_node_free (t);
         }
 
+      break;
+
+    case PKL_AST_ASS_STMT:
+
+      pkl_ast_node_free (PKL_AST_ASS_STMT_LVALUE (ast));
+      pkl_ast_node_free (PKL_AST_ASS_STMT_EXP (ast));
+      break;
+
+    case PKL_AST_IF_STMT:
+
+      pkl_ast_node_free (PKL_AST_IF_STMT_EXP (ast));
+      pkl_ast_node_free (PKL_AST_IF_STMT_THEN_STMT (ast));
+      pkl_ast_node_free (PKL_AST_IF_STMT_ELSE_STMT (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -1529,6 +1577,23 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       IPRINTF ("stmts:\n");
       PRINT_AST_SUBAST_CHAIN (COMP_STMT_STMTS);
+      break;
+
+    case PKL_AST_ASS_STMT:
+      IPRINTF ("ASS_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (lvalue, ASS_STMT_LVALUE);
+      PRINT_AST_SUBAST (exp, ASS_STMT_EXP);
+      break;
+
+    case PKL_AST_IF_STMT:
+      IPRINTF ("IF_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (exp, IF_STMT_EXP);
+      PRINT_AST_SUBAST (then_stmt, IF_STMT_THEN_STMT);
+      PRINT_AST_SUBAST (else_stmt, IF_STMT_ELSE_STMT);
       break;
       
     default:

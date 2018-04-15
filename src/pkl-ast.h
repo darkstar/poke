@@ -758,6 +758,53 @@ struct pkl_ast_comp_stmt
 
 pkl_ast_node pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts);
 
+/* PKL_AST_ASS_STMT nodes represent assignment statements in the
+   language.
+
+   LVALUE is the l-value of the assignment.
+   EXP is the r-value of the assignment.  */
+
+#define PKL_AST_ASS_STMT_LVALUE(AST) ((AST)->ass_stmt.lvalue)
+#define PKL_AST_ASS_STMT_EXP(AST) ((AST)->ass_stmt.exp)
+
+struct pkl_ast_ass_stmt
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *lvalue;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_ass_stmt (pkl_ast ast,
+                                    pkl_ast_node lvalue, pkl_ast_node exp);
+
+/* PKL_AST_IF_STMT nodes represent conditional statements, with an
+   optional `else' part.
+
+   EXP is the expression that is to be evaluated to decide what branch
+   to take.
+
+   THEN_STMT is the statement to be executed when EXP holds true.
+   ELSE_STMT is the statement to be executed when EXP holds false.  */
+
+#define PKL_AST_IF_STMT_EXP(AST) ((AST)->if_stmt.exp)
+#define PKL_AST_IF_STMT_THEN_STMT(AST) ((AST)->if_stmt.then_stmt)
+#define PKL_AST_IF_STMT_ELSE_STMT(AST) ((AST)->if_stmt.else_stmt)
+
+struct pkl_ast_if_stmt
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *exp;
+  union pkl_ast_node *then_stmt;
+  union pkl_ast_node *else_stmt;
+};
+
+pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
+                                   pkl_ast_node exp,
+                                   pkl_ast_node then_stmt,
+                                   pkl_ast_node else_stmt);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -789,6 +836,8 @@ union pkl_ast_node
   struct pkl_ast_enumerator enumerator;
   /* Statements.  */
   struct pkl_ast_comp_stmt comp_stmt;
+  struct pkl_ast_ass_stmt ass_stmt;
+  struct pkl_ast_if_stmt if_stmt;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.
