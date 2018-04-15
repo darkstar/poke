@@ -89,7 +89,6 @@ pkl_tab_error (YYLTYPE *llocp,
 
 %token ENUM
 %token STRUCT
-%token TYPEDEF
 %token BREAK
 %token CONST
 %token CONTINUE
@@ -101,6 +100,8 @@ pkl_tab_error (YYLTYPE *llocp,
 %token ASSERT
 %token ERR
 %token INTCONSTR UINTCONSTR OFFSETCONSTR
+%token DEFUN DEFSET DEFTYPE DEFVAR
+%token RETURN
 
 /* Operator tokens and their precedences, in ascending order.  */
 
@@ -142,6 +143,9 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <ast> struct_elem_list struct_elem
 %type <ast> type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
+%type <ast> declaration
+%type <ast> function_specifier function_args function_arg_list function_arg
+%type <ast> comp_stmt stmt_list stmt lvalue
 
 %start program
 
@@ -193,12 +197,12 @@ program_elem:
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
                 }
-/*	  declaration
+	| declaration
           	{
                   if (pkl_parser->what == PKL_PARSE_EXPRESSION)
                     YYERROR;
                   $$ = $1;
-                  }*/
+                  }
         ;
 
 /*
@@ -580,10 +584,42 @@ struct_elem_type:
         ;
 
 /*
+ * Declarations.
+ */
+
+declaration:
+        DEFUN IDENTIFIER '=' function_specifier ';'
+/*        | DEFSET IDENTIFIER '=' set_specifier ';' */
+        | DEFTYPE IDENTIFIER '=' type_specifier ';'
+        | DEFVAR IDENTIFIER '=' expression ';'
+        ;
+
+function_specifier:
+          function_args comp_stmt
+        | function_args ':' type_specifier comp_stmt
+        ;
+
+function_args:
+	  '(' ')'
+        | '(' function_arg_list ')'
+        ;
+
+function_arg_list:
+	  function_arg
+        | function_arg_list "," function_arg
+          	{
+                  $$ = pkl_ast_chainon ($1, $3);
+                }
+        ;
+
+function_arg:
+	  type_specifier IDENTIFIER
+        ;
+
+/*
  * Statements.
  */
 
-/*
 comp_stmt:
 	  '{' '}'
           	{
@@ -620,7 +656,7 @@ stmt:
                   $$ = pkl_ast_make_if_stmt ($3, $5, $7);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | RETURN exp ';'
+        | RETURN expression ';'
                 {
                   $$ = pkl_ast_make_return_stmt ($2);
                   PKL_AST_LOC ($$) = @$;
@@ -632,31 +668,11 @@ lvalue:
 		{
 		  $$ = $1;
 		  PKL_AST_LOC ($$) = @$;
-		  PKL_AST_LOC ($2) = @$;
 		}
          | array_ref
          | struct_ref
          | mapping
          ;
-*/
-          
-/*
- * Declarations.
- */
-
-/*
-declaration:
-          DEFUN IDENTIFIER '=' function_specifier ';'
-        | DEFSET IDENTIFIER '=' set_specifier ';'
-        | DEFTYPE IDENTIFIER '=' type_specifier ';'
-        | DEFVAR IDENTIFIER '=' var_specifier ';'
-        ;
-
-function_specifier:
-          '(' function_arg_list ')' comp_stmt
-        | '(' function_arg_list ')' ':' 'type_specifier comp_stmt
-        ;
-*/
 
 /*
  * Enumerations.

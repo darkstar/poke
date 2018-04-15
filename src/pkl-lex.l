@@ -106,7 +106,6 @@ D [0-9]
 
 "enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }
-"typedef"	{ return TYPEDEF; }
 "break"		{ return BREAK; }
 "const"		{ return CONST; }
 "continue"	{ return CONTINUE; }
@@ -116,6 +115,11 @@ D [0-9]
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
 "assert"	{ return ASSERT; }
+"defun"		{ return DEFUN; }
+"defset"	{ return DEFSET; }
+"deftype"	{ return DEFTYPE; }
+"defvar"	{ return DEFVAR; }
+"return"        { return RETURN; }
 
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
