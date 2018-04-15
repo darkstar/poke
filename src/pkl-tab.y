@@ -447,10 +447,19 @@ funcall_arg_list:
 		{ $$ = NULL; }
 	| funcall_arg
         | funcall_arg_list ',' funcall_arg
+        	{
+                  $$ = pkl_ast_chainon ($3, $1);
+                }
         ;
 
 funcall_arg:
 	  type_specifier IDENTIFIER
+          	{
+                  $$ = pkl_ast_make_funcall_arg (pkl_parser->ast,
+                                                 $1, $2);
+                  PKL_AST_LOC ($1) = @1;
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 struct:
@@ -648,12 +657,14 @@ function_arg:
 comp_stmt:
 	  '{' '}'
           	{
-                  $$ = pkl_ast_make_comp_stmt (NULL);
+                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
+                                               NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
         | '{' stmt_list '}'
         	{
-                  $$ = pkl_ast_make_comp_stmt (pkl_ast_reverse ($2));
+                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
+                                               pkl_ast_reverse ($2));
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
@@ -668,27 +679,32 @@ stmt:
 	  comp_stmt
         | lvalue '=' expression ';'
           	{
-                  $$ = pkl_ast_make_ass_stmt ($1, $3);
+                  $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
+                                              $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
         | IF '(' expression ')' stmt ';'
                 {
-                  $$ = pkl_ast_make_if_stmt ($3, $5, NULL);
+                  $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
+                                             $3, $5, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
         | IF '(' expression ')' stmt ELSE stmt ';'
                 {
-                  $$ = pkl_ast_make_if_stmt ($3, $5, $7);
+                  $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
+                                             $3, $5, $7);
                   PKL_AST_LOC ($$) = @$;
                 }
         | RETURN expression ';'
                 {
-                  $$ = pkl_ast_make_return_stmt ($2);
+                  $$ = pkl_ast_make_return_stmt (pkl_parser->ast,
+                                                 $2);
                   PKL_AST_LOC ($$) = @$;
                 }
         | expression ';'
         	{
-                  $$ = pkl_ast_make_exp_stmt ($1);
+                  $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,
+                                              $1);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
