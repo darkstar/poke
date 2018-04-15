@@ -793,6 +793,20 @@ pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp)
   return return_stmt;
 }
 
+/* Build and return an AST node for an "expression statement".  */
+
+pkl_ast_node
+pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp)
+{
+  pkl_ast_node exp_stmt = pkl_ast_make_node (ast,
+                                             PKL_AST_EXP_STMT);
+
+  assert (exp);
+
+  PKL_AST_EXP_STMT_EXP (exp_stmt) = ASTREF (exp);
+  return exp_stmt;
+}
+
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node
@@ -996,6 +1010,11 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_RETURN_STMT:
 
       pkl_ast_node_free (PKL_AST_RETURN_STMT_EXP (ast));
+      break;
+
+    case PKL_AST_EXP_STMT:
+
+      pkl_ast_node_free (PKL_AST_EXP_STMT_EXP (ast));
       break;
 
     case PKL_AST_INTEGER:
@@ -1620,6 +1639,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (exp, RETURN_STMT_EXP);
+      break;
+
+    case PKL_AST_EXP_STMT:
+      IPRINTF ("EXP_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (exp_stmt, EXP_STMT_EXP);
       break;
       
     default:

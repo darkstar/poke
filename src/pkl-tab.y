@@ -648,12 +648,12 @@ function_arg:
 comp_stmt:
 	  '{' '}'
           	{
-                  $$ = pkl_ast_make_compound_stmt (NULL);
+                  $$ = pkl_ast_make_comp_stmt (NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
         | '{' stmt_list '}'
         	{
-                  $$ = pkl_ast_make_compound_stmt (pkl_ast_reverse ($2));
+                  $$ = pkl_ast_make_comp_stmt (pkl_ast_reverse ($2));
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
