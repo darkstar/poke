@@ -493,7 +493,6 @@ array_initializer:
                 }
         ;
 
-
 type_specifier:
 	  TYPENAME
                 {
@@ -628,15 +627,17 @@ stmt:
                 }
         ;
 
-/ * lvalue:
+lvalue:
            IDENTIFIER
+		{
+		  $$ = $1;
+		  PKL_AST_LOC ($$) = @$;
+		  PKL_AST_LOC ($2) = @$;
+		}
          | array_ref
          | struct_ref
          | mapping
          ;
-
-     Move those to their own non-terminal so we can use them in both
-     primary and here. * /
 */
           
 /*
