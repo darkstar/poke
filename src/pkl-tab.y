@@ -379,7 +379,13 @@ unary_operator:
 	;
 
 primary:
-	  INTEGER
+          IDENTIFIER
+          	{
+                  $$ = $1;
+                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
+                }
+	| INTEGER
                 {
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
@@ -533,6 +539,29 @@ array_initializer:
         ;
 
 /*
+ * Functions.
+ */
+
+function_specifier:
+          '(' function_arg_list ')' comp_stmt
+        | '(' function_arg_list ')' ':' type_specifier comp_stmt
+        ;
+
+function_arg_list:
+	  %empty
+		{ $$ = NULL; }
+	| function_arg
+        | function_arg_list "," function_arg
+          	{
+                  $$ = pkl_ast_chainon ($1, $3);
+                }
+        ;
+
+function_arg:
+	  type_specifier IDENTIFIER
+        ;
+
+/*
  * Types.
  */
 
@@ -630,25 +659,6 @@ declaration:
 /*        | DEFSET IDENTIFIER '=' set_specifier ';' */
         | DEFTYPE IDENTIFIER '=' type_specifier ';'
         | DEFVAR IDENTIFIER '=' expression ';'
-        ;
-
-function_specifier:
-          '(' function_arg_list ')' comp_stmt
-        | '(' function_arg_list ')' ':' type_specifier comp_stmt
-        ;
-
-function_arg_list:
-	  %empty
-		{ $$ = NULL; }
-	| function_arg
-        | function_arg_list "," function_arg
-          	{
-                  $$ = pkl_ast_chainon ($1, $3);
-                }
-        ;
-
-function_arg:
-	  type_specifier IDENTIFIER
         ;
 
 /*

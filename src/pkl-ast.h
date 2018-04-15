@@ -667,7 +667,10 @@ struct pkl_ast_decl
   struct pkl_ast_common common;
 
   union pkl_ast_node *name;
-  union pkl_ast_node *type;
+  union pkl_ast_node *type; /* XXX: we don't need this.  The type
+                               depends on the kind of node in INITIAL,
+                               and can be always be inferred from
+                               it.  */
   union pkl_ast_node *initial;
 };
 
