@@ -731,6 +731,19 @@ pkl_ast_make_map (pkl_ast ast,
   return map;
 }
 
+/* Build and return an AST node for a compound statement.  */
+
+pkl_ast_node
+pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts)
+{
+  pkl_ast_node comp_stmt = pkl_ast_make_node (ast,
+                                              PKL_AST_COMP_STMT);
+
+  if (stmts)
+    PKL_AST_COMP_STMT_STMTS (comp_stmt) = ASTREF (stmts);
+  return comp_stmt;
+}
+
 /* Build and return an AST node for a PKL program.  */
 
 pkl_ast_node
@@ -906,6 +919,16 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_MAP_TYPE (ast));
       pkl_ast_node_free (PKL_AST_MAP_OFFSET (ast));
+      break;
+
+    case PKL_AST_COMP_STMT:
+
+      for (t = PKL_AST_COMP_STMT_STMTS (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
+
       break;
 
     case PKL_AST_INTEGER:
@@ -1498,6 +1521,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (map_type, MAP_TYPE);
       PRINT_AST_SUBAST (offset, MAP_OFFSET);
+      break;
+
+    case PKL_AST_COMP_STMT:
+      IPRINTF ("COMP_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      IPRINTF ("stmts:\n");
+      PRINT_AST_SUBAST_CHAIN (COMP_STMT_STMTS);
       break;
       
     default:
