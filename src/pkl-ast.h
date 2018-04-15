@@ -805,6 +805,21 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
                                    pkl_ast_node then_stmt,
                                    pkl_ast_node else_stmt);
 
+/* PKL_AST_RETURN_STMT nodes represent return statements.
+
+   EXP is the expression to return to the caller.  */
+
+#define PKL_AST_RETURN_STMT_EXP(AST) ((AST)->return_stmt.exp)
+
+struct pkl_ast_return_stmt
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -838,6 +853,7 @@ union pkl_ast_node
   struct pkl_ast_comp_stmt comp_stmt;
   struct pkl_ast_ass_stmt ass_stmt;
   struct pkl_ast_if_stmt if_stmt;
+  struct pkl_ast_return_stmt return_stmt;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.
