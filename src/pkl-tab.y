@@ -591,7 +591,25 @@ stmt_list:
 stmt:
 	  compstmt
         | IDENTIFIER '=' expression ';'
-          	{ $$ = pkl_ast_make_ass_stmt ($1, $3); }
+          	{
+                  $$ = pkl_ast_make_ass_stmt ($1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | IF '(' expression ')' stmt ';'
+                {
+                  $$ = pkl_ast_make_if_stmt ($3, $5, NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | IF '(' expression ')' stmt ELSE stmt ';'
+                {
+                  $$ = pkl_ast_make_if_stmt ($3, $5, $7);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | RETURN exp ';'
+                {
+                  $$ = pkl_ast_make_return_stmt ($2);
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 */
           
@@ -601,75 +619,15 @@ stmt:
 
 /*
 declaration:
-	  declaration_specifiers ';'
+          DEFUN IDENTIFIER '=' function_specifier ';'
+        | DEFSET IDENTIFIER '=' set_specifier ';'
+        | DEFTYPE IDENTIFIER '=' type_specifier ';'
+        | DEFVAR IDENTIFIER '=' var_specifier ';'
         ;
 
-declaration_specifiers:
-          type_specifier
-       	| struct_specifier
-        | enum_specifier 
-        | function_specifier
-        ;
-
-*/
-
-/*
- * Type definitions
- */
-
-/*
-typedef_specifier:
-	  TYPEDEF type_specifier IDENTIFIER
-          	{
-                  const char *id = PKL_AST_IDENTIFIER_POINTER ($3);
-                  pkl_ast_node type = pkl_ast_make_type (PKL_AST_TYPE_CODE ($2),
-                                                         PKL_AST_TYPE_SIGNED ($2),
-                                                         PKL_AST_TYPE_SIZE ($2),
-                                                         PKL_AST_TYPE_ENUMERATION ($2),
-                                                         PKL_AST_TYPE_STRUCT ($2));
-
-                  if (pkl_ast_register (pkl_parser->ast, id, type) == NULL)
-                    {
-                      pkl_tab_error (&@2, pkl_parser, "type already defined");
-                      YYERROR;
-                    }
-
-                  $$ = NULL;
-                }
-        ;
-*/
-
-          /*          	| STRUCT IDENTIFIER
-        	{
-                  pkl_ast_node strct
-                    = pkl_ast_get_registered (pkl_parser->ast,
-                                              PKL_AST_IDENTIFIER_POINTER ($2),
-                                              PKL_AST_STRUCT);
-
-                  if (!strct)
-                    {
-                      pkl_tab_error (&@2, pkl_parser,
-                                     "expected struct tag");
-                      YYERROR;
-                    }
-                  else
-                    $$ = pkl_ast_make_type (PKL_TYPE_STRUCT, 0, 0, NULL, strct);
-                }
-        | ENUM IDENTIFIER
-        	{
-                  pkl_ast_node enumeration
-                    = pkl_ast_get_registered (pkl_parser->ast,
-                                              PKL_AST_IDENTIFIER_POINTER ($2),
-                                              PKL_AST_ENUM);
-
-                  if (!enumeration)
-                    {
-                      pkl_tab_error (&@2, pkl_parser, "expected enumeration tag");
-                      YYERROR;
-                    }
-                  else
-                    $$ = pkl_ast_make_type (PKL_TYPE_ENUM, 0, 32, enumeration, NULL);
-                    }
+function_specifier:
+          '(' function_arg_list ')' comp_stmt
+        | '(' function_arg_list ')' ':' type_specifier comp_stmt
         ;
 */
 

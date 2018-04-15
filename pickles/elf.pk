@@ -1530,7 +1530,7 @@ deftype Elf_Section =
 
     /* Functions.  */
 
-    defun name ()
+    defun name = ()
     {
       /* The name of a section is stored in a string table which is
          itself stored in a section in the file.  Find it.  */

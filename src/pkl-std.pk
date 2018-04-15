@@ -24,7 +24,7 @@
 /* Find the greatest common divisor of two integrals A and B using the
    Euclidean algorithm.  */
 
-defun _gcd (xint<*> a, xint<*> b) : xint<*>
+defun _gcd = (xint<*> a, xint<*> b) : xint<*>
 {
   if (b == 0)
     return a;
