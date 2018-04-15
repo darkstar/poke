@@ -137,12 +137,11 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <opcode> unary_operator
 
 %type <ast> program program_elem_list program_elem
-%type <ast> expression primary
+%type <ast> expression primary struct_ref array_ref mapping
 %type <ast> array_initializer_list array_initializer
 %type <ast> struct_elem_list struct_elem
 %type <ast> type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
-/*                      %type <ast> stmt_list stmt pushlevel compstmt*/
 
 %start program
 
@@ -397,11 +396,6 @@ primary:
         	{
                     $$ = $2;
                 }
-        | primary '[' expression ']' %prec '.'
-        	{
-                  $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
-                  PKL_AST_LOC ($$) = @$;
-                }
         | '[' array_initializer_list ']'
         	{
                     $$ = pkl_ast_make_array (pkl_parser->ast,
@@ -416,18 +410,39 @@ primary:
                                               0 /* nelem */, $2);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | primary '.' IDENTIFIER
-        	{
+        | mapping
+        | struct_ref
+        | array_ref %prec '.'
+	;
+
+/* Note that `struct_ref', `array_ref' and `mapping' are handled in
+   their own non-terminals (instead of in `primary' above) because
+   they are also used in assignment statements below.  */
+
+array_ref:
+	  primary '[' expression ']'
+                {
+                  $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	;
+
+struct_ref:
+	  primary '.' IDENTIFIER
+		{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($3) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
-        | type_specifier '@' expression
+	;
+
+mapping:
+	  type_specifier '@' expression
                 {
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
-	;
+        ;
 
 struct_elem_list:
 	  %empty
@@ -570,15 +585,16 @@ struct_elem_type:
  */
 
 /*
-compstmt:
+comp_stmt:
 	  '{' '}'
           	{
                   $$ = pkl_ast_make_compound_stmt (NULL);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | '{' stmt_list '}'
         	{
-                  $$ = pkl_ast_make_compound_stmt ($2);
-
+                  $$ = pkl_ast_make_compound_stmt ($2); / * XXX Reverse $2? * /
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
@@ -589,8 +605,8 @@ stmt_list:
 	;
 
 stmt:
-	  compstmt
-        | IDENTIFIER '=' expression ';'
+	  comp_stmt
+        | lvalue '=' expression ';'
           	{
                   $$ = pkl_ast_make_ass_stmt ($1, $3);
                   PKL_AST_LOC ($$) = @$;
@@ -611,6 +627,16 @@ stmt:
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
+
+/ * lvalue:
+           IDENTIFIER
+         | array_ref
+         | struct_ref
+         | mapping
+         ;
+
+     Move those to their own non-terminal so we can use them in both
+     primary and here. * /
 */
           
 /*
@@ -627,7 +653,7 @@ declaration:
 
 function_specifier:
           '(' function_arg_list ')' comp_stmt
-        | '(' function_arg_list ')' ':' type_specifier comp_stmt
+        | '(' function_arg_list ')' ':' 'type_specifier comp_stmt
         ;
 */
 
