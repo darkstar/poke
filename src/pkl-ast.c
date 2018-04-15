@@ -731,6 +731,41 @@ pkl_ast_make_map (pkl_ast ast,
   return map;
 }
 
+/* Build and return an AST node for a function call.  */
+
+pkl_ast_node
+pkl_ast_make_funcall (pkl_ast ast,
+                      pkl_ast_node function, pkl_ast_node args)
+{
+  pkl_ast_node funcall = pkl_ast_make_node (ast,
+                                            PKL_AST_FUNCALL);
+
+  assert (function);
+
+  PKL_AST_FUNCALL_FUNCTION (funcall) = ASTREF (function);
+  if (args)
+    PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (args);
+  return funcall;
+}
+
+/* Build and return an AST node for an actual argument of a function
+   call.  */
+
+pkl_ast_node
+pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node identifier,
+                          pkl_ast_node type)
+{
+  pkl_ast_node funcall_arg = pkl_ast_make_node (ast,
+                                                PKL_AST_FUNCALL_ARG);
+
+  assert (identifier && type);
+
+  PKL_AST_FUNCALL_ARG_IDENTIFIER (funcall_arg) = ASTREF (identifier);
+  PKL_AST_FUNCALL_ARG_TYPE (funcall_arg) = ASTREF (type);
+
+  return funcall_arg;
+}
+
 /* Build and return an AST node for a compound statement.  */
 
 pkl_ast_node
@@ -982,6 +1017,23 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_MAP_TYPE (ast));
       pkl_ast_node_free (PKL_AST_MAP_OFFSET (ast));
+      break;
+
+    case PKL_AST_FUNCALL:
+
+      pkl_ast_node_free (PKL_AST_FUNCALL_FUNCTION (ast));
+      for (t = PKL_AST_FUNCALL_ARGS (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
+      
+      break;
+
+    case PKL_AST_FUNCALL_ARG:
+
+      pkl_ast_node_free (PKL_AST_FUNCALL_ARG_IDENTIFIER (ast));
+      pkl_ast_node_free (PKL_AST_FUNCALL_ARG_TYPE (ast));
       break;
 
     case PKL_AST_COMP_STMT:
@@ -1607,6 +1659,22 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (map_type, MAP_TYPE);
       PRINT_AST_SUBAST (offset, MAP_OFFSET);
+      break;
+
+    case PKL_AST_FUNCALL:
+      IPRINTF ("FUNCALL::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (function, FUNCALL_FUNCTION);
+      IPRINTF ("args:\n");
+      PRINT_AST_SUBAST_CHAIN (FUNCALL_ARGS);
+      break;
+
+    case PKL_AST_FUNCALL_ARG:
+      IPRINTF ("FUNCALL_ARG::\n");
+
+      PRINT_AST_SUBAST (identifier, FUNCALL_ARG_IDENTIFIER);
+      PRINT_AST_SUBAST (type, FUNCALL_ARG_TYPE);
       break;
 
     case PKL_AST_COMP_STMT:

@@ -50,6 +50,8 @@ enum pkl_ast_code
   PKL_AST_OFFSET,
   PKL_AST_CAST,
   PKL_AST_MAP,
+  PKL_AST_FUNCALL,
+  PKL_AST_FUNCALL_ARG,
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
@@ -742,6 +744,47 @@ pkl_ast_node pkl_ast_make_map (pkl_ast ast,
                                pkl_ast_node type,
                                pkl_ast_node offset);
 
+/* PKL_AST_FUNCALL nodes represent the invocation of a function.
+
+   FUNCTION is the function being invoked.
+   ARGS is a chain of PKL_AST_FUNCALL_ARG nodes.  */
+
+#define PKL_AST_FUNCALL_ARGS(AST) ((AST)->funcall.args)
+#define PKL_AST_FUNCALL_FUNCTION(AST) ((AST)->funcall.function)
+
+struct pkl_ast_funcall
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *function;
+  union pkl_ast_node *args;
+};
+
+pkl_ast_node pkl_ast_make_funcall (pkl_ast ast,
+                                   pkl_ast_node function,
+                                   pkl_ast_node args);
+
+/* PKL_AST_FUNCALL_ARG nodes represent actual arguments in function
+   calls.
+
+   IDENTIFIER is the name of the argument.
+   TYPE is the type of the argument.  */
+
+#define PKL_AST_FUNCALL_ARG_IDENTIFIER(AST) ((AST)->funcall_arg.identifier)
+#define PKL_AST_FUNCALL_ARG_TYPE(AST) ((AST)->funcall_arg.type)
+
+struct pkl_ast_funcall_arg
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *identifier;
+  union pkl_ast_node *type;
+};
+
+pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast,
+                                       pkl_ast_node identifier,
+                                       pkl_ast_node type);
+
 /* PKL_AST_COMPOUND_STMT nodes represent compound statements in the
    language.
 
@@ -855,6 +898,8 @@ union pkl_ast_node
   struct pkl_ast_offset offset;
   struct pkl_ast_cast cast;
   struct pkl_ast_map map;
+  struct pkl_ast_funcall funcall;
+  struct pkl_ast_funcall_arg funcall_arg;
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;

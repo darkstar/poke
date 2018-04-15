@@ -437,7 +437,8 @@ mapping:
 funcall:
 	  primary '(' funcall_arg_list ')'
           	{
-                  $$ = pkl_ast_make_funcall ($1, $3);
+                  $$ = pkl_ast_make_funcall (pkl_parser->ast,
+                                             $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
