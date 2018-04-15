@@ -55,10 +55,13 @@ enum pkl_ast_code
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
-  /* Declarations.  */
-  PKL_AST_DECL,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
+  /* Functions.  */
+  PKL_AST_FUNC, /* XXX */
+  PKL_AST_FUNC_ARG, /* XXX */
+  /* Declarations.  */
+  PKL_AST_DECL, /* XXX finish */
   /* Statements.  */
   PKL_AST_COMP_STMT,
   PKL_AST_ASS_STMT,
@@ -656,7 +659,7 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    depends on what is being declared:
    - An expression node for a variable.
    - A PKL_AST_TYPE for a type.
-   - A PKL_AST_FUNCTION for a function.   */
+   - A PKL_AST_FUNC for a function.   */
 
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
