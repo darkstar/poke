@@ -383,7 +383,6 @@ primary:
           	{
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
-                  PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
                 }
 	| INTEGER
                 {
