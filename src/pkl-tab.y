@@ -522,6 +522,10 @@ array_initializer:
                 }
         ;
 
+/*
+ * Types.
+ */
+
 type_specifier:
 	  TYPENAME
                 {
@@ -570,7 +574,6 @@ type_specifier:
                 }
         | struct_type_specifier
         ;
-
 
 struct_type_specifier:
 	  STRUCT '{' '}'
