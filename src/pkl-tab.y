@@ -592,7 +592,7 @@ comp_stmt:
                 }
         | '{' stmt_list '}'
         	{
-                  $$ = pkl_ast_make_compound_stmt ($2); / * XXX Reverse $2? * /
+                  $$ = pkl_ast_make_compound_stmt (pkl_ast_reverse ($2));
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
