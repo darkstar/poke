@@ -649,12 +649,14 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    NAME is PKL_AST_IDENTIFIER node containing the name in the
    association.
 
-   TYPE is the type of the entity referred by the name.
+   TYPE is the type of the entity referred by the name.  For deftypes,
+   this is NULL.
 
-   INITIAL is the initial value of the entity, if any.  The initial
-   value is optional for variables and constants if an explicit type
-   was used in the declaration.  Initial values are mandatory for
-   functions and type declarations.  */
+   INITIAL is the initial value of the entity.  The kind of node
+   depends on what is being declared:
+   - An expression node for a variable.
+   - A PKL_AST_TYPE for a type.
+   - A PKL_AST_FUNCTION for a function.   */
 
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
