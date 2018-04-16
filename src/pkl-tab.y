@@ -153,10 +153,10 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <ast> function_specifier function_arg_list function_arg
 %type <ast> comp_stmt stmt_decl_list stmt
 
-/* The following two tokens are used in order to have two parsers: a
-   parser for expressions and a parser for full poke programs.  This
-   trick is explained in the Bison Manual in the "Multiple
-   start-symbols" section.  */
+/* The following two tokens are used in order to support several start
+   rules: one is for parsing an expression and the other for parsing a
+   full poke programs.  This trick is explained in the Bison Manual in
+   the "Multiple start-symbols" section.  */
 
 %token START_EXP START_PROGRAM;
 
