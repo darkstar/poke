@@ -63,26 +63,101 @@ pkl_free (pkl_compiler compiler)
   free (compiler);
 }
 
+static pvm_program
+rest_of_compilation (pkl_compiler compiler,
+                     pkl_ast ast)
+{
+  struct pkl_gen_payload gen_payload = { NULL, 0 };
+  
+  struct pkl_anal_payload anal1_payload = { 0 };
+  struct pkl_anal_payload anal2_payload = { 0 };
+  struct pkl_anal_payload analf_payload = { 0 };
+  
+  struct pkl_trans_payload trans1_payload = { 0 };
+  struct pkl_trans_payload trans2_payload = { 0 };
+  struct pkl_trans_payload trans3_payload = { 0 };
+  
+  struct pkl_typify_payload typify1_payload = { 0 };
+  struct pkl_typify_payload typify2_payload = { 0 };
+  
+  struct pkl_phase *frontend_phases[]
+    = { &pkl_phase_trans1,
+        &pkl_phase_anal1,
+        &pkl_phase_typify1,
+        &pkl_phase_promo,
+        &pkl_phase_trans2,
+        /*            &pkl_phase_fold,*/
+        &pkl_phase_typify2,
+        &pkl_phase_trans3,
+        &pkl_phase_anal2,
+        NULL,
+  };
+  
+  void *frontend_payloads[]
+    = { &trans1_payload,
+        &anal1_payload,
+        &typify1_payload,
+        NULL, /* promo */
+        &trans2_payload,
+        /*  NULL,*/ /* fold */
+        &typify2_payload,
+        &trans3_payload,
+        &anal2_payload,
+  };
+
+  /* Note that gen does subpasses, so no transformation phases should
+     be invoked in the bakend pass.  */
+  struct pkl_phase *backend_phases[]
+    = { &pkl_phase_analf,
+        &pkl_phase_gen,
+        NULL
+  };
+
+  void *backend_payloads[]
+    = { &analf_payload,
+        &gen_payload
+  };
+
+  /* XXX */
+  /* pkl_ast_print (stdout, ast->ast); */
+      
+  if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
+    goto error;
+    
+  if (trans1_payload.errors > 0
+      || trans2_payload.errors > 0
+      || trans3_payload.errors > 0
+      || anal1_payload.errors > 0
+      || anal2_payload.errors > 0
+      || typify1_payload.errors > 0
+      || typify2_payload.errors > 0)
+    goto error;
+
+  /* XXX */
+  /* pkl_ast_print (stdout, ast->ast); */
+  
+  if (!pkl_do_pass (ast, backend_phases, backend_payloads))
+    goto error;
+  
+  if (analf_payload.errors > 0)
+    goto error;
+
+  pkl_ast_free (ast);
+  return gen_payload.program;
+
+ error:
+  pkl_ast_free (ast);
+  return NULL;
+}
+
 
 pvm_program
 pkl_compile_expression (pkl_compiler compiler,
                         char *buffer, char **end)
 {
   pkl_ast ast = NULL;
+  pvm_program program;
   int ret;
-  struct pkl_gen_payload gen_payload = { NULL, 0 };
-
-  struct pkl_anal_payload anal1_payload = { 0 };
-  struct pkl_anal_payload anal2_payload = { 0 };
-  struct pkl_anal_payload analf_payload = { 0 };
-
-  struct pkl_trans_payload trans1_payload = { 0 };
-  struct pkl_trans_payload trans2_payload = { 0 };
-  struct pkl_trans_payload trans3_payload = { 0 };
-
-  struct pkl_typify_payload typify1_payload = { 0 };
-  struct pkl_typify_payload typify2_payload = { 0 };
-
 
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&ast, PKL_PARSE_EXPRESSION, buffer, end);
@@ -93,79 +168,16 @@ pkl_compile_expression (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  {
-    struct pkl_phase *frontend_phases[]
-      = { &pkl_phase_trans1,
-          &pkl_phase_anal1,
-          &pkl_phase_typify1,
-          &pkl_phase_promo,
-          &pkl_phase_trans2,
-          /*            &pkl_phase_fold,*/
-          &pkl_phase_typify2,
-          &pkl_phase_trans3,
-          &pkl_phase_anal2,
-          NULL,
-        };
+  program = rest_of_compilation (compiler, ast);
+  if (program == NULL)
+    goto error;
+  
+  pvm_specialize_program (program);
 
-    void *frontend_payloads[]
-      = { &trans1_payload,
-          &anal1_payload,
-          &typify1_payload,
-          NULL, /* promo */
-          &trans2_payload,
-          /*  NULL,*/ /* fold */
-          &typify2_payload,
-          &trans3_payload,
-          &anal2_payload,
-        };
-
-    /* Note that gen does subpasses, so no transformation phases
-       should be invoked in the bakend pass.  */
-    struct pkl_phase *backend_phases[]
-      = { &pkl_phase_analf,
-          &pkl_phase_gen,
-          NULL
-        };
-
-    void *backend_payloads[]
-      = { &analf_payload,
-          &gen_payload
-        };
-
-    /* XXX */
-    /* pkl_ast_print (stdout, ast->ast); */
-      
-    if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
-      goto error;
-    
-    if (trans1_payload.errors > 0
-        || trans2_payload.errors > 0
-        || trans3_payload.errors > 0
-        || anal1_payload.errors > 0
-        || anal2_payload.errors > 0
-        || typify1_payload.errors > 0
-        || typify2_payload.errors > 0)
-      goto error;
-
-    /* XXX */
-    /* pkl_ast_print (stdout, ast->ast); */
-      
-    if (!pkl_do_pass (ast, backend_phases, backend_payloads))
-      goto error;
-
-    if (analf_payload.errors > 0)
-      goto error;
-  }
-
-  pkl_ast_free (ast);
-
-  pvm_specialize_program (gen_payload.program);
-
-  return gen_payload.program;
+  return program;
 
  error:
-  pkl_ast_free (ast);
-  pvm_destroy_program (gen_payload.program);
+  pvm_destroy_program (program);
   return NULL;
 }
 
