@@ -219,16 +219,10 @@ expression:
                   PKL_AST_LOC ($$).last_line = @3.last_line;
                   PKL_AST_LOC ($$).last_column = @3.last_column;
                 }
-        | SIZEOF expression %prec UNARY
+        | SIZEOF '(' expression ')' %prec UNARY
         	{
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast,
-                                               PKL_AST_OP_SIZEOF, $2);
-                  PKL_AST_LOC ($$) = @1;
-                }
-        | SIZEOF type_specifier %prec UNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF,
-                                               $2);
+                                               PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
                 }
 	| SIZEOF '(' type_specifier ')' %prec HYPERUNARY
