@@ -200,12 +200,6 @@ program_elem_list:
 
 program_elem:
 	  declaration
-          	{
-                  /* XXX: add the declaration to the top-level
-                     compile-time environment.  */
-
-                  $$ = $1;
-                }
         ;
 
 /*
