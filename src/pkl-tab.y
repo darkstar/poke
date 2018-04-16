@@ -151,7 +151,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
-%type <ast> comp_stmt stmt_list stmt
+%type <ast> comp_stmt stmt_decl_list stmt
 
 /* The following two tokens are used in order to have two parsers: a
    parser for expressions and a parser for full poke programs.  This
@@ -676,16 +676,19 @@ declaration:
  */
 
 comp_stmt:
-          '{' stmt_list '}'
+          '{' stmt_decl_list '}'
         	{
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
 
-stmt_list:
+stmt_decl_list:
 	  stmt
-        | stmt_list stmt
+        | stmt_decl_list stmt
+          	{ $$ = pkl_ast_chainon ($1, $2); }
+        | declaration
+        | stmt_decl_list declaration
           	{ $$ = pkl_ast_chainon ($1, $2); }
 	;
 
