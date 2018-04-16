@@ -17,11 +17,15 @@
  */
 
 #include <config.h>
+
 #include <gettext.h>
 #define _(str) gettext (str)
 #include <stdarg.h>
 #include <tmpdir.h>
 #include <tempname.h>
+#include <stdlib.h>
+#include <string.h>
+#include <xalloc.h>
 
 #include "pk-term.h"
 
@@ -36,9 +40,33 @@
 #include "pkl-promo.h"
 #include "pkl-fold.h"
 
-int
-pkl_compile_buffer (pvm_program *prog,
-                    int what, char *buffer, char **end)
+struct pkl_compiler
+{
+  /* XXX: put the compiler environment here.  */
+  /* XXX: put a link to the run-time top-level closure here.  */
+
+};
+
+pkl_compiler
+pkl_new ()
+{
+  pkl_compiler compiler
+    = xmalloc (sizeof (struct pkl_compiler));
+
+  memset (compiler, 0, sizeof (struct pkl_compiler));
+  return compiler;
+}
+
+void
+pkl_free (pkl_compiler compiler)
+{
+  free (compiler);
+}
+
+
+pvm_program
+pkl_compile_expression (pkl_compiler compiler,
+                        char *buffer, char **end)
 {
   pkl_ast ast = NULL;
   int ret;
@@ -57,7 +85,7 @@ pkl_compile_buffer (pvm_program *prog,
 
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&ast, what, buffer, end);
+  ret = pkl_parse_buffer (&ast, PKL_PARSE_EXPRESSION, buffer, end);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -132,16 +160,16 @@ pkl_compile_buffer (pvm_program *prog,
   pkl_ast_free (ast);
 
   pvm_specialize_program (gen_payload.program);
-  *prog = gen_payload.program;
 
-  return 1;
+  return gen_payload.program;
 
  error:
   pkl_ast_free (ast);
   pvm_destroy_program (gen_payload.program);
-  return 0;
+  return NULL;
 }
 
+#if 0
 int
 pkl_compile_file (pvm_program *prog,
                   FILE *fd,
@@ -170,6 +198,7 @@ pkl_compile_file (pvm_program *prog,
   pkl_ast_free (ast);
   return 0;
 }
+#endif
 
 void
 pkl_error (pkl_ast ast,

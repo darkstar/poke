@@ -62,22 +62,28 @@
    longer needed, in order to do some finalization tasks and free
    resources.  */
 
-/* Compile a poke expression, or a program, from a NULL-terminated
-   string BUFFER.  WHAT determines the entity to compile.  Return 0 in
-   case of a compilation error.  Return 1 otherwise.  If not NULL, END
-   is set to the first character in BUFFER that is not part of the
-   program/expression.  */
+typedef struct pkl_compiler *pkl_compiler; /* This data structure is
+                                              defined in pkl.c */
 
-#define PKL_PROGRAM 0
-#define PKL_EXPRESSION 1
+/* Initialization and finalization functions.  */
 
-int pkl_compile_buffer (pvm_program *prog, int what, char *buffer,
-                        char **end);
+pkl_compiler pkl_new (void);
+void pkl_free (pkl_compiler compiler);
 
-/* Compile a poke program from a file.  Return 0 in case of a
-   compilation error.  Return 1 otherwise.  */
+/* Compile a poke program from the given file descriptor FD, with file
+   name FNAME.  Return 0 in case of a compilation error.  Return 1
+   otherwise.  */
 
-int pkl_compile_file (pvm_program *prog, FILE *fd, const char *fname);
+int pkl_compile_file (pkl_compiler compiler,
+                      FILE *fd, const char *fname);
+
+/* Compile a poke expression from a NULL-terminated string BUFFER.
+   Return NULL in case of a compilation error.  Return 1 otherwise.
+   If not NULL, END is set to the first character in BUFFER that is
+   not part of the expression.  */
+
+pvm_program pkl_compile_expression (pkl_compiler compiler,
+                                    char *buffer, char **end);
 
 /* Diagnostic routines.  */
 

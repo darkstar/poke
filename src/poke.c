@@ -33,6 +33,7 @@
 
 #include "pk-io.h"
 #include "pk-cmd.h"
+#include "pkl.h"
 #include "pvm.h"
 #include "poke.h"
 
@@ -52,6 +53,9 @@ int poke_quiet_p;
 
 int poke_exit_p;
 int poke_exit_code;
+
+/* The following global is the poke compiler.  */
+pkl_compiler poke_compiler;
 
 /* Command line options management.  */
 
@@ -229,6 +233,7 @@ main (int argc, char *argv[])
   poke_interactive_p = isatty (fileno (stdin));
 
   /* Initialization.  */
+  poke_compiler = pkl_new ();
   pvm_init ();
 
   /* Enter the REPL.  */
@@ -239,6 +244,7 @@ main (int argc, char *argv[])
   pk_io_shutdown ();
   pk_cmd_shutdown ();
   pvm_shutdown ();
+  pkl_free (poke_compiler);
     
   return poke_exit_code;
 }

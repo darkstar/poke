@@ -33,7 +33,7 @@
 #define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
-#include "pkl.h" /* For pkl_compile_buffer  */
+#include "pkl.h" /* For pkl_compile_expression */
 #include "pkl-parser.h"
 #include "pk-io.h"
 #include "pk-cmd.h"
@@ -348,14 +348,12 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                   {
                     /* Compile a poke expression.  */
                     pvm_program prog;
-                    int ret;
                     char *end;
 
-                    ret = pkl_compile_buffer (&prog,
-                                              PKL_EXPRESSION,
-                                              p, &end);
+                    prog = pkl_compile_expression (poke_compiler,
+                                                   p, &end);
                     
-                    if (ret != 0)
+                    if (prog != NULL)
                       {
                         argv[argc].val.exp = prog;
                         argv[argc].type = PK_CMD_ARG_EXP;

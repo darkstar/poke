@@ -19,9 +19,12 @@
 #ifndef POKE_H
 #define POKE_H
 
+#include "pkl.h"
+
 extern int poke_interactive_p;
 extern int poke_exit_p;
 extern int poke_exit_code;
+extern pkl_compiler poke_compiler;
 
 void pk_print_version ();
 
