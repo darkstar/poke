@@ -45,6 +45,7 @@ extern struct pk_cmd peek_cmd; /* pk-peek.c  */
 extern struct pk_cmd poke_cmd; /* pk-poke.c  */
 extern struct pk_cmd file_cmd; /* pk-file.c  */
 extern struct pk_cmd close_cmd; /* pk-file.c */
+extern struct pk_cmd load_cmd; /* pk-file.c */
 extern struct pk_cmd info_cmd; /* pk-info.c  */
 extern struct pk_cmd exit_cmd; /* pk-misc.c  */
 extern struct pk_cmd version_cmd; /* pk-misc.c */
@@ -65,6 +66,7 @@ static struct pk_cmd *cmds[] =
     &version_cmd,
     &info_cmd,
     &close_cmd,
+    &load_cmd,
     &help_cmd,
     &vm_cmd,
     &print_cmd,

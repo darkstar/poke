@@ -160,9 +160,6 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     /* Note that the compiler emits it's own error messages.  */
     return 0;
 
-  if (poke_interactive_p)
-    printf (_("Loaded file `%s'\n"), filename);
-
   return 1;
 }
 

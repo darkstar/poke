@@ -178,7 +178,9 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
 
   fclose (fd);
   program = rest_of_compilation (compiler, ast);
-  assert (program == NULL);
+  /* XXX */  
+  pvm_print_program (stdout, program);
+  pvm_destroy_program (program);
 
   return 1;
 
