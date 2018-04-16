@@ -103,6 +103,20 @@ pkl_tab_error (YYLTYPE *llocp,
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
 
+%token <opcode> MULA
+%token <opcode> DIVA
+%token <opcode> MODA
+%token <opcode> ADDA
+%token <opcode> SUBA
+%token <opcode> SLA
+%token <opcode> SRA
+%token <opcode> BANDA
+%token <opcode> XORA
+%token <opcode> IORA
+
+%token MSB LSB
+%token SIGNED UNSIGNED
+
 /* Operator tokens and their precedences, in ascending order.  */
 
 %right '?' ':'
@@ -120,20 +134,6 @@ pkl_tab_error (YYLTYPE *llocp,
 %left '@'
 %left HYPERUNARY
 %left '.'
-
-%token <opcode> MULA
-%token <opcode> DIVA
-%token <opcode> MODA
-%token <opcode> ADDA
-%token <opcode> SUBA
-%token <opcode> SLA
-%token <opcode> SRA
-%token <opcode> BANDA
-%token <opcode> XORA
-%token <opcode> IORA
-
-%token MSB LSB
-%token SIGNED UNSIGNED
 
 %type <opcode> unary_operator
 
