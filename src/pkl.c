@@ -150,6 +150,33 @@ rest_of_compilation (pkl_compiler compiler,
   return NULL;
 }
 
+int
+pkl_compile_file (pkl_compiler compiler,
+                  FILE *fd, const char *fname)
+{
+  int ret;
+  pkl_ast ast = NULL;
+  pvm_program program;
+
+  ret = pkl_parse_file (&ast, fd, fname);
+  if (ret == 1)
+    /* Parse error.  */
+    goto error;
+  else if (ret == 2)
+    {
+      /* Memory exhaustion.  */
+      printf (_("out of memory\n"));
+    }
+
+  program = rest_of_compilation (compiler, ast);
+  assert (program == NULL);
+
+  return 1;
+
+ error:
+  pkl_ast_free (ast);
+  return 0;
+}
 
 pvm_program
 pkl_compile_expression (pkl_compiler compiler,
@@ -180,37 +207,6 @@ pkl_compile_expression (pkl_compiler compiler,
   pvm_destroy_program (program);
   return NULL;
 }
-
-#if 0
-int
-pkl_compile_file (pvm_program *prog,
-                  FILE *fd,
-                  const char *fname)
-{
-  int ret;
-  pkl_ast ast = NULL;
-  pvm_program p = NULL; /* This is to avoid a compiler warning.  */
-
-  ret = pkl_parse_file (&ast, fd, fname);
-  if (ret == 1)
-    /* Parse error.  */
-    goto error;
-  else if (ret == 2)
-    {
-      /* Memory exhaustion.  */
-      printf (_("out of memory\n"));
-    }
-
-  pvm_specialize_program (p);
-  *prog = p;
-
-  return 1;
-
- error:
-  pkl_ast_free (ast);
-  return 0;
-}
-#endif
 
 void
 pkl_error (pkl_ast ast,
