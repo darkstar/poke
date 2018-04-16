@@ -295,11 +295,12 @@ pkl_error (pkl_ast ast,
                 && cur_line <= loc.last_line)
               {
                 /* Print until newline or end of string.  */
-                while (c != EOF && c != '\0' && c != '\n')
+                do
                   {
-                    fputc (c, stderr);
                     c = fgetc (fd);
+                    fputc (c, stderr);
                   }
+                while (c != EOF && c != '\0' && c != '\n');
                 break;
               }
           }
