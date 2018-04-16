@@ -538,7 +538,7 @@ function_arg_list:
 	  %empty
 		{ $$ = NULL; }
 	| function_arg
-        | function_arg_list "," function_arg
+        | function_arg_list ',' function_arg
           	{
                   $$ = pkl_ast_chainon ($1, $3);
                 }
