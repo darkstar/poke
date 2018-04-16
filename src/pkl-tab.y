@@ -137,7 +137,7 @@ pkl_tab_error (YYLTYPE *llocp,
 
 %type <opcode> unary_operator
 
-%type <ast> program program_elem_list program_elem
+%type <ast> start program program_elem_list program_elem
 %type <ast> expression primary struct_ref array_ref mapping
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
@@ -148,48 +148,39 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <ast> function_specifier function_arg_list function_arg
 %type <ast> comp_stmt stmt_list stmt lvalue
 
-%start program
+/* The following two tokens are used in order to have two parsers: a
+   parser for expressions and a parser for full poke programs.  */
+%token START_EXP START_PROGRAM;
+
+%start start
 
 %% /* The grammar follows.  */
+
+start:
+	  START_EXP expression
+          	{
+                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
+                    /* Expressions are not valid top-level structures
+                       in full poke programs.  */
+                    YYERROR;
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+        | START_PROGRAM program
+        	{
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+        ;
 
 program:
 	  %empty
 		{
-                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
-                    /* We should parse exactly one expression.  */
-                    YYERROR;
-                  $$ = pkl_ast_make_program (pkl_parser->ast, NULL);
-                  PKL_AST_LOC ($$) = @$;
-                  pkl_parser->ast->ast = ASTREF ($$);
+                  $$ = NULL;
                 }
 	| program_elem_list
-          	{
-                  $$ = pkl_ast_make_program (pkl_parser->ast,$1);
-                  PKL_AST_LOC ($$) = @$;
-                  pkl_parser->ast->ast = ASTREF ($$);
-                }
-        | expression
-        	{
-                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
-                    /* Expressions are not valid top-level structures
-                       in full poke programs.  */
-                    YYERROR;
-                  $$ = pkl_ast_make_program (pkl_parser->ast, $1);
-                  PKL_AST_LOC ($$) = @$;
-                  pkl_parser->ast->ast = ASTREF ($$);
-                  YYACCEPT;
-                  }
-	| expression ','
-        	{
-                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
-                    /* Expressions are not valid top-level structures
-                       in full poke programs.  */
-                    YYERROR;
-                  $$ = pkl_ast_make_program (pkl_parser->ast, $1);
-                  PKL_AST_LOC ($$) = @$;
-                  pkl_parser->ast->ast = ASTREF ($$);
-                  YYACCEPT;
-                }
         ;
 
 program_elem_list:
