@@ -159,13 +159,16 @@ pkl_tab_error (YYLTYPE *llocp,
 start:
 	  START_EXP expression
           	{
-                  if (pkl_parser->what != PKL_PARSE_EXPRESSION)
-                    /* Expressions are not valid top-level structures
-                       in full poke programs.  */
-                    YYERROR;
                   $$ = pkl_ast_make_program (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
+                }
+        | START_EXP expression ','
+          	{
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                  YYACCEPT;
                 }
         | START_PROGRAM program
         	{
@@ -193,11 +196,6 @@ program_elem_list:
 
 program_elem:
 	| declaration
-          	{
-                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
-                    YYERROR;
-                  $$ = $1;
-                  }
         ;
 
 /*

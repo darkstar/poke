@@ -96,6 +96,17 @@ D [0-9]
 
 %%
 
+%{
+  /* Handle the support for multiple parsers.  */
+
+  if (yyextra->start_token)
+  {
+    int t = yyextra->start_token;
+    yyextra->start_token = 0;
+    return t;
+  }
+%}
+
 {NEWLINE}	{ /* Ignore newlines.  */  }
 {BLANK}		{ /* Ignore whitespace.  */ }
 

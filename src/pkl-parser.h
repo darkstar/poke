@@ -35,7 +35,7 @@ struct pkl_parser
   pkl_ast ast;
   int interactive;
   char *filename;
-  int what; /* What to parse.  */
+  int start_token;
   size_t nchars;
 };
 
@@ -45,7 +45,7 @@ struct pkl_parser
 #define PKL_PARSE_EXPRESSION 1
 
 int pkl_parse_cmdline (pkl_ast *ast);
-int pkl_parse_file (pkl_ast *ast, int what, FILE *fd, const char *fname);
+int pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname);
 int pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end);
 
 

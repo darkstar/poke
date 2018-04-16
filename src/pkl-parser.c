@@ -92,14 +92,14 @@ pkl_parse_cmdline (pkl_ast *ast)
    syntax error and 2 if there was a memory exhaustion.  */
 
 int
-pkl_parse_file (pkl_ast *ast, int what, FILE *fd, const char *fname)
+pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
 {
   int ret;
   struct pkl_parser *parser;
 
   parser = pkl_parser_init ();
   parser->filename = xstrdup (fname);
-  parser->what = what;
+  parser->start_token = START_PROGRAM;
 
   pkl_tab_set_in (fd, parser->scanner);
   ret = pkl_tab_parse (parser);
@@ -109,10 +109,11 @@ pkl_parse_file (pkl_ast *ast, int what, FILE *fd, const char *fname)
   return ret;
 }
 
-/* Parse the contents of BUFFER as a PKL program.  If END is not NULL,
-   set it to the first character after the parsed string.  Return 0 if
-   the parsing was successful, 1 if there was a syntax error and 2 if
-   there was a memory exhaustion.  */
+/* Parse the contents of BUFFER as a PKL program, or an expression
+   depending on the value of WHAT.  If END is not NULL, set it to the
+   first character after the parsed string.  Return 0 if the parsing
+   was successful, 1 if there was a syntax error and 2 if there was a
+   memory exhaustion.  */
 
 int
 pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
@@ -122,8 +123,14 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
   int ret;
 
   parser = pkl_parser_init ();
-  parser->what = what;
   parser->interactive = 1;
+
+  if (what == PKL_PARSE_PROGRAM)
+    parser->start_token = START_PROGRAM;
+  else if (what == PKL_PARSE_EXPRESSION)
+    parser->start_token = START_EXP;
+  else
+    assert (0);
 
   yybuffer = pkl_tab__scan_string(buffer, parser->scanner);
 

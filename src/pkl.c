@@ -151,7 +151,7 @@ pkl_compile_file (pvm_program *prog,
   pkl_ast ast = NULL;
   pvm_program p = NULL; /* This is to avoid a compiler warning.  */
 
-  ret = pkl_parse_file (&ast, PKL_PARSE_PROGRAM, fd, fname);
+  ret = pkl_parse_file (&ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
