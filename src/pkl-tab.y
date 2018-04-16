@@ -112,7 +112,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %left '^'
 %left '&'
 %left EQ NE
-%left LE GE
+%left LE GE '<' '>'
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
