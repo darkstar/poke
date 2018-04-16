@@ -200,6 +200,12 @@ program_elem_list:
 
 program_elem:
 	  declaration
+          	{
+                  /* XXX: add the declaration to the top-level
+                     compile-time environment.  */
+
+                  $$ = $1;
+                }
         ;
 
 /*
@@ -649,9 +655,24 @@ struct_elem_type:
 
 declaration:
         DEFUN IDENTIFIER '=' function_specifier ';'
+        	{
+                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+                }
 /*        | DEFSET IDENTIFIER '=' set_specifier ';' */
         | DEFTYPE IDENTIFIER '=' type_specifier ';'
+        	{
+                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+                }
         | DEFVAR IDENTIFIER '=' expression ';'
+        	{
+                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 /*

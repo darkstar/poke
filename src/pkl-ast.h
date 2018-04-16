@@ -61,7 +61,7 @@ enum pkl_ast_code
   PKL_AST_FUNC,
   PKL_AST_FUNC_ARG,
   /* Declarations.  */
-  PKL_AST_DECL, /* XXX finish */
+  PKL_AST_DECL,
   /* Statements.  */
   PKL_AST_COMP_STMT,
   PKL_AST_NULL_STMT,
@@ -705,9 +705,6 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    NAME is PKL_AST_IDENTIFIER node containing the name in the
    association.
 
-   TYPE is the type of the entity referred by the name.  For deftypes,
-   this is NULL.
-
    INITIAL is the initial value of the entity.  The kind of node
    depends on what is being declared:
    - An expression node for a variable.
@@ -723,12 +720,11 @@ struct pkl_ast_decl
   struct pkl_ast_common common;
 
   union pkl_ast_node *name;
-  union pkl_ast_node *type; /* XXX: we don't need this.  The type
-                               depends on the kind of node in INITIAL,
-                               and can be always be inferred from
-                               it.  */
   union pkl_ast_node *initial;
 };
+
+pkl_ast_node pkl_ast_make_decl (pkl_ast ast,
+                                pkl_ast_node name, pkl_ast_node initial);
 
 /* PKL_AST_OFFSET nodes represent poke object constructions.
 

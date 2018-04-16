@@ -676,6 +676,22 @@ pkl_ast_make_struct_elem (pkl_ast ast,
   return elem;
 }
 
+/* Build and return an AST node for a declaration.  */
+
+pkl_ast_node
+pkl_ast_make_decl (pkl_ast ast, pkl_ast_node name,
+                   pkl_ast_node initial)
+{
+  pkl_ast_node decl = pkl_ast_make_node (ast, PKL_AST_DECL);
+
+  assert (name && initial);
+
+  PKL_AST_DECL_NAME (decl) = ASTREF (name);
+  PKL_AST_DECL_INITIAL (decl) = ASTREF (initial);
+
+  return decl;
+}
+
 /* Build and return an AST node for an offset construct.  */
 
 pkl_ast_node
@@ -1062,6 +1078,12 @@ pkl_ast_node_free (pkl_ast_node ast)
           pkl_ast_node_free (t);
         }
       
+      break;
+
+    case PKL_AST_DECL:
+
+      pkl_ast_node_free (PKL_AST_DECL_NAME (ast));
+      pkl_ast_node_free (PKL_AST_DECL_INITIAL (ast));
       break;
 
     case PKL_AST_OFFSET:
@@ -1715,6 +1737,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (struct, STRUCT_REF_STRUCT);
       PRINT_AST_SUBAST (identifier, STRUCT_REF_IDENTIFIER);
+      break;
+
+    case PKL_AST_DECL:
+      IPRINTF ("DECL::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (name, DECL_NAME);
+      PRINT_AST_SUBAST (initial, DECL_INITIAL);
       break;
 
     case PKL_AST_OFFSET:
