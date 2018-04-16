@@ -172,7 +172,8 @@ start:
                 }
         | START_PROGRAM program
         	{
-                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  $$ = pkl_ast_make_program (pkl_parser->ast,
+                                             pkl_ast_reverse ($2));
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
@@ -195,7 +196,7 @@ program_elem_list:
 	;
 
 program_elem:
-	| declaration
+	  declaration
         ;
 
 /*
