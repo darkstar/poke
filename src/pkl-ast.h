@@ -64,6 +64,7 @@ enum pkl_ast_code
   PKL_AST_DECL, /* XXX finish */
   /* Statements.  */
   PKL_AST_COMP_STMT,
+  PKL_AST_NULL_STMT,
   PKL_AST_ASS_STMT,
   PKL_AST_IF_STMT,
   PKL_AST_RETURN_STMT,
@@ -860,6 +861,16 @@ struct pkl_ast_comp_stmt
 };
 
 pkl_ast_node pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts);
+
+/* PKL_AST_NULL_STMT nodes represent the "null statement".  It can
+   appear anywhere an statement is expected, but it has no effect.  */
+
+struct pkl_ast_null_stmt
+{
+  struct pkl_ast_common common;
+};
+
+pkl_ast_node pkl_ast_make_null_stmt (pkl_ast ast);
 
 /* PKL_AST_ASS_STMT nodes represent assignment statements in the
    language.

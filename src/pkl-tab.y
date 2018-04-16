@@ -656,15 +656,7 @@ declaration:
  */
 
 comp_stmt:
-/* XXX: do not allow empty compound statement, require at least one
-   statement, but then we need a null statement.  */
-	  '{' '}'
-          	{
-                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
-                                               NULL);
-                  PKL_AST_LOC ($$) = @$;
-                }
-        | '{' stmt_list '}'
+          '{' stmt_list '}'
         	{
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
                                                pkl_ast_reverse ($2));
@@ -679,7 +671,12 @@ stmt_list:
 	;
 
 stmt:
-	  comp_stmt
+          comp_stmt
+        | ';'
+          	{
+                  $$ = pkl_ast_make_null_stmt (pkl_parser->ast);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | expression '=' expression ';'
           	{
                   $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,

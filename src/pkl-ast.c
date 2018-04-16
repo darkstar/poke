@@ -864,6 +864,16 @@ pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp)
   return return_stmt;
 }
 
+/* Build and return an AST node fora  "null statement".  */
+
+pkl_ast_node
+pkl_ast_make_null_stmt (pkl_ast ast)
+{
+  pkl_ast_node null_stmt = pkl_ast_make_node (ast,
+                                              PKL_AST_NULL_STMT);
+  return null_stmt;
+}
+
 /* Build and return an AST node for an "expression statement".  */
 
 pkl_ast_node
@@ -1120,6 +1130,9 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_EXP_STMT:
 
       pkl_ast_node_free (PKL_AST_EXP_STMT_EXP (ast));
+      break;
+
+    case PKL_AST_NULL_STMT:
       break;
 
     case PKL_AST_INTEGER:
@@ -1784,6 +1797,12 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (exp_stmt, EXP_STMT_EXP);
+      break;
+
+    case PKL_AST_NULL_STMT:
+      IPRINTF ("NULL_STMT::\n");
+      
+      PRINT_COMMON_FIELDS;
       break;
       
     default:
