@@ -58,8 +58,8 @@ enum pkl_ast_code
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
   /* Functions.  */
-  PKL_AST_FUNC, /* XXX */
-  PKL_AST_FUNC_ARG, /* XXX */
+  PKL_AST_FUNC,
+  PKL_AST_FUNC_ARG,
   /* Declarations.  */
   PKL_AST_DECL, /* XXX finish */
   /* Statements.  */
@@ -523,6 +523,27 @@ struct pkl_ast_func
 pkl_ast_node pkl_ast_make_func (pkl_ast ast,
                                 pkl_ast_node args, pkl_ast_node body);
 
+/* PKL_AST_FUNC_ARG nodes represent a formal argument in a function
+   definition.
+
+   TYPE is the type of the argument.
+   IDENTIFIER is the name of the argument.  */
+
+#define PKL_AST_FUNC_ARG_TYPE(AST) ((AST)->func_arg.type)
+#define PKL_AST_FUNC_ARG_IDENTIFIER(AST) ((AST)->func_arg.identifier)
+
+struct pkl_ast_func_arg
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *type;
+  union pkl_ast_node *identifier;
+};
+
+pkl_ast_node pkl_ast_make_func_arg (pkl_ast ast,
+                                    pkl_ast_node type,
+                                    pkl_ast_node identifier);
+
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
    BASE must point to a PKL_AST_ARRAY node.
@@ -938,6 +959,7 @@ union pkl_ast_node
   struct pkl_ast_enumerator enumerator;
   /* Functions.  */
   struct pkl_ast_func func;
+  struct pkl_ast_func_arg func_arg;
   /* Declarations.  */
   struct pkl_ast_decl decl;
   /* Statements.  */

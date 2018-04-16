@@ -216,6 +216,23 @@ pkl_ast_make_func (pkl_ast ast, pkl_ast_node args,
   return func;
 }
 
+/* Build and return an AST node for a function definition formal
+   argument.  */
+
+pkl_ast_node
+pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
+                       pkl_ast_node identifier)
+{
+  pkl_ast_node func_arg = pkl_ast_make_node (ast, PKL_AST_FUNC_ARG);
+
+  assert (type && identifier);
+
+  PKL_AST_FUNC_ARG_TYPE (func_arg) = ASTREF (type);
+  PKL_AST_FUNC_ARG_IDENTIFIER (func_arg) = ASTREF (identifier);
+
+  return func_arg;
+}
+
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
@@ -980,6 +997,12 @@ pkl_ast_node_free (pkl_ast_node ast)
               pkl_ast_node_free (t);
             }
       break;
+
+    case PKL_AST_FUNC_ARG:
+
+      pkl_ast_node_free (PKL_AST_FUNC_ARG_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_FUNC_ARG_IDENTIFIER (ast));
+      break;
       
     case PKL_AST_STRING:
 
@@ -1658,6 +1681,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST_CHAIN (FUNC_ARGS);
       PRINT_AST_SUBAST (body, FUNC_BODY);
+      break;
+
+    case PKL_AST_FUNC_ARG:
+      IPRINTF ("FUNC_ARG::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (type, FUNC_ARG_TYPE);
+      PRINT_AST_SUBAST (identifier, FUNC_ARG_IDENTIFIER);
       break;
       
     case PKL_AST_STRUCT_REF:
