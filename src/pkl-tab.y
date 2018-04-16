@@ -432,7 +432,7 @@ funcall_arg_list:
 	| funcall_arg
         | funcall_arg_list ',' funcall_arg
         	{
-                  $$ = pkl_ast_chainon ($3, $1);
+                  $$ = pkl_ast_chainon ($1, $3);
                 }
         ;
 
@@ -460,7 +460,8 @@ struct_elem_list:
 		{ $$ = NULL; }
         | struct_elem
         | struct_elem_list ',' struct_elem
-		{                  
+		{
+                  /* Note these are chained in reverse order!  */
                   $$ = pkl_ast_chainon ($3, $1);
                 }
         ;
