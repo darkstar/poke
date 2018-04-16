@@ -202,13 +202,15 @@ pkl_ast_make_unary_exp (pkl_ast ast,
 /* Build and return an AST node for a function definition.  */
 
 pkl_ast_node
-pkl_ast_make_func (pkl_ast ast, pkl_ast_node args,
-                   pkl_ast_node body)
+pkl_ast_make_func (pkl_ast ast, pkl_ast_node ret_type,
+                   pkl_ast_node args, pkl_ast_node body)
 {
   pkl_ast_node func = pkl_ast_make_node (ast, PKL_AST_FUNC);
 
   assert (body);
 
+  if (ret_type)
+    PKL_AST_FUNC_RET_TYPE (func) = ASTREF (ret_type);
   if (args)
     PKL_AST_FUNC_ARGS (func) = ASTREF (args);
   PKL_AST_FUNC_BODY (func) = ASTREF (body);
@@ -990,6 +992,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_FUNC:
 
+      pkl_ast_node_free (PKL_AST_FUNC_RET_TYPE (ast));
       pkl_ast_node_free (PKL_AST_FUNC_BODY (ast));
       for (t = PKL_AST_FUNC_ARGS (ast); t; t = n)
             {
@@ -1679,6 +1682,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("FUNC::\n");
 
       PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (ret_type, FUNC_RET_TYPE);
       PRINT_AST_SUBAST_CHAIN (FUNC_ARGS);
       PRINT_AST_SUBAST (body, FUNC_BODY);
       break;

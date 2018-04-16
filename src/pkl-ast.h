@@ -503,12 +503,17 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
 
 /* PKL_AST_FUNC nodes represent a function definition.
 
+   RET_TYPE is the type of the value returned by the function, or NULL
+   if the type doesn't return any value.
+
    ARGS is a chain of PKL_AST_FUNC_ARG nodes describing the formal
-   arguments to the function.
+   arguments to the function.  It can be NULL if the function takes no
+   arguments.
 
    BODY is a PKL_AST_COMP_STMT node containing the statements that
    conform the function body.  */
 
+#define PKL_AST_FUNC_RET_TYPE(AST) ((AST)->func.ret_type)
 #define PKL_AST_FUNC_ARGS(AST) ((AST)->func.args)
 #define PKL_AST_FUNC_BODY(AST) ((AST)->func.body)
 
@@ -516,12 +521,15 @@ struct pkl_ast_func
 {
   struct pkl_ast_common common;
 
+  union pkl_ast_node *ret_type;
   union pkl_ast_node *args;
   union pkl_ast_node *body;
 };
 
 pkl_ast_node pkl_ast_make_func (pkl_ast ast,
-                                pkl_ast_node args, pkl_ast_node body);
+                                pkl_ast_node ret_type,
+                                pkl_ast_node args,
+                                pkl_ast_node body);
 
 /* PKL_AST_FUNC_ARG nodes represent a formal argument in a function
    definition.

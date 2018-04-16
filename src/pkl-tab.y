@@ -543,7 +543,21 @@ array_initializer:
 
 function_specifier:
           '(' function_arg_list ')' comp_stmt
+          	{
+                  $$ = pkl_ast_make_func (pkl_parser->ast,
+                                          NULL /* ret_type */,
+                                          pkl_ast_reverse ($2),
+                                          $4);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | '(' function_arg_list ')' ':' type_specifier comp_stmt
+        	{
+                  $$ = pkl_ast_make_func (pkl_parser->ast,
+                                          $5,
+                                          pkl_ast_reverse ($2),
+                                          $6);
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 function_arg_list:
@@ -558,6 +572,12 @@ function_arg_list:
 
 function_arg:
 	  type_specifier IDENTIFIER
+          	{
+                  $$ = pkl_ast_make_func_arg (pkl_parser->ast,
+                                              $1, $2);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 /*
