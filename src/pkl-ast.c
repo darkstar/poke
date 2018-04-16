@@ -199,6 +199,23 @@ pkl_ast_make_unary_exp (pkl_ast ast,
   return exp;
 }
 
+/* Build and return an AST node for a function definition.  */
+
+pkl_ast_node
+pkl_ast_make_func (pkl_ast ast, pkl_ast_node args,
+                   pkl_ast_node body)
+{
+  pkl_ast_node func = pkl_ast_make_node (ast, PKL_AST_FUNC);
+
+  assert (body);
+
+  if (args)
+    PKL_AST_FUNC_ARGS (func) = ASTREF (args);
+  PKL_AST_FUNC_BODY (func) = ASTREF (body);
+
+  return func;
+}
+
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
@@ -953,6 +970,16 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_ARRAY_REF_ARRAY (ast));
       pkl_ast_node_free (PKL_AST_ARRAY_REF_INDEX (ast));
       break;
+
+    case PKL_AST_FUNC:
+
+      pkl_ast_node_free (PKL_AST_FUNC_BODY (ast));
+      for (t = PKL_AST_FUNC_ARGS (ast); t; t = n)
+            {
+              n = PKL_AST_CHAIN (t);
+              pkl_ast_node_free (t);
+            }
+      break;
       
     case PKL_AST_STRING:
 
@@ -1625,6 +1652,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
       break;
 
+    case PKL_AST_FUNC:
+      IPRINTF ("FUNC::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST_CHAIN (FUNC_ARGS);
+      PRINT_AST_SUBAST (body, FUNC_BODY);
+      break;
+      
     case PKL_AST_STRUCT_REF:
       IPRINTF ("STRUCT_REF::\n");
 

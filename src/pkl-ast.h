@@ -492,6 +492,7 @@ pkl_ast_node pkl_ast_make_enumerator (pkl_ast ast,
 struct pkl_ast_enum
 {
   struct pkl_ast_common common;
+
   union pkl_ast_node *tag;
   union pkl_ast_node *values;
 };
@@ -499,6 +500,28 @@ struct pkl_ast_enum
 pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
                                 pkl_ast_node tag,
                                 pkl_ast_node values);
+
+/* PKL_AST_FUNC nodes represent a function definition.
+
+   ARGS is a chain of PKL_AST_FUNC_ARG nodes describing the formal
+   arguments to the function.
+
+   BODY is a PKL_AST_COMP_STMT node containing the statements that
+   conform the function body.  */
+
+#define PKL_AST_FUNC_ARGS(AST) ((AST)->func.args)
+#define PKL_AST_FUNC_BODY(AST) ((AST)->func.body)
+
+struct pkl_ast_func
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *args;
+  union pkl_ast_node *body;
+};
+
+pkl_ast_node pkl_ast_make_func (pkl_ast ast,
+                                pkl_ast_node args, pkl_ast_node body);
 
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
@@ -911,10 +934,12 @@ union pkl_ast_node
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;
-  /* Declarations.  */
-  struct pkl_ast_decl decl;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
+  /* Functions.  */
+  struct pkl_ast_func func;
+  /* Declarations.  */
+  struct pkl_ast_decl decl;
   /* Statements.  */
   struct pkl_ast_comp_stmt comp_stmt;
   struct pkl_ast_ass_stmt ass_stmt;
