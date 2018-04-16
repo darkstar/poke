@@ -1260,6 +1260,7 @@ pkl_ast_free (pkl_ast ast)
   pkl_ast_node_free (ast->stringtype);
 
   free (ast->buffer);
+  free (ast->filename);
   free (ast);
 }
 

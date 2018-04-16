@@ -111,8 +111,8 @@ D [0-9]
 {BLANK}		{ /* Ignore whitespace.  */ }
 
 "/*" { BEGIN(C_COMMENT); }          
-<C_COMMENT>"*/" { BEGIN(INITIAL); } 
-<C_COMMENT>.    {  }                    
+<C_COMMENT>"*/" { BEGIN(INITIAL); }
+<C_COMMENT>.    {  }
 <C_COMMENT>\n   {  }
 
 "enum"		{ return ENUM; }

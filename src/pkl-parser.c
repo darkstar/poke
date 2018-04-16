@@ -75,6 +75,8 @@ pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
   parser->filename = xstrdup (fname);
   parser->start_token = START_PROGRAM;
 
+  parser->ast->file = fd;
+  parser->ast->filename = xstrdup (fname);
   pkl_tab_set_in (fd, parser->scanner);
   ret = pkl_tab_parse (parser);
   *ast = parser->ast;

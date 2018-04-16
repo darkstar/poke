@@ -120,7 +120,7 @@ rest_of_compilation (pkl_compiler compiler,
   };
 
   /* XXX */
-  /* pkl_ast_print (stdout, ast->ast); */
+  pkl_ast_print (stdout, ast->ast);
       
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
     goto error;
@@ -229,6 +229,9 @@ pkl_error (pkl_ast ast,
   va_list valist;
   size_t i;
 
+  if (ast->filename)
+    fprintf (stderr, "%s:", ast->filename);
+  
   if (PKL_AST_LOC_VALID (loc))
     fprintf (stderr, "%d:%d: ",
              loc.first_line, loc.first_column);
@@ -238,31 +241,71 @@ pkl_error (pkl_ast ast,
   va_end (valist);
   fputc ('\n', stderr);
 
-  /* XXX: make fancy output optional.  */
+  /* XXX: cleanup this pile of shit, and make fancy output
+     optional.  */
   if (PKL_AST_LOC_VALID (loc))
   {
     size_t cur_line = 1;
     size_t cur_column = 1;
-    char *p = ast->buffer;
 
-    for (p = ast->buffer; *p != '\0'; ++p)
+    if (ast->buffer)
       {
-        if (*p == '\n')
+        char *p = ast->buffer;
+        for (p = ast->buffer; *p != '\0'; ++p)
           {
-            cur_line++;
-            cur_column = 1;
+            if (*p == '\n')
+              {
+                cur_line++;
+                cur_column = 1;
+              }
+            else
+              cur_column++;
+            
+            if (cur_line >= loc.first_line
+                && cur_line <= loc.last_line)
+              {
+                /* Print until newline or end of string.  */
+                for (;*p != '\0' && *p != '\n'; ++p)
+                  fputc (*p, stderr);
+                break;
+              }
           }
-        else
-          cur_column++;
+      }
+    else
+      {
+        FILE *fd = ast->file;
+        int c;
 
-        if (cur_line >= loc.first_line
-            && cur_line <= loc.last_line)
+        off64_t cur_pos = ftello (fd);
+
+        /* Seek to the beginning of the file.  */
+        assert (fseeko (fd, 0, SEEK_SET) == 0);
+
+        while ((c = fgetc (fd)) != EOF)
           {
-            /* Print until newline or end of string.  */
-            for (;*p != '\0' && *p != '\n'; ++p)
-              fputc (*p, stderr);
-            break;
+            if (c == '\n')
+              {
+                cur_line++;
+                cur_column = 1;
+              }
+            else
+              cur_column++;
+            
+           if (cur_line >= loc.first_line
+                && cur_line <= loc.last_line)
+              {
+                /* Print until newline or end of string.  */
+                while (c != EOF && c != '\0' && c != '\n')
+                  {
+                    fputc (c, stderr);
+                    c = fgetc (fd);
+                  }
+                break;
+              }
           }
+
+        /* Restore the file position so parsing can continue.  */
+        assert (fseeko (fd, cur_pos, SEEK_SET) == 0);
       }
 
     fputc ('\n', stderr);

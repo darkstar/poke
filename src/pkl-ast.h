@@ -1020,6 +1020,8 @@ struct pkl_ast
   pkl_ast_node stringtype;
 
   char *buffer;
+  FILE *file;
+  char *filename;
 };
 
 pkl_ast pkl_ast_init (void);
