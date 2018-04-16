@@ -168,28 +168,17 @@ program:
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
-        ;
-
-program_elem_list:
-	  program_elem
-        | program_elem_list program_elem
-        	{
-                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
-                    /* We should parse exactly one expression.  */
-                    YYERROR;
-                  $$ = pkl_ast_chainon ($1, $2);
-                }
-	;
-
-program_elem:
-          expression
+        | expression
         	{
                   if (pkl_parser->what != PKL_PARSE_EXPRESSION)
                     /* Expressions are not valid top-level structures
                        in full poke programs.  */
                     YYERROR;
-                  $$ = $1;
-                }
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $1);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                  YYACCEPT;
+                  }
 	| expression ','
         	{
                   if (pkl_parser->what != PKL_PARSE_EXPRESSION)
@@ -201,6 +190,17 @@ program_elem:
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
                 }
+        ;
+
+program_elem_list:
+	  program_elem
+        | program_elem_list program_elem
+        	{
+                  $$ = pkl_ast_chainon ($1, $2);
+                }
+	;
+
+program_elem:
 	| declaration
           	{
                   if (pkl_parser->what == PKL_PARSE_EXPRESSION)
@@ -241,7 +241,7 @@ expression:
                                                $2);
                   PKL_AST_LOC ($$) = @1;
                 }
-	| SIZEOF '(' type_specifier ')' %prec UNARY
+	| SIZEOF '(' type_specifier ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
