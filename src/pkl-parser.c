@@ -61,32 +61,6 @@ pkl_parser_free (struct pkl_parser *parser)
   return;
 }
 
-/* Read input from the command line, one line at a time, parsing its
-   contents as a PKL program.  The parser stops and returns when a PKL
-   construct is the last non-blank and non-comment contents of a
-   line.
-
-   Return 0 if the parsing was successful, 1 if there as a syntax
-   error and 2 if there was a memory exhaustion.  */
-
-int
-pkl_parse_cmdline (pkl_ast *ast)
-{
-  int ret;
-  struct pkl_parser *parser;
-
-  parser = pkl_parser_init ();
-  parser->interactive = 1;
-
-  pkl_tab_set_in (stdin, parser->scanner);
-  ret = pkl_tab_parse (parser);
-  *ast = parser->ast;
-  pkl_parser_free (parser);
-
-  return ret;
-}
-
-
 /* Read from FD until end of file, parsing its contents as a PKL
    program.  Return 0 if the parsing was successful, 1 if there was a
    syntax error and 2 if there was a memory exhaustion.  */
