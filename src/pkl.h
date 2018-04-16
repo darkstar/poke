@@ -26,10 +26,47 @@
 #include "pkl-ast.h"
 #include "pvm.h"
 
+/* This is the main header file for the Poke Compiler.  The Poke
+   Compiler is an "incremental compiler", i.e. it is designed to
+   compile poke programs incrementally.
+
+   A poke program is a sequence of declarations of several classes of
+   entities, namely variables, types and functions.  Unlike in many
+   other programming languages, there is not a main function or
+   procedure where execution starts by default.  Poke programs, as
+   such, are not executable.
+
+   Instead, the poke compiler works as follows:
+
+   First, a compiler is created and initialized with `pkl_new'.  At
+   this point, the internal program is almost empty, but not quite:
+   part of the compiler is written in poke itself, and thus it needs
+   to bootstrap itself defining some variables, types and functions,
+   that compose the run-time environment.
+
+   Then, subsequent calls to `pkl_compile_buffer' and
+   `pkl_compile_file (..., PKL_PROGRAM, ...)' expands the
+   internally-maintained program, with definitions of variables,
+   types, function etc from the user.
+
+   At any point, the user can request to compile a poke expression
+   with `pkl_compile_expression'.  This returns a PVM program that,
+   can be executed in a virtual machine.  It is up to the user to free
+   the returned PVM program when it is not useful anymore.
+
+   `pkl_compile_buffer', `pkl_compile_file' and
+   `pkl_compile_expression' can be called any number of times, in any
+   possible combination.
+
+   Finally, `pkl_free' should be invoked when the compiler is no
+   longer needed, in order to do some finalization tasks and free
+   resources.  */
+
 /* Compile a poke expression, or a program, from a NULL-terminated
-   string BUFFER.  Return 0 in case of a compilation error.  Return 1
-   otherwise.  If not NULL, END is set to the first character in
-   BUFFER that is not part of the program/expression.  */
+   string BUFFER.  WHAT determines the entity to compile.  Return 0 in
+   case of a compilation error.  Return 1 otherwise.  If not NULL, END
+   is set to the first character in BUFFER that is not part of the
+   program/expression.  */
 
 #define PKL_PROGRAM 0
 #define PKL_EXPRESSION 1
