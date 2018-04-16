@@ -138,15 +138,15 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression primary struct_ref array_ref mapping
-%type <ast> funcall funcall_arg_list funcall_arg
+%type <ast> expression primary
+%type <ast> funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
 %type <ast> type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
-%type <ast> comp_stmt stmt_list stmt lvalue
+%type <ast> comp_stmt stmt_list stmt
 
 /* The following two tokens are used in order to have two parsers: a
    parser for expressions and a parser for full poke programs.  */
@@ -395,45 +395,29 @@ primary:
                 }
         | array
 	| struct
-        | mapping
-        | struct_ref
-        | array_ref %prec '.'
-        | funcall
-	;
-
-array_ref:
-	  primary '[' expression ']'
+        | type_specifier '@' expression
                 {
-                  $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
-                  PKL_AST_LOC ($$) = @$;
+                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($$) = @$;
                 }
-	;
-
-struct_ref:
-	  primary '.' IDENTIFIER
+        | primary '.' IDENTIFIER
 		{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($3) = @3;
                     PKL_AST_LOC ($$) = @$;
                 }
-	;
-
-mapping:
-	  type_specifier '@' expression
+        | primary '[' expression ']' %prec '.'
                 {
-                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
-                    PKL_AST_LOC ($$) = @$;
+                  $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
+                  PKL_AST_LOC ($$) = @$;
                 }
-        ;
-
-funcall:
-	  primary '(' funcall_arg_list ')'
+        | primary '(' funcall_arg_list ')' %prec '.'
           	{
                   $$ = pkl_ast_make_funcall (pkl_parser->ast,
                                              $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        ;
+	;
 
 funcall_arg_list:
 	  %empty
@@ -672,6 +656,8 @@ declaration:
  */
 
 comp_stmt:
+/* XXX: do not allow empty compound statement, require at least one
+   statement, but then we need a null statement.  */
 	  '{' '}'
           	{
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
@@ -694,7 +680,7 @@ stmt_list:
 
 stmt:
 	  comp_stmt
-        | lvalue '=' expression ';'
+        | expression '=' expression ';'
           	{
                   $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
                                               $1, $3);
@@ -725,17 +711,6 @@ stmt:
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
-
-lvalue:
-           IDENTIFIER
-		{
-		  $$ = $1;
-		  PKL_AST_LOC ($$) = @$;
-		}
-         | array_ref
-         | struct_ref
-         | mapping
-         ;
 
 /*
  * Enumerations.
