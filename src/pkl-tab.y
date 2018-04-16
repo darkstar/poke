@@ -117,6 +117,11 @@ pkl_tab_error (YYLTYPE *llocp,
 %token MSB LSB
 %token SIGNED UNSIGNED
 
+/* This is for the dangling ELSE.  */
+
+%precedence THEN
+%precedence ELSE
+
 /* Operator tokens and their precedences, in ascending order.  */
 
 %right '?' ':'
@@ -697,13 +702,13 @@ stmt:
                                               $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | IF '(' expression ')' stmt
+        | IF '(' expression ')' stmt %prec THEN
                 {
                   $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
                                              $3, $5, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | IF '(' expression ')' stmt ELSE stmt
+        | IF '(' expression ')' stmt ELSE stmt %prec ELSE
                 {
                   $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
                                              $3, $5, $7);
