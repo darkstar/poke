@@ -824,23 +824,18 @@ pkl_ast_node pkl_ast_make_funcall (pkl_ast ast,
 /* PKL_AST_FUNCALL_ARG nodes represent actual arguments in function
    calls.
 
-   IDENTIFIER is the name of the argument.
-   TYPE is the type of the argument.  */
+   EXP is the value passed for the argument.  */
 
-#define PKL_AST_FUNCALL_ARG_IDENTIFIER(AST) ((AST)->funcall_arg.identifier)
-#define PKL_AST_FUNCALL_ARG_TYPE(AST) ((AST)->funcall_arg.type)
+#define PKL_AST_FUNCALL_ARG_EXP(AST) ((AST)->funcall_arg.exp)
 
 struct pkl_ast_funcall_arg
 {
   struct pkl_ast_common common;
 
-  union pkl_ast_node *identifier;
-  union pkl_ast_node *type;
+  union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast,
-                                       pkl_ast_node identifier,
-                                       pkl_ast_node type);
+pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp);
 
 /* PKL_AST_COMPOUND_STMT nodes represent compound statements in the
    language.

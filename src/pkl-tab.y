@@ -437,11 +437,10 @@ funcall_arg_list:
         ;
 
 funcall_arg:
-	  type_specifier IDENTIFIER
+	   expression
           	{
                   $$ = pkl_ast_make_funcall_arg (pkl_parser->ast,
-                                                 $1, $2);
-                  PKL_AST_LOC ($1) = @1;
+                                                 $1);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
