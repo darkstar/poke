@@ -152,7 +152,17 @@ pkl_tab_error (YYLTYPE *llocp,
 
 %% /* The grammar follows.  */
 
-program: program_elem_list
+program:
+	  %empty
+		{
+                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
+                    /* We should parse exactly one expression.  */
+                    YYERROR;
+                  $$ = pkl_ast_make_program (pkl_parser->ast, NULL);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+	| program_elem_list
           	{
                   $$ = pkl_ast_make_program (pkl_parser->ast,$1);
                   PKL_AST_LOC ($$) = @$;
@@ -161,14 +171,7 @@ program: program_elem_list
         ;
 
 program_elem_list:
-          %empty
-		{
-                  if (pkl_parser->what == PKL_PARSE_EXPRESSION)
-                    /* We should parse exactly one expression.  */
-                    YYERROR;
-                  $$ = NULL;
-                }
-	| program_elem
+	  program_elem
         | program_elem_list program_elem
         	{
                   if (pkl_parser->what == PKL_PARSE_EXPRESSION)
