@@ -140,12 +140,40 @@ pk_cmd_info_files (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static int
+pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* load FILENAME */
+
+  const char *filename;
+
+  assert (argc == 1);
+  filename = PK_CMD_ARG_STR (argv[0]);
+
+  if (access (filename, R_OK) != 0)
+    {
+      printf (_("%s: file cannot be read\n"), filename);
+      return 0;
+    }
+
+  if (!pkl_compile_file (poke_compiler, filename))
+    /* Note that the compiler emits it's own error messages.  */
+    return 0;
+
+  if (poke_interactive_p)
+    printf (_("Loaded file `%s'\n"), filename);
+
+  return 1;
+}
+
 struct pk_cmd file_cmd =
   {"file", "tf", "", 0, NULL, pk_cmd_file, "file (FILENAME|#ID)"};
-
 
 struct pk_cmd close_cmd =
   {"close", "?t", "", PK_CMD_F_REQ_IO, NULL, pk_cmd_close, "close [#ID]"};
 
 struct pk_cmd info_files_cmd =
   {"files", "", "", 0, NULL, pk_cmd_info_files, "info files"};
+
+struct pk_cmd load_cmd =
+  {"load", "f", "", 0, NULL, pk_cmd_load_file, "load FILENAME"};

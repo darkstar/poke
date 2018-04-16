@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <tmpdir.h>
 #include <tempname.h>
+#include <stdio.h> /* For fopen, etc */
 #include <stdlib.h>
 #include <string.h>
 #include <xalloc.h>
@@ -151,13 +152,20 @@ rest_of_compilation (pkl_compiler compiler,
 }
 
 int
-pkl_compile_file (pkl_compiler compiler,
-                  FILE *fd, const char *fname)
+pkl_compile_file (pkl_compiler compiler, const char *fname)
 {
   int ret;
   pkl_ast ast = NULL;
   pvm_program program;
+  FILE *fd;
 
+  fd = fopen (fname, "rb");
+  if (!fd)
+    {
+      perror (fname);
+      return 0;
+    }
+  
   ret = pkl_parse_file (&ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
@@ -168,12 +176,14 @@ pkl_compile_file (pkl_compiler compiler,
       printf (_("out of memory\n"));
     }
 
+  fclose (fd);
   program = rest_of_compilation (compiler, ast);
   assert (program == NULL);
 
   return 1;
 
  error:
+  fclose (fd);
   pkl_ast_free (ast);
   return 0;
 }
