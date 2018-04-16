@@ -175,8 +175,7 @@ start:
                 }
         | START_PROGRAM program
         	{
-                  $$ = pkl_ast_make_program (pkl_parser->ast,
-                                             pkl_ast_reverse ($2));
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
@@ -520,16 +519,13 @@ function_specifier:
           	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
                                           NULL /* ret_type */,
-                                          pkl_ast_reverse ($2),
-                                          $4);
+                                          $2, $4);
                   PKL_AST_LOC ($$) = @$;
                 }
         | '(' function_arg_list ')' ':' type_specifier comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $5,
-                                          pkl_ast_reverse ($2),
-                                          $6);
+                                          $5, $2, $6);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
@@ -648,7 +644,7 @@ struct_elem_type:
  */
 
 declaration:
-        DEFUN IDENTIFIER '=' function_specifier ';'
+        DEFUN IDENTIFIER '=' function_specifier
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
@@ -701,13 +697,13 @@ stmt:
                                               $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | IF '(' expression ')' stmt ';'
+        | IF '(' expression ')' stmt
                 {
                   $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
                                              $3, $5, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | IF '(' expression ')' stmt ELSE stmt ';'
+        | IF '(' expression ')' stmt ELSE stmt
                 {
                   $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
                                              $3, $5, $7);
