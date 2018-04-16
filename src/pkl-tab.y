@@ -624,7 +624,7 @@ struct_type_specifier:
 struct_elem_type_list:
 	  struct_elem_type
         | struct_elem_type_list struct_elem_type
-        	{ $$ = pkl_ast_chainon ($2, $1); }
+        	{ $$ = pkl_ast_chainon ($1, $2); }
         ;
 
 struct_elem_type:
@@ -677,8 +677,7 @@ declaration:
 comp_stmt:
           '{' stmt_list '}'
         	{
-                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast,
-                                               pkl_ast_reverse ($2));
+                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;

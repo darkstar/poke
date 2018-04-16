@@ -87,9 +87,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_struct)
 PKL_PHASE_END_HANDLER
 
 /* Compute and set the indexes of all the elements of an ARRAY node
-   and set the size of the array consequently.  Also, reverse the list
-   of initializers so they are handled in the right order in
-   depth-first.  */
+   and set the size of the array consequently.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
 {
@@ -161,9 +159,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
 
   PKL_AST_ARRAY_NELEM (array) = nelem;
   PKL_AST_ARRAY_NINITIALIZER (array) = ninitializer;
-  initializers = pkl_ast_reverse (initializers);
-  PKL_AST_ARRAY_INITIALIZERS (array)
-    = ASTREF (initializers);
 }
 PKL_PHASE_END_HANDLER
 
