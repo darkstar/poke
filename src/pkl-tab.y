@@ -492,7 +492,7 @@ struct:
                     /* There can't be declarations inside a struct
                        literal.  The pushlevel in this rule and the
                        subsequent pop_frame is to avoid shift/reduce
-                       conflicts with the next rule.  */
+                       conflicts.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	;
