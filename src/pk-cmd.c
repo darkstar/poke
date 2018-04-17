@@ -52,6 +52,9 @@ extern struct pk_cmd version_cmd; /* pk-misc.c */
 extern struct pk_cmd help_cmd; /* pk-help.c */
 extern struct pk_cmd vm_cmd; /* pk-vm.c  */
 extern struct pk_cmd print_cmd; /* pk-print.c */
+extern struct pk_cmd deftype_cmd; /* pk-def.c */
+extern struct pk_cmd defvar_cmd; /* pk-def.c */
+extern struct pk_cmd defun_cmd; /* pk-def.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, NULL, 0, NULL, NULL};
@@ -70,6 +73,9 @@ static struct pk_cmd *cmds[] =
     &help_cmd,
     &vm_cmd,
     &print_cmd,
+    &deftype_cmd,
+    &defvar_cmd,
+    &defun_cmd,
     &null_cmd
   };
 
@@ -370,6 +376,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         besilent = 1;
                       }
 
+                    argv[argc].type = PK_CMD_ARG_DEF;
                     match = 1;
                     p = end;
                     free (program_string);

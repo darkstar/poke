@@ -21,7 +21,7 @@ poke_SOURCES = poke.c poke.h \
                pk-cmd.c pk-cmd.h \
                pk-dump.c pk-peek.c pk-poke.c pk-file.c \
                pk-info.c pk-misc.c pk-help.c pk-vm.c \
-               pk-print.c \
+               pk-print.c pk-def.c \
                pkl.h pkl.c \
                pkl-ast.h pkl-ast.c \
                pkl-env.h pkl-env.c \

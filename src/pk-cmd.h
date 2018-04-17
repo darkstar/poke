@@ -28,6 +28,7 @@ enum pk_cmd_arg_type
 {
   PK_CMD_ARG_NULL,
   PK_CMD_ARG_EXP,
+  PK_CMD_ARG_DEF,
   PK_CMD_ARG_INT,
   PK_CMD_ARG_ADDR,
   PK_CMD_ARG_STR,
@@ -36,6 +37,7 @@ enum pk_cmd_arg_type
 
 #define PK_CMD_ARG_TYPE(arg) ((arg).type)
 #define PK_CMD_ARG_EXP(arg) ((arg).val.exp)
+#define PK_CMD_ARG_DEF(arg) 0
 #define PK_CMD_ARG_INT(arg) ((arg).val.integer)
 #define PK_CMD_ARG_ADDR(arg) ((arg).val.addr)
 #define PK_CMD_ARG_STR(arg) ((arg).val.str)
