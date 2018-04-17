@@ -388,10 +388,10 @@ unary_operator:
 primary:
           IDENTIFIER
           	{
-                  /* XXX Search for a variable definition in the
+                  /* Search for a variable definition in the
                      compile-time environment, and create a
-                     PKL_AST_VAR node with it's lexical
-                     environment.  */
+                     PKL_AST_VAR node with it's lexical environment,
+                     annotated with the proper type.  */
 
                   int back, over;
                   pkl_ast_node var_type;
