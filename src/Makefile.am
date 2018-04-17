@@ -31,7 +31,6 @@ poke_SOURCES = poke.c poke.h \
                pkl-typify.h pkl-typify.c \
 	       pkl-anal.h pkl-anal.c \
                pkl-trans.h pkl-trans.c \
-               pkl-prep.h pkl-prep.c \
                pkl-tab.y pkl-lex.l \
                pkl-gen.h pkl-gen.c \
                pkl-asm.h pkl-asm.c \
