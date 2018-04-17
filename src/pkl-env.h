@@ -70,32 +70,50 @@ pkl_env pkl_env_new (void);
 
 void pkl_env_free (pkl_env env);
 
-/* Make a new frame for the variable list DECLS and stack it in the
-   environment ENV.  */
+/* Push a new frame to ENV and return the modified environment.  The
+   new frame is empty.  */
 
-pkl_env pkl_env_push_frame (pkl_env env, pkl_ast_node decls);
+pkl_env pkl_env_push_frame (pkl_env env);
 
-/* Pop a frame from environment ENV and dispose it, then return the
-   resulting environment.  Return NULL if ENV only contains the
-   top-level frame.  */
+/* Pop a frame from ENV and return the modified environment.  The
+   contents of the popped frame are disposed.  */
 
 pkl_env pkl_env_pop_frame (pkl_env env);
 
-/* Search in the environment ENV for a declaration for IDENTIFIER, and
-   put the lexical address of the first match in BACK and OVER.
+/* Register the type declaration DECL in the current frame under NAME.
+   Return 1 if the type was properly registered.  Return 0 if there is
+   already a type with the given name in the current frame.  */
+
+int pkl_env_register_type (pkl_env env,
+                           const char *name,
+                           pkl_ast_node decl);
+
+/* Register the variable or function declaration DECL in the current
+   frame under NAME.  Return 1 if the variable or function was
+   properly registered.  Return 0 if there is already a variable or
+   function with the given name in the current frame.  */
+
+int pkl_env_register_var (pkl_env env,
+                          const char *name,
+                          pkl_ast_node decl);
+
+/* Search in the environment ENV for a declaration for the variable or
+   function NAME, and put the lexical address of the first match in
+   BACK and OVER.  Return the declaration node.
 
    BACK is the number of frames back the declaration is located.  It
    is 0-based.
 
    OVER indicates its position in the list of declarations in the
-   resulting frame.  It is 0-based.
+   resulting frame.  It is 0-based.  */
 
-   Return the result declaration node if a declaration was found for
-   the free variable IDENTIFIER.  NULL otherwise.  The main purpose of
-   returning the declaration is for the client to have access to the
-   associated type.  */
+pkl_ast_node pkl_env_lookup_var (pkl_env env, const char *name,
+                                 int *back, int *over);
 
-pkl_ast_node pkl_env_lookup (pkl_env env, pkl_ast_node identifier,
-                             int *back, int *over);
+/* Search in the environment ENV for a declaration for the type NAME,
+   and return the type (not the declaration.)  Return a PKL_AST_TYPE
+   in case the type is found.  Return NULL ortherwise.  */
+
+pkl_ast_node pkl_env_lookup_type (pkl_env env, const char *name);
 
 #endif /* !PKL_ENV_H  */

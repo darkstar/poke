@@ -716,11 +716,16 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    depends on what is being declared:
    - An expression node for a variable.
    - A PKL_AST_TYPE for a type.
-   - A PKL_AST_FUNC for a function.   */
+   - A PKL_AST_FUNC for a function.
+
+   ORDER is the order of the declaration in its containing
+   compile-time environment.  It is filled up when the declaration is
+   registered in an environment.  */
 
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
 #define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
+#define PKL_AST_DECL_ORDER(AST) ((AST)->decl.order)
 
 struct pkl_ast_decl
 {
@@ -728,6 +733,7 @@ struct pkl_ast_decl
 
   union pkl_ast_node *name;
   union pkl_ast_node *initial;
+  int order;
 };
 
 pkl_ast_node pkl_ast_make_decl (pkl_ast ast,

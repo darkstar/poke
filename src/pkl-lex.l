@@ -42,8 +42,9 @@
 #include <ctype.h>
 #include <xalloc.h>
 #include <assert.h>
-#include <pkl-ast.h>
-#include <pkl-parser.h>
+#include "pkl-ast.h"
+#include "pkl-env.h"
+#include "pkl-parser.h"
 #define YYLTYPE pkl_ast_loc
 #define YYDEBUG 1
 #include <pkl-tab.h>
@@ -188,23 +189,19 @@ D [0-9]
 "@"		{ return '@'; }
 
 {L}({L}|{D})* {
-#if 0
-   /* XXX: search for a type declaration in the compile-time environment.  */
-   pkl_ast_node type;
-   if ((type = pkl_ast_get_registered (yyextra->ast, 
-                                       yytext, PKL_AST_TYPE)) != NULL)
+   pkl_ast_node type
+       = pkl_env_lookup_type (yyextra->env, yytext);
+
+   if (type != NULL)
      {
        yylval->ast = type;
        return TYPENAME;
      }
    else
      {
-#endif
        yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
        return IDENTIFIER;
-#if 0
      }
-#endif
 }
 
 ({HEXCST}|{BINCST}|{OCTCST}|{DECCST}){IS}? {

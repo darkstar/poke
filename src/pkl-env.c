@@ -37,12 +37,13 @@
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */
 
-#define PKL_ENV_UP(F) ((F)->up)
-
 struct pkl_env
 {
   pkl_hash types_table;
   pkl_hash vars_table;
+
+  int num_types;
+  int num_vars;
   
   struct pkl_env *up;
 };
@@ -85,6 +86,44 @@ free_hash_table (pkl_hash *hash_table)
         }
 }
 
+pkl_ast_node
+get_registered (pkl_hash hash_table, const char *name)
+{
+  pkl_ast_node t;
+  int hash;
+
+  hash = hash_string (name);
+  for (t = hash_table[hash]; t != NULL; t = PKL_AST_CHAIN2 (t))
+    {
+      pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
+      
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
+                  name) == 0)
+        return t;
+    }
+
+  return NULL;
+}
+
+static int
+register_decl (pkl_hash hash_table,
+               const char *name,
+               pkl_ast_node decl)
+{
+  int hash;
+  
+  if (get_registered (hash_table, name) != NULL)
+    /* Already registered.  */
+    return 0;
+
+  /* Add the declaration to the hash table.  */
+  hash = hash_string (name);
+  PKL_AST_CHAIN2 (decl) = hash_table[hash];
+  hash_table[hash] = ASTREF (decl);
+
+  return 1;
+}
+
 /* The following functions are documented in pkl-env.h.  */
 
 pkl_env
@@ -101,7 +140,7 @@ pkl_env_free (pkl_env env)
 {
   if (env)
     {
-      pkl_env_free (PKL_ENV_UP (env));
+      pkl_env_free (env->up);
 
       free_hash_table (&env->types_table);
       free_hash_table (&env->vars_table);
@@ -110,69 +149,93 @@ pkl_env_free (pkl_env env)
 }
 
 pkl_env
-pkl_env_push_frame (pkl_env env, pkl_ast_node decls)
+pkl_env_push_frame (pkl_env env)
 {
-  pkl_env new = pkl_env_new ();
+  pkl_env frame = pkl_env_new ();
 
-  PKL_ENV_DECLS (env) = ASTREF (decls);
-  PKL_ENV_UP (env) = env;
-  return new;
+  frame->up = env;
+  return frame;
 }
 
 pkl_env
 pkl_env_pop_frame (pkl_env env)
 {
-  pkl_ast_node decl, next;
-  pkl_env up = PKL_ENV_UP (env);
-  pkl_ast_node decls = PKL_ENV_DECLS (env);
+  pkl_env up = NULL;
 
-  for (decl = decls; decl; decl = next)
-    {
-      next = PKL_AST_CHAIN2 (decl);
-      pkl_ast_node_free (decl);
-    }
-  
-  free (env);
+  if (env)
+    up = env->up;
+
+  pkl_env_free (env);
   return up;
 }
 
+int
+pkl_env_register_type (pkl_env env,
+                       const char *name,
+                       pkl_ast_node decl)
+{
+  if (register_decl (env->types_table, name, decl))
+    {
+      PKL_AST_DECL_ORDER (decl) = env->num_types++;
+      return 1;
+    }
+
+  return 0;
+}
+
+int
+pkl_env_register_var (pkl_env env,
+                      const char *name,
+                      pkl_ast_node decl)
+{
+  if (register_decl (env->vars_table, name, decl))
+    {
+      PKL_AST_DECL_ORDER (decl) = env->num_vars++;
+      return 1;
+    }
+
+  return 0;
+}
+
 static pkl_ast_node
-pkl_env_lookup_1 (pkl_env env, pkl_ast_node identifier,
-                  int *back, int *over, int num_frame)
+pkl_env_lookup_var_1 (pkl_env env, const char *name,
+                      int *back, int *over, int num_frame)
 {
   if (env == NULL)
     return NULL;
   else
     {
-      pkl_ast_node decls = PKL_ENV_DECLS (env);
-      pkl_ast_node decl, next;
-      int num_decl = 0;
- 
-      for (decl = decls; decl; decl = next)
+      pkl_ast_node decl = get_registered (env->vars_table, name);
+      if (decl)
         {
-          pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
-
-          next = PKL_AST_CHAIN2 (decl);
-
-          if (strcmp (PKL_AST_IDENTIFIER_POINTER (identifier),
-                      PKL_AST_IDENTIFIER_POINTER (decl_name)) == 0)
-            {
-              *back = num_frame;
-              *over = num_decl;
-              return decl;
-            }
-
-          num_decl++;
+          *back = num_frame;
+          *over = PKL_AST_DECL_ORDER (decl);
+          return decl;
         }
-    }      
+    }
 
-  return pkl_env_lookup_1 (PKL_ENV_UP (env), identifier,
-                           back, over, num_frame + 1);
+  return pkl_env_lookup_var_1 (env->up, name, back, over,
+                               num_frame + 1);
 }
 
 pkl_ast_node
-pkl_env_lookup (pkl_env env, pkl_ast_node identifier,
-                int *back, int *over)
+pkl_env_lookup_var (pkl_env env, const char *name,
+                    int *back, int *over)
 {
-  return pkl_env_lookup_1 (env, identifier, back, over, 0);
+  return pkl_env_lookup_var_1 (env, name, back, over, 0);
+}
+
+pkl_ast_node
+pkl_env_lookup_type (pkl_env env, const char *name)
+{
+  if (env == NULL)
+    return NULL;
+  else
+    {
+      pkl_ast_node decl = get_registered (env->types_table, name);
+      if (decl)
+        return PKL_AST_DECL_INITIAL (decl);
+    }
+
+  return pkl_env_lookup_type (env->up, name);
 }
