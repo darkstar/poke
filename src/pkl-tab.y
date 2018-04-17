@@ -656,33 +656,54 @@ struct_elem_type:
  * Declarations.
  */
 
-/* XXX: midrule action in breath-first: If local definition, push a
-   new frame to the current environment.  */
-
 declaration:
         DEFUN IDENTIFIER '=' function_specifier
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-                  /* XXX: add the declaration to the current
-                     environment.  Error if it already exists.  */
-                }
-        | DEFTYPE IDENTIFIER '=' type_specifier ';'
-        	{
-                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_LOC ($$) = @$;
-                  /* XXX: add the declaration to the current
-                     environment.  Error if it already exists. */
+
+                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (!pkl_env_register_var (pkl_parser->env,
+                                             PKL_AST_IDENTIFIER_POINTER ($2),
+                                             $$))
+                    {
+                      pkl_error (pkl_parser->ast, @2,
+                                 "function or variable `%s' already defined",
+                                 PKL_AST_IDENTIFIER_POINTER ($2));
+                    }
                 }
         | DEFVAR IDENTIFIER '=' expression ';'
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-                  /* XXX: add the declaration to the current
-                     environment.  Error if it already exists.  */
+
+                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (!pkl_env_register_var (pkl_parser->env,
+                                             PKL_AST_IDENTIFIER_POINTER ($2),
+                                             $$))
+                    {
+                      pkl_error (pkl_parser->ast, @2,
+                                 "function or variable `%s' already defined",
+                                 PKL_AST_IDENTIFIER_POINTER ($2));
+                    }
+                }
+        | DEFTYPE IDENTIFIER '=' type_specifier ';'
+        	{
+                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+
+                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (!pkl_env_register_type (pkl_parser->env,
+                                              PKL_AST_IDENTIFIER_POINTER ($2),
+                                             $$))
+                    {
+                      pkl_error (pkl_parser->ast, @2,
+                                 "type `%s' already defined",
+                                 PKL_AST_IDENTIFIER_POINTER ($2));
+                    }
                 }
         ;
 
@@ -693,12 +714,21 @@ declaration:
 comp_stmt:
           '{' stmt_decl_list '}'
         	{
+                  pkl_ast_node stmt_decl;
+                  
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
 
-                  /* XXX: pop N frames from the current environment,
-                     where N is the number of declarations in
+                  /* Pop N frames from the current environment, where
+                     N is the number of declarations in
                      stmt_decl_list.  */
+                  for (stmt_decl = $2;
+                       stmt_decl;
+                       stmt_decl = PKL_AST_CHAIN (stmt_decl))
+                    {
+                      if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
+                        pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                    }
                 }
         ;
 
