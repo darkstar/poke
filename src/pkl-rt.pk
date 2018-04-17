@@ -33,6 +33,9 @@ defun _gcd = (xint<*> a, xint<*> b) : xint<*>
     return _gcd (a % b);
 }
 
+/* Array to string.
+   Struct to string.  */
+
 /*
 Local variables:
 mode:c
