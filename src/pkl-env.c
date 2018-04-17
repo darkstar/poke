@@ -165,9 +165,10 @@ pkl_env_pop_frame (pkl_env env)
 {
   pkl_env up = NULL;
 
-  if (env)
-    up = env->up;
+  assert (env);
 
+  up = env->up;
+  env->up = NULL;
   pkl_env_free (env);
   return up;
 }
