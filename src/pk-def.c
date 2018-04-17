@@ -33,11 +33,11 @@ pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
 struct pk_cmd deftype_cmd =
   {"deftype", "d", 0, 0, NULL, pk_cmd_def,
-   "deftype NAME = TYPE;"};
+   "deftype NAME = TYPE"};
 
 struct pk_cmd defvar_cmd =
   {"defvar", "d", 0, 0, NULL, pk_cmd_def,
-   "defvar NAME = EXP;"};
+   "defvar NAME = EXP"};
 
 struct pk_cmd defun_cmd =
   {"defun", "d", 0, 0, NULL, pk_cmd_def,

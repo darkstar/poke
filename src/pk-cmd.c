@@ -362,7 +362,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                        first part of the program to compile.  Also,
                        add the final ';' for defvar and deftype.  */
                     program_string = xmalloc (strlen (cmd_name) + strlen (p)
-                                              + 1 /* ; */ + 1);
+                                              + 2 + 1);
                     strcpy (program_string, cmd_name);
                     strcat (program_string, " ");
                     strcat (program_string, p);
@@ -383,7 +383,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
                     argv[argc].type = PK_CMD_ARG_DEF;
                     match = 1;
-                    p = end;
+                    p += end - program_string - 1 - strlen (cmd_name) - 1;
                     free (program_string);
                     break;
                   }

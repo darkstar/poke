@@ -459,4 +459,8 @@ set test deftype-1
 poke_test_cmd "deftype anint = int" {}
 poke_test_cmd "print sizeof (anint)" {\[32UL b\]}
 
+set test deftype-2
+poke_test_cmd "deftype imm13 = int<13>" {}
+poke_test_cmd "print sizeof (imm13)" {\[13UL b\]}
+
 poke_exit
