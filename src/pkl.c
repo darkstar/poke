@@ -45,7 +45,6 @@
 struct pkl_compiler
 {
   pkl_env env;  /* Compiler environment.  */
-  /* XXX: put the compiler environment here.  */
   /* XXX: put a link to the run-time top-level closure here.  */
 };
 
