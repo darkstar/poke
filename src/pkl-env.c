@@ -37,6 +37,9 @@
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */
 
+#define HASH_TABLE_SIZE 1008
+typedef pkl_ast_node pkl_hash[HASH_TABLE_SIZE];
+
 struct pkl_env
 {
   pkl_hash types_table;
@@ -72,14 +75,14 @@ hash_string (const char *name)
 }
 
 static void
-free_hash_table (pkl_hash *hash_table)
+free_hash_table (pkl_hash hash_table)
 {
   size_t i;
   pkl_ast_node t, n;
 
   for (i = 0; i < HASH_TABLE_SIZE; ++i)
-    if ((*hash_table)[i])
-      for (t = (*hash_table)[i]; t; t = n)
+    if (hash_table[i])
+      for (t = hash_table[i]; t; t = n)
         {
           n = PKL_AST_CHAIN2 (t);
           pkl_ast_node_free (t);
@@ -142,8 +145,8 @@ pkl_env_free (pkl_env env)
     {
       pkl_env_free (env->up);
 
-      free_hash_table (&env->types_table);
-      free_hash_table (&env->vars_table);
+      free_hash_table (env->types_table);
+      free_hash_table (env->vars_table);
       free (env);
     }
 }

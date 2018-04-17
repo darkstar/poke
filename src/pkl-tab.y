@@ -618,14 +618,18 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0, NULL);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | STRUCT '{' struct_elem_type_list '}'
+        | STRUCT '{' pushlevel struct_elem_type_list '}'
         	{
-                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $3);
+                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
                     PKL_AST_LOC ($$) = @$;
 
                     /* XXX: pop N frames from the current environment,
                        where N is the number of declarations in
                        struct_elem_type_list.  */
+
+                    /* Now pop the frame introduced by the struct type
+                       definition itself.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         ;
 
@@ -720,24 +724,38 @@ declaration:
  * Statements.
  */
 
+pushlevel:
+	  %empty
+		{
+                  /* The purpose of pushing a new frame at the
+                     beginning of a new statement and a new struct
+                     type definition is to allow the first declaration
+                     in the block to ghost a global declaration.  */
+                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                }
+
 comp_stmt:
-          '{' stmt_decl_list '}'
+          '{' pushlevel stmt_decl_list '}'
         	{
                   pkl_ast_node stmt_decl;
                   
-                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $2);
+                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $3);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop N frames from the current environment, where
                      N is the number of declarations in
                      stmt_decl_list.  */
-                  for (stmt_decl = $2;
+                  for (stmt_decl = $3;
                        stmt_decl;
                        stmt_decl = PKL_AST_CHAIN (stmt_decl))
                     {
                       if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
                         pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                     }
+
+                  /* Now pop the frame introduced by the
+                     compound-statement itself.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         ;
 

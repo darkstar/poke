@@ -49,12 +49,6 @@
      For more details on this technique, see the Wizard Book (SICP)
      section 3.2, "The Environment model of Evaluation".  */
 
-/* The environment uses several hash tables to speed access to
-   declared entities.  */
-
-#define HASH_TABLE_SIZE 1008
-typedef pkl_ast_node pkl_hash[HASH_TABLE_SIZE];
-
 /* An environment consists on a stack of frames, each frame containing
    a set of declarations, which in effect are PKL_AST_DECL nodes.
 
