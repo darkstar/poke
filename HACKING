@@ -43,6 +43,11 @@ Typify phases:
 - src/pkl-typify.c
 - src/pkl-typify.h
 
+Prep phase:
+
+- src/pkl-prep.c
+- src/pkl-prep.h
+
 Constant folding phase:
 
 - src/pkl-fold.c
