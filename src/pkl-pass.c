@@ -416,6 +416,76 @@ pkl_do_pass_1 (jmp_buf toplevel,
                          PKL_AST_STRUCT_ELEM_TYPE_TYPE (node), 0, node,
                          payloads, phases);
       break;
+    case PKL_AST_DECL:
+      PKL_AST_DECL_INITIAL (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_DECL_INITIAL (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_FUNC:
+      if (PKL_AST_FUNC_RET_TYPE (node))
+        PKL_AST_FUNC_RET_TYPE (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_FUNC_RET_TYPE (node), 0, node,
+                           payloads, phases);
+      if (PKL_AST_FUNC_ARGS (node))
+        PKL_AST_FUNC_ARGS (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_FUNC_ARGS (node), 0, node,
+                           payloads, phases);
+      PKL_AST_FUNC_BODY (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_FUNC_BODY (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_FUNC_ARG:
+      PKL_AST_FUNC_ARG_TYPE (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_FUNC_ARG_TYPE (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_COMP_STMT:
+      if (PKL_AST_COMP_STMT_STMTS (node))
+        PKL_PASS_CHAIN (PKL_AST_COMP_STMT_STMTS (node));
+      break;
+    case PKL_AST_ASS_STMT:
+      PKL_AST_ASS_STMT_LVALUE (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_ASS_STMT_LVALUE (node), 0, node,
+                         payloads, phases);
+      PKL_AST_ASS_STMT_EXP (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_ASS_STMT_EXP (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_IF_STMT:
+      PKL_AST_IF_STMT_EXP (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_IF_STMT_EXP (node), 0, node,
+                         payloads, phases);
+      PKL_AST_IF_STMT_THEN_STMT (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_IF_STMT_THEN_STMT (node), 0, node,
+                         payloads, phases);
+      if (PKL_AST_IF_STMT_ELSE_STMT (node))
+        PKL_AST_IF_STMT_ELSE_STMT (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_IF_STMT_ELSE_STMT (node), 0, node,
+                           payloads, phases);
+      break;
+    case PKL_AST_RETURN_STMT:
+      PKL_AST_RETURN_STMT_EXP (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_RETURN_STMT_EXP (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_EXP_STMT:
+      PKL_AST_EXP_STMT_EXP (node)
+        = pkl_do_pass_1 (toplevel, ast,
+                         PKL_AST_EXP_STMT_EXP (node), 0, node,
+                         payloads, phases);
+      break;
+    case PKL_AST_NULL_STMT:
     case PKL_AST_INTEGER:
     case PKL_AST_STRING:
     case PKL_AST_IDENTIFIER:

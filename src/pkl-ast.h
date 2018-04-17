@@ -536,7 +536,9 @@ pkl_ast_node pkl_ast_make_func (pkl_ast ast,
    definition.
 
    TYPE is the type of the argument.
-   IDENTIFIER is the name of the argument.  */
+
+   IDENTIFIER is the name of the argument.  It is a PKL_AST_IDENTIFIER
+   node.  */
 
 #define PKL_AST_FUNC_ARG_TYPE(AST) ((AST)->func_arg.type)
 #define PKL_AST_FUNC_ARG_IDENTIFIER(AST) ((AST)->func_arg.identifier)
