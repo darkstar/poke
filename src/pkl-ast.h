@@ -109,24 +109,9 @@ enum pkl_ast_endian
 
 enum pkl_ast_endian pkl_ast_default_endian (void);
 
-/* The AST nodes representing types are characterized by type codes
-   (see below in this file for more details on this.)  The following
-   enumeration defines the type codes.
-
-   The definitions of the supported integral types are in
-   pdl-types.def.  */
-
-#define PKL_DEF_TYPE(CODE,NAME,SIZE,SIGNED) CODE,
-enum pkl_ast_integral_type_code
-{
-# include "pkl-types.def"
-  PKL_TYPE_LAST_INTEGRAL
-};
-#undef PKL_DEF_TYPE
-
 enum pkl_ast_type_code
 {
-  PKL_TYPE_INTEGRAL = PKL_TYPE_LAST_INTEGRAL,
+  PKL_TYPE_INTEGRAL,
   PKL_TYPE_STRING,
   PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,

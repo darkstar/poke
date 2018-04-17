@@ -1,0 +1,45 @@
+/* pkl-std.pk - Standard library for poke.  */
+
+/* Copyright (C) 2018 Jose E. Marchesi.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* Standard integral types.  */
+
+deftype bit = uint<1>;
+deftype nibble = uint<4>;
+
+deftype uint8 = uint<8>;
+deftype uint16 = uint<16>;
+deftype uint32 = uint<32>;
+deftype uint64 = uint<64>;
+
+deftype int8 = int<8>;
+deftype int16 = int<16>;
+deftype int32 = int<32>;
+deftype int64 = int<64>;
+
+deftype char = uint8;
+deftype byte = uint8;
+deftype ushort = uint16;
+deftype short = int16;
+deftype ulong = uint64;
+deftype long = int64;
+
+/*
+Local variables:
+mode:c
+End:
+*/

@@ -119,6 +119,13 @@ Commands:
 - src/pk-print.c
 - src/pk-vm.c
 
+Poke Environment
+----------------
+
+- pickles/std.pk
+
+  Poke standard library.
+
 Test Suite
 ----------
 
