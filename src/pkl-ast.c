@@ -1591,6 +1591,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("VAR::\n");
 
       PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_IMM (back, VAR_BACK, "%d");
       PRINT_AST_IMM (over, VAR_OVER, "%d");
       break;
