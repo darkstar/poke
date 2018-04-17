@@ -826,6 +826,19 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp)
   return funcall_arg;
 }
 
+/* Build and return an AST node for a variable reference.  */
+
+pkl_ast_node
+pkl_ast_make_var (pkl_ast ast, int back, int over)
+{
+  pkl_ast_node var = pkl_ast_make_node (ast, PKL_AST_VAR);
+
+  PKL_AST_VAR_BACK (var) = back;
+  PKL_AST_VAR_OVER (var) = over;
+
+  return var;
+}
+
 /* Build and return an AST node for a compound statement.  */
 
 pkl_ast_node
@@ -1126,6 +1139,9 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_FUNCALL_ARG:
 
       pkl_ast_node_free (PKL_AST_FUNCALL_ARG_EXP (ast));
+      break;
+
+    case PKL_AST_VAR:
       break;
 
     case PKL_AST_COMP_STMT:
@@ -1571,6 +1587,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (exp, FUNCALL_ARG_EXP);
       break;
 
+    case PKL_AST_VAR:
+      IPRINTF ("VAR::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_IMM (back, VAR_BACK, "%d");
+      PRINT_AST_IMM (over, VAR_OVER, "%d");
+      break;
+      
     case PKL_AST_COMP_STMT:
       IPRINTF ("COMP_STMT::\n");
 

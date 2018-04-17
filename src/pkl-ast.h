@@ -52,6 +52,7 @@ enum pkl_ast_code
   PKL_AST_MAP,
   PKL_AST_FUNCALL,
   PKL_AST_FUNCALL_ARG,
+  PKL_AST_VAR,
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
@@ -835,6 +836,27 @@ struct pkl_ast_funcall_arg
 
 pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp);
 
+/* PKL_AST_VAR nodes represent variable references.
+
+   BACK is the number of compile-time environment frames to traverse
+   in order to find the frame where the referred variable is declared.
+
+   OVER is the position in the frame, i.e. the variable declaration is
+   the OVERth variable declaration in the frame.  */
+
+#define PKL_AST_VAR_BACK(AST) ((AST)->var.back)
+#define PKL_AST_VAR_OVER(AST) ((AST)->var.over)
+
+struct pkl_ast_var
+{
+  struct pkl_ast_common common;
+
+  int back;
+  int over;
+};
+
+pkl_ast_node pkl_ast_make_var (pkl_ast ast, int back, int over);
+
 /* PKL_AST_COMPOUND_STMT nodes represent compound statements in the
    language.
 
@@ -960,6 +982,7 @@ union pkl_ast_node
   struct pkl_ast_map map;
   struct pkl_ast_funcall funcall;
   struct pkl_ast_funcall_arg funcall_arg;
+  struct pkl_ast_var var;
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;
