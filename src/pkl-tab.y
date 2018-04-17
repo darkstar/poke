@@ -375,7 +375,7 @@ unary_operator:
 primary:
           IDENTIFIER
           	{
-                  /* Search for a variable definition in the
+                  /* XXX Search for a variable definition in the
                      compile-time environment, and create a
                      PKL_AST_VAR node with it's lexical
                      environment.  */

@@ -56,15 +56,24 @@ pkl_new ()
 
   memset (compiler, 0, sizeof (struct pkl_compiler));
 
+  /* Create the top-level compile-time environment.  This will be used
+     as long as the incremental compiler lives.  */
   compiler->env = pkl_env_new ();
+
   /* XXX: bootstrap the compiler: Load pkl-rt.pk.  An error
      bootstraping is an internal error and should be reported as
      such.  */
-  
-  /* XXX: Now we can load the standard library, which among other
-     things defines the standard types.  An error in the standard
-     library should be reported as a regular error.  */
 
+  /* Now we can load the standard library, which among other things
+     defines the standard types.  An error in the standard library
+     should be reported as a regular error.  */
+
+#if 0
+  if (!pkl_compile_file (compiler,
+                         /* XXX: use POKEDIR  */
+                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
+    exit (1);
+#endif
   return compiler;
 }
 
@@ -131,7 +140,7 @@ rest_of_compilation (pkl_compiler compiler,
   };
 
   /* XXX */
-  pkl_ast_print (stdout, ast->ast);
+  /*  pkl_ast_print (stdout, ast->ast); */
       
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
     goto error;
@@ -177,7 +186,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       return 0;
     }
 
-  ret = pkl_parse_file (NULL /* XXX env */, &ast, fd, fname);
+  ret = pkl_parse_file (compiler->env, &ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -190,7 +199,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   fclose (fd);
   program = rest_of_compilation (compiler, ast);
   /* XXX */  
-  pvm_print_program (stdout, program);
+  /* pvm_print_program (stdout, program); */
   pvm_destroy_program (program);
 
   return 1;
@@ -210,7 +219,7 @@ pkl_compile_expression (pkl_compiler compiler,
   int ret;
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (NULL /* XXX env */, &ast, PKL_PARSE_EXPRESSION, buffer, end);
+  ret = pkl_parse_buffer (compiler->env, &ast, PKL_PARSE_EXPRESSION, buffer, end);
   if (ret == 1)
     /* Parse error.  */
     goto error;

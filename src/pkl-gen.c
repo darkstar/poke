@@ -62,6 +62,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 PKL_PHASE_END_HANDLER
 
 /*
+ * DECL
+ * | INITIAL
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
+{
+  /* XXX: stop for now.  */
+  PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * INTEGER
  */
 
@@ -987,6 +999,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   {
+   PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
    PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),

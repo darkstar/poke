@@ -31,6 +31,8 @@ deftype int16 = int<16>;
 deftype int32 = int<32>;
 deftype int64 = int<64>;
 
+deftype uint = uint32;
+deftype int = int32;
 deftype char = uint8;
 deftype byte = uint8;
 deftype ushort = uint16;

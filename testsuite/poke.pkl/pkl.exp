@@ -18,6 +18,11 @@
 
 poke_start
 
+# Load the standard library.
+
+set test load_std
+poke_test_cmd "load $srcdir/../pickles/std.pk" {}
+
 # Integers.
 
 set test intn
