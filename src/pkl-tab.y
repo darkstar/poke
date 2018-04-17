@@ -671,6 +671,8 @@ declaration:
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              $$))
                     {
+                      /* XXX: in the top-level, rename the old
+                         declaration and add the new one.  */
                       pkl_error (pkl_parser->ast, @2,
                                  "function or variable `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
