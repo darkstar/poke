@@ -280,8 +280,6 @@ pkl_error (pkl_ast ast,
                 break;
               }
           }
-
-        fputc ('\n', stderr);
       }
     else
       {
@@ -310,7 +308,8 @@ pkl_error (pkl_ast ast,
                 do
                   {
                     c = fgetc (fd);
-                    fputc (c, stderr);
+                    if (c != '\n')
+                      fputc (c, stderr);
                   }
                 while (c != EOF && c != '\0' && c != '\n');
                 break;
@@ -321,6 +320,7 @@ pkl_error (pkl_ast ast,
         assert (fseeko (fd, cur_pos, SEEK_SET) == 0);
       }
 
+    fputc ('\n', stderr);
     for (i = 1; i < loc.first_column; ++i)
       fputc (' ', stderr);
     for (; i < loc.last_column; ++i)
