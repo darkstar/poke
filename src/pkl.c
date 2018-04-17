@@ -162,6 +162,37 @@ rest_of_compilation (pkl_compiler compiler,
 }
 
 int
+pkl_compile_buffer (pkl_compiler compiler, char *buffer,
+                    char **end)
+{
+  pkl_ast ast = NULL;
+  pvm_program program;
+  int ret;
+
+  /* Parse the input program into an AST.  */
+  ret = pkl_parse_buffer (&compiler->env,
+                          &ast,
+                          PKL_PARSE_DECLARATION, buffer, end);
+  if (ret == 1)
+    /* Parse error.  */
+    goto error;
+  else if (ret == 2)
+    /* Memory exhaustion.  */
+    printf (_("out of memory\n"));
+
+  program = rest_of_compilation (compiler, ast);
+  /* XXX */  
+  /* pvm_print_program (stdout, program); */
+  pvm_destroy_program (program);
+
+  return 1;
+
+ error:
+  pkl_ast_free (ast);
+  return 0;
+}
+
+int
 pkl_compile_file (pkl_compiler compiler, const char *fname)
 {
   int ret;

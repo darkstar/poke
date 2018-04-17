@@ -110,6 +110,8 @@ pkl_parse_buffer (pkl_env *env,
     parser->start_token = START_PROGRAM;
   else if (what == PKL_PARSE_EXPRESSION)
     parser->start_token = START_EXP;
+  else if (what == PKL_PARSE_DECLARATION)
+    parser->start_token = START_DECL;
   else
     assert (0);
 

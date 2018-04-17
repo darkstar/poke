@@ -158,7 +158,7 @@ pkl_tab_error (YYLTYPE *llocp,
    full poke programs.  This trick is explained in the Bison Manual in
    the "Multiple start-symbols" section.  */
 
-%token START_EXP START_PROGRAM;
+%token START_EXP START_DECL START_PROGRAM;
 
 %start start
 
@@ -178,6 +178,19 @@ start:
                   pkl_parser->ast->ast = ASTREF ($$);
                   YYACCEPT;
                 }
+        | START_DECL declaration
+        	{
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+        | START_DECL declaration ','
+        	{
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+
         | START_PROGRAM program
         	{
                   $$ = pkl_ast_make_program (pkl_parser->ast, $2);

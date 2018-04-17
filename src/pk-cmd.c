@@ -346,6 +346,35 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
               
               switch (*a)
                 {
+                case 'd':
+                  {
+                    /* Process a poke definition.  */
+                    char *program_string;
+                    char *end;
+
+                    /* The command name (deftype, defvar, etc) is the
+                       first part of the program to compile.  */
+                    program_string = xmalloc (strlen (cmd_name) + strlen (p)
+                                              + 1);
+                    strcpy (program_string, cmd_name);
+                    strcat (program_string, " ");
+                    strcat (program_string, p);
+
+                    if (!pkl_compile_buffer (poke_compiler,
+                                             program_string,
+                                             &end))
+                      {
+                        /* The compiler should have emitted diagnostic
+                           messages, so don't bother the user with the
+                           usage message.  */
+                        besilent = 1;
+                      }
+
+                    match = 1;
+                    p = end;
+                    free (program_string);
+                    break;
+                  }
                 case 'e':
                   {
                     /* Compile a poke expression.  */
