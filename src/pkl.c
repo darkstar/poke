@@ -40,12 +40,13 @@
 #include "pkl-typify.h"
 #include "pkl-promo.h"
 #include "pkl-fold.h"
+#include "pkl-env.h"
 
 struct pkl_compiler
 {
+  pkl_env env;  /* Compiler environment.  */
   /* XXX: put the compiler environment here.  */
   /* XXX: put a link to the run-time top-level closure here.  */
-
 };
 
 pkl_compiler
@@ -55,12 +56,19 @@ pkl_new ()
     = xmalloc (sizeof (struct pkl_compiler));
 
   memset (compiler, 0, sizeof (struct pkl_compiler));
+
+  compiler->env = pkl_env_new ();
+  /* XXX: register standard types in the environment.  */
+  /* XXX: actually, load the standard library, which must define the
+     standard types.  */
+  
   return compiler;
 }
 
 void
 pkl_free (pkl_compiler compiler)
 {
+  pkl_env_free (compiler->env);
   free (compiler);
 }
 
@@ -165,8 +173,8 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       perror (fname);
       return 0;
     }
-  
-  ret = pkl_parse_file (&ast, fd, fname);
+
+  ret = pkl_parse_file (NULL /* XXX env */, &ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -199,7 +207,7 @@ pkl_compile_expression (pkl_compiler compiler,
   int ret;
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&ast, PKL_PARSE_EXPRESSION, buffer, end);
+  ret = pkl_parse_buffer (NULL /* XXX env */, &ast, PKL_PARSE_EXPRESSION, buffer, end);
   if (ret == 1)
     /* Parse error.  */
     goto error;

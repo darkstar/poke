@@ -187,13 +187,9 @@ D [0-9]
 "."		{ return '.'; }
 "@"		{ return '@'; }
 
-[A-Z]({L}|{D})* {
-  yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
-  return TYPENAME;
-}
-
-[a-z_]({L}|{D})* {
+{L}({L}|{D})* {
 #if 0
+   /* Search for a type declaration in the compile-time environment.  */
    pkl_ast_node type;
    if ((type = pkl_ast_get_registered (yyextra->ast, 
                                        yytext, PKL_AST_TYPE)) != NULL)

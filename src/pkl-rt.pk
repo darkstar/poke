@@ -18,6 +18,7 @@
 
 /* XXX: document here the special rules for the code in this file.
 
+   - No standard types.
    - Use a `_' prefix for every declaration.
    - No array, struct operators.  */
 

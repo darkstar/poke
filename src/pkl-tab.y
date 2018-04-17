@@ -375,6 +375,10 @@ unary_operator:
 primary:
           IDENTIFIER
           	{
+                  /* Search for a variable definition in the
+                     compile-time environment, and create a
+                     PKL_AST_VAR node with it's lexical
+                     environment.  */
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
                 }
@@ -649,25 +653,33 @@ struct_elem_type:
  * Declarations.
  */
 
+/* XXX: midrule action in breath-first: If local definition, push a
+   new frame to the current environment.  */
+
 declaration:
         DEFUN IDENTIFIER '=' function_specifier
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
+                  /* XXX: add the declaration to the current
+                     environment.  Error if it already exists.  */
                 }
-/*        | DEFSET IDENTIFIER '=' set_specifier ';' */
         | DEFTYPE IDENTIFIER '=' type_specifier ';'
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
+                  /* XXX: add the declaration to the current
+                     environment.  Error if it already exists. */
                 }
         | DEFVAR IDENTIFIER '=' expression ';'
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
+                  /* XXX: add the declaration to the current
+                     environment.  Error if it already exists.  */
                 }
         ;
 
@@ -680,6 +692,10 @@ comp_stmt:
         	{
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
+
+                  /* XXX: pop N frames from the current environment,
+                     where N is the number of declarations in
+                     stmt_decl_list.  */
                 }
         ;
 

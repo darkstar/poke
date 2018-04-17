@@ -76,6 +76,10 @@ typedef struct pkl_env *pkl_env;
 
 pkl_env pkl_env_new (void);
 
+/* Destroy ENV, freeing all resources.  */
+
+void pkl_env_free (pkl_env env);
+
 /* Make a new frame for the variable list DECLS and stack it in the
    environment ENV.  */
 

@@ -40,6 +40,7 @@ pkl_parser_init (void)
   pkl_tab_lex_init (&(parser->scanner));
   pkl_tab_set_extra (parser, parser->scanner);
 
+  parser->env = NULL;
   parser->ast = pkl_ast_init ();
   parser->interactive = 0;
   parser->filename = NULL;
@@ -66,7 +67,8 @@ pkl_parser_free (struct pkl_parser *parser)
    syntax error and 2 if there was a memory exhaustion.  */
 
 int
-pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
+pkl_parse_file (pkl_env env,
+                pkl_ast *ast, FILE *fd, const char *fname)
 {
   int ret;
   struct pkl_parser *parser;
@@ -75,6 +77,7 @@ pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
   parser->filename = xstrdup (fname);
   parser->start_token = START_PROGRAM;
 
+  parser->env = env;
   parser->ast->file = fd;
   parser->ast->filename = xstrdup (fname);
   pkl_tab_set_in (fd, parser->scanner);
@@ -92,7 +95,8 @@ pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname)
    memory exhaustion.  */
 
 int
-pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
+pkl_parse_buffer (pkl_env env,
+                  pkl_ast *ast, int what, char *buffer, char **end)
 {
   YY_BUFFER_STATE yybuffer;
   struct pkl_parser *parser;
@@ -112,6 +116,7 @@ pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end)
 
   /* XXX */
   /* pkl_tab_debug = 1; */
+  parser->env = env;
   parser->ast->buffer = xstrdup (buffer);
   ret = pkl_tab_parse (parser);
   *ast = parser->ast;

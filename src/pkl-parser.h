@@ -22,6 +22,7 @@
 #include <config.h>
 #include <stdio.h>
 
+#include "pkl-env.h"
 #include "pkl-ast.h"
 
 /* The `pkl_parser' struct holds the parser state.
@@ -32,6 +33,7 @@
 struct pkl_parser
 {
   void *scanner;
+  pkl_env env;
   pkl_ast ast;
   int interactive;
   char *filename;
@@ -44,8 +46,8 @@ struct pkl_parser
 #define PKL_PARSE_PROGRAM 0
 #define PKL_PARSE_EXPRESSION 1
 
-int pkl_parse_file (pkl_ast *ast, FILE *fd, const char *fname);
-int pkl_parse_buffer (pkl_ast *ast, int what, char *buffer, char **end);
+int pkl_parse_file (pkl_env env, pkl_ast *ast, FILE *fd, const char *fname);
+int pkl_parse_buffer (pkl_env env, pkl_ast *ast, int what, char *buffer, char **end);
 
 
 

@@ -33,6 +33,23 @@ pkl_env_new ()
   return env;
 }
 
+void
+pkl_env_free (pkl_env env)
+{
+  if (env)
+    {
+      pkl_ast_node t, n;
+
+      pkl_env_free (PKL_ENV_UP (env));
+      for (t = PKL_ENV_DECLS (env); t; t = n)
+        {
+          n = PKL_AST_CHAIN2 (t);
+          pkl_ast_node_free (t);
+        }
+      free (env);
+    }
+}
+
 pkl_env
 pkl_env_push_frame (pkl_env env, pkl_ast_node decls)
 {
