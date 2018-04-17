@@ -33,8 +33,10 @@ defun _gcd = (xint<*> a, xint<*> b) : xint<*>
     return _gcd (a % b);
 }
 
-/* Array to string.
+/* XXX Array to string.
    Struct to string.  */
+/* XXX error reporting routine, called by the macro
+   pkl_asm_rterror().  This should exit.  */
 
 /*
 Local variables:
