@@ -72,6 +72,13 @@ proc poke_test_cmd {cmd pattern} {
     global spawn_id
     global test
 
+    if [string equal $pattern {}] then {
+        set expected_pattern "\r\n$poke_prompt $"
+    } else {
+        set expected_pattern "\r\n$pattern\r\n$poke_prompt $"
+    }
+    
+
     send "$cmd\n"
     expect {
         -ex "internal compiler error" {
@@ -84,7 +91,7 @@ proc poke_test_cmd {cmd pattern} {
             fail "$test (compilation warning)"
         }
 
-        -re "\r\n$pattern\r\n$poke_prompt $" { pass "$test" }
+        -re $expected_pattern { pass "$test" }
 
         -re "$poke_prompt $" {
             fail "$test (bad match)"
