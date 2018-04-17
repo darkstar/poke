@@ -618,7 +618,11 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0, NULL);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | STRUCT '{' pushlevel struct_elem_type_list '}'
+        | STRUCT '{'
+        	{
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                }
+          struct_elem_type_list '}'
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
                     PKL_AST_LOC ($$) = @$;
@@ -724,18 +728,12 @@ declaration:
  * Statements.
  */
 
-pushlevel:
-	  %empty
-		{
-                  /* The purpose of pushing a new frame at the
-                     beginning of a new statement and a new struct
-                     type definition is to allow the first declaration
-                     in the block to ghost a global declaration.  */
+comp_stmt:
+          '{'
+          	{
                   pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
                 }
-
-comp_stmt:
-          '{' pushlevel stmt_decl_list '}'
+	  stmt_decl_list '}'
         	{
                   pkl_ast_node stmt_decl;
                   
