@@ -47,31 +47,20 @@
      For more details on this technique, see the Wizard Book (SICP)
      section 3.2, "The Environment model of Evaluation".  */
 
+/* The environment uses several hash tables to speed access to
+   declared entities.  */
+
+#define HASH_TABLE_SIZE 1008
+typedef pkl_ast_node pkl_hash[HASH_TABLE_SIZE];
+
 /* An environment consists on a stack of frames, each frame containing
-   a list of declarations, which in effect are PKL_AST_DECL nodes.
+   a set of declarations, which in effect are PKL_AST_DECL nodes.
 
    There are no values bound to the entities being declared, as values
    are not generally available at compile-time.  However, the type
-   information is always available at compile-time.
+   information is always available at compile-time.  */
 
-   DECLS is a pointer to the first of such declarations, or NULL if
-   the frame is empty.  The declaration nodes are chained through
-   CHAIN2.  Note that a given variable can only be linked by one
-   frame.
-
-   UP is a link to the immediately enclosing frame.  This is NULL for
-   the top-level frame.  */
-
-#define PKL_ENV_DECLS(F) ((F)->decls)
-#define PKL_ENV_UP(F) ((F)->up)
-
-struct pkl_env
-{
-  pkl_ast_node decls;
-  struct pkl_env *up;
-};
-
-typedef struct pkl_env *pkl_env;
+typedef struct pkl_env *pkl_env;  /* Struct defined in pkl-env.c */
 
 /* Get an empty environment.  */
 

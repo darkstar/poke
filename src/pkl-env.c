@@ -24,6 +24,69 @@
 
 #include "pkl-env.h"
 
+/* The declarations are organized in a set of hash tables:
+   TYPES_TABLE contains type declarations.
+   VARS_TABLE contains both variable and function declarations.
+
+   Note that the reason we are storing variables and functions in a
+   single table is because they share the same namespace.
+
+   The declaration nodes are chained in the hash tables through
+   CHAIN2.
+
+   UP is a link to the immediately enclosing frame.  This is NULL for
+   the top-level frame.  */
+
+#define PKL_ENV_UP(F) ((F)->up)
+
+struct pkl_env
+{
+  pkl_hash types_table;
+  pkl_hash vars_table;
+  
+  struct pkl_env *up;
+};
+
+/* The hash tables above are handled using the following
+   functions.  */
+
+static int
+hash_string (const char *name)
+{
+  size_t len;
+  int hash;
+  int i;
+
+  len = strlen (name);
+  hash = len;
+  for (i = 0; i < len; i++)
+    hash = ((hash * 613) + (unsigned)(name[i]));
+
+#define HASHBITS 30
+  hash &= (1 << HASHBITS) - 1;
+  hash %= HASH_TABLE_SIZE;
+#undef HASHBITS
+
+  return hash;
+}
+
+static void
+free_hash_table (pkl_hash *hash_table)
+{
+  size_t i;
+  pkl_ast_node t, n;
+
+  for (i = 0; i < HASH_TABLE_SIZE; ++i)
+    if ((*hash_table)[i])
+      for (t = (*hash_table)[i]; t; t = n)
+        {
+          n = PKL_AST_CHAIN2 (t);
+          pkl_ast_node_free (t);
+        }
+}
+
+/* The following functions are documented in pkl-env.h.  */
+
 pkl_env
 pkl_env_new ()
 {
@@ -38,14 +101,10 @@ pkl_env_free (pkl_env env)
 {
   if (env)
     {
-      pkl_ast_node t, n;
-
       pkl_env_free (PKL_ENV_UP (env));
-      for (t = PKL_ENV_DECLS (env); t; t = n)
-        {
-          n = PKL_AST_CHAIN2 (t);
-          pkl_ast_node_free (t);
-        }
+
+      free_hash_table (&env->types_table);
+      free_hash_table (&env->vars_table);
       free (env);
     }
 }
