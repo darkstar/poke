@@ -1176,82 +1176,21 @@ pkl_ast_node_free (pkl_ast_node ast)
   free (ast);
 }
 
-/* Allocate and initialize a new AST and return it.  The hash tables
-   are zeroed.  */
+/* Allocate and initialize a new AST and return it.  */
 
 pkl_ast
 pkl_ast_init (void)
 {
-#if 0
-  static struct
-    {
-      int code;
-      char *id;
-      size_t size;
-      int signed_p;
-    } *type, stditypes[] =
-        {
-#define PKL_DEF_TYPE(CODE,ID,SIZE,SIGNED) {CODE, ID, SIZE, SIGNED},
-# include "pkl-types.def"
-#undef PKL_DEF_TYPE
-          { PKL_TYPE_NOTYPE, NULL, 0 }
-        };
-
-  size_t nentries;
-#endif
   struct pkl_ast *ast;
 
   /* Allocate a new AST and initialize it to 0.  */
-  
   ast = xmalloc (sizeof (struct pkl_ast));
   memset (ast, 0, sizeof (struct pkl_ast));
 
-
-#if 0
-  /* Create and register standard types in the types hash and also in
-     the stdtypes array for easy access by type code.  */
-  
-  nentries
-    = (sizeof (stditypes) / sizeof (stditypes[0]));
-  ast->stdtypes = xmalloc (nentries * sizeof (pkl_ast_node *));
-
-  /* Integral types.  */
-  for (type = stditypes; type->code != PKL_TYPE_NOTYPE; type++)
-    {
-      pkl_ast_node t
-        = pkl_ast_make_integral_type (ast,
-                                      type->size, type->signed_p);
-      pkl_ast_register (ast, type->id, t);
-      ast->stdtypes[type->code] = ASTREF (t);
-    }
-  ast->stdtypes[nentries - 1] = NULL;
-  
-  /* String type.  */
-  ast->stringtype = pkl_ast_make_string_type (ast);
-  ast->stringtype = ASTREF (ast->stringtype);
-  pkl_ast_register (ast, "string", ast->stringtype);
-#endif
-  
   return ast;
 }
 
-/* Free all the memory allocated to store the nodes and the hash
-   tables of an AST.  */
-
-static void
-free_hash_table (pkl_hash *hash_table)
-{
-  size_t i;
-  pkl_ast_node t, n;
-
-  for (i = 0; i < HASH_TABLE_SIZE; ++i)
-    if ((*hash_table)[i])
-      for (t = (*hash_table)[i]; t; t = n)
-        {
-          n = PKL_AST_CHAIN2 (t);
-          pkl_ast_node_free (t);
-        }
-}
+/* Free all the memory allocated to store the nodes of an AST.  */
 
 void
 pkl_ast_free (pkl_ast ast)
@@ -1264,194 +1203,10 @@ pkl_ast_free (pkl_ast ast)
     return;
   
   pkl_ast_node_free (ast->ast);
-
-  free_hash_table (&ast->ids_hash_table);
-  free_hash_table (&ast->types_hash_table);
-  free_hash_table (&ast->enums_hash_table);
-
-#if 0
-  for (i = 0; ast->stdtypes[i] != NULL; i++)
-    pkl_ast_node_free (ast->stdtypes[i]);
-  free (ast->stdtypes);
-  pkl_ast_node_free (ast->stringtype);
-#endif
-  
   free (ast->buffer);
   free (ast->filename);
   free (ast);
 }
-
-
-/* Hash a string.  This is used by the functions below.  */
-
-static int
-hash_string (const char *name)
-{
-  size_t len;
-  int hash;
-  int i;
-
-  len = strlen (name);
-  hash = len;
-  for (i = 0; i < len; i++)
-    hash = ((hash * 613) + (unsigned)(name[i]));
-
-#define HASHBITS 30
-  hash &= (1 << HASHBITS) - 1;
-  hash %= HASH_TABLE_SIZE;
-#undef HASHBITS
-
-  return hash;
-}
-
-/* Return a PKL_AST_IDENTIFIER node whose name is the NULL-terminated
-   string STR.  If an identifier with that name has previously been
-   referred to, the name node is returned this time.  */
-
-pkl_ast_node
-pkl_ast_get_identifier (struct pkl_ast *ast,
-                        const char *str)
-{
-  pkl_ast_node id;
-  int hash;
-  size_t len;
-
-  /* Compute the hash code for the identifier string.  */
-  len = strlen (str);
-
-  hash = hash_string (str);
-
-  /* Search the hash table for the identifier.  */
-  for (id = ast->ids_hash_table[hash];
-       id != NULL;
-       id = PKL_AST_CHAIN2 (id))
-    if (PKL_AST_IDENTIFIER_LENGTH (id) == len
-        && !strcmp (PKL_AST_IDENTIFIER_POINTER (id), str))
-      return id;
-
-  /* Create a new node for this identifier, and put it in the hash
-     table.  */
-  id = pkl_ast_make_identifier (ast, str);
-  PKL_AST_CHAIN2 (id) = ast->ids_hash_table[hash];
-  ast->ids_hash_table[hash] = ASTREF (id);
-
-  return id;
-
-}
-
-/* Return the standard type string.  */
-
-pkl_ast_node
-pkl_ast_get_string_type (pkl_ast ast)
-{
-  return ast->stringtype;
-}
-
-/* Return an integral type with the given attribute SIZE and SIGNED_P.
-   If the type exists in the stdtypes array, return it.  Otherwise
-   create a new one.  */
-
-pkl_ast_node
-pkl_ast_get_integral_type (pkl_ast ast, size_t size, int signed_p)
-{
-  size_t i;
-
-  i = 0;
-  while (ast->stdtypes[i] != NULL)
-    {
-      pkl_ast_node stdtype = ast->stdtypes[i];
-
-      if (PKL_AST_TYPE_I_SIZE (stdtype) == size
-          && PKL_AST_TYPE_I_SIGNED (stdtype) == signed_p)
-        return stdtype;
-
-      ++i;
-    }
-
-  return pkl_ast_make_integral_type (ast, size, signed_p);
-}
-
-#if 0
-/* Register an AST node under the given NAME in the corresponding hash
-   table maintained by the AST, and return a pointer to it.  */
-
-pkl_ast_node
-pkl_ast_register (struct pkl_ast *ast,
-                  const char *name,
-                  pkl_ast_node ast_node)
-{
-  enum pkl_ast_code code;
-  pkl_hash *hash_table;
-  int hash;
-  pkl_ast_node t;
-
-  code = PKL_AST_CODE (ast_node);
-  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM);
-
-  if (code == PKL_AST_ENUM)
-    hash_table = &ast->enums_hash_table;
-  else
-    hash_table = &ast->types_hash_table;
-
-  hash = hash_string (name);
-
-  for (t = (*hash_table)[hash]; t != NULL; t = PKL_AST_CHAIN (t))
-    if ((code == PKL_AST_TYPE
-         && (PKL_AST_TYPE_NAME (t)
-             && !strcmp (PKL_AST_TYPE_NAME (t), name)))
-        || (code == PKL_AST_ENUM
-            && PKL_AST_ENUM_TAG (t)
-            && PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name)))
-      return NULL;
-
-  if (code == PKL_AST_TYPE)
-    /* Put the passed type in the hash table.  */
-    PKL_AST_TYPE_NAME (ast_node) = xstrdup (name);
-
-  PKL_AST_CHAIN2 (ast_node) = (*hash_table)[hash];
-  (*hash_table)[hash] = ASTREF (ast_node);
-
-  return ast_node;
-}
-#endif
-
-#if 0
-/* Return the AST node registered under the name NAME, of type CODE
-   has not been registered, return NULL.  */
-
-pkl_ast_node
-pkl_ast_get_registered (pkl_ast ast,
-                        const char *name,
-                        enum pkl_ast_code code)
-{
-  int hash;
-  pkl_ast_node t;
-  pkl_hash *hash_table;
-
-  assert (code == PKL_AST_TYPE || code == PKL_AST_ENUM);
-
-  if (code == PKL_AST_ENUM)
-    hash_table = &ast->enums_hash_table;
-  else
-    hash_table = &ast->types_hash_table;
-    
-  hash = hash_string (name);
-
-  /* Search the hash table for the type.  */
-  for (t = (*hash_table)[hash]; t != NULL; t = PKL_AST_CHAIN2 (t))
-    if ((code == PKL_AST_TYPE
-         && (PKL_AST_TYPE_NAME (t)
-             && !strcmp (PKL_AST_TYPE_NAME (t), name)))
-        || (code == PKL_AST_ENUM
-            && PKL_AST_ENUM_TAG (t)
-            && PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t))
-            && !strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_ENUM_TAG (t)), name)))
-      return t;
-
-  return NULL;
-}
-#endif
 
 pkl_ast_node
 pkl_ast_reverse (pkl_ast_node ast)

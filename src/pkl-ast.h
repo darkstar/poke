@@ -998,14 +998,11 @@ union pkl_ast_node
    AST contains the tree of linked nodes, starting with a
    PKL_AST_PROGRAM node.
 
-   Some of the tree nodes can be stored in the several hash tables,
-   which are created during parsing.
-
    `pkl_ast_init' allocates and initializes a new AST and returns a
    pointer to it.
 
    `pkl_ast_free' frees all the memory allocated to store the AST
-   nodes and also the hash tables.
+   nodes.
 
    `pkl_ast_node_free' frees the memory allocated to store a single
    node in the AST and its descendants.  This function is used by the
@@ -1019,14 +1016,6 @@ struct pkl_ast
   size_t uid;
   pkl_ast_node ast;
 
-  pkl_hash ids_hash_table;
-  pkl_hash types_hash_table;
-  pkl_hash enums_hash_table;
-  pkl_hash structs_hash_table;
-
-  pkl_ast_node *stdtypes;
-  pkl_ast_node stringtype;
-
   char *buffer;
   FILE *file;
   char *filename;
@@ -1035,24 +1024,6 @@ struct pkl_ast
 pkl_ast pkl_ast_init (void);
 void pkl_ast_free (pkl_ast ast);
 void pkl_ast_node_free (pkl_ast_node ast);
-
-/* The following functions are used by the lexer and the parser in
-   order to populate/inquiry the hash tables in the AST.  */
-
-pkl_ast_node pkl_ast_get_identifier (pkl_ast ast,
-                                     const char *str);
-
-pkl_ast_node pkl_ast_get_registered (pkl_ast ast,
-                                     const char *name,
-                                     enum pkl_ast_code code);
-
-pkl_ast_node pkl_ast_register (pkl_ast ast,
-                               const char *name,
-                               pkl_ast_node ast_node);
-
-pkl_ast_node pkl_ast_get_string_type (pkl_ast ast);
-pkl_ast_node pkl_ast_get_integral_type (pkl_ast ast,
-                                        size_t size, int signed_p);
 
 #ifdef PKL_DEBUG
 
