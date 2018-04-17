@@ -379,8 +379,28 @@ primary:
                      compile-time environment, and create a
                      PKL_AST_VAR node with it's lexical
                      environment.  */
-                  $$ = $1;
-                  PKL_AST_LOC ($$) = @$;
+
+                  int back, over;
+                  pkl_ast_node var_type;
+
+                  const char *name = PKL_AST_IDENTIFIER_POINTER ($1);
+
+                  pkl_ast_node decl
+                    = pkl_env_lookup_var (pkl_parser->env,
+                                          name, &back, &over);
+                  if (!decl)
+                    {
+                      pkl_error (pkl_parser->ast, @1,
+                                 "undefined variable '%s'", name);
+                      YYERROR;
+                    }
+
+                  $$ = pkl_ast_make_var (pkl_parser->ast, back, over);
+                  var_type = PKL_AST_TYPE (PKL_AST_DECL_INITIAL (decl));
+                  PKL_AST_TYPE ($$) = ASTREF (var_type);
+                  PKL_AST_LOC ($$) = @1;
+
+                  ASTREF ($1); pkl_ast_node_free ($1);
                 }
 	| INTEGER
                 {
@@ -686,6 +706,7 @@ declaration:
                       pkl_error (pkl_parser->ast, @2,
                                  "function or variable `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
+                      YYERROR;
                     }
                 }
         | DEFVAR IDENTIFIER '=' expression ';'
@@ -706,6 +727,7 @@ declaration:
                       pkl_error (pkl_parser->ast, @2,
                                  "function or variable `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
+                      YYERROR;
                     }
                 }
         | DEFTYPE IDENTIFIER '=' type_specifier ';'
@@ -726,6 +748,7 @@ declaration:
                       pkl_error (pkl_parser->ast, @2,
                                  "type `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
+                      YYERROR;
                     }
                 }
         ;

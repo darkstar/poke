@@ -403,6 +403,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
     case PKL_AST_IDENTIFIER:
     case PKL_AST_ENUM:
     case PKL_AST_ENUMERATOR:
+    case PKL_AST_VAR:
       /* These node types have no children.  */
       break;
     default:
