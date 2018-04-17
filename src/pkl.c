@@ -64,16 +64,6 @@ pkl_new ()
      bootstraping is an internal error and should be reported as
      such.  */
 
-  /* Now we can load the standard library, which among other things
-     defines the standard types.  An error in the standard library
-     should be reported as a regular error.  */
-
-#if 0
-  if (!pkl_compile_file (compiler,
-                         /* XXX: use POKEDIR  */
-                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
-    exit (1);
-#endif
   return compiler;
 }
 

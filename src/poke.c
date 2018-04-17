@@ -233,8 +233,14 @@ main (int argc, char *argv[])
   poke_interactive_p = isatty (fileno (stdin));
 
   /* Initialization.  */
-  poke_compiler = pkl_new ();
   pvm_init ();
+  poke_compiler = pkl_new ();
+  /* Load the poke standard library, which among other things defines
+     the standard types.  */
+  if (!pkl_compile_file (poke_compiler,
+                         /* XXX: use POKEDIR  */
+                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
+    exit (1);
 
   /* Enter the REPL.  */
   if (poke_interactive_p)
