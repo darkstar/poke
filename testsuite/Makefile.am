@@ -16,7 +16,7 @@
 AUTOMAKE_OPTIONS = dejagnu
 
 check-DEJAGNU: site.exp
-	srcdir=`cd $(srcdir) && pwd`; export srcdir; \
+	@srcdir=`cd $(srcdir) && pwd`; export srcdir; \
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
