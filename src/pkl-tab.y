@@ -622,6 +622,10 @@ struct_type_specifier:
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $3);
                     PKL_AST_LOC ($$) = @$;
+
+                    /* XXX: pop N frames from the current environment,
+                       where N is the number of declarations in
+                       struct_elem_type_list.  */
                 }
         ;
 
