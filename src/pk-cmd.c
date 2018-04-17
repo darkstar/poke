@@ -359,12 +359,17 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     char *end;
 
                     /* The command name (deftype, defvar, etc) is the
-                       first part of the program to compile.  */
+                       first part of the program to compile.  Also,
+                       add the final ';' for defvar and deftype.  */
                     program_string = xmalloc (strlen (cmd_name) + strlen (p)
-                                              + 1);
+                                              + 1 /* ; */ + 1);
                     strcpy (program_string, cmd_name);
                     strcat (program_string, " ");
                     strcat (program_string, p);
+
+                    if (strcmp (cmd_name, "defvar") == 0
+                        || strcmp (cmd_name, "deftype") == 0)
+                      strcat (program_string, ";");
 
                     if (!pkl_compile_buffer (poke_compiler,
                                              program_string,
