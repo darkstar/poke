@@ -50,8 +50,9 @@
 /* An environment consists on a stack of frames, each frame containing
    a list of declarations, which in effect are PKL_AST_DECL nodes.
 
-   There are no values bound to these variables, as values are not
-   generally available at compile-time.
+   There are no values bound to the entities being declared, as values
+   are not generally available at compile-time.  However, the type
+   information is always available at compile-time.
 
    DECLS is a pointer to the first of such declarations, or NULL if
    the frame is empty.  The declaration nodes are chained through
