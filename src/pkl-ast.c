@@ -282,6 +282,17 @@ pkl_ast_make_type (pkl_ast ast)
 }
 
 pkl_ast_node
+pkl_ast_make_named_type (pkl_ast ast, pkl_ast_node name)
+{
+  pkl_ast_node type = pkl_ast_make_type (ast);
+
+  assert (name);
+
+  PKL_AST_TYPE_NAME (type) = ASTREF (name);
+  return type;
+}
+
+pkl_ast_node
 pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
@@ -1171,6 +1182,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 pkl_ast
 pkl_ast_init (void)
 {
+#if 0
   static struct
     {
       int code;
@@ -1184,17 +1196,21 @@ pkl_ast_init (void)
 #undef PKL_DEF_TYPE
           { PKL_TYPE_NOTYPE, NULL, 0 }
         };
-  struct pkl_ast *ast;
+
   size_t nentries;
+#endif
+  struct pkl_ast *ast;
 
   /* Allocate a new AST and initialize it to 0.  */
   
   ast = xmalloc (sizeof (struct pkl_ast));
   memset (ast, 0, sizeof (struct pkl_ast));
 
+
+#if 0
   /* Create and register standard types in the types hash and also in
      the stdtypes array for easy access by type code.  */
-
+  
   nentries
     = (sizeof (stditypes) / sizeof (stditypes[0]));
   ast->stdtypes = xmalloc (nentries * sizeof (pkl_ast_node *));
@@ -1214,7 +1230,8 @@ pkl_ast_init (void)
   ast->stringtype = pkl_ast_make_string_type (ast);
   ast->stringtype = ASTREF (ast->stringtype);
   pkl_ast_register (ast, "string", ast->stringtype);
-
+#endif
+  
   return ast;
 }
 
@@ -1239,7 +1256,9 @@ free_hash_table (pkl_hash *hash_table)
 void
 pkl_ast_free (pkl_ast ast)
 {
+#if 0
   size_t i;
+#endif
 
   if (ast == NULL)
     return;
@@ -1250,11 +1269,13 @@ pkl_ast_free (pkl_ast ast)
   free_hash_table (&ast->types_hash_table);
   free_hash_table (&ast->enums_hash_table);
 
+#if 0
   for (i = 0; ast->stdtypes[i] != NULL; i++)
     pkl_ast_node_free (ast->stdtypes[i]);
   free (ast->stdtypes);
   pkl_ast_node_free (ast->stringtype);
-
+#endif
+  
   free (ast->buffer);
   free (ast->filename);
   free (ast);
@@ -1350,6 +1371,7 @@ pkl_ast_get_integral_type (pkl_ast ast, size_t size, int signed_p)
   return pkl_ast_make_integral_type (ast, size, signed_p);
 }
 
+#if 0
 /* Register an AST node under the given NAME in the corresponding hash
    table maintained by the AST, and return a pointer to it.  */
 
@@ -1392,7 +1414,9 @@ pkl_ast_register (struct pkl_ast *ast,
 
   return ast_node;
 }
+#endif
 
+#if 0
 /* Return the AST node registered under the name NAME, of type CODE
    has not been registered, return NULL.  */
 
@@ -1427,6 +1451,7 @@ pkl_ast_get_registered (pkl_ast ast,
 
   return NULL;
 }
+#endif
 
 pkl_ast_node
 pkl_ast_reverse (pkl_ast_node ast)
@@ -1655,41 +1680,46 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("TYPE::\n");
 
       PRINT_COMMON_FIELDS;
-      IPRINTF ("code:\n");
-      switch (PKL_AST_TYPE_CODE (ast))
+      if (PKL_AST_TYPE_NAME (ast))
+        PRINT_AST_SUBAST (name, TYPE_NAME);
+      else
         {
-        case PKL_TYPE_INTEGRAL: IPRINTF ("  integral\n"); break;
-        case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
-        case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
-        case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
-        case PKL_TYPE_OFFSET: IPRINTF ("  offset\n"); break;
-        default:
-          IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
-          break;
-        }
-      PRINT_AST_IMM (complete, TYPE_COMPLETE, "%d");
-      switch (PKL_AST_TYPE_CODE (ast))
-        {
-        case PKL_TYPE_INTEGRAL:
-          PRINT_AST_IMM (signed_p, TYPE_I_SIGNED, "%d");
-          PRINT_AST_IMM (size, TYPE_I_SIZE, "%zu");
-          break;
-        case PKL_TYPE_ARRAY:
-          PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
-          PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
-          break;
-        case PKL_TYPE_STRUCT:
-          PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%zu");
-          IPRINTF ("elems:\n");
-          PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
-          break;
-        case PKL_TYPE_OFFSET:
-          PRINT_AST_SUBAST (base_type, TYPE_O_BASE_TYPE);
-          PRINT_AST_SUBAST (unit, TYPE_O_UNIT);
-          break;
-        case PKL_TYPE_STRING:
-        default:
-          break;
+          IPRINTF ("code:\n");
+          switch (PKL_AST_TYPE_CODE (ast))
+            {
+            case PKL_TYPE_INTEGRAL: IPRINTF ("  integral\n"); break;
+            case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
+            case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
+            case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
+            case PKL_TYPE_OFFSET: IPRINTF ("  offset\n"); break;
+            default:
+              IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
+              break;
+            }
+          PRINT_AST_IMM (complete, TYPE_COMPLETE, "%d");
+          switch (PKL_AST_TYPE_CODE (ast))
+            {
+            case PKL_TYPE_INTEGRAL:
+              PRINT_AST_IMM (signed_p, TYPE_I_SIGNED, "%d");
+              PRINT_AST_IMM (size, TYPE_I_SIZE, "%zu");
+              break;
+            case PKL_TYPE_ARRAY:
+              PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
+              PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
+              break;
+            case PKL_TYPE_STRUCT:
+              PRINT_AST_IMM (nelem, TYPE_S_NELEM, "%zu");
+              IPRINTF ("elems:\n");
+              PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
+              break;
+            case PKL_TYPE_OFFSET:
+              PRINT_AST_SUBAST (base_type, TYPE_O_BASE_TYPE);
+              PRINT_AST_SUBAST (unit, TYPE_O_UNIT);
+              break;
+            case PKL_TYPE_STRING:
+            default:
+              break;
+            }
         }
       break;
 

@@ -562,7 +562,8 @@ function_arg:
 type_specifier:
 	  TYPENAME
                 {
-                    $$ = $1;
+                    $$ = pkl_ast_make_named_type (pkl_parser->ast, $1);
+                    PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
         | INTCONSTR INTEGER '>'

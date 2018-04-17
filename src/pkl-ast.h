@@ -619,6 +619,10 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
 
 /* PKL_AST_TYPE nodes represent types.
    
+   If NAME is not NULL, then all we know about this type is its name,
+   which is encoded in a PKL_AST_IDENTIFIER node.  The rest of the
+   attributes are meaningless in this case.
+
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
 
@@ -657,9 +661,9 @@ struct pkl_ast_type
 {
   struct pkl_ast_common common;
 
+  union pkl_ast_node *name;
   enum pkl_ast_type_code code;
   int complete;
-  char *name;
   
   union
   {
@@ -690,6 +694,7 @@ struct pkl_ast_type
   } val;
 };
 
+pkl_ast_node pkl_ast_make_named_type (pkl_ast ast, pkl_ast_node name);
 pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);

@@ -33,26 +33,19 @@
      pushes a new frame to the environment containing the declaration.
      When the scope of the local declaration ends, it pops the frame.
 
-   - When it finds a type name in a PKL_AST_IDENTIFIER node, it
+   - When it finds a named type (PKL_AST_TYPE with a name), it
      searches for its declaration in the current environment and
-     replaces the identifier with a PKL_AST_TYPE node.  If a
-     declaration is not found for the type a compile-time error is
-     raised.
+     replaces the named type with a complete PKL_AST_TYPE node.  If a
+     declaration is not found for the named type a compile-time error
+     is raised.
 
-   - When it finds a variable name in a PKL_AST_IDENTIFIER node, it
-     searches for its declaration in the current environment and
-     replaces the identifier with a PKL_AST_VAR_REF node containing
-     its lexical address.  If a declaration is not found for the
-     variable a compile-time error is raised.
+   - When it finds a named variable (PKL_AST_VAR with a name), it
+     searches for its declaration in the current environment and turns
+     the named variable into a lexical variable, with a lexical
+     address.  If a declaration is not found for the named variable a
+     compile-time error is raised.  The variable may be a function.
 
-   - When it finds a function name in a PKL_AST_IDENTIFIER node as
-     part of a funcall, it searches for its declaration in the current
-     environment and replaces the identifier with a PKL_AST_FUN_REF
-     node containing its lexical address.  If a declaration is not
-     found for the function a compile-time error is raised.
-
-   After this phase every type, variable and function reference are
-   resolved.
+   After this phase every type and variable reference are resolved.
 
    The global compile-time environment is given in the `env' field of
    the payload.  It should not be NULL.  */

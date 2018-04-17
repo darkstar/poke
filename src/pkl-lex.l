@@ -187,9 +187,14 @@ D [0-9]
 "."		{ return '.'; }
 "@"		{ return '@'; }
 
-{L}({L}|{D})* {
-   pkl_ast_node type;
+[A-Z]({L}|{D})* {
+  yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
+  return TYPENAME;
+}
 
+[a-z_]({L}|{D})* {
+#if 0
+   pkl_ast_node type;
    if ((type = pkl_ast_get_registered (yyextra->ast, 
                                        yytext, PKL_AST_TYPE)) != NULL)
      {
@@ -198,9 +203,12 @@ D [0-9]
      }
    else
      {
+#endif
        yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
        return IDENTIFIER;
+#if 0
      }
+#endif
 }
 
 ({HEXCST}|{BINCST}|{OCTCST}|{DECCST}){IS}? {
