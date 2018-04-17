@@ -223,6 +223,31 @@ repl ()
     }
 }
 
+static void
+initialize ()
+{
+  /* Initialize the Poke Virtual Machine.  */
+  pvm_init ();
+
+  /* Initialize the poke incremental compiler and load the standard
+     library.  */
+
+  poke_compiler = pkl_new ();
+  if (!pkl_compile_file (poke_compiler,
+                         /* XXX: use POKEDIR  */
+                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
+    exit (1);
+}
+
+static void
+finalize ()
+{
+  pk_io_shutdown ();
+  pk_cmd_shutdown ();
+  pvm_shutdown ();
+  pkl_free (poke_compiler);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -233,24 +258,14 @@ main (int argc, char *argv[])
   poke_interactive_p = isatty (fileno (stdin));
 
   /* Initialization.  */
-  pvm_init ();
-  poke_compiler = pkl_new ();
-  /* Load the poke standard library, which among other things defines
-     the standard types.  */
-  if (!pkl_compile_file (poke_compiler,
-                         /* XXX: use POKEDIR  */
-                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
-    exit (1);
-
+  initialize ();
+  
   /* Enter the REPL.  */
   if (poke_interactive_p)
     repl ();
 
   /* Cleanup.  */
-  pk_io_shutdown ();
-  pk_cmd_shutdown ();
-  pvm_shutdown ();
-  pkl_free (poke_compiler);
-    
+  finalize ();
+  
   return poke_exit_code;
 }
