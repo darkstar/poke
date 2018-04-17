@@ -489,6 +489,10 @@ struct:
                                               0 /* nelem */, $3);
                     PKL_AST_LOC ($$) = @$;
 
+                    /* There can't be declarations inside a struct
+                       literal.  The pushlevel in this rule and the
+                       subsequent pop_frame is to avoid shift/reduce
+                       conflicts with the next rule.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	;
@@ -653,8 +657,10 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0, NULL);
                     PKL_AST_LOC ($$) = @$;
 
-                    /* The pushlevel in this rule is to avoid
-                       shift/reduce conflicts with the next rule.  */
+                    /* The pushlevel in this rule and the subsequent
+                       pop_frame, while not strictly needed, is to
+                       avoid shift/reduce conflicts with the next
+                       rule.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         | pushlevel STRUCT '{' struct_elem_type_list '}'
