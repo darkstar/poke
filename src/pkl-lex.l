@@ -189,7 +189,7 @@ D [0-9]
 
 {L}({L}|{D})* {
 #if 0
-   /* Search for a type declaration in the compile-time environment.  */
+   /* XXX: search for a type declaration in the compile-time environment.  */
    pkl_ast_node type;
    if ((type = pkl_ast_get_registered (yyextra->ast, 
                                        yytext, PKL_AST_TYPE)) != NULL)
