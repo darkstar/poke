@@ -58,7 +58,9 @@ pkl_new ()
   memset (compiler, 0, sizeof (struct pkl_compiler));
 
   compiler->env = pkl_env_new ();
-  /* XXX: register standard types in the environment.  */
+  /* XXX: bootstrap the compiler.  Load pkl-rt.pk.  */
+  /* XXX: Now we can load the standard library, which must define the
+     standard types.  */
   /* XXX: actually, load the standard library, which must define the
      standard types.  */
   
