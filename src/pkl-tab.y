@@ -620,6 +620,8 @@ struct_type_specifier:
                 }
         | STRUCT '{'
         	{
+                  /* This is to allow redefining in the first
+                     declaration in the struct type.  */
                     pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
                 }
           struct_elem_type_list '}'
@@ -735,6 +737,8 @@ declaration:
 comp_stmt:
           '{'
           	{
+                  /* This is to allow redefining in the first
+                     declaration in the compound statement.  */
                   pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
                 }
 	  stmt_decl_list '}'
