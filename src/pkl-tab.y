@@ -483,11 +483,13 @@ funcall_arg:
         ;
 
 struct:
-	  '{' struct_elem_list '}'
+	  pushlevel '{' struct_elem_list '}'
 		{
                     $$ = pkl_ast_make_struct (pkl_parser->ast,
-                                              0 /* nelem */, $2);
+                                              0 /* nelem */, $3);
                     PKL_AST_LOC ($$) = @$;
+
+                    pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	;
 
@@ -646,18 +648,16 @@ type_specifier:
         ;
 
 struct_type_specifier:
-	  STRUCT '{' '}'
+	  pushlevel STRUCT '{' '}'
           	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0, NULL);
                     PKL_AST_LOC ($$) = @$;
+
+                    /* The pushlevel in this rule is to avoid
+                       shift/reduce conflicts with the next rule.  */
+                    pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | STRUCT '{'
-        	{
-                  /* This is to allow redefining in the first
-                     declaration in the struct type.  */
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
-                }
-          struct_elem_type_list '}'
+        | pushlevel STRUCT '{' struct_elem_type_list '}'
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
                     PKL_AST_LOC ($$) = @$;
@@ -668,7 +668,7 @@ struct_type_specifier:
 
                     /* Now pop the frame introduced by the struct type
                        definition itself.  */
-                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                    pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         ;
 
@@ -770,14 +770,18 @@ declaration:
  * Statements.
  */
 
-comp_stmt:
-          '{'
-          	{
+pushlevel:
+	  %empty
+		{
                   /* This is to allow redefining in the first
-                     declaration in the compound statement.  */
+                     declaration in the compound statement or struct
+                     type definition.  */
                   pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
                 }
-	  stmt_decl_list '}'
+        ;
+
+comp_stmt:
+	  pushlevel '{' stmt_decl_list '}'
         	{
                   pkl_ast_node stmt_decl;
                   
