@@ -176,7 +176,8 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       return 0;
     }
 
-  ret = pkl_parse_file (compiler->env, &ast, fd, fname);
+  ret = pkl_parse_file (&compiler->env,
+                        &ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -209,7 +210,9 @@ pkl_compile_expression (pkl_compiler compiler,
   int ret;
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (compiler->env, &ast, PKL_PARSE_EXPRESSION, buffer, end);
+  ret = pkl_parse_buffer (&compiler->env,
+                          &ast,
+                          PKL_PARSE_EXPRESSION, buffer, end);
   if (ret == 1)
     /* Parse error.  */
     goto error;
