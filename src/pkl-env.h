@@ -20,6 +20,8 @@
 #define PKL_ENV_H
 
 #include <config.h>
+#include <assert.h>
+
 #include "pkl-ast.h"
 
 /* The poke compiler maintains a data structure called the
@@ -115,5 +117,10 @@ pkl_ast_node pkl_env_lookup_var (pkl_env env, const char *name,
    in case the type is found.  Return NULL ortherwise.  */
 
 pkl_ast_node pkl_env_lookup_type (pkl_env env, const char *name);
+
+/* Return 1 if the given ENV contains only one frame.  Return 0
+   otherwise.  */
+
+int pkl_env_toplevel_p (pkl_env env);
 
 #endif /* !PKL_ENV_H  */

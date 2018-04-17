@@ -239,3 +239,10 @@ pkl_env_lookup_type (pkl_env env, const char *name)
 
   return pkl_env_lookup_type (env->up, name);
 }
+
+int
+pkl_env_toplevel_p (pkl_env env)
+{
+  assert (env);
+  return env->up == NULL;
+}

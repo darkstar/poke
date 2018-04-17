@@ -663,7 +663,10 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (! pkl_env_toplevel_p (pkl_parser->env))
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+
+
                   if (!pkl_env_register_var (pkl_parser->env,
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              $$))
@@ -679,7 +682,9 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (! pkl_env_toplevel_p (pkl_parser->env))
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+
                   if (!pkl_env_register_var (pkl_parser->env,
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              $$))
@@ -695,7 +700,9 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  if (! pkl_env_toplevel_p (pkl_parser->env))
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+
                   if (!pkl_env_register_type (pkl_parser->env,
                                               PKL_AST_IDENTIFIER_POINTER ($2),
                                              $$))
