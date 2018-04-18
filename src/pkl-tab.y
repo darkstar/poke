@@ -728,7 +728,7 @@ declaration:
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       /* XXX: also, annotate the decl to be renaming a
                          toplevel variable, so the code generator can
-                         do the right thing: to generate a POPRVAR
+                         do the right thing: to generate a POPSETVAR
                          instruction instead of a POPVAR.  */
                       YYERROR;
                     }
