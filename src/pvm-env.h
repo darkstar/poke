@@ -22,7 +22,7 @@
 #include <config.h>
 #include <assert.h>
 
-#include "pvm.h"
+#include "pvm-val.h"
 
 /* The poke virtual machine (PVM) maintains a data structure called
    the run-time environment.  This structure contains run-time frames,

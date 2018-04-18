@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include "pvm-val.h"
+#include "pvm-env.h"
 
 /* The following enumeration contains every possible exit code
    resulting from the execution of a program in the PVM.  */

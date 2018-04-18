@@ -37,6 +37,10 @@ end
 
 wrapped-functions
   printf
+  pvm_env_lookup
+  pvm_env_register
+  pvm_env_pop_frame
+  pvm_env_push_frame
 end
 
 #wrapped-globals
@@ -136,7 +140,7 @@ end
 
 state-struct-runtime-c
   code
-      /* XXX: add the run-time environment here.  */
+      pvm_env env;
       uint32_t push_hi;
   end
 end
@@ -184,28 +188,32 @@ end
 
 instruction pushf ()
   code
-  /* XXX push a new frame in the environment.  */
+    jitter_state_runtime.env
+       = pvm_env_push_frame (jitter_state_runtime.env);
   end
 end
 
 instruction popf ()
   code
-  /* XXX pop a frame from the environment.  */
+    jitter_state_runtime.env
+       = pvm_env_pop_frame (jitter_state_runtime.env);
   end
 end
 
 # pushvar BACK, OVER
 instruction pushvar (?n, ?n) #  _ -> VAL
   code
-  /* XXX push the variable value stored at
-         (BACK,OVER)  in the environment.  */
+    pvm_env_lookup (jitter_state_runtime.env,
+                    (int) JITTER_ARGN0,
+                    (int) JITTER_ARGN1);
   end
 end
 
 instruction popvar () # VAL -> _
   code
-  /* XXX pop a value from the stack and register
-     it in the current environment.  */
+    pvm_env_register (jitter_state_runtime.env,
+                      JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
   end
 end
 

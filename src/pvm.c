@@ -30,6 +30,8 @@
   ((PVM)->pvm_state.pvm_state_backing.result_value)
 #define PVM_STATE_EXIT_CODE(PVM)                        \
   ((PVM)->pvm_state.pvm_state_backing.exit_code)
+#define PVM_STATE_ENV(PVM)                              \
+  ((PVM)->pvm_state.pvm_state_runtime.env)
 
 struct pvm
 {
@@ -53,7 +55,7 @@ pvm_init (void)
   GC_INIT ();
 
   /* Initialize the VM state.  */
-  /* XXX: create an initial run-time environment.  */
+  PVM_STATE_ENV (pvm) = pvm_env_new ();
   pvm_state_initialize (&pvm->pvm_state);
 
   return pvm;
