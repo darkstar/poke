@@ -489,4 +489,8 @@ set test defvar-4
 poke_test_cmd "defvar name = \"foo\"" {}
 poke_test_cmd "print name + \" bar\"" {"foo bar"}
 
+set test defvar-5
+poke_test_cmd "defvar offset = \[12 B\]" {}
+poke_test_cmd "print offset + \[1 b\]" {\[97 b\]}
+
 poke_exit
