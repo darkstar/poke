@@ -37,6 +37,7 @@ poke_SOURCES = poke.c poke.h \
                pkl-parser.h pkl-parser.c \
                pvm.h pvm.c \
                pvm-val.h pvm-val.c \
+               pvm-env.h pvm-env.c \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 BUILT_SOURCES = pkl-tab.h pkl-lex.c

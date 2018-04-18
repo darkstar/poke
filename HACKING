@@ -76,6 +76,16 @@ Virtual machine driver:
 - src/pvm.c
 - src/pvm.h
 
+Virtual machine values:
+
+- src/pvm-val.c
+- src/pvm-val.h
+
+Run-time environment:
+
+- src/pvm-env.c
+- src/pvm-env.h
+
 Virtual machine instructions:
 
 - src/pvm.jitter

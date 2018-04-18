@@ -163,9 +163,9 @@ pkl_env_push_frame (pkl_env env)
 pkl_env
 pkl_env_pop_frame (pkl_env env)
 {
-  pkl_env up = NULL;
+  pkl_env up;
 
-  assert (env);
+  assert (env->up != NULL);
 
   up = env->up;
   env->up = NULL;
@@ -247,6 +247,5 @@ pkl_env_lookup_type (pkl_env env, const char *name)
 int
 pkl_env_toplevel_p (pkl_env env)
 {
-  assert (env);
   return env->up == NULL;
 }

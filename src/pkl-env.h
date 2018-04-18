@@ -72,7 +72,8 @@ void pkl_env_free (pkl_env env);
 pkl_env pkl_env_push_frame (pkl_env env);
 
 /* Pop a frame from ENV and return the modified environment.  The
-   contents of the popped frame are disposed.  */
+   contents of the popped frame are disposed.  Trying to pop the
+   top-level frame is an error.  */
 
 pkl_env pkl_env_pop_frame (pkl_env env);
 
