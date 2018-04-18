@@ -138,6 +138,55 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * FUNC
+ * | [TYPE]
+ * | [FUNC_ARG]...
+ * | BODY
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
+{
+  /* Function prologue:
+     - Push an environment.
+  */
+
+  /* XXX */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * FUNC_ARG
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
+{
+  /* Pop the argument from the stack and put it in the current
+     environment.  */
+
+  /* XXX  */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | [TYPE]
+ * | [FUNC_ARG]...
+ * | BODY
+ * FUNC
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func)
+{
+  /* Function epilogue:
+
+     - Push the return value in the stack, if the function returns a
+       value.
+     - Pop the function's environment.
+     - Return to the caller: link.
+   */
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * INTEGER
  */
 
@@ -1082,6 +1131,9 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
+   PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),
    PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
