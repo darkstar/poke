@@ -86,6 +86,32 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 {
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node decl = PKL_PASS_NODE;
+
+  /* If we are not at the top-level, push a new frame in the
+     run-time environment.  */
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
+    {
+      pkl_asm_insn (payload->pasm, PKL_INSN_PUSHF);
+    }
+
+  switch (PKL_AST_DECL_KIND (decl))
+    {
+    case PKL_AST_DECL_KIND_VAR:
+      pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);
+      break;
+    case PKL_AST_DECL_KIND_TYPE:
+      /* Nothing to do.  */
+      break;
+    case PKL_AST_DECL_KIND_FUNC:
+    default:
+      assert (0);
+      break;
+    }
+
   /* if DEFUN
 
        - Especialize payload->program
@@ -93,8 +119,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
          and the current environment.
        - Push a new environment, if parent != PROGRAM.
        - Register the pvm_val fun in the environment.
-
-      if DEFVAR
 
        - INITIAL pushed a value in the stack.
        - Push a new environment, if parent != PROGRAM.
@@ -106,6 +130,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
        - Push a new environment, if parent != PROGRAM.
        - Register it in the environment.
     */
+
 
   /* XXX */
 }

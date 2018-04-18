@@ -1542,6 +1542,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("DECL::\n");
 
       PRINT_COMMON_FIELDS;
+      PRINT_AST_IMM (kind, DECL_KIND, "%d");
       PRINT_AST_SUBAST (name, DECL_NAME);
       PRINT_AST_SUBAST (initial, DECL_INITIAL);
       break;
