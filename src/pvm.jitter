@@ -118,6 +118,7 @@ end
 
 state-struct-runtime-c
   code
+      /* XXX: add the run-time environment here.  */
       uint32_t push_hi;
   end
 end
