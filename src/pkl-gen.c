@@ -112,6 +112,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 PKL_PHASE_END_HANDLER
 
 /*
+ * VAR
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
+{
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node var = PKL_PASS_NODE;
+
+  pkl_asm_insn (payload->pasm, PKL_INSN_PUSHVAR,
+                PKL_AST_VAR_BACK (var), PKL_AST_VAR_OVER (var));
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * COMP_STMT
  * | (STMT | DECL)
  * | ...
@@ -1129,6 +1144,7 @@ struct pkl_phase pkl_phase_gen =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
    PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
+   PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
