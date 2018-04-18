@@ -78,7 +78,10 @@ pvm_env_register (pvm_env env, pvm_val val)
   env->vars[env->num_vars++] = val;
 }
 
-pvm_val
+/* Note the function attribute to assure the function is compiled with
+   tail-recursion optimization.  */
+
+pvm_val __attribute__((optimize ("optimize-sibling-calls")))
 pvm_env_lookup (pvm_env env, int back, int over)
 {
   if (back == 0)
