@@ -20,9 +20,6 @@
 #define PVM_H
 
 #include <config.h>
-#include <string.h>
-#include <stdint.h>
-#include <xalloc.h>
 
 #include "pvm-val.h"
 
