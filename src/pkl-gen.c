@@ -68,8 +68,72 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
 {
+  /* if DEFUN
+
+       - Save a copy of the partial program in payload->program.
+       - Start a new pvm_program for the function body, and
+       put it in the payload.  */
+
   /* XXX: stop for now.  */
   PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | INITIAL
+ * DECL
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
+{
+  /* if DEFUN
+
+       - Especialize payload->program
+       - Make a pvm_val for a closure, containing payload->program
+         and the current environment.
+       - Push a new environment.
+       - Register the pvm_val fun in the environment.
+
+      if DEFVAR
+
+       - INITIAL pushed a value in the stack.
+       - Push a new environment.
+       - Register it in the environment.
+
+      if DEFTYPE  (???)
+       
+       - INITIAL pushed a value in the stack.
+       - Push a new environment.
+       - Register it in the environment.
+    */
+
+  /* XXX */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * COMP_STMT
+ * | (STMT | DECL)
+ * | ...
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_comp_stmt)
+{
+  /* Push a frame into the environment.  */
+  /* XXX */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | (STMT | DECL)
+ * | ...
+ * COMP_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
+{
+  /* Pop N+1 frames from the environment.  */
+  /* XXX */
 }
 PKL_PHASE_END_HANDLER
 
@@ -513,6 +577,19 @@ PKL_PHASE_END_HANDLER
 #endif
 
 /*
+ * TYPE_STRUCT
+ * | STRUCT_ELEM_TYPE
+ * | ...
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type_struct)
+{
+  /* Push a frame to the environment.  */
+  /* XXX */
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
  *  PKL_AST_STRUCT_ELEM_TYPE)
  * | | STRUCT_ELEM_TYPE
@@ -534,6 +611,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
  pkl_asm_insn (pasm, PKL_INSN_MKTYSCT);
+
+ /* XXX: pop N+1 frames from the environment.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1000,6 +1079,9 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_gen =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
+   PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
+   PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
    PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
@@ -1042,6 +1124,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
+   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_bf_type_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
    PKL_PHASE_ELSE_HANDLER (pkl_gen_noimpl),
   };

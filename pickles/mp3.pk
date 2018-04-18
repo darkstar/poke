@@ -48,7 +48,7 @@ deftype mp3_frame_hdr =
 
     uint16 checksum if protection_bit == 0;
 
-    defun bitrate : uint32
+    defun bitrate = () : uint32
     {
       /* MPEG-1,2 Layer 1  */
       if (layer_id == 3)

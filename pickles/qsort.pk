@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-defun qsort (array, left = 0, right = sizeof (array))
+defun qsort = (any[] array, left = 0, right = sizeof (array))
 {
-  defun partition (left, right)
+  defun partition = (left, right) : int
   {
     let pivot = array[left];
     let i = left;
@@ -56,7 +56,7 @@ defun qsort (array, left = 0, right = sizeof (array))
     }
 }
 
-defun test_qsort ()
+defun test_qsort = ()
 {
   /* Sort several arrays in the current IO stream.  */
   let bytes = byte[2048] @ 0x0;
