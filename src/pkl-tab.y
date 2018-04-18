@@ -726,6 +726,10 @@ declaration:
                       pkl_error (pkl_parser->ast, @2,
                                  "function or variable `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
+                      /* XXX: also, annotate the decl to be renaming a
+                         toplevel variable, so the code generator can
+                         do the right thing: to generate a POPRVAR
+                         instruction instead of a POPVAR.  */
                       YYERROR;
                     }
                 }
