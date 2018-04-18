@@ -62,24 +62,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 PKL_PHASE_END_HANDLER
 
 /*
- * DECL
- * | INITIAL
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
-{
-  /* if DEFUN
-
-       - Save a copy of the partial program in payload->program.
-       - Start a new pvm_program for the function body, and
-       put it in the payload.  */
-
-  /* XXX: stop for now.  */
-  PKL_PASS_BREAK;
-}
-PKL_PHASE_END_HANDLER
-
-/*
  * | INITIAL
  * DECL
  */
@@ -1167,7 +1149,6 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
    PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
    PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),

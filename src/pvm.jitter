@@ -203,9 +203,9 @@ end
 # pushvar BACK, OVER
 instruction pushvar (?n, ?n) #  _ -> VAL
   code
-    pvm_env_lookup (jitter_state_runtime.env,
-                    (int) JITTER_ARGN0,
-                    (int) JITTER_ARGN1);
+    JITTER_PUSH_STACK (pvm_env_lookup (jitter_state_runtime.env,
+                                       (int) JITTER_ARGN0,
+                                       (int) JITTER_ARGN1));
   end
 end
 
