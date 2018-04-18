@@ -36,8 +36,8 @@ enum pk_cmd_arg_type
 };
 
 #define PK_CMD_ARG_TYPE(arg) ((arg).type)
-#define PK_CMD_ARG_EXP(arg) ((arg).val.exp)
-#define PK_CMD_ARG_DEF(arg) 0
+#define PK_CMD_ARG_EXP(arg) ((arg).val.prog)
+#define PK_CMD_ARG_DEF(arg) ((arg).val.prog)
 #define PK_CMD_ARG_INT(arg) ((arg).val.integer)
 #define PK_CMD_ARG_ADDR(arg) ((arg).val.addr)
 #define PK_CMD_ARG_STR(arg) ((arg).val.str)
@@ -48,7 +48,7 @@ struct pk_cmd_arg
   enum pk_cmd_arg_type type;
   union
   {
-    pvm_program exp;
+    pvm_program prog;
     int64_t integer;
     pk_io_off addr;
     const char *str;

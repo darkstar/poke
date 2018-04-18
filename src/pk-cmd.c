@@ -353,55 +353,55 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
               switch (*a)
                 {
                 case 'd':
-                  {
-                    /* Process a poke definition.  */
-                    char *program_string;
-                    char *end;
-
-                    /* The command name (deftype, defvar, etc) is the
-                       first part of the program to compile.  Also,
-                       add the final ';' for defvar and deftype.  */
-                    program_string = xmalloc (strlen (cmd_name) + strlen (p)
-                                              + 2 + 1);
-                    strcpy (program_string, cmd_name);
-                    strcat (program_string, " ");
-                    strcat (program_string, p);
-
-                    if (strcmp (cmd_name, "defvar") == 0
-                        || strcmp (cmd_name, "deftype") == 0)
-                      strcat (program_string, ";");
-
-                    if (!pkl_compile_buffer (poke_compiler,
-                                             program_string,
-                                             &end))
-                      {
-                        /* The compiler should have emitted diagnostic
-                           messages, so don't bother the user with the
-                           usage message.  */
-                        besilent = 1;
-                      }
-
-                    argv[argc].type = PK_CMD_ARG_DEF;
-                    match = 1;
-                    p += end - program_string - 1 - strlen (cmd_name) - 1;
-                    free (program_string);
-                    break;
-                  }
                 case 'e':
                   {
-                    /* Compile a poke expression.  */
+                    /* Compile a poke program.  */
                     pvm_program prog;
                     char *end;
+                    char *program_string;
 
-                    prog = pkl_compile_expression (poke_compiler,
-                                                   p, &end);
+                    if (*a == 'd') 
+                      {
+                        /* The command name (deftype, defvar, etc) is
+                           the first part of the program to compile.
+                           Also, add the final ';' for defvar and
+                           deftype.  */
+                        program_string = xmalloc (strlen (cmd_name) + strlen (p)
+                                                  + 2 + 1);
+                        strcpy (program_string, cmd_name);
+                        strcat (program_string, " ");
+                        strcat (program_string, p);
+                        
+                        if (strcmp (cmd_name, "defvar") == 0
+                            || strcmp (cmd_name, "deftype") == 0)
+                          strcat (program_string, ";");
+                      }
+                    else
+                      program_string = p;
+
+                    if (*a == 'e')
+                      prog = pkl_compile_expression (poke_compiler,
+                                                     program_string, &end);
+                    else
+                      prog = pkl_compile_buffer (poke_compiler,
+                                                 program_string, &end);
                     
                     if (prog != NULL)
                       {
-                        argv[argc].val.exp = prog;
-                        argv[argc].type = PK_CMD_ARG_EXP;
+                        argv[argc].val.prog = prog;
                         match = 1;
-                        p = end;
+
+                        if (*a == 'd')
+                          {
+                            argv[argc].type = PK_CMD_ARG_DEF;
+                            p += end - program_string - 1 - strlen (cmd_name) - 1;
+                            free (program_string);
+                          }
+                        else
+                          {
+                            argv[argc].type = PK_CMD_ARG_EXP;
+                            p = end;
+                          }
                       }
                     else
                       /* The compiler should have emitted diagnostic
@@ -561,8 +561,9 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   /* Free arguments occupying memory.  */
   for (i = 0; i < argc; ++i)
     {
-      if (argv[i].type == PK_CMD_ARG_EXP)
-        pvm_destroy_program (argv[i].val.exp);
+      if (argv[i].type == PK_CMD_ARG_EXP
+          || argv[i].type == PK_CMD_ARG_DEF)
+        pvm_destroy_program (argv[i].val.prog);
     }
   
   return ret;

@@ -47,7 +47,8 @@
    Then, subsequent calls to `pkl_compile_buffer' and
    `pkl_compile_file (..., PKL_PROGRAM, ...)' expands the
    internally-maintained program, with definitions of variables,
-   types, function etc from the user.
+   types, function etc from the user.  They return a PVM program that
+   should be executed to complete the declaration.
 
    At any point, the user can request to compile a poke expression
    with `pkl_compile_expression'.  This returns a PVM program that,
@@ -70,21 +71,21 @@ typedef struct pkl_compiler *pkl_compiler; /* This data structure is
 pkl_compiler pkl_new (void);
 void pkl_free (pkl_compiler compiler);
 
-/* Compile a poke program from the given file FNAME.  Return 0 in case
-   of a compilation error.  Return 1 otherwise.  */
+/* Compile a poke program from the given file FNAME.  Return NULL in
+   case of a compilation error.  */
 
-int pkl_compile_file (pkl_compiler compiler, const char *fname);
+pvm_program pkl_compile_file (pkl_compiler compiler, const char *fname);
 
-/* Compile a poke program from the given BUFFER.  Return 0 in case of
-   a compilation error.  Return 1 otherwise.  */
+/* Compile a poke program from the given BUFFER.  Return NULL in case
+   of a compilation error.  */
 
-int pkl_compile_buffer (pkl_compiler compiler,
-                        char *buffer, char **end);
+pvm_program pkl_compile_buffer (pkl_compiler compiler,
+                                char *buffer, char **end);
 
 /* Compile a poke expression from a NULL-terminated string BUFFER.
-   Return NULL in case of a compilation error.  Return 1 otherwise.
-   If not NULL, END is set to the first character in BUFFER that is
-   not part of the expression.  */
+   Return NULL in case of a compilation error.  If not NULL, END is
+   set to the first character in BUFFER that is not part of the
+   expression.  */
 
 pvm_program pkl_compile_expression (pkl_compiler compiler,
                                     char *buffer, char **end);

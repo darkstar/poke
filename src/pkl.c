@@ -161,7 +161,7 @@ rest_of_compilation (pkl_compiler compiler,
   return NULL;
 }
 
-int
+pvm_program
 pkl_compile_buffer (pkl_compiler compiler, char *buffer,
                     char **end)
 {
@@ -183,16 +183,18 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   program = rest_of_compilation (compiler, ast);
   /* XXX */  
   /* pvm_print_program (stdout, program); */
-  pvm_destroy_program (program);
+  if (program == NULL)
+    goto error;
 
-  return 1;
+  pvm_specialize_program (program);
+  return program;
 
  error:
   pkl_ast_free (ast);
-  return 0;
+  return NULL;
 }
 
-int
+pvm_program
 pkl_compile_file (pkl_compiler compiler, const char *fname)
 {
   int ret;
@@ -204,7 +206,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   if (!fd)
     {
       perror (fname);
-      return 0;
+      return NULL;
     }
 
   ret = pkl_parse_file (&compiler->env,
@@ -222,14 +224,16 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   program = rest_of_compilation (compiler, ast);
   /* XXX */  
   /* pvm_print_program (stdout, program); */
-  pvm_destroy_program (program);
+  if (program == NULL)
+    goto error;
 
-  return 1;
+  pvm_specialize_program (program);
+  return program;
 
  error:
   fclose (fd);
   pkl_ast_free (ast);
-  return 0;
+  return NULL;
 }
 
 pvm_program
@@ -256,7 +260,6 @@ pkl_compile_expression (pkl_compiler compiler,
     goto error;
   
   pvm_specialize_program (program);
-
   return program;
 
  error:

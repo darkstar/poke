@@ -18,16 +18,34 @@
 
 #include <config.h>
 #include <assert.h>
+#include <stdio.h>
+#include <gettext.h>
+#define _(str) dgettext (PACKAGE, str)
 
+#include "poke.h"
 #include "pk-cmd.h"
 
 static int
 pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
+  int pvm_ret;
+  pvm_program prog;
+  pvm_val val;
+  
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_DEF);
 
-  /* Nothing to do.  */
+  /* Execute the program with the definition in the pvm and check for
+     execution errors, but ignore the returned value.  */
+  
+  prog = PK_CMD_ARG_DEF (argv[0]);
+  pvm_ret = pvm_run (poke_pvm, prog, &val);
+  if (pvm_ret != PVM_EXIT_OK)
+    {
+      printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
+      return 0;
+    }
+
   return 1;
 }
 
