@@ -762,13 +762,27 @@ declaration:
                                               PKL_AST_IDENTIFIER_POINTER ($2),
                                               $$))
                     {
-                      /* XXX: in the top-level, rename the old
-                         declaration and add the new one.  */
-                      pkl_error (pkl_parser->ast, @2,
-                                 "type `%s' already defined",
-                                 PKL_AST_IDENTIFIER_POINTER ($2));
-                      YYERROR;
+                      assert (0);  /* This can't happen, because the
+                                      lexer wouldn't have scanned an
+                                      IDENTIFIER if the type were
+                                      already declared in the
+                                      environment.  */
                     }
+                }
+	| DEFTYPE TYPENAME '=' type_specifier ';'
+        	{
+                  if (pkl_env_toplevel_p (pkl_parser->env))
+                      {
+                          /* XXX: in the top-level, rename the old
+                             declaration and add the new one.  */
+                      }        
+
+                  pkl_error (pkl_parser->ast, @2,
+                             "type already defined");
+                  $2 = $2; /* To avoid warning.  */
+                  $4 = $4; /* Likewise.  */
+                  $$ = $$; /* Likewise.  */
+                  YYERROR;
                 }
         ;
 
