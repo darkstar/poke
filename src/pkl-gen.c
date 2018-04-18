@@ -163,7 +163,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
   /* Pop the argument from the stack and put it in the current
      environment.  */
 
-  /* XXX  */
+  /* XXX  pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);  */
 }
 PKL_PHASE_END_HANDLER
 

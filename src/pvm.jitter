@@ -161,6 +161,37 @@ end
 
 
 
+## Environment instructions
+
+instruction pushf ()
+  code
+  /* XXX push a new frame in the environment.  */
+  end
+end
+
+instruction popf ()
+  code
+  /* XXX pop a frame from the environment.  */
+  end
+end
+
+# pushvar BACK, OVER
+instruction pushvar (?n, ?n) #  _ -> VAL
+  code
+  /* XXX push the variable value stored at
+         (BACK,OVER)  in the environment.  */
+  end
+end
+
+instruction popvar () # VAL -> _
+  code
+  /* XXX pop a value from the stack and register
+     it in the current environment.  */
+  end
+end
+
+
+
 ## Miscellaneous Instructions
 
 instruction nop ()
