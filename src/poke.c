@@ -57,6 +57,9 @@ int poke_exit_code;
 /* The following global is the poke compiler.  */
 pkl_compiler poke_compiler;
 
+/* the following global is the poke virtual machine.  */
+pvm poke_pvm;
+
 /* Command line options management.  */
 
 enum
@@ -229,7 +232,7 @@ initialize ()
   /* Initialize the Poke Virtual Machine.  Note this should be done
      before initializing the compiler, since the later constructs pvm
      programs.  */
-  pvm_init ();
+  poke_pvm = pvm_init ();
 
   /* Initialize the poke incremental compiler and load the standard
      library.  */
@@ -245,8 +248,8 @@ finalize ()
 {
   pk_io_shutdown ();
   pk_cmd_shutdown ();
-  pvm_shutdown ();
   pkl_free (poke_compiler);
+  pvm_shutdown (poke_pvm);
 }
 
 int

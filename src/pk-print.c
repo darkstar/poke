@@ -22,6 +22,7 @@
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
+#include "poke.h"
 #include "pk-cmd.h"
 
 #define PK_PRINT_UFLAGS "xbo"
@@ -63,7 +64,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     base = 8;
   
   /* jitter_disassemble_program (prog, true, JITTER_CROSS_OBJDUMP, NULL); */
-  pvm_ret = pvm_run (prog, &val);
+  pvm_ret = pvm_run (poke_pvm, prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
   

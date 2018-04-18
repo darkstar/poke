@@ -22,6 +22,7 @@
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
+#include "poke.h"
 #include "pk-cmd.h"
 #include "pk-io.h"
 
@@ -47,7 +48,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
       prog = PK_CMD_ARG_EXP (argv[0]);
 
-      pvm_ret = pvm_run (prog, &val);
+      pvm_ret = pvm_run (poke_pvm, prog, &val);
       if (pvm_ret != PVM_EXIT_OK)
         goto rterror;
 

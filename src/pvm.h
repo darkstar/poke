@@ -37,17 +37,32 @@ enum pvm_exit_code
    in the file because it uses some stuff defined above.  */
 #include "pvm-vm.h"
 
+typedef struct pvm *pvm;
+
 /* A PVM program can be executed in the virtual machine at any time.
    The struct pvm_program is provided by Jitter, but we provide here
    an opaque type to be used by the PVM users.  */
 
 typedef struct pvm_program *pvm_program;
 
-/* Public functions.  */
+/* Initialize a new Poke Virtual Machine and return it.  */
 
-void pvm_init (void);
-void pvm_shutdown (void);
-enum pvm_exit_code pvm_run (pvm_program prog, pvm_val *res);
+pvm pvm_init (void);
+
+/* Finalize a Poke Virtual Machine, freeing all used resources.  */
+
+void pvm_shutdown (pvm pvm);
+
+/* Run a PVM program in a given Poke Virtual Machine.  Put the
+   resulting value in RES, if any, and return an exit code.  */
+
+enum pvm_exit_code pvm_run (pvm pvm,
+                            pvm_program prog,
+                            pvm_val *res);
+
+/* Get a string with a description of a PVM exit code as returned by
+   `pvm_run'.  */
+
 const char *pvm_error (enum pvm_exit_code code);
 
 #endif /* ! PVM_H */

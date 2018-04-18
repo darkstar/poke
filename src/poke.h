@@ -25,6 +25,7 @@ extern int poke_interactive_p;
 extern int poke_exit_p;
 extern int poke_exit_code;
 extern pkl_compiler poke_compiler;
+extern pvm poke_pvm;
 
 void pk_print_version ();
 
