@@ -48,7 +48,10 @@ pvm_run (pvm_program prog, pvm_val *res)
 {
   pvm_state.pvm_state_backing.result_value = PVM_NULL;
   pvm_state.pvm_state_backing.exit_code = PVM_EXIT_OK;
-    
+
+  /* XXX: get the run-time environment as an argument and set it
+     before interpreting the program.  */
+  
   pvm_interpret (prog, &pvm_state);
 
   if (res != NULL)
