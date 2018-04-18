@@ -695,6 +695,10 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
 /* PKL_AST_DECL nodes represent the declaration of a named entity:
    function, type, variable....
 
+   KIND allows to quickly identify the nature of the entity being
+   declared: PKL_AST_DECL_KIND_VAR, PKL_AST_DECL_KIND_TYPE or
+   PKL_AST_DECL_KIND_FUNC.
+
    NAME is PKL_AST_IDENTIFIER node containing the name in the
    association.
 
@@ -708,21 +712,28 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
    compile-time environment.  It is filled up when the declaration is
    registered in an environment.  */
 
+#define PKL_AST_DECL_KIND(AST) ((AST)->decl.kind)
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
 #define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
 #define PKL_AST_DECL_ORDER(AST) ((AST)->decl.order)
 
+#define PKL_AST_DECL_KIND_NONE 0
+#define PKL_AST_DECL_KIND_VAR 1
+#define PKL_AST_DECL_KIND_TYPE 2
+#define PKL_AST_DECL_KIND_FUNC 3
+
 struct pkl_ast_decl
 {
   struct pkl_ast_common common;
 
+  int kind;
   union pkl_ast_node *name;
   union pkl_ast_node *initial;
   int order;
 };
 
-pkl_ast_node pkl_ast_make_decl (pkl_ast ast,
+pkl_ast_node pkl_ast_make_decl (pkl_ast ast, int kind,
                                 pkl_ast_node name, pkl_ast_node initial);
 
 /* PKL_AST_OFFSET nodes represent poke object constructions.

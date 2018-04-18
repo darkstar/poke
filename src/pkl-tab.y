@@ -708,7 +708,8 @@ struct_elem_type:
 declaration:
         DEFUN IDENTIFIER '=' function_specifier
         	{
-                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  $$ = pkl_ast_make_decl (pkl_parser->ast,
+                                          PKL_AST_DECL_KIND_FUNC, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
@@ -730,7 +731,8 @@ declaration:
                 }
         | DEFVAR IDENTIFIER '=' expression ';'
         	{
-                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  $$ = pkl_ast_make_decl (pkl_parser->ast,
+                                          PKL_AST_DECL_KIND_VAR, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
@@ -751,7 +753,8 @@ declaration:
                 }
         | DEFTYPE IDENTIFIER '=' type_specifier ';'
         	{
-                  $$ = pkl_ast_make_decl (pkl_parser->ast, $2, $4);
+                  $$ = pkl_ast_make_decl (pkl_parser->ast,
+                                          PKL_AST_DECL_KIND_TYPE, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 

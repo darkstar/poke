@@ -690,13 +690,14 @@ pkl_ast_make_struct_elem (pkl_ast ast,
 /* Build and return an AST node for a declaration.  */
 
 pkl_ast_node
-pkl_ast_make_decl (pkl_ast ast, pkl_ast_node name,
+pkl_ast_make_decl (pkl_ast ast, int kind, pkl_ast_node name,
                    pkl_ast_node initial)
 {
   pkl_ast_node decl = pkl_ast_make_node (ast, PKL_AST_DECL);
 
   assert (name && initial);
 
+  PKL_AST_DECL_KIND (decl) = kind;
   PKL_AST_DECL_NAME (decl) = ASTREF (name);
   PKL_AST_DECL_INITIAL (decl) = ASTREF (initial);
 
