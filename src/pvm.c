@@ -83,9 +83,6 @@ pvm_run (pvm pvm, pvm_program prog, pvm_val *res)
   PVM_STATE_RESULT_VALUE (pvm) = PVM_NULL;
   PVM_STATE_EXIT_CODE (pvm) = PVM_EXIT_OK;
 
-  /* XXX: get the run-time environment as an argument and set it in
-     pvm_state_runtime before interpreting the program. */
-  
   pvm_interpret (prog, &pvm->pvm_state);
 
   if (res != NULL)
