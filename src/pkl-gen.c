@@ -91,19 +91,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
        - Especialize payload->program
        - Make a pvm_val for a closure, containing payload->program
          and the current environment.
-       - Push a new environment.
+       - Push a new environment, if parent != PROGRAM.
        - Register the pvm_val fun in the environment.
 
       if DEFVAR
 
        - INITIAL pushed a value in the stack.
-       - Push a new environment.
+       - Push a new environment, if parent != PROGRAM.
        - Register it in the environment.
 
       if DEFTYPE  (???)
        
        - INITIAL pushed a value in the stack.
-       - Push a new environment.
+       - Push a new environment, if parent != PROGRAM.
        - Register it in the environment.
     */
 
