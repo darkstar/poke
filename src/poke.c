@@ -226,12 +226,13 @@ repl ()
 static void
 initialize ()
 {
-  /* Initialize the Poke Virtual Machine.  */
+  /* Initialize the Poke Virtual Machine.  Note this should be done
+     before initializing the compiler, since the later constructs pvm
+     programs.  */
   pvm_init ();
 
   /* Initialize the poke incremental compiler and load the standard
      library.  */
-
   poke_compiler = pkl_new ();
   if (!pkl_compile_file (poke_compiler,
                          /* XXX: use POKEDIR  */
