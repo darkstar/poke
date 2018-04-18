@@ -241,6 +241,13 @@ PKL_DEF_INSN (PKL_INSN_PEEKL, "n", "peekl")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "n", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
 
+/* Environment instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_PUSHF, "", "pushf")
+PKL_DEF_INSN (PKL_INSN_POPF, "", "popf")
+PKL_DEF_INSN (PKL_INSN_PUSHVAR,"nn", "pushvar")
+PKL_DEF_INSN (PKL_INSN_POPVAR, "", "popvar")
+
 /* Miscellaneous instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
