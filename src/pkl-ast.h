@@ -710,13 +710,18 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
 
    ORDER is the order of the declaration in its containing
    compile-time environment.  It is filled up when the declaration is
-   registered in an environment.  */
+   registered in an environment.
+
+   SOURCE is a string describing where the declaration comes from.
+   Usually it will be the name of a source file, or "<stdin>" or
+   whatever.  */
 
 #define PKL_AST_DECL_KIND(AST) ((AST)->decl.kind)
 #define PKL_AST_DECL_NAME(AST) ((AST)->decl.name)
 #define PKL_AST_DECL_TYPE(AST) ((AST)->decl.type)
 #define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
 #define PKL_AST_DECL_ORDER(AST) ((AST)->decl.order)
+#define PKL_AST_DECL_SOURCE(AST) ((AST)->decl.source)
 
 #define PKL_AST_DECL_KIND_ANY 0
 #define PKL_AST_DECL_KIND_VAR 1
@@ -728,13 +733,15 @@ struct pkl_ast_decl
   struct pkl_ast_common common;
 
   int kind;
+  char *source;
   union pkl_ast_node *name;
   union pkl_ast_node *initial;
   int order;
 };
 
 pkl_ast_node pkl_ast_make_decl (pkl_ast ast, int kind,
-                                pkl_ast_node name, pkl_ast_node initial);
+                                pkl_ast_node name, pkl_ast_node initial,
+                                const char *source);
 
 /* PKL_AST_OFFSET nodes represent poke object constructions.
 

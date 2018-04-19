@@ -58,11 +58,20 @@ print_var_decl (pkl_ast_node decl, void *data)
 {
   pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
   pkl_ast_loc loc = PKL_AST_LOC (decl);
+  char *source =  PKL_AST_DECL_SOURCE (decl);
   /* XXX pvm_val = pvm_env_lookup (..); */
 
-  printf ("%s\t\t%s\t\t\tXXX:%d\n",
+  /* Print the name and the current value of the variable.  */
+  printf ("%s\t\t%s\t\t\t",
           PKL_AST_IDENTIFIER_POINTER (decl_name),
-          "XXX", loc.first_line);
+          "XXX");
+
+  /* Print information about the site where the variable was
+     declared.  */
+  if (source)
+    printf ("%s:%d\n", source, loc.first_line);
+  else
+    printf ("<stdin>\n");
 }
 
 static int

@@ -691,7 +691,7 @@ pkl_ast_make_struct_elem (pkl_ast ast,
 
 pkl_ast_node
 pkl_ast_make_decl (pkl_ast ast, int kind, pkl_ast_node name,
-                   pkl_ast_node initial)
+                   pkl_ast_node initial, const char *source)
 {
   pkl_ast_node decl = pkl_ast_make_node (ast, PKL_AST_DECL);
 
@@ -700,6 +700,8 @@ pkl_ast_make_decl (pkl_ast ast, int kind, pkl_ast_node name,
   PKL_AST_DECL_KIND (decl) = kind;
   PKL_AST_DECL_NAME (decl) = ASTREF (name);
   PKL_AST_DECL_INITIAL (decl) = ASTREF (initial);
+  if (source)
+    PKL_AST_DECL_SOURCE (decl) = xstrdup (source);
 
   return decl;
 }
@@ -1104,6 +1106,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_DECL:
 
+      free (PKL_AST_DECL_SOURCE (ast));
       pkl_ast_node_free (PKL_AST_DECL_NAME (ast));
       pkl_ast_node_free (PKL_AST_DECL_INITIAL (ast));
       break;
@@ -1543,6 +1546,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_IMM (kind, DECL_KIND, "%d");
+      if (PKL_AST_DECL_SOURCE (ast))
+        PRINT_AST_IMM (source, DECL_SOURCE, "'%s'");
       PRINT_AST_SUBAST (name, DECL_NAME);
       PRINT_AST_SUBAST (initial, DECL_INITIAL);
       break;
