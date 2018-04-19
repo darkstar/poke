@@ -102,6 +102,8 @@ pkl_tab_error (YYLTYPE *llocp,
 %token INTCONSTR UINTCONSTR OFFSETCONSTR
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
+%token LAMBDA
+%token STRING
 
 %token <opcode> MULA
 %token <opcode> DIVA
@@ -445,7 +447,8 @@ primary:
                 } 
         | '(' expression ')'
         	{
-                    $$ = $2;
+                  $$ = $2;
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         | array
 	| struct
@@ -574,18 +577,26 @@ array_initializer:
  */
 
 function_specifier:
-          '(' function_arg_list ')' comp_stmt
+          LAMBDA '(' pushlevel function_arg_list ')' comp_stmt
           	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
                                           NULL /* ret_type */,
-                                          $2, $4);
+                                          $4, $6);
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Pop the frame introduced by `pushlevel'
+                     above.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | '(' function_arg_list ')' ':' type_specifier comp_stmt
+        | LAMBDA '(' pushlevel function_arg_list ')' ':' type_specifier comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $5, $2, $6);
+                                          $7, $4, $8);
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Pop the frame introduced by `pushlevel'
+                     above.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         ;
 
@@ -606,6 +617,37 @@ function_arg:
                                               $1, $2);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Register the argument in the current environment,
+                     which is the function's environment pushed in
+                     `function_specifier'.  */
+
+                  pkl_ast_node arg_decl;
+
+                  pkl_ast_node dummy
+                    = pkl_ast_make_integer (pkl_parser->ast, 0);
+                  PKL_AST_TYPE (dummy) = ASTREF ($1);
+                  
+                  arg_decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                PKL_AST_DECL_KIND_VAR,
+                                                $2,
+                                                dummy,
+                                                NULL /* source */);
+                  PKL_AST_LOC (arg_decl) = @$;
+                  
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($2),
+                                         arg_decl))
+                    {
+                      pkl_error (pkl_parser->ast, @2,
+                                 "duplicated argument name `%s' in function declaration",
+                                 PKL_AST_IDENTIFIER_POINTER ($2));
+                      /* Make sure to pop the lambda frame.  */
+                      pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                      YYERROR;
+                    }
+
+                  $$ = $1;
                 }
         ;
 
@@ -622,6 +664,11 @@ type_specifier:
                   assert (decl != NULL
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | STRING
+        	{
+                  $$ = pkl_ast_make_string_type (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
         | INTCONSTR INTEGER '>'

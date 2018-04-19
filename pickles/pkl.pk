@@ -24,18 +24,19 @@
 
 /* Compiler built-ins.  */
 
-defun print = (string str) { __builtin_print__ }
+defun print = lambda (string str) { __builtin_print__ }
 
 /* Find the greatest common divisor of two integrals A and B using the
    Euclidean algorithm.  */
 
-defun _gcd = (xint<*> a, xint<*> b) : xint<*>
-{
-  if (b == 0)
-    return a;
-  else
-    return _gcd (a % b);
-}
+defun _gcd =
+  lambda (xint<*> a, xint<*> b) : xint<*>
+  {
+   if (b == 0)
+     return a;
+   else
+     return _gcd (a % b);
+  }
 
 /* XXX Array to string.
    Struct to string.  */

@@ -132,6 +132,8 @@ D [0-9]
 "deftype"	{ return DEFTYPE; }
 "defvar"	{ return DEFVAR; }
 "return"        { return RETURN; }
+"lambda"        { return LAMBDA; }
+"string"	{ return STRING; }
 
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }
