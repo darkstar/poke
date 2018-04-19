@@ -61,6 +61,12 @@ pvm_init (void)
   return pvm;
 }
 
+pvm_env
+pvm_get_env (pvm pvm)
+{
+  return PVM_STATE_ENV (pvm);
+}
+
 void
 pvm_shutdown (pvm pvm)
 {

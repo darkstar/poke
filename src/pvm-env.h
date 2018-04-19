@@ -83,8 +83,8 @@ pvm_env pvm_env_pop_frame (pvm_env env);
 void pvm_env_register (pvm_env env, pvm_val val);
 
 /* Return the value for the variable occupying the position BACK, OVER
-   in the the run-time environment ENV.  Return NULL if the variable
-   is not found.  */
+   in the the run-time environment ENV.  Return PVM_NULL if the
+   variable is not found.  */
 
 pvm_val pvm_env_lookup (pvm_env env, int back, int over);
 

@@ -91,15 +91,9 @@ pvm_program pkl_compile_buffer (pkl_compiler compiler,
 pvm_program pkl_compile_expression (pkl_compiler compiler,
                                     char *buffer, char **end);
 
-/* Map over the declarations defined in the top-level compile-time
-   environment executing a handler.  This function is implemented in
-   pkl-env.c, and both `pkl_map_decl_fn' and the accepted values for
-   WHAT are defined in pkl-env.h.  */
+/* Return the current compile-time environment in COMPILER.  */
 
-void pkl_map_decls (pkl_compiler compiler,
-                    int what,
-                    pkl_map_decl_fn cb,
-                    void *data);
+pkl_env pkl_get_env (pkl_compiler compiler);
 
 /* Diagnostic routines.  */
 

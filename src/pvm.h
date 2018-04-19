@@ -54,6 +54,10 @@ pvm pvm_init (void);
 
 void pvm_shutdown (pvm pvm);
 
+/* Get the current run-time environment of PVM.  */
+
+pvm_env pvm_get_env (pvm pvm);
+
 /* Run a PVM program in a given Poke Virtual Machine.  Put the
    resulting value in RES, if any, and return an exit code.  */
 

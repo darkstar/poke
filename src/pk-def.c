@@ -59,27 +59,40 @@ print_var_decl (pkl_ast_node decl, void *data)
   pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
   pkl_ast_loc loc = PKL_AST_LOC (decl);
   char *source =  PKL_AST_DECL_SOURCE (decl);
-  /* XXX pvm_val = pvm_env_lookup (..); */
+  int back, over;
+  pvm_val val;
 
+  pkl_env compiler_env = pkl_get_env (poke_compiler);
+  pvm_env runtime_env = pvm_get_env (poke_pvm);
+
+  assert (pkl_env_lookup_var (compiler_env,
+                              PKL_AST_IDENTIFIER_POINTER (decl_name),
+                              &back, &over) != NULL);
+
+  val = pvm_env_lookup (runtime_env, back, over);
+  assert (val != PVM_NULL);
+                              
   /* Print the name and the current value of the variable.  */
-  printf ("%s\t\t%s\t\t\t",
-          PKL_AST_IDENTIFIER_POINTER (decl_name),
-          "XXX");
+  fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
+  fputs ("\t\t", stdout);
+  /* XXX: support different bases with a /[xbo] cmd flag.  */
+  pvm_print_val (stdout, val, 10);
+  fputs ("\t\t\t", stdout);
 
   /* Print information about the site where the variable was
      declared.  */
   if (source)
     printf ("%s:%d\n", source, loc.first_line);
   else
-    printf ("<stdin>\n");
+    fputs ("<stdin>\n", stdout);
 }
 
 static int
 pk_cmd_info_var (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   printf (_("Name\t\tValue\t\t\tDeclared at\n"));
-  pkl_map_decls (poke_compiler, PKL_AST_DECL_KIND_VAR,
-                 print_var_decl, NULL);
+  pkl_env_map_decls (pkl_get_env (poke_compiler), PKL_AST_DECL_KIND_VAR,
+                     print_var_decl, NULL);
   return 1;
 }
 

@@ -267,15 +267,11 @@ pkl_compile_expression (pkl_compiler compiler,
   return NULL;
 }
 
-void
-pkl_map_decls (pkl_compiler compiler,
-               int what,
-               pkl_map_decl_fn cb,
-               void *data)
+pkl_env
+pkl_get_env (pkl_compiler compiler)
 {
-  pkl_env_map_decls (compiler->env, what, cb, data);
+  return compiler->env;
 }
-
 
 void
 pkl_error (pkl_ast ast,
