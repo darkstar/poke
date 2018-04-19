@@ -143,7 +143,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression primary
+%type <ast> expression primary identifier
 %type <ast> funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
@@ -217,6 +217,15 @@ program_elem_list:
 
 program_elem:
 	  declaration
+        ;
+
+/*
+ * Identifiers.
+ */
+
+identifier:
+	  TYPENAME
+        | IDENTIFIER
         ;
 
 /*
@@ -444,7 +453,7 @@ primary:
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | primary '.' IDENTIFIER
+        | primary '.' identifier
 		{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($3) = @3;
@@ -514,7 +523,7 @@ struct_elem:
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, NULL, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | '.' IDENTIFIER '=' expression
+        | '.' identifier '=' expression
 	        {
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $2, $4);
                     PKL_AST_LOC ($2) = @2;
@@ -589,7 +598,7 @@ function_arg_list:
         ;
 
 function_arg:
-	  type_specifier IDENTIFIER
+	  type_specifier identifier
           	{
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
                                               $1, $2);
@@ -604,8 +613,10 @@ function_arg:
 
 type_specifier:
 	  TYPENAME
-                {
-                  $$ = $1;
+          	{
+                  $$ = pkl_env_lookup_type (pkl_parser->env,
+                                            PKL_AST_IDENTIFIER_POINTER ($1));
+                  assert ($$ != NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
         | INTCONSTR INTEGER '>'
@@ -685,7 +696,7 @@ struct_elem_type_list:
         ;
 
 struct_elem_type:
-	  type_specifier IDENTIFIER ';'
+	  type_specifier identifier ';'
           	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
                     PKL_AST_LOC ($$) = @$;
@@ -706,7 +717,7 @@ struct_elem_type:
  */
 
 declaration:
-        DEFUN IDENTIFIER '=' function_specifier
+        DEFUN identifier '=' function_specifier
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast,
                                           PKL_AST_DECL_KIND_FUNC, $2, $4,
@@ -734,7 +745,7 @@ declaration:
                       YYERROR;
                     }
                 }
-        | DEFVAR IDENTIFIER '=' expression ';'
+        | DEFVAR identifier '=' expression ';'
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast,
                                           PKL_AST_DECL_KIND_VAR, $2, $4,
@@ -757,7 +768,7 @@ declaration:
                       YYERROR;
                     }
                 }
-        | DEFTYPE IDENTIFIER '=' type_specifier ';'
+        | DEFTYPE identifier '=' type_specifier ';'
         	{
                   $$ = pkl_ast_make_decl (pkl_parser->ast,
                                           PKL_AST_DECL_KIND_TYPE, $2, $4,
@@ -780,21 +791,23 @@ declaration:
                       YYERROR;
                     }
                 }
+/*
 	| DEFTYPE TYPENAME '=' type_specifier ';'
         	{
                   if (pkl_env_toplevel_p (pkl_parser->env))
                       {
-                          /* XXX: in the top-level, rename the old
-                             declaration to "" and add the new one.  */
+                          / * XXX: in the top-level, rename the old
+                             declaration to "" and add the new one.  * /
                       }        
 
                   pkl_error (pkl_parser->ast, @2,
                              "type already defined");
-                  $2 = $2; /* To avoid warning.  */
-                  $4 = $4; /* Likewise.  */
-                  $$ = $$; /* Likewise.  */
+                  $2 = $2; / * To avoid warning.  * /
+                  $4 = $4; / * Likewise.  * /
+                  $$ = $$; / * Likewise.  * /
                   YYERROR;
                 }
+*/
         ;
 
 /*

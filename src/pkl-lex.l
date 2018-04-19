@@ -192,17 +192,11 @@ D [0-9]
    pkl_ast_node type
        = pkl_env_lookup_type (yyextra->env, yytext);
 
+   yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
    if (type != NULL)
-     {
-       /* XXX: return an identifier here in yylval->ast.  */
-       yylval->ast = type;
-       return TYPENAME;
-     }
+     return TYPENAME;
    else
-     {
-       yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
-       return IDENTIFIER;
-     }
+     return IDENTIFIER;
 }
 
 ({HEXCST}|{BINCST}|{OCTCST}|{DECCST}){IS}? {
