@@ -92,10 +92,10 @@ get_registered (pkl_hash hash_table, int what, const char *name)
     {
       pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
       
-      if ((PKL_AST_DECL_KIND (t) == PKL_AST_DECL_KIND_ANY)
-          || (PKL_AST_DECL_KIND (t) == what
-              && strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
-                         name) == 0))
+      if ((what == PKL_AST_DECL_KIND_ANY
+           || (PKL_AST_DECL_KIND (t) == what))
+          && strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
+                     name) == 0)
         return t;
     }
 

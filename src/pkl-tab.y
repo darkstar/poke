@@ -750,7 +750,7 @@ declaration:
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
                       pkl_error (pkl_parser->ast, @2,
-                                 "function or variable `%s' already defined",
+                                 "`%s' is already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       YYERROR;
                     }
@@ -769,11 +769,12 @@ declaration:
                                               PKL_AST_IDENTIFIER_POINTER ($2),
                                               $$))
                     {
-                      assert (0);  /* This can't happen, because the
-                                      lexer wouldn't have scanned an
-                                      IDENTIFIER if the type were
-                                      already declared in the
-                                      environment.  */
+                      /* XXX: in the top-level, rename the old
+                         declaration to "" and add the new one.  */
+                      pkl_error (pkl_parser->ast, @2,
+                                 "`%s' is already defined",
+                                 PKL_AST_IDENTIFIER_POINTER ($2));
+                      YYERROR;
                     }
                 }
 	| DEFTYPE TYPENAME '=' type_specifier ';'
