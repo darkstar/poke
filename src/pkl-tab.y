@@ -471,6 +471,7 @@ primary:
                                              $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
+        | function_specifier
 	;
 
 funcall_arg_list:
