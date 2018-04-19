@@ -718,7 +718,7 @@ int pkl_ast_type_is_complete (pkl_ast_node type);
 #define PKL_AST_DECL_INITIAL(AST) ((AST)->decl.initial)
 #define PKL_AST_DECL_ORDER(AST) ((AST)->decl.order)
 
-#define PKL_AST_DECL_KIND_NONE 0
+#define PKL_AST_DECL_KIND_ANY 0
 #define PKL_AST_DECL_KIND_VAR 1
 #define PKL_AST_DECL_KIND_TYPE 2
 #define PKL_AST_DECL_KIND_FUNC 3
