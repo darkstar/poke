@@ -194,6 +194,7 @@ D [0-9]
 
    if (type != NULL)
      {
+       /* XXX: return an identifier here in yylval->ast.  */
        yylval->ast = type;
        return TYPENAME;
      }
