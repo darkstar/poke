@@ -162,7 +162,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* At this point offsets can have either an identifier or a type name
+/* At this point offsets can have either an identifier or a type
    expressing its unit.  This handler takes care of the first case,
    replacing the identifier with a suitable unit factor.  If the
    identifier is invalid, then an error is raised.

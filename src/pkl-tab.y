@@ -84,6 +84,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token <ast> STR
 %token <ast> IDENTIFIER
 %token <ast> TYPENAME
+%token <ast> UNIT
 
 /* Reserved words.  */
 
@@ -137,7 +138,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
-%nonassoc '#'
+%nonassoc UNIT
 %right UNARY INC DEC
 %right '@'
 %left HYPERUNARY
@@ -372,27 +373,16 @@ expression:
                 }
 /*                      | expression '?' expression ':' expression
         	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
-        | '#' IDENTIFIER
+        | UNIT
 		{
-                    $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $2);
-                    PKL_AST_LOC ($2) = @2;
+                    $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $1);
+                    PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
-        | '#' type_specifier
-                {
-                    $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $2);
-                    PKL_AST_LOC ($$) = @$;
-                }
-        | expression '#' type_specifier
+        | expression UNIT
         	{
-                  $$ = pkl_ast_make_offset (pkl_parser->ast, $1, $3);
-                  PKL_AST_LOC ($3) = @3;
-                  PKL_AST_LOC ($$) = @$;
-                }
-        | expression '#' IDENTIFIER
-        	{
-                  $$ = pkl_ast_make_offset (pkl_parser->ast, $1, $3);
-                  PKL_AST_LOC ($3) = @3;
+                  $$ = pkl_ast_make_offset (pkl_parser->ast, $1, $2);
+                  PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
