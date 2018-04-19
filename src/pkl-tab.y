@@ -138,7 +138,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %left '+' '-'
 %left '*' '/' '%'
 %right UNARY INC DEC
-%left '@'
+%nonassoc '@'
 %left HYPERUNARY
 %left '.'
 
