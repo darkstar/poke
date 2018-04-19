@@ -44,8 +44,8 @@ struct pvm
 pvm
 pvm_init (void)
 {
-  pvm pvm = xmalloc (sizeof (struct pvm));
-  memset (pvm, 0, sizeof (struct pvm));
+  pvm apvm = xmalloc (sizeof (struct pvm));
+  memset (apvm, 0, sizeof (struct pvm));
   
   /* Initialize the VM subsystem.  */
   pvm_initialize ();
@@ -55,23 +55,23 @@ pvm_init (void)
   GC_INIT ();
 
   /* Initialize the VM state.  */
-  PVM_STATE_ENV (pvm) = pvm_env_new ();
-  pvm_state_initialize (&pvm->pvm_state);
+  PVM_STATE_ENV (apvm) = pvm_env_new ();
+  pvm_state_initialize (&apvm->pvm_state);
 
-  return pvm;
+  return apvm;
 }
 
 pvm_env
-pvm_get_env (pvm pvm)
+pvm_get_env (pvm apvm)
 {
-  return PVM_STATE_ENV (pvm);
+  return PVM_STATE_ENV (apvm);
 }
 
 void
-pvm_shutdown (pvm pvm)
+pvm_shutdown (pvm apvm)
 {
   /* Finalize the VM state.  */
-  pvm_state_finalize (&pvm->pvm_state);
+  pvm_state_finalize (&apvm->pvm_state);
 
   /* Make the garbage collector to collect the memory used by the
      PVM.  */
@@ -80,21 +80,21 @@ pvm_shutdown (pvm pvm)
   /* Finalize the VM subsystem.  */
   pvm_finalize ();
 
-  free (pvm);
+  free (apvm);
 }
 
 enum pvm_exit_code
-pvm_run (pvm pvm, pvm_program prog, pvm_val *res)
+pvm_run (pvm apvm, pvm_program prog, pvm_val *res)
 {
-  PVM_STATE_RESULT_VALUE (pvm) = PVM_NULL;
-  PVM_STATE_EXIT_CODE (pvm) = PVM_EXIT_OK;
+  PVM_STATE_RESULT_VALUE (apvm) = PVM_NULL;
+  PVM_STATE_EXIT_CODE (apvm) = PVM_EXIT_OK;
 
-  pvm_interpret (prog, &pvm->pvm_state);
+  pvm_interpret (prog, &apvm->pvm_state);
 
   if (res != NULL)
-    *res = PVM_STATE_RESULT_VALUE (pvm);
+    *res = PVM_STATE_RESULT_VALUE (apvm);
 
-  return PVM_STATE_EXIT_CODE (pvm);
+  return PVM_STATE_EXIT_CODE (apvm);
 }
 
 const char *
