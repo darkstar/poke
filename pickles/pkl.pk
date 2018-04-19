@@ -1,4 +1,4 @@
-/* pkl-rt.pk - Run-time library for the poke compiler.  */
+/* pkl.pk - Run-time library for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi.  */
 

@@ -66,7 +66,7 @@ Macro-assembler:
 
 Run-time library:
 
-- src/pkl-rt.pk
+- pickles/pkl.pk
 
 Poke Virtual Machine
 --------------------
