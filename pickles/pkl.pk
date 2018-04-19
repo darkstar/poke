@@ -24,8 +24,7 @@
 
 /* Compiler built-ins.  */
 
-defun foo = (...) { __builtin__ }
-defun bar = (...) { __builtin__ }
+defun print = (string str) { __builtin__ }
 
 /* Find the greatest common divisor of two integrals A and B using the
    Euclidean algorithm.  */
