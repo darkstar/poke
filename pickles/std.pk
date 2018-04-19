@@ -17,6 +17,7 @@
  */
 
 /* Standard integral types.  */
+/* XXX: these types should be immutable.  */
 
 deftype bit = uint<1>;
 deftype nibble = uint<4>;
