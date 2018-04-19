@@ -24,8 +24,12 @@
 
 #include "pkl-env.h"
 
-/* The declarations are organized in a hash table, chained in their
-   buckes through CHAIN2.
+/* The declarations are organized in a set of hash tables:
+   TYPES_TABLE contains type declarations.
+   VARS_TABLE contains variable declarations.
+
+   The declaration nodes are chained in the hash tables through
+   CHAIN2.
 
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */
@@ -35,6 +39,9 @@ typedef pkl_ast_node pkl_hash[HASH_TABLE_SIZE];
 
 struct pkl_env
 {
+  pkl_hash types_table;
+  pkl_hash vars_table;
+
   pkl_hash hash_table;
 
   int num_types;
@@ -82,7 +89,7 @@ free_hash_table (pkl_hash hash_table)
 }
 
 static pkl_ast_node
-get_registered (pkl_hash hash_table, int what, const char *name)
+get_registered (pkl_hash hash_table, const char *name)
 {
   pkl_ast_node t;
   int hash;
@@ -92,10 +99,8 @@ get_registered (pkl_hash hash_table, int what, const char *name)
     {
       pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
       
-      if ((what == PKL_AST_DECL_KIND_ANY
-           || what == PKL_AST_DECL_KIND (t))
-          && strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
-                     name) == 0)
+      if (strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
+                  name) == 0)
         return t;
     }
 
@@ -109,7 +114,7 @@ register_decl (pkl_hash hash_table,
 {
   int hash;
   
-  if (get_registered (hash_table, PKL_AST_DECL_KIND_ANY, name) != NULL)
+  if (get_registered (hash_table, name) != NULL)
     /* Already registered.  */
     return 0;
 
@@ -139,7 +144,8 @@ pkl_env_free (pkl_env env)
     {
       pkl_env_free (env->up);
 
-      free_hash_table (env->hash_table);
+      free_hash_table (env->types_table);
+      free_hash_table (env->vars_table);
       free (env);
     }
 }
@@ -171,7 +177,7 @@ pkl_env_register_type (pkl_env env,
                        const char *name,
                        pkl_ast_node decl)
 {
-  if (register_decl (env->hash_table, name, decl))
+  if (register_decl (env->types_table, name, decl))
     {
       PKL_AST_DECL_ORDER (decl) = env->num_types++;
       return 1;
@@ -185,7 +191,7 @@ pkl_env_register_var (pkl_env env,
                       const char *name,
                       pkl_ast_node decl)
 {
-  if (register_decl (env->hash_table, name, decl))
+  if (register_decl (env->vars_table, name, decl))
     {
       PKL_AST_DECL_ORDER (decl) = env->num_vars++;
       return 1;
@@ -202,9 +208,8 @@ pkl_env_lookup_var_1 (pkl_env env, const char *name,
     return NULL;
   else
     {
-      pkl_ast_node decl = get_registered (env->hash_table,
-                                          PKL_AST_DECL_KIND_VAR,
-                                          name);
+      pkl_ast_node decl = get_registered (env->vars_table, name);
+
       if (decl)
         {
           *back = num_frame;
@@ -231,9 +236,7 @@ pkl_env_lookup_type (pkl_env env, const char *name)
     return NULL;
   else
     {
-      pkl_ast_node decl = get_registered (env->hash_table,
-                                          PKL_AST_DECL_KIND_TYPE,
-                                          name);
+      pkl_ast_node decl = get_registered (env->types_table, name);
       if (decl)
         return PKL_AST_DECL_INITIAL (decl);
     }
@@ -254,10 +257,18 @@ pkl_env_map_decls (pkl_env env,
                    void *data)
 {
   int i;
+  pkl_hash *hash_table;
+
+  if (what == PKL_MAP_DECL_TYPES)
+    hash_table = &env->types_table;
+  else if (what == PKL_MAP_DECL_VARS)
+    hash_table = &env->vars_table;
+  else
+    assert (0);
 
   for (i = 0; i < HASH_TABLE_SIZE; ++i)
     {
-      pkl_ast_node t = env->hash_table[i];
+      pkl_ast_node t = (*hash_table)[i];
       
       for (; t; t = PKL_AST_CHAIN2 (t))
         {
