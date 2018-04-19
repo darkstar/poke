@@ -22,6 +22,8 @@
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
+#include "pkl.h"
+#include "pvm.h"
 #include "poke.h"
 #include "pk-cmd.h"
 
@@ -51,10 +53,24 @@ pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static void
+print_var_decl (pkl_ast_node decl, void *data)
+{
+  pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
+  pkl_ast_loc loc = PKL_AST_LOC (decl);
+  /* XXX pvm_val = pvm_env_lookup (..); */
+
+  printf ("%s\t\t%s\t\t\tXXX:%d\n",
+          PKL_AST_IDENTIFIER_POINTER (decl_name),
+          "XXX", loc.first_line);
+}
+
 static int
 pk_cmd_info_vars (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
-  printf (_("Name\tType\tLocation\tValue\n"));
+  printf (_("Name\t\tValue\t\t\tDeclared at\n"));
+  pkl_map_decls (poke_compiler, PKL_AST_DECL_KIND_VAR,
+                 print_var_decl, NULL);
   return 1;
 }
 

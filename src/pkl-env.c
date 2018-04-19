@@ -93,7 +93,7 @@ get_registered (pkl_hash hash_table, int what, const char *name)
       pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
       
       if ((what == PKL_AST_DECL_KIND_ANY
-           || (PKL_AST_DECL_KIND (t) == what))
+           || what == PKL_AST_DECL_KIND (t))
           && strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
                      name) == 0)
         return t;
@@ -253,6 +253,17 @@ pkl_env_map_decls (pkl_env env,
                    pkl_map_decl_fn cb,
                    void *data)
 {
-  /* XXX: use a single hash table for everything, as all entities
-     share the same namespace.  */
+  int i;
+
+  for (i = 0; i < HASH_TABLE_SIZE; ++i)
+    {
+      pkl_ast_node t = env->hash_table[i];
+      
+      for (; t; t = PKL_AST_CHAIN2 (t))
+        {
+          if ((what == PKL_AST_DECL_KIND_ANY
+               || what == PKL_AST_DECL_KIND (t)))
+            cb (t, data);
+        }
+    }
 }

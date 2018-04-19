@@ -35,8 +35,8 @@ defun _gcd = (xint<*> a, xint<*> b) : xint<*>
 
 /* XXX Array to string.
    Struct to string.  */
-/* XXX error reporting routine, called by the macro
-   pkl_asm_rterror().  This should exit.  */
+/* XXX error reporting routine, called by the macro pkl_asm_rterror().
+   This should exit the vm with the exitvm instruction.  */
 
 /*
 Local variables:
