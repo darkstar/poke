@@ -709,42 +709,41 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     }
   else if (PVM_IS_OFF (val))
     {
-      fprintf (out, CYAN "[" NOATTR);
       pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base);
+      fprintf (out, CYAN "#" NOATTR);
       switch (PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)))
         {
         case PVM_VAL_OFF_UNIT_BITS:
-          fprintf (out, CYAN " b" NOATTR);
+          fprintf (out, CYAN "b" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_NIBBLES:
-          fprintf (out, CYAN " N" NOATTR);
+          fprintf (out, CYAN "N" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_BYTES:
-          fprintf (out, CYAN " B" NOATTR);
+          fprintf (out, CYAN "B" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_KILOBITS:
-          fprintf (out, CYAN " Kb" NOATTR);
+          fprintf (out, CYAN "Kb" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_KILOBYTES:
-          fprintf (out, CYAN " KB" NOATTR);
+          fprintf (out, CYAN "KB" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_MEGABITS:
-          fprintf (out, CYAN " Mb" NOATTR);
+          fprintf (out, CYAN "Mb" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_MEGABYTES:
-          fprintf (out, CYAN " MB" NOATTR);
+          fprintf (out, CYAN "MB" NOATTR);
           break;
         case PVM_VAL_OFF_UNIT_GIGABITS:
-          fprintf (out, CYAN " Gb" NOATTR);
+          fprintf (out, CYAN "Gb" NOATTR);
           break;
         default:
           /* XXX: print here the name of the base type of the
              offset.  */
-          fprintf (out, CYAN " %" PRIu64 NOATTR,
+          fprintf (out, CYAN "%" PRIu64 NOATTR,
                    PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
           break;
         }
-      fprintf (out, CYAN "]" NOATTR);
     }
   else
     assert (0);

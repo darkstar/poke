@@ -100,16 +100,16 @@ set test u2addi5
 poke_test_cmd "print (uint<2>) 1 + (int<5>) 2" {\(uint<5>\) 3}
 
 set test offset-to-offset-1
-poke_test_cmd "print (offset<uint16,B>) \[1024 b\]" {\[128UH B\]}
+poke_test_cmd "print (offset<uint16,B>) (1024#b)" {128UH#B}
 
 set test offset-to-offset-2
-poke_test_cmd "print (offset<uint16,byte\[1\]>) \[1024 b\]" {\[128UH B\]}
+poke_test_cmd "print (offset<uint16,byte\[1\]>) (1024#b)" {128UH#B}
 
 set test offset-to-offset-3
-poke_test_cmd "print (offset<uint16,byte\[2\]>) \[1024 b\]" {\[64UH 16\]}
+poke_test_cmd "print (offset<uint16,byte\[2\]>) (1024#b)" {64UH#16}
 
 set test offset-to-offset-4
-poke_test_cmd "print (offset<int,B>) \[1 long]" {\[8 B\]}
+poke_test_cmd "print (offset<int,B>) (#long)" {8#B}
 
 # Operations
 
@@ -138,13 +138,13 @@ set test subli
 poke_test_cmd "print 3L - 4" "-1L"
 
 set test mulol-ub
-poke_test_cmd "print \[2L b\] * 3UB" {\[6UL b\]}
+poke_test_cmd "print 2L#b * 3UB" {6UL#b}
 
 set test mulbyte
-poke_test_cmd "print \[2L B\] * 4" {\[8L B\]}
+poke_test_cmd "print 2L#B * 4" {8L#B}
 
 set test mulneg
-poke_test_cmd "print \[-2 int\] * 3" {\[-6 32\]}
+poke_test_cmd "print -2#int * 3" {-6#32}
 
 set test divii
 poke_test_cmd "print 10 / 5" "2"
@@ -244,200 +244,200 @@ poke_test_cmd "print \[0,1,2\]\[1\]" "1"
 # Sizeof TYPE
 
 set test sizeof-type-int
-poke_test_cmd "print sizeof (int)" {\[32UL b\]}
+poke_test_cmd "print sizeof (int)" {32UL#b}
 
 set test sizeof-type-long
-poke_test_cmd "print sizeof (long)" {\[64UL b\]}
+poke_test_cmd "print sizeof (long)" {64UL#b}
 
 set test sizeof-array-type-ul
-poke_test_cmd "print sizeof (int\[2UL\])" {\[64UL b\]}
+poke_test_cmd "print sizeof (int\[2UL\])" {64UL#b}
 
 set test sizeof-array-type
-poke_test_cmd "print sizeof (int\[2\])" {\[64UL b\]}
+poke_test_cmd "print sizeof (int\[2\])" {64UL#b}
 
 set test sizeof-array-of-array-type
-poke_test_cmd "print sizeof (int\[2\]\[2\])" {\[128UL b\]}
+poke_test_cmd "print sizeof (int\[2\]\[2\])" {128UL#b}
 
 set test sizeof-array-of-struct
-poke_test_cmd "print sizeof (struct {int;int;}\[2\])" {\[128UL b\]}
+poke_test_cmd "print sizeof (struct {int;int;}\[2\])" {128UL#b}
 
 set test sizeof-struct-empty
-poke_test_cmd "print sizeof (struct {})" {\[0UL b\]}
+poke_test_cmd "print sizeof (struct {})" {0UL#b}
 
 set test sizeof-struct
-poke_test_cmd "print sizeof (struct { int; long; })" {\[96UL b\]}
+poke_test_cmd "print sizeof (struct { int; long; })" {96UL#b}
 
 set test sizeof-struct-with-struct
 poke_test_cmd "print sizeof (struct {int; struct {int;int;};})" \
-    {\[96UL b\]}
+    {96UL#b}
 
 set test sizeof-struct-with-struct-2
 poke_test_cmd "print sizeof (struct {int; struct {int;int;long;};})" \
-    {\[160UL b\]}
+    {160UL#b}
 
 set test sizeof-struct-with-array
 poke_test_cmd "print sizeof (struct {int; int\[5\]; int\[3\];})" \
-    {\[288UL b\]}
+    {288UL#b}
 
 set test sizeof-struct-with-intconstr
 poke_test_cmd "print sizeof (struct {int<5> foo; int<6> bar; int<7> baz;})" \
-    {\[18UL b\]}
+    {18UL#b}
 
 set test sizeof-offset-type
-poke_test_cmd "print sizeof (offset<int,B>)" {\[32UL b\]}
+poke_test_cmd "print sizeof (offset<int,B>)" {32UL#b}
 
 set test sizeof-offset-type-2
-poke_test_cmd "print sizeof (offset<int<5>,B>)" {\[5UL b\]}
+poke_test_cmd "print sizeof (offset<int<5>,B>)" {5UL#b}
 
 # Offsets
 
 set test offset-bit-no-magnitude
-poke_test_cmd "print \[bit\]" {\[1 b\]}
+poke_test_cmd "print #bit" {1#b}
 
 set test offset-int-no-magnitude
-poke_test_cmd "print \[int\]" {\[1 32\]}
+poke_test_cmd "print #int" {1#32}
 
 set test offsetB
-poke_test_cmd "print \[12 B\]" {\[12 B\]}
+poke_test_cmd "print 12#B" {12#B}
 
 set test offsetb
-poke_test_cmd "print \[12 b\]" {\[12 b\]}
+poke_test_cmd "print 12#b" {12#b}
 
 set test offset_exp
-poke_test_cmd "print \[1 + 3 B\]" {\[4 B\]}
+poke_test_cmd "print (1 + 3)#B" {4#B}
 
 set test offset_Kb
-poke_test_cmd "print \[12 Kb\]" {\[12 Kb\]}
+poke_test_cmd "print 12#Kb" {12#Kb}
 
 set test offset_KB
-poke_test_cmd "print \[12 KB\]" {\[12 KB\]}
+poke_test_cmd "print 12#KB" {12#KB}
 
 set test offset_Mb
-poke_test_cmd "print \[12 Mb\]" {\[12 Mb\]}
+poke_test_cmd "print 12#Mb" {12#Mb}
 
 set test offset_MB
-poke_test_cmd "print \[12 MB\]" {\[12 MB\]}
+poke_test_cmd "print 12#MB" {12#MB}
 
 set test offset_array
-poke_test_cmd "print \[3 uint8\[1024\]\]" {\[3 KB\]}
+poke_test_cmd "print 3#uint8\[1024\]" {3#KB}
 
 set test offset_struct
-poke_test_cmd "print \[3 struct {uint8; uint8\[1023\];}\]" \
-    {\[3 KB\]}
+poke_test_cmd "print 3#struct {uint8; uint8\[1023\];}" \
+    {3#KB}
 
 set test offset-ints-in-longs
-poke_test_cmd "print \[20 long\]/\[int\]" "40"
+poke_test_cmd "print 20#long/#int" "40"
 
 set test offset-1024-bits-in-bytes-units
-poke_test_cmd "print \[1024UL b\]/\[1UB byte\]" {128UL}
+poke_test_cmd "print 1024UL#b/1UB#byte" {128UL}
 
 set test offset-mod-then-div
-poke_test_cmd "print \[10 bit\]%\[byte\]/\[bit\]" "2"
+poke_test_cmd "print 10#bit%#byte/#bit" "2"
 
 set test offset-mod-nibble
-poke_test_cmd "print \[3 nibble\]%\[byte\]" {\[1 N\]}
+poke_test_cmd "print 3#nibble%#byte" {1#N}
 
 set test offset-add-ii
-poke_test_cmd "print \[1 b\] + \[2 b\]" {\[3 b\]}
+poke_test_cmd "print 1#b + 2#b" {3#b}
 
 set test offset-add-iuiu
-poke_test_cmd "print \[1U b\] + \[2U b\]" {\[3U b\]}
+poke_test_cmd "print 1U#b + 2U#b" {3U#b}
 
 set test offset-add-ll
-poke_test_cmd "print \[1L b\] + \[2L b\]" {\[3L b\]}
+poke_test_cmd "print 1L#b + 2L#b" {3L#b}
 
 set test offset-add-lulu
-poke_test_cmd "print \[1UL b\] + \[2UL b\]" {\[3UL b\]}
+poke_test_cmd "print 1UL#b + 2UL#b" {3UL#b}
 
 set test offset-add-promo
-poke_test_cmd "print \[(int<7>) 2 B\] + \[(int<2>) 1 b\]" {\[\(int<7>\) 17 b\]}
+poke_test_cmd "print (int<7>) 2#B + (int<2>) 1#b" {\(int<7>\) 17#b}
 
 set test offset-sub-ii
-poke_test_cmd "print \[1 b\] - \[2 b\]" {\[-1 b\]}
+poke_test_cmd "print 1#b - 2#b" {-1#b}
 
 set test offset-sub-iuiu
-poke_test_cmd "print \[2U b\] - \[1U b\]" {\[1U b\]}
+poke_test_cmd "print 2U#b - 1U#b" {1U#b}
 
 set test offset-sub-ll
-poke_test_cmd "print \[1L b\] - \[2L b\]" {\[-1L b\]}
+poke_test_cmd "print 1L#b - 2L#b" {-1L#b}
 
 set test offset-sub-lulu
-poke_test_cmd "print \[10UL b\] - \[2UL b\]" {\[8UL b\]}
+poke_test_cmd "print 10UL#b - 2UL#b" {8UL#b}
 
 set test offset-sub-promo
-poke_test_cmd "print \[(int<7>) 2 B\] - \[(int<2>) 1 b\]" {\[\(int<7>\) 15 b\]}
+poke_test_cmd "print (int<7>) 2#B - (int<2>) 1#b" {\(int<7>\) 15#b}
 
 set test offset-eq-true-1
-poke_test_cmd "print \[12 b\] == \[11 + 1 b\]" "1"
+poke_test_cmd "print 12#b == (11 + 1)#b" "1"
 
 set test offset-eq-true-2
-poke_test_cmd "print \[2L byte\] == \[16UH bit\]" "1"
+poke_test_cmd "print 2L#byte == 16UH#bit" "1"
 
 set test offset-eq-false-1
-poke_test_cmd "print \[12 b\] == \[11 + 2 b\]" "0"
+poke_test_cmd "print 12#b == (11 + 2)#b" "0"
 
 set test offset-eq-false-2
-poke_test_cmd "print \[3 byte\] == \[16 b\]" "0"
+poke_test_cmd "print 3#byte == 16#b" "0"
 
 set test offset-ne-true-1
-poke_test_cmd "print \[12 b\] != \[11 + 2 b\]" "1"
+poke_test_cmd "print 12#b != (11 + 2)#b" "1"
 
 set test offset-ne-true-2
-poke_test_cmd "print \[3L byte\] != \[16U b\]" "1"
+poke_test_cmd "print 3L#byte != 16U#b" "1"
 
 set test offset-ne-false-1
-poke_test_cmd "print \[12 b\] != \[11 + 1 b\]" "0"
+poke_test_cmd "print 12#b != (11 + 1)#b" "0"
 
 set test offset-ne-false-2
-poke_test_cmd "print \[2 byte\] != \[16 bit\]" "0"
+poke_test_cmd "print 2#byte != 16#bit" "0"
 
 set test offset-gt-true-1
-poke_test_cmd "print \[12 b\] > \[11 b\]" "1"
+poke_test_cmd "print 12#b > 11#b" "1"
 
 set test offset-gt-true-2
-poke_test_cmd "print \[1L B\] > \[-7H b\]" "1"
+poke_test_cmd "print 1L#B > -7H#b" "1"
 
 set test offset-gt-false-1
-poke_test_cmd "print \[11 b\] > \[20 b\]" "0"
+poke_test_cmd "print 11#b > 20#b" "0"
 
 set test offset-gt-false-2
-poke_test_cmd "print \[1 B\] > \[9 b\]" "0"
+poke_test_cmd "print 1#B > 9#b" "0"
 
 set test offset-ge-true-1
-poke_test_cmd "print \[12 b\] >= \[12 b\]" "1"
+poke_test_cmd "print 12#b >= 12#b" "1"
 
 set test offset-ge-true-2
-poke_test_cmd "print \[1L B\] >= \[7UB b\]" "1"
+poke_test_cmd "print 1L#B >= 7UB#b" "1"
 
 set test offset-ge-false-1
-poke_test_cmd "print \[11 b\] >= \[20 b\]" "0"
+poke_test_cmd "print 11#b >= 20#b" "0"
 
 set test offset-ge-false-2
-poke_test_cmd "print \[1 B\] >= \[9 b\]" "0"
+poke_test_cmd "print 1#B >= 9#b" "0"
 
 set test offset-lt-true-1
-poke_test_cmd "print \[11 b\] < \[12 b\]" "1"
+poke_test_cmd "print 11#b < 12#b" "1"
 
 set test offset-lt-true-2
-poke_test_cmd "print \[7LU b\] < \[1UH B\]" "1"
+poke_test_cmd "print 7LU#b < 1UH#B" "1"
 
 set test offset-lt-false-1
-poke_test_cmd "print \[20 b\] < \[11 b\]" "0"
+poke_test_cmd "print 20#b < 11#b" "0"
 
 set test offset-lt-false-2
-poke_test_cmd "print \[9 b\] < \[1 B\]" "0"
+poke_test_cmd "print 9#b < 1#B" "0"
 
 set test offset-le-true-1
-poke_test_cmd "print \[12 b\] <= \[12 b\]" "1"
+poke_test_cmd "print 12#b <= 12#b" "1"
 
 set test offset-le-true-2
-poke_test_cmd "print \[-7H b\] <= \[1L B\]" "1"
+poke_test_cmd "print -7H#b <= 1L#B" "1"
 
 set test offset-le-false-1
-poke_test_cmd "print \[20 b\] <= \[11 b\]" "0"
+poke_test_cmd "print 20#b <= 11#b" "0"
 
 set test offset-le-false-2
-poke_test_cmd "print \[9 b\] <= \[1 B\]" "0"
+poke_test_cmd "print 9#b <= 1#B" "0"
 
 # Structs
 
@@ -451,25 +451,25 @@ set test struct-ref-1
 poke_test_cmd "print {.fo=10}.fo" "10"
 
 set test struct-ref-2
-poke_test_cmd "print {.fo=\[10 Kb\]}.fo/\[2 Kb\]" {5}
+poke_test_cmd "print {.fo=10#Kb}.fo/2#Kb" {5}
 
 # deftype
 
 set test deftype-1
 poke_test_cmd "deftype anint = int" {}
-poke_test_cmd "print sizeof (anint)" {\[32UL b\]}
+poke_test_cmd "print sizeof (anint)" {32UL#b}
 
 set test deftype-2
 poke_test_cmd "deftype imm13 = int<13>" {}
-poke_test_cmd "print sizeof (imm13)" {\[13UL b\]}
+poke_test_cmd "print sizeof (imm13)" {13UL#b}
 
 set test deftype-3
 poke_test_cmd "deftype uimm13 = int<13>" {}
-poke_test_cmd "print sizeof (imm13\[2\])" {\[26UL b\]}
+poke_test_cmd "print sizeof (imm13\[2\])" {26UL#b}
 
 set test deftype-4
 poke_test_cmd "deftype at3 = int\[2 + 1\]" {}
-poke_test_cmd "print sizeof (at3)" {\[96UL b\]}
+poke_test_cmd "print sizeof (at3)" {96UL#b}
 
 # defvar
 
@@ -490,8 +490,8 @@ poke_test_cmd "defvar name = \"foo\"" {}
 poke_test_cmd "print name + \" bar\"" {"foo bar"}
 
 set test defvar-5
-poke_test_cmd "defvar offset = \[12 B\]" {}
-poke_test_cmd "print offset + \[1 b\]" {\[97 b\]}
+poke_test_cmd "defvar offset = 12#B" {}
+poke_test_cmd "print offset + #b" {97#b}
 
 set test defvar-6
 poke_test_cmd "defvar triplet = {.uno=1, .dos=2, .tres=\"foo\"}" {}
