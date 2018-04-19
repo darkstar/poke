@@ -66,7 +66,7 @@ print_var_decl (pkl_ast_node decl, void *data)
 }
 
 static int
-pk_cmd_info_vars (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+pk_cmd_info_var (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   printf (_("Name\t\tValue\t\t\tDeclared at\n"));
   pkl_map_decls (poke_compiler, PKL_AST_DECL_KIND_VAR,
@@ -86,6 +86,6 @@ struct pk_cmd defun_cmd =
   {"defun", "d", 0, 0, NULL, pk_cmd_def,
    "defun NAME = (ARGS) [: TYPE] { BODY }"};
 
-struct pk_cmd info_vars_cmd =
-  {"vars", "", "", 0, NULL, pk_cmd_info_vars,
-   "info vars"};
+struct pk_cmd info_var_cmd =
+  {"variable", "", "", 0, NULL, pk_cmd_info_var,
+   "info variable"};
