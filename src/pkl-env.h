@@ -77,26 +77,18 @@ pkl_env pkl_env_push_frame (pkl_env env);
 
 pkl_env pkl_env_pop_frame (pkl_env env);
 
-/* Register the type declaration DECL in the current frame under NAME.
-   Return 1 if the type was properly registered.  Return 0 if there is
-   already a type with the given name in the current frame.  */
+/* Register the declaration DECL in the current frame under NAME.
+   Return 1 if the declaration was properly registered.  Return 0 if
+   there is already a declaration with the given name in the current
+   frame.  */
 
-int pkl_env_register_type (pkl_env env,
-                           const char *name,
-                           pkl_ast_node decl);
+int pkl_env_register (pkl_env env,
+                      const char *name,
+                      pkl_ast_node decl);
 
-/* Register the variable or function declaration DECL in the current
-   frame under NAME.  Return 1 if the variable or function was
-   properly registered.  Return 0 if there is already a variable or
-   function with the given name in the current frame.  */
-
-int pkl_env_register_var (pkl_env env,
-                          const char *name,
-                          pkl_ast_node decl);
-
-/* Search in the environment ENV for a declaration for the variable or
-   function NAME, and put the lexical address of the first match in
-   BACK and OVER.  Return the declaration node.
+/* Search in the environment ENV for a declaration with name NAME, put
+   the lexical address of the first match in BACK and OVER if these
+   are not NULL.  Return the declaration node.
 
    BACK is the number of frames back the declaration is located.  It
    is 0-based.
@@ -104,14 +96,8 @@ int pkl_env_register_var (pkl_env env,
    OVER indicates its position in the list of declarations in the
    resulting frame.  It is 0-based.  */
 
-pkl_ast_node pkl_env_lookup_var (pkl_env env, const char *name,
-                                 int *back, int *over);
-
-/* Search in the environment ENV for a declaration for the type NAME,
-   and return the type (not the declaration.)  Return a PKL_AST_TYPE
-   in case the type is found.  Return NULL ortherwise.  */
-
-pkl_ast_node pkl_env_lookup_type (pkl_env env, const char *name);
+pkl_ast_node pkl_env_lookup (pkl_env env, const char *name,
+                             int *back, int *over);
 
 /* Return 1 if the given ENV contains only one frame.  Return 0
    otherwise.  */

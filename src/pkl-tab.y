@@ -408,9 +408,10 @@ primary:
                   const char *name = PKL_AST_IDENTIFIER_POINTER ($1);
 
                   pkl_ast_node decl
-                    = pkl_env_lookup_var (pkl_parser->env,
-                                          name, &back, &over);
-                  if (!decl)
+                    = pkl_env_lookup (pkl_parser->env,
+                                      name, &back, &over);
+                  if (!decl
+                      || PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR)
                     {
                       pkl_error (pkl_parser->ast, @1,
                                  "undefined variable '%s'", name);
@@ -614,9 +615,12 @@ function_arg:
 type_specifier:
 	  TYPENAME
           	{
-                  $$ = pkl_env_lookup_type (pkl_parser->env,
-                                            PKL_AST_IDENTIFIER_POINTER ($1));
-                  assert ($$ != NULL);
+                  pkl_ast_node decl = pkl_env_lookup (pkl_parser->env,
+                                                      PKL_AST_IDENTIFIER_POINTER ($1),
+                                                      NULL, NULL);
+                  assert (decl != NULL
+                          && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
+                  $$ = PKL_AST_DECL_INITIAL (decl);
                   PKL_AST_LOC ($$) = @$;
                 }
         | INTCONSTR INTEGER '>'
@@ -729,9 +733,9 @@ declaration:
                     pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
 
 
-                  if (!pkl_env_register_var (pkl_parser->env,
-                                             PKL_AST_IDENTIFIER_POINTER ($2),
-                                             $$))
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($2),
+                                         $$))
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
@@ -756,9 +760,9 @@ declaration:
                   if (! pkl_env_toplevel_p (pkl_parser->env))
                     pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
 
-                  if (!pkl_env_register_var (pkl_parser->env,
-                                             PKL_AST_IDENTIFIER_POINTER ($2),
-                                             $$))
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($2),
+                                         $$))
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
@@ -779,9 +783,9 @@ declaration:
                   if (! pkl_env_toplevel_p (pkl_parser->env))
                     pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
 
-                  if (!pkl_env_register_type (pkl_parser->env,
-                                              PKL_AST_IDENTIFIER_POINTER ($2),
-                                              $$))
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($2),
+                                         $$))
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */

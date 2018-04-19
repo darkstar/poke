@@ -65,9 +65,12 @@ print_var_decl (pkl_ast_node decl, void *data)
   pkl_env compiler_env = pkl_get_env (poke_compiler);
   pvm_env runtime_env = pvm_get_env (poke_vm);
 
-  assert (pkl_env_lookup_var (compiler_env,
-                              PKL_AST_IDENTIFIER_POINTER (decl_name),
-                              &back, &over) != NULL);
+  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR)
+    return;
+
+  assert (pkl_env_lookup (compiler_env,
+                          PKL_AST_IDENTIFIER_POINTER (decl_name),
+                          &back, &over) != NULL);
 
   val = pvm_env_lookup (runtime_env, back, over);
   assert (val != PVM_NULL);

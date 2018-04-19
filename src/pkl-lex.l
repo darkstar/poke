@@ -189,11 +189,12 @@ D [0-9]
 "@"		{ return '@'; }
 
 {L}({L}|{D})* {
-   pkl_ast_node type
-       = pkl_env_lookup_type (yyextra->env, yytext);
+   pkl_ast_node decl
+       = pkl_env_lookup (yyextra->env, yytext, NULL, NULL);
 
    yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext);
-   if (type != NULL)
+
+   if (decl && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE)
      return TYPENAME;
    else
      return IDENTIFIER;
