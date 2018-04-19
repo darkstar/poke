@@ -249,3 +249,13 @@ pkl_env_toplevel_p (pkl_env env)
 {
   return env->up == NULL;
 }
+
+void
+pkl_env_map_decls (pkl_env env,
+                   int what,
+                   pkl_map_decl_fn cb,
+                   void *data)
+{
+  /* XXX: use a single hash table for everything, as all entities
+     share the same namespace.  */
+}

@@ -118,4 +118,17 @@ pkl_ast_node pkl_env_lookup_type (pkl_env env, const char *name);
 
 int pkl_env_toplevel_p (pkl_env env);
 
+/* Map over the declarations defined in the top-level compile-time
+   environment, executing a handler.  */
+
+#define PKL_MAP_DECL_TYPES PKL_AST_DECL_KIND_TYPE
+#define PKL_MAP_DECL_VARS  PKL_AST_DECL_KIND_VAR
+
+typedef void (*pkl_map_decl_fn) (pkl_ast_node decl, void *data);
+
+void pkl_env_map_decls (pkl_env env,
+                        int what,
+                        pkl_map_decl_fn cb,
+                        void *data);
+
 #endif /* !PKL_ENV_H  */

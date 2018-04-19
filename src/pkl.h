@@ -24,6 +24,7 @@
 #include <stdarg.h>
 
 #include "pkl-ast.h"
+#include "pkl-env.h"
 #include "pvm.h"
 
 /* This is the main header file for the Poke Compiler.  The Poke
@@ -89,6 +90,16 @@ pvm_program pkl_compile_buffer (pkl_compiler compiler,
 
 pvm_program pkl_compile_expression (pkl_compiler compiler,
                                     char *buffer, char **end);
+
+/* Map over the declarations defined in the top-level compile-time
+   environment executing a handler.  This function is implemented in
+   pkl-env.c, and both `pkl_map_decl_fn' and the accepted values for
+   WHAT are defined in pkl-env.h.  */
+
+void pkl_map_decls (pkl_compiler compiler,
+                    int what,
+                    pkl_map_decl_fn cb,
+                    void *data);
 
 /* Diagnostic routines.  */
 

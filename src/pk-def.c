@@ -51,6 +51,13 @@ pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static int
+pk_cmd_info_vars (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  printf (_("Name\tType\tLocation\tValue\n"));
+  return 1;
+}
+
 struct pk_cmd deftype_cmd =
   {"deftype", "d", 0, 0, NULL, pk_cmd_def,
    "deftype NAME = TYPE"};
@@ -63,3 +70,6 @@ struct pk_cmd defun_cmd =
   {"defun", "d", 0, 0, NULL, pk_cmd_def,
    "defun NAME = (ARGS) [: TYPE] { BODY }"};
 
+struct pk_cmd info_vars_cmd =
+  {"vars", "", "", 0, NULL, pk_cmd_info_vars,
+   "info vars"};
