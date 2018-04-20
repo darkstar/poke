@@ -666,8 +666,6 @@ function_arg:
                       pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                       YYERROR;
                     }
-
-                  $$ = $1;
                 }
         ;
 

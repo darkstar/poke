@@ -220,6 +220,12 @@ instruction prolog ()
   end
 end
 
+instruction return ()
+  code
+  /* XXX: writeme. */
+  end
+end
+
 
 
 ## Environment instructions

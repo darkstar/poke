@@ -498,11 +498,18 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
    arguments.
 
    BODY is a PKL_AST_COMP_STMT node containing the statements that
-   conform the function body.  */
+   conform the function body.
+
+   NFRAMES is a counter used by the parser as an aid in determining
+   the number of lexical frames a RETURN_STMT should pop before
+   returning from the function.  While parsing, this contains the
+   number of frames pushed to the environment at any moment.  After
+   parsing, this field is not used anymore.  */
 
 #define PKL_AST_FUNC_RET_TYPE(AST) ((AST)->func.ret_type)
 #define PKL_AST_FUNC_ARGS(AST) ((AST)->func.args)
 #define PKL_AST_FUNC_BODY(AST) ((AST)->func.body)
+#define PKL_AST_FUNC_NFRAMES(AST) ((AST)->func.nframes)
 
 struct pkl_ast_func
 {
@@ -511,6 +518,8 @@ struct pkl_ast_func
   union pkl_ast_node *ret_type;
   union pkl_ast_node *args;
   union pkl_ast_node *body;
+
+  int nframes;
 };
 
 pkl_ast_node pkl_ast_make_func (pkl_ast ast,
@@ -967,14 +976,20 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
 
 /* PKL_AST_RETURN_STMT nodes represent return statements.
 
-   EXP is the expression to return to the caller.  */
+   EXP is the expression to return to the caller.
+
+   NFRAMES is the number of lexical frames to pop before returning
+   from the function.  This is used by the code generator.  */
 
 #define PKL_AST_RETURN_STMT_EXP(AST) ((AST)->return_stmt.exp)
+#define PKL_AST_RETURN_STMT_NFRAMES(AST) ((AST)->return_stmt.nframes)
 
 struct pkl_ast_return_stmt
 {
   struct pkl_ast_common common;
+
   union pkl_ast_node *exp;
+  int nframes;
 };
 
 pkl_ast_node pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp);

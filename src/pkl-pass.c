@@ -375,7 +375,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_FUNC_RET_TYPE (node))
         PKL_PASS (PKL_AST_FUNC_RET_TYPE (node));
       if (PKL_AST_FUNC_ARGS (node))
-        PKL_PASS (PKL_AST_FUNC_ARGS (node));
+        PKL_PASS_CHAIN (PKL_AST_FUNC_ARGS (node));
       PKL_PASS (PKL_AST_FUNC_BODY (node));
 
       break;
