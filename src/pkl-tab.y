@@ -916,7 +916,7 @@ stmt:
                   $$ = pkl_ast_make_null_stmt (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | expression '=' expression ';'
+        | primary '=' expression ';'
           	{
                   $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
                                               $1, $3);
