@@ -282,11 +282,14 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
 {
-  /* Function prologue:
-     - Push an environment.
-  */
+  /* Function prologue.  */
 
-  /* XXX */
+  /* XXX: other stuff for the function prologue goes here.  */
+
+  /* Push the function environment, for the arguments.  The
+     compound-statement that is the body for the function will create
+     it's own frame.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -296,10 +299,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
 {
-  /* Pop the argument from the stack and put it in the current
+  /* Pop an actual argument from the stack and put it in the current
      environment.  */
 
-  /* XXX  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 }
 PKL_PHASE_END_HANDLER
 
@@ -402,6 +405,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type)
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_INTEGER
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRING
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_OFFSET
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_ARG
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_MAP))
     PKL_PASS_BREAK;
 }
