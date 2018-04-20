@@ -86,6 +86,10 @@ pkl_parse_file (pkl_env *env,
   *env = parser->env;
   pkl_parser_free (parser);
 
+  /* Only the top-level compile-time environment should remain after
+     parsing.  */
+  assert (pkl_env_toplevel_p (parser->env));
+
   return ret;
 }
 
@@ -128,6 +132,10 @@ pkl_parse_buffer (pkl_env *env,
     *end = buffer + parser->nchars;
   pkl_tab__delete_buffer (yybuffer, parser->scanner);
   pkl_parser_free (parser);
+
+  /* Only the top-level compile-time environment should remain after
+     parsing.  */
+  assert (pkl_env_toplevel_p (parser->env));
 
   return ret;
 }

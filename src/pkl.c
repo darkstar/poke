@@ -130,7 +130,7 @@ rest_of_compilation (pkl_compiler compiler,
   };
 
   /* XXX */
-  /* pkl_ast_print (stdout, ast->ast); */
+  /* pkl_ast_print (stdout, ast->ast);*/
       
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
     goto error;
@@ -179,7 +179,7 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   else if (ret == 2)
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
-
+  
   program = rest_of_compilation (compiler, ast);
   /* XXX */  
   /* pvm_print_program (stdout, program); */

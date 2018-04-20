@@ -177,9 +177,9 @@ pkl_env_register (pkl_env env,
           PKL_AST_DECL_ORDER (decl) = env->num_types++;
           break;
         case PKL_AST_DECL_KIND_VAR:
+        case PKL_AST_DECL_KIND_FUNC:
           PKL_AST_DECL_ORDER (decl) = env->num_vars++;
           break;
-        case PKL_AST_DECL_KIND_FUNC:
         default:
           assert (0);
         }
