@@ -322,9 +322,9 @@ pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
 #define PVM_VAL_CLS(V) (PVM_VAL_BOX_CLS (PVM_VAL_BOX ((V))))
 
-#define PVM_VAL_CLS_PROGRAM(V) (PVM_VAL_MAP((V))->program)
-#define PVM_VAL_CLS_ENTRY_POINT(V) (PVM_VAL_MAP((V))->entry_point)
-#define PVM_VAL_CLS_ENV(V) (PVM_VAL_MAP((V))->env)
+#define PVM_VAL_CLS_PROGRAM(V) (PVM_VAL_CLS((V))->program)
+#define PVM_VAL_CLS_ENTRY_POINT(V) (PVM_VAL_CLS((V))->entry_point)
+#define PVM_VAL_CLS_ENV(V) (PVM_VAL_CLS((V))->env)
 
 struct pvm_cls
 {

@@ -266,9 +266,10 @@ instruction regvar () # VAL -> _
 end
 
 # Put Environment in Closure
-instruction pec () # CLOS -> CLOS (+ current environment)
+instruction pec () # CLS -> CLS (+ current environment)
   code
-  /* XXX: writeme.  */
+    pvm_val cls = JITTER_TOP_STACK ();
+    PVM_VAL_CLS_ENV (cls) = jitter_state_runtime.env;
   end
 end
 
