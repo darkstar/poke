@@ -464,6 +464,28 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     }
                   
                   break;
+                case 's':
+                  {
+                    /* Parse a string.  */
+
+                    char *end, *str;
+                    size_t size;
+                    
+                    end = skip_blanks (p);
+                    while (*end != '\0' && *end != ',')
+                      end++;
+
+                    size = end - p + 1;
+                    assert (size > 0);
+                    str = xmalloc (size);
+                    strncpy (str, p, size);
+
+                    argv[argc].type = PK_CMD_ARG_STR;
+                    argv[argc].val.str = str;
+                    p = end;
+                    match = 1;
+                    break;
+                  }
                 case 'f':
                   {
                     /* Parse a filename.  */
@@ -590,6 +612,9 @@ extern struct pk_trie *help_trie; /* pk-help.c */
 extern struct pk_cmd *vm_cmds[]; /* pk-vm.c  */
 extern struct pk_trie *vm_trie;  /* pk-vm.c  */
 
+extern struct pk_cmd *vm_disas_cmds[];  /* pk-vm.c */
+extern struct pk_trie *vm_disas_trie; /* pk-vm.c */
+
 static struct pk_trie *cmds_trie;
 
 int
@@ -603,6 +628,8 @@ pk_cmd_exec (char *str)
     help_trie = pk_trie_from_cmds (help_cmds);
   if (vm_trie == NULL)
     vm_trie = pk_trie_from_cmds (vm_cmds);
+  if (vm_disas_trie == NULL)
+    vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
 
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }

@@ -27,7 +27,7 @@
 #define PK_VM_DIS_F_NAT 0x1
 
 static int
-pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+pk_cmd_vm_disas_exp (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* disassemble expression EXP.  */
 
@@ -47,13 +47,80 @@ pk_cmd_vm_disas (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static int
+pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* disassemble function FNAME.  */
+
+  const char *fname;
+  pkl_ast_node decl;
+  pvm_program prog;
+  int back, over;
+  pvm_val val;
+
+  pkl_env compiler_env = pkl_get_env (poke_compiler);
+  pvm_env runtime_env = pvm_get_env (poke_vm);
+  
+  assert (argc == 1);
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_STR);
+  
+  fname = PK_CMD_ARG_STR (argv[0]);
+
+  decl = pkl_env_lookup (compiler_env, fname,
+                         &back, &over);
+
+  if (decl == NULL)
+    {
+      fprintf (stdout, "error: no such function `%s'\n", fname);
+      return 0;
+    }
+  else if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC)
+    {
+      fprintf (stdout, "error: `%s' is not a function\n", fname);
+      return 0;
+    }
+
+  val = pvm_env_lookup (runtime_env, back, over);
+  assert (val != PVM_NULL);
+
+  prog = PVM_VAL_CLS_PROGRAM (val);
+
+  if (uflags & PK_VM_DIS_F_NAT)
+    pvm_disassemble_program (prog, true,
+                             JITTER_OBJDUMP, NULL);
+  else
+    pvm_print_program (stdout, prog);
+  
+  return 1;
+}
+
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
-struct pk_cmd vm_disas_cmd =
-  {"disassemble", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas,
-   "vm disassemble[/n] EXP\n\
+struct pk_cmd vm_disas_exp_cmd =
+  {"expression", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas_exp,
+   "vm disassemble expression[/n] EXP\n\
 Flags:\n\
   n (do a native disassemble)"};
+
+struct pk_cmd vm_disas_fun_cmd =
+  {"function", "s", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas_fun,
+   "vm disassemble function[/n] EXP\n\
+Flags:\n\
+  n (do a native disassemble)"};
+
+
+struct pk_cmd *vm_disas_cmds[] =
+  {
+   &vm_disas_exp_cmd,
+   &vm_disas_fun_cmd,
+   &null_cmd
+  };
+
+struct pk_trie *vm_disas_trie;
+
+struct pk_cmd vm_disas_cmd =
+  {"disassemble", "e", PK_VM_DIS_UFLAGS, 0, &vm_disas_trie, NULL,
+   "vm disassemble (expression|function)"};
 
 struct pk_cmd *vm_cmds[] =
   {

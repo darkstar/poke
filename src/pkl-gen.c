@@ -139,10 +139,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
         pvm_specialize_program (program);
         closure = pvm_make_cls (program);
 
-        /* XXX */
-        printf ("XXX function program:\n");
-        pvm_print_program (stdout, program);
-
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
