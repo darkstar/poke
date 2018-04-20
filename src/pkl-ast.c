@@ -832,10 +832,14 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp)
 /* Build and return an AST node for a variable reference.  */
 
 pkl_ast_node
-pkl_ast_make_var (pkl_ast ast, int back, int over)
+pkl_ast_make_var (pkl_ast ast, pkl_ast_node name,
+                  int back, int over)
 {
   pkl_ast_node var = pkl_ast_make_node (ast, PKL_AST_VAR);
 
+  assert (name);
+  
+  PKL_AST_VAR_NAME (var) = ASTREF (name);
   PKL_AST_VAR_BACK (var) = back;
   PKL_AST_VAR_OVER (var) = over;
 

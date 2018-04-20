@@ -429,12 +429,11 @@ primary:
                       YYERROR;
                     }
 
-                  $$ = pkl_ast_make_var (pkl_parser->ast, back, over);
+                  $$ = pkl_ast_make_var (pkl_parser->ast,
+                                         $1, back, over);
                   var_type = PKL_AST_TYPE (PKL_AST_DECL_INITIAL (decl));
                   PKL_AST_TYPE ($$) = ASTREF (var_type);
                   PKL_AST_LOC ($$) = @1;
-
-                  ASTREF ($1); pkl_ast_node_free ($1);
                 }
 	| INTEGER
                 {
