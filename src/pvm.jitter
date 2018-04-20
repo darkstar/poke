@@ -19,7 +19,7 @@
 vm
   set prefix "pvm"
   tos-stack "pvm_val" "stack"
-  ntos-stack "pvm_val" "returnstack"
+  ntos-stack "jitter_uint" "returnstack"
 end
 
 
@@ -210,7 +210,7 @@ instruction prolog ()
     /* Fill the return stack slot with the return address.  The return
        stack has already been pushed (with an unspecified value on the
        top) by the caller. */
-    JITTER_TOP_RETURNSTACK() = (pvm_val) JITTER_LINK;
+    JITTER_TOP_RETURNSTACK() = (jitter_uint) JITTER_LINK;
   end
 end
 
