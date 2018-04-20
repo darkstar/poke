@@ -1081,6 +1081,13 @@ pkl_ast_node_free (pkl_ast_node ast)
               pkl_ast_node_free (t);
             }
           break;
+        case PKL_TYPE_FUNCTION:
+          for (t = PKL_AST_TYPE_F_ARGS (ast); t; t = n)
+            {
+              n = PKL_AST_CHAIN (t);
+              pkl_ast_node_free (t);
+            }
+          break;
         case PKL_TYPE_INTEGRAL:
         case PKL_TYPE_STRING:
         case PKL_TYPE_OFFSET:
@@ -1094,6 +1101,11 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_NAME (ast));
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_TYPE (ast));
+      break;
+
+    case PKL_AST_FUNCTION_ARG_TYPE:
+
+      pkl_ast_node_free (PKL_AST_FUNCTION_ARG_TYPE_TYPE (ast));
       break;
       
     case PKL_AST_ARRAY_REF:
@@ -1531,6 +1543,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
             case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
             case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
             case PKL_TYPE_STRUCT: IPRINTF ("  struct\n"); break;
+            case PKL_TYPE_FUNCTION: IPRINTF ("  function\n"); break;
             case PKL_TYPE_OFFSET: IPRINTF ("  offset\n"); break;
             default:
               IPRINTF (" unknown (%d)\n", PKL_AST_TYPE_CODE (ast));
@@ -1552,6 +1565,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
               IPRINTF ("elems:\n");
               PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
               break;
+            case PKL_TYPE_FUNCTION:
+              PRINT_AST_IMM (narg, TYPE_F_NARG, "%zu");
+              IPRINTF ("args:\n");
+              PRINT_AST_SUBAST_CHAIN (TYPE_F_ARGS);
+              break;
             case PKL_TYPE_OFFSET:
               PRINT_AST_SUBAST (base_type, TYPE_O_BASE_TYPE);
               PRINT_AST_SUBAST (unit, TYPE_O_UNIT);
@@ -1569,6 +1587,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;      
       PRINT_AST_SUBAST (name, STRUCT_ELEM_TYPE_NAME);
       PRINT_AST_SUBAST (type, STRUCT_ELEM_TYPE_TYPE);
+      break;
+
+    case PKL_AST_FUNCTION_ARG_TYPE:
+      IPRINTF ("FUNCTION_ARG_TYPE::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (type, FUNCTION_ARG_TYPE_TYPE);
       break;
       
     case PKL_AST_ARRAY_REF:
