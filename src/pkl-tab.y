@@ -103,7 +103,6 @@ pkl_tab_error (YYLTYPE *llocp,
 %token INTCONSTR UINTCONSTR OFFSETCONSTR
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
-%token LAMBDA
 %token STRING
 
 %token <opcode> MULA
@@ -466,7 +465,7 @@ primary:
                                              $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | function_specifier
+/*        | function_specifier */
 	;
 
 funcall_arg_list:
@@ -569,21 +568,21 @@ array_initializer:
  */
 
 function_specifier:
-          LAMBDA '(' pushlevel function_arg_list ')' comp_stmt
+          '(' pushlevel function_arg_list ')' comp_stmt
           	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
                                           NULL /* ret_type */,
-                                          $4, $6);
+                                          $3, $5);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | LAMBDA '(' pushlevel function_arg_list ')' ':' type_specifier comp_stmt
+        | '(' pushlevel function_arg_list ')' ':' type_specifier comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $7, $4, $8);
+                                          $6, $3, $7);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
@@ -634,7 +633,7 @@ function_arg:
                       pkl_error (pkl_parser->ast, @2,
                                  "duplicated argument name `%s' in function declaration",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
-                      /* Make sure to pop the lambda frame.  */
+                      /* Make sure to pop the function frame.  */
                       pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                       YYERROR;
                     }
