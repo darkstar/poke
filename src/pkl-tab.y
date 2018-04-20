@@ -368,6 +368,11 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @2;
                 }
+        | type_specifier '@' expression
+                {
+                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($$) = @$;
+                }
         | UNIT
 		{
                     $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $1);
@@ -444,11 +449,6 @@ primary:
                 }
         | array
 	| struct
-        | type_specifier '@' expression
-                {
-                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
-                    PKL_AST_LOC ($$) = @$;
-                }
         | primary '.' identifier
 		{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
