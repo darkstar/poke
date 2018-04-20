@@ -407,9 +407,7 @@ primary:
                   /* Search for a variable definition in the
                      compile-time environment, and create a
                      PKL_AST_VAR node with it's lexical environment,
-                     annotated with its initialization.  The type of
-                     the variable will be set in typify in due
-                     time.  */
+                     annotated with its initialization.  */
 
                   int back, over;
                   pkl_ast_node var_type;
