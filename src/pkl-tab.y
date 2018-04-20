@@ -460,7 +460,6 @@ primary:
                   PKL_AST_LOC ($$) = @$;
                 }
 	| funcall
-/*        | function_specifier */
 	;
 
 funcall:
