@@ -144,7 +144,7 @@ There is NO WARRANTY, to the extent permitted by law.\n"), "2018");
 
   puts (_("\
 \n\
-Perpetrated by Jose E. Marchesi.  To my father."));
+Perpetrated by Jose E. Marchesi."));
 }
 
 static void
