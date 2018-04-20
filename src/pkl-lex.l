@@ -134,6 +134,7 @@ D [0-9]
 "return"        { return RETURN; }
 "lambda"        { return LAMBDA; }
 "string"	{ return STRING; }
+"as"		{ return AS; }
 
 "lsb"		{ return LSB; }
 "msb"		{ return MSB; }

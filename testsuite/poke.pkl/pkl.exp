@@ -27,37 +27,37 @@ set test inth
 poke_test_cmd "print 6h" {6H}
 
 set test int16
-poke_test_cmd "print (int<16>) 6" {6H}
+poke_test_cmd "print 6 as int<16>" {6H}
 
 set test uinth
 poke_test_cmd "print 6hu" {6UH}
 
 set test uint16
-poke_test_cmd "print (uint<16>) 6" {6UH}
+poke_test_cmd "print 6 as uint<16>" {6UH}
 
 set test intx-1
-poke_test_cmd "print/x (uint<4>) -1" {0xfUN}
+poke_test_cmd "print/x -1 as uint<4>" {0xfUN}
 
 set test intx-2
-poke_test_cmd "print/x (int<4>) -1" {0xfN}
+poke_test_cmd "print/x -1 as int<4>" {0xfN}
 
 set test into-1
-poke_test_cmd "print/o (uint<3>) -1" {\(uint<3>\) 0o7}
+poke_test_cmd "print/o -1 as uint<3>" {\(uint<3>\) 0o7}
 
 set test into-2
-poke_test_cmd "print/o (int<3>) -1" {\(int<3>\) 0o7}
+poke_test_cmd "print/o -1 as int<3>" {\(int<3>\) 0o7}
 
 set test intb-1
-poke_test_cmd "print/b (uint<4>) -1" {0b1111UN}
+poke_test_cmd "print/b -1 as uint<4>" {0b1111UN}
 
 set test intb-2
-poke_test_cmd "print/b (int<4>) -1" {0b1111N}
+poke_test_cmd "print/b -1 as int<4>" {0b1111N}
 
 set test intb-3
-poke_test_cmd "print/b (int<3>) -1" {\(int<3>\) 0b111}
+poke_test_cmd "print/b -1 as int<3>" {\(int<3>\) 0b111}
 
 set test intb-4
-poke_test_cmd "print/b (uint<3>) -1" {\(uint<3>\) 0b111}
+poke_test_cmd "print/b -1 as uint<3>" {\(uint<3>\) 0b111}
 
 # Strings
 
@@ -79,37 +79,37 @@ poke_test_cmd {print "foo" != "fooo"} {1}
 # Conversions.
 
 set test int-to-int1-0
-poke_test_cmd "print (int<1>) 0" {\(int<1>\) 0}
+poke_test_cmd "print 0 as int<1>" {\(int<1>\) 0}
 
 set test int-to-uint1-0
-poke_test_cmd "print (uint<1>) 0" {\(uint<1>\) 0}
+poke_test_cmd "print 0 as uint<1>" {\(uint<1>\) 0}
 
 set test i32toi32
-poke_test_cmd "print (int) 1" "1"
+poke_test_cmd "print 1 as int" "1"
 
 set test i32tou32
-poke_test_cmd "print (uint32) 1" "1U"
+poke_test_cmd "print 1 as uint32" "1U"
 
 set test i32toi64
-poke_test_cmd "print (long) 1" "1L"
+poke_test_cmd "print 1 as long" "1L"
 
 set test i32tou64
-poke_test_cmd "print (uint64) 1" "1UL"
+poke_test_cmd "print 1 as uint64" "1UL"
 
 set test u2addi5
-poke_test_cmd "print (uint<2>) 1 + (int<5>) 2" {\(uint<5>\) 3}
+poke_test_cmd "print 1 as uint<2> + 2 as int<5>" {\(uint<5>\) 3}
 
 set test offset-to-offset-1
-poke_test_cmd "print (offset<uint16,B>) (1024#b)" {128UH#B}
+poke_test_cmd "print 1024#b as offset<uint16,B>" {128UH#B}
 
 set test offset-to-offset-2
-poke_test_cmd "print (offset<uint16,byte\[1\]>) (1024#b)" {128UH#B}
+poke_test_cmd "print 1024#b as offset<uint16,byte\[1\]>" {128UH#B}
 
 set test offset-to-offset-3
-poke_test_cmd "print (offset<uint16,byte\[2\]>) (1024#b)" {64UH#16}
+poke_test_cmd "print 1024#b as offset<uint16,byte\[2\]>" {64UH#16}
 
 set test offset-to-offset-4
-poke_test_cmd "print (offset<int,B>) (#long)" {8#B}
+poke_test_cmd "print #long as offset<int,B>" {8#B}
 
 # Operations
 
@@ -216,22 +216,22 @@ set test sl-5
 poke_test_cmd "print 1 <- 33" "2"
 
 set test sl-6
-poke_test_cmd "print (uint<4>) 1 <- 1" "2UN"
+poke_test_cmd "print 1 as uint<4> <- 1" "2UN"
 
 set test sl-7
-poke_test_cmd "print (uint<4>) 1 <- 2" "4UN"
+poke_test_cmd "print 1 as uint<4> <- 2" "4UN"
 
 set test sl-8
-poke_test_cmd "print (uint<4>) 1 <- 3" "8UN"
+poke_test_cmd "print 1 as uint<4> <- 3" "8UN"
 
 set test sl-9
-poke_test_cmd "print (uint<4>) 1 <- 4" "1UN"
+poke_test_cmd "print 1 as uint<4> <- 4" "1UN"
 
 set test sl-10
-poke_test_cmd "print (uint<4>) 1 <- 5" "2UN"
+poke_test_cmd "print 1 as uint<4> <- 5" "2UN"
 
 set test sl-11
-poke_test_cmd "print (uint<34>) 1 <- 34" {\(uint<34>\) 1}
+poke_test_cmd "print 1 as uint<34> <- 34" {\(uint<34>\) 1}
 
 # Arrays
 
@@ -343,7 +343,7 @@ set test offset-add-lulu
 poke_test_cmd "print 1UL#b + 2UL#b" {3UL#b}
 
 set test offset-add-promo
-poke_test_cmd "print (int<7>) 2#B + (int<2>) 1#b" {\(int<7>\) 17#b}
+poke_test_cmd "print 2 as int<7> #B + 1 as int<2> #b" {\(int<7>\) 17#b}
 
 set test offset-sub-ii
 poke_test_cmd "print 1#b - 2#b" {-1#b}
@@ -358,7 +358,7 @@ set test offset-sub-lulu
 poke_test_cmd "print 10UL#b - 2UL#b" {8UL#b}
 
 set test offset-sub-promo
-poke_test_cmd "print (int<7>) 2#B - (int<2>) 1#b" {\(int<7>\) 15#b}
+poke_test_cmd "print 2 as int<7> #B - 1 as int<2> #b" {\(int<7>\) 15#b}
 
 set test offset-eq-true-1
 poke_test_cmd "print 12#b == (11 + 1)#b" "1"

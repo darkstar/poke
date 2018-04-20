@@ -138,9 +138,9 @@ pkl_tab_error (YYLTYPE *llocp,
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
-%left '@'
+%right '@'
 %nonassoc UNIT
-%right UNARY INC DEC
+%right UNARY INC DEC AS
 %left HYPERUNARY
 %left '.'
 
@@ -244,13 +244,10 @@ expression:
                                                $1, $2);
                   PKL_AST_LOC ($$) = @1;
                 }
-        | '(' type_specifier ')' expression %prec UNARY
+        | expression AS type_specifier
         	{
-                  $$ = pkl_ast_make_cast (pkl_parser->ast, $2, $4);
-                  PKL_AST_LOC ($$).first_line = @1.first_line;
-                  PKL_AST_LOC ($$).first_column = @1.first_column;
-                  PKL_AST_LOC ($$).last_line = @3.last_line;
-                  PKL_AST_LOC ($$).last_column = @3.last_column;
+                  $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
+                  PKL_AST_LOC ($$) = @2;
                 }
         | SIZEOF '(' expression ')' %prec UNARY
         	{
