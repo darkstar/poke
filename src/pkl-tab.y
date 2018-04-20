@@ -244,7 +244,7 @@ expression:
                                                $1, $2);
                   PKL_AST_LOC ($$) = @1;
                 }
-        | expression AS type_specifier
+	| expression AS type_specifier
         	{
                   $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
                   PKL_AST_LOC ($$) = @2;
