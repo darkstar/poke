@@ -147,7 +147,7 @@ pkl_tab_error (YYLTYPE *llocp,
 
 %type <ast> start program program_elem_list program_elem
 %type <ast> expression primary identifier
-%type <ast> funcall_arg_list funcall_arg
+%type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
 %type <ast> type_specifier
@@ -242,11 +242,6 @@ expression:
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast,
                                                $1, $2);
                   PKL_AST_LOC ($$) = @1;
-                }
-	| expression AS type_specifier
-        	{
-                  $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
-                  PKL_AST_LOC ($$) = @2;
                 }
         | SIZEOF '(' expression ')' %prec UNARY
         	{
@@ -367,6 +362,11 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @2;
                 }
+	| expression AS type_specifier
+        	{
+                  $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
+                  PKL_AST_LOC ($$) = @2;
+                }
         | type_specifier '@' expression
                 {
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
@@ -459,13 +459,17 @@ primary:
                   $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '(' funcall_arg_list ')' %prec '.'
+	| funcall
+/*        | function_specifier */
+	;
+
+funcall:
+          primary '(' funcall_arg_list ')' %prec '.'
           	{
                   $$ = pkl_ast_make_funcall (pkl_parser->ast,
                                              $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-/*        | function_specifier */
 	;
 
 funcall_arg_list:
