@@ -384,6 +384,7 @@ expression:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
+   	| struct
         ;
 
 unary_operator:
@@ -447,7 +448,6 @@ primary:
                   $$ = $2;
                 }
         | array
-	| struct
         | primary '.' identifier
 		{
                     $$ = pkl_ast_make_struct_ref (pkl_parser->ast, $1, $3);
@@ -491,17 +491,11 @@ funcall_arg:
         ;
 
 struct:
-         pushlevel '{' struct_elem_list '}'
+	  '{' struct_elem_list '}'
 		{
                     $$ = pkl_ast_make_struct (pkl_parser->ast,
-                                              0 /* nelem */, $3);
+                                              0 /* nelem */, $2);
                     PKL_AST_LOC ($$) = @$;
-
-                    /* There can't be declarations inside a struct
-                       literal.  The pushlevel in this rule and the
-                       subsequent pop_frame is to avoid shift/reduce
-                       conflicts.  */
-                    pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	;
 

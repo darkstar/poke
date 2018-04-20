@@ -446,10 +446,11 @@ set test struct-2
 poke_test_cmd "print {1,2}" {\{1,2\}}
 
 set test struct-ref-1
-poke_test_cmd "print {.fo=10}.fo" "10"
+poke_test_cmd "print ({.fo=10}).fo" "10"
 
 set test struct-ref-2
-poke_test_cmd "print {.fo=10#Kb}.fo/2#Kb" {5}
+poke_test_cmd "defvar struct_ref_2 = {.fo = 10#Kb}" {}
+poke_test_cmd "print struct_ref_2.fo/2#Kb" {5}
 
 # deftype
 
