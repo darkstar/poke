@@ -138,9 +138,9 @@ pkl_tab_error (YYLTYPE *llocp,
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
+%left '@'
 %nonassoc UNIT
 %right UNARY INC DEC
-%right '@'
 %left HYPERUNARY
 %left '.'
 
@@ -371,8 +371,6 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @2;
                 }
-/*                      | expression '?' expression ':' expression
-        	{ $$ = pkl_ast_make_cond_exp ($1, $3, $5); }*/
         | UNIT
 		{
                     $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $1);
@@ -449,9 +447,9 @@ primary:
                 }
         | array
 	| struct
-        | '(' type_specifier '@' expression ')'
+        | type_specifier '@' expression
                 {
-                    $$ = pkl_ast_make_map (pkl_parser->ast, $2, $4);
+                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
         | primary '.' identifier
