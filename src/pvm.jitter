@@ -210,7 +210,19 @@ instruction pushvar (?n, ?n) #  _ -> VAL
   end
 end
 
-instruction popvar () # VAL -> _
+instruction popvar (?n, ?n) # VAL -> _
+  code
+    /* XXX: writeme.  */
+#if 0
+    pvm_env_set_var (jitter_state_runtime.env,
+                     (int) JITTER_ARGN0,
+                     (int) JITTER_ARGN1,
+                     JITTER_TOP_STACK ());
+#endif
+  end
+end
+
+instruction regvar () # VAL -> _
   code
     pvm_env_register (jitter_state_runtime.env,
                       JITTER_TOP_STACK ());

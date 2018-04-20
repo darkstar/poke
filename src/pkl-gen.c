@@ -120,7 +120,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_VAR:
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       break;
     case PKL_AST_DECL_KIND_TYPE:
       /* Nothing to do.  */
@@ -142,12 +142,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 
         /* PUSH label_to_code
            MKC  # label_to_code -> _ (plus current environment)
-           POPVAR
+           REGVAR
         */
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, code);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKC);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 #endif
         PKL_GEN_POP_ASM;
         assert (0);
@@ -190,8 +190,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
 {
   pkl_ast_node var = PKL_PASS_NODE;
 
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                PKL_AST_VAR_BACK (var), PKL_AST_VAR_OVER (var));
+  if (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+    /* This is a l-value in an assignment.  Generate nothing, as this
+       node is only used as a recipient for the lexical address of the
+       variable.  */
+    ;
+  else
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                  PKL_AST_VAR_BACK (var), PKL_AST_VAR_OVER (var));
 }
 PKL_PHASE_END_HANDLER
 
@@ -236,6 +242,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | LVALUE
+ * | EXP
+ * ASS_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_ass_stmt)
+{
+  pkl_ast_node ass_stmt = PKL_PASS_NODE;
+  pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
+
+  /* At this point the r-value, generated from executing EXP, is in
+     the stack.  Note that `gen' didn't generate anything for LVALUE,
+     as it is only used as a place-holder for the lexical address of
+     the variable.  */
+  
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
+                PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | EXP
  * RETURN
  */
@@ -272,7 +299,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
   /* Pop the argument from the stack and put it in the current
      environment.  */
 
-  /* XXX  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);  */
+  /* XXX  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1168,6 +1195,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
