@@ -268,8 +268,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
- * | FUNCTION
  * | [ARG]...
+ * | FUNCTION
  * FUNCALL
  */
 
@@ -278,8 +278,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall)
   /* At this point the closure for FUNCTION and the actuals are pushed
      in the stack.  Just call the bloody function.  */
 
-  int narg = PKL_AST_FUNCALL_NARG (PKL_PASS_NODE);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL, narg);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
 }
 PKL_PHASE_END_HANDLER
 

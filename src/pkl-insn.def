@@ -252,7 +252,7 @@ PKL_DEF_INSN (PKL_INSN_PEC, "", "pec")
 
 /* Function management instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_CALL, "n", "call")
+PKL_DEF_INSN (PKL_INSN_CALL, "", "call")
 PKL_DEF_INSN (PKL_INSN_PROLOG, "", "prolog")
 PKL_DEF_INSN (PKL_INSN_RETURN, "", "return")
 

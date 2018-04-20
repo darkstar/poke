@@ -188,7 +188,7 @@ end
 
 ## Function management instructions
 
-instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
+instruction call () # ARG1 ... ARGN CLOSURE -> RETVAL
   caller
   code
   int arity = JITTER_ARGN0;
