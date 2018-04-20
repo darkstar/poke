@@ -414,7 +414,7 @@ pkl_ast_dup_type (pkl_ast_node type)
       {
         pkl_ast_node etype
           = pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type));
-        PKL_AST_TYPE_A_NELEM (new) = PKL_AST_TYPE_A_NELEM (type);
+        PKL_AST_TYPE_A_NELEM (new) = ASTREF (PKL_AST_TYPE_A_NELEM (type));
         PKL_AST_TYPE_A_ETYPE (new) = ASTREF (etype);
       }
       break;
@@ -514,6 +514,22 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
                         PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (sb)))
                 || !pkl_ast_type_equal (PKL_AST_STRUCT_ELEM_TYPE_TYPE (sa),
                                         PKL_AST_STRUCT_ELEM_TYPE_TYPE (sb)))
+              return 0;
+          }
+        break;
+      }
+    case PKL_TYPE_FUNCTION:
+      {
+        pkl_ast_node fa, fb;
+
+        if (PKL_AST_TYPE_F_NARG (a) != PKL_AST_TYPE_F_NARG (b))
+          return 0;
+        for (fa = PKL_AST_TYPE_F_ARGS (a), fb = PKL_AST_TYPE_F_ARGS (b);
+             fa && fb;
+             fa = PKL_AST_CHAIN (fa), fb = PKL_AST_CHAIN (fb))
+          {
+            if (!pkl_ast_type_equal (PKL_AST_FUNCTION_ARG_TYPE_TYPE (fa),
+                                     PKL_AST_FUNCTION_ARG_TYPE_TYPE (fb)))
               return 0;
           }
         break;
