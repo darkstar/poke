@@ -204,7 +204,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_comp_stmt)
 {
   /* Push a frame into the environment.  */
-  /* XXX */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -216,8 +216,22 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 {
-  /* Pop N+1 frames from the environment.  */
-  /* XXX */
+  pkl_ast_node comp_stmt = PKL_PASS_NODE;
+  pkl_ast_node stmt_decl;
+
+  /* Pop the frames created by the declarations contained in the
+     compound statement from the enviroment.  */
+
+  for (stmt_decl = comp_stmt;
+       stmt_decl;
+       stmt_decl = PKL_AST_CHAIN (stmt_decl))
+    {
+      if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
+    }
+
+  /* Now pop the frame created by the compound statement itself.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
 }
 PKL_PHASE_END_HANDLER
 

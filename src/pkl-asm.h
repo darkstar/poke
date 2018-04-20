@@ -90,7 +90,9 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
 
 /* For loop:
  *
- * pkl_asm_dotimes (pasm, INTEGER)
+ * pkl_asm_dotimes (pasm)
+ *
+ * ... integral ...
  *
  * pkl_asm_loop (pasm);
  *
