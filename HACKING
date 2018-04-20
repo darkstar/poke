@@ -223,6 +223,9 @@ The phases above are organized in two passes:
     Pass1: trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
     Pass2: analf gen
 
+The following subsections contain a brief but complete description of
+the tasks performed by each phase.  Please keep it up to date.
+
 trans1
 ------
 
