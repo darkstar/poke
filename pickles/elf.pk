@@ -1535,9 +1535,8 @@ deftype Elf_Section =
       /* The name of a section is stored in a string table which is
          itself stored in a section in the file.  Find it.  */
       
-      for (s in shdr)
-        if (s is strtab)
-          return (string @ s.strtab[shdr.sh_name]);
+      for (s in shdr where s is strtab)
+        return (string @ s.strtab[shdr.sh_name]);
     };
   };
 

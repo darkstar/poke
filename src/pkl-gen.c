@@ -62,6 +62,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 PKL_PHASE_END_HANDLER
 
 /*
+ * DECL
+ * | INITIAL
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
+{
+#if 0
+  pkl_gen_payload payload
+    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node decl = PKL_PASS_NODE;
+
+  /* INITIAL is a PKL_AST_FUNC, that will compile into a program
+     containing the function code.  Push a new assembler to the stack
+     of assemblers in the payload and use it to process INITIAL.  */
+
+  payload->pasm
+    = pkl_gen_push_asm (payload->pasm, pkl_asm_new (PKL_PASS_AST));
+#endif
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | INITIAL
  * DECL
  */
@@ -89,6 +111,33 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
       /* Nothing to do.  */
       break;
     case PKL_AST_DECL_KIND_FUNC:
+      {
+        /* At this point the code for the function specification
+           INITIAL has been assembled in the current macroassembler.
+           Finalize the program and put it in a PVM closure, along
+           with the current environment.  */
+
+#if 0 /* XXX */
+        pvm_program code;
+        pvm_val closure;
+        pkl_asm f_pasm = payload->pasm;
+
+        payload->pasm = pkl_gen_pop_asm (payload->pasm);
+        code = pkl_asm_finish (f_pasm);
+        pvm_specialize_program (code);
+
+        /* PUSH label_to_code
+           MKC  # label_to_code -> _ (plus current environment)
+           POPVAR
+        */
+
+        pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, code);
+        pkl_asm_insn (payload->pasm, PKL_INSN_MKC);
+        pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);
+#endif
+        assert (0);
+        break;
+      }
     default:
       assert (0);
       break;
@@ -156,6 +205,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 {
   /* Pop N+1 frames from the environment.  */
   /* XXX */
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | EXP
+ * RETURN
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
+{
+  /* XXX: generate a return instruction.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1152,10 +1212,12 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   {
+   PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
    PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
    PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),

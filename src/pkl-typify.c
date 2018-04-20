@@ -715,7 +715,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_map)
   if (PKL_AST_TYPE_CODE (map_offset_type) != PKL_TYPE_OFFSET)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (map_offset),
-                 "invalid offset in map");
+                 "expected offset");
       payload->errors++;
       PKL_PASS_ERROR;
     }
