@@ -40,7 +40,7 @@
   do                                                                  \
     {                                                                 \
       assert (PKL_GEN_PAYLOAD->cur_pasm < PKL_GEN_MAX_PASM);          \
-      PKL_GEN_PAYLOAD->pasm[++PKL_GEN_PAYLOAD->cur_pasm] = (new_pasm);  \
+      PKL_GEN_PAYLOAD->pasm[++(PKL_GEN_PAYLOAD->cur_pasm)] = (new_pasm); \
     }                                                                 \
   while (0)
 
