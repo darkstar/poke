@@ -380,6 +380,20 @@ pkl_ast_make_struct_elem_type (pkl_ast ast,
   return struct_type_elem;
 }
 
+pkl_ast_node
+pkl_ast_make_function_arg_type (pkl_ast ast, pkl_ast_node type)
+{
+  pkl_ast_node function_type_arg
+    = pkl_ast_make_node (ast, PKL_AST_FUNCTION_ARG_TYPE);
+
+  assert (type);
+
+  PKL_AST_FUNCTION_ARG_TYPE_TYPE (function_type_arg)
+    = ASTREF (type);
+
+  return function_type_arg;
+}
+
 /* Allocate and return a duplicated type AST node.  */
 
 pkl_ast_node

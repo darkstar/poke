@@ -56,6 +56,7 @@ enum pkl_ast_code
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
+  PKL_AST_FUNCTION_ARG_TYPE,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
   /* Functions.  */
@@ -617,6 +618,23 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
                                             pkl_ast_node name,
                                             pkl_ast_node type);
 
+/* PKL_AST_FUNCTION_ARG_TYPE nodes represent the arguments part of a
+   function type.
+
+   TYPE is a PKL_AST_TYPE node describing the type of the
+   argument.  */
+
+#define PKL_AST_FUNCTION_ARG_TYPE_TYPE(AST) ((AST)->fun_type_arg.type)
+
+struct pkl_ast_function_arg_type
+{
+  struct pkl_ast_common common;
+  union pkl_ast_node *type;
+};
+
+pkl_ast_node pkl_ast_make_function_arg_type (pkl_ast ast,
+                                             pkl_ast_node type);
+
 /* PKL_AST_TYPE nodes represent types.
    
    If NAME is not NULL, then all we know about this type is its name,
@@ -636,6 +654,11 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
    In struct types, NELEM is the number of elements in the struct type.
    ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.
 
+   In function types, NARG is the number of formal arguments in the
+   function type.  ARGS is a chain of PKL_AST_FUNCTION_ARG_TYPE nodes.
+   RTYPE is the type of the returned value, or NULL if the function
+   type denotes a void function.
+
    When the size of a value of a given type can be determined at
    compile time, we say that such type is "complete".  Otherwise, we
    say that the type is "incomplete" and should be completed at
@@ -652,6 +675,9 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
 #define PKL_AST_TYPE_O_UNIT(AST) ((AST)->type.val.off.unit)
 #define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
+#define PKL_AST_TYPE_F_RTYPE(AST) ((AST)->type.val.fun.rtype)
+#define PKL_AST_TYPE_F_NARG(AST) ((AST)->type.val.fun.narg)
+#define PKL_ASt_TYPE_F_ARGS(AST) ((AST)->type.val.fun.args)
 
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
 #define PKL_AST_TYPE_COMPLETE_YES 1
@@ -690,6 +716,13 @@ struct pkl_ast_type
       union pkl_ast_node *unit;
       union pkl_ast_node *base_type;
     } off;
+
+    struct
+    {
+      union pkl_ast_node *rtype;
+      union pkl_ast_node *narg;
+      union pkl_ast_node *args;
+    } fun;
     
   } val;
 };
@@ -700,6 +733,8 @@ pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
+pkl_ast_node pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
+                                         pkl_ast_node narg, pkl_ast_node args);
 
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
@@ -1041,6 +1076,7 @@ union pkl_ast_node
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;
+  struct pkl_ast_function_arg_type fun_type_arg;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
   /* Functions.  */
