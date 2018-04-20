@@ -75,7 +75,29 @@ pkl_tab_error (YYLTYPE *llocp,
   int integer;
 }
 
-%destructor { $$ = ASTREF ($$); pkl_ast_node_free ($$); } <ast>
+%destructor {
+  if ($$)
+    {
+      switch (PKL_AST_CODE ($$))
+        {
+        case PKL_AST_COMP_STMT:
+          /* XXX: for comp_stmt, we should pop N-levels.  */
+          assert (0);
+          break;
+        case PKL_AST_TYPE:
+          if (PKL_AST_TYPE_CODE ($$) == PKL_TYPE_STRUCT)
+            pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+          break;
+        case PKL_AST_FUNC:
+          pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+          break;
+        default:
+          break;
+        }
+    }
+
+  $$ = ASTREF ($$); pkl_ast_node_free ($$);
+ } <ast>
 
 /* Primaries.  */
 

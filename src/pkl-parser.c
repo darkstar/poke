@@ -86,9 +86,12 @@ pkl_parse_file (pkl_env *env,
   *env = parser->env;
   pkl_parser_free (parser);
 
-  /* Only the top-level compile-time environment should remain after
-     parsing.  */
-  assert (pkl_env_toplevel_p (parser->env));
+  /* In the absence of an error, only the top-level compile-time
+     environment should remain after parsing.  In the case of an
+     error, this doesn't matter since the environment is gonna be
+     discarded anyway.  XXX but it would be nice to fix this in the
+     parser's destructor.  */
+  assert (ret != 0 || pkl_env_toplevel_p (parser->env));
 
   return ret;
 }
@@ -133,9 +136,12 @@ pkl_parse_buffer (pkl_env *env,
   pkl_tab__delete_buffer (yybuffer, parser->scanner);
   pkl_parser_free (parser);
 
-  /* Only the top-level compile-time environment should remain after
-     parsing.  */
-  assert (pkl_env_toplevel_p (parser->env));
+  /* In the absence of an error, only the top-level compile-time
+     environment should remain after parsing.  In the case of an
+     error, this doesn't matter since the environment is gonna be
+     discarded anyway.  XXX but it would be nice to fix this in the
+     parser's destructor.  */
+  assert (ret != 0 || pkl_env_toplevel_p (parser->env));
 
   return ret;
 }

@@ -168,10 +168,12 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   pkl_ast ast = NULL;
   pvm_program program;
   int ret;
+  pkl_env env = NULL;
 
+  env = pkl_env_dup_toplevel (compiler->env);
+  
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&compiler->env,
-                          &ast,
+  ret = pkl_parse_buffer (&env, &ast,
                           PKL_PARSE_DECLARATION, buffer, end);
   if (ret == 1)
     /* Parse error.  */
@@ -186,15 +188,12 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   if (program == NULL)
     goto error;
 
-  /* XXX: use a copy of env, so we can rollback in case of errors in
-     rest_of_compilation.  Otherwise we are left with the erroneous
-     definitions.  */
-  
+  compiler->env = env;
   pvm_specialize_program (program);
   return program;
 
  error:
-  pkl_ast_free (ast);
+  pkl_env_free (env);
   return NULL;
 }
 
@@ -205,6 +204,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   pkl_ast ast = NULL;
   pvm_program program;
   FILE *fd;
+  pkl_env env = NULL;
 
   fd = fopen (fname, "rb");
   if (!fd)
@@ -213,8 +213,8 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       return NULL;
     }
 
-  ret = pkl_parse_file (&compiler->env,
-                        &ast, fd, fname);
+  env = pkl_env_dup_toplevel (compiler->env);
+  ret = pkl_parse_file (&env,  &ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -224,23 +224,20 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       printf (_("out of memory\n"));
     }
 
-  fclose (fd);
   program = rest_of_compilation (compiler, ast);
   /* XXX */  
   /* pvm_print_program (stdout, program); */
   if (program == NULL)
     goto error;
 
-  /* XXX: use a copy of env, so we can rollback in case of errors in
-     rest_of_compilation.  Otherwise we are left with the erroneous
-     definitions.  */
-
+  compiler->env = env;
   pvm_specialize_program (program);
+  fclose (fd);
   return program;
 
  error:
   fclose (fd);
-  pkl_ast_free (ast);
+  pkl_env_free (env);
   return NULL;
 }
 

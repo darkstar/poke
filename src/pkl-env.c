@@ -246,3 +246,26 @@ pkl_env_map_decls (pkl_env env,
         }
     }
 }
+
+pkl_env
+pkl_env_dup_toplevel (pkl_env env)
+{
+  pkl_env new;
+  int i;
+
+  assert (pkl_env_toplevel_p (env));
+
+  new = pkl_env_new ();
+  for (i = 0; i < HASH_TABLE_SIZE; ++i)
+    {
+      pkl_ast_node decl = env->hash_table[i];
+
+      for (; decl; decl = PKL_AST_CHAIN2 (decl))
+        new->hash_table[i] = ASTREF (decl);
+    }
+
+  new->num_types = env->num_types;
+  new->num_vars = env->num_vars;
+  
+  return new;
+}

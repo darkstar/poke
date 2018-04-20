@@ -117,4 +117,9 @@ void pkl_env_map_decls (pkl_env env,
                         pkl_map_decl_fn cb,
                         void *data);
 
+/* Return a copy of ENV.  Note this only works for top-level
+   environments.  */
+
+pkl_env pkl_env_dup_toplevel (pkl_env env);
+
 #endif /* !PKL_ENV_H  */
