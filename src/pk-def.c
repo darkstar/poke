@@ -41,9 +41,6 @@ pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
      execution errors, but ignore the returned value.  */
   
   prog = PK_CMD_ARG_DEF (argv[0]);
-  /* XXX */
-  /* printf ("XXX decl program: \n");*/
-  pvm_print_program (stdout, prog);
   pvm_ret = pvm_run (poke_vm, prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     {
