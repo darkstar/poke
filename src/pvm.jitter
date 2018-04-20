@@ -185,6 +185,29 @@ end
 
 
 
+## Function management instructions
+
+instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
+  code
+  /* XXX: writeme  */
+#if 0
+  int arity = JITTER_ARGN0;
+  pvm_clos closure = JITTER_AT_DEPTH_STACK (arity);
+  
+  /* Make place for the return address in the return stack.  The
+     actual value will be written by the callee. */
+  JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
+
+  /* Branch-and-link to the native code, whose first instruction will
+     be a prolog. */
+  JITTER_BRANCH_AND_LINK (PVM_VAL_CLOS_CODE (closure));
+#endif
+  end
+end
+
+
+
+
 ## Environment instructions
 
 instruction pushf ()

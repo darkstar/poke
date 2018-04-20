@@ -274,6 +274,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | FUNCTION
+ * | [ARG]...
+ * FUNCALL
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall)
+{
+  /* At this point the closure for FUNCTION and the actuals are pushed
+     in the stack.  Call the closure.  */
+
+  /* XXX: move this to `trans1'.  */
+  pkl_ast_node arg;
+  int nargs = 0;
+  for (arg = PKL_AST_FUNCALL_ARGS (PKL_PASS_NODE);
+       arg;
+       arg = PKL_AST_CHAIN (arg))
+    nargs++;
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL, nargs);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * FUNC
  * | [TYPE]
  * | [FUNC_ARG]...
@@ -282,14 +305,26 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
 {
-  /* Function prologue.  */
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNCALL)
+    {
+      /* Push the closure for the function, that will be used along
+         with the actuals in the funcall.  */
 
-  /* XXX: other stuff for the function prologue goes here.  */
+      /* XXX */
+      assert (0);
+    }
+  else
+    {
+      /* This is a function prologue.  */
 
-  /* Push the function environment, for the arguments.  The
-     compound-statement that is the body for the function will create
-     it's own frame.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+      /* XXX: other stuff for the function prologue goes here.  */
+      
+      /* Push the function environment, for the arguments.  The
+         compound-statement that is the body for the function will create
+         it's own frame.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1202,6 +1237,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_gen_df_funcall),
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),

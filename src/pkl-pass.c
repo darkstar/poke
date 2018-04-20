@@ -366,6 +366,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
       PKL_PASS (PKL_AST_DECL_INITIAL (node));
 
       break;
+    case PKL_AST_FUNCALL:
+      PKL_PASS (PKL_AST_FUNCALL_FUNCTION (node));
+      if (PKL_AST_FUNCALL_ARGS (node))
+        PKL_PASS (PKL_AST_FUNCALL_ARGS (node));
+      break;
     case PKL_AST_FUNC:
       if (PKL_AST_FUNC_RET_TYPE (node))
         PKL_PASS (PKL_AST_FUNC_RET_TYPE (node));
