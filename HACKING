@@ -223,6 +223,26 @@ The phases above are organized in two passes:
     Pass1: trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
     Pass2: analf gen
 
+trans1
+------
+
+- Links return statements with their containing functions.
+- Annotates return statements with the number of lexical frames they
+  should pop before exitting the function.
+
+anal1
+-----
+
+- Checks that every return statement is linked to a function.
+- Checks that no return statement is linked to a void function.
+
+typify2
+-------
+
+- Checks that the type of the expression in a return statement matches
+  the return type of its containing function.  This uses hte link set
+  in trans1.
+
 Debugging Poke
 ==============
 

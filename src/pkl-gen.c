@@ -177,6 +177,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
 PKL_PHASE_END_HANDLER
 
 /*
+ * NULL_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_null_stmt)
+{
+  /* Null is nothing, nada.  */
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * COMP_STMT
  * | (STMT | DECL)
  * | ...
@@ -1216,6 +1226,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
    PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_NULL_STMT, pkl_gen_df_null_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_gen_df_funcall),
