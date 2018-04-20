@@ -404,6 +404,10 @@ unary_operator:
 primary:
           IDENTIFIER
           	{
+                    /* XXX: Create a PKL_AST_VAR with an identifier and let
+                       `prep' to determine the lexical environment and
+                       type.  */
+
                   /* Search for a variable definition in the
                      compile-time environment, and create a
                      PKL_AST_VAR node with it's lexical environment,
