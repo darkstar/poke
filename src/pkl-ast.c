@@ -603,6 +603,14 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
 
         break;
       }
+    case PKL_TYPE_FUNCTION:
+      {
+        /* By convention functions have sizeof 0#b  */
+        res = pkl_ast_make_integer (ast, 0);
+        PKL_AST_TYPE (res) = ASTREF (res_type);
+        PKL_AST_LOC (res) = PKL_AST_LOC (type);
+        break;
+      }
     case PKL_TYPE_OFFSET:
       return pkl_ast_sizeof_type (ast, PKL_AST_TYPE_O_BASE_TYPE (type));
       break;
