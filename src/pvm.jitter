@@ -19,6 +19,7 @@
 vm
   set prefix "pvm"
   tos-stack "pvm_val" "stack"
+  ntos-stack "pvm_val" "returnstack"
 end
 
 
@@ -190,8 +191,6 @@ end
 instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
   caller
   code
-  /* XXX: writeme  */
-#if 0
   int arity = JITTER_ARGN0;
   pvm_val closure = JITTER_AT_DEPTH_STACK (arity);
   
@@ -202,27 +201,24 @@ instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
   /* Branch-and-link to the native code, whose first instruction will
      be a prolog. */
   JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
-#endif
   end
 end
 
 instruction prolog ()
   callee
   code
-  /* XXX */
-  printf ("link: %p\n", JITTER_LINK);
-#if 0
     /* Fill the return stack slot with the return address.  The return
        stack has already been pushed (with an unspecified value on the
        top) by the caller. */
-    JITTER_TOP_RETURNSTACK() = (jitterlisp_object) JITTER_LINK;
-#endif
+    JITTER_TOP_RETURNSTACK() = (pvm_val) JITTER_LINK;
   end
 end
 
 instruction return ()
   code
-  /* XXX: writeme. */
+    jitter_uint return_address = JITTER_TOP_RETURNSTACK();
+    JITTER_DROP_RETURNSTACK();
+    JITTER_RETURN (return_address);
   end
 end
 

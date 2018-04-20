@@ -294,7 +294,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
 {
   /* This is a function prologue.  */
   
-  /* XXX: other stuff for the function prologue goes here.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
   
   /* Push the function environment, for the arguments.  The
      compound-statement that is the body for the function will create
@@ -337,6 +337,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func)
   /* Pop the function's environment.  */
   pkl_asm_note (PKL_GEN_ASM, "DF func"); /* XXX */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
 
