@@ -359,6 +359,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     pvm_program prog;
                     char *end;
                     char *program_string;
+                    int trailing_semicolon = 0;
 
                     if (*a == 'd') 
                       {
@@ -374,7 +375,10 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         
                         if (strcmp (cmd_name, "defvar") == 0
                             || strcmp (cmd_name, "deftype") == 0)
-                          strcat (program_string, ";");
+                          {
+                            strcat (program_string, ";");
+                            trailing_semicolon = 1;
+                          }
                       }
                     else
                       program_string = p;
@@ -385,7 +389,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     else
                       prog = pkl_compile_buffer (poke_compiler,
                                                  program_string, &end);
-                    
+
                     if (prog != NULL)
                       {
                         argv[argc].val.prog = prog;
@@ -394,7 +398,10 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         if (*a == 'd')
                           {
                             argv[argc].type = PK_CMD_ARG_DEF;
-                            p += end - program_string - 1 - strlen (cmd_name) - 1;
+                            p += end - program_string - 1 - strlen (cmd_name);
+                            if (trailing_semicolon)
+                              p--;
+
                             free (program_string);
                           }
                         else

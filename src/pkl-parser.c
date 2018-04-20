@@ -142,7 +142,7 @@ pkl_parse_buffer (pkl_env *env,
      parser's destructor.  */
   assert (ret != 0 || pkl_env_toplevel_p (parser->env));
   pkl_parser_free (parser);
-  
+
   return ret;
 }
 

@@ -227,7 +227,7 @@ pvm_make_cls (pvm_program program)
                       using the closure.  */
 
   PVM_VAL_BOX_CLS (box) = cls;
-  return PVM_BOX (cls);
+  return PVM_BOX (box);
 }
 
 pvm_val
@@ -759,6 +759,10 @@ pvm_print_val (FILE *out, pvm_val val, int base)
                    PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
           break;
         }
+    }
+  else if (PVM_IS_CLS (val))
+    {
+      fprintf (out, "#<closure>");
     }
   else
     assert (0);

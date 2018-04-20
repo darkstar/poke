@@ -126,6 +126,8 @@
             "TYPE")
            ((#xd) ;; PVM_VAL_TAG_MAP
             "MAP")
+           ((#xe) ;; PVM_VAL_TAG_CLS
+            "CLS")
            (else
             "Unknown PVM_VAL_BOX tag"))))
       ((#x7) ;; PVM_NULL

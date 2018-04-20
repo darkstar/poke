@@ -393,7 +393,7 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_MAP)
 #define PVM_IS_CLS(V)                                                   \
-  (PVM_VAL_TAG(V) == PVM_VAL_TAG_CLS                                    \
+  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_CLS)
 #define PVM_IS_OFF(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
