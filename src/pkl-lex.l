@@ -147,8 +147,8 @@ D [0-9]
 "%="		{ return MODA; }
 "+="		{ return ADDA; }
 "-="		{ return SUBA; }
-"<<="		{ return SLA; }
-">>="		{ return SRA; }
+"<-="		{ return SLA; }
+"->="		{ return SRA; }
 "&="		{ return BANDA; }
 "|="		{ return IORA; }
 "^="		{ return XORA; }
@@ -159,8 +159,8 @@ D [0-9]
 "!="		{ return NE; }
 "<="		{ return LE; }
 ">="		{ return GE; }
-"<<"		{ return SL; }
-">>"		{ return SR; }
+"<-"		{ return SL; }
+"->"		{ return SR; }
 "++"		{ return INC; }
 "--"		{ return DEC; }
 
