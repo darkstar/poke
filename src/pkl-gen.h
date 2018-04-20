@@ -22,6 +22,7 @@
 #include <config.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "pkl-ast.h"
 #include "pkl-pass.h"
@@ -29,14 +30,27 @@
 #include "pkl-asm.h"
 #include "pvm.h"
 
+/* It would be very unlikely to have more than 24 function
+   declarations nested in a poke program... if it ever happens, we
+   will just increase this, thats a promise :P */
+#define PKL_GEN_MAX_PASM 25
+
 struct pkl_gen_payload
 {
-  pkl_asm pasm;
+  pkl_asm pasm[PKL_GEN_MAX_PASM];
+  int cur_pasm;
   pvm_program program;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
 
 extern struct pkl_phase pkl_phase_gen;
+
+static inline void
+pkl_gen_init_payload (pkl_gen_payload payload)
+{
+  memset (payload, 0, sizeof (struct pkl_gen_payload));
+}
+
 
 #endif /* !PKL_GEN_H  */

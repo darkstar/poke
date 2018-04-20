@@ -28,6 +28,30 @@
 #include "pkl-asm.h"
 #include "pvm.h"
 
+/* The following macros are used in the rules below, to reduce
+   verbosity.  */
+
+#define PKL_GEN_PAYLOAD ((pkl_gen_payload) PKL_PASS_PAYLOAD)
+
+#define PKL_GEN_ASM                                     \
+  (PKL_GEN_PAYLOAD->pasm[PKL_GEN_PAYLOAD->cur_pasm])
+
+#define PKL_GEN_PUSH_ASM(new_pasm)                                    \
+  do                                                                  \
+    {                                                                 \
+      assert (PKL_GEN_PAYLOAD->cur_pasm < PKL_GEN_MAX_PASM);          \
+      PKL_GEN_PAYLOAD->pasm[++PKL_GEN_PAYLOAD->cur_pasm] = (new_pasm);  \
+    }                                                                 \
+  while (0)
+
+#define PKL_GEN_POP_ASM                         \
+  do                                            \
+    {                                           \
+      assert (PKL_GEN_PAYLOAD->cur_pasm > 0);   \
+      PKL_GEN_PAYLOAD->cur_pasm -= 1;           \
+    }                                           \
+  while (0)
+
 /*
  * PROGRAM
  * | PROGRAM_ELEM
@@ -39,10 +63,7 @@
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  payload->pasm = pkl_asm_new (PKL_PASS_AST);
+  PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST);
 }
 PKL_PHASE_END_HANDLER
 
@@ -54,10 +75,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  payload->program = pkl_asm_finish (payload->pasm);
+  PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM);
 }
 PKL_PHASE_END_HANDLER
 
@@ -68,18 +86,17 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
 {
-#if 0
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node decl = PKL_PASS_NODE;
 
-  /* INITIAL is a PKL_AST_FUNC, that will compile into a program
-     containing the function code.  Push a new assembler to the stack
-     of assemblers in the payload and use it to process INITIAL.  */
+  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC)
+    {
+      /* INITIAL is a PKL_AST_FUNC, that will compile into a program
+         containing the function code.  Push a new assembler to the
+         stack of assemblers in the payload and use it to process
+         INITIAL.  */
 
-  payload->pasm
-    = pkl_gen_push_asm (payload->pasm, pkl_asm_new (PKL_PASS_AST));
-#endif
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST));
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -90,8 +107,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node decl = PKL_PASS_NODE;
 
   /* If we are not at the top-level, push a new frame in the
@@ -99,13 +114,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
     {
-      pkl_asm_insn (payload->pasm, PKL_INSN_PUSHF);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
     }
 
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_VAR:
-      pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);
       break;
     case PKL_AST_DECL_KIND_TYPE:
       /* Nothing to do.  */
@@ -120,9 +135,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 #if 0 /* XXX */
         pvm_program code;
         pvm_val closure;
-        pkl_asm f_pasm = payload->pasm;
+        pkl_asm f_pasm = PKL_GEN_ASM;
 
-        payload->pasm = pkl_gen_pop_asm (payload->pasm);
         code = pkl_asm_finish (f_pasm);
         pvm_specialize_program (code);
 
@@ -131,10 +145,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
            POPVAR
         */
 
-        pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, code);
-        pkl_asm_insn (payload->pasm, PKL_INSN_MKC);
-        pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, code);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKC);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);
 #endif
+        PKL_GEN_POP_ASM;
         assert (0);
         break;
       }
@@ -173,11 +188,9 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node var = PKL_PASS_NODE;
 
-  pkl_asm_insn (payload->pasm, PKL_INSN_PUSHVAR,
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
                 PKL_AST_VAR_BACK (var), PKL_AST_VAR_OVER (var));
 }
 PKL_PHASE_END_HANDLER
@@ -245,7 +258,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
   /* Pop the argument from the stack and put it in the current
      environment.  */
 
-  /* XXX  pkl_asm_insn (payload->pasm, PKL_INSN_POPVAR);  */
+  /* XXX  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR);  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -274,9 +287,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node integer = PKL_PASS_NODE;
   pkl_ast_node type;
   pvm_val val;
@@ -305,7 +315,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
         val = pvm_make_uint (value, size);
     }
   
-  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -317,14 +327,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_identifier)
 {
   /* XXX this doesn't feel right.  */
 
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node identifier = PKL_PASS_NODE;
   pvm_val val
     = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (identifier));
 
-  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -334,14 +341,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node string = PKL_PASS_NODE;
   pvm_val val
     = pvm_make_string (PKL_AST_STRING_POINTER (string));
 
-  pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, val);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
 
@@ -384,9 +388,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_offset)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_asm_insn (pasm, PKL_INSN_MKO);
 }
@@ -399,10 +401,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
 
   pkl_ast_node exp;
@@ -478,9 +477,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_ast_node map = PKL_PASS_NODE;
   pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
@@ -534,9 +531,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
 
   pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -557,10 +552,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_ref)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_AREF);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -572,9 +564,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_asm_insn (pasm, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 64));
@@ -591,13 +581,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   /* If the struct initializer doesn't include a name, generate a null
      value as expected by the mksct instruction.  */
   if (!PKL_AST_STRUCT_ELEM_NAME (PKL_PASS_NODE))
-    pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, PVM_NULL);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -609,10 +596,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct_ref)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_SREF);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -629,9 +613,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
 
   pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -659,10 +641,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYA);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
 }
 PKL_PHASE_END_HANDLER
 
@@ -679,10 +658,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYS);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
 PKL_PHASE_END_HANDLER
 
@@ -702,10 +678,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_MKTYO);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYO);
 }
 PKL_PHASE_END_HANDLER
 #endif
@@ -738,9 +711,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
- pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
- pkl_asm pasm = payload->pasm;
+ pkl_asm pasm = PKL_GEN_ASM;
 
  pkl_asm_insn (pasm, PKL_INSN_PUSH,
                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
@@ -765,13 +736,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem_type)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   /* If the struct type element doesn't include a name, generate a
      null value as expected by the mktysct instruction.  */
   if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
-    pkl_asm_insn (payload->pasm, PKL_INSN_PUSH, PVM_NULL);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -785,10 +753,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -832,10 +797,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -876,10 +838,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -941,11 +900,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node node = PKL_PASS_NODE;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node type = PKL_AST_TYPE (node);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
@@ -991,11 +947,9 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node node = PKL_PASS_NODE;
 
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node type = PKL_AST_TYPE (node);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
@@ -1038,9 +992,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_intexp)
 {
-  pkl_gen_payload payload
-    = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
@@ -1075,37 +1027,25 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
 {
-  pkl_gen_payload payload
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_AND);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AND);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_or)
 {
-  pkl_gen_payload payload
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_OR);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_not)
 {
-  pkl_gen_payload payload
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_NOT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NOT);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
 {
-  pkl_gen_payload payload
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm pasm = payload->pasm;
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node exp = PKL_PASS_NODE;
   int exp_code = PKL_AST_EXP_CODE (exp);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
@@ -1173,10 +1113,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sizeof)
 {
-  pkl_gen_payload payload
-      = (pkl_gen_payload) PKL_PASS_PAYLOAD;
-
-  pkl_asm_insn (payload->pasm, PKL_INSN_SIZ);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
 }
 PKL_PHASE_END_HANDLER
 

@@ -78,7 +78,7 @@ static pvm_program
 rest_of_compilation (pkl_compiler compiler,
                      pkl_ast ast)
 {
-  struct pkl_gen_payload gen_payload = { NULL, 0 };
+  struct pkl_gen_payload gen_payload;
   
   struct pkl_anal_payload anal1_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
@@ -128,6 +128,9 @@ rest_of_compilation (pkl_compiler compiler,
     = { &analf_payload,
         &gen_payload
   };
+
+  /* Initialize payloads.  */
+  pkl_gen_init_payload (&gen_payload);
 
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast);*/
