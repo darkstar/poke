@@ -83,8 +83,8 @@ pvm_env_register (pvm_env env, pvm_val val)
   env->vars[env->num_vars++] = val;
 }
 
-/* Note the function attribute to assure the function is compiled with
-   tail-recursion optimization.  */
+/* Note the function attribute to assure the functions are compiled
+   with tail-recursion optimization.  */
 
 pvm_val __attribute__((optimize ("optimize-sibling-calls")))
 pvm_env_lookup (pvm_env env, int back, int over)
@@ -93,6 +93,15 @@ pvm_env_lookup (pvm_env env, int back, int over)
     return env->vars[over];
   else
     return pvm_env_lookup (env->up, back - 1, over);
+}
+
+void __attribute__((optimize ("optimize-sibling-calls")))
+pvm_env_set_var (pvm_env env, int back, int over, pvm_val val)
+{
+  if (back == 0)
+    env->vars[over] = val;
+  else
+    pvm_env_set_var (env->up, back - 1, over, val);
 }
 
 int

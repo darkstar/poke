@@ -88,6 +88,11 @@ void pvm_env_register (pvm_env env, pvm_val val);
 
 pvm_val pvm_env_lookup (pvm_env env, int back, int over);
 
+/* Set the value of the variable occupying the position BACK, OVER in
+   the run-time environment ENV to VAL.  */
+
+void pvm_env_set_var (pvm_env env, int back, int over, pvm_val val);
+
 /* Return 1 if the given run-time environment ENV contains only one
    frame.  Return 0 otherwise.  */
 
