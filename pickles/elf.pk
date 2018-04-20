@@ -1299,8 +1299,8 @@ deftype elf_sym =
         uint32 st_info;
         struct
         {
-          elf_sym_binding<uint<28> > st_bind;
-          elf_st_type<uint<4> > (mach) st_type;
+          elf_sym_binding<uint<28>> st_bind;
+          elf_st_type<uint<4>> (mach) st_type;
         };
       };
 
@@ -1309,7 +1309,7 @@ deftype elf_sym =
         byte st_other;
         struct
         {
-          elf_sym_visibility<uint<3> > st_visibility;
+          elf_sym_visibility<uint<3>> st_visibility;
           uint<5>;
         };
       };
@@ -1326,8 +1326,8 @@ deftype elf_sym =
         uint64 st_info;
         struct
         {
-          elf_sym_binding<uint<60> > st_bind;
-          elf_st_type<uint<4> > (mach) st_type;
+          elf_sym_binding<uint<60>> st_bind;
+          elf_st_type<uint<4>> (mach) st_type;
         };
       };
 
@@ -1336,7 +1336,7 @@ deftype elf_sym =
         byte st_other;
         struct
         {
-          elf_sym_visibility<uint<3> > st_visibility;
+          elf_sym_visibility<uint<3>> st_visibility;
           uint<5>;
         };
       };

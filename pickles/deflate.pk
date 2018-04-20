@@ -31,7 +31,7 @@ deftype deflate_block =
   aligned(1) struct
   {
     uint<1> bfinal last: bfinal != 1;
-    deflate_btype<uint<2> > btype;
+    deflate_btype<uint<2>> btype;
 
     union
     {
