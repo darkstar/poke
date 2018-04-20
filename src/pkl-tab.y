@@ -404,14 +404,12 @@ unary_operator:
 primary:
           IDENTIFIER
           	{
-                    /* XXX: Create a PKL_AST_VAR with an identifier and let
-                       `prep' to determine the lexical environment _and_
-                       type.  */
-
                   /* Search for a variable definition in the
                      compile-time environment, and create a
                      PKL_AST_VAR node with it's lexical environment,
-                     annotated with the proper type.  */
+                     annotated with its initialization.  The type of
+                     the variable will be set in typify in due
+                     time.  */
 
                   int back, over;
                   pkl_ast_node var_type;
@@ -430,7 +428,9 @@ primary:
                     }
 
                   $$ = pkl_ast_make_var (pkl_parser->ast,
-                                         $1, back, over);
+                                         $1, /* name.  */
+                                         PKL_AST_DECL_INITIAL (decl),
+                                         back, over);
                   var_type = PKL_AST_TYPE (PKL_AST_DECL_INITIAL (decl));
                   PKL_AST_TYPE ($$) = ASTREF (var_type);
                   PKL_AST_LOC ($$) = @1;
@@ -663,9 +663,6 @@ type_specifier:
 simple_type_specifier:
 	  TYPENAME
           	{
-                  /* XXX: use pkl_ast_make_named_type (IDENTIFIER).
-                     `prep' will turn the type name to a complete type
-                     specification.  */
                   pkl_ast_node decl = pkl_env_lookup (pkl_parser->env,
                                                       PKL_AST_IDENTIFIER_POINTER ($1),
                                                       NULL, NULL);
@@ -810,17 +807,6 @@ declaration:
                                           pkl_parser->filename);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-
-                  /* XXX: this assumes that PKL_AST_TYPE ($4) is
-                     known, which is NOT true in general as it is
-                     calculated in typify for most node types.
-                     
-                     We should register dummy declarations, as the
-                     types do not really matter at this point: the
-                     only purpose of calculating the compile-time
-                     environment at parse time is to allow flex to
-                     determine what is a typename and what is a
-                     variable name.  */
 
                   if (! pkl_env_toplevel_p (pkl_parser->env))
                     pkl_parser->env = pkl_env_push_frame (pkl_parser->env);

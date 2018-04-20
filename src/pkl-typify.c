@@ -724,10 +724,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_map)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of a variable reference is the type of its initializer.
+   Note that due to the scope rules of the language the type of the
+   initializer should have been calculated already.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_var)
+{
+  pkl_ast_node var = PKL_PASS_NODE;
+  pkl_ast_node initial = PKL_AST_VAR_INITIAL (var);
+
+  assert (PKL_AST_TYPE (initial) != NULL);
+  PKL_AST_TYPE (var) = ASTREF (PKL_AST_TYPE (initial));
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
 
+   PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_typify1_df_var),
    PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify1_df_cast),
    PKL_PHASE_DF_HANDLER (PKL_AST_MAP, pkl_typify1_df_map),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify1_df_offset),
