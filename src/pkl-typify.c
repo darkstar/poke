@@ -725,8 +725,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_map)
 PKL_PHASE_END_HANDLER
 
 /* The type of a variable reference is the type of its initializer.
-   Note that due to the scope rules of the language the type of the
-   initializer should have been calculated already.  */
+   Note that due to the scope rules of the language it is guaranteed
+   the type of the initializer has been already calculated.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_var)
 {
