@@ -939,7 +939,7 @@ stmt:
                                                  $2);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | expression ';'
+        | funcall ';'
         	{
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,
                                               $1);
