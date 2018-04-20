@@ -504,12 +504,16 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
    the number of lexical frames a RETURN_STMT should pop before
    returning from the function.  While parsing, this contains the
    number of frames pushed to the environment at any moment.  After
-   parsing, this field is not used anymore.  */
+   parsing, this field is not used anymore.
+
+   NAME is a C string containing the name used to declare the
+   function.  */
 
 #define PKL_AST_FUNC_RET_TYPE(AST) ((AST)->func.ret_type)
 #define PKL_AST_FUNC_ARGS(AST) ((AST)->func.args)
 #define PKL_AST_FUNC_BODY(AST) ((AST)->func.body)
 #define PKL_AST_FUNC_NFRAMES(AST) ((AST)->func.nframes)
+#define PKL_AST_FUNC_NAME(AST) ((AST)->func.name)
 
 struct pkl_ast_func
 {
@@ -520,6 +524,7 @@ struct pkl_ast_func
   union pkl_ast_node *body;
 
   int nframes;
+  char *name;
 };
 
 pkl_ast_node pkl_ast_make_func (pkl_ast ast,

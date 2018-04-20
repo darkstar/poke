@@ -229,6 +229,9 @@ the tasks performed by each phase.  Please keep it up to date.
 trans1
 ------
 
+- Annotates functions and types with the names they are declared. XXX:
+  currently in the parser.
+
 - Links return statements with their containing functions.
 - Annotates return statements with the number of lexical frames they
   should pop before exitting the function.

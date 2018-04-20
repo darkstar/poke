@@ -738,7 +738,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       strcpy (note_end, note_end_prefix);
       strcat (note_end, macro_name);
 
-      pkl_asm_note (pasm, note_begin);
+      /* pkl_asm_note (pasm, note_begin); */
       switch (insn)
         {
         case PKL_INSN_NTON:
@@ -845,7 +845,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           assert (0);
         }
 
-      pkl_asm_note (pasm, note_end);
+      /* pkl_asm_note (pasm, note_end); */
       free (note_begin);
       free (note_end);
     }

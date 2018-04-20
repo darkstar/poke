@@ -191,7 +191,6 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_comp_stmt)
 {
   /* Push a frame into the environment.  */
-  pkl_asm_note (PKL_GEN_ASM, "BF comp_stmt"); /* XXX */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
@@ -219,7 +218,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
     }
 
   /* Now pop the frame created by the compound statement itself.  */
-  pkl_asm_note (PKL_GEN_ASM, "DF comp_stmt"); /* XXX */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
 }
 PKL_PHASE_END_HANDLER
@@ -254,8 +252,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
 {
   /* Return from the function: pop N frames and generate a return
      instruction.  */
-
-  pkl_asm_note (PKL_GEN_ASM, "DF return_stmt"); /* XXX */
 
   int i;
   for (i = 0;
@@ -298,13 +294,13 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
 {
   /* This is a function prologue.  */
-  
+  pkl_asm_note (PKL_GEN_ASM,
+                PKL_AST_FUNC_NAME (PKL_PASS_NODE));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
   
   /* Push the function environment, for the arguments.  The
      compound-statement that is the body for the function will create
      it's own frame.  */
-  pkl_asm_note (PKL_GEN_ASM, "BF func"); /* XXX */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
@@ -340,7 +336,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func)
    */
 
   /* Pop the function's environment.  */
-  pkl_asm_note (PKL_GEN_ASM, "DF func"); /* XXX */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);

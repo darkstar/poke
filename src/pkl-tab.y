@@ -440,7 +440,8 @@ primary:
                     = pkl_env_lookup (pkl_parser->env,
                                       name, &back, &over);
                   if (!decl
-                      || PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR)
+                      || (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR
+                          && PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC))
                     {
                       pkl_error (pkl_parser->ast, @1,
                                  "undefined variable '%s'", name);
@@ -817,6 +818,10 @@ declaration:
                          instruction instead of a POPVAR.  */
                       YYERROR;
                     }
+
+                  /* XXX: move to trans1.  */
+                  PKL_AST_FUNC_NAME ($4)
+                    = xstrdup (PKL_AST_IDENTIFIER_POINTER ($2));
                 }
         | DEFVAR identifier '=' expression ';'
         	{
