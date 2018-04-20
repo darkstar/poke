@@ -216,6 +216,21 @@ pvm_make_map (pvm_val type, pvm_val offset)
 }
 
 pvm_val
+pvm_make_cls (pvm_program program)
+{
+  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
+  pvm_cls cls = GC_MALLOC (sizeof (struct pvm_cls));
+
+  cls->program = program;
+  cls->entry_point = PVM_PROGRAM_BEGINNING (program);
+  cls->env = NULL; /* This should be set by a PEC instruction before
+                      using the closure.  */
+
+  PVM_VAL_BOX_CLS (box) = cls;
+  return PVM_BOX (cls);
+}
+
+pvm_val
 pvm_make_offset (pvm_val magnitude, pvm_val unit)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_OFF);

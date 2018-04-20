@@ -188,11 +188,12 @@ end
 ## Function management instructions
 
 instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
+  caller
   code
   /* XXX: writeme  */
 #if 0
   int arity = JITTER_ARGN0;
-  pvm_clos closure = JITTER_AT_DEPTH_STACK (arity);
+  pvm_val closure = JITTER_AT_DEPTH_STACK (arity);
   
   /* Make place for the return address in the return stack.  The
      actual value will be written by the callee. */
@@ -200,11 +201,24 @@ instruction call (?n) # CLOSURE ARG1 ... ARGN -> RETVAL
 
   /* Branch-and-link to the native code, whose first instruction will
      be a prolog. */
-  JITTER_BRANCH_AND_LINK (PVM_VAL_CLOS_CODE (closure));
+  JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
 #endif
   end
 end
 
+instruction prolog ()
+  callee
+  code
+  /* XXX */
+  printf ("link: %p\n", JITTER_LINK);
+#if 0
+    /* Fill the return stack slot with the return address.  The return
+       stack has already been pushed (with an unspecified value on the
+       top) by the caller. */
+    JITTER_TOP_RETURNSTACK() = (jitterlisp_object) JITTER_LINK;
+#endif
+  end
+end
 
 
 
@@ -248,6 +262,13 @@ instruction regvar () # VAL -> _
     pvm_env_register (jitter_state_runtime.env,
                       JITTER_TOP_STACK ());
     JITTER_DROP_STACK ();
+  end
+end
+
+# Put Environment in Closure
+instruction pec () # CLOS -> CLOS (+ current environment)
+  code
+  /* XXX: writeme.  */
   end
 end
 

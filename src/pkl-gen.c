@@ -132,53 +132,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
            Finalize the program and put it in a PVM closure, along
            with the current environment.  */
 
-#if 0 /* XXX */
-        pvm_program code;
+        pvm_program program = pkl_asm_finish (PKL_GEN_ASM);
         pvm_val closure;
-        pkl_asm f_pasm = PKL_GEN_ASM;
 
-        code = pkl_asm_finish (f_pasm);
-        pvm_specialize_program (code);
+        pvm_specialize_program (program);
+        closure = pvm_make_cls (program);
 
-        /* PUSH label_to_code
-           MKC  # label_to_code -> _ (plus current environment)
-           REGVAR
-        */
-
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, code);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKC);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-#endif
+
         PKL_GEN_POP_ASM;
-        assert (0);
         break;
       }
     default:
       assert (0);
       break;
     }
-
-  /* if DEFUN
-
-       - Especialize payload->program
-       - Make a pvm_val for a closure, containing payload->program
-         and the current environment.
-       - Push a new environment, if parent != PROGRAM.
-       - Register the pvm_val fun in the environment.
-
-       - INITIAL pushed a value in the stack.
-       - Push a new environment, if parent != PROGRAM.
-       - Register it in the environment.
-
-      if DEFTYPE  (???)
-       
-       - INITIAL pushed a value in the stack.
-       - Push a new environment, if parent != PROGRAM.
-       - Register it in the environment.
-    */
-
-
-  /* XXX */
 }
 PKL_PHASE_END_HANDLER
 
@@ -283,7 +253,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall)
 {
   /* At this point the closure for FUNCTION and the actuals are pushed
-     in the stack.  We are ready to use the `call' instruction!  */
+     in the stack.  Just call the bloody function.  */
 
   int narg = PKL_AST_FUNCALL_NARG (PKL_PASS_NODE);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL, narg);

@@ -64,6 +64,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_SCT 0xb
 #define PVM_VAL_TAG_TYP 0xc
 #define PVM_VAL_TAG_MAP 0xd
+#define PVM_VAL_TAG_CLS 0xe
 
 /* Integers up to 32-bit are unboxed and encoded the following way:
 
@@ -153,6 +154,7 @@ pvm_val pvm_make_ulong (uint64_t value, int size);
 #define PVM_VAL_BOX_SCT(B) ((B)->v.sct)
 #define PVM_VAL_BOX_TYP(B) ((B)->v.type)
 #define PVM_VAL_BOX_MAP(B) ((B)->v.map)
+#define PVM_VAL_BOX_CLS(B) ((B)->v.cls)
 #define PVM_VAL_BOX_OFF(B) ((B)->v.offset)
 
 struct pvm_val_box
@@ -166,6 +168,7 @@ struct pvm_val_box
     struct pvm_type *type;
     struct pvm_map *map;
     struct pvm_off *offset;
+    struct pvm_cls *cls;
   } v;
 };
 
@@ -315,6 +318,27 @@ typedef struct pvm_map *pvm_map;
 
 pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
+/* Closures are also boxed.  */
+
+#define PVM_VAL_CLS(V) (PVM_VAL_BOX_CLS (PVM_VAL_BOX ((V))))
+
+#define PVM_VAL_CLS_PROGRAM(V) (PVM_VAL_MAP((V))->program)
+#define PVM_VAL_CLS_ENTRY_POINT(V) (PVM_VAL_MAP((V))->entry_point)
+#define PVM_VAL_CLS_ENV(V) (PVM_VAL_MAP((V))->env)
+
+struct pvm_cls
+{
+  /* Note we have to use explicit pointers here due to the include
+     mess induced by jitter's combined header files :/ */
+  struct jitter_program *program;
+  const void *entry_point;
+  struct pvm_env *env;
+};
+
+typedef struct pvm_cls *pvm_cls;
+
+pvm_val pvm_make_cls (struct jitter_program *program);
+
 /* Offsets are boxed values.  */
 
 #define PVM_VAL_OFF(V) (PVM_VAL_BOX_OFF (PVM_VAL_BOX ((V))))
@@ -368,6 +392,9 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 #define PVM_IS_MAP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_MAP)
+#define PVM_IS_CLS(V)                                                   \
+  (PVM_VAL_TAG(V) == PVM_VAL_TAG_CLS                                    \
+   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_CLS)
 #define PVM_IS_OFF(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_OFF)
