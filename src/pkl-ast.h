@@ -735,7 +735,7 @@ pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_n
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
 pkl_ast_node pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
-                                         pkl_ast_node narg, pkl_ast_node args);
+                                         size_t narg, pkl_ast_node args);
 
 pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);

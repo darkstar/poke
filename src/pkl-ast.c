@@ -381,6 +381,20 @@ pkl_ast_make_struct_elem_type (pkl_ast ast,
 }
 
 pkl_ast_node
+pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
+                            size_t narg, pkl_ast_node args)
+{
+  pkl_ast_node type = pkl_ast_make_type (ast);
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_FUNCTION;
+  PKL_AST_TYPE_F_RTYPE (type) = ASTREF (rtype);
+  PKL_AST_TYPE_F_NARG (type) = narg;
+  PKL_AST_TYPE_F_ARGS (type) = ASTREF (args);
+
+  return type;
+}
+
+pkl_ast_node
 pkl_ast_make_function_arg_type (pkl_ast ast, pkl_ast_node type)
 {
   pkl_ast_node function_type_arg
