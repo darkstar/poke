@@ -22,11 +22,13 @@
 extern struct pk_cmd null_cmd;       /* pk-cmd.c  */
 extern struct pk_cmd info_files_cmd; /* pk-file.c  */
 extern struct pk_cmd info_var_cmd;   /* pk-def.c  */
+extern struct pk_cmd info_fun_cmd;   /* pk-def.c  */
 
 struct pk_cmd *info_cmds[] =
   {
     &info_files_cmd,
     &info_var_cmd,
+    &info_fun_cmd,
     &null_cmd
   };
 

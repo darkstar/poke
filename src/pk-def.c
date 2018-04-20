@@ -63,6 +63,7 @@ print_var_decl (pkl_ast_node decl, void *data)
   pkl_env compiler_env = pkl_get_env (poke_compiler);
   pvm_env runtime_env = pvm_get_env (poke_vm);
 
+  /* XXX this is not needed.  */
   if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR)
     return;
 
@@ -88,12 +89,62 @@ print_var_decl (pkl_ast_node decl, void *data)
     fputs ("<stdin>\n", stdout);
 }
 
+static void
+print_fun_decl (pkl_ast_node decl, void *data)
+{
+  pkl_ast_node decl_name = PKL_AST_DECL_NAME (decl);
+  pkl_ast_loc loc = PKL_AST_LOC (decl);
+  char *source =  PKL_AST_DECL_SOURCE (decl);
+  int back, over;
+  pvm_val val;
+
+  pkl_env compiler_env = pkl_get_env (poke_compiler);
+  pvm_env runtime_env = pvm_get_env (poke_vm);
+
+  /* XXX This is not needed.  */
+  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC)
+    return;
+
+  assert (pkl_env_lookup (compiler_env,
+                          PKL_AST_IDENTIFIER_POINTER (decl_name),
+                          &back, &over) != NULL);
+
+  val = pvm_env_lookup (runtime_env, back, over);
+  assert (val != PVM_NULL);
+                              
+  /* Print the name and the current value of the function.  */
+  fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
+  fputs ("\t\t", stdout);
+  /*XXX */
+  fputs ("XXX", stdout);
+  /*   pvm_print_val (stdout, val, 10); */
+  fputs ("\t\t\t", stdout);
+
+  /* Print information about the site where the function was
+     declared.  */
+  if (source)
+    printf ("%s:%d\n", source, loc.first_line);
+  else
+    fputs ("<stdin>\n", stdout);
+}
+
 static int
 pk_cmd_info_var (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   printf (_("Name\t\tValue\t\t\tDeclared at\n"));
   pkl_env_map_decls (pkl_get_env (poke_compiler), PKL_AST_DECL_KIND_VAR,
                      print_var_decl, NULL);
+  return 1;
+}
+
+static int
+pk_cmd_info_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* XXX: print function arguments, return type, etc.  */
+  printf (_("Name\t\tValue\t\t\tDeclared at\n"));
+  pkl_env_map_decls (pkl_get_env (poke_compiler), PKL_AST_DECL_KIND_FUNC,
+                     print_fun_decl, NULL);
+
   return 1;
 }
 
@@ -112,3 +163,7 @@ struct pk_cmd defun_cmd =
 struct pk_cmd info_var_cmd =
   {"variable", "", "", 0, NULL, pk_cmd_info_var,
    "info variable"};
+
+struct pk_cmd info_fun_cmd =
+  {"function", "", "", 0, NULL, pk_cmd_info_fun,
+   "info funtion"};
