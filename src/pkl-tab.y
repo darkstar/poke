@@ -577,6 +577,8 @@ function_specifier:
                   $$ = pkl_ast_make_func (pkl_parser->ast,
                                           NULL /* ret_type */,
                                           $3, $5);
+                  /* XXX: create a function type and set $$'s type
+                     with it.  */
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'

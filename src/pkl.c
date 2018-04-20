@@ -186,6 +186,10 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   if (program == NULL)
     goto error;
 
+  /* XXX: use a copy of env, so we can rollback in case of errors in
+     rest_of_compilation.  Otherwise we are left with the erroneous
+     definitions.  */
+  
   pvm_specialize_program (program);
   return program;
 
@@ -226,6 +230,10 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   /* pvm_print_program (stdout, program); */
   if (program == NULL)
     goto error;
+
+  /* XXX: use a copy of env, so we can rollback in case of errors in
+     rest_of_compilation.  Otherwise we are left with the erroneous
+     definitions.  */
 
   pvm_specialize_program (program);
   return program;
