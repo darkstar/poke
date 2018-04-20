@@ -167,6 +167,13 @@ pkl_tab_error (YYLTYPE *llocp,
 
 %% /* The grammar follows.  */
 
+pushlevel:
+	  %empty
+		{
+                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                }
+        ;
+
 start:
 	  START_EXP expression
           	{
@@ -857,16 +864,6 @@ declaration:
 /*
  * Statements.
  */
-
-pushlevel:
-	  %empty
-		{
-                  /* This is to allow redefining in the first
-                     declaration in the compound statement or struct
-                     type definition.  */
-                  pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
-                }
-        ;
 
 comp_stmt:
 	  pushlevel '{' stmt_decl_list '}'
