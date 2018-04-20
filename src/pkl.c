@@ -186,7 +186,7 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
     printf (_("out of memory\n"));
   
   program = rest_of_compilation (compiler, ast);
-  /* XXX */  
+  /* XXX */
   /* pvm_print_program (stdout, program); */
   if (program == NULL)
     goto error;

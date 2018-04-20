@@ -84,7 +84,6 @@ pkl_parse_file (pkl_env *env,
   ret = pkl_tab_parse (parser);
   *ast = parser->ast;
   *env = parser->env;
-  pkl_parser_free (parser);
 
   /* In the absence of an error, only the top-level compile-time
      environment should remain after parsing.  In the case of an
@@ -92,6 +91,7 @@ pkl_parse_file (pkl_env *env,
      discarded anyway.  XXX but it would be nice to fix this in the
      parser's destructor.  */
   assert (ret != 0 || pkl_env_toplevel_p (parser->env));
+  pkl_parser_free (parser);
 
   return ret;
 }
@@ -134,7 +134,6 @@ pkl_parse_buffer (pkl_env *env,
   if (end != NULL)
     *end = buffer + parser->nchars;
   pkl_tab__delete_buffer (yybuffer, parser->scanner);
-  pkl_parser_free (parser);
 
   /* In the absence of an error, only the top-level compile-time
      environment should remain after parsing.  In the case of an
@@ -142,7 +141,8 @@ pkl_parse_buffer (pkl_env *env,
      discarded anyway.  XXX but it would be nice to fix this in the
      parser's destructor.  */
   assert (ret != 0 || pkl_env_toplevel_p (parser->env));
-
+  pkl_parser_free (parser);
+  
   return ret;
 }
 
