@@ -191,16 +191,16 @@ end
 instruction call () # ARG1 ... ARGN CLOSURE -> RETVAL
   caller
   code
-  int arity = JITTER_ARGN0;
-  pvm_val closure = JITTER_AT_DEPTH_STACK (arity);
+    pvm_val closure = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
   
-  /* Make place for the return address in the return stack.  The
-     actual value will be written by the callee. */
-  JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
+    /* Make place for the return address in the return stack.  The
+       actual value will be written by the callee. */
+    JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
 
-  /* Branch-and-link to the native code, whose first instruction will
-     be a prolog. */
-  JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
+    /* Branch-and-link to the native code, whose first instruction will
+       be a prolog. */
+    JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
   end
 end
 
