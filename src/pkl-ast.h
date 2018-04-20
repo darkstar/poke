@@ -117,6 +117,7 @@ enum pkl_ast_type_code
   PKL_TYPE_STRING,
   PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,
+  PKL_TYPE_FUNCTION,
   PKL_TYPE_OFFSET,
   PKL_TYPE_NOTYPE,
 };
@@ -677,7 +678,7 @@ pkl_ast_node pkl_ast_make_function_arg_type (pkl_ast ast,
 #define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
 #define PKL_AST_TYPE_F_RTYPE(AST) ((AST)->type.val.fun.rtype)
 #define PKL_AST_TYPE_F_NARG(AST) ((AST)->type.val.fun.narg)
-#define PKL_ASt_TYPE_F_ARGS(AST) ((AST)->type.val.fun.args)
+#define PKL_AST_TYPE_F_ARGS(AST) ((AST)->type.val.fun.args)
 
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
 #define PKL_AST_TYPE_COMPLETE_YES 1
@@ -720,7 +721,7 @@ struct pkl_ast_type
     struct
     {
       union pkl_ast_node *rtype;
-      union pkl_ast_node *narg;
+      size_t narg;
       union pkl_ast_node *args;
     } fun;
     

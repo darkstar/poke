@@ -442,6 +442,25 @@ pkl_ast_dup_type (pkl_ast_node type)
           PKL_AST_TYPE_S_ELEMS (new) = ASTREF (PKL_AST_TYPE_S_ELEMS (new));
         }
       break;
+    case PKL_TYPE_FUNCTION:
+      PKL_AST_TYPE_F_RTYPE (new)
+        = pkl_ast_dup_type (PKL_AST_TYPE_F_RTYPE (type));
+      PKL_AST_TYPE_F_NARG (new) = PKL_AST_TYPE_F_NARG (type);
+      for (t = PKL_AST_TYPE_F_ARGS (type); t; t = PKL_AST_CHAIN (t))
+        {
+          pkl_ast_node fun_type_arg_type
+            = PKL_AST_FUNCTION_ARG_TYPE_TYPE (t);
+
+          pkl_ast_node function_type_arg
+            = pkl_ast_make_function_arg_type (PKL_AST_AST (new),
+                                              fun_type_arg_type);
+
+          PKL_AST_TYPE_F_ARGS (new)
+            = pkl_ast_chainon (PKL_AST_TYPE_F_ARGS (new),
+                               function_type_arg);
+          PKL_AST_TYPE_F_ARGS (new) = ASTREF (PKL_AST_TYPE_F_ARGS (new));
+        }
+      break;
     case PKL_TYPE_OFFSET:
       /* Fallthrough.  */
     case PKL_TYPE_STRING:
