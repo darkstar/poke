@@ -259,29 +259,34 @@ set test sizeof-array-of-array-type
 poke_test_cmd "print sizeof (int\[2\]\[2\])" {128UL#b}
 
 set test sizeof-array-of-struct
-poke_test_cmd "print sizeof (struct {int;int;}\[2\])" {128UL#b}
+poke_test_cmd "deftype array_of_struct = struct {int; int;}" {}
+poke_test_cmd "print sizeof (array_of_struct\[2\])" {128UL#b}
 
 set test sizeof-struct-empty
-poke_test_cmd "print sizeof (struct {})" {0UL#b}
+poke_test_cmd "deftype struct_empty = struct {}" {}
+poke_test_cmd "print sizeof (struct_empty)" {0UL#b}
 
 set test sizeof-struct
-poke_test_cmd "print sizeof (struct { int; long; })" {96UL#b}
+poke_test_cmd "deftype struct_for_sizeof = struct { int; long; }" {}
+poke_test_cmd "print sizeof (struct_for_sizeof)" {96UL#b}
 
 set test sizeof-struct-with-struct
-poke_test_cmd "print sizeof (struct {int; struct {int;int;};})" \
+poke_test_cmd "deftype struct_with_struct = struct {int; struct {int;int;};}" {}
+poke_test_cmd "print sizeof (struct_with_struct)" \
     {96UL#b}
 
 set test sizeof-struct-with-struct-2
-poke_test_cmd "print sizeof (struct {int; struct {int;int;long;};})" \
-    {160UL#b}
+poke_test_cmd "deftype struct_with_struct_2 = struct {int; struct {int;int;long;};}" \
+    {}
+poke_test_cmd "print sizeof (struct_with_struct_2)" {160UL#b}
 
 set test sizeof-struct-with-array
-poke_test_cmd "print sizeof (struct {int; int\[5\]; int\[3\];})" \
-    {288UL#b}
+poke_test_cmd "deftype struct_with_array = struct {int; int\[5\]; int\[3\];}" {}
+poke_test_cmd "print sizeof (struct_with_array)" {288UL#b}
 
 set test sizeof-struct-with-intconstr
-poke_test_cmd "print sizeof (struct {int<5> foo; int<6> bar; int<7> baz;})" \
-    {18UL#b}
+poke_test_cmd "deftype struct_with_intconstr = struct {int<5> foo; int<6> bar; int<7> baz;}" {}
+poke_test_cmd "print sizeof (struct_with_intconstr)" {18UL#b}
 
 set test sizeof-offset-type
 poke_test_cmd "print sizeof (offset<int,B>)" {32UL#b}

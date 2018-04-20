@@ -150,7 +150,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
-%type <ast> type_specifier
+%type <ast> type_specifier simple_type_specifier
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
@@ -249,7 +249,7 @@ expression:
                                                PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
                 }
-	| SIZEOF '(' type_specifier ')' %prec HYPERUNARY
+	| SIZEOF '(' simple_type_specifier ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
@@ -362,12 +362,12 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @2;
                 }
-	| expression AS type_specifier
+	| expression AS simple_type_specifier
         	{
                   $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
                   PKL_AST_LOC ($$) = @2;
                 }
-        | type_specifier '@' expression
+        | simple_type_specifier '@' expression
                 {
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
@@ -492,7 +492,7 @@ funcall_arg:
         ;
 
 struct:
-	  pushlevel '{' struct_elem_list '}'
+         pushlevel '{' struct_elem_list '}'
 		{
                     $$ = pkl_ast_make_struct (pkl_parser->ast,
                                               0 /* nelem */, $3);
@@ -583,7 +583,7 @@ function_specifier:
                      above.  */
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | '(' pushlevel function_arg_list ')' ':' type_specifier comp_stmt
+        | '(' pushlevel function_arg_list ')' ':' simple_type_specifier comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
                                           $6, $3, $7);
@@ -606,7 +606,7 @@ function_arg_list:
         ;
 
 function_arg:
-	  type_specifier identifier
+	  simple_type_specifier identifier
           	{
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
                                               $1, $2);
@@ -651,6 +651,11 @@ function_arg:
  */
 
 type_specifier:
+	  simple_type_specifier
+        | struct_type_specifier
+        ;
+
+simple_type_specifier:
 	  TYPENAME
           	{
                   pkl_ast_node decl = pkl_env_lookup (pkl_parser->env,
@@ -682,31 +687,30 @@ type_specifier:
                     ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | OFFSETCONSTR type_specifier ',' IDENTIFIER '>'
+        | OFFSETCONSTR simple_type_specifier ',' IDENTIFIER '>'
                 {
                     $$ = pkl_ast_make_offset_type (pkl_parser->ast,
                                                    $2, $4);
                     PKL_AST_LOC ($4) = @4;
                     PKL_AST_LOC ($$) = @$;
                 }
-        | OFFSETCONSTR type_specifier ',' type_specifier '>'
+        | OFFSETCONSTR simple_type_specifier ',' type_specifier '>'
                 {
                     $$ = pkl_ast_make_offset_type (pkl_parser->ast,
                                                    $2, $4);
                     PKL_AST_LOC ($$) = @$;
                 }
 
-        | type_specifier '[' expression ']'
+        | simple_type_specifier '[' expression ']'
           	{
                     $$ = pkl_ast_make_array_type (pkl_parser->ast, $3, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
-	| type_specifier '[' ']'
+	| simple_type_specifier '[' ']'
         	{
                     $$ = pkl_ast_make_array_type (pkl_parser->ast, NULL, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | struct_type_specifier
         ;
 
 struct_type_specifier:
