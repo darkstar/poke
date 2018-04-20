@@ -31,8 +31,8 @@
    `trans1' finishes ARRAY, STRUCT and TYPE_STRUCT nodes by
             determining its number of elements and characteristics.
             It also finishes OFFSET nodes by replacing certain unit
-            identifiers with factors.  It should be executed right
-            after parsing.
+            identifiers with factors and completes/annotates other
+            structures.  It should be executed right after parsing.
 
    `trans2' scans the AST and annotates nodes that are literals.
             Henceforth any other phase relying on this information
@@ -245,12 +245,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_offset)
 }
 PKL_PHASE_END_HANDLER
 
+/* Calculate the number of arguments in funcalls.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_funcall)
+{
+  pkl_ast_node arg;
+  int nargs = 0;
+
+  for (arg = PKL_AST_FUNCALL_ARGS (PKL_PASS_NODE);
+       arg;
+       arg = PKL_AST_CHAIN (arg))
+    nargs++;
+
+  PKL_AST_FUNCALL_NARG (PKL_PASS_NODE) = nargs;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans1_df_array),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans1_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_trans1_df_funcall),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_df_type_offset),
   };

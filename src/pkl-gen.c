@@ -190,7 +190,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
 {
   pkl_ast_node var = PKL_PASS_NODE;
 
-  if (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
     /* This is a l-value in an assignment.  Generate nothing, as this
        node is only used as a recipient for the lexical address of the
        variable.  */
@@ -282,17 +283,10 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall)
 {
   /* At this point the closure for FUNCTION and the actuals are pushed
-     in the stack.  Call the closure.  */
+     in the stack.  We are ready to use the `call' instruction!  */
 
-  /* XXX: move this to `trans1'.  */
-  pkl_ast_node arg;
-  int nargs = 0;
-  for (arg = PKL_AST_FUNCALL_ARGS (PKL_PASS_NODE);
-       arg;
-       arg = PKL_AST_CHAIN (arg))
-    nargs++;
-
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL, nargs);
+  int narg = PKL_AST_FUNCALL_NARG (PKL_PASS_NODE);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL, narg);
 }
 PKL_PHASE_END_HANDLER
 
@@ -305,26 +299,14 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
 {
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNCALL)
-    {
-      /* Push the closure for the function, that will be used along
-         with the actuals in the funcall.  */
-
-      /* XXX */
-      assert (0);
-    }
-  else
-    {
-      /* This is a function prologue.  */
-
-      /* XXX: other stuff for the function prologue goes here.  */
-      
-      /* Push the function environment, for the arguments.  The
-         compound-statement that is the body for the function will create
-         it's own frame.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-    }
+  /* This is a function prologue.  */
+  
+  /* XXX: other stuff for the function prologue goes here.  */
+  
+  /* Push the function environment, for the arguments.  The
+     compound-statement that is the body for the function will create
+     it's own frame.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
 

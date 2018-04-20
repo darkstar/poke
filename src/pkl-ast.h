@@ -820,16 +820,20 @@ pkl_ast_node pkl_ast_make_map (pkl_ast ast,
 
 /* PKL_AST_FUNCALL nodes represent the invocation of a function.
 
-   FUNCTION is the function being invoked.
-   ARGS is a chain of PKL_AST_FUNCALL_ARG nodes.  */
+   FUNCTION is a variable with the function being invoked.
+   ARGS is a chain of PKL_AST_FUNCALL_ARG nodes.
+
+   NARG is the number of arguments in the funcall.  */
 
 #define PKL_AST_FUNCALL_ARGS(AST) ((AST)->funcall.args)
 #define PKL_AST_FUNCALL_FUNCTION(AST) ((AST)->funcall.function)
+#define PKL_AST_FUNCALL_NARG(AST) ((AST)->funcall.narg)
 
 struct pkl_ast_funcall
 {
   struct pkl_ast_common common;
 
+  int narg;
   union pkl_ast_node *function;
   union pkl_ast_node *args;
 };
