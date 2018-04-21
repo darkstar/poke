@@ -514,4 +514,8 @@ set test defun-3
 poke_test_cmd "defun anoffset = () : offset<int,B> { return 2#B; }" {}
 poke_test_cmd "print int @ anoffset()" {0}
 
+set test defun-4
+poke_test_cmd "defun defun_4 = (int i) : int { return i + 1; }" {}
+poke_test_cmd "print defun_4 (10)" {11}
+
 poke_exit

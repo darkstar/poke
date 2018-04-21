@@ -375,6 +375,9 @@ pkl_do_pass_1 (jmp_buf toplevel,
         PKL_PASS (PKL_AST_FUNCALL_ARGS (node));
       PKL_PASS (PKL_AST_FUNCALL_FUNCTION (node));
       break;
+    case PKL_AST_FUNCALL_ARG:
+      PKL_PASS (PKL_AST_FUNCALL_ARG_EXP (node));
+      break;
     case PKL_AST_FUNC:
       if (PKL_AST_FUNC_RET_TYPE (node))
         PKL_PASS (PKL_AST_FUNC_RET_TYPE (node));
@@ -385,6 +388,9 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_FUNC_ARG:
       PKL_PASS (PKL_AST_FUNC_ARG_TYPE (node));
+      break;
+    case PKL_AST_FUNCTION_ARG_TYPE:
+      PKL_PASS (PKL_AST_FUNCTION_ARG_TYPE_TYPE (node));
       break;
     case PKL_AST_COMP_STMT:
       if (PKL_AST_COMP_STMT_STMTS (node))
@@ -417,6 +423,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     default:
       /* Unknown node code.  This kills the poke :'( */
+      printf ("XXX: %d\n", PKL_AST_CODE (node));
       assert (0);
     }
 

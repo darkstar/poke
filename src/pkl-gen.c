@@ -273,6 +273,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | EXP
+ * FUNCALL_ARG
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall_arg)
+{
+  /* Do nothing, the argument is alread pushed in the stack.  */
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | [ARG]...
  * | FUNCTION
  * FUNCALL
@@ -318,6 +329,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
      environment.  */
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * FUNCTION_ARG_TYPE
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_function_arg_type)
+{
+  /* Nothing to do here.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1224,9 +1245,11 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_gen_df_funcall),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_df_funcall_arg),
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCTION_ARG_TYPE, pkl_gen_df_function_arg_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
