@@ -734,13 +734,38 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
             if (ename)
               fprintf (out, " %s",
                        PKL_AST_IDENTIFIER_POINTER (ename));
+            fputc (';', out);
           }
         fputs ("}", out);
         break;
       }
     case PKL_TYPE_FUNCTION:
-      /* XXX */
-      break;
+      {
+        pkl_ast_node rtype = PKL_AST_TYPE_F_RTYPE (type);
+        pkl_ast_node t;
+
+        fputc ('(', out);
+
+        for (t = PKL_AST_TYPE_F_ARGS (type); t;
+             t = PKL_AST_CHAIN (t))
+          {
+            pkl_ast_node atype
+              = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
+
+            if (t != PKL_AST_TYPE_F_ARGS (t))
+              fputc (',', out);
+            pkl_print_type (out, atype, use_given_name);
+          }
+        
+        fputc (')', out);
+
+        if (rtype)
+          {
+            fputs (": ", out);
+            pkl_print_type (out, rtype, use_given_name);
+          }
+        break;
+      }
     case PKL_TYPE_OFFSET:
       /* XXX */
       break;
