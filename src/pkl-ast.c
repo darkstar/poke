@@ -779,6 +779,8 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
           pkl_print_type (out, unit, use_given_name);
         else if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
           fputs (PKL_AST_IDENTIFIER_POINTER (unit), out);
+        else if (PKL_AST_CODE (unit) == PKL_AST_INTEGER)
+          fprintf (out, "%lu", PKL_AST_INTEGER_VALUE (unit));
         else
           assert (0);
         

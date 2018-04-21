@@ -682,8 +682,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
       pkl_ast_node fa, aa;
       int narg = 0;
 
-      /* Move to promo.  */
-
       for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
            aa = PKL_AST_FUNCALL_ARGS (funcall);
            fa && aa;
@@ -700,6 +698,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
               char *passed_type = pkl_type_str (aa_type, 1);
               char *expected_type = pkl_type_str (fa_type, 1);
 
+              /* XXX: abstract this logic in a macro or function
+                 `can_be_promoted_p'.  */
+              if ((PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
+                   && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+                  || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
+                      && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
+                /* The actual argument can be promoted.  */
+                continue;
+              
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                          "passing function argument %d of the wrong type.\n\
 Expected %s, got %s",
