@@ -665,7 +665,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
       PKL_AST_TYPE_F_NARG (funcall_function_type))
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
-                 "too few argument passed to function");
+                 "too few arguments passed to function");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+  else if (PKL_AST_FUNCALL_NARG (funcall) >
+           PKL_AST_TYPE_F_NARG (funcall_function_type))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+                 "too many arguments passed to function");
       payload->errors++;
       PKL_PASS_ERROR;
     }
