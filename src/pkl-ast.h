@@ -21,11 +21,9 @@
 
 #include <config.h>
 
-#ifdef PKL_DEBUG
-# include <stdio.h>
-#endif
-
+#include <stdio.h>
 #include <stdint.h>
+
 #include "pkl-ast.h"
 
 /* The following enumeration defines the codes characterizing the
@@ -651,9 +649,8 @@ pkl_ast_node pkl_ast_make_func_arg_type (pkl_ast ast,
 
 /* PKL_AST_TYPE nodes represent types.
    
-   If NAME is not NULL, then all we know about this type is its name,
-   which is encoded in a PKL_AST_IDENTIFIER node.  The rest of the
-   attributes are meaningless in this case.
+   If NAME is not NULL, then this specific type instance has a given
+   name, which is encoded in a PKL_AST_IDENTIFIER node.
 
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
@@ -754,6 +751,7 @@ pkl_ast_node pkl_ast_dup_type (pkl_ast_node type);
 int pkl_ast_type_equal (pkl_ast_node t1, pkl_ast_node t2);
 pkl_ast_node pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type);
 int pkl_ast_type_is_complete (pkl_ast_node type);
+void pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name);
 
 /* PKL_AST_DECL nodes represent the declaration of a named entity:
    function, type, variable....

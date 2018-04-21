@@ -678,6 +678,79 @@ pkl_ast_type_is_complete (pkl_ast_node type)
   return complete;
 }
 
+/* Print a textual description of TYPE to the file OUT.  If TYPE is a
+   named type then it's given name is preferred if USE_GIVEN_NAME is
+   1.  */
+
+void
+pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
+{
+  assert (PKL_AST_CODE (type) == PKL_AST_TYPE);
+
+  /* Use the type's given name, if requested and this specific type
+     instance is named.  */
+  if (use_given_name
+      && PKL_AST_TYPE_NAME (type))
+    {
+      fprintf (out,
+               PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (type)));
+      return;
+    }
+
+  /* Otherwise, print a description of the type, as terse as possible
+     but complete.  The descriptions should follow the same
+     style/syntax/conventions used in both the language specification
+     and the PVM.  */
+  switch (PKL_AST_TYPE_CODE (type))
+    {
+    case PKL_TYPE_INTEGRAL:
+      if (!PKL_AST_TYPE_I_SIGNED (type))
+        fputc ('u', out);
+      fprintf (out, "int<%lu>", PKL_AST_TYPE_I_SIZE (type));
+      break;
+    case PKL_TYPE_STRING:
+      fprintf (out, "string");
+      break;
+    case PKL_TYPE_ARRAY:
+      pkl_print_type (out, PKL_AST_TYPE_A_ETYPE (type),
+                      use_given_name);
+      fputs ("[]", out);
+      break;
+    case PKL_TYPE_STRUCT:
+      {
+        pkl_ast_node t;
+
+        fputs ("struct {", out);
+
+        for (t = PKL_AST_TYPE_S_ELEMS (type); t;
+             t = PKL_AST_CHAIN (t))
+          {
+            pkl_ast_node ename
+              = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
+            pkl_ast_node etype
+              = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
+
+            pkl_print_type (out, etype, use_given_name);
+            if (ename)
+              fprintf (out, " %s",
+                       PKL_AST_IDENTIFIER_POINTER (ename));
+          }
+        fputs ("}", out);
+        break;
+      }
+    case PKL_TYPE_FUNCTION:
+      /* XXX */
+      break;
+    case PKL_TYPE_OFFSET:
+      /* XXX */
+      break;
+    case PKL_TYPE_NOTYPE:
+    default:
+      assert (0);
+      break;
+    }
+}
+
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node
