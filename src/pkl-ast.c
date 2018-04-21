@@ -792,6 +792,21 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
     }
 }
 
+/* Like pkl_print_type, but return the string describing the type in a
+   string.  It is up to the caller to free the string memory.  */
+
+char *
+pkl_type_str (pkl_ast_node type, int use_given_name)
+{
+  char *str;
+  size_t str_size;
+  FILE *buffer = open_memstream (&str, &str_size);
+
+  pkl_print_type (buffer, type, use_given_name);
+  fclose (buffer);
+  return str;
+}
+
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node
