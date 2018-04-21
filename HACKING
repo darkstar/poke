@@ -248,11 +248,14 @@ typify1
 - Checks that the expression in which a funcall is applied is a
   function, and that the types of the formal parameters mach the types
   of the funcall arguments.
-- Checks that the type of the expression in a return statement matches
-  the return type of its containing function.  This uses the link set
-  in trans1.
 - Checks that void functions are not called in contexts where a value
   is expected.
+
+typify2
+-------
+
+- Checks that the type of the expression in a return statement matches
+  the return type of its containing function.
 
 Debugging Poke
 ==============
