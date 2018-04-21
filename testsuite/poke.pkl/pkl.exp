@@ -518,4 +518,8 @@ set test defun-4
 poke_test_cmd "defun defun_4 = (int i) : int { return i + 1; }" {}
 poke_test_cmd "print defun_4 (10)" {11}
 
+set test defun-5
+poke_test_cmd "defun defun_5 = (int i, long l) { return i + l; }" {}
+poke_test_cmd "print defun_5 (1, 2L)" {3L}
+
 poke_exit

@@ -538,7 +538,22 @@ struct pkl_phase pkl_phase_trans3 =
 
 
 
+/* Reverse the order of the function arguments, as the callee expects
+   them in reverse order in the stack.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans4_df_funcall)
+{
+  pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node funcall_args = PKL_AST_FUNCALL_ARGS (funcall);
+
+  funcall_args = pkl_ast_reverse (funcall_args);
+  PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (funcall_args);
+}
+PKL_PHASE_END_HANDLER
+
+
 struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_trans4_df_funcall),
   };
