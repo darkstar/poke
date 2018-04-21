@@ -57,7 +57,7 @@ enum pkl_ast_code
   /* Types.  */
   PKL_AST_TYPE,
   PKL_AST_STRUCT_ELEM_TYPE,
-  PKL_AST_FUNCTION_ARG_TYPE,
+  PKL_AST_FUNC_ARG_TYPE,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
   /* Functions.  */
@@ -632,21 +632,21 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
                                             pkl_ast_node name,
                                             pkl_ast_node type);
 
-/* PKL_AST_FUNCTION_ARG_TYPE nodes represent the arguments part of a
+/* PKL_AST_FUNC_ARG_TYPE nodes represent the arguments part of a
    function type.
 
    TYPE is a PKL_AST_TYPE node describing the type of the
    argument.  */
 
-#define PKL_AST_FUNCTION_ARG_TYPE_TYPE(AST) ((AST)->fun_type_arg.type)
+#define PKL_AST_FUNC_ARG_TYPE_TYPE(AST) ((AST)->fun_type_arg.type)
 
-struct pkl_ast_function_arg_type
+struct pkl_ast_func_arg_type
 {
   struct pkl_ast_common common;
   union pkl_ast_node *type;
 };
 
-pkl_ast_node pkl_ast_make_function_arg_type (pkl_ast ast,
+pkl_ast_node pkl_ast_make_func_arg_type (pkl_ast ast,
                                              pkl_ast_node type);
 
 /* PKL_AST_TYPE nodes represent types.
@@ -669,7 +669,7 @@ pkl_ast_node pkl_ast_make_function_arg_type (pkl_ast ast,
    ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.
 
    In function types, NARG is the number of formal arguments in the
-   function type.  ARGS is a chain of PKL_AST_FUNCTION_ARG_TYPE nodes.
+   function type.  ARGS is a chain of PKL_AST_FUNC_ARG_TYPE nodes.
    RTYPE is the type of the returned value, or NULL if the function
    type denotes a void function.
 
@@ -1090,7 +1090,7 @@ union pkl_ast_node
   /* Types.  */
   struct pkl_ast_type type;
   struct pkl_ast_struct_elem_type sct_type_elem;
-  struct pkl_ast_function_arg_type fun_type_arg;
+  struct pkl_ast_func_arg_type fun_type_arg;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
   /* Functions.  */

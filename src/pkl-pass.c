@@ -389,8 +389,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
     case PKL_AST_FUNC_ARG:
       PKL_PASS (PKL_AST_FUNC_ARG_TYPE (node));
       break;
-    case PKL_AST_FUNCTION_ARG_TYPE:
-      PKL_PASS (PKL_AST_FUNCTION_ARG_TYPE_TYPE (node));
+    case PKL_AST_FUNC_ARG_TYPE:
+      PKL_PASS (PKL_AST_FUNC_ARG_TYPE_TYPE (node));
       break;
     case PKL_AST_COMP_STMT:
       if (PKL_AST_COMP_STMT_STMTS (node))

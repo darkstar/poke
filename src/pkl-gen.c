@@ -333,10 +333,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
 PKL_PHASE_END_HANDLER
 
 /*
- * FUNCTION_ARG_TYPE
+ * FUNC_ARG_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_function_arg_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg_type)
 {
   /* Nothing to do here.  */
 }
@@ -1249,7 +1249,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCTION_ARG_TYPE, pkl_gen_df_function_arg_type),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG_TYPE, pkl_gen_df_func_arg_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),

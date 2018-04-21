@@ -609,26 +609,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_func)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
-  pkl_ast_node t, function_arg_types = NULL;
+  pkl_ast_node t, func_arg_types = NULL;
   size_t nargs = 0;
 
   /* Build a chain with the types of the function arguments.  */
   for (t = PKL_AST_FUNC_ARGS (node); t; t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node function_arg_type
-        = pkl_ast_make_function_arg_type (PKL_PASS_AST,
+      pkl_ast_node func_arg_type
+        = pkl_ast_make_func_arg_type (PKL_PASS_AST,
                                           PKL_AST_FUNC_ARG_TYPE (t));
-      PKL_AST_LOC (function_arg_type) = PKL_AST_LOC (t);
+      PKL_AST_LOC (func_arg_type) = PKL_AST_LOC (t);
 
-      function_arg_types = pkl_ast_chainon (function_arg_types,
-                                            ASTREF (function_arg_type));
+      func_arg_types = pkl_ast_chainon (func_arg_types,
+                                            ASTREF (func_arg_type));
       nargs++;
     }
 
   /* Build the type of the function.  */
   type = pkl_ast_make_function_type (PKL_PASS_AST,
                                      PKL_AST_FUNC_RET_TYPE (node),
-                                     nargs, function_arg_types);
+                                     nargs, func_arg_types);
   PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
   PKL_PASS_RESTART = 1;
