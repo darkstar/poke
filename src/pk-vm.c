@@ -104,7 +104,7 @@ Flags:\n\
 
 struct pk_cmd vm_disas_fun_cmd =
   {"function", "s", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas_fun,
-   "vm disassemble function[/n] EXP\n\
+   "vm disassemble function[/n] FUNCTION_NAME\n\
 Flags:\n\
   n (do a native disassemble)"};
 
