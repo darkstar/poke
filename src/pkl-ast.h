@@ -36,7 +36,8 @@ enum pkl_ast_code
 {
   PKL_AST_PROGRAM,
   /* Expressions.  */
-  PKL_AST_EXP,
+  PKL_AST_FIRST_EXP,
+  PKL_AST_EXP = PKL_AST_FIRST_EXP,
   PKL_AST_COND_EXP,
   PKL_AST_INTEGER,
   PKL_AST_STRING,
@@ -65,14 +66,26 @@ enum pkl_ast_code
   /* Declarations.  */
   PKL_AST_DECL,
   /* Statements.  */
-  PKL_AST_COMP_STMT,
+  PKL_AST_FIRST_STMT,
+  PKL_AST_COMP_STMT = PKL_AST_FIRST_STMT,
   PKL_AST_NULL_STMT,
   PKL_AST_ASS_STMT,
   PKL_AST_IF_STMT,
   PKL_AST_RETURN_STMT,
   PKL_AST_EXP_STMT,
+  PKL_AST_LAST_STMT = PKL_AST_EXP_STMT,
   PKL_AST_LAST
 };
+
+/* The following macros implement some node code categories.  */
+
+#define PKL_AST_IS_EXP(AST)                              \
+  (PKL_AST_CODE ((AST)) >= PKL_AST_FIRST_EXP             \
+   && PKL_AST_CODE ((AST)) <= PKL_AST_LAST_EXP)
+
+#define PKL_AST_IS_STMT(AST)                            \
+  (PKL_AST_CODE ((AST)) >= PKL_AST_FIRST_STMT            \
+   && PKL_AST_CODE ((AST)) <= PKL_AST_LAST_STMT)
 
 /* The AST nodes representing expressions are characterized by
    operators (see below in this file for more details on this.)  The

@@ -251,6 +251,8 @@ typify1
 - Checks that the type of the expression in a return statement matches
   the return type of its containing function.  This uses the link set
   in trans1.
+- Checks that void functions are not called in contexts where a value
+  is expected.
 
 Debugging Poke
 ==============

@@ -662,9 +662,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
 
   /* XXX: check the types of the function and the funcall.  */
 
-  /* XXX: what if RTYPE is NULL, i.e. void function?  */
+  /* Set the type of the funcall itself.  */
   PKL_AST_TYPE (funcall)
     = ASTREF (PKL_AST_TYPE_F_RTYPE (funcall_function_type));
+
+  /* If the called function is a void function, i.e. it doesn't return
+     any type, the parent of this funcall shouldn't expect a
+     value.  */
+  {
+    int parent_code = PKL_AST_CODE (PKL_PASS_PARENT);
+
+    if (PKL_AST_TYPE (funcall) == NULL
+        && (parent_code == PKL_AST_EXP
+            || parent_code == PKL_AST_COND_EXP
+            || parent_code == PKL_AST_ARRAY_INITIALIZER
+            || parent_code == PKL_AST_ARRAY_REF
+            || parent_code == PKL_AST_STRUCT_ELEM
+            || parent_code == PKL_AST_OFFSET
+            || parent_code == PKL_AST_CAST
+            || parent_code == PKL_AST_MAP
+            || parent_code == PKL_AST_FUNCALL
+            || parent_code == PKL_AST_FUNCALL_ARG
+            || parent_code == PKL_AST_DECL))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+                 "function doesn't return a value");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+  }
 }
 PKL_PHASE_END_HANDLER
 
