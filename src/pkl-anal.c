@@ -40,8 +40,8 @@
    See the handlers below for detailed information about what these
    phases check for.  */
 
-/* The following handler is used in both anal1 and anal2, and
-   initializes the phase payload.  */
+/* The following handler is used in all anal phases, and initializes
+   the phase payload.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
 {
