@@ -661,6 +661,47 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
     }
 
   /* XXX: check the types of the function and the funcall.  */
+  if (PKL_AST_FUNCALL_NARG (funcall) <
+      PKL_AST_TYPE_F_NARG (funcall_function_type))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+                 "too few argument passed to function");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+  else
+    {
+      pkl_ast_node fa, aa;
+      int narg = 0;
+
+      for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
+           aa = PKL_AST_FUNCALL_ARGS (funcall);
+           fa && aa;
+           fa = PKL_AST_CHAIN (fa), aa = PKL_AST_CHAIN (aa))
+        {
+          pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
+          pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
+          pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
+
+          assert (aa_type);
+
+          if (!pkl_ast_type_equal (fa_type, aa_type))
+            {
+              char *passed_type = pkl_type_str (aa_type, 1);
+              char *expected_type = pkl_type_str (fa_type, 1);
+
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                         "passing function argument %d of the wrong type.  Expected %s, got %s",
+                         narg, expected_type, passed_type);
+              free (expected_type);
+              free (passed_type);
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+
+          narg++;
+        }
+    }
 
   /* Set the type of the funcall itself.  */
   PKL_AST_TYPE (funcall)
