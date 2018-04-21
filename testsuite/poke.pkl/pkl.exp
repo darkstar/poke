@@ -509,4 +509,8 @@ poke_test_cmd "defvar defun_2_message = \"hello world\"" {}
 poke_test_cmd "defun get_message = () { return defun_2_message; }" {}
 poke_test_cmd "print get_message ()" {"hello world"}
 
+set test defun-3
+poke_test_cmd "defun anoffset = () : offset<int,B> { return 2#B; }" {}
+poke_test_cmd "print int @ anoffset()" {0}
+
 poke_exit
