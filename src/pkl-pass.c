@@ -372,7 +372,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_FUNCALL:
       if (PKL_AST_FUNCALL_ARGS (node))
-        PKL_PASS (PKL_AST_FUNCALL_ARGS (node));
+        PKL_PASS_CHAIN (PKL_AST_FUNCALL_ARGS (node));
       PKL_PASS (PKL_AST_FUNCALL_FUNCTION (node));
       break;
     case PKL_AST_FUNCALL_ARG:

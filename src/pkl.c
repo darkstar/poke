@@ -87,6 +87,7 @@ rest_of_compilation (pkl_compiler compiler,
   struct pkl_trans_payload trans1_payload = { 0 };
   struct pkl_trans_payload trans2_payload = { 0 };
   struct pkl_trans_payload trans3_payload = { 0 };
+  struct pkl_trans_payload trans4_payload = { 0 };
   
   struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_typify_payload typify2_payload = { 0 };
@@ -116,6 +117,15 @@ rest_of_compilation (pkl_compiler compiler,
         &anal2_payload,
   };
 
+  void *middleend_payloads[]
+    = { &trans4_payload,
+  };
+
+  struct pkl_phase *middleend_phases[]
+    = { &pkl_phase_trans4,
+        NULL
+  };
+
   /* Note that gen does subpasses, so no transformation phases should
      be invoked in the bakend pass.  */
   struct pkl_phase *backend_phases[]
@@ -133,7 +143,7 @@ rest_of_compilation (pkl_compiler compiler,
   pkl_gen_init_payload (&gen_payload);
 
   /* XXX */
-  /* pkl_ast_print (stdout, ast->ast);*/
+  /* pkl_ast_print (stdout, ast->ast); */
       
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
     goto error;
@@ -145,6 +155,15 @@ rest_of_compilation (pkl_compiler compiler,
       || anal2_payload.errors > 0
       || typify1_payload.errors > 0
       || typify2_payload.errors > 0)
+    goto error;
+
+  /* XXX */
+  /* pkl_ast_print (stdout, ast->ast); */
+
+  if (!pkl_do_pass (ast, middleend_phases, middleend_payloads))
+    goto error;
+
+  if (trans4_payload.errors > 0)
     goto error;
 
   /* XXX */

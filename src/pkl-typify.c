@@ -691,7 +691,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
               char *expected_type = pkl_type_str (fa_type, 1);
 
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                         "passing function argument %d of the wrong type.  Expected %s, got %s",
+                         "passing function argument %d of the wrong type.\n\
+Expected %s, got %s",
                          narg, expected_type, passed_type);
               free (expected_type);
               free (passed_type);
