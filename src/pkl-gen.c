@@ -204,12 +204,15 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 {
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
+  pkl_ast_node comp_stmt_stmts
+    = PKL_AST_COMP_STMT_STMTS (comp_stmt);
+
   pkl_ast_node stmt_decl;
 
   /* Pop the frames created by the declarations contained in the
      compound statement from the enviroment.  */
 
-  for (stmt_decl = comp_stmt;
+  for (stmt_decl = comp_stmt_stmts;
        stmt_decl;
        stmt_decl = PKL_AST_CHAIN (stmt_decl))
     {

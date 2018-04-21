@@ -662,6 +662,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
 
   /* XXX: check the types of the function and the funcall.  */
 
+  /* XXX: what if RTYPE is NULL, i.e. void function?  */
   PKL_AST_TYPE (funcall)
     = ASTREF (PKL_AST_TYPE_F_RTYPE (funcall_function_type));
 }
