@@ -1037,16 +1037,21 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
    EXP is the expression to return to the caller.
 
    NFRAMES is the number of lexical frames to pop before returning
-   from the function.  This is used by the code generator.  */
+   from the function.  This is used by the code generator.
+
+   FUNCTION is the PKL_AST_FUNCTION containing this return
+   statement. */
 
 #define PKL_AST_RETURN_STMT_EXP(AST) ((AST)->return_stmt.exp)
 #define PKL_AST_RETURN_STMT_NFRAMES(AST) ((AST)->return_stmt.nframes)
+#define PKL_AST_RETURN_STMT_FUNCTION(AST) ((AST)->return_stmt.function)
 
 struct pkl_ast_return_stmt
 {
   struct pkl_ast_common common;
 
   union pkl_ast_node *exp;
+  union pkl_ast_node *function;
   int nframes;
 };
 

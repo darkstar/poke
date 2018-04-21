@@ -24,7 +24,6 @@
 #include "pkl-pass.h"
 #include "pkl-trans.h"
 
-
 /* This file implements several transformation compiler phases which,
    generally speaking, are restartable.
 
@@ -32,7 +31,7 @@
             determining its number of elements and characteristics.
             It also finishes OFFSET nodes by replacing certain unit
             identifiers with factors and completes/annotates other
-            structures.  It should be executed right after parsing.
+            structures.
 
    `trans2' scans the AST and annotates nodes that are literals.
             Henceforth any other phase relying on this information
