@@ -655,7 +655,7 @@ function_arg:
                                                 dummy,
                                                 NULL /* source */);
                   PKL_AST_LOC (arg_decl) = @$;
-                  
+
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
                                          arg_decl))
