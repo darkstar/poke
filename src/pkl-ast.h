@@ -665,6 +665,11 @@ pkl_ast_node pkl_ast_make_func_arg_type (pkl_ast ast,
    In struct types, NELEM is the number of elements in the struct type.
    ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.
 
+   In offset types, BASE_TYPE is a PKL_AST_TYPE with the base type for
+   the offset's magnitude, and UNIT is either a PKL_AST_IDENTIFIER
+   containing one of few recognized keywords (b, B, Kb, etc) or a
+   PKL_AST_TYPE.
+
    In function types, NARG is the number of formal arguments in the
    function type.  ARGS is a chain of PKL_AST_FUNC_ARG_TYPE nodes.
    RTYPE is the type of the returned value, or NULL if the function

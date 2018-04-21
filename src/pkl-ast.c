@@ -767,8 +767,24 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         break;
       }
     case PKL_TYPE_OFFSET:
-      /* XXX */
-      break;
+      {
+        pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (type);
+
+        fputs ("offset<", out);
+        pkl_print_type (out, PKL_AST_TYPE_O_BASE_TYPE (type),
+                        use_given_name);
+        fputc (',', out);
+
+        if (PKL_AST_CODE (unit) == PKL_AST_TYPE)
+          pkl_print_type (out, unit, use_given_name);
+        else if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
+          fputs (PKL_AST_IDENTIFIER_POINTER (unit), out);
+        else
+          assert (0);
+        
+        fputc ('>', out);
+        break;
+      }
     case PKL_TYPE_NOTYPE:
     default:
       assert (0);
