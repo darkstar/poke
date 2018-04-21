@@ -265,8 +265,9 @@ typify2
 trans4
 ------
 
-- Reverse the list of formal arguments in functions, so the code
-  generator tackles them in the right (reversed) order.
+- Reverse the list of actual arguments in function calls, so the code
+  generator tackles them in the right (reversed) order, as it is
+  expected by the callee.
 
 Debugging Poke
 ==============
