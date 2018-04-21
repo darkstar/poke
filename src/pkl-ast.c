@@ -752,7 +752,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
             pkl_ast_node atype
               = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
 
-            if (t != PKL_AST_TYPE_F_ARGS (t))
+            if (t != PKL_AST_TYPE_F_ARGS (type))
               fputc (',', out);
             pkl_print_type (out, atype, use_given_name);
           }
@@ -761,7 +761,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
 
         if (rtype)
           {
-            fputs (": ", out);
+            fputc (':', out);
             pkl_print_type (out, rtype, use_given_name);
           }
         break;
