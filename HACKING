@@ -242,6 +242,13 @@ anal1
 - Checks that every return statement is linked to a function.
 - Checks that no return statement is linked to a void function.
 
+typify1
+-------
+
+- Checks that the expression in which a funcall is applied is a
+  function, and that the types of the formal parameters mach the types
+  of the funcall arguments.
+
 typify2
 -------
 

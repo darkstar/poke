@@ -635,6 +635,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_func)
 }
 PKL_PHASE_END_HANDLER
 
+/* The expression to which a FUNCALL is applied should be a function,
+   and the types of the formal parameters should match the types of
+   the actual arguments in the funcall.  Also, set the type of the
+   funcall, which is the type returned by the function.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node funcall_function
+    = PKL_AST_FUNCALL_FUNCTION (funcall);
+  pkl_ast_node funcall_function_type
+    = PKL_AST_TYPE (funcall_function);
+
+  if (PKL_AST_TYPE_CODE (funcall_function_type)
+      != PKL_TYPE_FUNCTION)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+                 "variable is not a function");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* XXX: check the types of the function and the funcall.  */
+
+  PKL_AST_TYPE (funcall)
+    = ASTREF (PKL_AST_TYPE_F_RTYPE (funcall_function_type));
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of a STRUCT_ELEM in a struct initializer is the type of
    it's expression.  */
 
@@ -784,6 +816,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify1_df_struct),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_df_struct_elem),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_typify1_df_func),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_typify1_df_funcall),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
