@@ -543,11 +543,14 @@ struct pkl_phase pkl_phase_trans3 =
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans4_df_func)
 {
+  /* XXX this is not actually needed.  */
+#if 0  
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
 
   func_args = pkl_ast_reverse (func_args);
   PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
+#endif
 }
 PKL_PHASE_END_HANDLER
 
