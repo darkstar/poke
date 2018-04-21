@@ -682,6 +682,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
       pkl_ast_node fa, aa;
       int narg = 0;
 
+      /* Move to promo.  */
+
       for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
            aa = PKL_AST_FUNCALL_ARGS (funcall);
            fa && aa;
