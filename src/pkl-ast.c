@@ -1106,8 +1106,6 @@ pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp)
   pkl_ast_node return_stmt = pkl_ast_make_node (ast,
                                                 PKL_AST_RETURN_STMT);
 
-  assert (exp);
-
   PKL_AST_RETURN_STMT_EXP (return_stmt) = ASTREF (exp);
   return return_stmt;
 }
@@ -1473,24 +1471,43 @@ pkl_ast_reverse (pkl_ast_node ast)
 
 static void
 pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
-                          int nframes)
+                          int *nframes)
 {
+  /* STMT can be a statement or a declaration.  */
+
   switch (PKL_AST_CODE (stmt))
     {
+    case PKL_AST_RETURN_STMT:
+      PKL_AST_RETURN_STMT_FUNCTION (stmt) = function; /* Note no ASTREF.  */
+      PKL_AST_RETURN_STMT_NFRAMES (stmt) = *nframes;
+      break;
     case PKL_AST_COMP_STMT:
       {
         pkl_ast_node t;
 
+        *nframes += 1;
         for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
              t = PKL_AST_CHAIN (t))
-          pkl_ast_finish_returns_1 (function, t, nframes + 1);
+          pkl_ast_finish_returns_1 (function, t, nframes);
         break;
       }
-    case PKL_AST_RETURN_STMT:
-      PKL_AST_RETURN_STMT_FUNCTION (stmt) = function; /* Note no ASTREF.  */
-      PKL_AST_RETURN_STMT_NFRAMES (stmt) = nframes;
+    case PKL_AST_IF_STMT:
+      pkl_ast_finish_returns_1 (function,
+                                PKL_AST_IF_STMT_THEN_STMT (stmt),
+                                nframes);
+      if (PKL_AST_IF_STMT_ELSE_STMT (stmt))
+        pkl_ast_finish_returns_1 (function,
+                                  PKL_AST_IF_STMT_ELSE_STMT (stmt),
+                                  nframes);
+      break;
+    case PKL_AST_DECL:
+      *nframes += 1;
+      break;
+    case PKL_AST_ASS_STMT:
+    case PKL_AST_NULL_STMT:
       break;
     default:
+      assert (0);
       break;
     }
 }
@@ -1498,8 +1515,9 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
 void
 pkl_ast_finish_returns (pkl_ast_node function)
 {
+  int nframes = 0;
   pkl_ast_finish_returns_1 (function, PKL_AST_FUNC_BODY (function),
-                            0);
+                            &nframes);
 }
 
 #ifdef PKL_DEBUG

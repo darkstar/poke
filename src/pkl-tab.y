@@ -957,6 +957,12 @@ stmt:
                                              $3, $5, $7);
                   PKL_AST_LOC ($$) = @$;
                 }
+        | RETURN ';'
+        	{
+                  $$ = pkl_ast_make_return_stmt (pkl_parser->ast,
+                                                 NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | RETURN expression ';'
                 {
                   $$ = pkl_ast_make_return_stmt (pkl_parser->ast,

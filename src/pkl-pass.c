@@ -407,7 +407,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
         PKL_PASS (PKL_AST_IF_STMT_ELSE_STMT (node));
       break;
     case PKL_AST_RETURN_STMT:
-      PKL_PASS (PKL_AST_RETURN_STMT_EXP (node));
+      if (PKL_AST_RETURN_STMT_EXP (node))
+        PKL_PASS (PKL_AST_RETURN_STMT_EXP (node));
       break;
     case PKL_AST_EXP_STMT:
       PKL_PASS (PKL_AST_EXP_STMT_EXP (node));

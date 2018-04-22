@@ -231,7 +231,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
 PKL_PHASE_END_HANDLER
 
 /* A return statement returning a value is not allowed in a void
-   function.  */
+   function.  Also, an expressionless return statement is invalid in a
+   non-void function.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_return_stmt)
 {
@@ -249,6 +250,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_return_stmt)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+  else if (!exp && PKL_AST_FUNC_RET_TYPE (function))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (return_stmt),
+                 "the function expects a return value");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* A funcall to a void function is only allowed in an "expression
+   statement."  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_funcall)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node funcall_function = PKL_AST_FUNCALL_FUNCTION (funcall);
+  pkl_ast_node function_type = PKL_AST_TYPE (funcall_function);
+
+  if (PKL_AST_TYPE_F_RTYPE (function_type) == NULL
+      && PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_EXP_STMT)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+                 "call to void function in expression");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -260,6 +292,7 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_df_return_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_anal2_df_funcall),
    PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };
 

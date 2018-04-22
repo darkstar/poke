@@ -963,8 +963,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
   pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
   pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
 
-  pkl_ast_node returned_type = PKL_AST_TYPE (exp);
-  pkl_ast_node expected_type = PKL_AST_FUNC_RET_TYPE (function);
+  pkl_ast_node returned_type;
+  pkl_ast_node expected_type;
+
+  if (exp == NULL)
+    PKL_PASS_DONE;
+
+  returned_type = PKL_AST_TYPE (exp);
+  expected_type = PKL_AST_FUNC_RET_TYPE (function);
 
   if (expected_type
       && !pkl_ast_type_equal (returned_type, expected_type))
