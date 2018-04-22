@@ -225,11 +225,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
         num_frames++;
     }
 
-  if (num_frames > 0)
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames);
-  
-  /* Now pop the frame created by the compound statement itself.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+  /* Note this includes the compound statement's frame.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames + 1);
 }
 PKL_PHASE_END_HANDLER
 
@@ -262,12 +259,11 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
 {
   /* Return from the function: pop N frames and generate a return
-     instruction.  */
+     instruction.  Note the popf below includes the function's
+     frame.  */
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
-                PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE));
-
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1); /* Function's frame.  */
+                PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE) + 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
