@@ -707,7 +707,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
     case PKL_TYPE_INTEGRAL:
       if (!PKL_AST_TYPE_I_SIGNED (type))
         fputc ('u', out);
-      fprintf (out, "int<%lu>", PKL_AST_TYPE_I_SIZE (type));
+      fprintf (out, "int<%zd>", PKL_AST_TYPE_I_SIZE (type));
       break;
     case PKL_TYPE_STRING:
       fprintf (out, "string");
@@ -781,7 +781,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         else if (PKL_AST_CODE (unit) == PKL_AST_IDENTIFIER)
           fputs (PKL_AST_IDENTIFIER_POINTER (unit), out);
         else if (PKL_AST_CODE (unit) == PKL_AST_INTEGER)
-          fprintf (out, "%lu", PKL_AST_INTEGER_VALUE (unit));
+          fprintf (out, "%" PRIu64, PKL_AST_INTEGER_VALUE (unit));
         else
           assert (0);
         
