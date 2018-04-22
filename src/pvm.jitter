@@ -198,8 +198,10 @@ instruction call () # ARG1 ... ARGN CLOSURE -> RETVAL
        actual value will be written by the callee. */
     JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
 
-    /* XXX: save the current environment and use the callee's
-      environment.  */
+    /* Save the current environment and use the callee's environment.
+     */
+    JITTER_PUSH_RETURNSTACK ((jitter_uint) (uintptr_t) jitter_state_runtime.env);
+    jitter_state_runtime.env = PVM_VAL_CLS_ENV (closure);
 
     /* Branch-and-link to the native code, whose first instruction will
        be a prolog. */
@@ -212,15 +214,22 @@ instruction prolog ()
   code
     /* Fill the return stack slot with the return address.  The return
        stack has already been pushed (with an unspecified value on the
-       top) by the caller. */
-    JITTER_TOP_RETURNSTACK() = (jitter_uint) JITTER_LINK;
+       under top) by the caller. */
+    JITTER_UNDER_TOP_RETURNSTACK() = (jitter_uint) JITTER_LINK;
   end
 end
 
 instruction return ()
   code
-    jitter_uint return_address = JITTER_TOP_RETURNSTACK();
+    jitter_uint return_address;
+
+    /* Restore the environment of the caller.  */
+    jitter_state_runtime.env = (pvm_env) JITTER_TOP_RETURNSTACK ();
     JITTER_DROP_RETURNSTACK();
+
+    return_address = JITTER_TOP_RETURNSTACK();
+    JITTER_DROP_RETURNSTACK();
+
     JITTER_RETURN (return_address);
   end
 end
