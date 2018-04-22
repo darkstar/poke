@@ -819,6 +819,11 @@ declaration:
                       YYERROR;
                     }
 
+                  /* Annotate the contained RETURN statements with
+                     their function and their lexical nest level
+                     within the function.  */
+                  pkl_ast_finish_returns ($4);
+
                   /* XXX: move to trans1.  */
                   PKL_AST_FUNC_NAME ($4)
                     = xstrdup (PKL_AST_IDENTIFIER_POINTER ($2));

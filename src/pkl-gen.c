@@ -257,17 +257,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
      instruction.  */
 
   int i;
+
+  pkl_asm_note (PKL_GEN_ASM, "begin return stmt");
+
   for (i = 0;
        i < PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE);
        ++i)
-    /* XXX: this is currently always 0.  */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
 
-  /* Pop function's compound statement frame.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
-  /* Pop function's frame.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
-
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF); /* Function's frame.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER

@@ -699,11 +699,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
               char *expected_type = pkl_type_str (fa_type, 1);
 
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                         "passing function argument %d of the wrong type.\n\
+                         "passing function argument %d of the wrong type\n\
 Expected %s, got %s",
                          narg, expected_type, passed_type);
               free (expected_type);
               free (passed_type);
+
               payload->errors++;
               PKL_PASS_ERROR;
             }
@@ -950,9 +951,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
+/* Check that the type of the expression in a `return' statement
+   matches the return type of it's containing function.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node return_stmt = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
+  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
+
+  pkl_ast_node returned_type = PKL_AST_TYPE (exp);
+  pkl_ast_node expected_type = PKL_AST_FUNC_RET_TYPE (function);
+
+  if (!pkl_ast_type_equal (returned_type, expected_type))
+    {
+      char *returned_type_str = pkl_type_str (returned_type, 1);
+      char *expected_type_str = pkl_type_str (expected_type, 1);
+      
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                 "returning an expression of the wrong type\n\
+Expected %s, got %s",
+                 expected_type_str, returned_type_str);
+      free (expected_type_str);
+      free (returned_type_str);
+
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_typify2_df_return_stmt),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),

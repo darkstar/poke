@@ -1467,6 +1467,40 @@ pkl_ast_reverse (pkl_ast_node ast)
   return prev;
 }
 
+/* Annotate FUNCTIONs return statements with the function and their
+   nest level within the function.  */
+
+static void
+pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
+                          int nframes)
+{
+  switch (PKL_AST_CODE (stmt))
+    {
+    case PKL_AST_COMP_STMT:
+      {
+        pkl_ast_node t;
+
+        for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
+             t = PKL_AST_CHAIN (t))
+          pkl_ast_finish_returns_1 (function, t, nframes + 1);
+        break;
+      }
+    case PKL_AST_RETURN_STMT:
+      PKL_AST_RETURN_STMT_FUNCTION (stmt) = function; /* Note no ASTREF.  */
+      PKL_AST_RETURN_STMT_NFRAMES (stmt) = nframes;
+      break;
+    default:
+      break;
+    }
+}
+
+void
+pkl_ast_finish_returns (pkl_ast_node function)
+{
+  pkl_ast_finish_returns_1 (function, PKL_AST_FUNC_BODY (function),
+                            0);
+}
+
 #ifdef PKL_DEBUG
 
 /* The following macros are commodities to be used to keep the

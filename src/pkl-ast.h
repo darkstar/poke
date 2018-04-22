@@ -1056,6 +1056,7 @@ struct pkl_ast_return_stmt
 };
 
 pkl_ast_node pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp);
+void pkl_ast_finish_returns (pkl_ast_node function);
 
 /* PKL_AST_EXP_STMT nodes represent "expression statements".
 
