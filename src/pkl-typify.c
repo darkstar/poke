@@ -966,7 +966,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
   pkl_ast_node returned_type = PKL_AST_TYPE (exp);
   pkl_ast_node expected_type = PKL_AST_FUNC_RET_TYPE (function);
 
-  if (!pkl_ast_type_equal (returned_type, expected_type))
+  if (exp
+      && !pkl_ast_type_equal (returned_type, expected_type))
     {
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
