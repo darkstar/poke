@@ -1503,6 +1503,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
     case PKL_AST_DECL:
       *nframes += 1;
       break;
+    case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
     case PKL_AST_NULL_STMT:
       break;

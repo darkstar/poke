@@ -198,6 +198,9 @@ instruction call () # ARG1 ... ARGN CLOSURE -> RETVAL
        actual value will be written by the callee. */
     JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
 
+    /* XXX: save the current environment and use the callee's
+      environment.  */
+
     /* Branch-and-link to the native code, whose first instruction will
        be a prolog. */
     JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
@@ -385,7 +388,13 @@ instruction push32 (?Rnl pvm_literal_printer)
   end
 end
 
-instruction pop (!R)
+instruction pop ()
+  code
+    JITTER_DROP_STACK();
+  end
+end
+
+instruction popr (!R)
   code
     pvm_val top = JITTER_TOP_STACK();
     JITTER_DROP_STACK();
