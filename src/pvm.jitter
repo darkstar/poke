@@ -107,6 +107,12 @@ printer-c
       fputc (')', out);
       printer_hi = 0;
     }
+
+    void
+    popf_printer (FILE *out, jitter_uint nframes)
+    {
+      fprintf (out, "%" JITTER_PRIu, nframes);
+    }
   end
 end
 
@@ -245,10 +251,13 @@ instruction pushf ()
   end
 end
 
-instruction popf ()
+instruction popf (?n popf_printer)
   code
-    jitter_state_runtime.env
-       = pvm_env_pop_frame (jitter_state_runtime.env);
+    jitter_uint i;
+
+    for (i = 0; i < JITTER_ARGN0; ++i)
+        jitter_state_runtime.env
+           = pvm_env_pop_frame (jitter_state_runtime.env);
   end
 end
 

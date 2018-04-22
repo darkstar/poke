@@ -130,7 +130,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
         closure = pvm_make_cls (program);
 
         /*XXX*/
-        /* pvm_print_program (stdout, program); */
+        /*        pvm_print_program (stdout, program); */
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -212,6 +212,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
 
   pkl_ast_node stmt_decl;
 
+  int num_frames = 0;
+
   /* Pop the frames created by the declarations contained in the
      compound statement from the enviroment.  */
 
@@ -220,11 +222,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
        stmt_decl = PKL_AST_CHAIN (stmt_decl))
     {
       if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
+        num_frames++;
     }
 
+  if (num_frames > 0)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames);
+  
   /* Now pop the frame created by the compound statement itself.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
 }
 PKL_PHASE_END_HANDLER
 
@@ -259,16 +264,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
   /* Return from the function: pop N frames and generate a return
      instruction.  */
 
-  int i;
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
+                PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE));
 
-  pkl_asm_note (PKL_GEN_ASM, "begin return stmt");
-
-  for (i = 0;
-       i < PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE);
-       ++i)
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
-
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF); /* Function's frame.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1); /* Function's frame.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
@@ -380,7 +379,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 
   /* Pop the function's environment and return.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
