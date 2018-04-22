@@ -700,7 +700,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
 
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                          "passing function argument %d of the wrong type\n\
-Expected %s, got %s",
+expected %s, got %s",
                          narg, expected_type, passed_type);
               free (expected_type);
               free (passed_type);
@@ -980,7 +980,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
       
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                  "returning an expression of the wrong type\n\
-Expected %s, got %s",
+expected %s, got %s",
                  expected_type_str, returned_type_str);
       free (expected_type_str);
       free (returned_type_str);
