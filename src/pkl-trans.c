@@ -293,6 +293,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_exp)
       if (!literal_p)
         break;
     }
+
+  PKL_AST_LITERAL_P (exp) = literal_p;
 }
 PKL_PHASE_END_HANDLER
 

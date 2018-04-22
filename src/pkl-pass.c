@@ -55,7 +55,7 @@
                                         payloads + i + 1,               \
                                         phases + i + 1);                \
                   /* goto restart */                                    \
-                  break;                                                \
+                  goto restart;                                         \
                 }                                                       \
             }                                                           \
           i++;                                                          \
@@ -96,7 +96,7 @@
                                         payloads + i + 1,               \
                                         phases + i + 1);                \
                   /* goto restart */                                    \
-                  break;;                                               \
+                  goto restart;                                         \
                 }                                                       \
             }                                                           \
           i++;                                                          \
@@ -185,6 +185,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
   else if (order == PKL_PASS_DEPTH_FIRST)
     PKL_CALL_PHASES_SINGLE(default_bf);
 
+ restart:
  _exit:
   *_dobreak = dobreak;
   return node;
@@ -437,6 +438,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
      registered phases in case they are defined.  */
   if (handlers_used == 0)
     PKL_CALL_PHASES_SINGLE(else);
+ restart:
 
   /* If a new node was created to replace the incoming node, increase
      its reference counter.  This assumes that the node returned by

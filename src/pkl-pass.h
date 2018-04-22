@@ -169,7 +169,8 @@ typedef struct pkl_phase *pkl_phase;
    the handler modifies its subtree structure in any way, either
    creating new nodes or removing existing nodes.  This makes the pass
    machinery do the right thing (hopefully.)  By default its value is
-   0.  This macro should _not_ be used as an r-value.
+   0.  This macro should _not_ be used as an r-value.  Also, setting
+   PKL_PASS_RESTART to 1 should only be done in DF handlers.
 
    PKL_PASS_SUBPASS (NODE) starts a subpass that processes the subtree
    starting at NODE.  If the execution of the subpass returns an error
