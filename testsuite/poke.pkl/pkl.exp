@@ -507,7 +507,7 @@ poke_test_cmd "print hello () + \" world\"" {"hello world"}
 
 set test defun-2
 poke_test_cmd "defvar defun_2_message = \"hello world\"" {}
-poke_test_cmd "defun get_message = () { return defun_2_message; }" {}
+poke_test_cmd "defun get_message = () : string { return defun_2_message; }" {}
 poke_test_cmd "print get_message ()" {"hello world"}
 
 set test defun-3
@@ -519,7 +519,7 @@ poke_test_cmd "defun defun_4 = (int i) : int { return i + 1; }" {}
 poke_test_cmd "print defun_4 (10)" {11}
 
 set test defun-5
-poke_test_cmd "defun defun_5 = (int i, long l) { return i + l; }" {}
+poke_test_cmd "defun defun_5 = (int i, long l) : long { return i + l; }" {}
 poke_test_cmd "print defun_5 (1, 2L)" {3L}
 
 poke_exit

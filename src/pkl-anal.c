@@ -230,6 +230,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
 }
 PKL_PHASE_END_HANDLER
 
+/* A return statement returning a value is not allowed in a void
+   function.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_return_stmt)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node return_stmt = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
+  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
+
+  if (exp && !PKL_AST_FUNC_RET_TYPE (function))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                 "returning a value in a void function");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal2 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
@@ -237,6 +259,7 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_df_return_stmt),
    PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };
 

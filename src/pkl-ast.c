@@ -549,7 +549,8 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
         break;
       }
     case PKL_TYPE_OFFSET:
-      assert (0); /* XXX */
+      return pkl_ast_type_equal (PKL_AST_TYPE_O_BASE_TYPE (a),
+                                 PKL_AST_TYPE_O_BASE_TYPE (b));
       break;
     case PKL_TYPE_STRING:
       /* Fallthrough.  */
