@@ -109,19 +109,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
 
-  /* If we are not at the top-level, push a new frame in the
-     run-time environment.  */
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
-    {
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-    }
-
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_VAR:
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-      break;
     case PKL_AST_DECL_KIND_TYPE:
       /* Nothing to do.  */
       break;
@@ -139,16 +129,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
         pvm_specialize_program (program);
         closure = pvm_make_cls (program);
 
+        /*XXX*/
+        /* pvm_print_program (stdout, program); */
+
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-        
         break;
       }
     default:
       assert (0);
       break;
     }
+
+  /* If we are not at the top-level, push a new frame in the run-time
+     environment.  */
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+
+  /* Finally register the declared entity, unless it is a type.  Types
+     are not variables.  */
+
+  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);    
 }
 PKL_PHASE_END_HANDLER
 
