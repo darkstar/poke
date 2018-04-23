@@ -151,7 +151,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
      are not variables.  */
 
   if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE)
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);    
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 }
 PKL_PHASE_END_HANDLER
 
