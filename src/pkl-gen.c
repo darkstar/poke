@@ -63,7 +63,7 @@
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
 {
-  PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST);
+  PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST, 1 /* guard_stack */);
 }
 PKL_PHASE_END_HANDLER
 
@@ -95,7 +95,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
          stack of assemblers in the payload and use it to process
          INITIAL.  */
 
-      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST));
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST, 0 /* guard_stack */));
     }
 }
 PKL_PHASE_END_HANDLER
@@ -490,6 +490,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type)
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_ARG
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_VAR
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_MAP))
     PKL_PASS_BREAK;
 }

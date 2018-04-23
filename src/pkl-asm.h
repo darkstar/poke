@@ -54,9 +54,11 @@ enum pkl_asm_reg
 typedef struct pkl_asm *pkl_asm;
 
 /* Create a new instance of an assembler.  This initializes a new
+   program.  If GUARD_STACK is non-zero then the assembler emits code
+   for checking that the stack is empty at the end of the assembled
    program.  */
 
-pkl_asm pkl_asm_new (pkl_ast ast);
+pkl_asm pkl_asm_new (pkl_ast ast, int guard_stack);
 
 /* Finish the assembly of the current program and return it.  This
    function frees all resources used by the assembler instance, and

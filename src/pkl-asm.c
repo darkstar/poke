@@ -568,7 +568,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
    program.  */
 
 pkl_asm
-pkl_asm_new (pkl_ast ast)
+pkl_asm_new (pkl_ast ast, int guard_stack)
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
   pvm_program program;
@@ -596,7 +596,8 @@ pkl_asm_new (pkl_ast ast)
      registers.  */
 
   /* Push the stack centinel value.  */
-  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
+  if (guard_stack)
+      pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
   
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
   
