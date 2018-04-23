@@ -451,8 +451,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_identifier)
 {
-  /* XXX this doesn't feel right.  */
-
   pkl_ast_node identifier = PKL_PASS_NODE;
   pvm_val val
     = pvm_make_string (PKL_AST_IDENTIFIER_POINTER (identifier));
@@ -898,18 +896,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
     case PKL_TYPE_OFFSET:
       {
         /* Calculate the magnitude of the new offset, which is the
-           addition of both magnitudes, once normalized to bits.
-           Since addition is commutative we can process OFF2 first and
-           save a swap.  */
+           addition of both magnitudes.  The unit used for the result
+           is the greatest common divisor of the operand's units.
 
+           Note that since addition is commutative we can process OFF2
+           first and save a swap.  */
+
+        pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+        pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+        
+        pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
+        pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+        
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
         pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
 
-        PKL_PASS_SUBPASS (res_unit);
+        /* PKL_PASS_SUBPASS (res_unit); */
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
+        pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_SWAP);
-        PKL_PASS_SUBPASS (res_unit);
+        /* PKL_PASS_SUBPASS (res_unit); */
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
+        pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_ADD, base_type);

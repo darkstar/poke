@@ -27,6 +27,8 @@
 #include "pkl-asm.h"
 #include "pvm.h"
 
+#include "poke.h" /* For poke_compiler  */
+
 /* In order to allow nested multi-function macros, like conditionals
    and loops, the assembler supports the notion of "nesting levels".
    For example, consider the following conditional code:
@@ -933,4 +935,17 @@ pkl_asm_endif (pkl_asm pasm)
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
   pkl_asm_poplevel (pasm);
+}
+
+void
+pkl_asm_call (pkl_asm pasm, const char *funcname)
+{
+  pkl_env compiler_env = pkl_get_env (poke_compiler);
+  int back, over;
+  
+  assert (pkl_env_lookup (compiler_env, funcname,
+                          &back, &over) != NULL);
+
+  pkl_asm_insn (pasm, PKL_INSN_PUSHVAR, back, over);
+  pkl_asm_insn (pasm, PKL_INSN_CALL);
 }

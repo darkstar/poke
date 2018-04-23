@@ -73,6 +73,11 @@ pvm_program pkl_asm_finish (pkl_asm pasm);
 
 void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
 
+/* Emit assembly code for calling the function FUNCNAME, which should
+   be defined in the global environment.  */
+
+void pkl_asm_call (pkl_asm pasm, const char *funcname);
+
 /* Conditionals.
  *
  *  pkl_asm_if (pasm, exp);
