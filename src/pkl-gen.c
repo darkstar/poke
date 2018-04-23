@@ -279,6 +279,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_if_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * LOOP_STMT
+ * | CONDITION
+ * | BODY
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_loop_stmt)
+{
+  pkl_ast_node loop_stmt = PKL_PASS_NODE;
+  pkl_ast_node loop_stmt_condition
+    = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
+  pkl_ast_node loop_stmt_body
+    = PKL_AST_LOOP_STMT_BODY (loop_stmt);
+
+  pkl_asm_while (PKL_GEN_ASM);
+  PKL_PASS_SUBPASS (loop_stmt_condition);
+  pkl_asm_loop (PKL_GEN_ASM);
+  PKL_PASS_SUBPASS (loop_stmt_body);
+  pkl_asm_endloop (PKL_GEN_ASM);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | EXP
  * RETURN
  */
@@ -1300,6 +1322,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_DF_HANDLER (PKL_AST_NULL_STMT, pkl_gen_df_null_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
    PKL_PHASE_BF_HANDLER (PKL_AST_IF_STMT, pkl_gen_bf_if_stmt),
+   PKL_PHASE_BF_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_bf_loop_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_EXP_STMT, pkl_gen_df_exp_stmt),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_gen_df_funcall),

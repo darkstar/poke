@@ -965,7 +965,7 @@ pkl_asm_while (pkl_asm pasm)
 void
 pkl_asm_loop (pkl_asm pasm)
 {
-  pkl_asm_insn (pasm, PKL_INSN_BZ, pasm->level->label2);
+  pkl_asm_insn (pasm, PKL_INSN_BZI, pasm->level->label2);
   /* Pop the loop condition from the stack.  */
   pkl_asm_insn (pasm, PKL_INSN_POP);
 }
