@@ -792,20 +792,24 @@ struct_elem_type:
  */
 
 declaration:
-        DEFUN identifier '=' function_specifier
-        	{
-                  $$ = pkl_ast_make_decl (pkl_parser->ast,
-                                          PKL_AST_DECL_KIND_FUNC, $2, $4,
-                                          pkl_parser->filename);
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_LOC ($$) = @$;
+        DEFUN identifier
+                {
+                  /* In order to allow for the function to be called
+                     from within itself (recursive calls) we should
+                     register a partial declaration in the
+                     compile-time environment before processing the
+                     `function_specifier' below.  */
 
-                  if (! pkl_env_toplevel_p (pkl_parser->env))
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+                  $<ast>$ = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_FUNC, $2,
+                                               NULL /* initial */,
+                                               pkl_parser->filename);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($<ast>$) = @$;
 
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
-                                         $$))
+                                         $<ast>$))
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
@@ -818,14 +822,23 @@ declaration:
                          instruction instead of a POPVAR.  */
                       YYERROR;
                     }
+                }
+        '=' function_specifier
+        	{
+                  PKL_AST_DECL_INITIAL ($<ast>3)
+                    = ASTREF ($5);
+                  $$ = $<ast>3;
+                  
+                  if (! pkl_env_toplevel_p (pkl_parser->env))
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
 
                   /* Annotate the contained RETURN statements with
                      their function and their lexical nest level
                      within the function.  */
-                  pkl_ast_finish_returns ($4);
+                  pkl_ast_finish_returns ($5);
 
                   /* XXX: move to trans1.  */
-                  PKL_AST_FUNC_NAME ($4)
+                  PKL_AST_FUNC_NAME ($5)
                     = xstrdup (PKL_AST_IDENTIFIER_POINTER ($2));
                 }
         | DEFVAR identifier '=' expression ';'
