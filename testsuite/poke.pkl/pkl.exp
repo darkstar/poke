@@ -525,4 +525,17 @@ poke_test_cmd "print defun_5 (1, 2L)" {3L}
 set test defun-6
 poke_test_cmd "defun bomb = () : int { return bomb (); }" {}
 
+set test defun-7
+poke_test_cmd "defun defun_7 = (int i) : int\
+{\
+ defvar res = 0;\
+\
+ if (i > 10)\
+   res = 666;\
+\
+ return res;\
+}" {}
+poke_test_cmd "print defun_7 (5)" "0"
+poke_test_cmd "print defun_7 (20)" "666"
+
 poke_exit

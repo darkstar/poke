@@ -902,7 +902,8 @@ pkl_asm_then (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
 
-  pkl_asm_insn (pasm, PKL_INSN_BZ, pasm->level->node1,
+  pkl_asm_insn (pasm, PKL_INSN_BZ,
+                PKL_AST_TYPE (pasm->level->node1),
                 pasm->level->label1);
 }
 
