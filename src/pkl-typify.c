@@ -901,7 +901,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_loop_stmt)
 
   if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
       || PKL_AST_TYPE_I_SIZE (condition_type) != 32
-      || PKL_AST_TYPE_I_SIGNED (condition_type) != 0)
+      || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
                  "expected boolean expression in loop");
