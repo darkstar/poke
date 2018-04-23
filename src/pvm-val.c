@@ -44,7 +44,7 @@ pvm_make_uint (uint32_t value, int size)
 static inline pvm_val
 pvm_make_long_ulong (int64_t value, int size, int tag)
 {
-  uint64_t *ll = GC_MALLOC (sizeof (uint64_t) * 2);
+  uint64_t *ll = GC_MALLOC_UNCOLLECTABLE (sizeof (uint64_t) * 2);
       
   ll[0] = value;
   ll[1] = (size - 1) & 0x3f;
@@ -66,7 +66,7 @@ pvm_make_ulong (uint64_t value, int size)
 static pvm_val_box
 pvm_make_box (uint8_t tag)
 {
-  pvm_val_box box = GC_MALLOC (sizeof (struct pvm_val_box));
+  pvm_val_box box = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_val_box));
 
   PVM_VAL_BOX_TAG (box) = tag;
   return box;
@@ -85,12 +85,12 @@ pvm_val
 pvm_make_array (pvm_val nelem, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ARR);
-  pvm_array arr = GC_MALLOC (sizeof (struct pvm_array));
+  pvm_array arr = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_array));
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem);
 
   arr->nelem = nelem;
   arr->type = type;
-  arr->elems = GC_MALLOC (nbytes);
+  arr->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
   memset (arr->elems, 0, nbytes);
   
   PVM_VAL_BOX_ARR (box) = arr;
@@ -101,11 +101,11 @@ pvm_val
 pvm_make_struct (pvm_val nelem)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
-  pvm_struct sct = GC_MALLOC (sizeof (struct pvm_struct));
+  pvm_struct sct = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_struct));
   size_t nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
 
   sct->nelem = nelem;
-  sct->elems = GC_MALLOC (nbytes);
+  sct->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
   memset (sct->elems, 0, nbytes);
 
   PVM_VAL_BOX_SCT (box) = sct;
@@ -138,7 +138,7 @@ static pvm_val
 pvm_make_type (enum pvm_type_code code)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_TYP);
-  pvm_type type = GC_MALLOC (sizeof (struct pvm_type));
+  pvm_type type = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_type));
 
   memset (type, 0, sizeof (struct pvm_type));
   type->code = code;
@@ -206,7 +206,7 @@ pvm_val
 pvm_make_map (pvm_val type, pvm_val offset)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_MAP);
-  pvm_map map = GC_MALLOC (sizeof (struct pvm_map));
+  pvm_map map = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_map));
 
   map->type = type;
   map->offset = offset;
@@ -219,7 +219,7 @@ pvm_val
 pvm_make_cls (pvm_program program)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
-  pvm_cls cls = GC_MALLOC (sizeof (struct pvm_cls));
+  pvm_cls cls = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_cls));
 
   cls->program = program;
   cls->entry_point = PVM_PROGRAM_BEGINNING (program);
@@ -234,7 +234,7 @@ pvm_val
 pvm_make_offset (pvm_val magnitude, pvm_val unit)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_OFF);
-  pvm_off off = GC_MALLOC (sizeof (struct pvm_off));
+  pvm_off off = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_off));
 
   off->base_type = pvm_typeof (magnitude);
   off->magnitude = magnitude;
@@ -249,8 +249,8 @@ pvm_allocate_struct_attrs (pvm_val nelem,
                            pvm_val **enames, pvm_val **etypes)
 {
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
-  *enames = GC_MALLOC (nbytes);
-  *etypes = GC_MALLOC (nbytes);
+  *enames = GC_MALLOC_UNCOLLECTABLE (nbytes);
+  *etypes = GC_MALLOC_UNCOLLECTABLE (nbytes);
 }
 
 pvm_val
@@ -801,8 +801,8 @@ pvm_typeof (pvm_val val)
 
       if (PVM_VAL_ULONG (nelem) > 0)
         {
-          enames = GC_MALLOC (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-          etypes = GC_MALLOC (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+          enames = GC_MALLOC_UNCOLLECTABLE (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
+          etypes = GC_MALLOC_UNCOLLECTABLE (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
       
           for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
             {

@@ -909,16 +909,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
         pkl_ast_node op2_type = PKL_AST_TYPE (op2);
         
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-        pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
 
-        /* PKL_PASS_SUBPASS (res_unit); */
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
         pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_SWAP);
-        /* PKL_PASS_SUBPASS (res_unit); */
+
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
         pkl_asm_call (pasm, "_pkl_gcd");
@@ -926,7 +924,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_ADD, base_type);
 
-        PKL_PASS_SUBPASS (res_unit);
+        /* PKL_PASS_SUBPASS (res_unit); */
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
+        pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
