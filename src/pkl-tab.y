@@ -117,8 +117,8 @@ pkl_tab_error (YYLTYPE *llocp,
 %token CONTINUE
 %token ELSE
 %token FOR
-%token WHILE
 %token IF
+%token WHILE
 %token SIZEOF
 %token ASSERT
 %token ERR
@@ -968,6 +968,12 @@ stmt:
                 {
                   $$ = pkl_ast_make_if_stmt (pkl_parser->ast,
                                              $3, $5, $7);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| WHILE '(' expression ')' stmt
+        	{
+                  $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
+                                               $3, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
         | RETURN ';'
