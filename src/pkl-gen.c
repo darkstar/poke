@@ -297,6 +297,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_loop_stmt)
   pkl_asm_loop (PKL_GEN_ASM);
   PKL_PASS_SUBPASS (loop_stmt_body);
   pkl_asm_endloop (PKL_GEN_ASM);
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 

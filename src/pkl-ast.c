@@ -1512,6 +1512,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
         for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
              t = PKL_AST_CHAIN (t))
           pkl_ast_finish_returns_1 (function, t, nframes);
+        *nframes -= 1;
         break;
       }
     case PKL_AST_IF_STMT:
