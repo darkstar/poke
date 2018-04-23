@@ -73,7 +73,7 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
 
 /* Conditionals.
  *
- *  pkl_asm_if (pasm);
+ *  pkl_asm_if (pasm, exp);
  *
  *  ... exp ...
  *
@@ -87,6 +87,11 @@ void pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...);
  *
  *  pkl_asm_endif (pasm);
  */
+
+void pkl_asm_if (pkl_asm pasm, pkl_ast_node exp);
+void pkl_asm_then (pkl_asm pasm);
+void pkl_asm_else (pkl_asm pasm);
+void pkl_asm_endif (pkl_asm pasm);
 
 /* For loop:
  *

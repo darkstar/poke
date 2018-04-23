@@ -54,7 +54,11 @@
    top-level.
 
    PARENT is the parent level, i.e. the level containing this one.
-   This is NULL at the top-level.  */
+   This is NULL at the top-level.
+   
+   The meaning of the LABEL* and NODE* fields depend on the particular
+   kind of environment.  See the details in the implementation of the
+   functions below.  */
 
 #define PKL_ASM_ENV_NULL 0
 #define PKL_ASM_ENV_CONDITIONAL 1
@@ -62,8 +66,12 @@
 
 struct pkl_asm_level
 {
-  enum pkl_asm_insn current_env;
+  int current_env;
   struct pkl_asm_level *parent;
+  jitter_label label1;
+  jitter_label label2;
+  jitter_label label3;
+  pkl_ast_node node1;
 };
 
 /* An assembler instance.
@@ -84,6 +92,8 @@ struct pkl_asm_level
 
    EXIT_LABEL marks the return handler defined in the standard
    prologue.  */
+
+#define PKL_ASM_LEVEL(PASM) ((PASM)->level)
 
 struct pkl_asm
 {
@@ -109,6 +119,7 @@ pkl_asm_pushlevel (pkl_asm pasm, int env)
 
   memset (level, 0, sizeof (struct pkl_asm_level));
   level->parent = pasm->level;
+  level->current_env = env;
   pasm->level = level;
 }
 
@@ -861,4 +872,56 @@ pkl_asm_note (pkl_asm pasm, const char *str)
 #if __WORDSIZE == 64
   pkl_asm_insn (pasm, PKL_INSN_NOTE, pvm_make_string (str));
 #endif
+}
+
+/* The following functions implement conditional constructions.  The
+   code generated is:
+
+        ... condition expression ...
+        BZ label1;
+        ... then body ...
+        BA label2;
+     label1:
+        ... else body ...
+     label2:
+
+     Thus, conditionals use two labels.  */
+
+void
+pkl_asm_if (pkl_asm pasm, pkl_ast_node exp)
+{
+  pkl_asm_pushlevel (pasm, PKL_ASM_ENV_CONDITIONAL);
+
+  pasm->level->label1 = jitter_fresh_label (pasm->program);
+  pasm->level->label2 = jitter_fresh_label (pasm->program);
+  pasm->level->node1 = ASTREF (exp);
+}
+
+void
+pkl_asm_then (pkl_asm pasm)
+{
+  assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
+
+  pkl_asm_insn (pasm, PKL_INSN_BZ, pasm->level->node1,
+                pasm->level->label1);
+}
+
+void
+pkl_asm_else (pkl_asm pasm)
+{
+  assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
+
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
+  pvm_append_label (pasm->program, pasm->level->label1);
+}
+
+void
+pkl_asm_endif (pkl_asm pasm)
+{
+  assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
+  pvm_append_label (pasm->program, pasm->level->label2);
+
+  /* Cleanup and pop the current level.  */
+  pkl_ast_node_free (pasm->level->node1);
+  pkl_asm_poplevel (pasm);
 }
