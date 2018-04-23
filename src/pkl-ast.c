@@ -1036,14 +1036,14 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp)
 
 pkl_ast_node
 pkl_ast_make_var (pkl_ast ast, pkl_ast_node name,
-                  pkl_ast_node initial, int back, int over)
+                  pkl_ast_node decl, int back, int over)
 {
   pkl_ast_node var = pkl_ast_make_node (ast, PKL_AST_VAR);
 
-  assert (name && initial);
+  assert (name && decl);
 
-  PKL_AST_VAR_INITIAL (var) = ASTREF (initial);
   PKL_AST_VAR_NAME (var) = ASTREF (name);
+  PKL_AST_VAR_DECL (var) = ASTREF (decl);
   PKL_AST_VAR_BACK (var) = back;
   PKL_AST_VAR_OVER (var) = over;
 
@@ -1366,7 +1366,7 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_VAR:
 
       pkl_ast_node_free (PKL_AST_VAR_NAME (ast));
-      pkl_ast_node_free (PKL_AST_VAR_INITIAL (ast));
+      pkl_ast_node_free (PKL_AST_VAR_DECL (ast));
       break;
 
     case PKL_AST_COMP_STMT:

@@ -930,8 +930,7 @@ pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp);
    NAME is a PKL_AST_IDENTIFIER containing the name used to refer to
    the variable.
 
-   INITIAL isthe expression used to initialize the variable in its
-   declaration.
+   DECL is the declaration that declared the variable.
 
    BACK is the number of compile-time environment frames to traverse
    in order to find the frame where the referred variable is declared.
@@ -940,7 +939,7 @@ pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp);
    the OVERth variable declaration in the frame.  */
 
 #define PKL_AST_VAR_NAME(AST) ((AST)->var.name)
-#define PKL_AST_VAR_INITIAL(AST) ((AST)->var.initial)
+#define PKL_AST_VAR_DECL(AST) ((AST)->var.decl)
 #define PKL_AST_VAR_BACK(AST) ((AST)->var.back)
 #define PKL_AST_VAR_OVER(AST) ((AST)->var.over)
 
@@ -949,7 +948,7 @@ struct pkl_ast_var
   struct pkl_ast_common common;
 
   union pkl_ast_node *name;
-  union pkl_ast_node *initial;
+  union pkl_ast_node *decl;
   int back;
   int over;
 };
