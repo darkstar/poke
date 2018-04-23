@@ -822,6 +822,9 @@ declaration:
                 }
         '=' function_specifier
         	{
+                  /* Complete the declaration registered above with
+                     it's initial value, which is the specifier of the
+                     function being defined.  */
                   PKL_AST_DECL_INITIAL ($<ast>3)
                     = ASTREF ($5);
                   $$ = $<ast>3;
