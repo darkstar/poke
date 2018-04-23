@@ -182,7 +182,6 @@ instruction exit ()
     {
       jitter_original_state->pvm_state_backing.result_value
         = JITTER_TOP_STACK();
-        /* XXX: this drop doesn't work if there is no result of execution.  */
       JITTER_DROP_STACK ();
     }
 
