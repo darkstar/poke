@@ -24,7 +24,7 @@
 
 /* Compiler built-ins.  */
 
-defun print = (string str) { __builtin_print__ }
+/* defun print = (string str) { __builtin_print__ } */
 
 /* Find the greatest common divisor of two unsigned 64-bit integrals A
    and B using the Euclidean algorithm.  */
@@ -34,7 +34,7 @@ defun _gcd = (uint<64> a, uint<64> b) : uint<64>
    if (b == 0)
      return a;
    else
-     return _gcd (a % b);
+     return _gcd (b, a % b);
   }
 
 /* XXX Array to string.
