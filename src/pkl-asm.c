@@ -937,6 +937,48 @@ pkl_asm_endif (pkl_asm pasm)
   pkl_asm_poplevel (pasm);
 }
 
+/* The following functions implement while loops.  The code generated
+   is:
+
+   label1:
+   ... loop condition expression ...
+   BZ label2;
+   POP the condition expression
+   ... loop body ...
+   BA label1;
+   label2:
+   POP the condition expression
+  
+   Thus, loops use two labels.  */
+
+void
+pkl_asm_while (pkl_asm pasm)
+{
+  pkl_asm_pushlevel (pasm, PKL_ASM_ENV_LOOP);
+
+  pasm->level->label1 = jitter_fresh_label (pasm->program);
+  pasm->level->label2 = jitter_fresh_label (pasm->program);
+
+  pvm_append_label (pasm->program, pasm->level->label1);
+}
+
+void
+pkl_asm_loop (pkl_asm pasm)
+{
+  pkl_asm_insn (pasm, PKL_INSN_BZ, pasm->level->label2);
+  /* Pop the loop condition from the stack.  */
+  pkl_asm_insn (pasm, PKL_INSN_POP);
+}
+
+void
+pkl_asm_endloop (pkl_asm pasm)
+{
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label1);
+  pvm_append_label (pasm->program, pasm->level->label2);
+  /* Pop the loop condition from the stack.  */
+  pkl_asm_insn (pasm, PKL_INSN_POP);
+}
+
 void
 pkl_asm_call (pkl_asm pasm, const char *funcname)
 {

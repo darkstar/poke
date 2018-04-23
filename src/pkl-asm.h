@@ -100,19 +100,7 @@ void pkl_asm_then (pkl_asm pasm);
 void pkl_asm_else (pkl_asm pasm);
 void pkl_asm_endif (pkl_asm pasm);
 
-/* For loop:
- *
- * pkl_asm_dotimes (pasm)
- *
- * ... integral ...
- *
- * pkl_asm_loop (pasm);
- *
- * ... loop body ...
- *
- * pkl_asm_end_loop (pasm);
- *
- * While loop:
+/* While loops.
  *
  * pkl_asm_while (pasm);
  * 
@@ -125,15 +113,22 @@ void pkl_asm_endif (pkl_asm pasm);
  * pkl_asm_end_loop (pasm);
  */
 
-/* Call and return instruction:
+void pkl_asm_while (pkl_asm pasm);
+void pkl_asm_loop (pkl_asm pasm);
+void pkl_asm_endloop (pkl_asm pasm);
+
+/* For loop:
  *
- *  pkl_asm_insn (pasm, PKL_INSN_CALL, label);
+ * pkl_asm_dotimes (pasm)
  *
- * Internally based on push return address then ba.
+ * ... integral ...
  *
- *  pkl_asm_insn (pasm, PKL_INSN_RET, label);
+ * pkl_asm_loop (pasm);
  *
- * Internally based on pop the return address and ba.
+ * ... loop body ...
+ *
+ * pkl_asm_end_loop (pasm);
+ *
  */
 
 /* Assembler directives:
