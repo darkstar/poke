@@ -159,8 +159,8 @@ D [0-9]
 "!="		{ return NE; }
 "<="		{ return LE; }
 ">="		{ return GE; }
-"<-"		{ return SL; }
-"->"		{ return SR; }
+"<<."		{ return SL; }
+".>>"		{ return SR; }
 "++"		{ return INC; }
 "--"		{ return DEC; }
 
