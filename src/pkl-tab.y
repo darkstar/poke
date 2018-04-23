@@ -432,7 +432,6 @@ primary:
                      annotated with its initialization.  */
 
                   int back, over;
-                  pkl_ast_node var_type;
 
                   const char *name = PKL_AST_IDENTIFIER_POINTER ($1);
 
@@ -450,10 +449,8 @@ primary:
 
                   $$ = pkl_ast_make_var (pkl_parser->ast,
                                          $1, /* name.  */
-                                         PKL_AST_DECL_INITIAL (decl),
+                                         decl,
                                          back, over);
-                  var_type = PKL_AST_TYPE (PKL_AST_DECL_INITIAL (decl));
-                  PKL_AST_TYPE ($$) = ASTREF (var_type);
                   PKL_AST_LOC ($$) = @1;
                 }
 	| INTEGER
