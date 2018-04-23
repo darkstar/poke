@@ -590,12 +590,13 @@ pkl_asm_new (pkl_ast ast)
   /* Standard prologue.  */
   pkl_asm_note (pasm, "#begin prologue");
 
-  /* XXX: Compile here the contents of pkl-std.pk, with the standard
-     functions.  */
   /* XXX: move this assembly to asm() statements in pkl-prolog.pk and
      pkl-epilog.pk.  */
   /* XXX: initialize the base register to [0 b] and other PVM
      registers.  */
+
+  /* Push the stack centinel value.  */
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
   
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
   

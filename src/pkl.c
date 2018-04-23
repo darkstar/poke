@@ -213,13 +213,13 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
     printf (_("out of memory\n"));
   
   program = rest_of_compilation (compiler, ast);
-  /* XXX */
-  /* pvm_print_program (stdout, program); */
   if (program == NULL)
     goto error;
 
   compiler->env = env;
   pvm_specialize_program (program);
+  /* XXX */
+  /* pvm_print_program (stdout, program); */
   return program;
 
  error:
@@ -255,13 +255,13 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
     }
 
   program = rest_of_compilation (compiler, ast);
-  /* XXX */  
-  /* pvm_print_program (stdout, program); */
   if (program == NULL)
     goto error;
 
   compiler->env = env;
   pvm_specialize_program (program);
+  /* XXX */  
+  /* pvm_print_program (stdout, program); */
   fclose (fd);
   return program;
 

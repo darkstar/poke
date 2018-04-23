@@ -36,7 +36,7 @@ defun _gcd = (uint<64> a, uint<64> b) : uint<64>
    else
      return _gcd (b, a % b);
   }
-  
+
 /* XXX Array to string.
    Struct to string.  */
 /* XXX error reporting routine, called by the macro pkl_asm_rterror().

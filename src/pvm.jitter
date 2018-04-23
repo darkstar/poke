@@ -178,13 +178,17 @@ instruction exit ()
     JITTER_DROP_STACK ();
 
     /* Get the result of the execution, if any.  */
-    if (1 /* !EOS == expression */)
+    if (JITTER_TOP_STACK() != PVM_NULL)
     {
       jitter_original_state->pvm_state_backing.result_value
         = JITTER_TOP_STACK();
         /* XXX: this drop doesn't work if there is no result of execution.  */
-//      JITTER_DROP_STACK ();
+      JITTER_DROP_STACK ();
     }
+
+    /* Check for the stack centinel and pop it.  */
+    assert (JITTER_TOP_STACK() == PVM_NULL);
+    JITTER_DROP_STACK ();
 
     JITTER_EXIT ();
   end
