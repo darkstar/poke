@@ -260,38 +260,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_return_stmt)
 }
 PKL_PHASE_END_HANDLER
 
-struct pkl_phase pkl_phase_anal2 =
-  {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_df_return_stmt),
-   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
-  };
-
-
-
-/* Make sure that every array initializer features an index at this
-   point.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_array_initializer)
-{
-  if (!PKL_AST_ARRAY_INITIALIZER_INDEX (PKL_PASS_NODE))
-    {
-      pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
-               "array initializer node #%" PRIu64 " has no index",
-               PKL_AST_UID (PKL_PASS_NODE));
-      PKL_PASS_ERROR;
-    }
-}
-PKL_PHASE_END_HANDLER
-
 /* A funcall to a void function is only allowed in an "expression
    statement.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_funcall)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -312,9 +284,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+struct pkl_phase pkl_phase_anal2 =
+  {
+   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
+   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_checktype),
+   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
+   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
+   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_df_return_stmt),
+   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_anal2_df_funcall),
+   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
+  };
+
+
+
+/* Make sure that every array initializer features an index at this
+   point.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_array_initializer)
+{
+  if (!PKL_AST_ARRAY_INITIALIZER_INDEX (PKL_PASS_NODE))
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_NOLOC,
+               "array initializer node #%" PRIu64 " has no index",
+               PKL_AST_UID (PKL_PASS_NODE));
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_analf =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_analf_df_array_initializer),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_analf_df_funcall),
   };
