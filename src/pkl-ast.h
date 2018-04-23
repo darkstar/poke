@@ -69,6 +69,7 @@ enum pkl_ast_code
   PKL_AST_NULL_STMT,
   PKL_AST_ASS_STMT,
   PKL_AST_IF_STMT,
+  PKL_AST_LOOP_STMT,
   PKL_AST_RETURN_STMT,
   PKL_AST_EXP_STMT,
   PKL_AST_LAST_STMT = PKL_AST_EXP_STMT,
@@ -1031,6 +1032,30 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
                                    pkl_ast_node then_stmt,
                                    pkl_ast_node else_stmt);
 
+/* PKL_AST_LOOP_STMT nodes represent iterative statements.
+
+   CONDITION is an expression that should evaluate to a boolean, that
+   is evaluated at the beginning of the loop.  If it evals to false,
+   the loop is exited.
+
+   BODY is a statement, which is the body of the loop.
+*/
+
+#define PKL_AST_LOOP_STMT_CONDITION(AST) ((AST)->loop_stmt.condition)
+#define PKL_AST_LOOP_STMT_BODY(AST) ((AST)->loop_stmt.body)
+
+struct pkl_ast_loop_stmt
+{
+  struct pkl_ast_common COMMON;
+
+  union pkl_ast_node *condition;
+  union pkl_ast_node *body;
+};
+
+pkl_ast_node pkl_ast_make_loop_stmt (pkl_ast ast,
+                                     pkl_ast_node condition,
+                                     pkl_ast_node body);
+
 /* PKL_AST_RETURN_STMT nodes represent return statements.
 
    EXP is the expression to return to the caller.
@@ -1111,6 +1136,7 @@ union pkl_ast_node
   struct pkl_ast_comp_stmt comp_stmt;
   struct pkl_ast_ass_stmt ass_stmt;
   struct pkl_ast_if_stmt if_stmt;
+  struct pkl_ast_loop_stmt loop_stmt;
   struct pkl_ast_return_stmt return_stmt;
   struct pkl_ast_exp_stmt exp_stmt;
 };

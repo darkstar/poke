@@ -1098,6 +1098,23 @@ pkl_ast_make_if_stmt (pkl_ast ast, pkl_ast_node exp,
   return if_stmt;
 }
 
+/* Build and return an AST node for a loop statement.  */
+
+pkl_ast_node
+pkl_ast_make_loop_stmt (pkl_ast ast, pkl_ast_node condition,
+                        pkl_ast_node body)
+{
+  pkl_ast_node loop_stmt
+    = pkl_ast_make_node (ast, PKL_AST_LOOP_STMT);
+
+  assert (condition && body);
+
+  PKL_AST_LOOP_STMT_CONDITION (loop_stmt) = ASTREF (condition);
+  PKL_AST_LOOP_STMT_BODY (loop_stmt) = ASTREF (body);
+
+  return loop_stmt;
+}
+
 /* Build and return an AST node for a return statement.  */
 
 pkl_ast_node
@@ -1392,6 +1409,12 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_IF_STMT_ELSE_STMT (ast));
       break;
 
+    case PKL_AST_LOOP_STMT:
+
+      pkl_ast_node_free (PKL_AST_LOOP_STMT_CONDITION (ast));
+      pkl_ast_node_free (PKL_AST_LOOP_STMT_BODY (ast));
+      break;
+
     case PKL_AST_RETURN_STMT:
 
       pkl_ast_node_free (PKL_AST_RETURN_STMT_EXP (ast));
@@ -1499,6 +1522,11 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
         pkl_ast_finish_returns_1 (function,
                                   PKL_AST_IF_STMT_ELSE_STMT (stmt),
                                   nframes);
+      break;
+    case PKL_AST_LOOP_STMT:
+      pkl_ast_finish_returns_1 (function,
+                                PKL_AST_LOOP_STMT_BODY (stmt),
+                                nframes);
       break;
     case PKL_AST_DECL:
       *nframes += 1;
@@ -1915,6 +1943,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (exp, IF_STMT_EXP);
       PRINT_AST_SUBAST (then_stmt, IF_STMT_THEN_STMT);
       PRINT_AST_SUBAST (else_stmt, IF_STMT_ELSE_STMT);
+      break;
+
+    case PKL_AST_LOOP_STMT:
+      IPRINTF ("LOOP_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (condition, LOOP_STMT_CONDITION);
+      PRINT_AST_SUBAST (body, LOOP_STMT_BODY);
       break;
 
     case PKL_AST_RETURN_STMT:
