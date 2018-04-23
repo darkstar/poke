@@ -450,7 +450,6 @@ poke_test_cmd "print ({.fo=10}).fo" "10"
 
 set test struct-ref-2
 poke_test_cmd "defvar struct_ref_2 = {.fo = 10#Kb}" {}
-#XXX poke_test_cmd "vm dis e struct_ref_2.fo/2#Kb" {}
 poke_test_cmd "print struct_ref_2.fo/2#Kb" {5}
 
 # deftype

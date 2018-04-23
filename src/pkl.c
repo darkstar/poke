@@ -42,6 +42,9 @@
 #include "pkl-fold.h"
 #include "pkl-env.h"
 
+#include "pvm.h"
+#include "poke.h" /* For poke_vm */
+
 struct pkl_compiler
 {
   pkl_env env;  /* Compiler environment.  */
@@ -60,18 +63,25 @@ pkl_new ()
      for as long as the incremental compiler lives.  */
   compiler->env = pkl_env_new ();
 
-  /* XXX: bootstrap the compiler: Load pkl-rt.pk.  An error
-     bootstraping is an internal error and should be reported as
+  /* XXX: bootstrap the compiler: Load pkl-rt.pk and execute it.  An
+     error bootstraping is an internal error and should be reported as
      such.  */
-  if (!pkl_compile_file (compiler,
-                         /* XXX: use datadir/bleh  */
-                         "/home/jemarch/gnu/hacks/poke/src/pkl.pk"))
-    {
-      fprintf (stderr,
-               "Internal error: compiler failed to bootstrap itself\n");
-      exit (1);
-    }
+  {
+    pvm_val val;
+    pvm_program pkl_prog
+      = pkl_compile_file (compiler,
+                          /* XXX: use datadir/bleh */
+                          "/home/jemarch/gnu/hacks/poke/src/pkl.pk");
 
+    if (pkl_prog == NULL
+        || (pvm_run (poke_vm, pkl_prog, &val) != PVM_EXIT_OK))
+      {
+        fprintf (stderr,
+                 "Internal error: compiler failed to bootstrap itself\n");
+        exit (1);
+      }
+  }
+  
   return compiler;
 }
 
