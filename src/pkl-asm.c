@@ -881,9 +881,11 @@ pkl_asm_note (pkl_asm pasm, const char *str)
 
         ... condition expression ...
         BZ label1;
+        POP the condition expression
         ... then body ...
         BA label2;
      label1:
+        POP the condition expression
         ... else body ...
      label2:
 
@@ -907,6 +909,8 @@ pkl_asm_then (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_BZ,
                 PKL_AST_TYPE (pasm->level->node1),
                 pasm->level->label1);
+  /* Pop the expression condition from the stack.  */
+  pkl_asm_insn (pasm, PKL_INSN_POP);
 }
 
 void
@@ -916,6 +920,8 @@ pkl_asm_else (pkl_asm pasm)
 
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
+  /* Pop the expression condition from the stack.  */
+  pkl_asm_insn (pasm, PKL_INSN_POP);
 }
 
 void
@@ -923,7 +929,7 @@ pkl_asm_endif (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
   pvm_append_label (pasm->program, pasm->level->label2);
-
+  
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
   pkl_asm_poplevel (pasm);
