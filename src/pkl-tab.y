@@ -394,7 +394,7 @@ expression:
 	| expression AS simple_type_specifier
         	{
                   $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
-                  PKL_AST_LOC ($$) = @2;
+                  PKL_AST_LOC ($$) = @$;
                 }
         | simple_type_specifier '@' expression
                 {

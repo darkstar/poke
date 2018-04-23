@@ -979,10 +979,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
   expected_type = PKL_AST_FUNC_RET_TYPE (function);
 
   if (expected_type
-      /* The following two checks is to make sure the type is
-         fully defined, see `pkl_typify1_bf_func'.  */
-      && PKL_AST_TYPE_F_RTYPE (expected_type)
-      && PKL_AST_TYPE_F_ARGS (expected_type)
       && !pkl_ast_type_equal (returned_type, expected_type))
     {
       char *returned_type_str = pkl_type_str (returned_type, 1);
