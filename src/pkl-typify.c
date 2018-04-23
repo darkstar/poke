@@ -887,6 +887,31 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_var)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of the condition of a loop statement should be a
+   boolean.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_loop_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node loop_stmt = PKL_PASS_NODE;
+  pkl_ast_node condition = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
+  pkl_ast_node condition_type = PKL_AST_TYPE (condition);
+
+  if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
+      || PKL_AST_TYPE_I_SIZE (condition_type) != 32
+      || PKL_AST_TYPE_I_SIGNED (condition_type) != 0)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
+                 "expected boolean expression in loop");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
@@ -902,6 +927,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_typify1_bf_func),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_typify1_df_funcall),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
+   PKL_PHASE_DF_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_df_loop_stmt),
 
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
    PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_not),
