@@ -407,6 +407,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_IF_STMT_ELSE_STMT (node))
         PKL_PASS (PKL_AST_IF_STMT_ELSE_STMT (node));
       break;
+    case PKL_AST_LOOP_STMT:
+      PKL_PASS (PKL_AST_LOOP_STMT_CONDITION (node));
+      PKL_PASS (PKL_AST_LOOP_STMT_BODY (node));
+      break;
     case PKL_AST_RETURN_STMT:
       if (PKL_AST_RETURN_STMT_EXP (node))
         PKL_PASS (PKL_AST_RETURN_STMT_EXP (node));
