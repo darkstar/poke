@@ -539,15 +539,15 @@ poke_test_cmd "print defun_7 (5)" "0"
 poke_test_cmd "print defun_7 (20)" "666"
 
 set test defun-8
-poke_test_cmd "defun _gcd = (uint<64> a, uint<64> b) : uint<64>\
+poke_test_cmd "defun defun_8 = (uint<64> a, uint<64> b) : uint<64>\
 {\
    if (b == 0)\
      return a;\
    else\
-     return _gcd (b, a % b);\
+     return defun_8 (b, a % b);\
 }" {}
-poke_test_cmd "print _gcd (2UL, 8UL)" {2UL}
-poke_test_cmd "print _gcd (4UL, 8UL)" {4UL}
-poke_test_cmd "print _gcd (4UL, 10UL)" {2UL}
+poke_test_cmd "print defun_8 (2UL, 8UL)" {2UL}
+poke_test_cmd "print defun_8 (4UL, 8UL)" {4UL}
+poke_test_cmd "print defun_8 (4UL, 10UL)" {2UL}
 
 poke_exit

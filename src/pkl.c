@@ -63,6 +63,14 @@ pkl_new ()
   /* XXX: bootstrap the compiler: Load pkl-rt.pk.  An error
      bootstraping is an internal error and should be reported as
      such.  */
+  if (!pkl_compile_file (compiler,
+                         /* XXX: use datadir/bleh  */
+                         "/home/jemarch/gnu/hacks/poke/src/pkl.pk"))
+    {
+      fprintf (stderr,
+               "Internal error: compiler failed to bootstrap itself\n");
+      exit (1);
+    }
 
   return compiler;
 }
