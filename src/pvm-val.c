@@ -822,10 +822,9 @@ pvm_typeof (pvm_val val)
 void
 pvm_print_string (FILE *out, pvm_val string)
 {
-  /* XXX: process \n sequences in STRING.  */
-
   char *p;
 
+  /* XXX: process \ sequences in trans1, not here.  */
   for (p = PVM_VAL_STR (string); *p != '\0'; ++p)
     {
       char c = *p;
