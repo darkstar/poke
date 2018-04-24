@@ -1,0 +1,43 @@
+# poke-dg.exp - Infrastructure for testing the poke compiler.
+
+# Copyright (C) 2018 Jose E. Marchesi
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GCC; see the file COPYING3.  If not see
+# <http://www.gnu.org/licenses/>.
+
+load_lib dg.exp
+
+# We set LC_ALL and LANG to C so that we get the same error messages as expected.
+setenv LC_ALL C
+setenv LANG C
+
+proc poke-dg-test { prog do_what extra_tool_flags } {
+
+    # We only support { dg-do run } and {dg-do compile}
+    switch $do_what {
+        "compile" {
+            # Invoke poke with -l FILE.pk
+
+        }
+        "run" {
+            # Invoke poke with -l FILE.pk and -e EXP
+        }
+        default {
+            perror "$do_what: not a valid dg-do keyword"
+            return ""
+        }
+    }
+
+    return [list $comp_output $output_file]
+}

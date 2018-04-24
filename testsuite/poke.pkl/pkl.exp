@@ -660,5 +660,13 @@ poke_test_cmd "defun loop_4 = () : int\
    }" {}
 poke_test_cmd "print loop_4 ()" {9}
 
-
 poke_exit
+
+## DG tests
+
+load_lib ${tool}-dg.exp
+dg-init
+dg-runtest [lsort [glob -nocomplain $srcdir/*.pk]] {} {}
+dg-finish
+
+

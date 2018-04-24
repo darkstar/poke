@@ -1,4 +1,4 @@
-# poke.exp - Utilities to be used in poke tests.
+# poke.exp - Infrastructure for testing poke in interactive mode.
 
 # Copyright (c) 2018 Jose E. Marchesi
 
