@@ -193,8 +193,13 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_comp_stmt)
 {
-  /* Push a frame into the environment.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+  pkl_ast_node comp_stmt = PKL_PASS_NODE;
+
+  if (PKL_AST_COMP_STMT_BUILTIN (comp_stmt) == PKL_AST_BUILTIN_NONE)
+    {  
+      /* Push a frame into the environment.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -209,24 +214,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
   pkl_ast_node comp_stmt_stmts
     = PKL_AST_COMP_STMT_STMTS (comp_stmt);
+  int comp_stmt_builtin
+    = PKL_AST_COMP_STMT_BUILTIN (comp_stmt);
 
-  pkl_ast_node stmt_decl;
-
-  int num_frames = 0;
-
-  /* Pop the frames created by the declarations contained in the
-     compound statement from the enviroment.  */
-
-  for (stmt_decl = comp_stmt_stmts;
-       stmt_decl;
-       stmt_decl = PKL_AST_CHAIN (stmt_decl))
+  if (comp_stmt_builtin != PKL_AST_BUILTIN_NONE)
     {
-      if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
-        num_frames++;
+      switch (comp_stmt_builtin)
+        {
+        case PKL_AST_BUILTIN_PRINT:
+          {
+            /* defun print = (string s) __builtin_print __ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, pvm_make_int (10, 32));
+            break;
+          }
+        default:
+            assert (0);
+        }
     }
+  else
+    {
+      pkl_ast_node stmt_decl;
+      int num_frames = 0;
 
-  /* Note this includes the compound statement's frame.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames + 1);
+      /* Pop the frames created by the declarations contained in the
+         compound statement from the enviroment.  */
+
+      for (stmt_decl = comp_stmt_stmts;
+           stmt_decl;
+           stmt_decl = PKL_AST_CHAIN (stmt_decl))
+        {
+          if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
+            num_frames++;
+        }
+      
+      /* Note this includes the compound statement's frame.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames + 1);
+    }
 }
 PKL_PHASE_END_HANDLER
 

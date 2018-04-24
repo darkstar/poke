@@ -319,6 +319,14 @@ instruction siz () # VAL -> ULONG
   end
 end
 
+# print BASE
+instruction print (?n pvm_literal_printer) # STR -> _
+  code
+    pvm_print_val (stdout, JITTER_TOP_STACK (), (int) JITTER_ARGN0);
+    JITTER_DROP_STACK ();
+  end
+end
+
 
 
 ## Stack manipulation instructions

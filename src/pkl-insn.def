@@ -262,6 +262,7 @@ PKL_DEF_INSN (PKL_INSN_RETURN, "", "return")
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
+PKL_DEF_INSN (PKL_INSN_PRINT, "n", "print")
 
 /* VM instructions.  */
 
