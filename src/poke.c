@@ -68,6 +68,7 @@ enum
   VERSION_ARG,
   QUIET_ARG,
   LOAD_ARG,
+  CMD_ARG,
 };
 
 static const struct option long_options[] =
@@ -76,6 +77,7 @@ static const struct option long_options[] =
   {"version", no_argument, NULL, VERSION_ARG},
   {"quiet", no_argument, NULL, QUIET_ARG},
   {"load", required_argument, NULL, LOAD_ARG},
+  {"command", required_argument, NULL, CMD_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -85,7 +87,7 @@ print_help ()
   /* TRANSLATORS: --help output, gnunity synopsis.
      no-wrap */
   printf (_("\
-Usage: poke [OPTION]... [FILE]\n"));
+Usage: poke [-l FILE]... [-c CMD]... [OPTION]... [FILE]\n"));
 
   /* TRANSLATORS: --help output, gnunity summary.
      no-wrap */
@@ -96,7 +98,8 @@ Interactive editor for binary files.\n"), stdout);
   /* TRANSLATORS: --help output, poke arguments.
      no-wrap */
   fputs (_("\
-  -l, --load=FILE                     load the given pickle at startup.\n"),
+  -l, --load=FILE                     load the given pickle at startup.\n\
+  -c, --command=CMD                   execute the given command.\n"),
          stdout);
 
   puts ("");
@@ -164,7 +167,7 @@ parse_args (int argc, char *argv[])
 
   while ((ret = getopt_long (argc,
                              argv,
-                             "l:",
+                             "l:c:",
                              long_options,
                              NULL)) != -1)
     {
@@ -191,7 +194,7 @@ parse_args (int argc, char *argv[])
               = pkl_compile_file (poke_compiler, optarg);
 
             if (program == NULL)
-              /* The compiler mits it's own error messages.  */
+              /* The compiler emits it's own error messages.  */
               exit (EXIT_FAILURE);
 
             ret = pvm_run (poke_vm, program, &val);
@@ -201,6 +204,15 @@ parse_args (int argc, char *argv[])
                 exit (EXIT_FAILURE);
               }
             
+            break;
+          }
+        case 'c':
+        case CMD_ARG:
+          {
+            int ret = pk_cmd_exec (optarg);
+            if (!ret)
+              exit (EXIT_FAILURE);
+            poke_interactive_p = 0;
             break;
           }
         default:
