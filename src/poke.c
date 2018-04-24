@@ -89,7 +89,7 @@ print_help ()
   /* TRANSLATORS: --help output, gnunity synopsis.
      no-wrap */
   printf (_("\
-Usage: poke [-l FILE ...] [-c CMD ...] [-s FILE ...] [OPTION]... [FILE]\n"));
+Usage: poke [OPTION]... [FILE]\n"));
 
   /* TRANSLATORS: --help output, gnunity summary.
      no-wrap */
@@ -100,9 +100,17 @@ Interactive editor for binary files.\n"), stdout);
   /* TRANSLATORS: --help output, poke arguments.
      no-wrap */
   fputs (_("\
-  -l, --load=FILE                     load the given pickle at startup.\n\
-  -c, --command=CMD                   execute the given poke command.\n\
-  -s, --script=FILE                   execute poke commands from FILE.\n"),
+  -l, --load=FILE                     load the given pickle at startup.\n"),
+         stdout);
+
+  puts ("");
+
+  /* TRANSLATORS: --help output, poke arguments.
+     no-wrap */
+  fputs(_("\
+Commanding poke from the command line:\n\
+  -c, --command=CMD                   execute the given command.\n\
+  -s, --script=FILE                   execute commands from FILE.\n"),
          stdout);
 
   puts ("");
@@ -126,12 +134,8 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
   printf (_("Report %s bugs to: %s\n"), PACKAGE_PACKAGER,
           PACKAGE_PACKAGER_BUG_REPORTS);
 #endif
-#ifdef PACKAGE_URL
-  printf (_("%s home page: <%s>\n"), PACKAGE_NAME, PACKAGE_URL);
-#else
-  printf (_("%s home page: <http://www.gnu.org/software/poke/>\n"),
-          PACKAGE_NAME, PACKAGE);
-#endif
+  printf (_("%s home page: <http://www.gnu.org/s/poke/>\n"),
+          PACKAGE_NAME);
   fputs (_("General help using GNU software: <http://www.gnu.org/gethelp/>\n"),
          stdout);
 }
