@@ -101,8 +101,8 @@ Interactive editor for binary files.\n"), stdout);
      no-wrap */
   fputs (_("\
   -l, --load=FILE                     load the given pickle at startup.\n\
-  -c, --command=CMD                   execute the given command.\n\
-  -s, --script=FILE                   execute commands from FILE.\n"),
+  -c, --command=CMD                   execute the given poke command.\n\
+  -s, --script=FILE                   execute poke commands from FILE.\n"),
          stdout);
 
   puts ("");
