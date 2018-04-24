@@ -612,5 +612,31 @@ poke_test_cmd "print loop_2 (4)" {2}
 poke_test_cmd "print loop_2 (5)" {3}
 poke_test_cmd "print loop_2 (10)" {5}
 
+set test loop-3
+
+poke_test_cmd "defun loop_3 = (int i) : int\
+{\
+ if (i == 0)\
+   return 666;\
+ else\
+   {\
+     defvar n = 0;\
+     defvar res = 1;\
+\
+     while (n < i)\
+       {\
+         res = res * 2;\
+         n = n + 1;\
+       }\
+\
+     return res;\
+   }\
+ }" {}
+
+poke_test_cmd "print loop_3 (0)" {666}
+poke_test_cmd "print loop_3 (1) " {2}
+poke_test_cmd "print loop_3 (2) " {4}
+poke_test_cmd "print loop_3 (3) " {8}
+poke_test_cmd "print loop_3 (4) " {16}
 
 poke_exit

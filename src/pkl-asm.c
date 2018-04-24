@@ -977,6 +977,9 @@ pkl_asm_endloop (pkl_asm pasm)
   pvm_append_label (pasm->program, pasm->level->label2);
   /* Pop the loop condition from the stack.  */
   pkl_asm_insn (pasm, PKL_INSN_POP);
+
+  /* Cleanup and pop the current level.  */
+  pkl_asm_poplevel (pasm);
 }
 
 void
