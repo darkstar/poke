@@ -225,7 +225,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
           {
             /* defun print = (string s) __builtin_print __ */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, pvm_make_int (10, 32));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT);
             break;
           }
         default:

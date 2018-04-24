@@ -179,6 +179,7 @@ typedef struct pvm_val_box *pvm_val_box;
 #define PVM_VAL_STR(V) (PVM_VAL_BOX_STR (PVM_VAL_BOX ((V))))
 
 pvm_val pvm_make_string (const char *value);
+void pvm_print_string (FILE *out, pvm_val string);
 
 /* Arrays are also boxed.  */
 

@@ -818,3 +818,35 @@ pvm_typeof (pvm_val val)
 
   return type;
 }
+
+void
+pvm_print_string (FILE *out, pvm_val string)
+{
+  /* XXX: process \n sequences in STRING.  */
+
+  char *p;
+
+  for (p = PVM_VAL_STR (string); *p != '\0'; ++p)
+    {
+      char c = *p;
+      
+      if (c == '\\')
+        {
+          switch (p[1])
+            {
+            case '\\':
+              fputc ('\\', out); break;
+            case 'n':
+              fputc ('\n', out); break;
+            case 't':
+              fputc ('\t', out); break;
+            default:
+              assert (0);
+            }
+          p += 1; /* Skip the backslash.  */
+          continue;
+        }
+
+      fputc (c, out);
+    }
+}
