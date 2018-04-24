@@ -80,6 +80,8 @@ pkl_new ()
                  "Internal error: compiler failed to bootstrap itself\n");
         exit (1);
       }
+
+    /* XXX: disable compiler built-ins from this point on.  */
   }
   
   return compiler;

@@ -962,15 +962,24 @@ pkl_ast_node pkl_ast_make_var (pkl_ast ast,
 /* PKL_AST_COMPOUND_STMT nodes represent compound statements in the
    language.
 
-   STMTS is a possibly empty chain of statements.  */
+   STMTS is a possibly empty chain of statements.
+
+   If BUILTIN is not PKL_AST_BUILTIN_NONE, then this compound
+   statement is a compiler builtin, i.e. specific code will be
+   generated for this node.  In this case, STMTS should be NULL.  */
 
 #define PKL_AST_COMP_STMT_STMTS(AST) ((AST)->comp_stmt.stmts)
+#define PKL_AST_COMP_STMT_BUILTIN(AST) ((AST)->comp_stmt.builtin)
+
+#define PKL_AST_BUILTIN_NONE 0
+#define PKL_AST_BUILTIN_PRINT 1
 
 struct pkl_ast_comp_stmt
 {
   struct pkl_ast_common common;
 
   union pkl_ast_node *stmts;
+  int builtin;
 };
 
 pkl_ast_node pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts);

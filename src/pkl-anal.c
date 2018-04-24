@@ -131,6 +131,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
 }
 PKL_PHASE_END_HANDLER
 
+/* Builtin compound statements can't contain statements
+   themselves.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_comp_stmt)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node comp_stmt = PKL_PASS_NODE;
+
+  if (PKL_AST_COMP_STMT_BUILTIN (comp_stmt) != PKL_AST_BUILTIN_NONE
+      && PKL_AST_COMP_STMT_STMTS (comp_stmt) != NULL)
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (comp_stmt),
+               "builtin comp-stmt contains statements");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* Every node in the AST should have a valid location after parsing.
    This handler is used in both anal1 and anal2.  */
 
@@ -150,6 +170,7 @@ struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
+   PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_anal1_df_comp_stmt),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
    PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
   };
@@ -172,7 +193,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
                "node #%" PRIu64 " has no type",
                PKL_AST_UID (node));
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 
   if (PKL_AST_TYPE_COMPLETE (type)
@@ -182,7 +203,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
                "type completeness is unknown in node #%" PRIu64,
                PKL_AST_UID (node));
       payload->errors++;
-      PKL_PASS_DONE;
+      PKL_PASS_ERROR;
     }
 }
 PKL_PHASE_END_HANDLER
