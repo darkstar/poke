@@ -1525,6 +1525,16 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
         for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
              t = PKL_AST_CHAIN (t))
           pkl_ast_finish_returns_1 (function, t, nframes);
+
+        /* Pop `N' frames, one for declaration in the compound
+           statement's body.  */
+        for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
+             t = PKL_AST_CHAIN (t))
+          {
+            if (PKL_AST_CODE (t) == PKL_AST_DECL)
+              *nframes -= 1;
+          }
+        /* And the frame of the compount itself.  */
         *nframes -= 1;
         break;
       }

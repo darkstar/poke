@@ -639,4 +639,26 @@ poke_test_cmd "print loop_3 (2) " {4}
 poke_test_cmd "print loop_3 (3) " {8}
 poke_test_cmd "print loop_3 (4) " {16}
 
+set test loop-4
+poke_test_cmd "defun loop_4 = () : int\
+  {\
+   defvar res = 0;\
+   defvar i = 0;\
+\
+   while (i < 3)\
+     {\
+       defvar j = 0;\
+       while (j < 3)\
+         {\
+           res = res + 1;\
+           j = j + 1;\
+         }\
+       i = i + 1;\
+     }\
+\
+   return res;\
+   }" {}
+poke_test_cmd "print loop_4 ()" {9}
+
+
 poke_exit
