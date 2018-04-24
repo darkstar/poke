@@ -69,6 +69,7 @@ enum
   QUIET_ARG,
   LOAD_ARG,
   CMD_ARG,
+  SCRIPT_ARG,
 };
 
 static const struct option long_options[] =
@@ -78,6 +79,7 @@ static const struct option long_options[] =
   {"quiet", no_argument, NULL, QUIET_ARG},
   {"load", required_argument, NULL, LOAD_ARG},
   {"command", required_argument, NULL, CMD_ARG},
+  {"script", required_argument, NULL, SCRIPT_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -87,7 +89,7 @@ print_help ()
   /* TRANSLATORS: --help output, gnunity synopsis.
      no-wrap */
   printf (_("\
-Usage: poke [-l FILE]... [-c CMD]... [OPTION]... [FILE]\n"));
+Usage: poke [-l FILE ...] [-c CMD ...] [-s FILE ...] [OPTION]... [FILE]\n"));
 
   /* TRANSLATORS: --help output, gnunity summary.
      no-wrap */
@@ -99,7 +101,8 @@ Interactive editor for binary files.\n"), stdout);
      no-wrap */
   fputs (_("\
   -l, --load=FILE                     load the given pickle at startup.\n\
-  -c, --command=CMD                   execute the given command.\n"),
+  -c, --command=CMD                   execute the given command.\n\
+  -s, --script=FILE                   execute commands from FILE.\n"),
          stdout);
 
   puts ("");
@@ -167,7 +170,7 @@ parse_args (int argc, char *argv[])
 
   while ((ret = getopt_long (argc,
                              argv,
-                             "l:c:",
+                             "l:c:s:",
                              long_options,
                              NULL)) != -1)
     {
@@ -210,6 +213,15 @@ parse_args (int argc, char *argv[])
         case CMD_ARG:
           {
             int ret = pk_cmd_exec (optarg);
+            if (!ret)
+              exit (EXIT_FAILURE);
+            poke_interactive_p = 0;
+            break;
+          }
+        case 's':
+        case SCRIPT_ARG:
+          {
+            int ret = pk_cmd_exec_script (optarg);
             if (!ret)
               exit (EXIT_FAILURE);
             poke_interactive_p = 0;

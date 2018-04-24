@@ -634,6 +634,83 @@ pk_cmd_exec (char *str)
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }
 
+int
+pk_cmd_exec_script (const char *filename)
+{
+  int is_eof;
+  FILE *fd = fopen (filename, "r");
+
+  if (fd == NULL)
+    {
+      perror (filename);
+      return 1;
+    }
+
+  /* Read commands from FD, one per line, and execute them.  Lines
+     starting with the '#' character are comments, and ignored.
+     Likewise, empty lines are also ignored.  */
+
+  is_eof = 0;
+  while (1)
+    {
+      size_t i;
+      int ret;
+#define MAX_LINE 1025
+      char line[MAX_LINE]; /* XXX: yes this sucks.  */
+
+      if (is_eof)
+        break;
+
+      /* Read a line from the file.  */
+      i = 0;
+      while (1)
+        {
+          int c = fgetc (fd);
+
+          assert (i < MAX_LINE);
+          
+          if (c == EOF)
+            {
+              line[i] = '\0';
+              is_eof = 1;
+              break;
+            }
+          else if ((char)c == '\n')
+            {
+              line[i] = '\0';
+              break;
+            }
+          else
+            line[i++] = (char)c;
+        }
+
+      /* If the line is empty, or it starts with '#', or it contains
+         just blank characters, just ignore it.  */
+      if (line[0] == '#' || line[0] == '\0')
+        continue;
+      else
+        {
+          char *c = line;
+          while (*c != '\0' && (*c == ' ' || *c == '\t'))
+            c++;
+          if (*c == '\0')
+            continue;
+        }
+
+      /* Execute the line.  */
+      ret = pk_cmd_exec (line);
+      if (!ret)
+        goto error;
+    }
+
+  fclose (fd);
+  return 0;
+
+ error:
+  fclose (fd);
+  return 1;
+}
+
 void
 pk_cmd_shutdown (void)
 {

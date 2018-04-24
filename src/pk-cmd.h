@@ -84,6 +84,11 @@ struct pk_cmd
 
 int pk_cmd_exec (char *str);
 
+/* Execute commands from the given FILENAME.  Return 1 if all the
+   commands were executed successfully, 0 otherwise.  */
+
+int pk_cmd_exec_script (const char *filename);
+
 /* Shutdown the cmd subsystem, freeing all used resources.  */
 
 void pk_cmd_shutdown (void);
