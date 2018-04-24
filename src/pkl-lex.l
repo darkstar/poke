@@ -142,6 +142,8 @@ D [0-9]
 "int<"          { return INTCONSTR; }
 "offset<"       { return OFFSETCONSTR; }
 
+"__builtin_print__"	{ return BUILTIN_PRINT; }
+
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
 "%="		{ return MODA; }

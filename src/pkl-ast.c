@@ -1064,6 +1064,18 @@ pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts)
   return comp_stmt;
 }
 
+/* Build and return an AST node for a compiler builtin.  */
+
+pkl_ast_node
+pkl_ast_make_builtin (pkl_ast ast, int builtin)
+{
+  pkl_ast_node comp_stmt = pkl_ast_make_node (ast,
+                                              PKL_AST_COMP_STMT);
+
+  PKL_AST_COMP_STMT_BUILTIN (comp_stmt) = builtin;
+  return comp_stmt;
+}
+
 /* Build and return an AST node for an assignment statement.  */
 
 pkl_ast_node

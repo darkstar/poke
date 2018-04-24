@@ -983,6 +983,7 @@ struct pkl_ast_comp_stmt
 };
 
 pkl_ast_node pkl_ast_make_comp_stmt (pkl_ast ast, pkl_ast_node stmts);
+pkl_ast_node pkl_ast_make_builtin (pkl_ast ast, int builtin);
 
 /* PKL_AST_NULL_STMT nodes represent the "null statement".  It can
    appear anywhere an statement is expected, but it has no effect.  */

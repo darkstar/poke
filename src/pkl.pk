@@ -20,11 +20,14 @@
 
    - No standard types.
    - Use a `_pkl_' prefix for every declaration.
-   - No array, struct operators.  */
+   - No array, struct operators.
+   - Compiler __builtins__ can be used in this file, but nowhere else.
+*/
 
 /* Compiler built-ins.  */
 
 /*defun print = (string str) { __builtin_print__ } */
+
 
 /* Find the greatest common divisor of two unsigned 64-bit integrals A
    and B using the Euclidean algorithm.  */

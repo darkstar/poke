@@ -127,6 +127,10 @@ pkl_tab_error (YYLTYPE *llocp,
 %token RETURN
 %token STRING
 
+/* Compiler builtins.  */
+
+%token BUILTIN_PRINT
+
 %token <opcode> MULA
 %token <opcode> DIVA
 %token <opcode> MODA
@@ -933,6 +937,12 @@ comp_stmt:
                   /* Now pop the frame introduced by the
                      compound-statement itself.  */
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                }
+         |  BUILTIN_PRINT ';'
+        	{
+                  $$ = pkl_ast_make_builtin (pkl_parser->ast,
+                                             PKL_AST_BUILTIN_PRINT);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
