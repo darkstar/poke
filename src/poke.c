@@ -67,6 +67,7 @@ enum
   HELP_ARG,
   VERSION_ARG,
   QUIET_ARG,
+  LOAD_ARG,
 };
 
 static const struct option long_options[] =
@@ -74,6 +75,7 @@ static const struct option long_options[] =
   {"help", no_argument, NULL, HELP_ARG},
   {"version", no_argument, NULL, VERSION_ARG},
   {"quiet", no_argument, NULL, QUIET_ARG},
+  {"load", required_argument, NULL, LOAD_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -91,7 +93,14 @@ Usage: poke [OPTION]... [FILE]\n"));
 Interactive editor for binary files.\n"), stdout);
 
   puts ("");
-  /* TRANSLATORS: --help output, gnunity arguments.
+  /* TRANSLATORS: --help output, poke arguments.
+     no-wrap */
+  fputs (_("\
+  -l, --load=FILE                     load the given pickle at startup.\n"),
+         stdout);
+
+  puts ("");
+  /* TRANSLATORS: --help output, less used poke arguments.
      no-wrap */
   fputs (_("\
       --quiet                         be as terse as possible.\n\
@@ -155,7 +164,7 @@ parse_args (int argc, char *argv[])
 
   while ((ret = getopt_long (argc,
                              argv,
-                             "",
+                             "l:",
                              long_options,
                              NULL)) != -1)
     {
@@ -173,6 +182,27 @@ parse_args (int argc, char *argv[])
         case QUIET_ARG:
           poke_quiet_p = 1;
           break;
+        case 'l':
+        case LOAD_ARG:
+          {
+            pvm_val val;
+            int ret;
+            pvm_program program
+              = pkl_compile_file (poke_compiler, optarg);
+
+            if (program == NULL)
+              /* The compiler mits it's own error messages.  */
+              exit (EXIT_FAILURE);
+
+            ret = pvm_run (poke_vm, program, &val);
+            if (ret != PVM_EXIT_OK)
+              {
+                fprintf (stderr, _("run-time error: %s\n"), pvm_error (ret));
+                exit (EXIT_FAILURE);
+              }
+            
+            break;
+          }
         default:
           exit (EXIT_FAILURE);
         }
@@ -229,6 +259,12 @@ repl ()
 static void
 initialize ()
 {
+  /* This is used by the `progname' gnulib module.  */
+  set_program_name ("poke");
+  
+  /* Determine whether the tool has been invoked interactively.  */
+  poke_interactive_p = isatty (fileno (stdin));
+  
   /* Initialize the Poke Virtual Machine.  Note this should be done
      before initializing the compiler, since the later constructs pvm
      programs.  */
@@ -255,15 +291,12 @@ finalize ()
 int
 main (int argc, char *argv[])
 {
-  set_program_name ("poke");
-  parse_args (argc, argv);
-
-  /* Determine whether the tool has been invoked interactively.  */
-  poke_interactive_p = isatty (fileno (stdin));
-
   /* Initialization.  */
   initialize ();
-  
+
+  /* Parse args, loading files, opening files for IO, etc etc */
+  parse_args (argc, argv);
+
   /* Enter the REPL.  */
   if (poke_interactive_p)
     repl ();
