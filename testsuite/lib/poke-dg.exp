@@ -16,22 +16,41 @@
 # along with GCC; see the file COPYING3.  If not see
 # <http://www.gnu.org/licenses/>.
 
+load_lib poke.exp
 load_lib dg.exp
 
-# We set LC_ALL and LANG to C so that we get the same error messages as expected.
+# We set LC_ALL and LANG to C so that we get the same error messages
+# as expected.
 setenv LC_ALL C
 setenv LANG C
 
+# The default do-what keyword
+set dg-do-what-default run
+
+# When dg-interpreter-batch-mode is 1, no execution test or excess
+# error tests are performed.
+set dg-interpreter-batch-mode 0
+
+# Line number format.  This is how line numbers appear in program output.
+set dg-linenum-format ":%d:"
+proc dg-format-linenum { linenum } {
+    global dg-linenum-format
+    return [format ${dg-linenum-format} $linenum]
+}
+
 proc poke-dg-test { prog do_what extra_tool_flags } {
+
+    global POKE
 
     # We only support { dg-do run } and {dg-do compile}
     switch $do_what {
         "compile" {
             # Invoke poke with -l FILE.pk
-
+            set comp_output [exec $POKE -l if-1.pk $extra_tool_flags]
         }
         "run" {
             # Invoke poke with -l FILE.pk and -e EXP
+            
         }
         default {
             perror "$do_what: not a valid dg-do keyword"
@@ -39,5 +58,5 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
         }
     }
 
-    return [list $comp_output $output_file]
+    return [list $comp_output ""]
 }
