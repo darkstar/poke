@@ -17,7 +17,9 @@
  */
 
 #include <config.h>
+
 #include <stdio.h>
+#include <xalloc.h>
 
 #include "pkl.h"
 #include "pkl-ast.h"
@@ -31,7 +33,7 @@
             determining its number of elements and characteristics.
             It also finishes OFFSET nodes by replacing certain unit
             identifiers with factors and completes/annotates other
-            structures.
+            structures.  It also finishes STRING nodes.
 
    `trans2' scans the AST and annotates nodes that are literals.
             Henceforth any other phase relying on this information
@@ -260,6 +262,72 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+/* Finish strings, by expanding \-sequences, and emit errors if an
+   invalid \-sequence is found.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_string)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node string = PKL_PASS_NODE;
+  char *string_pointer = PKL_AST_STRING_POINTER (string);
+  char *new_string_pointer;
+  char *p;
+  size_t string_length, i;
+
+  /* First pass: calculate the size of the resulting string after
+     \-expansion, and report errors.  */
+  for (p = string_pointer, string_length = 0; *p != '\0'; ++p)
+    {
+      if (p[0] == '\\')
+        {
+          switch (p[1])
+            {
+            case '\\':
+            case 'n':
+            case 't':
+              string_length++;
+              break;
+            default:
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (string),
+                         "invalid \\%c sequence in string", p[1]);
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+          p++;
+        }
+      else
+        string_length++;
+    }
+
+  /* Second pass: compose the new string.  */
+  new_string_pointer = xmalloc (string_length);
+
+  for (p = string_pointer, i = 0; *p != '\0'; ++p, ++i)
+    {
+      if (p[0] == '\\')
+        {
+          switch (p[1])
+            {
+            case '\\': new_string_pointer[i] = '\\'; break;
+            case 'n':  new_string_pointer[i] = '\n'; break;
+            case 't':  new_string_pointer[i] = '\t'; break;
+            default:
+              assert (0);
+            }
+          p++;
+        }
+      else
+        new_string_pointer[i] = p[0];
+    }
+  new_string_pointer[i] = '\0';
+  
+  free (string_pointer);
+  PKL_AST_STRING_POINTER (string) = new_string_pointer;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
@@ -267,6 +335,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
    PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans1_df_offset),
    PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_trans1_df_funcall),
+   PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_trans1_df_string),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
    PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_df_type_offset),
   };

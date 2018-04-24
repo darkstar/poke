@@ -822,30 +822,5 @@ pvm_typeof (pvm_val val)
 void
 pvm_print_string (FILE *out, pvm_val string)
 {
-  char *p;
-
-  /* XXX: process \ sequences in trans1, not here.  */
-  for (p = PVM_VAL_STR (string); *p != '\0'; ++p)
-    {
-      char c = *p;
-      
-      if (c == '\\')
-        {
-          switch (p[1])
-            {
-            case '\\':
-              fputc ('\\', out); break;
-            case 'n':
-              fputc ('\n', out); break;
-            case 't':
-              fputc ('\t', out); break;
-            default:
-              assert (0);
-            }
-          p += 1; /* Skip the backslash.  */
-          continue;
-        }
-
-      fputc (c, out);
-    }
+  fputs (PVM_VAL_STR (string), out);
 }
