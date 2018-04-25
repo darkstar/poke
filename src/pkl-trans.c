@@ -277,7 +277,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_string)
   size_t string_length, i;
 
   /* First pass: calculate the size of the resulting string after
-     \-expansion, and report errors.  */
+     \-expansion, and report errors in the contents of the string.  */
   for (p = string_pointer, string_length = 0; *p != '\0'; ++p)
     {
       if (p[0] == '\\')
