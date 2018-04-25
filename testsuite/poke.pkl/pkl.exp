@@ -20,45 +20,6 @@ poke_start
 
 # Integers.
 
-set test intn
-poke_test_cmd "print 6n" {6N}
-
-set test inth
-poke_test_cmd "print 6h" {6H}
-
-set test int16
-poke_test_cmd "print 6 as int<16>" {6H}
-
-set test uinth
-poke_test_cmd "print 6hu" {6UH}
-
-set test uint16
-poke_test_cmd "print 6 as uint<16>" {6UH}
-
-set test intx-1
-poke_test_cmd "print/x -1 as uint<4>" {0xfUN}
-
-set test intx-2
-poke_test_cmd "print/x -1 as int<4>" {0xfN}
-
-set test into-1
-poke_test_cmd "print/o -1 as uint<3>" {\(uint<3>\) 0o7}
-
-set test into-2
-poke_test_cmd "print/o -1 as int<3>" {\(int<3>\) 0o7}
-
-set test intb-1
-poke_test_cmd "print/b -1 as uint<4>" {0b1111UN}
-
-set test intb-2
-poke_test_cmd "print/b -1 as int<4>" {0b1111N}
-
-set test intb-3
-poke_test_cmd "print/b -1 as int<3>" {\(int<3>\) 0b111}
-
-set test intb-4
-poke_test_cmd "print/b -1 as uint<3>" {\(uint<3>\) 0b111}
-
 # Strings
 
 set test str-cat
