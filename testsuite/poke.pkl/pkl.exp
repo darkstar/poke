@@ -273,21 +273,6 @@ poke_test_cmd "print 20#b <= 11#b" "0"
 set test offset-le-false-2
 poke_test_cmd "print 9#b <= 1#B" "0"
 
-# Structs
-
-set test struct-1
-poke_test_cmd "print {}" "{}"
-
-set test struct-2
-poke_test_cmd "print {1,2}" {\{1,2\}}
-
-set test struct-ref-1
-poke_test_cmd "print ({.fo=10}).fo" "10"
-
-set test struct-ref-2
-poke_test_cmd "defvar struct_ref_2 = {.fo = 10#Kb}" {}
-poke_test_cmd "print struct_ref_2.fo/2#Kb" {5}
-
 poke_exit
 
 ## DG tests follow
