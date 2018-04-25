@@ -525,36 +525,6 @@ poke_test_cmd "print defun_5 (1, 2L)" {3L}
 set test defun-6
 poke_test_cmd "defun bomb = () : int { return bomb (); }" {}
 
-# Conditionals
-
-set test if-2
-poke_test_cmd "defun if_2 = (uint<64> a, uint<64> b) : uint<64>\
-{\
-   if (b == 0)\
-     return a;\
-   else\
-     return if_2 (b, a % b);\
-}" {}
-poke_test_cmd "print if_2 (2UL, 8UL)" {2UL}
-poke_test_cmd "print if_2 (4UL, 8UL)" {4UL}
-poke_test_cmd "print if_2 (4UL, 10UL)" {2UL}
-
-set test if-3
-poke_test_cmd "defun if_3 = (uint<64> a, uint<64> b) : uint<64>\
-{\
-   if (b == 0)\
-      {\
-        return a;\
-      }\
-   else\
-     {\
-       return if_3 (b, a % b);\
-      }\
-}" {}
-poke_test_cmd "print if_3 (2UL, 8UL)" {2UL}
-poke_test_cmd "print if_3 (4UL, 8UL)" {4UL}
-poke_test_cmd "print if_3 (4UL, 10UL)" {2UL}
-
 poke_exit
 
 ## DG tests
