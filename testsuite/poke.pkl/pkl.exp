@@ -113,9 +113,6 @@ poke_test_cmd "print #long as offset<int,B>" {8#B}
 
 # Operations
 
-set test addii
-poke_test_cmd "print 3 + 4" "7"
-
 set test addll
 poke_test_cmd "print 3L + 4L" "7L"
 

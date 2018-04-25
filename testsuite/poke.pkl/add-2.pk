@@ -1,0 +1,15 @@
+/* { dg-do run } */
+
+defun add = () : int
+  {
+   return 3 + 4;
+  }
+
+/* { dg-command { print add ()} } */
+/* { dg-output 7 } */
+  
+/*
+Local variables:
+mode:c
+End:
+*/
