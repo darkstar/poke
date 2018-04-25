@@ -70,4 +70,10 @@ enum pvm_exit_code pvm_run (pvm pvm,
 
 const char *pvm_error (enum pvm_exit_code code);
 
+/* The following function is to be used in pvm.jitter, because the
+   system `assert' may expand to a macro and is therefore
+   non-wrappeable.  */
+
+void pvm_assert (int expression);
+
 #endif /* ! PVM_H */

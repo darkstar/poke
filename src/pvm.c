@@ -21,6 +21,7 @@
 #include <gc.h>
 #include <xalloc.h>
 #include <string.h>
+#include <assert.h>
 
 #include "pvm.h"
 
@@ -106,3 +107,8 @@ pvm_error (enum pvm_exit_code code)
   return pvm_error_strings[code];
 }
 
+void
+pvm_assert (int expression)
+{
+  assert (expression);
+}

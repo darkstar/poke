@@ -38,10 +38,28 @@ end
 
 wrapped-functions
   printf
+  pvm_assert
   pvm_env_lookup
   pvm_env_register
   pvm_env_pop_frame
   pvm_env_push_frame
+  pvm_make_int
+  pvm_make_uint
+  pvm_make_long
+  pvm_make_ulong
+  pvm_make_string
+  pvm_make_array
+  pvm_make_struct
+  pvm_make_offset
+  pvm_make_map
+  pvm_make_integral_type
+  pvm_make_string_type
+  pvm_make_offset_type
+  pvm_make_map_type
+  pvm_make_array_type
+  pvm_allocate_struct_attrs
+  pvm_make_struct_type
+  pvm_typeof
 end
 
 #wrapped-globals
@@ -186,7 +204,7 @@ instruction exit ()
     }
 
     /* Check for the stack centinel and pop it.  */
-    assert (JITTER_TOP_STACK() == PVM_NULL);
+    pvm_assert (JITTER_TOP_STACK() == PVM_NULL);
     JITTER_DROP_STACK ();
 
     JITTER_EXIT ();
