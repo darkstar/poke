@@ -1,0 +1,29 @@
+/* { dg-do run } */
+/* { dg-options {-c "print loop_3 (0)" -c "print loop_3 (1)" -c "print loop_3 (2)"} } */
+
+defun loop_3 = (int i) : int
+  {
+   if (i == 0)
+     return 666;
+   else
+     {
+       defvar n = 0;
+       defvar res = 1;
+       
+       while (n < i)
+         {
+           res = res * 2;
+           n = n + 1;
+         }
+       
+       return res;
+     }
+  }
+
+/* { dg-output "666\n2\n4" } */
+
+/*
+Local variables:
+mode:c
+End:
+*/

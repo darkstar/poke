@@ -1,0 +1,29 @@
+/* { dg-do run } */
+/* { dg-options {-c "print loop_4 ()"} } */
+
+defun loop_4 = () : int
+  {
+   defvar res = 0;
+   defvar i = 0;
+
+   while (i < 3)
+     {
+       defvar j = 0;
+       while (j < 3)
+         {
+           res = res + 1;
+           j = j + 1;
+         }
+       i = i + 1;
+     }
+   
+   return res;
+  }
+
+/* { dg-output "9" } */
+
+/*
+Local variables:
+mode:c
+End:
+*/
