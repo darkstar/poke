@@ -143,10 +143,12 @@ Target-specific dejagnu configuration:
 Utilities to be used in poke tests:
 
 - testsuite/lib/poke.exp
+- testsuite/lib/poke-dg.exp
 
 Compiler testsuite:
 
 - poke.pkl/pkl.exp
+- poke.pkl/*.pk
 
 Other Stuff
 -----------
@@ -193,11 +195,23 @@ The bison parser in pkl-tab.y
 
 The only purpose of the bison parser in pkl-tab.y is to do the
 syntactic analysis, build the initial AST, and set the locations of
-the AST nodes.  Nothing else.  As we shall see below, any further
-analysis and transformations on the AST are performed by the compiler
-phases, which are implemented elsewhere.  This helps a lot to keep the
-parser code clean and easy to read, and also eases changing the
-syntactic structure of poke programs.
+the AST nodes.
+
+Unfortunately, currently it also does some extra work, due to
+limitations in the LARL parser:
+
+- It builds the compile-time environment and register type, variable
+  and function declarations.
+- It annotates variables with their lexical addresses.
+- It links return statements with their containing functions.
+- It annotates return statements with he number of lexical frames
+  they should pop before exitting the function.
+
+As we shall see below, any further analysis and transformations on the
+AST are performed by the compiler phases, which are implemented
+elsewhere.  This helps a lot to keep the parser code clean and easy to
+read, and also eases changing the syntactic structure of poke
+programs.
 
 Compiler Passes and Phases
 --------------------------
@@ -234,12 +248,8 @@ the tasks performed by each phase.  Please keep it up to date.
 trans1
 ------
 
-- Annotates functions and types with the names they are declared. XXX:
-  currently in the parser.
-
-- Links return statements with their containing functions.
-- Annotates return statements with the number of lexical frames they
-  should pop before exitting the function.
+- Finishes strings by expanding \-sequences, emitting diagnostics if
+  an invalid \-sequence is found.
 
 anal1
 -----
