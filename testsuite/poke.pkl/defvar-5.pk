@@ -1,0 +1,8 @@
+/* { dg-do run } */
+
+defvar triplet = {.uno = 1, .dos = 2, .tres = "foo"};
+
+/* { dg-command { print triplet.uno } } */
+/* { dg-command { print triplet.dos } } */
+/* { dg-command { print triplet.tres } } */
+/* { dg-output "1\n2\n\"foo\"" } */

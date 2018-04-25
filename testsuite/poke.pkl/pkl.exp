@@ -452,34 +452,6 @@ set test deftype-4
 poke_test_cmd "deftype at3 = int\[2 + 1\]" {}
 poke_test_cmd "print sizeof (at3)" {96UL#b}
 
-# defvar
-
-set test defvar-1
-poke_test_cmd "defvar foo = 10" {}
-poke_test_cmd "print foo" {10}
-
-set test defvar-2
-poke_test_cmd "defvar bar = 20" {}
-poke_test_cmd "print bar" {20}
-
-set test defvar-3
-poke_test_cmd "defvar baz = foo + bar" {}
-poke_test_cmd "print baz" {30}
-
-set test defvar-4
-poke_test_cmd "defvar name = \"foo\"" {}
-poke_test_cmd "print name + \" bar\"" {"foo bar"}
-
-set test defvar-5
-poke_test_cmd "defvar offset = 12#B" {}
-poke_test_cmd "print offset + #b" {97#b}
-
-set test defvar-6
-poke_test_cmd "defvar triplet = {.uno=1, .dos=2, .tres=\"foo\"}" {}
-poke_test_cmd "print triplet.uno" {1}
-poke_test_cmd "print triplet.dos" {2}
-poke_test_cmd "print triplet.tres" {"foo"}
-
 poke_exit
 
 ## DG tests follow
