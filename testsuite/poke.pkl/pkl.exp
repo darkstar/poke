@@ -18,25 +18,6 @@
 
 poke_start
 
-# Integers.
-
-# Strings
-
-set test str-cat
-poke_test_cmd {print "foo" + "bar"} {"foobar"}
-
-set test str-eq-true
-poke_test_cmd {print "foo" == "foo"} {1}
-
-set test str-eq-false
-poke_test_cmd {print "foo" == "fooo"} {0}
-
-set test str-ne-false
-poke_test_cmd {print "foo" != "foo"} {0}
-
-set test str-ne-true
-poke_test_cmd {print "foo" != "fooo"} {1}
-
 # Conversions.
 
 set test int-to-int1-0
@@ -394,24 +375,6 @@ poke_test_cmd "print ({.fo=10}).fo" "10"
 set test struct-ref-2
 poke_test_cmd "defvar struct_ref_2 = {.fo = 10#Kb}" {}
 poke_test_cmd "print struct_ref_2.fo/2#Kb" {5}
-
-# deftype
-
-set test deftype-1
-poke_test_cmd "deftype anint = int" {}
-poke_test_cmd "print sizeof (anint)" {32UL#b}
-
-set test deftype-2
-poke_test_cmd "deftype imm13 = int<13>" {}
-poke_test_cmd "print sizeof (imm13)" {13UL#b}
-
-set test deftype-3
-poke_test_cmd "deftype uimm13 = int<13>" {}
-poke_test_cmd "print sizeof (imm13\[2\])" {26UL#b}
-
-set test deftype-4
-poke_test_cmd "deftype at3 = int\[2 + 1\]" {}
-poke_test_cmd "print sizeof (at3)" {96UL#b}
 
 poke_exit
 

@@ -1,0 +1,20 @@
+/* { dg-do run } */
+
+deftype anint = int;
+
+deftype imm13 = int<13>;
+deftype uimm13 = uint<13>;
+
+deftype at3 = int[2 + 1];
+
+/* { dg-command { print sizeof (anint) } } */
+/* { dg-output 32UL#b } */
+
+/* { dg-command { print sizeof (imm13) } } */
+/* { dg-output "\n13UL#b" } */
+
+/* { dg-command { print sizeof (uimm13) } } */
+/* { dg-output "\n13UL#b" } */
+
+/* { dg-command { print sizeof (at3) } } */
+/* { dg-output "\n96UL#b" } */
