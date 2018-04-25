@@ -1,4 +1,4 @@
-/* pkl-typify.c - Type annotation phases for the poke compiler.  */
+/* pkl-typify.c - Type handling phases for the poke compiler.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
