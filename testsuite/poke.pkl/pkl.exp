@@ -122,14 +122,6 @@ poke_test_cmd "print 1 as uint<4> <<. 5" "2UN"
 set test sl-11
 poke_test_cmd "print 1 as uint<34> <<. 34" {\(uint<34>\) 1}
 
-# Arrays
-
-set test simplearray
-poke_test_cmd "print \[0,1,2\]" {\[0,1,2\]}
-
-set test arrayref
-poke_test_cmd "print \[0,1,2\]\[1\]" "1"
-
 # Offsets
 
 set test offset-bit-no-magnitude
