@@ -482,11 +482,6 @@ poke_test_cmd "print triplet.tres" {"foo"}
 
 # defun
 
-set test defun-1
-poke_test_cmd "defun hello = () : string { return \"hello\"; }" {}
-poke_test_cmd "print hello ()" {"hello"}
-poke_test_cmd "print hello () + \" world\"" {"hello world"}
-
 set test defun-2
 poke_test_cmd "defvar defun_2_message = \"hello world\"" {}
 poke_test_cmd "defun get_message = () : string { return defun_2_message; }" {}
