@@ -22,6 +22,7 @@
 #include "pkl.h"
 
 extern int poke_interactive_p;
+extern int poke_quiet_p;
 extern int poke_exit_p;
 extern int poke_exit_code;
 extern pkl_compiler poke_compiler;

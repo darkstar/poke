@@ -43,7 +43,7 @@
 #include "pkl-env.h"
 
 #include "pvm.h"
-#include "poke.h" /* For poke_vm */
+#include "poke.h"
 
 struct pkl_compiler
 {
@@ -341,6 +341,9 @@ pkl_error (pkl_ast ast,
   va_end (valist);
   fputc ('\n', stderr);
 
+  if (poke_quiet_p)
+    return;
+  
   /* XXX: cleanup this pile of shit, and make fancy output
      optional.  */
   if (PKL_AST_LOC_VALID (loc))
@@ -411,6 +414,7 @@ pkl_error (pkl_ast ast,
       }
 
     fputc ('\n', stderr);
+
     for (i = 1; i < loc.first_column; ++i)
       fputc (' ', stderr);
     for (; i < loc.last_column; ++i)

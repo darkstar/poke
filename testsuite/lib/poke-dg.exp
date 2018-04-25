@@ -40,17 +40,22 @@ proc dg-format-linenum { linenum } {
 
 proc poke-dg-test { prog do_what extra_tool_flags } {
 
+    global objdir
     global POKE
 
-    # We only support { dg-do run } and {dg-do compile}
     switch $do_what {
         "compile" {
-            # Invoke poke with -l FILE.pk
-            set comp_output [exec $POKE -l if-1.pk $extra_tool_flags]
+            catch "exec $POKE --quiet -l $prog $extra_tool_flags" comp_output
+            set output_file ""
         }
         "run" {
-            # Invoke poke with -l FILE.pk and -e EXP
-            
+            # Create a script and run it.
+            set comp_output ""
+            set output_file "${objdir}/[file rootname [file tail $prog]]"
+            set fd [open $output_file w]
+            puts $fd "$POKE --quiet -l $prog $extra_tool_flags"
+            close $fd
+            file attributes $output_file -permissions a+rx
         }
         default {
             perror "$do_what: not a valid dg-do keyword"
@@ -58,5 +63,5 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
         }
     }
 
-    return [list $comp_output ""]
+    return [list $comp_output $output_file]
 }
