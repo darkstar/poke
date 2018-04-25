@@ -66,7 +66,8 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
                 return ""
             }
             
-            # Create a script and run it.
+            # Create a script in `output_file'.  DG will run it after
+            # we return.
             set comp_output ""
             set output_file "${objdir}/[file rootname [file tail $prog]]"
             set fd [open $output_file w]
