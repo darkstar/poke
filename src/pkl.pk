@@ -16,13 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* XXX: document here the special rules for the code in this file.
+/* Please note, in this file:
 
    - No standard types.
    - Use a `_pkl_' prefix for every declaration.
-   - No array, struct operators.
-   - Compiler __builtins__ can be used in this file, but nowhere else.
-*/
+   - No array or struct operators, only simple values please.
+   - Compiler __builtins__ can be used in this file.
+
+   You break it, you fix it.  */
 
 /* Compiler built-ins.  */
 
