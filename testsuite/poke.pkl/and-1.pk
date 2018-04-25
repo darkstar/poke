@@ -1,0 +1,37 @@
+/* { dg-do run } */
+
+/* { dg-command { print 0 && 0 } } */
+/* { dg-output 0 } */
+
+/* { dg-command { print 0 && 1 } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 1 && 0 } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 1 && 1 } } */
+/* { dg-output "\n1" } */
+
+/* { dg-command { print 0 && 0L } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 0 && 12L } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 1 && 0L } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 1 && 1L } } */
+/* { dg-output "\n1" } */
+
+/* { dg-command { print 0L && 0 } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 12L && 0 } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 100L && 0L } } */
+/* { dg-output "\n0" } */
+
+/* { dg-command { print 23UL && 1L } } */
+/* { gd-output "\n1" } */

@@ -1,0 +1,10 @@
+/* { dg-do run } */
+
+/* { dg-command { print 2L#b * 3UB } } */
+/* { dg-output 6UL#b } */
+
+/* { dg-command { print 2L#B * 4 } } */
+/* { dg-output "\n8L#B" } */
+
+/* { dg-command { print -2#int * 3 } } */
+/* { dg-output "\n-6#32" } */

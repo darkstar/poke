@@ -1,0 +1,7 @@
+/* { dg-do run } */
+
+/* { dg-command { print 10 / 5 } } */
+/* { dg-output 2 } */
+
+/* { dg-command { print 10 / 5L } } */
+/* { dg-output "\n2L" } */

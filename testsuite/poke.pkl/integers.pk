@@ -24,17 +24,17 @@
 /* { dg-command { print/o -1 as uint<3> } } */
 /* { dg-output "\n\\(uint<3>\\) 0o7" } */
 
-/* { do-command { print/o -1 as int<3> } } */
-/* { do-output "\n\\(int<3>\\) 0o7" } */
+/* { dg-command { print/o -1 as int<3> } } */
+/* { dg-output "\n\\(int<3>\\) 0o7" } */
 
-/* { do-command { print/b -1 as uint<4> } } */
-/* { do-output "\n0b1111UN" } */
+/* { dg-command { print/b -1 as uint<4> } } */
+/* { dg-output "\n0b1111UN" } */
 
-/* { do-command { print/b -1 as int<4> } } */
-/* { do-output "\n0b1111N" } */
+/* { dg-command { print/b -1 as int<4> } } */
+/* { dg-output "\n0b1111N" } */
 
-/* { do-command { print/b -1 as int<3> } } */
-/* { do-output "\n\\(int<3>\\) 0b111" } */
+/* { dg-command { print/b -1 as int<3> } } */
+/* { dg-output "\n\\(int<3>\\) 0b111" } */
 
-/* { do-command { print/b -1 as uint<3> } } */
-/* { do-output "\n\\(uint<3>\\) 0b111" } */
+/* { dg-command { print/b -1 as uint<3> } } */
+/* { dg-output "\n\\(uint<3>\\) 0b111" } */
