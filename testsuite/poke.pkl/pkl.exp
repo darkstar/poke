@@ -527,7 +527,7 @@ poke_test_cmd "defun bomb = () : int { return bomb (); }" {}
 
 poke_exit
 
-## DG tests
+## DG tests follow
 
 load_lib ${tool}-dg.exp
 dg-init
