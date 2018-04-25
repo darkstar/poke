@@ -333,8 +333,13 @@ pkl_error (pkl_ast ast,
     fprintf (stderr, "%s:", ast->filename);
   
   if (PKL_AST_LOC_VALID (loc))
-    fprintf (stderr, "%d:%d: ",
-             loc.first_line, loc.first_column);
+    {
+      if (poke_quiet_p)
+        fprintf (stderr, "%d: ", loc.first_line);
+      else
+        fprintf (stderr, "%d:%d: ",
+                 loc.first_line, loc.first_column);
+    }
   fputs (RED REVERSE "error: " NOATTR, stderr);
   va_start (valist, fmt);
   vfprintf (stderr, fmt, valist);
