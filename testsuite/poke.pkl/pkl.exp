@@ -527,19 +527,6 @@ poke_test_cmd "defun bomb = () : int { return bomb (); }" {}
 
 # Conditionals
 
-set test if-1
-poke_test_cmd "defun if_1 = (int i) : int\
-{\
- defvar res = 0;\
-\
- if (i > 10)\
-   res = 666;\
-\
- return res;\
-}" {}
-poke_test_cmd "print if_1 (5)" "0"
-poke_test_cmd "print if_1 (20)" "666"
-
 set test if-2
 poke_test_cmd "defun if_2 = (uint<64> a, uint<64> b) : uint<64>\
 {\
@@ -567,50 +554,6 @@ poke_test_cmd "defun if_3 = (uint<64> a, uint<64> b) : uint<64>\
 poke_test_cmd "print if_3 (2UL, 8UL)" {2UL}
 poke_test_cmd "print if_3 (4UL, 8UL)" {4UL}
 poke_test_cmd "print if_3 (4UL, 10UL)" {2UL}
-
-# Loops
-
-set test loop-1
-poke_test_cmd "defun loop_1 = (int i) : int\
-  {\
-   defvar n = 0;\
-   defvar res = 1;\
-\
-   while (n < i)\
-     {\
-       res = res * 2;\
-       n = n + 1;\
-     }\
-\
-   return res;\
-   }" {}
-poke_test_cmd "print loop_1 (0)" {1}
-poke_test_cmd "print loop_1 (4)" {16}
-
-set test loop-2
-poke_test_cmd "defun loop_2 = (int i) : int\
-  {\
-   defvar n = 0;\
-   defvar res = 0;\
-\
-   while (n < i)\
-     {\
-       if (n % 2 == 0)\
-         res = res + 1;\
-\
-       n = n + 1;\
-     }\
-\
-   return res;\
-   }" {}
-
-poke_test_cmd "print loop_2 (0)" {0}
-poke_test_cmd "print loop_2 (1)" {1}
-poke_test_cmd "print loop_2 (2)" {1}
-poke_test_cmd "print loop_2 (3)" {2}
-poke_test_cmd "print loop_2 (4)" {2}
-poke_test_cmd "print loop_2 (5)" {3}
-poke_test_cmd "print loop_2 (10)" {5}
 
 poke_exit
 
