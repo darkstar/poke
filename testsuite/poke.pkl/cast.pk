@@ -1,0 +1,34 @@
+/* { dg-do run } */
+
+/* { dg-command { print 0 as int<1> } } */
+/* { dg-output "\\(int<1>\\) 0" } */
+
+/* { dg-command { print 0 as uint<1> } } */
+/* { dg-output "\n\\(uint<1>\\) 0" } */
+
+/* { dg-command { print 1 as int } } */
+/* { dg-output "\n1" } */
+
+/* { dg-command { print 1 as uint32 } } */
+/* { dg-output "\n1U" } */
+
+/* { dg-command { print 1 as long } } */
+/* { dg-output "\n1L" } */
+
+/* { dg-command { print 1 as uint64 } } */
+/* { dg-output "\n1UL" } */
+
+/* { dg-command { print 1 as uint<2> + 2 as int<5> } } */
+/* { dg-output "\n\\(uint<5>\\) 3" } */
+
+/* { dg-command { print 1024#b as offset<uint16,B> } } */
+/* { dg-output "\n128UH#B" } */
+
+/* { dg-command { print 1024#b as offset<uint16,byte[1]> } } */
+/* { dg-output "\n128UH#B" } */
+
+/* { dg-command { print 1024#b as offset<uint16,byte[2]> } } */
+/* { dg-output "\n64UH#16" } */
+
+/* { dg-command { print #long as offset<int,B> } } */
+/* { dg-output "\n8#B" } */

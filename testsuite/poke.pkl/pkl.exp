@@ -18,41 +18,6 @@
 
 poke_start
 
-# Conversions.
-
-set test int-to-int1-0
-poke_test_cmd "print 0 as int<1>" {\(int<1>\) 0}
-
-set test int-to-uint1-0
-poke_test_cmd "print 0 as uint<1>" {\(uint<1>\) 0}
-
-set test i32toi32
-poke_test_cmd "print 1 as int" "1"
-
-set test i32tou32
-poke_test_cmd "print 1 as uint32" "1U"
-
-set test i32toi64
-poke_test_cmd "print 1 as long" "1L"
-
-set test i32tou64
-poke_test_cmd "print 1 as uint64" "1UL"
-
-set test u2addi5
-poke_test_cmd "print 1 as uint<2> + 2 as int<5>" {\(uint<5>\) 3}
-
-set test offset-to-offset-1
-poke_test_cmd "print 1024#b as offset<uint16,B>" {128UH#B}
-
-set test offset-to-offset-2
-poke_test_cmd "print 1024#b as offset<uint16,byte\[1\]>" {128UH#B}
-
-set test offset-to-offset-3
-poke_test_cmd "print 1024#b as offset<uint16,byte\[2\]>" {64UH#16}
-
-set test offset-to-offset-4
-poke_test_cmd "print #long as offset<int,B>" {8#B}
-
 # Operations
 
 set test subil
