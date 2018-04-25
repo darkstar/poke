@@ -193,9 +193,3 @@ deftype flv =
     uint32 always_0 = 0;
     flv_tag[] tags;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

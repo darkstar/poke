@@ -1587,9 +1587,3 @@ deftype Elf =
                  edhr.e_ident.ei_class,
                  phdr[segments$index]) [ehdr.e_phnum] segments;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

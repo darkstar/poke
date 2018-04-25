@@ -155,9 +155,3 @@ deftype relocs =
       R_ALPHA_BAR = 2
     } if mach == ALPHA;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

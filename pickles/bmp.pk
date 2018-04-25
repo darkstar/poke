@@ -103,9 +103,3 @@ deftype bmp =
       };
     };
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

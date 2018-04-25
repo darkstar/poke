@@ -31,9 +31,3 @@ deftype jpeg =
   {
     
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

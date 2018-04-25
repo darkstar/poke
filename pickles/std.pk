@@ -40,9 +40,3 @@ deftype ushort = uint16;
 deftype short = int16;
 deftype ulong = uint64;
 deftype long = int64;
-
-/*
-Local variables:
-mode:c
-End:
-*/

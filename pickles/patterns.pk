@@ -8,9 +8,3 @@ deftype retpoline =
   {
     ind_jump jump1;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

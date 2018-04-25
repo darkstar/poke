@@ -65,9 +65,3 @@ let points = Point[] @ 0x0;
    values are stored in memory.  */
 
 let e = int32 @ 0x0;
-
-/*
-Local variables:
-mode:c
-End:
-*/

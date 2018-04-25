@@ -81,10 +81,3 @@ struct sparc_insn
     struct sparc_insn_other other;
   } insn;
 };
-
-
-/*
-Local variables:
-mode:c
-End:
-*/

@@ -1,4 +1,3 @@
-/* -*- mode: c -*- */
 /* { dg-do run } */
 
 defvar defun_2_message = "hello world";

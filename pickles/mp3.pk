@@ -96,9 +96,3 @@ deftype mp3 =
     mp3_frame[] mpeg_frames;
     id3v1_tag id3v1_tag optional;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

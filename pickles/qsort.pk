@@ -71,9 +71,3 @@ defun test_qsort = ()
   let array = [3, 2, 1, 0];
   qsort (array);
 }
-
-/*
-Local variables:
-mode:c
-End:
-*/

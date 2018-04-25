@@ -53,9 +53,3 @@ deftype gzip_member =
   };
 
 deftype gzip = gzip_member[];
-
-/*
-Local variables:
-mode:c
-End:
-*/

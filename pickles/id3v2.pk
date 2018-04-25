@@ -112,9 +112,3 @@ deftype id3v2_tag =
     /* Padding.  */
     byte[tag_size - .];
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

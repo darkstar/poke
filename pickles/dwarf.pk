@@ -189,9 +189,3 @@ deftype dwarf_cfa_expression =
     uint128 len;
     dwarf_op (version, ptr_size, offset_size) [#len] exp;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

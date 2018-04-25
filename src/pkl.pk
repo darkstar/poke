@@ -46,9 +46,3 @@ defun _pkl_gcd = (uint<64> a, uint<64> b) : uint<64>
    Struct to string.  */
 /* XXX error reporting routine, called by the macro pkl_asm_rterror().
    This should exit the vm with the exitvm instruction.  */
-
-/*
-Local variables:
-mode:c
-End:
-*/

@@ -25,9 +25,3 @@ deftype swf_rect =
     uint<n> ymin;
     uint<n> ymax;
   };
-
-/*
-Local variables:
-mode:c
-End:
-*/

@@ -243,9 +243,3 @@ let bdoc_c = bson_doc @ 0x00;
 
 print_bson_elements (bdoc_b);
 print_bson_elements (bdoc_c);
-
-/*
-Local variables:
-mode:c
-End:
-*/
