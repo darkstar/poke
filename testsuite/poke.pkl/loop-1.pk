@@ -1,5 +1,4 @@
 /* { dg-do run } */
-/* { dg-options {-c "print loop_1 (0)" -c "print loop_1 (4)"} } */
 
 defun loop_1 = (int i) : int
   {
@@ -15,6 +14,8 @@ defun loop_1 = (int i) : int
    return res;
    }
 
+/* { dg-command { print loop_1 (0) } } */
+/* { dg-command { print loop_1 (4) } } */
 /* { dg-output "1\n16" } */
 
 /*

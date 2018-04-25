@@ -19,6 +19,27 @@
 load_lib poke.exp
 load_lib dg.exp
 
+# Our own dg-* handlers
+#
+# Note that in all the handlers the first argument is the line number
+# where the dg-* element appears in the source file.
+
+set poke_commands {}
+
+proc dg-command { args } {
+    global poke_commands
+
+    if { [llength $args] > 2 } {
+        error "[linex $args 0]: too many arguments"
+    }
+
+    # Note this makes use of the non-portable printf %q.  If this is a
+    # problem, we may need to write a little(?) tcl procedure to do
+    # shell unquoting.  I would rather not do that - jemarch.
+    set poke_commands \
+        "$poke_commands -c [exec printf %q [lindex $args 1]]"
+}
+
 # We set LC_ALL and LANG to C so that we get the same error messages
 # as expected.
 setenv LC_ALL C
@@ -29,6 +50,7 @@ set dg-do-what-default compile
 
 proc poke-dg-test { prog do_what extra_tool_flags } {
 
+    global poke_commands
     global objdir
     global POKE
 
@@ -38,11 +60,18 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
             set output_file ""
         }
         "run" {
+            # This requires at least one command
+            if {$poke_commands eq {}} {
+                perror "$do_what: at least one dg-command is required"
+                return ""
+            }
+            
             # Create a script and run it.
             set comp_output ""
             set output_file "${objdir}/[file rootname [file tail $prog]]"
             set fd [open $output_file w]
-            puts $fd "$POKE --quiet -l $prog $extra_tool_flags"
+            puts $fd "#!/bin/bash"
+            puts $fd "$POKE --quiet -l $prog $extra_tool_flags $poke_commands"
             close $fd
             file attributes $output_file -permissions a+rx
         }
@@ -51,6 +80,8 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
             return ""
         }
     }
+
+    set poke_commands {}
 
     return [list $comp_output $output_file]
 }

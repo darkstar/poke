@@ -1,5 +1,4 @@
 /* { dg-do run } */
-/* { dg-options {-c "print if_3 (2UL, 8UL)" -c "print if_3 (4UL, 8UL)" -c "print if_3 (4UL, 10UL)" } } */
 
 
 defun if_3 = (uint<64> a, uint<64> b) : uint<64>
@@ -14,7 +13,11 @@ defun if_3 = (uint<64> a, uint<64> b) : uint<64>
      }
   }
 
+/* { dg-command { print if_3 (2UL, 8UL) } } */
+/* { dg-command { print if_3 (4UL, 8UL) } } */
+/* { dg-command { print if_3 (4UL, 10UL) } } */
 /* { dg-output "2UL\n4UL\n2UL" } */
+
 
 /*
 Local variables:

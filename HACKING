@@ -150,6 +150,8 @@ Compiler testsuite:
 - poke.pkl/pkl.exp
 - poke.pkl/*.pk
 
+XXX: explain the DG infrastructure and how it is used.
+
 Other Stuff
 -----------
 
