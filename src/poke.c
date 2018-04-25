@@ -294,8 +294,8 @@ initialize ()
   poke_interactive_p = isatty (fileno (stdin));
   
   /* Initialize the Poke Virtual Machine.  Note this should be done
-     before initializing the compiler, since the later constructs pvm
-     programs.  */
+     before initializing the compiler, since the later constructs and
+     runs pvm programs internally.  */
   poke_vm = pvm_init ();
 
   /* Initialize the poke incremental compiler and load the standard
