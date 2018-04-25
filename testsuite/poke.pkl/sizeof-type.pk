@@ -1,0 +1,90 @@
+/* { dg-do run } */
+
+/* { dg-command { print sizeof (int) } } */
+/* { dg-output 32UL#b } */
+
+/* { dg-command { print sizeof (long) } } */
+/* { dg-output "\n64UL#b" } */
+
+/* { dg-command { print sizeof (int[2UL]) } } */
+/* { dg-output "\n64UL#b" } */
+
+/* { dg-command { print sizeof (int[2]) } } */
+/* { dg-output "\n64UL#b" } */
+
+/* { dg-command { print sizeof (int[2][2]) } } */
+/* { dg-output "\n128UL#b" } */
+
+deftype array_of_struct = struct {int; int;};
+
+/* { dg-command { print sizeof (array_of_struct[2]) } } */
+/* { dg-output "\n128UL#b" } */
+
+deftype struct_empty = struct {};
+
+/* { dg-command { print sizeof (struct_empty) } } */
+/* { dg-output "\n0UL#b" } */
+
+deftype struct_for_sizeof = struct { int; long; };
+
+/* { dg-command { print sizeof (struct_for_sizeof) } } */
+/* { dg-output "\n96UL#b" } */
+
+deftype struct_with_struct =
+  struct
+  {
+    int;
+
+    struct
+    {
+      int;
+      int;
+    };
+  };
+
+/* { dg-command { print sizeof (struct_with_struct) } } */
+/* { dg-output "\n96UL#b" } */
+
+deftype struct_with_struct_2 =
+  struct
+  {
+    int;
+
+    struct
+    {
+      int;
+      int;
+      long;
+    };
+  };
+
+/* { dg-command { print sizeof (struct_with_struct_2) } } */
+/* { dg-output "\n160UL#b" } */
+
+deftype struct_with_array =
+  struct
+  {
+    int;
+    int[5];
+    int[3];
+  };
+
+/* { dg-command { print sizeof (struct_with_array) } } */
+/* { dg-output "\n288UL#b" } */
+
+deftype struct_with_intconstr =
+  struct
+  {
+    int<5> foo;
+    int<6> bar;
+    int<7> baz;
+  };
+
+/* { dg-command { print sizeof (struct_with_intconstr) } } */
+/* { dg-output "\n18UL#b" } */
+
+/* { dg-command { print sizeof (offset<int,B>) } } */
+/* { dg-output "\n32UL#b" } */
+
+/* { dg-command { print sizeof (offset<int<5>,B>) } } */
+/* { dg-output "\n5UL#b" } */
