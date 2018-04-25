@@ -342,8 +342,6 @@ D [0-9]
    /* Strip the quoting characters */
    yytext[strlen(yytext) - 1] = 0;
 
-   /* XXX: handle escape characters.  */
-
    type = pkl_ast_make_string_type (yyextra->ast);
 
    yylval->ast = pkl_ast_make_string (yyextra->ast, yytext + 1);
