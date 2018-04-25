@@ -1,3 +1,4 @@
+/* -*- mode: c -*- */
 /* { dg-do run } */
 
 defun loop_4 = () : int
@@ -21,9 +22,3 @@ defun loop_4 = () : int
 
 /* { dg-command { print loop_4 () } } */
 /* { dg-output "9" } */
-
-/*
-Local variables:
-mode:c
-End:
-*/

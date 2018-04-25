@@ -1,3 +1,4 @@
+/* -*- mode: c -*- */
 /* { dg-do run } */
 
 defun hello = () : string

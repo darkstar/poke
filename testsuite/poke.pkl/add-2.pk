@@ -1,3 +1,4 @@
+/* -*- mode: c -*- */
 /* { dg-do run } */
 
 /* { dg-command { print 3 + 4 } } */
@@ -17,9 +18,3 @@
 
 /* { dg-command { print 3L - 4L } } */
 /* { dg-output "\n-1L" } */
-  
-/*
-Local variables:
-mode:c
-End:
-*/

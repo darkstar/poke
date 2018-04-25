@@ -1,3 +1,4 @@
+/* -*- mode: c -*- */
 /* { dg-do run } */
 
 defun if_1 = (int i) : int
@@ -13,9 +14,3 @@ defun if_1 = (int i) : int
 /* { dg-command { print if_1 (10) } } */
 /* { dg-command { print if_1 (20) } } */
 /* { dg-output "0\n666" } */
-
-/*
-Local variables:
-mode:c
-End:
-*/
