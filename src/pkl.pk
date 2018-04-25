@@ -25,6 +25,8 @@
 
    You break it, you fix it.  */
 
+/* XXX: every declaration here should be immutable.  */
+
 /* Compiler built-ins.  */
 
 defun print = (string str) __builtin_print__;
