@@ -16,7 +16,6 @@
 # along with GCC; see the file COPYING3.  If not see
 # <http://www.gnu.org/licenses/>.
 
-load_lib poke.exp
 load_lib dg.exp
 
 # Our own dg-* handlers
