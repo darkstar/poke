@@ -6,4 +6,4 @@ defun anoffset = () : offset<int,B>
   }
 
 /* { dg-command { print  anoffset() } } */
-/* { dg-output "2#B" } */
+/* { dg-output 2#B } */

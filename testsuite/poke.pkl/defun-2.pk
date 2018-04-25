@@ -8,4 +8,4 @@ defun get_message = () : string
   }
 
 /* { dg-command { print get_message () } } */
-/* { dg-output "\"hello world\"" } */
+/* { dg-output {"hello world"} } */

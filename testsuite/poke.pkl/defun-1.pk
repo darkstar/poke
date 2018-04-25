@@ -6,7 +6,7 @@ defun hello = () : string
   }
 
 /* { dg-command { print hello () } } */
-/* { dg-output \"hello\" } */
+/* { dg-output {"hello"} } */
 
 /* { dg-command { print hello () + " world" } } */
 /* { dg-output "\n\"hello world\"" } */

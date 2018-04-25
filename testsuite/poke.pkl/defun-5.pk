@@ -6,4 +6,4 @@ defun defun_5 = (int i, long l) : long
   }
 
 /* { dg-command { print defun_5 (1, 2L) } } */
-/* { dg-output "3L" } */
+/* { dg-output 3L } */
