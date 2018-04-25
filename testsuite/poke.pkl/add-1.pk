@@ -1,0 +1,13 @@
+/* { dg-do compile } */
+
+defun add_wrong = ()
+  {
+   defvar a = 10;
+   return a + "foo"; /* { dg-error "invalid operands" } */
+  }
+
+/*
+Local variables:
+mode:c
+End:
+*/
