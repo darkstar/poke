@@ -1,0 +1,7 @@
+/* { dg-do run } */
+
+/* { dg-command { print [0,1,2] } } */
+/* { dg-output "\\\[0,1,2\\\]" } */
+
+/* { dg-command { print [0,1,2][1] } } */
+/* { dg-output "\n1" } */
