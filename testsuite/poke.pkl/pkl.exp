@@ -480,19 +480,6 @@ poke_test_cmd "print triplet.uno" {1}
 poke_test_cmd "print triplet.dos" {2}
 poke_test_cmd "print triplet.tres" {"foo"}
 
-# defun
-
-set test defun-4
-poke_test_cmd "defun defun_4 = (int i) : int { return i + 1; }" {}
-poke_test_cmd "print defun_4 (10)" {11}
-
-set test defun-5
-poke_test_cmd "defun defun_5 = (int i, long l) : long { return i + l; }" {}
-poke_test_cmd "print defun_5 (1, 2L)" {3L}
-
-set test defun-6
-poke_test_cmd "defun bomb = () : int { return bomb (); }" {}
-
 poke_exit
 
 ## DG tests follow

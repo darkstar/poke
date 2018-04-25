@@ -1,0 +1,10 @@
+/* -*- mode: c -*- */
+/* { dg-do run } */
+
+defun defun_5 = (int i, long l) : long
+  {
+   return i + l;
+  }
+
+/* { dg-command { print defun_5 (1, 2L) } } */
+/* { dg-output "3L" } */

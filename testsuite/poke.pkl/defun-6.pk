@@ -1,0 +1,7 @@
+/* -*- mode: c -*- */
+/* { dg-do compile } */
+
+defun bomb = () : int
+  {
+   return bomb ();
+  }
