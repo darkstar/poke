@@ -42,7 +42,6 @@ pk_io_open (const char *filename)
 
   /* Open the requested file.  The open mode is read-write if
      possible.  Otherwise read-only.  */
-
   if (access (filename, R_OK | W_OK) != 0)
     {
       fmode |= O_RDONLY;
@@ -94,9 +93,7 @@ pk_io_close (pk_io io)
   free (io->filename);
 
   /* Unlink the IO from the list.  */
-
   assert (ios != NULL); /* The list must contain at least io.  */
-
   if (ios == io)
     ios = ios->next;
   else
