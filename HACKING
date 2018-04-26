@@ -66,7 +66,7 @@ Macro-assembler:
 
 Run-time library:
 
-- pickles/pkl.pk
+- pk/pkl.pk
 
 Poke Virtual Machine
 --------------------
@@ -128,7 +128,7 @@ Commands:
 Poke Environment
 ----------------
 
-- pickles/std.pk
+- pk/std.pk
 
   Poke standard library.
 

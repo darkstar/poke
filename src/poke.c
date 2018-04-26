@@ -303,7 +303,7 @@ initialize ()
   poke_compiler = pkl_new ();
   if (!pkl_compile_file (poke_compiler,
                          /* XXX: use POKEDIR  */
-                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
+                         "/home/jemarch/gnu/hacks/poke/pk/std.pk"))
     exit (1);
 }
 
