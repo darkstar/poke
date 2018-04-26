@@ -1,4 +1,3 @@
 SUBDIRS = pickles
 
-pkldatadir = $(pkgdatadir)/pkl
-dist_pkldata_DATA = pkl.pk std.pk
+dist_pkgdata_DATA = pkl.pk std.pk
