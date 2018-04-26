@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+pkldatadir = $(pkgdatadir)/pkl
+dist_pkldata_DATA = pkl.pk
+
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
                pk-io.c pk-io.h \
@@ -44,7 +48,8 @@ BUILT_SOURCES = pkl-tab.h pkl-lex.c
 AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
-poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG
+poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG \
+                -DPKGDATADIR=$(pkgdatadir)
 poke_CFLAGS = -Wall -Werror $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE) $(BDW_GC_LIBS)
