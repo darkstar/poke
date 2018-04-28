@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-defun qsort = (any[] array, left = 0, right = sizeof (array))
+defun qsort = (any[] array, left = 0, right = array'size)
 {
   defun partition = (left, right) : int
   {
