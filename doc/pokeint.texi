@@ -211,6 +211,22 @@ Poke test drivers.
 PKL compiler test suite.
 @end table
 
+@section Documentation
+
+@table @file
+@item doc/poke.texi
+
+The Poke book.
+
+@item doc/pokeint.texi
+
+The Poke Internals manual.  This very document.
+
+@item doc/pkl-spec.texi
+
+The PKL Specification.
+@end table
+
 @section Other Stuff
 
 @table @file
