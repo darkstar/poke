@@ -29,5 +29,6 @@ config.h.in
 /doc/poke.info
 /doc/stamp-vti
 /doc/version.texi
+/doc/version-int.texi
 /gnulib
 /src/pcl-lex.h
