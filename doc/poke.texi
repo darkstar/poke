@@ -51,7 +51,7 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
-The Poke Language
+Writing Pickle Programs
 * Hello Poke::
 * Numbers::
 * Metatypes::
@@ -73,16 +73,6 @@ The Poke Language
 Advanced Editing
 @c Searching
 
-@c XXX
-@c  deftype foo =
-@c    struct
-@c    {
-@c     byte b1;
-@c     byte b2 = b1 * 4;
-@c   };
-@c
-@c (poke) search foo
-
 @c Marks
 @c Useful Idioms
 
@@ -91,6 +81,12 @@ Reverse Engineering
 Extending Poke
 @c * Writing commands in C::
 @c * Writing commands in Poke::
+
+Pickle Specification
+@c * Literals
+@c * Variables
+@c * Functions
+* The Pickle Type System::
 
 Poke Internals
 * Poke Architecture::		Overall architecture.
@@ -2157,6 +2153,293 @@ Integer values are de/encoded as follows:
       endianness @code{.endian}.  Nulls of this type are encoded to
       @code{0x0000}, @code{0x0000_0000} and
       @code{0x0000_0000_0000_0000} respectively.
+@end itemize
+
+@c ======== Pickle Specification
+
+@node The Pickle Type System
+@chapter The Pickle Type System
+
+Static.  (XXX: rationale on why static.)
+
+Probably sound, but not proven (yet).  The proof should be done by
+induction, on the poke expressions tree.
+
+Not complete.  Three possibilities: a) sound type system, b) complete
+type system or c) both sound and complete and the type checker many
+never terminate.  We choose a).
+
+@section Type Expressions
+
+Pickle type expressions are structured, and are defined as follows.
+
+A @dfn{basic type constructor}, maybe applied to some arguments, is a
+type expression, and constructs basic types.  Basic type constructors
+include:
+
+@itemize @bullet
+@item Integer types.
+
+If @var{size} is a constant expression evaluating to a positive
+integer and @var{sign} is a constant expression evaluating to a
+boolean, then:
+
+@example
+integer (@var{size}, @var{sign})
+@end example
+
+is a type expression denoting an integer of width @var{size} bits and
+signedness @var{sign}.
+
+Examples:
+  
+@example
+integer (32, 1) -> Signed 32-bit integer.
+integer (13, 1) -> Signed 13-bit integer.
+integer (64, 0) -> Unsigned 64-bit integer.
+integer (4, 0)  -> Unsigned 4-bit integer ("nibble").
+@end example
+
+@item String types.
+
+@code{string} is a type expression denoting a NULL-terminated string.
+
+@item Void type.
+
+@code{void} is a type expression denoting the absence of a type.  It
+is used for functions that do not return a value.
+@end itemize
+
+A @dfn{type constructor}, applied to type expressions, is a type
+expression.  Type constructors include:
+
+@itemize @minus
+@item Offsets.
+
+If @var{t} is a basic integral type expression and @var{u} is a constant
+expression evaluating to a non-negative integer, then @code{offset (@var{t},@var{u})}
+denotes an "united" magnitude having type @var{t} and multiple of the basic
+unit @var{u}:
+
+@example
+offset (integer (32, 1), 8)     -> Signed 32-bit offset with unit 8 (bytes).
+offset (integer (32, 1), 7 + 1) -> Likewise.
+offset (integer (64, 0), 1)     -> Unsigned 64-bit offset with unit 1 (bits).
+@end example
+
+@item Arrays.
+
+If @var{t} is a type expression, @code{array (@var{t})} is a type
+expression denoting the type of an array with zero or more elements of
+type @var{t}:
+
+@example
+array (integer (32, 1))  -> Array of signed 32-bit integrals.
+array (offset (integer (32, 1) ,8))
+                               -> Array of signed 32-bit offsets with
+                                  unit bytes.
+@end example
+
+Note that array types do not include a number of elements.  When
+something like this is found in a struct type definition:
+
+@example
+struct
+@{
+   int num;
+   Packet[num] packets;
+@};
+@end example
+
+the type of @code{packets} is @code{array (Packet)}, and @code{num} is
+used in the struct constructor to create the @emph{value} of the
+array.  Likewise, in:
+
+@example
+defvar a = [1,2,3];
+@end example
+
+the type of @code{a} is @code{array (integer (32, 1))}, and it's size
+is @code{3}.
+ 
+In function definitions, it is not allowed to specify a size for an
+array argument, thus, this is @emph{not} allowed:
+
+@example
+defun foo = (int[3] a) @{ ... @}
+@end example
+
+Ditto for casts to arrays.  The following is @emph{not} allowed:
+
+@example
+array as int[32]
+@end example
+
+@item Structs.
+
+If @var{n} is a string, @var{ln} are strings, @var{tn} are type
+expressions, and @var{field} is an expression like:
+
+@example
+field (@var{l1}, @var{t1})
+@end example
+
+then
+
+@example
+struct (@var{n}, @var{field1}, ..., @var{fieldm})
+@end example
+
+is a type expression denoting a struct type having name @var{n} and @var{m}
+fields, each featuring a field name @var{li} and a type @var{ti}.
+  
+The strings @var{n} and @var{li} can be @code{NULL}, meaning the
+structure type is anonymous and that the corresponding struct fields
+are anonymous, respectively.
+
+@item Unions.
+
+      XXX
+
+@item Functions.
+
+If @var{tn} are type expressions, `function (@var{t0}, @var{t1},
+@var{t2},..., @var{tm})' is a type expression denoting the type of a
+function getting @var{m} arguments of the given types, and returning a
+value of type @var{t0}.
+
+Note that @var{t0} should be @code{void} for functions that do not
+return a value.
+
+@end itemize
+
+Poke uses graphs (XXX: trees or dags?) to represent type expressions,
+where interior nodes are type constructors, and leaves are basic type
+constructors.
+
+Note that type names, by themselves, do not constitute type
+expressions.  However they can be part of some type constructor, like
+in structs and unions.
+
+@section Cycles in Type Expressions
+
+Pickle imposes the restriction that no type can be referred by name
+before it is declared.  Therefore, it is not possible to define
+recursive types and the graphs used to implement type expressions
+can't have cycles.
+
+@section Type Equivalence
+
+The checking rules described below uses the notion of equality among
+type expressions: "if T1 and T2 are equal".
+
+R-TYPE-00: Pickle uses structural equivalence for all types, but for
+struct and union types, which are compared by name.
+
+Note however that not all the components of the type expressions are
+used in the equivalence rules.  The structural equivalence algorithm
+implements some modified notions of equivalence.  For example, two
+array types are equivalent even if they have a different number of
+elements defined in their type expression.
+
+Structural equivalence rules:
+
+@example
+IF T1.type = string AND T2.type = string
+   RETURN true;
+IF T1.type = int<s1> AND T2.type = int<s2>
+   RETURN s1 == s2;
+ELIF T1.type = uint<s1> AND T2.type = uint<s2>
+   RETURN s1 == s2;
+ELIF T1.type = offset<t1,u1> AND T2.type = offset<t2,u2>
+   RETURN t1 EQUAL t2 AND u1 == u2
+ELIF T1.type = t11 x t12 AND T2.type = t21 x t22
+   RETURN t11 EQUAL t21 AND t12 EQUAL t22
+ELIF T1.type = t1[] AND T2.type = t2[]
+   RETURN t1 EQUAL t2
+ELIF T1.type = struct @{name=n1@} AND T2.type = struct @{name=n2@}
+   RETURN n1 == n2
+ELIF T1.type = union @{name=n1@} AND T2.type = union @{name=n2@}
+   RETURN n1 == n2
+ELIF T1.type = (T11, ..., T1n) : T10 AND T2.type = (T21, .., T2n) : T20
+   RETURN T10 EQUAL T20 AND (T11 EQUAL T21 AND ... T1n EQUAL T2n)
+@end example
+    
+The pickle compiler function @code{pkl_ast_type_equal} implements the
+equivalence rules described above.
+
+Anonymous struct and union types are never equivalent to any union type,
+not even to themselves, thus:
+
+@example
+defvar s = @{.foo=10,.bar=20@};
+s = @{.foo=30,.bar=40@};  /* Type error.  */
+@end example
+
+@section Overloading of Operators
+
+Certain pickle operators are overloaded.  Example, addition.
+
+However, the overloading of operators in pickle are carefully designed
+in a way it is always possible to infer the type of the result of the
+operator (maybe a partial type) based on the types of the arguments.
+This means no additional top-down pass to narrow types is ever
+necessary.  For example:
+
+@example
+int<N> + int<N> -> int<N>          is defined.
+int<N> + int<N> -> int<N*2>        is NOT defined.
+@end example
+
+@section Type Checking of Expressions
+
+R-TYPE-02: The type of the Nth actual parameter passed in a function
+call should match the type of the Nth formal argument defined in the
+function type of the function being called.
+
+@section Type Checking of Statements
+
+In pickle statements do not have types, but expressions can appear in
+certain statements, and the types of these expressions are checked
+according to the following rules.
+
+R-TYPE-01: The type of the expression in the right-hand side of an
+assignment statement should match the type of the variable in the
+left-hand side.
+
+R-TYPE-03: Record and union type specifiers are only allowed in
+deftype constructions and embedded in other struct and union type
+specifiers.  In particular, these specifiers are not allowed in
+function argument lists and casts.
+
+R-TYPE-04: The type of the expression in the condition part of a
+conditional statement should be an integral type, suitable to be
+promoted to a signed 32-bit integer.
+
+R-TYPE-05: The type of the expression in the condition part of a while
+statement should be an integral type, suitable to be promoted to a
+signed 32-bit integer.
+
+R-TYPE-06: The type of the expression in an expression statement
+should be @code{void}, i.e. a call to a function that doesn't return
+any value.
+
+@section Future Extensions to the Type System
+
+The idea is to evolve the type system, in subsequent versions, in a
+backwards-compatible way:
+
+@itemize @bullet
+@item
+Support for recursive types.  It may be useful, although binary file
+formats are seldom defined in a recursive way.
+
+@item
+Variable types, eg. @code{int<@var{exp}>} where @var{exp} is not constant.
+
+@item
+Evolve into a kind of gradual typing, to provide more dynamism while
+keeping the control and efficiency associated with static typing.
 @end itemize
 
 @node Poke Architecture
