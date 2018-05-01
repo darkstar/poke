@@ -253,8 +253,7 @@ can't have cycles.
 The checking rules described below uses the notion of equality among
 type expressions: "if T1 and T2 are equal".
 
-@noindent
-R-TYPE-00: PKL uses structural equivalence for all types, but for
+@b{R-TYPE-00}: PKL uses structural equivalence for all types, but for
 struct and union types, which are compared by name.
 
 Note however that not all the components of the type expressions are
@@ -325,29 +324,24 @@ In PKL statements do not have types, but expressions can appear in
 certain statements, and the types of these expressions are checked
 according to the following rules.
 
-@noindent
-R-TYPE-01: The type of the expression in the right-hand side of an
+@b{R-TYPE-01}: The type of the expression in the right-hand side of an
 assignment statement should match the type of the variable in the
 left-hand side.
 
-@noindent
-R-TYPE-03: Record and union type specifiers are only allowed in
+@b{R-TYPE-03}: Record and union type specifiers are only allowed in
 deftype constructions and embedded in other struct and union type
 specifiers.  In particular, these specifiers are not allowed in
 function argument lists and casts.
 
-@noindent
-R-TYPE-04: The type of the expression in the condition part of a
+@b{R-TYPE-04}: The type of the expression in the condition part of a
 conditional statement should be an integral type, suitable to be
 promoted to a signed 32-bit integer.
 
-@noindent
-R-TYPE-05: The type of the expression in the condition part of a while
-statement should be an integral type, suitable to be promoted to a
-signed 32-bit integer.
+@b{R-TYPE-05}: The type of the expression in the condition part of a
+while statement should be an integral type, suitable to be promoted to
+a signed 32-bit integer.
 
-@noindent
-R-TYPE-06: The type of the expression in an expression statement
+@b{R-TYPE-06}: The type of the expression in an expression statement
 should be @code{void}, i.e. a call to a function that doesn't return
 any value.
 
