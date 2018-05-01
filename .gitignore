@@ -29,6 +29,7 @@ config.h.in
 /doc/poke.info
 /doc/pokeint.info
 /doc/pkl-spec.info
+/doc/stamp-1
 /doc/stamp-vti
 /doc/version.texi
 /doc/version-int.texi
