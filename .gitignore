@@ -27,6 +27,8 @@ config.h.in
 /build-aux/missing
 /autom4te.cache/
 /doc/poke.info
+/doc/pokeint.info
+/doc/pkl-spec.info
 /doc/stamp-vti
 /doc/version.texi
 /doc/version-int.texi

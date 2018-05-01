@@ -7,7 +7,7 @@
 @comment %**end of header
 
 @copying
-This book describes the internals of GNU poke (version
+This document describes the internals of GNU poke (version
 @value{VERSION}, @value{UPDATED}).
 
 Copyright @copyright{} 2018 Jose E. Marchesi
