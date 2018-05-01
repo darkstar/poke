@@ -243,55 +243,58 @@ experience.
 @node Poke Architecture
 @chapter Poke Architecture
 
+@float Figure,fig:pokearch
 @verbatim
-
-      +----------+
-      | compiler |      
-      +----------+      +------+
-           |            |      |
-           v            |      |
-      +----------+      |      |
-      |   PVM    | <--->|  IO  |
-      +----------+      |      |
-           ^            |      |
-           |            |      |
-           v            +------+
-      +----------+
-      | command  |
-      +----------+
-
++----------+
+| compiler |      
++----------+      +------+
+     |            |      |
+     v            |      |
++----------+      |      |
+|   PVM    | <--->|  IO  |
++----------+      |      |
+     ^            |      |
+     |            |      |
+     v            +------+
++----------+
+| command  |
++----------+
 @end verbatim
+@caption{Overall Architecture of Poke}
+@end float
 
 @node The PKL Compiler
 @chapter The PKL Compiler
 
 @section Compiler Overview
 
+@float Figure,fig:compiler
 @verbatim
-
-            /--------\
-            | source |
-            \---+----/
-                |
-                v
-        +-----------------+
-        |      Parser     |
-        +-----------------+
-        |  analysis and   |
-        | transformation  |
-        |     phases      |
-        +-----------------+    
-        | code generation |
-        |      phase      |
-        +-----------------+
-        | Macro assembler |
-        +-----------------+
-                |
-                v
-           /---------\
-           | program |
-           \---------/
+      /--------\
+      | source |
+      \---+----/
+          |
+          v
+  +-----------------+
+  |      Parser     |
+  +-----------------+
+  |  analysis and   |
+  | transformation  |
+  |     phases      |
+  +-----------------+    
+  | code generation |
+  |      phase      |
+  +-----------------+
+  | Macro assembler |
+  +-----------------+
+          |
+          v
+     /---------\
+     | program |
+     \---------/
 @end verbatim
+@caption{The PKL compiler}
+@end float
 
 @section The bison Parser in @file{pkl-tab.y}
 
