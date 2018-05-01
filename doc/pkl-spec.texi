@@ -47,6 +47,7 @@ Documentation License''.
 @c * Variables
 @c * Functions
 * The PKL Type System::
+@c * Grammar
 * Future Extensions::
 
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -62,11 +63,23 @@ Indexes
 
 @section What is PKL
 
-PKL stands for ``Poke Language'', and it is pronounced ``pickle''.
+@dfn{PKL} is a domain-specific programming language whose main purpose
+is to be used in
+@code{poke}@footnote{@url{http://www.gnu.org/s/poke}}, the GNU
+interactive editor for binary files.  The name PKL stands for ``Poke
+Language'', and it is actually pronounced (and informally referred to)
+as ``pickle''.
 
 @section About this Document
 
-XXX
+This document contains a complete and semi-formal specification of
+PKL, describing all the aspects of the language.  The main purpose of
+the specification is to serve as a reference for implementations,
+notably GNU poke.
+
+This document is not intended to be a tutorial for learning how to
+write PKL programs.  For that purpose, please read the Poke Book. XXX:
+xref to the poke book.
 
 @node The PKL Type System
 @chapter The PKL Type System
