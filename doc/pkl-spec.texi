@@ -358,6 +358,13 @@ a signed 32-bit integer.
 should be @code{void}, i.e. a call to a function that doesn't return
 any value.
 
+@section Type Checking on Type Specifiers
+
+@b{R-TYPE-07}: An array type specifier may only contain an expression
+denoting the number of elements it contains when it appears in a field
+in a struct type.  Thus, @code{struct @{int[10] foo;@}} is valid, but
+@code{defun foo = (int[10] a) @{...@}} isn't.
+
 @node Future Extensions
 @chapter Future Extensions
 
