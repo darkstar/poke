@@ -1,7 +1,7 @@
 \input texinfo
 @comment %**start of header
-@setfilename pkl-spec.info
-@settitle PKL Specification
+@setfilename pkl.info
+@settitle The Poke Language
 @afourpaper
 @comment %**end of header
 
@@ -20,11 +20,11 @@ Documentation License''.
 
 @dircategory Languages
 @direntry
-* pkl-spec: (pkl-spec). Poke Language Specification.
+* pkl: (pkl). The Poke Language specification
 @end direntry
 
 @titlepage
-@title PKL Specification
+@title The Poke Language
 @subtitle Version 1
 @author by Jose E. Marchesi
 @page
@@ -36,7 +36,7 @@ Documentation License''.
 
 @ifnottex
 @node Top
-@top PKL Specification
+@top The Poke Language
 
 @insertcopying
 @end ifnottex
@@ -92,6 +92,39 @@ induction, on the poke expressions tree.
 Not complete.  Three possibilities: a) sound type system, b) complete
 type system or c) both sound and complete and the type checker many
 never terminate.  We choose a).
+
+The PKL type system establishes the rules to be applied in order to
+determine the type of many different language constructs.  This
+chapter contains an exhaustive relation of these rules.  A conforming
+implementation should check for all of these, emitting errors in case
+some rule is violated.
+
+@section Type Expressions and Type Specifiers
+
+While discussing the type system, we will be using two different but
+certainly related concepts: @dfn{type expressions} and @dfn{type
+specifiers}.
+
+A @dfn{type expression} is an abstract representation of a type, such
+as @code{integer (32, 0)}, that denotes an unsigned 32-bit integral
+type.  The syntax we use for type expressions doesn't equal the
+concrete syntax of PKL, and is often more general.
+
+A @dfn{type specifier} is the PKL concrete syntactic construction to
+denote a type, such as @code{int<32>}, which is a type specifier
+denoting an unsigned 32-bit integral type.
+
+As we shall see, type specifiers sometimes contain additional
+information that is not kept in the corresponding type expression.
+For example, @code{int[3]} is a valid array type specifier in certain
+contexts, but the corresponding type expression is @code{array
+(integer (3,1))}.  In this case, the @code{3} in the type specifier,
+that denotes the number of elements of the array, is not part of the
+type expression.
+
+Type expressions are useful to reason about types and their
+properties, such as type equivalence.  However, it is important to
+keep in mind that they are not language constructions.
 
 @section Type Expressions
 
@@ -320,8 +353,8 @@ This means no additional top-down pass to narrow types is ever
 necessary.  For example:
 
 @example
-int<N> + int<N> -> int<N>          is defined.
-int<N> + int<N> -> int<N*2>        is NOT defined.
+int<N> + int<N> -> int<N>          @r{is defined}.
+int<N> + int<N> -> int<N*2>        @r{is NOT defined}.
 @end example
 
 @section Type Checking of Expressions
@@ -358,12 +391,44 @@ a signed 32-bit integer.
 should be @code{void}, i.e. a call to a function that doesn't return
 any value.
 
-@section Type Checking on Type Specifiers
+@section Type Checking of Type Specifiers
 
-@b{R-TYPE-07}: An array type specifier may only contain an expression
-denoting the number of elements it contains when it appears in a field
-in a struct type.  Thus, @code{struct @{int[10] foo;@}} is valid, but
-@code{defun foo = (int[10] a) @{...@}} isn't.
+As described above, type constructors may contain other types, either
+directly or indirecly.
+
+An example of a direct type inclusion is the type of the elements
+specified in an array type constructor.  An example of an indirect
+type is the type of the constant expression denoting the units in an
+offset type constructor.
+
+Thus the PKL type system also includes checks for these contained
+types and are listed below.
+
+@b{R-TYPE-07}: An array type specifier may contain an expression
+denoting the number of elements it contains, but only when it appears
+in a field in a struct type.  Thus, @code{struct @{int[10] foo;@}} is
+valid, but @code{defun foo = (int[10] a) @{...@}} isn't.
+
+@b{R-TYPE-08}: The type of the expression denoting the number of
+elements in an array type constructor should be suitable to be
+promoted to an @code{uint<64>}.  (See promotion rules in XXX xref).
+
+@b{R-TYPE-09}: The expression denoting the number of elements in an
+array should be constant.
+
+@b{R-TYPE-10}: The base type of an offset type should be an integral
+type.  Thus, @code{offset<string,1>} is not valid.
+
+@b{R-TYPE-11}: The type of the expression denoting the unit of an
+offset type specifier should be suitable to be promoted to an
+@code{uint<64>}.
+
+@b{R-TYPE-12}: The type of the expression denoting the unit of an
+offset type specifier should be constant.
+
+@section Type Promotion
+
+XXX document promotion rules here.
 
 @node Future Extensions
 @chapter Future Extensions
