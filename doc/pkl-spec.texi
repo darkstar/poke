@@ -67,8 +67,8 @@ Indexes
 is to be used in
 @code{poke}@footnote{@url{http://www.gnu.org/s/poke}}, the GNU
 interactive editor for binary files.  The name PKL stands for ``Poke
-Language'', and it is actually pronounced (and informally referred to)
-as ``pickle''.
+Language'', and it is pronounced (and informally referred to) as
+``pickle''.
 
 @section About this Document
 
