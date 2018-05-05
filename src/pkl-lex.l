@@ -116,27 +116,17 @@ D [0-9]
 <C_COMMENT>.    {  }
 <C_COMMENT>\n   {  }
 
-"enum"		{ return ENUM; }
 "struct"	{ return STRUCT; }
-"break"		{ return BREAK; }
-"const"		{ return CONST; }
-"continue"	{ return CONTINUE; }
 "else"		{ return ELSE; }
-"for"		{ return FOR; }
 "while"		{ return WHILE; }
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
-"assert"	{ return ASSERT; }
 "defun"		{ return DEFUN; }
-"defset"	{ return DEFSET; }
 "deftype"	{ return DEFTYPE; }
 "defvar"	{ return DEFVAR; }
 "return"        { return RETURN; }
 "string"	{ return STRING; }
 "as"		{ return AS; }
-
-"lsb"		{ return LSB; }
-"msb"		{ return MSB; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

@@ -43,6 +43,7 @@ Documentation License''.
 
 @menu
 * Introduction::
+* Lexical::
 @c * Literals
 @c * Variables
 @c * Functions
@@ -80,6 +81,64 @@ notably GNU poke.
 This document is not intended to be a tutorial for learning how to
 write PKL programs.  For that purpose, please read the Poke Book. XXX:
 xref to the poke book.
+
+@node Lexical
+@chapter Lexical
+
+The fundamental pieces on which PKL programs are built are called
+@dfn{lexical tokens}.  The tokens themselves are built from a stream
+of characters provided by the user: the source program.
+
+Some lexical tokens carry over a @dfn{semantic payload}.  This is the
+case of numeric literals for example.
+
+In this chapter, the term @dfn{text} is used to refer to a sequence of
+@dfn{characters}, where characters are codes of a Character Set
+described below.
+
+@section Source Encoding and Character Set
+
+PKL source text shall be encoded in @acronym{ASCII} (ISO-646) and
+covers the @acronym{ASCII} character set.
+
+@section Newline Character
+
+Source code lines are separated by the @dfn{newline character},
+@acronym{ASCII} code @code{012}.
+
+@section Comments
+
+PKL supports two different kind of comments: multi-line non-nestable
+comments and partial-line stackable comments.  Both kind of comments
+are usually processed and removed by the lexical analyzer, as these
+are not intended to be preserved for subsequent
+processing@footnote{Some implementations may find it suitable to
+encode certain meta-information in comments however.}.
+
+Text enclosed between @code{/*} and @code{*/} sequences conforms a
+possibly multi-line comment, and is usually processed and removed by
+the lexical analyzer, as it isn't intended to be preserved for
+subsequent processing.
+
+@b{R-LEX-00}: Multi-line comments can't be nested.
+
+Characters following @code{//}, up to the next newline character or
+end of file, conform a partial line comment.
+
+@b{R-LEX-01}: Partial-line comments can be stacked.
+
+@section Identifiers
+
+@section Reserved Words
+
+Certain character sequences look like identifiers, but they conform
+other tokens.  These sequences are known as @dfn{reserved words}, and
+can't be used as identifiers in any context.
+
+@b{R-LEX-01}: The PKL reserved words are @code{struct}, @code{else},
+@code{while}, @code{if}, @code{sizeof}, @code{defun}, @code{deftype},
+@code{defvar}, @code{return}, @code{string}, @code{as} and
+@code{__builtin_print__}.
 
 @node The PKL Type System
 @chapter The PKL Type System
