@@ -116,6 +116,8 @@ D [0-9]
 <C_COMMENT>.    {  }
 <C_COMMENT>\n   {  }
 
+"//"[^\n]*	{ /* Partial-line comment.  */ }
+
 "struct"	{ return STRUCT; }
 "else"		{ return ELSE; }
 "while"		{ return WHILE; }
