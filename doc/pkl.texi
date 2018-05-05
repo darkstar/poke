@@ -129,6 +129,14 @@ end of file, conform a partial line comment.
 
 @section Identifiers
 
+@b{R-LEX-02}: A letter (uppercase or lowercase) or an underscore
+(@acronym{ASCII} code 137) followed by zero or more letters (uppercase
+or lowercase), underscore characters, or digits conform an
+@dfn{identifier}.
+
+The semantic payload of identifiers is the sequence of characters
+conforming the token.
+
 @section Reserved Words
 
 Certain character sequences look like identifiers, but they conform
@@ -139,6 +147,62 @@ can't be used as identifiers in any context.
 @code{while}, @code{if}, @code{sizeof}, @code{defun}, @code{deftype},
 @code{defvar}, @code{return}, @code{string}, @code{as} and
 @code{__builtin_print__}.
+
+@section Numeric Literals
+
+Numeric literals allow to express numbers of several characteristics,
+like width and numeration base.
+
+@b{R-LEX-02}: @dfn{Decimal numeric literals} are denoted by a digit
+followed by zero or more digits or underscores (@acronym{ASCII} code
+137), followed by an optional suffix string.
+
+@b{R-LEX-03}: @dfn{Hexadecimal numeric literals} are denoted by the
+sequence @code{0x} or @code{0X} followed by an @dfn{hexadecimal digit}
+(@code{[0-9fA-F]}), followed by zero or more hexadecimal digits or
+underscores, followed by an optional suffix string.
+
+@b{R-LEX-04}: @dfn{Octal numeric literals} are denoted by the sequence
+@code{0o} or @code{0O} followed by an @dfn{octal digit} (@code{[0-7]}),
+followed by zero or more octal digits or underscores, followed by an
+optional suffix string.
+
+@b{R-LEX-05}: @dfn{Binary numeric literals} are denoted by the
+sequence @code{0b} or @code{0B} folloed by a @dfn{binary digit}
+(@code{[01]}), followed by zero or more binary digits or underscores,
+followed by an optional suffix argument.
+
+The underscores in numeric literals are intended to increase
+readability, and do not contribute to the semantic value of the token.
+
+The optional suffix allowed in numeric literals are composed by
+sequences of characters, which characterize the number. The allowed
+characters are:
+
+@table @code
+@item u
+@itemx U
+The numeric literal is unsigned.
+@item n
+@item N
+The numeric literal is a @dfn{nibble}, i.e. it is 4-bit long.
+@item B
+The numeric literal is a @dfn{byte}, i.e. it is 8-bit long.
+@item h
+@itemx H
+The numeric literal is a @dfn{half}, i.e. it is 16-bit long.
+@item l
+@item L
+The numeric literal is a @dfn{long}, i.e. it is 64-bit long.
+@end table
+
+Not every combination of suffix characters makes sense.  Well-formed
+numeric literal suffixes are characterized by the regular expression
+@code{((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))}.
+
+@section String Literals
+
+@section Formatted String Literals
 
 @node The PKL Type System
 @chapter The PKL Type System

@@ -86,7 +86,7 @@ CHAR		   '(.|\\[n0t])'
 STRING             \"([^"]|\\(.|\n))*\"
 HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
-OCTCST             0[oO][0-9_]*
+OCTCST             0[oO][0-7_]*
 DECCST             [0-9][0-9_]*
 IS		   ((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))
 
