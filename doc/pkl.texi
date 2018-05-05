@@ -109,9 +109,9 @@ Source code lines are separated by the @dfn{newline character},
 @section Comments
 
 PKL supports two different kind of comments: multi-line non-nestable
-comments and partial-line stackable comments.  Both kind of comments
-are usually processed and removed by the lexical analyzer, as these
-are not intended to be preserved for subsequent
+comments and partial-line stackable comments.  Both flavors of
+comments are usually processed and removed by the lexical analyzer, as
+these are not intended to be preserved for subsequent
 processing@footnote{Some implementations may find it suitable to
 encode certain meta-information in comments however.}.
 
