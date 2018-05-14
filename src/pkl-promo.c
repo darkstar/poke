@@ -114,7 +114,7 @@ promote_offset (pkl_ast ast,
    operands are promoted to match the type of the integral result, if
    needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_div)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_div)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (exp);
@@ -194,7 +194,7 @@ PKL_PHASE_END_HANDLER
 
    In this configuration no promotions are done.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_add_sub_mod)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_add_sub_mod)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (exp);
@@ -272,7 +272,7 @@ PKL_PHASE_END_HANDLER
    the integral operand and the base type of the offset operand are
    promoted to match the base type of the offset result.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_mul)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_mul)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
@@ -353,7 +353,7 @@ PKL_PHASE_END_HANDLER
    No operand promotion is performed in the the S x S -> S
    configuration.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_rela)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_rela)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
@@ -448,7 +448,7 @@ PKL_PHASE_END_HANDLER
    match the type of the result.  The type of the second operand is
    promoted to an unsigned 32-bit integral type.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_bshift)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_bshift)
 {
   int restart1, restart2;
 
@@ -485,7 +485,7 @@ PKL_PHASE_END_HANDLER
    In the I OP I -> I configuration, the types of the operands are
    promoted to match the type of the result, if needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_binary)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_binary)
 {
   int restart1, restart2;
 
@@ -521,7 +521,7 @@ PKL_PHASE_END_HANDLER
    In the I -> I ocnfiguration, the type of the operand is promoted to
    match the type of the result, if needed.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_op_unary)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_unary)
 {
   int restart;
 
@@ -550,7 +550,7 @@ PKL_PHASE_END_HANDLER
 /* Handler for promoting indexes in array references to unsigned 64
    bit values.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_array_ref)
 {
   int restart;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -570,7 +570,7 @@ PKL_PHASE_END_HANDLER
 /* Handler for promoting the array size in array type literals to 64
    unsigned bit values.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
 {
   int restart;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -593,7 +593,7 @@ PKL_PHASE_END_HANDLER
 
 /* Indexes in array initializers should be unsigned long.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_df_array_initializer)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_array_initializer)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node index = PKL_AST_ARRAY_INITIALIZER_INDEX (node);
@@ -624,26 +624,26 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_df_op_bshift),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_df_op_bshift),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_df_op_binary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_df_op_unary),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_df_op_add_sub_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_df_op_add_sub_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_df_op_add_sub_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_df_op_mul),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_df_op_div),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_df_array_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_df_array_initializer),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_df_type_array),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LE, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_promo_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SL, pkl_promo_ps_op_bshift),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SR, pkl_promo_ps_op_bshift),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IOR, pkl_promo_ps_op_binary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_XOR, pkl_promo_ps_op_binary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BAND, pkl_promo_ps_op_binary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_AND, pkl_promo_ps_op_binary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_OR, pkl_promo_ps_op_binary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_promo_ps_op_unary),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ADD, pkl_promo_ps_op_add_sub_mod),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_promo_ps_op_add_sub_mod),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_ps_op_add_sub_mod),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_ps_op_mul),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_ps_array_initializer),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };

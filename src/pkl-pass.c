@@ -142,9 +142,9 @@ pkl_call_node_handlers (jmp_buf toplevel,
 #define PKL_DEF_OP(ocode, str)                                          \
           case ocode:                                                   \
             if (order == PKL_PASS_DEPTH_FIRST)                          \
-              PKL_CALL_PHASES (op, df, ocode);                          \
+              PKL_CALL_PHASES (op, ps, ocode);                          \
             else if (order == PKL_PASS_BREADTH_FIRST)                   \
-              PKL_CALL_PHASES (op, bf, ocode);                          \
+              PKL_CALL_PHASES (op, pr, ocode);                          \
             else                                                        \
               assert (0);                                               \
             break;
@@ -163,9 +163,9 @@ pkl_call_node_handlers (jmp_buf toplevel,
       int typecode = PKL_AST_TYPE_CODE (node);
 
       if (order == PKL_PASS_DEPTH_FIRST)
-        PKL_CALL_PHASES (type, df, typecode);
+        PKL_CALL_PHASES (type, ps, typecode);
       else if (order == PKL_PASS_BREADTH_FIRST)
-        PKL_CALL_PHASES (type, bf, typecode);
+        PKL_CALL_PHASES (type, pr, typecode);
       else
         assert (0);
     }
@@ -173,17 +173,17 @@ pkl_call_node_handlers (jmp_buf toplevel,
   /* Call the phase handlers defined for node codes, in the given
      order.  */
   if (order == PKL_PASS_DEPTH_FIRST)
-    PKL_CALL_PHASES (code, df, node_code);
+    PKL_CALL_PHASES (code, ps, node_code);
   else if (order == PKL_PASS_BREADTH_FIRST)
-    PKL_CALL_PHASES (code, bf, node_code);
+    PKL_CALL_PHASES (code, pr, node_code);
   else
     assert (0);
 
   /* Call the phase handlers defined as default.  */
   if (order == PKL_PASS_DEPTH_FIRST)
-    PKL_CALL_PHASES_SINGLE(default_df);
+    PKL_CALL_PHASES_SINGLE(default_ps);
   else if (order == PKL_PASS_DEPTH_FIRST)
-    PKL_CALL_PHASES_SINGLE(default_bf);
+    PKL_CALL_PHASES_SINGLE(default_pr);
 
  restart:
  _exit:

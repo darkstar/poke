@@ -48,7 +48,7 @@
 /* The following handler is used in all trans phases and initializes
    the phase payload.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans_bf_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans_pr_program)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -58,7 +58,7 @@ PKL_PHASE_END_HANDLER
 
 /* Compute and set the number of elements in a STRUCT node.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_struct)
 {
   pkl_ast_node astruct = PKL_PASS_NODE;
   pkl_ast_node t;
@@ -73,7 +73,7 @@ PKL_PHASE_END_HANDLER
 
 /* Compute and set the number of elements in a struct TYPE node.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_struct)
 {
   pkl_ast_node struct_type = PKL_PASS_NODE;
   pkl_ast_node t;
@@ -90,7 +90,7 @@ PKL_PHASE_END_HANDLER
 /* Compute and set the indexes of all the elements of an ARRAY node
    and set the size of the array consequently.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_array)
 {
   pkl_ast_node array = PKL_PASS_NODE;
   pkl_ast_node initializers
@@ -171,7 +171,7 @@ PKL_PHASE_END_HANDLER
    Also, if the magnitude of the offset wasn't specified then it
    defaults to 1. */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_offset)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -218,7 +218,7 @@ PKL_PHASE_END_HANDLER
    units.  This handler replaces the identifier with a suitable unit
    factor.  If the identifier is invalid, then an error is raised.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_type_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_offset)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -248,7 +248,7 @@ PKL_PHASE_END_HANDLER
 
 /* Calculate the number of arguments in funcalls.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_funcall)
 {
   pkl_ast_node arg;
   int nargs = 0;
@@ -265,7 +265,7 @@ PKL_PHASE_END_HANDLER
 /* Finish strings, by expanding \-sequences, and emit errors if an
    invalid \-sequence is found.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans1_df_string)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -330,14 +330,14 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans1 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans1_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans1_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans1_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_trans1_df_funcall),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_trans1_df_string),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_df_type_struct),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_df_type_offset),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans1_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_trans1_ps_struct),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans1_ps_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans1_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_trans1_ps_string),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
   };
 
 
@@ -349,7 +349,7 @@ struct pkl_phase pkl_phase_trans1 =
    Expressions having literals for operators are constant.
    Expressions having only constant operators are constant.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_exp)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_exp)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   int o, literal_p = 1;
@@ -369,7 +369,7 @@ PKL_PHASE_END_HANDLER
 
 /* An offset is a literal if its magnitude is also a literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_offset)
 {
   pkl_ast_node magnitude
     = PKL_AST_OFFSET_MAGNITUDE (PKL_PASS_NODE);
@@ -380,7 +380,7 @@ PKL_PHASE_END_HANDLER
 
 /* An array is a literal if all its initializers are literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_array)
 {
   int literal_p = 1;
   pkl_ast_node t, array = PKL_PASS_NODE;
@@ -403,7 +403,7 @@ PKL_PHASE_END_HANDLER
 /* An array ref is a literal if the referred array element is also a
    literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_array_ref)
 {
   pkl_ast_node array = PKL_AST_ARRAY_REF_ARRAY (PKL_PASS_NODE);
   PKL_AST_LITERAL_P (PKL_PASS_NODE)  = PKL_AST_LITERAL_P (array);
@@ -412,7 +412,7 @@ PKL_PHASE_END_HANDLER
 
 /* A struct is a literal if all its element values are literals.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct)
 {
   pkl_ast_node t;
   int literal_p = 1;
@@ -434,7 +434,7 @@ PKL_PHASE_END_HANDLER
 /* A struct ref is a literal if the value of the referred element is
    also a literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_struct_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct_ref)
 {
   pkl_ast_node stct = PKL_AST_STRUCT_REF_STRUCT (PKL_PASS_NODE);
   PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (stct);
@@ -444,7 +444,7 @@ PKL_PHASE_END_HANDLER
 /* A cast is considered a literal if the value of the referred element
    is also a literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_df_cast)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_cast)
 {
   PKL_AST_LITERAL_P (PKL_PASS_NODE)
     = PKL_AST_LITERAL_P (PKL_AST_CAST_EXP (PKL_PASS_NODE));
@@ -453,14 +453,14 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans2 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_trans2_df_exp),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans2_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_trans2_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_trans2_df_array_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_trans2_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_trans2_df_struct_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_trans2_df_cast),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_EXP, pkl_trans2_ps_exp),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans2_ps_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans2_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_trans2_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_trans2_ps_struct),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_trans2_ps_struct_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_trans2_ps_cast),
   };
 
 
@@ -468,7 +468,7 @@ struct pkl_phase pkl_phase_trans2 =
 /* SIZEOF nodes whose operand is a complete type should be replaced
    with an offset.  The type should be complete.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_op_sizeof)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -526,7 +526,7 @@ PKL_PHASE_END_HANDLER
    with an expression that calculates their size.  This only works
    with complete types.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -563,7 +563,7 @@ PKL_PHASE_END_HANDLER
 
 /* Ditto for offset types.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans3_df_offset_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset_type)
 {
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
@@ -600,10 +600,10 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans3 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_trans3_df_offset),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans3_df_offset_type),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_df_op_sizeof),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans3_ps_offset),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans3_ps_offset_type),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_ps_op_sizeof),
   };
 
 
@@ -611,7 +611,7 @@ struct pkl_phase pkl_phase_trans3 =
 /* Reverse the order of the function arguments, as the callee expects
    them in reverse order in the stack.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans4_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_funcall)
 {
   pkl_ast_node funcall = PKL_PASS_NODE;
   pkl_ast_node funcall_args = PKL_AST_FUNCALL_ARGS (funcall);
@@ -624,6 +624,6 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_trans4 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_trans_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_trans4_df_funcall),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans4_ps_funcall),
   };

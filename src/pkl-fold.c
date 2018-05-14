@@ -561,9 +561,9 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_fold =
   {
-   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_fold_cast),
+   PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_fold_cast),
 #define ENTRY(ops, fs)\
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_##ops, pkl_fold_##fs)
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_##ops, pkl_fold_##fs)
 
    ENTRY (OR, or), ENTRY (IOR, ior), ENTRY (ADD, add),
    ENTRY (XOR, xor), ENTRY (AND, and), ENTRY (BAND, band),

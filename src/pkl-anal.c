@@ -43,7 +43,7 @@
 /* The following handler is used in all anal phases, and initializes
    the phase payload.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal_bf_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal_pr_program)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -56,7 +56,7 @@ PKL_PHASE_END_HANDLER
 /* In struct literals, make sure that the names of its elements are
    unique in the structure.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -98,7 +98,7 @@ PKL_PHASE_END_HANDLER
 /* In struct TYPE nodes, check that no duplicated named element are
    declared in the type.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_type_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -134,7 +134,7 @@ PKL_PHASE_END_HANDLER
 /* Builtin compound statements can't contain statements
    themselves.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal1_df_comp_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_comp_stmt)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -154,7 +154,7 @@ PKL_PHASE_END_HANDLER
 /* Every node in the AST should have a valid location after parsing.
    This handler is used in both anal1 and anal2.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal_df_default)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal_ps_default)
 {
   if (!PKL_AST_LOC_VALID (PKL_AST_LOC (PKL_PASS_NODE)))
     {
@@ -168,11 +168,11 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_anal1 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal1_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_anal1_df_comp_stmt),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_df_type_struct),
-   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_anal1_ps_struct),
+   PKL_PHASE_PS_HANDLER (PKL_AST_COMP_STMT, pkl_anal1_ps_comp_stmt),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_ps_type_struct),
+   PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };
 
 
@@ -180,7 +180,7 @@ struct pkl_phase pkl_phase_anal1 =
 /* Every expression, array and struct node should be annotated with a
    type, and the type's completeness should have been determined.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_checktype)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_checktype)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -211,7 +211,7 @@ PKL_PHASE_END_HANDLER
 /* The magnitude in offset literals should be an integral expression.
    Also, it must have a type and its completeness should be known.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -255,7 +255,7 @@ PKL_PHASE_END_HANDLER
    function.  Also, an expressionless return statement is invalid in a
    non-void function.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_return_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -284,7 +284,7 @@ PKL_PHASE_END_HANDLER
 /* A funcall to a void function is only allowed in an "expression
    statement.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_anal2_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
 {
   pkl_anal_payload payload
     = (pkl_anal_payload) PKL_PASS_PAYLOAD;
@@ -307,14 +307,14 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_anal2 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_anal2_df_checktype),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_anal2_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_df_return_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_anal2_df_funcall),
-   PKL_PHASE_DF_DEFAULT_HANDLER (pkl_anal_df_default),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_EXP, pkl_anal2_ps_checktype),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_anal2_ps_checktype),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_anal2_ps_checktype),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_anal2_ps_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_ps_return_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal2_ps_funcall),
+   PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };
 
 
@@ -322,7 +322,7 @@ struct pkl_phase pkl_phase_anal2 =
 /* Make sure that every array initializer features an index at this
    point.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_analf_df_array_initializer)
+PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_array_initializer)
 {
   if (!PKL_AST_ARRAY_INITIALIZER_INDEX (PKL_PASS_NODE))
     {
@@ -336,6 +336,6 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_analf =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_anal_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_analf_df_array_initializer),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_analf_ps_array_initializer),
   };

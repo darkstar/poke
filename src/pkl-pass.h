@@ -34,43 +34,43 @@
    Implementing a phase involves defining a struct pkl_phase variable
    and filling it up.  A pkl_phase struct contains:
 
-   - CODE_DF_HANDLERS is a table indexed by node codes, which must be
+   - CODE_PS_HANDLERS is a table indexed by node codes, which must be
      values in the `pkl_ast_code' enumeration defined in pkl-ast.h.
      For example, PKL_AST_ARRAY.  It maps codes to
      pkl_phase_handler_fn functions.
 
-   - OP_DF_HANDLERS is a table indexed by operator codes, which must
+   - OP_PS_HANDLERS is a table indexed by operator codes, which must
      be values in the `pkl_ast_op' enumeration defined in pkl-ast.h.
      This enumeration is in turn generated from the operators defined
      in pkl-ops.def.  For example, PKL_AST_OP_ADD.  It maps codes to
      pkl_phase_handler_fn functions.
 
-   - TYPE_DF_HANDLERS is a table indexed by type codes, which must be
+   - TYPE_PS_HANDLERS is a table indexed by type codes, which must be
      values in the `pkl_ast_type_code' enumeration defined in
      pkl-ast.h. For example, PKL_TYPE_STRING.  It maps codes to
      pkl_phase_handler_fn functions.
 
    The handlers defined in the tables above are invoked while
-   traversing the AST in depth-first order.  Additional tables exist
-   to define handlers that are executed while traversing the AST in
-   breadth-first order:
+   traversing the AST in a post-order depth-first fashion.  Additional
+   tables exist to define handlers that are executed while traversing
+   the AST a pre-order depth-first fashion:
 
-   - CODE_BF_HANDLERS
-   - OP_BF_HANDLERS
-   - TYPE_BF_HANDLERS
+   - CODE_PR_HANDLERS
+   - OP_PR_HANDLERS
+   - TYPE_PR_HANDLERS
 
    A given phase can define handlers of both types: DF and BF.
 
    There are three additional handlers that the user can install:
 
-   - DEFAULT_BF_HANDLER is invoked for every node in the AST, after the
-     more particular ones, in breadth-first order.
+   - DEFAULT_PR_HANDLER is invoked for every node in the AST, after the
+     more particular ones, in pre-order.
 
-   - DEFAULT_DF_HANDLER is invoked for every node in the AST, after
-     the more particular ones, in depth-first order.
+   - DEFAULT_PS_HANDLER is invoked for every node in the AST, after
+     the more particular ones, in post-order.
 
    - ELSE_HANDLER, if not NULL, is invoked for every node for which no
-     other handler (BF or DF) has been invoked.
+     other handler (PR or PS) has been invoked.
 
    Note that if a given node class falls in several categories as
    implemented in the handlers tables, the more general handler will
@@ -99,15 +99,15 @@ struct pkl_phase
 {
   pkl_phase_handler_fn else_handler;
 
-  pkl_phase_handler_fn default_df_handler;
-  pkl_phase_handler_fn code_df_handlers[PKL_AST_LAST];
-  pkl_phase_handler_fn op_df_handlers[PKL_AST_OP_LAST];
-  pkl_phase_handler_fn type_df_handlers[PKL_TYPE_NOTYPE];
+  pkl_phase_handler_fn default_ps_handler;
+  pkl_phase_handler_fn code_ps_handlers[PKL_AST_LAST];
+  pkl_phase_handler_fn op_ps_handlers[PKL_AST_OP_LAST];
+  pkl_phase_handler_fn type_ps_handlers[PKL_TYPE_NOTYPE];
 
-  pkl_phase_handler_fn default_bf_handler;
-  pkl_phase_handler_fn code_bf_handlers[PKL_AST_LAST];
-  pkl_phase_handler_fn op_bf_handlers[PKL_AST_OP_LAST];
-  pkl_phase_handler_fn type_bf_handlers[PKL_TYPE_NOTYPE];
+  pkl_phase_handler_fn default_pr_handler;
+  pkl_phase_handler_fn code_pr_handlers[PKL_AST_LAST];
+  pkl_phase_handler_fn op_pr_handlers[PKL_AST_OP_LAST];
+  pkl_phase_handler_fn type_pr_handlers[PKL_TYPE_NOTYPE];
 };
 
 typedef struct pkl_phase *pkl_phase;
@@ -119,25 +119,25 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PHASE_ELSE_HANDLER(handler)      \
   .else_handler = handler
 
-#define PKL_PHASE_BF_DEFAULT_HANDLER(handler)   \
-  .default_bf_handler = handler
-#define PKL_PHASE_DF_DEFAULT_HANDLER(handler)   \
-  .default_df_handler = handler
+#define PKL_PHASE_PR_DEFAULT_HANDLER(handler)   \
+  .default_pr_handler = handler
+#define PKL_PHASE_PS_DEFAULT_HANDLER(handler)   \
+  .default_ps_handler = handler
 
-#define PKL_PHASE_BF_HANDLER(code, handler)     \
-  .code_bf_handlers[code] = handler
-#define PKL_PHASE_DF_HANDLER(code, handler)     \
-  .code_df_handlers[code] = handler
+#define PKL_PHASE_PR_HANDLER(code, handler)     \
+  .code_pr_handlers[code] = handler
+#define PKL_PHASE_PS_HANDLER(code, handler)     \
+  .code_ps_handlers[code] = handler
 
-#define PKL_PHASE_BF_OP_HANDLER(code,handler)   \
-  .op_bf_handlers[code] = handler
-#define PKL_PHASE_DF_OP_HANDLER(code,handler)   \
-  .op_df_handlers[code] = handler
+#define PKL_PHASE_PR_OP_HANDLER(code,handler)   \
+  .op_pr_handlers[code] = handler
+#define PKL_PHASE_PS_OP_HANDLER(code,handler)   \
+  .op_ps_handlers[code] = handler
 
-#define PKL_PHASE_BF_TYPE_HANDLER(code,handler) \
-  .type_bf_handlers[code] = handler
-#define PKL_PHASE_DF_TYPE_HANDLER(code,handler) \
-  .type_df_handlers[code] = handler
+#define PKL_PHASE_PR_TYPE_HANDLER(code,handler) \
+  .type_pr_handlers[code] = handler
+#define PKL_PHASE_PS_TYPE_HANDLER(code,handler) \
+  .type_ps_handlers[code] = handler
 
 /* The following macros are available to be used in the body of a node
    handler:

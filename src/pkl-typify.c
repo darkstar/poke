@@ -48,7 +48,7 @@
 /* The following handler is used in both `typify1' and `typify2'.  It
    initializes the payload.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify_bf_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_pr_program)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -61,7 +61,7 @@ PKL_PHASE_END_HANDLER
    and the type of its sole operand sould be suitable to be promoted
    to a boolean, i.e. it is an integral value.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_not)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_not)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -91,7 +91,7 @@ PKL_PHASE_END_HANDLER
    a boolean encoded as a 32-bit signed integer type.  Their operands
    should be either both integral types, or strings, or offsets.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_rela)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_rela)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -128,7 +128,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a binary operation EQ, NE, LT, GT, LE, GE, AND and OR
    is a boolean encoded as a 32-bit signed integer type.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_boolean)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_boolean)
 {
   pkl_ast_node type
     = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
@@ -141,7 +141,7 @@ PKL_PHASE_END_HANDLER
 /* The type of an unary operation NEG, POS, BNOT is the type of its
    single operand.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_first_operand)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_first_operand)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (PKL_AST_EXP_OPERAND (exp, 0));
@@ -152,7 +152,7 @@ PKL_PHASE_END_HANDLER
 
 /* The type of a CAST is the type of its target type.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_cast)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 {
   pkl_ast_node cast = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
@@ -188,7 +188,7 @@ PKL_PHASE_END_HANDLER
    same than the unit of the operand.  */
 
 #define TYPIFY_BIN(OP)                                                  \
-  PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_##OP)                         \
+  PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_##OP)                         \
   {                                                                     \
     pkl_typify_payload payload                                          \
       = (pkl_typify_payload) PKL_PASS_PAYLOAD;                          \
@@ -350,7 +350,7 @@ TYPIFY_BIN (add);
    TYPIFY_BIN here because it relies on a different logic to determine
    the result type.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_mul)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_mul)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -440,7 +440,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a SIZEOF operation is an offset type with an unsigned
    64-bit magnitude and units bits.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_op_sizeof)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_sizeof)
 {
   pkl_ast_node itype
     = pkl_ast_make_integral_type (PKL_PASS_AST,
@@ -462,7 +462,7 @@ PKL_PHASE_END_HANDLER
 /* The type of an offset is an offset type featuring the type of its
    magnitude, and its unit.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_offset)
 {
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node magnitude_type
@@ -481,7 +481,7 @@ PKL_PHASE_END_HANDLER
 /* The type of an ARRAY is determined from the number and the type of
    its initializers.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -531,7 +531,7 @@ PKL_PHASE_END_HANDLER
 /* The type of an ARRAY_REF is the type of the elements of the array
    it references.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -572,7 +572,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a STRUCT is determined from the types of its
    elements.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
@@ -607,7 +607,7 @@ PKL_PHASE_END_HANDLER
    because variables holding recursive calls to the function need the
    type of the function to exist.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_bf_func)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
@@ -642,7 +642,7 @@ PKL_PHASE_END_HANDLER
    the actual arguments in the funcall.  Also, set the type of the
    funcall, which is the type returned by the function.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -750,7 +750,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a STRUCT_ELEM in a struct initializer is the type of
    it's expression.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_elem)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem)
 {
   pkl_ast_node struct_elem = PKL_PASS_NODE;
   pkl_ast_node struct_elem_exp
@@ -766,7 +766,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a STRUCT_REF is the type of the referred element in the
    struct.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_struct_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -819,7 +819,7 @@ PKL_PHASE_END_HANDLER
 /* The array sizes in array type literals, if present, should be
    integer expressions.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -847,7 +847,7 @@ PKL_PHASE_END_HANDLER
 /* The type of a map is the type of the mapped value.  The expression
    in a map should be an offset.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_map)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -873,7 +873,7 @@ PKL_PHASE_END_HANDLER
    Note that due to the scope rules of the language it is guaranteed
    the type of the initializer has been already calculated.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_var)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_var)
 {
   pkl_ast_node var = PKL_PASS_NODE;
   pkl_ast_node decl = PKL_AST_VAR_DECL (var);
@@ -890,7 +890,7 @@ PKL_PHASE_END_HANDLER
 /* The type of the condition of a loop statement should be a
    boolean.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_df_loop_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -914,53 +914,53 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify1 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
 
-   PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_typify1_df_var),
-   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_typify1_df_cast),
-   PKL_PHASE_DF_HANDLER (PKL_AST_MAP, pkl_typify1_df_map),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_typify1_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_typify1_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_df_array_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_typify1_df_struct),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_df_struct_elem),
-   PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_typify1_bf_func),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_typify1_df_funcall),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_df_struct_ref),
-   PKL_PHASE_DF_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_df_loop_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_typify1_ps_var),
+   PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_typify1_ps_cast),
+   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_typify1_ps_map),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_typify1_ps_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_typify1_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_typify1_ps_struct),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_ps_struct_elem),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_typify1_pr_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_ps_loop_stmt),
 
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_df_op_sizeof),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_df_op_not),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_typify1_df_op_boolean),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify1_df_add),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify1_df_sub),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify1_df_mul),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify1_df_div),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify1_df_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_typify1_df_sl),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_typify1_df_sr),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify1_df_ior),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify1_df_xor),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify1_df_band),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_df_first_operand),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_df_first_operand),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_df_first_operand),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_ps_op_not),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NE, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LT, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LE, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_typify1_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_AND, pkl_typify1_ps_op_boolean),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_OR, pkl_typify1_ps_op_boolean),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ADD, pkl_typify1_ps_add),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify1_ps_sub),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify1_ps_mul),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify1_ps_div),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify1_ps_mod),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SL, pkl_typify1_ps_sl),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SR, pkl_typify1_ps_sr),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify1_ps_ior),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify1_ps_xor),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify1_ps_band),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_ps_first_operand),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_ps_first_operand),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),
 
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_df_type_array),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),
   };
 
 
 
 /* Determine the completeness of a type node.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
@@ -970,7 +970,7 @@ PKL_PHASE_END_HANDLER
 /* Determine the completeness of the type associated with a SIZEOF
    (TYPE).  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_op_sizeof)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_op_sizeof)
 {
   pkl_ast_node op
     = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
@@ -986,7 +986,7 @@ PKL_PHASE_END_HANDLER
 /* Check that the type of the expression in a `return' statement
    matches the return type of it's containing function.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_df_return_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_return_stmt)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -1025,9 +1025,9 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_typify2 =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_typify_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_typify2_df_return_stmt),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_df_type),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_df_type),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_df_op_sizeof),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_typify2_ps_return_stmt),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_ps_type),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_ps_type),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_ps_op_sizeof),
   };

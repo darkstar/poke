@@ -61,7 +61,7 @@
  * standard prologue.
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_program)
 {
   PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST, 1 /* guard_stack */);
 }
@@ -73,7 +73,7 @@ PKL_PHASE_END_HANDLER
  * PROGRAM
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_program)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
 {
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM);
 }
@@ -84,7 +84,7 @@ PKL_PHASE_END_HANDLER
  * | INITIAL
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_decl)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
 
@@ -105,7 +105,7 @@ PKL_PHASE_END_HANDLER
  * DECL
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_decl)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
 
@@ -159,7 +159,7 @@ PKL_PHASE_END_HANDLER
  * VAR
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_var)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_var)
 {
   pkl_ast_node var = PKL_PASS_NODE;
 
@@ -179,7 +179,7 @@ PKL_PHASE_END_HANDLER
  * NULL_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_null_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_null_stmt)
 {
   /* Null is nothing, nada.  */
 }
@@ -191,7 +191,7 @@ PKL_PHASE_END_HANDLER
  * | ...
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_comp_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_comp_stmt)
 {
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
 
@@ -209,7 +209,7 @@ PKL_PHASE_END_HANDLER
  * COMP_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_comp_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
 {
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
   pkl_ast_node comp_stmt_stmts
@@ -260,7 +260,7 @@ PKL_PHASE_END_HANDLER
  * ASS_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_ass_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
 {
   pkl_ast_node ass_stmt = PKL_PASS_NODE;
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
@@ -282,7 +282,7 @@ PKL_PHASE_END_HANDLER
  * | [ELSE_STMT]
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_if_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_if_stmt)
 {
   pkl_ast_node if_stmt = PKL_PASS_NODE;
   pkl_ast_node if_exp = PKL_AST_IF_STMT_EXP (if_stmt);
@@ -308,7 +308,7 @@ PKL_PHASE_END_HANDLER
  * | BODY
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_loop_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
 {
   pkl_ast_node loop_stmt = PKL_PASS_NODE;
   pkl_ast_node loop_stmt_condition
@@ -331,7 +331,7 @@ PKL_PHASE_END_HANDLER
  * RETURN
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_return_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
 {
   /* Return from the function: pop N frames and generate a return
      instruction.  Note the popf below includes the function's
@@ -348,7 +348,7 @@ PKL_PHASE_END_HANDLER
  * EXP_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_exp_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 {
   /* Pop the expression from the stack.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POP);
@@ -360,7 +360,7 @@ PKL_PHASE_END_HANDLER
  * FUNCALL_ARG
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall_arg)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall_arg)
 {
   /* Do nothing, the argument is alread pushed in the stack.  */
 }
@@ -372,7 +372,7 @@ PKL_PHASE_END_HANDLER
  * FUNCALL
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
 {
   /* At this point the closure for FUNCTION and the actuals are pushed
      in the stack.  Just call the bloody function.  */
@@ -388,7 +388,7 @@ PKL_PHASE_END_HANDLER
  * | BODY
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_func)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
 {
   /* This is a function prologue.  */
   pkl_asm_note (PKL_GEN_ASM,
@@ -406,7 +406,7 @@ PKL_PHASE_END_HANDLER
  * FUNC_ARG
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_arg)
 {
   /* Pop an actual argument from the stack and put it in the current
      environment.  */
@@ -419,7 +419,7 @@ PKL_PHASE_END_HANDLER
  * FUNC_ARG_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func_arg_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_arg_type)
 {
   /* Nothing to do here.  */
 }
@@ -432,7 +432,7 @@ PKL_PHASE_END_HANDLER
  * FUNC
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_func)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func)
 {
   /* Function epilogue.  */
 
@@ -459,7 +459,7 @@ PKL_PHASE_END_HANDLER
  * INTEGER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_integer)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_integer)
 {
   pkl_ast_node integer = PKL_PASS_NODE;
   pkl_ast_node type;
@@ -497,7 +497,7 @@ PKL_PHASE_END_HANDLER
  * IDENTIFIER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_identifier)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_identifier)
 {
   pkl_ast_node identifier = PKL_PASS_NODE;
   pvm_val val
@@ -511,7 +511,7 @@ PKL_PHASE_END_HANDLER
  * STRING
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_string)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_string)
 {
   pkl_ast_node string = PKL_PASS_NODE;
   pvm_val val
@@ -525,7 +525,7 @@ PKL_PHASE_END_HANDLER
  * TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
 {
   /* Avoid generating type nodes in certain circumstances.  */
   if (PKL_PASS_PARENT
@@ -548,7 +548,7 @@ PKL_PHASE_END_HANDLER
  * | UNIT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
 {
   /* We do not need to generate code for the offset type.  */
   PKL_PASS_BREAK;
@@ -562,7 +562,7 @@ PKL_PHASE_END_HANDLER
  * OFFSET
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
 {
   pkl_asm pasm = PKL_GEN_ASM;
 
@@ -575,7 +575,7 @@ PKL_PHASE_END_HANDLER
  * CAST
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_cast)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -651,7 +651,7 @@ PKL_PHASE_END_HANDLER
  * MAP
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_map)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
 {
   pkl_asm pasm = PKL_GEN_ASM;
 
@@ -692,7 +692,7 @@ PKL_PHASE_END_HANDLER
  * ARRAY_INITIALIZER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_initializer)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_initializer)
 {
   /* Nothing to do.  */
 }
@@ -705,7 +705,7 @@ PKL_PHASE_END_HANDLER
  *  ARRAY
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -726,7 +726,7 @@ PKL_PHASE_END_HANDLER
  * ARRAY_REF
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
 }
@@ -738,7 +738,7 @@ PKL_PHASE_END_HANDLER
  *  STRUCT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
 {
   pkl_asm pasm = PKL_GEN_ASM;
 
@@ -755,7 +755,7 @@ PKL_PHASE_END_HANDLER
  *  | STRUCT_ELEM_EXP
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem)
 {
   /* If the struct initializer doesn't include a name, generate a null
      value as expected by the mksct instruction.  */
@@ -770,7 +770,7 @@ PKL_PHASE_END_HANDLER
  * STRUCT_REF
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_struct_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
 }
@@ -782,7 +782,7 @@ PKL_PHASE_END_HANDLER
  * | TYPE_INTEGRAL
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_integral)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -810,7 +810,7 @@ PKL_PHASE_END_HANDLER
  * | TYPE_ARRAY
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_array)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -827,7 +827,7 @@ PKL_PHASE_END_HANDLER
  * | TYPE_STRING
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_string)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -847,7 +847,7 @@ PKL_PHASE_END_HANDLER
  * | TYPE_OFFSET
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_offset)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -865,7 +865,7 @@ PKL_PHASE_END_HANDLER
  * | ...
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_type_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 {
   /* Push a frame to the environment.  */
   /* XXX */
@@ -880,7 +880,7 @@ PKL_PHASE_END_HANDLER
  * | TYPE_STRUCT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_type_struct)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -905,7 +905,7 @@ PKL_PHASE_END_HANDLER
  * | | STRUCT_ELEM_TYPE_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_bf_struct_elem_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
   PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
@@ -927,7 +927,7 @@ PKL_PHASE_END_HANDLER
  * EXP
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -986,7 +986,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_add)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -1027,7 +1027,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sub)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node node = PKL_PASS_NODE;
@@ -1089,7 +1089,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mul)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_div)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_asm pasm = PKL_GEN_ASM;
@@ -1136,7 +1136,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_div)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
 {
   pkl_ast_node node = PKL_PASS_NODE;
 
@@ -1181,7 +1181,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_mod)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_intexp)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
 {
   pkl_asm pasm = PKL_GEN_ASM;
 
@@ -1216,25 +1216,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_intexp)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_and)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_and)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AND);
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_or)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_or)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_not)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_not)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NOT);
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_rela)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node exp = PKL_PASS_NODE;
@@ -1302,7 +1302,7 @@ PKL_PHASE_END_HANDLER
 
 #undef RELA_EXP_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_df_op_sizeof)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sizeof)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
 }
@@ -1340,66 +1340,66 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_gen =
   {
-   PKL_PHASE_BF_HANDLER (PKL_AST_DECL, pkl_gen_bf_decl),
-   PKL_PHASE_DF_HANDLER (PKL_AST_DECL, pkl_gen_df_decl),
-   PKL_PHASE_DF_HANDLER (PKL_AST_VAR, pkl_gen_df_var),
-   PKL_PHASE_BF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_bf_comp_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_COMP_STMT, pkl_gen_df_comp_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_NULL_STMT, pkl_gen_df_null_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ASS_STMT, pkl_gen_df_ass_stmt),
-   PKL_PHASE_BF_HANDLER (PKL_AST_IF_STMT, pkl_gen_bf_if_stmt),
-   PKL_PHASE_BF_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_bf_loop_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_df_return_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_EXP_STMT, pkl_gen_df_exp_stmt),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL, pkl_gen_df_funcall),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_df_funcall_arg),
-   PKL_PHASE_BF_HANDLER (PKL_AST_FUNC, pkl_gen_bf_func),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC, pkl_gen_df_func),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_df_func_arg),
-   PKL_PHASE_DF_HANDLER (PKL_AST_FUNC_ARG_TYPE, pkl_gen_df_func_arg_type),
-   PKL_PHASE_BF_HANDLER (PKL_AST_TYPE, pkl_gen_bf_type),
-   PKL_PHASE_BF_HANDLER (PKL_AST_PROGRAM, pkl_gen_bf_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_PROGRAM, pkl_gen_df_program),
-   PKL_PHASE_DF_HANDLER (PKL_AST_INTEGER, pkl_gen_df_integer),
-   PKL_PHASE_DF_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_df_identifier),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRING, pkl_gen_df_string),
-   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_bf_type_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_OFFSET, pkl_gen_df_offset),
-   PKL_PHASE_DF_HANDLER (PKL_AST_CAST, pkl_gen_df_cast),
-   PKL_PHASE_DF_HANDLER (PKL_AST_MAP, pkl_gen_df_map),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY, pkl_gen_df_array),
-   PKL_PHASE_DF_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_df_array_ref),
-   PKL_PHASE_BF_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_df_array_initializer),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT, pkl_gen_df_struct),
-   PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_bf_struct_elem),
-   PKL_PHASE_DF_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_df_struct_ref),
-   PKL_PHASE_BF_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_gen_bf_struct_elem_type),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_df_op_add),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_df_op_sub),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_df_op_mul),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_MOD, pkl_gen_df_op_mod),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BAND, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_BNOT, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NEG, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_IOR, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_XOR, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SL, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SR, pkl_gen_df_op_intexp),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_DIV, pkl_gen_df_op_div),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_AND, pkl_gen_df_op_and),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_OR, pkl_gen_df_op_or),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NOT, pkl_gen_df_op_not),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_EQ, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_NE, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LT, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_LE, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_df_op_rela),
-   PKL_PHASE_DF_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_gen_df_op_sizeof),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_df_type_integral),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_df_type_array),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_df_type_string),
-   PKL_PHASE_BF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_bf_type_struct),
-   PKL_PHASE_DF_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_df_type_struct),
+   PKL_PHASE_PR_HANDLER (PKL_AST_DECL, pkl_gen_pr_decl),
+   PKL_PHASE_PS_HANDLER (PKL_AST_DECL, pkl_gen_ps_decl),
+   PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_gen_ps_var),
+   PKL_PHASE_PR_HANDLER (PKL_AST_COMP_STMT, pkl_gen_pr_comp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_COMP_STMT, pkl_gen_ps_comp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_NULL_STMT, pkl_gen_ps_null_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_gen_ps_ass_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_IF_STMT, pkl_gen_pr_if_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_ps_func_arg),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG_TYPE, pkl_gen_ps_func_arg_type),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_gen_pr_type),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_gen_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_PROGRAM, pkl_gen_ps_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_INTEGER, pkl_gen_ps_integer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_ps_identifier),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_gen_ps_string),
+   PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_pr_type_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_gen_ps_offset),
+   PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_gen_ps_cast),
+   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_gen_ps_map),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_ps_array_ref),
+   PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_pr_struct_elem),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_ps_struct_ref),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_gen_pr_struct_elem_type),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_ps_op_add),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_ps_op_sub),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_ps_op_mul),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_gen_ps_op_mod),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BAND, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IOR, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_XOR, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SL, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SR, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_gen_ps_op_div),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_AND, pkl_gen_ps_op_and),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_OR, pkl_gen_ps_op_or),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_gen_ps_op_not),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NE, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LT, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LE, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_gen_ps_op_sizeof),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_ps_type_string),
+   PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_pr_type_struct),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_ps_type_struct),
    PKL_PHASE_ELSE_HANDLER (pkl_gen_noimpl),
   };
