@@ -603,7 +603,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
 PKL_PHASE_END_HANDLER
 
 /* The type of a FUNC is determined from the types of its arguments,
-   and its return type.  We need to use a breadth-first handler here
+   and its return type.  We need to use a pre-order handler here
    because variables holding recursive calls to the function need the
    type of the function to exist.  */
 

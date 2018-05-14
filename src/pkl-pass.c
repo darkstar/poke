@@ -113,8 +113,8 @@ static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
                                    void *payloads[], struct pkl_phase *phases[]);
 
 
-#define PKL_PASS_DEPTH_FIRST 0
-#define PKL_PASS_BREADTH_FIRST 1
+#define PKL_PASS_PRE_ORDER 0
+#define PKL_PASS_POST_ORDER 1
 
 static inline pkl_ast_node
 pkl_call_node_handlers (jmp_buf toplevel,
@@ -141,9 +141,9 @@ pkl_call_node_handlers (jmp_buf toplevel,
         {
 #define PKL_DEF_OP(ocode, str)                                          \
           case ocode:                                                   \
-            if (order == PKL_PASS_DEPTH_FIRST)                          \
+            if (order == PKL_PASS_PRE_ORDER)                          \
               PKL_CALL_PHASES (op, ps, ocode);                          \
-            else if (order == PKL_PASS_BREADTH_FIRST)                   \
+            else if (order == PKL_PASS_POST_ORDER)                   \
               PKL_CALL_PHASES (op, pr, ocode);                          \
             else                                                        \
               assert (0);                                               \
@@ -162,9 +162,9 @@ pkl_call_node_handlers (jmp_buf toplevel,
     {
       int typecode = PKL_AST_TYPE_CODE (node);
 
-      if (order == PKL_PASS_DEPTH_FIRST)
+      if (order == PKL_PASS_PRE_ORDER)
         PKL_CALL_PHASES (type, ps, typecode);
-      else if (order == PKL_PASS_BREADTH_FIRST)
+      else if (order == PKL_PASS_POST_ORDER)
         PKL_CALL_PHASES (type, pr, typecode);
       else
         assert (0);
@@ -172,17 +172,17 @@ pkl_call_node_handlers (jmp_buf toplevel,
 
   /* Call the phase handlers defined for node codes, in the given
      order.  */
-  if (order == PKL_PASS_DEPTH_FIRST)
+  if (order == PKL_PASS_PRE_ORDER)
     PKL_CALL_PHASES (code, ps, node_code);
-  else if (order == PKL_PASS_BREADTH_FIRST)
+  else if (order == PKL_PASS_POST_ORDER)
     PKL_CALL_PHASES (code, pr, node_code);
   else
     assert (0);
 
   /* Call the phase handlers defined as default.  */
-  if (order == PKL_PASS_DEPTH_FIRST)
+  if (order == PKL_PASS_PRE_ORDER)
     PKL_CALL_PHASES_SINGLE(default_ps);
-  else if (order == PKL_PASS_DEPTH_FIRST)
+  else if (order == PKL_PASS_PRE_ORDER)
     PKL_CALL_PHASES_SINGLE(default_pr);
 
  restart:
@@ -252,7 +252,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* Call the breadth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
-                                 PKL_PASS_BREADTH_FIRST);
+                                 PKL_PASS_POST_ORDER);
   if (dobreak)
     goto _exit;
 
@@ -436,7 +436,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* Call the depth-first handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
-                                 PKL_PASS_DEPTH_FIRST);
+                                 PKL_PASS_PRE_ORDER);
 
   /* If no handler has been invoked, call the default handler of the
      registered phases in case they are defined.  */
