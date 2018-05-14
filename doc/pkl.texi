@@ -116,9 +116,7 @@ processing@footnote{Some implementations may find it suitable to
 encode certain meta-information in comments however.}.
 
 Text enclosed between @code{/*} and @code{*/} sequences conforms a
-possibly multi-line comment, and is usually processed and removed by
-the lexical analyzer, as it isn't intended to be preserved for
-subsequent processing.
+possibly multi-line comment
 
 @b{R-LEX-00}: Multi-line comments can't be nested.
 
@@ -200,9 +198,42 @@ Not every combination of suffix characters makes sense.  Well-formed
 numeric literal suffixes are characterized by the regular expression
 @code{((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))}.
 
+If not explicitly specified with one of the @code{l}, @code{L},
+@code{B}, @code{h} or @code{H} suffixes, the width of an integer
+constant is the smallest signed or unsigned integer capable of holding
+it, starting with 32 bits, in steps of power of two and up to 64 bits.
+
+@section Character Literals
+
+There is another way to express unsigned 8-bit integers, which is to
+use a @dfn{character literal}.  Character literals are delimited by
+@code{'} characters, and contain a representation of an
+@acronym{ASCII} character.  The value of the resulting integer is the
+code of the represented @acronym{ASCII} character in the
+@acronym{ASCII}s 7-bit encoding.
+
+The representation of a printable character is the printable
+representation of the character itself.  For example, @code{'a'}
+represents the integer @code{97}.
+
+The representation of non-printable characters use escape sequences
+instead, which are listed in the following table.
+
+@table @code
+@item '\0'
+@code{NULL} character (@acronym{ASCII} @code{0}).
+@item '\t'
+Tab (@acronym{ASCII} @code{0x9}).
+@item '\n'
+Newline character (@acronym{ASCII} @code{0xa}).
+@end table
+
 @section String Literals
 
-@section Formatted String Literals
+String literals allow to express sequences of characters, implicitly
+finished by the @dfn{NULL character} or @code{'\0'}.
+
+@c XXX @section Formatted String Literals
 
 @node The PKL Type System
 @chapter The PKL Type System
@@ -453,7 +484,8 @@ ELIF T1.type = union @{name=n1@} AND T2.type = union @{name=n2@}
 ELIF T1.type = (T11, ..., T1n) : T10 AND T2.type = (T21, .., T2n) : T20
    RETURN T10 EQUAL T20 AND (T11 EQUAL T21 AND ... T1n EQUAL T2n)
 @end example
-    
+
+@c XXX move this paragraph to the pokeint manual.
 The PKL compiler function @code{pkl_ast_type_equal} implements the
 equivalence rules described above.
 
@@ -467,13 +499,18 @@ s = @{.foo=30,.bar=40@};  /* Type error.  */
 
 @section Overloading of Operators
 
-Certain PKL operators are overloaded.  Example, addition.
+Certain PKL operators are overloaded.  For example, addition is
+supported for integer types of any type, and also for strings.
 
-However, the overloading of operators in PKL are carefully designed
-in a way it is always possible to infer the type of the result of the
-operator (maybe a partial type) based on the types of the arguments.
-This means no additional top-down pass to narrow types is ever
-necessary.  For example:
+However, the overloading of operators in PKL are carefully designed in
+a way it is always possible to infer the type of the result of the
+operator based on the types of the arguments.
+
+This means it is possible for an implementation to perform type
+checking of expressions in a single pass, using synthetized attributes
+only.  No second top-down pass to narrow types is ever necessary.
+
+For example:
 
 @example
 int<N> + int<N> -> int<N>          @r{is defined}.
@@ -482,7 +519,6 @@ int<N> + int<N> -> int<N*2>        @r{is NOT defined}.
 
 @section Type Checking of Expressions
 
-@noindent
 R-TYPE-02: The type of the Nth actual parameter passed in a function
 call should match the type of the Nth formal argument defined in the
 function type of the function being called.
@@ -521,11 +557,11 @@ directly or indirecly.
 
 An example of a direct type inclusion is the type of the elements
 specified in an array type constructor.  An example of an indirect
-type is the type of the constant expression denoting the units in an
-offset type constructor.
+type inclusion is the type of the constant expression denoting the
+units in an offset type constructor.
 
-Thus the PKL type system also includes checks for these contained
-types and are listed below.
+Thus the PKL type system also includes checks for types contained in
+type expressions, and these are listed below.
 
 @b{R-TYPE-07}: An array type specifier may contain an expression
 denoting the number of elements it contains, but only when it appears
@@ -537,10 +573,10 @@ elements in an array type constructor should be suitable to be
 promoted to an @code{uint<64>}.  (See promotion rules in XXX xref).
 
 @b{R-TYPE-09}: The expression denoting the number of elements in an
-array should be constant.
+array should be constant.  (See constant expressions in XXX xref).
 
 @b{R-TYPE-10}: The base type of an offset type should be an integral
-type.  Thus, @code{offset<string,1>} is not valid.
+type.  For example, @code{offset<string,1>} is not valid.
 
 @b{R-TYPE-11}: The type of the expression denoting the unit of an
 offset type specifier should be suitable to be promoted to an
