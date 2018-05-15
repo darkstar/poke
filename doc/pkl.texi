@@ -220,8 +220,10 @@ The representation of non-printable characters use escape sequences
 instead, which are listed in the following table.
 
 @table @code
-@item '\0'
-@code{NULL} character (@acronym{ASCII} @code{0}).
+@item '\NNN'
+Character with octal code @code{NNN}.  The number can feature one, two
+or three digits, but no more.  Example: @code{\0} is the @code{NULL}
+character.
 @item '\t'
 Tab (@acronym{ASCII} @code{0x9}).
 @item '\n'

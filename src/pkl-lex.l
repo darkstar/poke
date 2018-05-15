@@ -82,7 +82,7 @@ NEWLINE            \n
 BLANK              [ \t]
 LETTER             [a-zA-Z]
 FIELD_NAME         {LETTER}[a-zA-Z0-9_]*
-CHAR		   '(.|\\[n0t])'
+CHAR		   '(.|\\[nt]|\\[0-7]|\\[0-7][0-7]|\\[0-7][0-7][0-7])'
 STRING             \"([^"]|\\(.|\n))*\"
 HEXCST		   0[xX][0-9a-fA-F][0-9a-fA-F_]*
 BINCST		   0[bB][01][01_]*
@@ -299,22 +299,29 @@ D [0-9]
 
    if (yytext[1] == '\\')
     {
-      switch (yytext[2])
-      {
-      case 'n':
-        value = '\n';
-        break;
-      case 't':
-        value = '\t';
-        break;
-      case '0':
-        value = '\0';
-        break;
-      default:
-        /* To avoid compiler warnings.  */
-        value = 0;
-        break;
-      }
+      if (yytext[2] >= '0' && yytext[2] <= '9')
+        {
+          char *end;
+          uint64_t val64;
+
+          /* strtoll can't fail in this context.  */
+          val64 = strtoll (yytext + 2, &end, 8);
+          value = (uint8_t) val64;
+        }
+      else
+        switch (yytext[2])
+          {
+          case 'n':
+            value = '\n';
+            break;
+          case 't':
+            value = '\t';
+            break;
+          default:
+            /* To avoid compiler warnings.  */
+            value = 0;
+            break;
+          }
     }
    else
      value = yytext[1];

@@ -1,0 +1,16 @@
+/* { dg-do run } */
+
+/* { dg-command { print 'a' } } */
+/* { dg-output "97UB" } */
+
+/* { dg-command { print '\141' } } */
+/* { dg-output "\n97UB" } */
+
+/* { dg-command { print '\0' } } */
+/* { dg-output "\n0UB" } */
+
+/* { dg-command { print '\00' } } */
+/* { dg-output "\n0UB" } */
+
+/* { dg-command { print '\000' } } */
+/* { dg-output "\n0UB" } */
