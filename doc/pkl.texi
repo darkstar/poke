@@ -47,7 +47,7 @@ Documentation License''.
 @c * Literals
 @c * Variables
 @c * Functions
-* The PKL Type System::
+* The Pkl Type System::
 @c * Grammar
 * Future Extensions::
 
@@ -62,30 +62,30 @@ Indexes
 @chapter Introduction
 
 
-@section What is PKL
+@section What is Pkl
 
-@dfn{PKL} is a domain-specific programming language whose main purpose
+@dfn{Pkl} is a domain-specific programming language whose main purpose
 is to be used in
 @code{poke}@footnote{@url{http://www.gnu.org/s/poke}}, the GNU
-interactive editor for binary files.  The name PKL stands for ``Poke
+interactive editor for binary files.  The name Pkl stands for ``Poke
 Language'', and it is pronounced (and informally referred to) as
 ``pickle''.
 
 @section About this Document
 
 This document contains a complete and semi-formal specification of
-PKL, describing all the aspects of the language.  The main purpose of
+Pkl, describing all the aspects of the language.  The main purpose of
 the specification is to serve as a reference for implementations,
 notably GNU poke.
 
 This document is not intended to be a tutorial for learning how to
-write PKL programs.  For that purpose, please read the Poke Book. XXX:
+write Pkl programs.  For that purpose, please read the Poke Book. XXX:
 xref to the poke book.
 
 @node Lexical
 @chapter Lexical
 
-The fundamental pieces on which PKL programs are built are called
+The fundamental pieces on which Pkl programs are built are called
 @dfn{lexical tokens}.  The tokens themselves are built from a stream
 of characters provided by the user: the source program.
 
@@ -98,7 +98,7 @@ described below.
 
 @section Source Encoding and Character Set
 
-PKL source text shall be encoded in @acronym{ASCII} (ISO-646) and
+Pkl source text shall be encoded in @acronym{ASCII} (ISO-646) and
 covers the @acronym{ASCII} character set.
 
 @section Newline Character
@@ -108,7 +108,7 @@ Source code lines are separated by the @dfn{newline character},
 
 @section Comments
 
-PKL supports two different kind of comments: multi-line non-nestable
+Pkl supports two different kind of comments: multi-line non-nestable
 comments and partial-line stackable comments.  Both flavors of
 comments are usually processed and removed by the lexical analyzer, as
 these are not intended to be preserved for subsequent
@@ -141,7 +141,7 @@ Certain character sequences look like identifiers, but they conform
 other tokens.  These sequences are known as @dfn{reserved words}, and
 can't be used as identifiers in any context.
 
-@b{R-LEX-01}: The PKL reserved words are @code{struct}, @code{else},
+@b{R-LEX-01}: The Pkl reserved words are @code{struct}, @code{else},
 @code{while}, @code{if}, @code{sizeof}, @code{defun}, @code{deftype},
 @code{defvar}, @code{return}, @code{string}, @code{as} and
 @code{__builtin_print__}.
@@ -235,8 +235,8 @@ finished by the @dfn{NULL character} or @code{'\0'}.
 
 @c XXX @section Formatted String Literals
 
-@node The PKL Type System
-@chapter The PKL Type System
+@node The Pkl Type System
+@chapter The Pkl Type System
 
 Static.  (XXX: rationale on why static.)
 
@@ -247,7 +247,7 @@ Not complete.  Three possibilities: a) sound type system, b) complete
 type system or c) both sound and complete and the type checker many
 never terminate.  We choose a).
 
-The PKL type system establishes the rules to be applied in order to
+The Pkl type system establishes the rules to be applied in order to
 determine the type of many different language constructs.  This
 chapter contains an exhaustive relation of these rules.  A conforming
 implementation should check for all of these, emitting errors in case
@@ -262,9 +262,9 @@ specifiers}.
 A @dfn{type expression} is an abstract representation of a type, such
 as @code{integer (32, 0)}, that denotes an unsigned 32-bit integral
 type.  The syntax we use for type expressions doesn't equal the
-concrete syntax of PKL, and is often more general.
+concrete syntax of Pkl, and is often more general.
 
-A @dfn{type specifier} is the PKL concrete syntactic construction to
+A @dfn{type specifier} is the Pkl concrete syntactic construction to
 denote a type, such as @code{int<32>}, which is a type specifier
 denoting an unsigned 32-bit integral type.
 
@@ -282,7 +282,7 @@ keep in mind that they are not language constructions.
 
 @section Type Expressions
 
-PKL type expressions are structured, and are defined as follows.
+Pkl type expressions are structured, and are defined as follows.
 
 A @dfn{basic type constructor}, maybe applied to some arguments, is a
 type expression, and constructs basic types.  Basic type constructors
@@ -443,7 +443,7 @@ in structs and unions.
 
 @section Cycles in Type Expressions
 
-PKL imposes the restriction that no type can be referred by name
+Pkl imposes the restriction that no type can be referred by name
 before it is declared.  Therefore, it is not possible to define
 recursive types and the graphs used to implement type expressions
 can't have cycles.
@@ -453,7 +453,7 @@ can't have cycles.
 The checking rules described below uses the notion of equality among
 type expressions: "if T1 and T2 are equal".
 
-@b{R-TYPE-00}: PKL uses structural equivalence for all types, but for
+@b{R-TYPE-00}: Pkl uses structural equivalence for all types, but for
 struct and union types, which are compared by name.
 
 Note however that not all the components of the type expressions are
@@ -486,7 +486,7 @@ ELIF T1.type = (T11, ..., T1n) : T10 AND T2.type = (T21, .., T2n) : T20
 @end example
 
 @c XXX move this paragraph to the pokeint manual.
-The PKL compiler function @code{pkl_ast_type_equal} implements the
+The Pkl compiler function @code{pkl_ast_type_equal} implements the
 equivalence rules described above.
 
 Anonymous struct and union types are never equivalent to any union type,
@@ -499,10 +499,10 @@ s = @{.foo=30,.bar=40@};  /* Type error.  */
 
 @section Overloading of Operators
 
-Certain PKL operators are overloaded.  For example, addition is
+Certain Pkl operators are overloaded.  For example, addition is
 supported for integer types of any type, and also for strings.
 
-However, the overloading of operators in PKL are carefully designed in
+However, the overloading of operators in Pkl are carefully designed in
 a way it is always possible to infer the type of the result of the
 operator based on the types of the arguments.
 
@@ -525,7 +525,7 @@ function type of the function being called.
 
 @section Type Checking of Statements
 
-In PKL statements do not have types, but expressions can appear in
+In Pkl statements do not have types, but expressions can appear in
 certain statements, and the types of these expressions are checked
 according to the following rules.
 
@@ -560,7 +560,7 @@ specified in an array type constructor.  An example of an indirect
 type inclusion is the type of the constant expression denoting the
 units in an offset type constructor.
 
-Thus the PKL type system also includes checks for types contained in
+Thus the Pkl type system also includes checks for types contained in
 type expressions, and these are listed below.
 
 @b{R-TYPE-07}: An array type specifier may contain an expression
