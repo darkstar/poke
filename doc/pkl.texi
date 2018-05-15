@@ -44,9 +44,9 @@ Documentation License''.
 @menu
 * Introduction::
 * Lexical::
-@c * Literals
-@c * Variables
-@c * Functions
+@c * Expressions::
+@c * Declarations::
+@c * Statements::
 * The Pkl Type System::
 @c * Grammar
 * Future Extensions::
@@ -68,8 +68,8 @@ Indexes
 is to be used in
 @code{poke}@footnote{@url{http://www.gnu.org/s/poke}}, the GNU
 interactive editor for binary files.  The name Pkl stands for ``Poke
-Language'', and it is pronounced (and informally referred to) as
-``pickle''.
+Language'', and it is pronounced as ``pickle''@footnote{Much as Tcl is
+prononced ``tickle'' :)}.
 
 @section About this Document
 
@@ -231,7 +231,28 @@ Newline character (@acronym{ASCII} @code{0xa}).
 @section String Literals
 
 String literals allow to express sequences of characters, implicitly
-finished by the @dfn{NULL character} or @code{'\0'}.
+finished by the @dfn{NULL character} or @code{'\0'}.  The contents of
+a string literal are enclosed between @code{"} characters.
+
+The @dfn{empty string}, which features only the implicit finishing
+@code{'\0'}, is denoted as @code{""}.
+
+The representation of printable ASCII characters in a string is the
+printable representation of the characters themselves.  For example,
+@code{"abc"} is a string composed by the characters @code{'a'},
+@code{'b'}, @code{'c'} and @code{'\0'}.
+
+The representation of non-printable characters within the string use
+escape sequences instead, which are listed in the following table.
+
+@table @code
+@item \\
+Represents the @code{\} character.
+@item \n
+Newline character (@acronym{ASCII} @code{0xa}).
+@item \t
+Tab (@acronym{ASCII} @code{0x9}).
+@end table
 
 @c XXX @section Formatted String Literals
 
