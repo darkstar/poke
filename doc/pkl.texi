@@ -1,7 +1,7 @@
 \input texinfo
 @comment %**start of header
 @setfilename pkl.info
-@settitle The Poke Language
+@settitle Pkl: The Poke Language
 @afourpaper
 @comment %**end of header
 
@@ -24,7 +24,7 @@ Documentation License''.
 @end direntry
 
 @titlepage
-@title The Poke Language
+@title Pkl: The Poke Language
 @subtitle Version 1
 @author by Jose E. Marchesi
 @page
@@ -36,7 +36,7 @@ Documentation License''.
 
 @ifnottex
 @node Top
-@top The Poke Language
+@top Pkl: The Poke Language
 
 @insertcopying
 @end ifnottex
@@ -62,7 +62,7 @@ Indexes
 @chapter Introduction
 
 
-@section What is Pkl
+@section About Pkl
 
 @dfn{Pkl} is a domain-specific programming language whose main purpose
 is to be used in
