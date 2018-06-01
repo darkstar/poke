@@ -290,12 +290,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_if_stmt)
   pkl_ast_node if_else_stmt = PKL_AST_IF_STMT_ELSE_STMT (if_stmt);
 
   pkl_asm_if (PKL_GEN_ASM, if_exp);
-  PKL_PASS_SUBPASS (if_exp);
+  {
+    PKL_PASS_SUBPASS (if_exp);
+  }
   pkl_asm_then (PKL_GEN_ASM);
-  PKL_PASS_SUBPASS (if_then_stmt);
-      pkl_asm_else (PKL_GEN_ASM);
-  if (if_else_stmt)
-    PKL_PASS_SUBPASS (if_else_stmt);
+  {
+    PKL_PASS_SUBPASS (if_then_stmt);
+  }
+  pkl_asm_else (PKL_GEN_ASM);
+  {
+    if (if_else_stmt)
+      PKL_PASS_SUBPASS (if_else_stmt);
+  }
   pkl_asm_endif (PKL_GEN_ASM);
 
   PKL_PASS_BREAK;
@@ -317,9 +323,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
     = PKL_AST_LOOP_STMT_BODY (loop_stmt);
 
   pkl_asm_while (PKL_GEN_ASM);
-  PKL_PASS_SUBPASS (loop_stmt_condition);
+  {
+    PKL_PASS_SUBPASS (loop_stmt_condition);
+  }
   pkl_asm_loop (PKL_GEN_ASM);
-  PKL_PASS_SUBPASS (loop_stmt_body);
+  {
+    PKL_PASS_SUBPASS (loop_stmt_body);
+  }
   pkl_asm_endloop (PKL_GEN_ASM);
 
   PKL_PASS_BREAK;
