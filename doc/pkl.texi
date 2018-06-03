@@ -47,7 +47,8 @@ Documentation License''.
 @c * Expressions::
 @c * Declarations::
 @c * Statements::
-* The Pkl Type System::
+* Types::
+* Structs and Unions::
 @c * Grammar
 * Future Extensions::
 
@@ -258,8 +259,8 @@ Tab (@acronym{ASCII} @code{0x9}).
 
 @c XXX @section Formatted String Literals
 
-@node The Pkl Type System
-@chapter The Pkl Type System
+@node Types
+@chapter Types
 
 Static.  (XXX: rationale on why static.)
 
@@ -611,6 +612,191 @@ offset type specifier should be constant.
 @section Type Promotion
 
 XXX document promotion rules here.
+
+@node Structs and Unions
+@chapter Structs and Unions
+
+@section Flattening
+
+Useful idiom: a struct containing common fields can be defined and
+used as a flattening inside the union alternatives.  The type
+@code{packet_epilogue} is not visible from outside the union.
+
+@example
+deftype Packet =
+  union
+  @{
+    deftype PacketEpilogue = struct @{ uint32 quux; @};
+
+    struct
+    @{
+      uint32 type = 0x0;
+      byte[1024] data;
+      PacketEpilogue;
+    @} audio;
+
+    struct
+    @{
+      uint32 type = 0x1;
+      byte[2048] data;
+      PacketEpilogue;
+    @} video;
+  @};
+@end example
+
+The desugared version of a conditional struct field is a flattened
+union with an empty alternative.
+
+@example
+deftype foo =
+  struct
+  @{
+    int f1;
+    int f2 if f1 > 0;
+  @};
+@end example
+
+@noindent
+is equivalent to
+
+@example
+deftype foo =
+  struct
+  @{
+    int f1;
+    union
+    @{
+      int f2 : f1 > 0;
+      struct @{@};
+    @};
+  @};
+@end example
+
+@noindent
+Flattened structs can also be conditional:
+
+@example
+deftype foo =
+  struct
+  @{
+    int f1;
+    struct
+    @{
+      int f2;
+      int f3;
+    @} if f1 > 0;
+  @};
+@end example
+
+@noindent
+is equivalent to
+
+@example
+deftype foo =
+  struct
+  @{
+    int f1;
+    union
+    @{
+      struct @{ int f2; int f3; @} : f1 > 0;
+      struct @{@};
+    @};
+  @};
+@end example
+
+@noindent
+Video file example.
+
+@example
+deftype vfile = tag [];
+
+deftype Tag =
+  union
+  @{
+    deftype TagCommon =
+      struct
+      @{
+        int flags;
+        int reserved;
+      @};
+    
+    struct
+    @{
+      int tag_type = TAG_VIDEO;
+      TagCommon;
+      uint64 time;
+      byte[1024] data;
+    @} video;
+
+    struct
+    @{
+      int tag_type = TAG_SCRIPT;
+      TagCommon;
+      string code;
+    @} script;
+
+    struct
+    @{
+      int tag_type = TAG_NULL;
+      TagCommon = @{ .flags = 0, .reserved = 0 @};
+    @} null;
+  @};
+@end example
+  
+Compare the above with the following version where flattening is not
+used at all.  The type `tag' is changed to a struct and an additional
+union is nested, very C-like.
+
+@example
+deftype Tag =
+  struct
+  @{
+    int tag_type;
+    int flags;
+    int reserved;
+
+    union
+    @{
+      struct
+      @{
+        uint64 time;
+        byte[1024] data;
+      @} video : tag_type == TAG_VIDEO;
+
+      struct
+      @{
+        string code;
+      @} script : tag_type == TAG_SCRIPT;
+
+      struct
+      @{
+      @} null : tag_type = TAG_NULL;
+      
+    @} data;
+  @};
+@end example
+
+@c XXX
+@noindent
+Flattening also works with enums.
+
+@example
+deftype relocs =
+  enum <int> (int mach)
+  @{
+    enum <int>
+    @{
+      R_SPARC_FOO = 1,
+      R_SPARC_BAR = 2
+    @} if mach == SPARC;
+
+    enum <int>
+    @{
+      R_ALPHA_FOO = 1,
+      R_ALPHA_BAR = 2
+    @} if mach == ALPHA;
+  @};
+@end example
 
 @node Future Extensions
 @chapter Future Extensions
