@@ -87,7 +87,6 @@ AC_CONFIG_FILES(Makefile
                 lib/Makefile
                 src/Makefile
                 pkl/Makefile
-                pkl/pickles/Makefile
                 doc/Makefile
                 po/Makefile.in
                 testsuite/Makefile)
