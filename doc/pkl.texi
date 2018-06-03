@@ -1,7 +1,7 @@
 \input texinfo
 @comment %**start of header
 @setfilename pkl.info
-@settitle Pkl: The Poke Language
+@settitle Pkl Reference Manual
 @afourpaper
 @comment %**end of header
 
@@ -20,11 +20,11 @@ Documentation License''.
 
 @dircategory Languages
 @direntry
-* pkl: (pkl). The Poke Language specification
+* pkl: (pkl). Pkl Reference Manual
 @end direntry
 
 @titlepage
-@title Pkl: The Poke Language
+@title Pkl Reference manual
 @subtitle Version 1
 @author by Jose E. Marchesi
 @page
@@ -36,7 +36,7 @@ Documentation License''.
 
 @ifnottex
 @node Top
-@top Pkl: The Poke Language
+@top Pkl Reference Manual
 
 @insertcopying
 @end ifnottex
@@ -49,8 +49,7 @@ Documentation License''.
 @c       Type Specifiers
 @c       Integer Type
 @c       String Type
-@c       Struct Type
-@c       Union Type
+@c       Struct and Union Types
 @c       Array Type
 @c       Type Equivalence
 @c       Type Attributes
@@ -100,7 +99,7 @@ Documentation License''.
 
 @menu
 * Introduction::	Introduction and conventions used.
-* Data Types::
+* Data Types::		Data types of values.
 * Structs and Unions::
 @c * Grammar
 * Future Extensions::
@@ -117,7 +116,7 @@ Indexes
 
 @dfn{Pkl} is a domain-specific programming language whose main purpose
 is to manipulate structured binary data.  It is used in @code{poke},
-the GNU interactive editor for binary files.  The name Pkl standas for
+the GNU interactive editor for binary files.  The name Pkl stands for
 ``Poke Language'' and it is pronounced ``pickle''@footnote{Much like
 Tcl is pronounced ``tickle'' ;)}.
 
@@ -184,352 +183,434 @@ preserved for subsequent processing@footnote{Some implementations may
 find it suitable to encode certain meta-information in comments
 however.}.
 
-@section Identifiers
+@c @section Identifiers
 
-@b{R-LEX-02}: A letter (uppercase or lowercase) or an underscore
-(@acronym{ASCII} code 137) followed by zero or more letters (uppercase
-or lowercase), underscore characters, or digits conform an
-@dfn{identifier}.
+@c @b{R-LEX-02}: A letter (uppercase or lowercase) or an underscore
+@c (@acronym{ASCII} code 137) followed by zero or more letters (uppercase
+@c or lowercase), underscore characters, or digits conform an
+@c @dfn{identifier}.
 
-The semantic payload of identifiers is the sequence of characters
-conforming the token.
+@c The semantic payload of identifiers is the sequence of characters
+@c conforming the token.
 
-@section Reserved Words
+@c @section Reserved Words
 
-Certain character sequences look like identifiers, but they conform
-other tokens.  These sequences are known as @dfn{reserved words}, and
-can't be used as identifiers in any context.
+@c Certain character sequences look like identifiers, but they conform
+@c other tokens.  These sequences are known as @dfn{reserved words}, and
+@c can't be used as identifiers in any context.
 
-@b{R-LEX-01}: The Pkl reserved words are @code{struct}, @code{else},
-@code{while}, @code{if}, @code{sizeof}, @code{defun}, @code{deftype},
-@code{defvar}, @code{return}, @code{string}, @code{as} and
-@code{__builtin_print__}.
+@c @b{R-LEX-01}: The Pkl reserved words are @code{struct}, @code{else},
+@c @code{while}, @code{if}, @code{sizeof}, @code{defun}, @code{deftype},
+@c @code{defvar}, @code{return}, @code{string}, @code{as} and
+@c @code{__builtin_print__}.
 
-@section Numeric Literals
+@c @section Numeric Literals
 
-Numeric literals allow to express numbers of several characteristics,
-like width and numeration base.
+@c Numeric literals allow to express numbers of several characteristics,
+@c like width and numeration base.
 
-@b{R-LEX-02}: @dfn{Decimal numeric literals} are denoted by a digit
-followed by zero or more digits or underscores (@acronym{ASCII} code
-137), followed by an optional suffix string.
+@c @b{R-LEX-02}: @dfn{Decimal numeric literals} are denoted by a digit
+@c followed by zero or more digits or underscores (@acronym{ASCII} code
+@c 137), followed by an optional suffix string.
 
-@b{R-LEX-03}: @dfn{Hexadecimal numeric literals} are denoted by the
-sequence @code{0x} or @code{0X} followed by an @dfn{hexadecimal digit}
-(@code{[0-9fA-F]}), followed by zero or more hexadecimal digits or
-underscores, followed by an optional suffix string.
+@c @b{R-LEX-03}: @dfn{Hexadecimal numeric literals} are denoted by the
+@c sequence @code{0x} or @code{0X} followed by an @dfn{hexadecimal digit}
+@c (@code{[0-9fA-F]}), followed by zero or more hexadecimal digits or
+@c underscores, followed by an optional suffix string.
 
-@b{R-LEX-04}: @dfn{Octal numeric literals} are denoted by the sequence
-@code{0o} or @code{0O} followed by an @dfn{octal digit} (@code{[0-7]}),
-followed by zero or more octal digits or underscores, followed by an
-optional suffix string.
+@c @b{R-LEX-04}: @dfn{Octal numeric literals} are denoted by the sequence
+@c @code{0o} or @code{0O} followed by an @dfn{octal digit} (@code{[0-7]}),
+@c followed by zero or more octal digits or underscores, followed by an
+@c optional suffix string.
 
-@b{R-LEX-05}: @dfn{Binary numeric literals} are denoted by the
-sequence @code{0b} or @code{0B} folloed by a @dfn{binary digit}
-(@code{[01]}), followed by zero or more binary digits or underscores,
-followed by an optional suffix argument.
+@c @b{R-LEX-05}: @dfn{Binary numeric literals} are denoted by the
+@c sequence @code{0b} or @code{0B} folloed by a @dfn{binary digit}
+@c (@code{[01]}), followed by zero or more binary digits or underscores,
+@c followed by an optional suffix argument.
 
-The underscores in numeric literals are intended to increase
-readability, and do not contribute to the semantic value of the token.
+@c The underscores in numeric literals are intended to increase
+@c readability, and do not contribute to the semantic value of the token.
 
-The optional suffix allowed in numeric literals are composed by
-sequences of characters, which characterize the number. The allowed
-characters are:
+@c The optional suffix allowed in numeric literals are composed by
+@c sequences of characters, which characterize the number. The allowed
+@c characters are:
 
-@table @code
-@item u
-@itemx U
-The numeric literal is unsigned.
-@item n
-@item N
-The numeric literal is a @dfn{nibble}, i.e. it is 4-bit long.
-@item B
-The numeric literal is a @dfn{byte}, i.e. it is 8-bit long.
-@item h
-@itemx H
-The numeric literal is a @dfn{half}, i.e. it is 16-bit long.
-@item l
-@item L
-The numeric literal is a @dfn{long}, i.e. it is 64-bit long.
-@end table
+@c @table @code
+@c @item u
+@c @itemx U
+@c The numeric literal is unsigned.
+@c @item n
+@c @item N
+@c The numeric literal is a @dfn{nibble}, i.e. it is 4-bit long.
+@c @item B
+@c The numeric literal is a @dfn{byte}, i.e. it is 8-bit long.
+@c @item h
+@c @itemx H
+@c The numeric literal is a @dfn{half}, i.e. it is 16-bit long.
+@c @item l
+@c @item L
+@c The numeric literal is a @dfn{long}, i.e. it is 64-bit long.
+@c @end table
 
-Not every combination of suffix characters makes sense.  Well-formed
-numeric literal suffixes are characterized by the regular expression
-@code{((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))}.
+@c Not every combination of suffix characters makes sense.  Well-formed
+@c numeric literal suffixes are characterized by the regular expression
+@c @code{((u|U)|(u|U)?(l|L|B|h|H|n|N)|(l|L|B|h|H|n|N)(u|U))}.
 
-If not explicitly specified with one of the @code{l}, @code{L},
-@code{B}, @code{h} or @code{H} suffixes, the width of an integer
-constant is the smallest signed or unsigned integer capable of holding
-it, starting with 32 bits, in steps of power of two and up to 64 bits.
+@c If not explicitly specified with one of the @code{l}, @code{L},
+@c @code{B}, @code{h} or @code{H} suffixes, the width of an integer
+@c constant is the smallest signed or unsigned integer capable of holding
+@c it, starting with 32 bits, in steps of power of two and up to 64 bits.
 
-@section Character Literals
+@c @section Character Literals
 
-There is another way to express unsigned 8-bit integers, which is to
-use a @dfn{character literal}.  Character literals are delimited by
-@code{'} characters, and contain a representation of an
-@acronym{ASCII} character.  The value of the resulting integer is the
-code of the represented @acronym{ASCII} character in the
-@acronym{ASCII}s 7-bit encoding.
+@c There is another way to express unsigned 8-bit integers, which is to
+@c use a @dfn{character literal}.  Character literals are delimited by
+@c @code{'} characters, and contain a representation of an
+@c @acronym{ASCII} character.  The value of the resulting integer is the
+@c code of the represented @acronym{ASCII} character in the
+@c @acronym{ASCII}s 7-bit encoding.
 
-The representation of a printable character is the printable
-representation of the character itself.  For example, @code{'a'}
-represents the integer @code{97}.
+@c The representation of a printable character is the printable
+@c representation of the character itself.  For example, @code{'a'}
+@c represents the integer @code{97}.
 
-The representation of non-printable characters use escape sequences
-instead, which are listed in the following table.
+@c The representation of non-printable characters use escape sequences
+@c instead, which are listed in the following table.
 
-@table @code
-@item '\NNN'
-Character with octal code @code{NNN}.  The number can feature one, two
-or three digits, but no more.  Example: @code{\0} is the @code{NULL}
-character.
-@item '\t'
-Tab (@acronym{ASCII} @code{0x9}).
-@item '\n'
-Newline character (@acronym{ASCII} @code{0xa}).
-@end table
+@c @table @code
+@c @item '\NNN'
+@c Character with octal code @code{NNN}.  The number can feature one, two
+@c or three digits, but no more.  Example: @code{\0} is the @code{NULL}
+@c character.
+@c @item '\t'
+@c Tab (@acronym{ASCII} @code{0x9}).
+@c @item '\n'
+@c Newline character (@acronym{ASCII} @code{0xa}).
+@c @end table
 
-@section String Literals
+@c @section String Literals
 
-String literals allow to express sequences of characters, implicitly
-finished by the @dfn{NULL character} or @code{'\0'}.  The contents of
-a string literal are enclosed between @code{"} characters.
+@c String literals allow to express sequences of characters, implicitly
+@c finished by the @dfn{NULL character} or @code{'\0'}.  The contents of
+@c a string literal are enclosed between @code{"} characters.
 
-The @dfn{empty string}, which features only the implicit finishing
-@code{'\0'}, is denoted as @code{""}.
+@c The @dfn{empty string}, which features only the implicit finishing
+@c @code{'\0'}, is denoted as @code{""}.
 
-The representation of printable ASCII characters in a string is the
-printable representation of the characters themselves.  For example,
-@code{"abc"} is a string composed by the characters @code{'a'},
-@code{'b'}, @code{'c'} and @code{'\0'}.
+@c The representation of printable ASCII characters in a string is the
+@c printable representation of the characters themselves.  For example,
+@c @code{"abc"} is a string composed by the characters @code{'a'},
+@c @code{'b'}, @code{'c'} and @code{'\0'}.
 
-The representation of non-printable characters within the string use
-escape sequences instead, which are listed in the following table.
+@c The representation of non-printable characters within the string use
+@c escape sequences instead, which are listed in the following table.
 
-@table @code
-@item \\
-Represents the @code{\} character.
-@item \n
-Newline character (@acronym{ASCII} @code{0xa}).
-@item \t
-Tab (@acronym{ASCII} @code{0x9}).
-@end table
+@c @table @code
+@c @item \\
+@c Represents the @code{\} character.
+@c @item \n
+@c Newline character (@acronym{ASCII} @code{0xa}).
+@c @item \t
+@c Tab (@acronym{ASCII} @code{0x9}).
+@c @end table
 
 @c XXX @section Formatted String Literals
 
 @node Data Types
 @chapter Data Types
 
-Static.  (XXX: rationale on why static.)
+@dfn{Values} are the data objects used and manipulated by Pkl
+programs.
 
-Probably sound, but not proven (yet).  The proof should be done by
-induction, on the poke expressions tree.
+Every value belongs to one, and only one, type.  Values of the same
+type have similar characteristics and may usually be used in the same
+contexts.  The type corresponding to a value is unambiguous and well
+defined, even if the value is denoted as a literal.  This suites well
+the purpose of the language, since the programmer should always be in
+control of the structure of the data being manipulated.
 
-Not complete.  Three possibilities: a) sound type system, b) complete
-type system or c) both sound and complete and the type checker many
-never terminate.  We choose a).
+Pkl provides a set of predefined type constructors that the programmer
+can use directly.  This includes whole numbers of several different
+bit lengths and signedness, and strings.  Also, constructs are
+provided to allow the declaration of user-defined types, like structs,
+unions and arrays.
 
-The Pkl type system establishes the rules to be applied in order to
-determine the type of many different language constructs.  This
-chapter contains an exhaustive relation of these rules.  A conforming
-implementation should check for all of these, emitting errors in case
-some rule is violated.
+This chapter describes generalities about types, the supported types,
+and also elaborates on how to define new types.
 
-@section Type Expressions and Type Specifiers
+@c Static.  (XXX: rationale on why static.)
 
-While discussing the type system, we will be using two different but
-certainly related concepts: @dfn{type expressions} and @dfn{type
-specifiers}.
+@c Probably sound, but not proven (yet).  The proof should be done by
+@c induction, on the poke expressions tree.
 
-A @dfn{type expression} is an abstract representation of a type, such
-as @code{integer (32, 0)}, that denotes an unsigned 32-bit integral
-type.  The syntax we use for type expressions doesn't equal the
-concrete syntax of Pkl, and is often more general.
+@c The Pkl type system establishes the rules to be applied in order to
+@c determine the type of many different language constructs.  This
+@c chapter contains an exhaustive relation of these rules.  A conforming
+@c implementation should check for all of these, emitting errors in case
+@c some rule is violated.
 
-A @dfn{type specifier} is the Pkl concrete syntactic construction to
-denote a type, such as @code{int<32>}, which is a type specifier
-denoting an unsigned 32-bit integral type.
+@menu
+* Type Constructors::		Type constructors and type names.
+* Declaration of Types::	Defining named types.
+* Integer Types::		Whole numbers.
+* String Type::			Character strings.
+* Struct and Union Types::	Collections of Fields.
+* Array Types::			Sequences of objects.
+* Type Equivalence::		What types are considered equal.
+* Type Attributes::		Querying properties of types.
+@end menu
 
-As we shall see, type specifiers sometimes contain additional
-information that is not kept in the corresponding type expression.
-For example, @code{int[3]} is a valid array type specifier in certain
-contexts, but the corresponding type expression is @code{array
-(integer (3,1))}.  In this case, the @code{3} in the type specifier,
-that denotes the number of elements of the array, is not part of the
-type expression.
+@node Type Constructors
+@section Type Constructors
 
-Type expressions are useful to reason about types and their
-properties, such as type equivalence.  However, it is important to
-keep in mind that they are not language constructions.
-
-@section Type Expressions
-
-Pkl type expressions are structured, and are defined as follows.
-
-A @dfn{basic type constructor}, maybe applied to some arguments, is a
-type expression, and constructs basic types.  Basic type constructors
-include:
-
-@itemize @bullet
-@item Integers.
-
-If @var{size} is a constant expression evaluating to a positive
-integer and @var{sign} is a constant expression evaluating to a
-boolean, then:
+A @dfn{type constructor} is a syntactic construction that denotes a
+type and its properties.  Depending on the type being denoted,
+constructors can be very simple, or rather complex.  Consider for
+example the following type constructors:
 
 @example
-integer (@var{size}, @var{sign})
+string
+int<32>
+offset<uint<16>,8>
+struct @{int foo; long bar;@}
+uint<8>[]
 @end example
 
-is a type expression denoting an integer of width @var{size} bits and
-signedness @var{sign}.
+The first line in the example above denotes the string type.  Since
+there is only one string type in Pkl, this constructor doesn't take
+any parameter.  Very simple.
 
-Examples:
+The second line denotes the unsigned 32-bit integer type.  In this
+case, it is needed to pass a parameter in order to specify the number
+of bits.  Note how @code{<} and @code{>} characters are used to
+enclose type constructor parameters.
 
-@itemize
-@item @code{integer (32, 1)} denotes a signed 32-bit integer type.
-@item @code{integer (13, 1)} denotes a signed 13-bit integer type.
-@item @code{integer (64, 0)} denotes an unsigned 64-bit integer type.
-@item @code{integer (4, 0)} denotes an unsigned 4-bit integer ("nibble").
-@end itemize
+The third line denotes the offset type with base type unsigned 16-bit
+integer and unit 8 bits.  Note how commas (@code{,}) are used to
+separate parameters, and how a type (in this case the integer type)
+can be passed as a parameter to a constructor.
 
-@item Strings.
+The fourth line denotes a struct type.  In this case, the constructor
+uses a more elaborated syntax, even if this example is actually a
+rather simple struct type.
 
-@code{string} is a type expression denoting a NULL-terminated string.
+The fifth line denotes an array type, whose elements (values) are of
+the unsigned 8-bit integer type.
 
-@item The @code{void} type.
+The following sections discuss type constructors in great detail, for
+the several types supported in Pkl.
 
-@code{void} is a type expression denoting the absence of a type.  It
-is used for functions that do not return a value.
-@end itemize
+@node Declaration of Types
+@section Declaration of Types
 
-A @dfn{type constructor}, applied to type expressions, is a type
-expression.  Type constructors include:
-
-@itemize
-@item Offsets.
-
-If @var{t} is a basic integral type expression and @var{u} is a constant
-expression evaluating to a non-negative integer, then @code{offset (@var{t},@var{u})}
-denotes an "united" magnitude having type @var{t} and multiple of the basic
-unit @var{u}.
-
-Examples:
-
-@itemize
-@item
-@code{offset (integer (32, 1), 8)} denotes a signed 32-bit offset with
-unit 8 (bytes).
-@item
-@code {offset (integer (32, 1), 7 + 1)} denotes the same type.
-@item
-@code{offset (integer (64, 0), 1)} denotes an unsigned 64-bit offset
-with unit 1 (bits).
-@end itemize
-
-@item Arrays.
-
-If @var{t} is a type expression, @code{array (@var{t})} is a type
-expression denoting the type of an array with zero or more elements of
-type @var{t}.
-
-Examples:
-
-@example
-array (integer (32, 1))  -> Array of signed 32-bit integrals.
-array (offset (integer (32, 1) ,8))
-                               -> Array of signed 32-bit offsets with
-                                  unit bytes.
-@end example
-
-Note that array types do not include a number of elements.  When
-something like this is found in a struct type definition:
-
-@example
-struct
-@{
-   int num;
-   Packet[num] packets;
-@};
-@end example
-
-the type of @code{packets} is @code{array (Packet)}, and @code{num} is
-used in the struct constructor to create the @emph{value} of the
-array.  Likewise, in:
-
-@example
-defvar a = [1,2,3];
-@end example
-
-the type of @code{a} is @code{array (integer (32, 1))}, and it's size
-is @code{3}.
- 
-In function definitions, it is not allowed to specify a size for an
-array argument, thus, this is @emph{not} allowed:
-
-@example
-defun foo = (int[3] a) @{ ... @}
-@end example
-
-Ditto for casts to arrays.  The following is @emph{not} allowed:
-
-@example
-array as int[32]
-@end example
-
-@item Structs.
-
-If @var{n} is a string, @var{ln} are strings, @var{tn} are type
-expressions, and @var{field} is an expression like:
-
-@example
-field (@var{l1}, @var{t1})
-@end example
-
-then
-
-@example
-struct (@var{n}, @var{field1}, ..., @var{fieldm})
-@end example
-
-is a type expression denoting a struct type having name @var{n} and @var{m}
-fields, each featuring a field name @var{li} and a type @var{ti}.
+@c deftype
   
-The strings @var{n} and @var{li} can be @code{NULL}, meaning the
-structure type is anonymous and that the corresponding struct fields
-are anonymous, respectively.
 
-@item Unions.
+@c While discussing the type system, we will be using two different but
+@c certainly related concepts: @dfn{type expressions} and @dfn{type
+@c specifiers}.
 
-      XXX
+@c A @dfn{type expression} is an abstract representation of a type, such
+@c as @code{integer (32, 0)}, that denotes an unsigned 32-bit integral
+@c type.  The syntax we use for type expressions doesn't equal the
+@c concrete syntax of Pkl, and is often more general.
 
-@item Functions.
+@c As we shall see, type specifiers sometimes contain additional
+@c information that is not kept in the corresponding type expression.
+@c For example, @code{int[3]} is a valid array type specifier in certain
+@c contexts, but the corresponding type expression is @code{array
+@c (integer (3,1))}.  In this case, the @code{3} in the type specifier,
+@c that denotes the number of elements of the array, is not part of the
+@c type expression.
 
-If @var{tn} are type expressions, `function (@var{t0}, @var{t1},
-@var{t2},..., @var{tm})' is a type expression denoting the type of a
-function getting @var{m} arguments of the given types, and returning a
-value of type @var{t0}.
+@c Type expressions are useful to reason about types and their
+@c properties, such as type equivalence.  However, it is important to
+@c keep in mind that they are not language constructions.
 
-Note that @var{t0} should be @code{void} for functions that do not
-return a value.
+@c @section Type Expressions
 
-@end itemize
+@c Pkl type expressions are structured, and are defined as follows.
 
-Poke uses graphs (XXX: trees or dags?) to represent type expressions,
-where interior nodes are type constructors, and leaves are basic type
-constructors.
+@c A @dfn{basic type constructor}, maybe applied to some arguments, is a
+@c type expression, and constructs basic types.  Basic type constructors
+@c include:
 
-Note that type names, by themselves, do not constitute type
-expressions.  However they can be part of some type constructor, like
-in structs and unions.
+@c @itemize @bullet
+@c @item Integers.
 
-@section Cycles in Type Expressions
+@c If @var{size} is a constant expression evaluating to a positive
+@c integer and @var{sign} is a constant expression evaluating to a
+@c boolean, then:
 
-Pkl imposes the restriction that no type can be referred by name
-before it is declared.  Therefore, it is not possible to define
-recursive types and the graphs used to implement type expressions
-can't have cycles.
+@c @example
+@c integer (@var{size}, @var{sign})
+@c @end example
 
+@c is a type expression denoting an integer of width @var{size} bits and
+@c signedness @var{sign}.
+
+@c Examples:
+
+@c @itemize
+@c @item @code{integer (32, 1)} denotes a signed 32-bit integer type.
+@c @item @code{integer (13, 1)} denotes a signed 13-bit integer type.
+@c @item @code{integer (64, 0)} denotes an unsigned 64-bit integer type.
+@c @item @code{integer (4, 0)} denotes an unsigned 4-bit integer ("nibble").
+@c @end itemize
+
+@c @item Strings.
+
+@c @code{string} is a type expression denoting a NULL-terminated string.
+
+@c @item The @code{void} type.
+
+@c @code{void} is a type expression denoting the absence of a type.  It
+@c is used for functions that do not return a value.
+@c @end itemize
+
+@c A @dfn{type constructor}, applied to type expressions, is a type
+@c expression.  Type constructors include:
+
+@c @itemize
+@c @item Offsets.
+
+@c If @var{t} is a basic integral type expression and @var{u} is a constant
+@c expression evaluating to a non-negative integer, then @code{offset (@var{t},@var{u})}
+@c denotes an "united" magnitude having type @var{t} and multiple of the basic
+@c unit @var{u}.
+
+@c Examples:
+
+@c @itemize
+@c @item
+@c @code{offset (integer (32, 1), 8)} denotes a signed 32-bit offset with
+@c unit 8 (bytes).
+@c @item
+@c @code {offset (integer (32, 1), 7 + 1)} denotes the same type.
+@c @item
+@c @code{offset (integer (64, 0), 1)} denotes an unsigned 64-bit offset
+@c with unit 1 (bits).
+@c @end itemize
+
+@c @item Arrays.
+
+@c If @var{t} is a type expression, @code{array (@var{t})} is a type
+@c expression denoting the type of an array with zero or more elements of
+@c type @var{t}.
+
+@c Examples:
+
+@c @example
+@c array (integer (32, 1))  -> Array of signed 32-bit integrals.
+@c array (offset (integer (32, 1) ,8))
+@c                                -> Array of signed 32-bit offsets with
+@c                                   unit bytes.
+@c @end example
+
+@c Note that array types do not include a number of elements.  When
+@c something like this is found in a struct type definition:
+
+@c @example
+@c struct
+@c @{
+@c    int num;
+@c    Packet[num] packets;
+@c @};
+@c @end example
+
+@c the type of @code{packets} is @code{array (Packet)}, and @code{num} is
+@c used in the struct constructor to create the @emph{value} of the
+@c array.  Likewise, in:
+
+@c @example
+@c defvar a = [1,2,3];
+@c @end example
+
+@c the type of @code{a} is @code{array (integer (32, 1))}, and it's size
+@c is @code{3}.
+ 
+@c In function definitions, it is not allowed to specify a size for an
+@c array argument, thus, this is @emph{not} allowed:
+
+@c @example
+@c defun foo = (int[3] a) @{ ... @}
+@c @end example
+
+@c Ditto for casts to arrays.  The following is @emph{not} allowed:
+
+@c @example
+@c array as int[32]
+@c @end example
+
+@c @item Structs.
+
+@c If @var{n} is a string, @var{ln} are strings, @var{tn} are type
+@c expressions, and @var{field} is an expression like:
+
+@c @example
+@c field (@var{l1}, @var{t1})
+@c @end example
+
+@c then
+
+@c @example
+@c struct (@var{n}, @var{field1}, ..., @var{fieldm})
+@c @end example
+
+@c is a type expression denoting a struct type having name @var{n} and @var{m}
+@c fields, each featuring a field name @var{li} and a type @var{ti}.
+  
+@c The strings @var{n} and @var{li} can be @code{NULL}, meaning the
+@c structure type is anonymous and that the corresponding struct fields
+@c are anonymous, respectively.
+
+@c @item Unions.
+
+@c       XXX
+
+@c @item Functions.
+
+@c If @var{tn} are type expressions, `function (@var{t0}, @var{t1},
+@c @var{t2},..., @var{tm})' is a type expression denoting the type of a
+@c function getting @var{m} arguments of the given types, and returning a
+@c value of type @var{t0}.
+
+@c Note that @var{t0} should be @code{void} for functions that do not
+@c return a value.
+
+@c @end itemize
+
+@c Poke uses graphs (XXX: trees or dags?) to represent type expressions,
+@c where interior nodes are type constructors, and leaves are basic type
+@c constructors.
+
+@c Note that type names, by themselves, do not constitute type
+@c expressions.  However they can be part of some type constructor, like
+@c in structs and unions.
+
+@c @section Cycles in Type Expressions
+
+@c Pkl imposes the restriction that no type can be referred by name
+@c before it is declared.  Therefore, it is not possible to define
+@c recursive types and the graphs used to implement type expressions
+@c can't have cycles.
+
+@node Integer Types
+@section Integer Types
+
+@node String Type
+@section String Type
+
+@node Struct and Union Types
+@section Struct and Union Types
+
+@c XXX: in this section we use struct literals, which are described
+@c later in @xref.
+
+@node Array Types
+@section Array Types
+
+@node Type Equivalence
 @section Type Equivalence
 
 The checking rules described below uses the notion of equality among
@@ -579,97 +660,100 @@ defvar s = @{.foo=10,.bar=20@};
 s = @{.foo=30,.bar=40@};  /* Type error.  */
 @end example
 
-@section Overloading of Operators
+@node Type Attributes
+@section Type Attributes
 
-Certain Pkl operators are overloaded.  For example, addition is
-supported for integer types of any type, and also for strings.
+@c @section Overloading of Operators
 
-However, the overloading of operators in Pkl are carefully designed in
-a way it is always possible to infer the type of the result of the
-operator based on the types of the arguments.
+@c Certain Pkl operators are overloaded.  For example, addition is
+@c supported for integer types of any type, and also for strings.
 
-This means it is possible for an implementation to perform type
-checking of expressions in a single pass, using synthetized attributes
-only.  No second top-down pass to narrow types is ever necessary.
+@c However, the overloading of operators in Pkl are carefully designed in
+@c a way it is always possible to infer the type of the result of the
+@c operator based on the types of the arguments.
 
-For example:
+@c This means it is possible for an implementation to perform type
+@c checking of expressions in a single pass, using synthetized attributes
+@c only.  No second top-down pass to narrow types is ever necessary.
 
-@example
-int<N> + int<N> -> int<N>          @r{is defined}.
-int<N> + int<N> -> int<N*2>        @r{is NOT defined}.
-@end example
+@c For example:
 
-@section Type Checking of Expressions
+@c @example
+@c int<N> + int<N> -> int<N>          @r{is defined}.
+@c int<N> + int<N> -> int<N*2>        @r{is NOT defined}.
+@c @end example
 
-R-TYPE-02: The type of the Nth actual parameter passed in a function
-call should match the type of the Nth formal argument defined in the
-function type of the function being called.
+@c @section Type Checking of Expressions
 
-@section Type Checking of Statements
+@c R-TYPE-02: The type of the Nth actual parameter passed in a function
+@c call should match the type of the Nth formal argument defined in the
+@c function type of the function being called.
 
-In Pkl statements do not have types, but expressions can appear in
-certain statements, and the types of these expressions are checked
-according to the following rules.
+@c @section Type Checking of Statements
 
-@b{R-TYPE-01}: The type of the expression in the right-hand side of an
-assignment statement should match the type of the variable in the
-left-hand side.
+@c In Pkl statements do not have types, but expressions can appear in
+@c certain statements, and the types of these expressions are checked
+@c according to the following rules.
 
-@b{R-TYPE-03}: Record and union type specifiers are only allowed in
-deftype constructions and embedded in other struct and union type
-specifiers.  In particular, these specifiers are not allowed in
-function argument lists and casts.
+@c @b{R-TYPE-01}: The type of the expression in the right-hand side of an
+@c assignment statement should match the type of the variable in the
+@c left-hand side.
 
-@b{R-TYPE-04}: The type of the expression in the condition part of a
-conditional statement should be an integral type, suitable to be
-promoted to a signed 32-bit integer.
+@c @b{R-TYPE-03}: Record and union type specifiers are only allowed in
+@c deftype constructions and embedded in other struct and union type
+@c specifiers.  In particular, these specifiers are not allowed in
+@c function argument lists and casts.
 
-@b{R-TYPE-05}: The type of the expression in the condition part of a
-while statement should be an integral type, suitable to be promoted to
-a signed 32-bit integer.
+@c @b{R-TYPE-04}: The type of the expression in the condition part of a
+@c conditional statement should be an integral type, suitable to be
+@c promoted to a signed 32-bit integer.
 
-@b{R-TYPE-06}: The type of the expression in an expression statement
-should be @code{void}, i.e. a call to a function that doesn't return
-any value.
+@c @b{R-TYPE-05}: The type of the expression in the condition part of a
+@c while statement should be an integral type, suitable to be promoted to
+@c a signed 32-bit integer.
 
-@section Type Checking of Type Specifiers
+@c @b{R-TYPE-06}: The type of the expression in an expression statement
+@c should be @code{void}, i.e. a call to a function that doesn't return
+@c any value.
 
-As described above, type constructors may contain other types, either
-directly or indirecly.
+@c @section Type Checking of Type Specifiers
 
-An example of a direct type inclusion is the type of the elements
-specified in an array type constructor.  An example of an indirect
-type inclusion is the type of the constant expression denoting the
-units in an offset type constructor.
+@c As described above, type constructors may contain other types, either
+@c directly or indirecly.
 
-Thus the Pkl type system also includes checks for types contained in
-type expressions, and these are listed below.
+@c An example of a direct type inclusion is the type of the elements
+@c specified in an array type constructor.  An example of an indirect
+@c type inclusion is the type of the constant expression denoting the
+@c units in an offset type constructor.
 
-@b{R-TYPE-07}: An array type specifier may contain an expression
-denoting the number of elements it contains, but only when it appears
-in a field in a struct type.  Thus, @code{struct @{int[10] foo;@}} is
-valid, but @code{defun foo = (int[10] a) @{...@}} isn't.
+@c Thus the Pkl type system also includes checks for types contained in
+@c type expressions, and these are listed below.
 
-@b{R-TYPE-08}: The type of the expression denoting the number of
-elements in an array type constructor should be suitable to be
-promoted to an @code{uint<64>}.  (See promotion rules in XXX xref).
+@c @b{R-TYPE-07}: An array type specifier may contain an expression
+@c denoting the number of elements it contains, but only when it appears
+@c in a field in a struct type.  Thus, @code{struct @{int[10] foo;@}} is
+@c valid, but @code{defun foo = (int[10] a) @{...@}} isn't.
 
-@b{R-TYPE-09}: The expression denoting the number of elements in an
-array should be constant.  (See constant expressions in XXX xref).
+@c @b{R-TYPE-08}: The type of the expression denoting the number of
+@c elements in an array type constructor should be suitable to be
+@c promoted to an @code{uint<64>}.  (See promotion rules in XXX xref).
 
-@b{R-TYPE-10}: The base type of an offset type should be an integral
-type.  For example, @code{offset<string,1>} is not valid.
+@c @b{R-TYPE-09}: The expression denoting the number of elements in an
+@c array should be constant.  (See constant expressions in XXX xref).
 
-@b{R-TYPE-11}: The type of the expression denoting the unit of an
-offset type specifier should be suitable to be promoted to an
-@code{uint<64>}.
+@c @b{R-TYPE-10}: The base type of an offset type should be an integral
+@c type.  For example, @code{offset<string,1>} is not valid.
 
-@b{R-TYPE-12}: The type of the expression denoting the unit of an
-offset type specifier should be constant.
+@c @b{R-TYPE-11}: The type of the expression denoting the unit of an
+@c offset type specifier should be suitable to be promoted to an
+@c @code{uint<64>}.
 
-@section Type Promotion
+@c @b{R-TYPE-12}: The type of the expression denoting the unit of an
+@c offset type specifier should be constant.
 
-XXX document promotion rules here.
+@c @section Type Promotion
+
+@c XXX document promotion rules here.
 
 @node Structs and Unions
 @chapter Structs and Unions
