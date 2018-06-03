@@ -15,22 +15,22 @@
 
 picklesdir = $(pkgdatadir)/pickles/
 
-dist_pickles_DATA = bmp.pk \
-                    bson.pk \
-                    deflate.pk \
-                    dwarf.pk \
-                    elf.pk \
-                    flattening.pk \
-                    flv.pk \
-                    foo.pk \
-                    gzip.pk \
-                    id3v1.pk \
-                    id3v2.pk \
-                    inodes.pk \
-                    jpeg.pk \
-                    leb128.pk \
-                    mp3.pk \
-                    patterns.pk \
-                    qsort.pk \
-                    sparc.pk \
-                    swf.pk
+dist_pickles_DATA = bmp.pkl \
+                    bson.pkl \
+                    deflate.pkl \
+                    dwarf.pkl \
+                    elf.pkl \
+                    flattening.pkl \
+                    flv.pkl \
+                    foo.pkl \
+                    gzip.pkl \
+                    id3v1.pkl \
+                    id3v2.pkl \
+                    inodes.pkl \
+                    jpeg.pkl \
+                    leb128.pkl \
+                    mp3.pkl \
+                    patterns.pkl \
+                    qsort.pkl \
+                    sparc.pkl \
+                    swf.pkl
