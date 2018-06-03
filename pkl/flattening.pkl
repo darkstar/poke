@@ -2,23 +2,23 @@
    used as a flattening inside the union alternatives.  The type
    `packet_epilogue' is not visible from outside the union.  */
 
-deftype packet =
+deftype Packet =
   union
   {
-    deftype packet_epilogue = struct { uint32 quux; };
+    deftype PacketEpilogue = struct { uint32 quux; };
 
     struct
     {
       uint32 type = 0x0;
       byte[1024] data;
-      packet_epilogue;
+      PacketEpilogue;
     } audio;
 
     struct
     {
       uint32 type = 0x1;
       byte[2048] data;
-      packet_epilogue;
+      PacketEpilogue;
     } video;
   };
 
@@ -75,10 +75,10 @@ deftype foo =
 
 deftype vfile = tag [];
 
-deftype tag =
+deftype Tag =
   union
   {
-    deftype tag_common =
+    deftype TagCommon =
       struct
       {
         int flags;
@@ -88,7 +88,7 @@ deftype tag =
     struct
     {
       int tag_type = TAG_VIDEO;
-      tag_common;
+      TagCommon;
       uint64 time;
       byte[1024] data;
     } video;
@@ -96,14 +96,14 @@ deftype tag =
     struct
     {
       int tag_type = TAG_SCRIPT;
-      tag_common;
+      TagCommon;
       string code;
     } script;
 
     struct
     {
       int tag_type = TAG_NULL;
-      tag_common;
+      TagCommon = { .flags = 0, .reserved = 0 };
     } null;
   };
 
@@ -111,7 +111,7 @@ deftype tag =
    used at all.  The type `tag' is changed to a struct and an
    additional union is nested, very C-like.  */
 
-deftype tag =
+deftype Tag =
   struct
   {
     int tag_type;
