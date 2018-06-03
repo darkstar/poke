@@ -51,7 +51,7 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
-Writing Pickle Programs
+Writing Pkl Programs
 * Hello Poke::
 * Numbers::
 * Metatypes::

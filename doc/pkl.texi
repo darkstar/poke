@@ -41,13 +41,66 @@ Documentation License''.
 @insertcopying
 @end ifnottex
 
+@c   Introduction
+@c       About this Document
+@c       Source Encoding and Character Set
+@c       Comments
+@c   Data Types
+@c       Type Specifiers
+@c       Integer Type
+@c       String Type
+@c       Struct Type
+@c       Union Type
+@c       Array Type
+@c       Type Equivalence
+@c       Type Attributes
+@c       Declaration of Types
+@c   Integers
+@c       Integer Literals
+@c       Comparison of Integers
+@c       Arithmetic Operations
+@c       Bitwise Operations
+@c       Integer Attributes
+@c   Strings
+@c       String Literals
+@c       Comparison of Strings
+@c       String Formatting
+@c       String Attributes
+@c   Structs and Unions
+@c       Fields
+@c       Anonymous Fields
+@c       Flattening
+@c       Unions
+@c       Conditional Fields
+@c       Field Constraints
+@c       Struct Literals
+@c       Struct and Union Arguments
+@c       Struct and Union Attributes
+@c   Arrays
+@c       Array Literals
+@c       Array Attributes
+@c   Sets
+@c       Enumerations
+@c       Bitmasks
+@c       Set Attributes
+@c   Control Structures  (Conditionals and loops)
+@c       Statements
+@c       Conditionals
+@c       Iteration
+@c   Variables
+@c       Variable Scope
+@c       Declaration of Variables
+@c   Functions
+@c       Declaration of Functions
+@c   Mapping  (Accessing the IO space)
+@c   Searching and Patterns
+@c   Modules and Files
+@c   The Pkl Standard Library
+@c       Standard Types
+
 @menu
-* Introduction::
-* Lexical::
-@c * Expressions::
-@c * Declarations::
-@c * Statements::
-* Types::
+* Introduction::	Introduction and conventions used.
+* Data Types::
 * Structs and Unions::
 @c * Grammar
 * Future Extensions::
@@ -62,69 +115,74 @@ Indexes
 @node Introduction
 @chapter Introduction
 
-
-@section About Pkl
-
 @dfn{Pkl} is a domain-specific programming language whose main purpose
-is to be used in
-@code{poke}@footnote{@url{http://www.gnu.org/s/poke}}, the GNU
-interactive editor for binary files.  The name Pkl stands for ``Poke
-Language'', and it is pronounced as ``pickle''@footnote{Much as Tcl is
-prononced ``tickle'' :)}.
+is to manipulate structured binary data.  It is used in @code{poke},
+the GNU interactive editor for binary files.  The name Pkl standas for
+``Poke Language'' and it is pronounced ``pickle''@footnote{Much like
+Tcl is pronounced ``tickle'' ;)}.
 
+@menu
+* About this Document::		What this document is and what it isn't.
+* Source Files::                Source Encoding and Character Set.
+* Comments::			Comments and their formatting conventions.
+@end menu
+
+@node About this Document
 @section About this Document
 
 This document contains a complete and semi-formal specification of
 Pkl, describing all the aspects of the language.  The main purpose of
-the specification is to serve as a reference for implementations,
-notably GNU poke.
+the specification is to serve as a reference for both users and
+implementors.
 
 This document is not intended to be a tutorial for learning how to
 write Pkl programs.  For that purpose, please read the Poke Book. XXX:
 xref to the poke book.
 
-@node Lexical
-@chapter Lexical
-
-The fundamental pieces on which Pkl programs are built are called
-@dfn{lexical tokens}.  The tokens themselves are built from a stream
-of characters provided by the user: the source program.
-
-Some lexical tokens carry over a @dfn{semantic payload}.  This is the
-case of numeric literals for example.
-
-In this chapter, the term @dfn{text} is used to refer to a sequence of
-@dfn{characters}, where characters are codes of a Character Set
-described below.
-
-@section Source Encoding and Character Set
+@node Source Files
+@section Source Files
 
 Pkl source text shall be encoded in @acronym{ASCII} (ISO-646) and
 covers the @acronym{ASCII} character set.
 
-@section Newline Character
-
 Source code lines are separated by the @dfn{newline character},
 @acronym{ASCII} code @code{012}.
 
+@node Comments
 @section Comments
 
 Pkl supports two different kind of comments: multi-line non-nestable
-comments and partial-line stackable comments.  Both flavors of
-comments are usually processed and removed by the lexical analyzer, as
-these are not intended to be preserved for subsequent
-processing@footnote{Some implementations may find it suitable to
-encode certain meta-information in comments however.}.
+comments and partial-line stackable comments.
 
 Text enclosed between @code{/*} and @code{*/} sequences conforms a
-possibly multi-line comment
+possibly multi-line comment.  This is an example:
 
-@b{R-LEX-00}: Multi-line comments can't be nested.
+@example
+/* This is a comment that spans
+   through several lines.  */
+@end example
+
+Multi-line comments can't be nested.  Thus, the following is not
+syntactically correct:
+
+@example
+/* This is /* not */ correct!  */
+@end example
 
 Characters following @code{//}, up to the next newline character or
-end of file, conform a partial line comment.
+end of file, conform a partial line comment.  These kind of comments
+can be stacked.  The following are valid comments:
 
-@b{R-LEX-01}: Partial-line comments can be stacked.
+@example
+// This is a one line comment.
+// This is a stacked // comment.
+@end example
+
+Both nestable and non-nestable comments comments are usually processed
+and removed by the lexical analyzer, as these are not intended to be
+preserved for subsequent processing@footnote{Some implementations may
+find it suitable to encode certain meta-information in comments
+however.}.
 
 @section Identifiers
 
@@ -259,8 +317,8 @@ Tab (@acronym{ASCII} @code{0x9}).
 
 @c XXX @section Formatted String Literals
 
-@node Types
-@chapter Types
+@node Data Types
+@chapter Data Types
 
 Static.  (XXX: rationale on why static.)
 

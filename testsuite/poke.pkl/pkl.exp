@@ -18,5 +18,5 @@
 
 load_lib ${tool}-dg.exp
 dg-init
-dg-runtest [lsort [glob -nocomplain $srcdir/poke.pkl/*.pk]] {} {}
+dg-runtest [lsort [glob -nocomplain $srcdir/poke.pkl/*.pkl]] {} {}
 dg-finish
