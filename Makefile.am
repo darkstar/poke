@@ -1,2 +1,2 @@
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = lib pk src doc testsuite
+SUBDIRS = lib pkl src doc testsuite

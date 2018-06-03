@@ -86,8 +86,8 @@ dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile
                 src/Makefile
-                pk/Makefile
-                pk/pickles/Makefile
+                pkl/Makefile
+                pkl/pickles/Makefile
                 doc/Makefile
                 po/Makefile.in
                 testsuite/Makefile)

@@ -28,7 +28,7 @@ config.h.in
 /autom4te.cache/
 /doc/poke.info
 /doc/pokeint.info
-/doc/pkl-spec.info
+/doc/pkl.info
 /doc/stamp-1
 /doc/stamp-vti
 /doc/version.texi
