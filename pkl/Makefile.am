@@ -1,7 +1,5 @@
-dist_pkgdata_DATA = std.pkl
-
-picklesdir = $(pkgdatadir)/pickles/
-dist_pickles_DATA = bmp.pkl \
+dist_pkgdata_DATA = std.pkl \
+                    bmp.pkl \
                     bson.pkl \
                     deflate.pkl \
                     dwarf.pkl \
