@@ -45,15 +45,15 @@ Documentation License''.
 @c       About this Document
 @c       Source Encoding and Character Set
 @c       Comments
-@c   Data Types
-@c       Type Specifiers
+@c   Data Types (XXX: in this chapter literals are used, but are explained in detail later)
+@c       Type Constructors
+@c       Declaration of Types
 @c       Integer Type
 @c       String Type
 @c       Struct and Union Types
 @c       Array Type
 @c       Type Equivalence
 @c       Type Attributes
-@c       Declaration of Types
 @c   Integers
 @c       Integer Literals
 @c       Comparison of Integers
@@ -350,7 +350,7 @@ and also elaborates on how to define new types.
 @c some rule is violated.
 
 @menu
-* Type Constructors::		Type constructors and type names.
+* Type Constructors::		Defining types.
 * Declaration of Types::	Defining named types.
 * Integer Types::		Whole numbers.
 * String Type::			Character strings.
@@ -365,20 +365,21 @@ and also elaborates on how to define new types.
 
 A @dfn{type constructor} is a syntactic construction that denotes a
 type and its properties.  Depending on the type being denoted,
-constructors can be very simple, or rather complex.  Consider for
+constructors can be as simple as a single keyword, or rather complex
+like a struct definition spawning several program pages.  Consider for
 example the following type constructors:
 
 @example
 string
 int<32>
 offset<uint<16>,8>
-struct @{int foo; long bar;@}
+struct @{int<32> foo; int<64> bar;@}
 uint<8>[]
 @end example
 
-The first line in the example above denotes the string type.  Since
-there is only one string type in Pkl, this constructor doesn't take
-any parameter.  Very simple.
+The first line in the example above denotes the @dfn{string type}.
+Since there is only one string type in Pkl, this constructor doesn't
+take any parameter.  Very simple.
 
 The second line denotes the unsigned 32-bit integer type.  In this
 case, it is needed to pass a parameter in order to specify the number
@@ -403,8 +404,48 @@ the several types supported in Pkl.
 @node Declaration of Types
 @section Declaration of Types
 
-@c deftype
-  
+Types can be given names using the @code{deftype} construct:
+
+@example
+deftype @var{name} = @var{type_constructor};
+@end example
+
+@noindent
+declares a new named type with name @var{name}, described by
+@var{type_sconstructor}.  Type names are conformed by a letter or an
+underscore character (@code{_}) followed by zero or more letters,
+underscore characters or digits.  The type names are case-sensitive.
+
+For example, consider the type declaration:
+
+@example
+deftype int = int<32>;
+@end example
+
+@noindent
+which declares a type named @code{int} as a signed 32-bit integer
+type.
+
+Once a named type is declared, it is visible until the end of the
+current lexical block (XXX xref see lexical blocks).  It is an error
+to declare two types with the same name in the same lexical block.
+Types declared in inner lexical blocks can ghost types declared in
+outer blocks.
+
+Once a type is declared, its name can be used everywhere a type is
+expected.  This includes another @code{deftype}:
+
+@example
+deftype another_int = int;
+@end example
+
+Note that, whereas a type name can appear everywhere a type
+constructor is expected, the inverse is not true: there are places
+where a type name is accepted but not a type constructor.  The
+following sections identify these contexts.
+
+By convention, CamelCase is used for @code{struct} and @code{union}
+types.
 
 @c While discussing the type system, we will be using two different but
 @c certainly related concepts: @dfn{type expressions} and @dfn{type
