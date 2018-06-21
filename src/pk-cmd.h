@@ -1,4 +1,4 @@
-/* pk-cmd.h - Poke commands.  Definitions.  */
+/* pk-cmd.h - Poke commands.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
