@@ -639,6 +639,33 @@ types.
 @node Integer Types
 @section Integer Types
 
+Most of the values manipulated in Pkl programs are whole numbers, also
+typically known as @dfn{integers} in computing parlance.  This is
+because integers are pervasive in binary formats.
+
+Most general-purpose programming languages provide a small set of
+integer types, each featuring a range corresponding to strategic
+storage sizes: basically, signed and unsigned variants of 8, 16, 32,
+64 bits.  When integers having an ``odd'' width (like 13 bits, for
+example) get into play for whatever reason, the programmer is required
+to use the integer arithmetic operators (and sometimes bit-wise
+operators) herself, in a clever way, in order to achieve the desired
+results.
+
+Pkl, on the contrary, provides a rich set of integer types featuring
+different widths, in both signed and unsigned variants.  The language
+operators are aware of these types, and will do the right thing when
+operating on integer values having different widths.  XXX xref: see
+arithmetic operators.
+
+Unsigned integer types are created using the type constructor
+@code{uint<@var{n}>}, where @var{n} is the number of bits.  @var{n}
+should be in the range @code{(0,64]}.
+
+Similarly, signed integer types are created using the type constructor
+@var{int<@var{n}>}, where @var{n} is the number of bits.  @var{n}
+should be in the range @code{(0,64]}.
+
 @node String Type
 @section String Type
 

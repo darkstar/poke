@@ -816,6 +816,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
 }
 PKL_PHASE_END_HANDLER
 
+/* The bit width in integral types should be between 1 and 64.  Note
+   that the width is a constant integer as per the parser.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node type = PKL_PASS_NODE;
+
+  if (PKL_AST_TYPE_I_SIZE (type) < 1
+      || PKL_AST_TYPE_I_SIZE (type) > 64)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
+                 "the width of an integral type should be in the [1,64] range");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* The array sizes in array type literals, if present, should be
    integer expressions.  */
 
@@ -953,6 +974,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),
 
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),
   };
 

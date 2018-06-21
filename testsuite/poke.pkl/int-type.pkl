@@ -1,0 +1,11 @@
+/* { dg-do compile } */
+
+deftype int1 = int<1>;
+deftype uint1 = uint<1>;
+
+deftype int2 = int<2>;
+deftype uint2 = uint<2>;
+
+deftype i64 = int<64>;
+deftype u64 = uint<64>;
+
