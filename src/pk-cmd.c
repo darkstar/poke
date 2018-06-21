@@ -488,7 +488,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                   }
                 case 'f':
                   {
-                    /* Parse a filename.  */
+                    /* Parse a filename, doing tilde expansion.  */
                     size_t i;
                     wordexp_t exp_result;
 
@@ -620,17 +620,6 @@ static struct pk_trie *cmds_trie;
 int
 pk_cmd_exec (char *str)
 {
-  if (cmds_trie == NULL)
-    cmds_trie = pk_trie_from_cmds (cmds);
-  if (info_trie == NULL)
-    info_trie = pk_trie_from_cmds (info_cmds);
-  if (help_trie == NULL)
-    help_trie = pk_trie_from_cmds (help_cmds);
-  if (vm_trie == NULL)
-    vm_trie = pk_trie_from_cmds (vm_cmds);
-  if (vm_disas_trie == NULL)
-    vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
-
   return pk_cmd_exec_1 (str, cmds_trie, NULL);
 }
 
@@ -712,10 +701,21 @@ pk_cmd_exec_script (const char *filename)
 }
 
 void
+pk_cmd_init (void)
+{
+  cmds_trie = pk_trie_from_cmds (cmds);
+  info_trie = pk_trie_from_cmds (info_cmds);
+  help_trie = pk_trie_from_cmds (help_cmds);
+  vm_trie = pk_trie_from_cmds (vm_cmds);
+  vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
+}
+
+void
 pk_cmd_shutdown (void)
 {
   pk_trie_free (cmds_trie);
   pk_trie_free (info_trie);
   pk_trie_free (help_trie);
   pk_trie_free (vm_trie);
+  pk_trie_free (vm_disas_trie);
 }

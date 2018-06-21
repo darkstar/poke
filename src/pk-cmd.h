@@ -89,6 +89,10 @@ int pk_cmd_exec (char *str);
 
 int pk_cmd_exec_script (const char *filename);
 
+/* Initialize the cmd subsystem.  */
+
+void pk_cmd_init (void);
+
 /* Shutdown the cmd subsystem, freeing all used resources.  */
 
 void pk_cmd_shutdown (void);

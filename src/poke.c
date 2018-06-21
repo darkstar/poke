@@ -305,6 +305,10 @@ initialize ()
                          /* XXX: use POKEDIR  */
                          "/home/jemarch/gnu/hacks/poke/pkl/std.pkl"))
     exit (1);
+
+  /* Initialize the command subsystem.  This should be done even if
+     called non-interactively.  */
+  pk_cmd_init ();
 }
 
 static void
