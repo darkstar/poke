@@ -660,11 +660,15 @@ arithmetic operators.
 
 Unsigned integer types are created using the type constructor
 @code{uint<@var{n}>}, where @var{n} is the number of bits.  @var{n}
-should be in the range @code{(0,64]}.
+should be an integer literal in the range @code{(0,64]}.
 
 Similarly, signed integer types are created using the type constructor
 @var{int<@var{n}>}, where @var{n} is the number of bits.  @var{n}
-should be in the range @code{(0,64]}.
+should be an integer literal in the range @code{(0,64]}.
+
+Note that expressions are not allowed in the type integral constructor
+parameters.  Not even constant expressions.  Thus, things like
+@code{int<foo>} and @code{uint<2+3>} are not allowed.
 
 @node String Type
 @section String Type
@@ -1028,6 +1032,15 @@ Variable types, eg. @code{int<@var{exp}>} where @var{exp} is not constant.
 Evolve into a kind of gradual typing, to provide more dynamism while
 keeping the control and efficiency associated with static typing.
 @end itemize
+
+@section Other future extensions
+
+@itemize
+@item
+Allow constant expressions in integral type constructors, like
+@code{uint<2+3>}.
+@end itemize
+
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
