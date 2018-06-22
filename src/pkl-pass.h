@@ -59,7 +59,8 @@
    - OP_PR_HANDLERS
    - TYPE_PR_HANDLERS
 
-   A given phase can define handlers of both types: DF and BF.
+   A given phase can define handlers of both types: PR (pre-order) and
+   PS (post-order).
 
    There are three additional handlers that the user can install:
 
@@ -163,17 +164,18 @@ typedef struct pkl_phase *pkl_phase;
    equivalent to reaching the end of the handler body.
 
    PKL_PASS_BREAK causes the pass manager to not process the children
-   of the current node.  This should only be used in a BF handler.
+   of the current node.  This should only be used in a PR handler.
 
    PKL_PASS_RESTART expands to an l-value that should be set to 1 if
    the handler modifies its subtree structure in any way, either
    creating new nodes or removing existing nodes.  This makes the pass
    machinery do the right thing (hopefully.)  By default its value is
    0.  This macro should _not_ be used as an r-value.  Also, setting
-   PKL_PASS_RESTART to 1 should only be done in DF handlers.
+   PKL_PASS_RESTART to 1 should only be done in PS handlers.
 
    PKL_PASS_SUBPASS (NODE) starts a subpass that processes the subtree
-   starting at NODE.  If the execution of the subpass returns an error
+   starting at NODE.  The subpass shares the same payloads than the
+   current pass.  If the execution of the subpass returns an error
    then the expansion of this macro calls PKL_PASS_ERROR.
    
    PKL_PASS_EXIT can be used in order to interrupt the execution of
@@ -210,8 +212,8 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_EXIT do { longjmp (_toplevel, 1); } while (0)
 #define PKL_PASS_ERROR do { longjmp (_toplevel, 2); } while (0)
 
-/* The following macros should be used in order to define phase
-   handlers, like follows:
+/* The following macros are used to define phase handlers, like
+   follows:
 
    PKL_PHASE_BEGIN_HANDLER (handler_name)
       ... handler prologue ...
@@ -255,7 +257,7 @@ pkl_phase_parent_in (pkl_ast_node parent,
   int i;
 
   if (parent == NULL)
-    /* This happens with the top-level node of the AST, or th
+    /* This happens with the top-level node of the AST, or the
        top-level node of a subpass.  */
     return 1;
 
@@ -287,7 +289,7 @@ pkl_phase_parent_in (pkl_ast_node parent,
    array.  There should be as much payloads as phases, and it is not
    needed to terminate this array with NULL.
 
-   Running several phases in parallel in the same pass is good for
+   Running several phases in "parallel" in the same pass is good for
    performance.  However, there is an important consideration: if a
    phase requires to process each AST nodes just once, no restarting
    phases must precede it in the pass.  This is the case of the code

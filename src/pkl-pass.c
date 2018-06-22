@@ -249,7 +249,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   if (phases == NULL)
     return node;
 
-  /* Call the breadth-first handlers from registered phases.  */
+  /* Call the pre-order handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_POST_ORDER);
@@ -429,11 +429,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     default:
       /* Unknown node code.  This kills the poke :'( */
-      printf ("XXX: %d\n", PKL_AST_CODE (node));
+      /* printf ("XXX: %d\n", PKL_AST_CODE (node)); */
       assert (0);
     }
 
-  /* Call the depth-first handlers from registered phases.  */
+  /* Call the post-order handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_PRE_ORDER);

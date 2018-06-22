@@ -149,7 +149,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 
   /* Finally register the declared entity, unless it is a type.  Types
      are not variables.  */
-
   if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 }
@@ -239,7 +238,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
 
       /* Pop the frames created by the declarations contained in the
          compound statement from the enviroment.  */
-
       for (stmt_decl = comp_stmt_stmts;
            stmt_decl;
            stmt_decl = PKL_AST_CHAIN (stmt_decl))

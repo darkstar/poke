@@ -43,6 +43,8 @@
             compilation-time: SIZEOF for complete types.  This phase
             is intended to be executed short before code generation.
 
+   `trans4' is executed just before the code generation pass.
+
    See the handlers below for details.  */
 
 /* The following handler is used in all trans phases and initializes
@@ -216,7 +218,8 @@ PKL_PHASE_END_HANDLER
 
 /* At this point offset types can have an identifier expressing its
    units.  This handler replaces the identifier with a suitable unit
-   factor.  If the identifier is invalid, then an error is raised.  */
+   factor.  If the identifier is invalid, then an error is raised.
+   XXX: to remove.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_offset)
 {
@@ -342,12 +345,11 @@ struct pkl_phase pkl_phase_trans1 =
 
 
 
-/* Annotate expression nodes to reflect whether they are literals.
-   Entities created by the lexer (INTEGER, STRING, etc) already have
-   this attribute set if needed.
+/* The following handlers annotate expression nodes to reflect whether
+   they are literals.  Entities created by the lexer (INTEGER, STRING,
+   etc) already have this attribute set if needed. */
 
-   Expressions having literals for operators are constant.
-   Expressions having only constant operators are constant.  */
+/*  Expressions having only literal operands are literal.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_exp)
 {
@@ -466,7 +468,7 @@ struct pkl_phase pkl_phase_trans2 =
 
 
 /* SIZEOF nodes whose operand is a complete type should be replaced
-   with an offset.  The type should be complete.  */
+   with an offset.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
 {
