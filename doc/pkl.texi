@@ -673,6 +673,16 @@ parameters.  Not even constant expressions.  Thus, things like
 @node String Type
 @section String Type
 
+Pkl supports a notion of @dfn{strings} which is very similar to the C
+programming language: a string value is a sequence of characters that
+is terminated the so-called @dfn{null character}.  String values, and
+the operations allowed on them, are described in detail in later
+chapters.
+
+There is only one type for Pkl string values (the lenght of the string
+is not part of its type) and the type constructor is simply the
+reserved word @code{string}.
+
 @node Struct and Union Types
 @section Struct and Union Types
 
