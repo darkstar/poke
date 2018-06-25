@@ -675,8 +675,8 @@ parameters.  Not even constant expressions.  Thus, things like
 
 Pkl supports a notion of @dfn{strings} which is very similar to the C
 programming language: a string value is a sequence of characters that
-is terminated the so-called @dfn{null character}.  String values, and
-the operations allowed on them, are described in detail in later
+is terminated by the so-called @dfn{null character}.  String values,
+and the operations allowed on them, are described in detail in later
 chapters.
 
 There is only one type for Pkl string values (the lenght of the string
