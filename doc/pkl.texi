@@ -177,8 +177,8 @@ can be stacked.  The following are valid comments:
 // This is a stacked // comment.
 @end example
 
-Both nestable and non-nestable comments comments are usually processed
-and removed by the lexical analyzer, as these are not intended to be
+Both stackable and non-nestable comments are usually processed and
+removed by the lexical analyzer, as these are not intended to be
 preserved for subsequent processing@footnote{Some implementations may
 find it suitable to encode certain meta-information in comments
 however.}.
@@ -319,15 +319,15 @@ however.}.
 @node Data Types
 @chapter Data Types
 
-@dfn{Values} are the data objects used and manipulated by Pkl
-programs.
+@dfn{Values} are the data objects manipulated by Pkl programs.  They
+include numbers, offsets, character strings, structs, arrays, etc.
 
 Every value belongs to one, and only one, type.  Values of the same
 type have similar characteristics and may usually be used in the same
 contexts.  The type corresponding to a value is unambiguous and well
 defined, even if the value is denoted as a literal.  This suites well
-the purpose of the language, since the programmer should always be in
-control of the structure of the data being manipulated.
+the purpose of the language, since the programmer should always be
+aware of the storage characteristics of the data being manipulated.
 
 Pkl provides a set of predefined type constructors that the programmer
 can use directly.  This includes whole numbers of several different
@@ -335,8 +335,8 @@ bit lengths and signedness, and strings.  Also, constructs are
 provided to allow the declaration of user-defined types, like structs,
 unions and arrays.
 
-This chapter describes generalities about types, the supported types,
-and also elaborates on how to define new types.
+This chapter describes generalities about types, an exhaustive list of
+supported types, and also elaborates on how to define new types.
 
 @c Static.  (XXX: rationale on why static.)
 
@@ -353,6 +353,7 @@ and also elaborates on how to define new types.
 * Type Constructors::		Defining types.
 * Declaration of Types::	Defining named types.
 * Integer Types::		Whole numbers.
+* Offset Types::                File offsets with units.
 * String Type::			Character strings.
 * Struct and Union Types::	Collections of Fields.
 * Array Types::			Sequences of objects.
@@ -381,10 +382,10 @@ The first line in the example above denotes the @dfn{string type}.
 Since there is only one string type in Pkl, this constructor doesn't
 take any parameter.  Very simple.
 
-The second line denotes the unsigned 32-bit integer type.  In this
-case, it is needed to pass a parameter in order to specify the number
-of bits.  Note how @code{<} and @code{>} characters are used to
-enclose type constructor parameters.
+The second line denotes the signed 32-bit integer type.  In this case,
+it is needed to pass a parameter in order to specify the number of
+bits.  Note how @code{<} and @code{>} characters are used to enclose
+type constructor parameters.
 
 The third line denotes the offset type with base type unsigned 16-bit
 integer and unit 8 bits.  Note how commas (@code{,}) are used to
@@ -412,7 +413,7 @@ deftype @var{name} = @var{type_constructor};
 
 @noindent
 declares a new named type with name @var{name}, described by
-@var{type_sconstructor}.  Type names are conformed by a letter or an
+@var{type_constructor}.  Type names are conformed by a letter or an
 underscore character (@code{_}) followed by zero or more letters,
 underscore characters or digits.  The type names are case-sensitive.
 
@@ -669,6 +670,9 @@ should be an integer literal in the range @code{(0,64]}.
 Note that expressions are not allowed in the type integral constructor
 parameters.  Not even constant expressions.  Thus, things like
 @code{int<foo>} and @code{uint<2+3>} are not allowed.
+
+@node Offset Types
+@section Offset Types
 
 @node String Type
 @section String Type
