@@ -496,7 +496,6 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       uint_fmt = "";
       break;
     default:
-      /* XXX: handle binary.  */
       assert (0);
       break;
     }

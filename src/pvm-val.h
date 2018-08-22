@@ -35,6 +35,7 @@
    - Arrays.
    - Structs.
    - Offsets.
+   - Closures.
 
    It is fundamental for pvm_val values to fit in 64 bits, in order to
    avoid expensive allocations and to also improve the performance of
@@ -94,7 +95,7 @@ pvm_val pvm_make_uint (uint32_t value, int size);
 
 /* Long integers, wider than 32-bit and up to 64-bit, are boxed.  A
    pointer
-                                             ttt
+                                             tag
                                              ---
          pppp pppp pppp pppp pppp pppp pppp pttt
 

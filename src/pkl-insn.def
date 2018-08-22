@@ -19,7 +19,7 @@
 /* This file contains the definition of the instructions known to the
    poke macro-assembler.
 
-   PKL_DEF_INSN defines an instruction, or a macro-instruction.
+   PKL_DEF_INSN defines either an instruction, or a macro-instruction.
 
    The first column is the code for the instruction.
 
@@ -30,13 +30,14 @@
    `v' is for a pvm_val.
    `l' is for a label.
    `n' is for an immediate.
-   `r' is for register.
+   `r' is for a register.
 
    `a' is for a pkl_ast_node.
-       This kind of arguments are only valid in macro-instructions.
+       AST node arguments are only valid in macro-instructions.
 
    For PVM instructions, the third column is the instruction name as
-   defined in pvm.jitter.  However, beware jitter's name mangling.
+   defined in pvm.jitter.  However, beware jitter's evil name
+   mangling; see jitterc-mangle.[ch].
 
    For macro-instructions, the third column is the name of the macro,
    to be used for debugging purposes.  */
@@ -269,7 +270,8 @@ PKL_DEF_INSN (PKL_INSN_PRINT, "", "print")
 PKL_DEF_INSN (PKL_INSN_EXIT, "", "exit")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
-   macro instructions, and it should not be assembled.  */
+   macro instructions, and it should not be passed to
+   `pkl_asm_insn'.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
 PKL_DEF_INSN (PKL_INSN_NTON, "aa", "nton")

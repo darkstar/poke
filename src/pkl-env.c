@@ -25,8 +25,9 @@
 #include "pkl-env.h"
 
 /* The declarations are organized in a hash table, chained in their
-   buckes through CHAIN2.  Note that in poke an unique namespace is
-   shared by types, variables and functions.
+   buckes through CHAIN2.  Note that in Pkl an unique namespace is
+   shared by types, variables and functions, so only one table is
+   required.
 
    UP is a link to the immediately enclosing frame.  This is NULL for
    the top-level frame.  */

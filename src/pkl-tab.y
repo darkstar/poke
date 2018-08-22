@@ -1,4 +1,4 @@
-/* pkl-tab.y - LARL(1) parser for Poke.  */
+/* pkl-tab.y - LALR(1) parser for Poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi.  */
 
