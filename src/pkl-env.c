@@ -253,6 +253,8 @@ pkl_env_dup_toplevel (pkl_env env)
   pkl_env new;
   int i;
 
+  /* XXX: this should do a deep copy!  */
+
   assert (pkl_env_toplevel_p (env));
 
   new = pkl_env_new ();
