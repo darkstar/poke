@@ -93,7 +93,6 @@ get_registered (pkl_hash hash_table, const char *name)
   for (t = hash_table[hash]; t != NULL; t = PKL_AST_CHAIN2 (t))
     {
       pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
-      
       if (strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
                   name) == 0)
         return t;
@@ -260,9 +259,7 @@ pkl_env_dup_toplevel (pkl_env env)
   for (i = 0; i < HASH_TABLE_SIZE; ++i)
     {
       pkl_ast_node decl = env->hash_table[i];
-
-      for (; decl; decl = PKL_AST_CHAIN2 (decl))
-        new->hash_table[i] = ASTREF (decl);
+      new->hash_table[i] = ASTREF (decl);
     }
 
   new->num_types = env->num_types;
