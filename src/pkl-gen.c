@@ -267,6 +267,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
      the stack.  Note that `gen' didn't generate anything for LVALUE,
      as it is only used as a place-holder for the lexical address of
      the variable.  */
+
+  assert (PKL_AST_CODE (lvalue) = PKL_AST_VAR);
   
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
                 PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
@@ -679,12 +681,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       pkl_asm_insn (pasm, PKL_INSN_MKO);
       break;
     case PKL_TYPE_ARRAY:
-      /* XXX: call to the std function std_map_array.  Error if we are
-         bootstrapping and this operation is not yet available.  */
+      /* Generate code to create an array of maps of the given
+         type.  */
+      /* Handle:
+
+         - If the size of the array is known, use a constant for loop.
+         - If the size of the array is variable, use a for loop.
+         - If the size of the array is not specified at all ([]) then
+           use a while (not EOF) loop to create the array.
+      */
     case PKL_TYPE_STRUCT:
-      /* XXX: call to the std function std_map_struct.  Error if we
-         are bootstrapping and this operation is not yet
-         available.  */
+      /* Generate code to create a struct of maps of the appropriate
+         types.  */
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,
