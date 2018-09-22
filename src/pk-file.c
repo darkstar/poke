@@ -35,7 +35,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_TAG)
     {
-      /* Switch to an already opened IO stream.  */
+      /* Switch to an already opened IO space.  */
 
       int io_id;
       pk_io io;
@@ -52,7 +52,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     }
   else
     {
-      /* Create a new IO stream.  */
+      /* Create a new IO space.  */
       const char *filename = PK_CMD_ARG_STR (argv[0]);
       
       if (access (filename, R_OK) != 0)
@@ -106,7 +106,7 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   if (changed)
     {
       if (pk_io_cur () == NULL)
-        puts (_("No more IO streams."));
+        puts (_("No more IO spaces."));
       else
         printf (_("The current file is now `%s'.\n"),
                 PK_IO_FILENAME (pk_io_cur ()));

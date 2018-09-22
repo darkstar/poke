@@ -27,7 +27,7 @@
 #include <xalloc.h>
 #define _(str) gettext (str)
 
-/* List of IO streams, and pointer to the current one.  */
+/* List of IO spaces, and pointer to the current one.  */
 
 static struct pk_io *ios;
 static struct pk_io *cur_io;
@@ -60,7 +60,7 @@ pk_io_open (const char *filename)
       return 0;
     }
 
-  /* Allocate and initialize the new IO stream.  */
+  /* Allocate and initialize the new IO space.  */
   io = xmalloc (sizeof (struct pk_io));
   io->next = NULL;
   io->mode = fmode;
@@ -183,7 +183,7 @@ pk_io_get (int n)
 void
 pk_io_shutdown (void)
 {
-  /* Close and free all open IO streams.  */
+  /* Close and free all open IO spaces.  */
   while (ios)
     pk_io_close (ios);
 }

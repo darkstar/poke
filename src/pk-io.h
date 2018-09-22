@@ -1,4 +1,4 @@
-/* pk-io.c - IO access for poke.  Definitions.  */
+/* pk-io.c - IO spaces.  Definitions.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -23,16 +23,45 @@
 #include <stdio.h>
 #include <fcntl.h>
 
+/* "IO spaces" are the entities used in poke in order to abstract the
+   heterogeneous devices that are suitable to be edited, such as
+   files, filesystems, memory images of processes, etc:
+
+                             
+                             +------+  
+                      +----->| File |
+       +-------+      |      +------+
+       |  IO   |      |       
+       | space |<-----+      +---------+
+       | iface |      +----->| Process |
+       +-------+      |      +---------+
+                   
+                      :           :
+                   
+                      |      +------------+
+                      +----->| Filesystem |
+                             +------------+
+
+   IO spaces are bit-addressable, and both bit- and byte- endianness
+   aware.
+
+   IO spaces also provide caching capabilities, transactions and
+   serialization of concurrent accesses.
+
+   The main consumer of IO spaces is, by far, the PVM.  Consequently,
+   the interface provided to manipulate IO spaces is tailored to the
+   needs of the virtual machine.  */
+
 #define PK_EOF EOF
 
 #define PK_SEEK_SET SEEK_SET
 #define PK_SEEK_CUR SEEK_CUR
 #define PK_SEEK_END SEEK_END
 
-/* Offset into an IO stream.  */
+/* Offset into an IO space.  */
 typedef off64_t pk_io_off;
 
-/* Type representing an IO stream, and accessor macros.  */
+/* Type representing an IO space, and accessor macros.  */
 
 #define PK_IO_FILE(io) ((io)->file)
 #define PK_IO_FILENAME(io) ((io)->filename)
@@ -50,17 +79,17 @@ struct pk_io
 
 typedef struct pk_io *pk_io;
 
-/* Create an IO stream reading and writing to FILENAME and set it as
-   the current stream.  Return 0 if there was an error opening the
+/* Create an IO space reading and writing to FILENAME and set it as
+   the current space.  Return 0 if there was an error opening the
    file, 1 otherwise.  */
 
 int pk_io_open (const char *filename);
 
-/* Close the given IO stream and perform any other cleanup.  */
+/* Close the given IO space and perform any other cleanup.  */
 
 void pk_io_close (pk_io io);
 
-/* Return the current position in the given IO stream.  Return -1 on
+/* Return the current position in the given IO space.  Return -1 on
    error.  */
 
 pk_io_off pk_io_tell (pk_io io);
@@ -72,37 +101,37 @@ pk_io_off pk_io_tell (pk_io io);
 
 int pk_io_seek (pk_io io, pk_io_off offset, int whence);
 
-/* Read the next character from the current IO stream and return it as
+/* Read the next character from the current IO space and return it as
    an unsigned char cast to an int, or PK_EOF on end of file or
    error.  */
 
 int pk_io_getc (void);
 
-/* Write a character in the current IO stream.  Return the character
+/* Write a character in the current IO space.  Return the character
    written as an unsigned char cast ot an int, or PK_EOF on error.  */
 
 int pk_io_putc (int c);
 
-/* Return the current IO stream.  */
+/* Return the current IO space.  */
 
 pk_io pk_io_cur (void);
 
-/* Set the current IO stream to IO.  */
+/* Set the current IO space to IO.  */
 
 void pk_io_set_cur (pk_io io);
 
-/* Map over all the IO streams executing a handler.  */
+/* Map over all the IO spaces executing a handler.  */
 
 typedef void (*pk_io_map_fn) (pk_io io, void *data);
 void pk_io_map (pk_io_map_fn cb, void *data);
 
-/* Return the IO stream with the given filename.  Return NULL if no
-   such IO stream exists.  */
+/* Return the IO space with the given filename.  Return NULL if no
+   such IO space exists.  */
 
 pk_io pk_io_search (const char *filename);
 
-/* Return the Nth IO stream.  If N is negative or bigger than the
-   number of IO streams, return NULL.  */
+/* Return the Nth IO space.  If N is negative or bigger than the
+   number of IO spaces, return NULL.  */
 
 pk_io pk_io_get (int n);
 

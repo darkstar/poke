@@ -68,7 +68,7 @@ Writing Pkl Programs
 * Variables::
 * Statements::
 * Procedures::
-* Mapping::			Accessing the IO stream from poke programs.
+* Mapping::			Accessing the IO space from poke programs.
 
 Advanced Editing
 @c Searching

@@ -58,8 +58,8 @@ struct pk_cmd_arg
 
 typedef int (*pk_cmd_fn) (int argc, struct pk_cmd_arg argv[], uint64_t uflags);
 
-#define PK_CMD_F_REQ_IO 0x1  /* Command requires an IO stream.  */
-#define PK_CMD_F_REQ_W  0x2  /* Command requires a writable IO stream.  */
+#define PK_CMD_F_REQ_IO 0x1  /* Command requires an IO space.  */
+#define PK_CMD_F_REQ_W  0x2  /* Command requires a writable IO space.  */
 
 struct pk_cmd
 {
