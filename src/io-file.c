@@ -23,7 +23,7 @@
 #include <assert.h>
 #include <xalloc.h>
 
-#include "pk-io.h"
+#include "io-be.h"
 
 /* State associated with a file device.  */
 

@@ -20,7 +20,7 @@ dist_pkgdata_DATA = pkl-rt.pkl
 
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
-               io.c io.h \
+               io.c io.h io-be.h \
                io-file.c \
                pk-cmd.c pk-cmd.h \
                pk-dump.c pk-peek.c pk-poke.c pk-file.c \
