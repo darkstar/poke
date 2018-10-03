@@ -30,7 +30,8 @@ typedef uint64_t io_boff;
 #define PK_SEEK_CUR 1
 #define PK_SEEK_END 2
 
-/* The struct below represents the interface for IO backends.  */
+/* Each IO backend should implement the interface defined by the
+   struct below.  */
 
 struct io_be
 {
