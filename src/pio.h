@@ -1,4 +1,4 @@
-/* io.h - IO spaces for poke.  Definitions.  */
+/* pio.h - IO spaces for poke.  Definitions.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IO_H
-#define IO_H
+#ifndef PIO_H
+#define PIO_H
 
 #include <config.h>
 #include <stdint.h>
@@ -25,8 +25,8 @@
 /* The following two functions intialize and shutdown the IO poke
    subsystem.  */
 
-void io_init (void);
-void io_shutdown (void);
+void pio_init (void);
+void pio_shutdown (void);
 
 /* "IO spaces" are the entities used in poke in order to abstract the
    heterogeneous devices that are suitable to be edited, such as
@@ -78,16 +78,16 @@ void io_shutdown (void);
    Since negative offsets are possible, the maximum size of any given
    IO space is 2^60 bytes.  */
 
-typedef int64_t io_off;
+typedef int64_t pio_off;
 
 /* The following macros should be used in order to abstract the
    internal representation of the offsets.  */
 
-#define IO_O_NEW(BYTES,BITS) \
+#define PIO_O_NEW(BYTES,BITS) \
   ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
 
-#define IO_O_BYTES(O) ((O) >> 3)
-#define IO_O_BITS(O)  ((O) & 0x3)
+#define PIO_O_BYTES(O) ((O) >> 3)
+#define PIO_O_BITS(O)  ((O) & 0x3)
 
 /* Open an IO space using a handler.  The handler is tried with all
    the supported backends until one recognizes it.  This can be the
@@ -96,20 +96,20 @@ typedef int64_t io_off;
    Return the IO space, or NULL if some error occurred (such as an
    invalid handler).  */
 
-io io_open (const char *handler);
+io pio_open (const char *handler);
 
 /* Return the current IO space.  */
 
-io io_cur (void);
+io pio_cur (void);
 
 /* Set the current IO space to IO.  */
 
-void io_set_cur (io io);
+void pio_set_cur (pio io);
 
 /* Map over all the IO spaces executing a handler.  */
 
-typedef void (*io_map_fn) (io io, void *data);
-void io_map (io_map_fn cb, void *data);
+typedef void (*pio_map_fn) (pio io, void *data);
+void pio_map (pio_map_fn cb, void *data);
 
 /* XXX: peek/poke API.
    
@@ -117,29 +117,29 @@ void io_map (io_map_fn cb, void *data);
    hooks, and also versions bypassing the cache.
  */
 
-int32_t io_peek_int (io io, int bits,
-                        io_off offset, io_endian endian,
-                        io_nenc nenc);
+int32_t pio_peek_int (pio io, int bits,
+                      pio_off offset, pio_endian endian,
+                      pio_nenc nenc);
 
-uint32_t io_peek_uint (io io, int bits,
-                          io_off offset, io_endian endian);
+uint32_t pio_peek_uint (pio io, int bits,
+                        pio_off offset, pio_endian endian);
 
-int64_t io_peek_long (io io, int bits,
-                         io_off offset, io_endian endian,
-                         io_nenc nenc);
+int64_t pio_peek_long (pio io, int bits,
+                       pio_off offset, pio_endian endian,
+                       pio_nenc nenc);
 
-uint64_t io_peek_ulong (io io, int bits,
-                           io_ff offset, io_endian endian);
+uint64_t pio_peek_ulong (pio io, int bits,
+                         pio_off offset, pio_endian endian);
 
-char *io_peek_string (io io, io_off offset);
+char *pio_peek_string (pio io, pio_off offset);
 
 /* XXX: 'update' hooks API.  */
 
 /* Type representing an IO space, and accessor macros.  */
 
-#define IO_FILE(io) ((io)->file)
-#define IO_FILENAME(io) ((io)->filename)
-#define IO_MODE(io) ((io)->mode)
+#define PIO_FILE(io) ((io)->file)
+#define PIO_FILENAME(io) ((io)->filename)
+#define PIO_MODE(io) ((io)->mode)
 
 struct io
 {
@@ -153,11 +153,11 @@ typedef struct io *io;
 /* Return the IO space with the given filename.  Return NULL if no
    such IO space exists.  */
 
-io io_search (const char *filename);
+io pio_search (const char *filename);
 
 /* Return the Nth IO space.  If N is negative or bigger than the
    number of IO spaces, return NULL.  */
 
-io io_get (int n);
+io pio_get (int n);
 
-#endif /* ! IO_H */
+#endif /* ! PIO_H */

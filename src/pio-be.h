@@ -1,4 +1,4 @@
-/* io-be.h - IO backend interface.  */
+/* pio-be.h - IO backend interface.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -24,16 +24,16 @@
 
 typedef uint64_t io_boff;
 
-#define PK_EOF -1
+#define PIO_EOF -1
 
-#define PK_SEEK_SET 0
-#define PK_SEEK_CUR 1
-#define PK_SEEK_END 2
+#define PIO_SEEK_SET 0
+#define PIO_SEEK_CUR 1
+#define PIO_SEEK_END 2
 
 /* Each IO backend should implement the interface defined by the
    struct below.  */
 
-struct io_be
+struct pio_be
 {
   /* Backend initialization.  This hook is invoked exactly once,
      before any other backend hook.  Return 1 if the initialization is
@@ -74,7 +74,7 @@ struct io_be
      and PK_SEEK_END.  Return 0 on successful completion, and -1 on
      error.  */
 
-  int (*seek) (void *iod, io_boff offset, int whence);
+  int (*seek) (void *iod, pio_boff offset, int whence);
 
   /* Read a byte from the given device at the current position.
      Return the byte in an int, or PK_EOF on error.  */

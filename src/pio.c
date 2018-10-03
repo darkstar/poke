@@ -1,4 +1,4 @@
-/* pk-io.c - IO access for poke.  */
+/* pio.c - IO access for poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -17,7 +17,7 @@
  */
 
 #include <config.h>
-#include "pk-io.h"
+#include "pio.h"
 #include <xalloc.h>
 #include <stdio.h>
 #include <gettext.h>
@@ -32,25 +32,25 @@ static struct pk_io *ios;
 static struct pk_io *cur_io;
 
 void
-pk_io_init (void)
+pio_init (void)
 {
   /* XXX: register the supported backends.  */
 }
 
 void
-pk_io_shutdown (void)
+pio_shutdown (void)
 {
   /* Close and free all open IO spaces.  */
   while (ios)
-    pk_io_close (ios);
+    pio_close (ios);
 }
 
 
 int
-pk_io_open (const char *filename)
+pio_open (const char *filename)
 {
   const char *mode;
-  pk_io io;
+  pio io;
   FILE *f;
   mode_t fmode = 0;
 
@@ -58,7 +58,7 @@ pk_io_open (const char *filename)
      corresponding hook.  */
 
   /* Allocate and initialize the new IO space.  */
-  io = xmalloc (sizeof (struct pk_io));
+  io = xmalloc (sizeof (struct pio));
   io->next = NULL;
   io->mode = fmode;
   io->file = f;
@@ -79,9 +79,9 @@ pk_io_open (const char *filename)
 }
 
 void
-pk_io_close (pk_io io)
+pio_close (pio io)
 {
-  struct pk_io *tmp;
+  struct pio *tmp;
   
   /* Close the file stream and free resources.  */
   /* XXX: if not saved, ask before closing.  */
@@ -105,31 +105,31 @@ pk_io_close (pk_io io)
   cur_io = ios;
 }
 
-pk_io
-pk_io_cur (void)
+pio
+pio_cur (void)
 {
   return cur_io;
 }
 
 void
-pk_io_set_cur (pk_io io)
+pio_set_cur (pio io)
 {
   cur_io = io;
 }
 
 void
-pk_io_map (pk_io_map_fn cb, void *data)
+pio_map (pio_map_fn cb, void *data)
 {
-  pk_io io;
+  pio io;
 
   for (io = ios; io; io = io->next)
     (*cb) (io, data);
 }
 
-pk_io
-pk_io_search (const char *filename)
+pio
+pio_search (const char *filename)
 {
-  pk_io io;
+  pio io;
 
   for (io = ios; io; io = io->next)
     if (strcmp (io->filename, filename) == 0)
@@ -138,10 +138,10 @@ pk_io_search (const char *filename)
   return io;
 }
 
-pk_io
-pk_io_get (int n)
+pio
+pio_get (int n)
 {
-  pk_io io;
+  pio io;
   
   if (n < 0)
     return NULL;
