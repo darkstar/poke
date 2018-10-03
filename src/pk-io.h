@@ -20,20 +20,26 @@
 #define PK_IO_H
 
 #include <config.h>
-#include <stdio.h>
-#include <fcntl.h>
+#include <stdint.h>
+
+/* The following two functions intialize and shutdown the IO poke
+   subsystem.  */
+
+void pk_io_init (void);
+void pk_io_shutdown (void);
 
 /* "IO spaces" are the entities used in poke in order to abstract the
    heterogeneous devices that are suitable to be edited, such as
-   files, filesystems, memory images of processes, etc:
+   files, filesystems, memory images of processes, etc.
 
+   Space of IO objects <=======> Space of bytes
                              
                              +------+  
                       +----->| File |
        +-------+      |      +------+
        |  IO   |      |       
        | space |<-----+      +---------+
-       | iface |      +----->| Process |
+       |       |      +----->| Process |
        +-------+      |      +---------+
                    
                       :           :
@@ -42,75 +48,44 @@
                       +----->| Filesystem |
                              +------------+
 
-   IO spaces are bit-addressable, and both bit- and byte- endianness
-   aware.
+   IO spaces are bit-addressable spaces of "IO objects", which can be
+   generally read (peeked) and written (poked).  The kind of objects
+   supported are:
 
-   IO spaces also provide caching capabilities, transactions and
-   serialization of concurrent accesses.
+   - "ints", which are signed integers from 1 to 64 bits wide.  They
+     can be stored using either msb or lsb endianness.  Negative
+     quantities are encoded using one of the supported negative
+     encodings.
 
-   The main consumer of IO spaces is, by far, the PVM.  Consequently,
-   the interface provided to manipulate IO spaces is tailored to the
-   needs of the virtual machine.  */
+   - "uints", which are unsigned integers from 1 to 64 bits wide.
+     They can be stored using either msb or lsb endianness.
 
-#define PK_EOF EOF
+   - "strings", which are sequences of bytes terminated by a NULL
+     byte, much like C strings.
 
-#define PK_SEEK_SET SEEK_SET
-#define PK_SEEK_CUR SEEK_CUR
-#define PK_SEEK_END SEEK_END
+   IO spaces also provide caching capabilities, transactions,
+   serialization of concurrent accesses, and more goodies.  */
 
-/* Offset into an IO space.  */
-typedef off64_t pk_io_off;
+/* IO spaces are bit-addressable.  "Offsets" characterize positions
+   into IO spaces.
 
-/* Type representing an IO space, and accessor macros.  */
+   Offsets are encoded in 64-bit integers, which denote the number of
+   bits since the beginning of the space.  They can be added,
+   subtracted and multiplied.
 
-#define PK_IO_FILE(io) ((io)->file)
-#define PK_IO_FILENAME(io) ((io)->filename)
-#define PK_IO_MODE(io) ((io)->mode)
+   Since negative offsets are possible, the maximum size of any given
+   IO space is 2^60 bytes.  */
 
-struct pk_io
-{
-  FILE *file;
-  char *filename;
-  mode_t mode;
-  /* XXX: status saved or not saved.  */
+typedef int64_t pk_io_off;
 
-  struct pk_io *next;
-};
+/* The following macros should be used in order to abstract the
+   internal representation of the offsets.  */
 
-typedef struct pk_io *pk_io;
+#define PK_IO_O_NEW(BYTES,BITS) \
+  ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
 
-/* Create an IO space reading and writing to FILENAME and set it as
-   the current space.  Return 0 if there was an error opening the
-   file, 1 otherwise.  */
-
-int pk_io_open (const char *filename);
-
-/* Close the given IO space and perform any other cleanup.  */
-
-void pk_io_close (pk_io io);
-
-/* Return the current position in the given IO space.  Return -1 on
-   error.  */
-
-pk_io_off pk_io_tell (pk_io io);
-
-/* Change the current position in the given IO according to OFFSET and
-   WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR and
-   PK_SEEK_END.  Return 0 on successful completion, and -1 on
-   error.  */
-
-int pk_io_seek (pk_io io, pk_io_off offset, int whence);
-
-/* Read the next character from the current IO space and return it as
-   an unsigned char cast to an int, or PK_EOF on end of file or
-   error.  */
-
-int pk_io_getc (void);
-
-/* Write a character in the current IO space.  Return the character
-   written as an unsigned char cast ot an int, or PK_EOF on error.  */
-
-int pk_io_putc (int c);
+#define PK_IO_O_BYTES(O) ((O) >> 3)
+#define PK_IO_O_BITS(O)  ((O) & 0x3)
 
 /* Return the current IO space.  */
 
@@ -125,6 +100,55 @@ void pk_io_set_cur (pk_io io);
 typedef void (*pk_io_map_fn) (pk_io io, void *data);
 void pk_io_map (pk_io_map_fn cb, void *data);
 
+/* XXX: peek/poke API.
+   
+   This should include special versions of poke that bypass update
+   hooks, and also versions bypassing the cache.
+ */
+
+int32_t pk_io_peek_int (pk_io io, int bits,
+                        pk_io_off offset, pk_io_endian endian,
+                        pk_io_nenc nenc);
+
+uint32_t pk_io_peek_uint (pk_io io, int bits,
+                          pk_io_off offset, pk_io_endian endian);
+
+int64_t pk_io_peek_long (pk_io io, int bits,
+                         pk_io_off offset, pk_io_endian endian,
+                         pk_io_nenc nenc);
+
+uint64_t pk_io_peek_ulong (pk_io io, int bits,
+                           pk_io_ff offset, pk_io_endian endian);
+
+char *pk_io_peek_string (pk_io io, pk_io_off offset);
+
+/* XXX: update hooks API.  */
+
+/* XXX: the interface and contents below should be moved to
+   pk-io-file.[ch]
+*****************************************************************/
+
+#define PK_EOF EOF
+
+#define PK_SEEK_SET SEEK_SET
+#define PK_SEEK_CUR SEEK_CUR
+#define PK_SEEK_END SEEK_END
+
+/* Type representing an IO space, and accessor macros.  */
+
+#define PK_IO_FILE(io) ((io)->file)
+#define PK_IO_FILENAME(io) ((io)->filename)
+#define PK_IO_MODE(io) ((io)->mode)
+
+struct pk_io
+{
+  /* XXX: status saved or not saved.  */
+
+  struct pk_io *next;
+};
+
+typedef struct pk_io *pk_io;
+
 /* Return the IO space with the given filename.  Return NULL if no
    such IO space exists.  */
 
@@ -135,8 +159,71 @@ pk_io pk_io_search (const char *filename);
 
 pk_io pk_io_get (int n);
 
-/* Shutdown the IO subsystem.  */
 
-void pk_io_shutdown (void);
+/*********** IO backends *****************************************/
+
+
+/* XXX: IO backends provide access to "devices", which can be files,
+   processes, etc.
+
+   XXX: IO devices are byte-oriented, which means they are oblivious
+   to endianness, alignment and negative encoding considerations.  */
+
+typedef uint64_t pk_io_boff;
+
+/* The struct below represents the interface for IO backends.  */
+
+struct pk_io_be
+{
+  /* Backend initialization.  This hook is invoked exactly once,
+     before any other backend hook.
+
+     Return 1 if the initialization is successful, 0 otherwise.  */
+
+  int (*init_fn) (void);
+
+  /* Backend finalization.  This hook is invoked exactly one, and
+     subsequently no other backend hook is ever invoked with the
+     exception of `init'.  
+
+     Return 1 if the finalization is successful, 0 otherwise.  */
+
+  int (*fini_fn) (void);
+
+  /* Open a device using the IO backend, using the provided HANDLER.
+     The contents of the handler are parsed and interpreted by the
+     backend.  This can be for example the name of a file to open, or
+     an URL, or a process PID.
+
+     Return the opened device, or NULL if there was an error.  */
+
+  void *(*open_fn) (const char *handler);
+
+  /* Close the given device.  */
+
+  int (*close_fn) (void *iod);
+
+  /* Return the current position in the given device.  Return -1 on
+     error.  */
+
+  pk_io_boff (*tell_fn) (void *iod);
+
+  /* Change the current position in the given device according to
+     OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
+     and PK_SEEK_END.  Return 0 on successful completion, and -1 on
+     error.  */
+
+  int (*seek_fn) (void *iod, pk_io_boff offset, int whence);
+
+  /* Read a byte from the given device at the current position.
+     Return the byte in an int, or PK_EOF on error.  */
+
+  int (*getc_fn) (void *iod);
+
+  /* Write a byte to the given device at the current position.  Return
+     the character written as an int, or PK_EOF on error.  */
+
+  int (*putc_fn) (void *iod, int c);
+};
 
 #endif /* ! PK_IO_H */

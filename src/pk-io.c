@@ -24,13 +24,27 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
-#include <xalloc.h>
 #define _(str) gettext (str)
 
 /* List of IO spaces, and pointer to the current one.  */
 
 static struct pk_io *ios;
 static struct pk_io *cur_io;
+
+void
+pk_io_init (void)
+{
+  /* XXX: register the supported backends.  */
+}
+
+void
+pk_io_shutdown (void)
+{
+  /* Close and free all open IO spaces.  */
+  while (ios)
+    pk_io_close (ios);
+}
+
 
 int
 pk_io_open (const char *filename)
@@ -40,25 +54,8 @@ pk_io_open (const char *filename)
   FILE *f;
   mode_t fmode = 0;
 
-  /* Open the requested file.  The open mode is read-write if
-     possible.  Otherwise read-only.  */
-  if (access (filename, R_OK | W_OK) != 0)
-    {
-      fmode |= O_RDONLY;
-      mode = "rb";
-    }
-  else
-    {
-      fmode |= O_RDWR;
-      mode = "r+b";
-    }
-  
-  f = fopen (filename, mode);
-  if (!f)
-    {
-      perror (filename);
-      return 0;
-    }
+  /* XXX file opening code was here.  Replace with a call to the
+     corresponding hook.  */
 
   /* Allocate and initialize the new IO space.  */
   io = xmalloc (sizeof (struct pk_io));
@@ -88,9 +85,9 @@ pk_io_close (pk_io io)
   
   /* Close the file stream and free resources.  */
   /* XXX: if not saved, ask before closing.  */
-  if (fclose (io->file) != 0)
-    perror (io->filename);
-  free (io->filename);
+
+  /* XXX: file closing code was here.  Replace with a call to the
+     corresponding hook.  */
 
   /* Unlink the IO from the list.  */
   assert (ios != NULL); /* The list must contain at least io.  */
@@ -106,31 +103,6 @@ pk_io_close (pk_io io)
   
   /* Set the new current IO.  */
   cur_io = ios;
-}
-
-int
-pk_io_getc (void)
-{
-  return fgetc (cur_io->file);
-}
-
-int
-pk_io_putc (int c)
-{
-  int ret = putc (c, cur_io->file);
-  return ret == EOF ? PK_EOF : ret;
-}
-
-pk_io_off
-pk_io_tell (pk_io io)
-{
-  return ftello (io->file);
-}
-
-int
-pk_io_seek (pk_io io, pk_io_off offset, int whence)
-{
-  return fseeko (io->file, offset, whence);
 }
 
 pk_io
@@ -180,10 +152,3 @@ pk_io_get (int n)
   return io;
 }
 
-void
-pk_io_shutdown (void)
-{
-  /* Close and free all open IO spaces.  */
-  while (ios)
-    pk_io_close (ios);
-}

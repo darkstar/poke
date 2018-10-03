@@ -309,6 +309,9 @@ initialize ()
   /* Initialize the command subsystem.  This should be done even if
      called non-interactively.  */
   pk_cmd_init ();
+
+  /* Initialize the IO subsystem.  Ditto.  */
+  pk_io_init ();
 }
 
 static void
