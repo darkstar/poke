@@ -238,7 +238,7 @@ parse_args (int argc, char *argv[])
 
   if (optind < argc)
     {
-      if (!pk_io_open (argv[optind++]))
+      if (!io_open (argv[optind++]))
         exit (EXIT_FAILURE);
     }
 
@@ -311,13 +311,13 @@ initialize ()
   pk_cmd_init ();
 
   /* Initialize the IO subsystem.  Ditto.  */
-  pk_io_init ();
+  io_init ();
 }
 
 static void
 finalize ()
 {
-  pk_io_shutdown ();
+  io_shutdown ();
   pk_cmd_shutdown ();
   pkl_free (poke_compiler);
   pvm_shutdown (poke_vm);

@@ -50,7 +50,7 @@ struct pk_cmd_arg
   {
     pvm_program prog;
     int64_t integer;
-    pk_io_off addr;
+    io_off addr;
     const char *str;
     int64_t tag;
   } val;

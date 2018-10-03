@@ -1,4 +1,4 @@
-/* pk-io.c - IO spaces.  Definitions.  */
+/* io.c - IO spaces for poke.  Definitions.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PK_IO_H
-#define PK_IO_H
+#ifndef IO_H
+#define IO_H
 
 #include <config.h>
 #include <stdint.h>
@@ -25,8 +25,8 @@
 /* The following two functions intialize and shutdown the IO poke
    subsystem.  */
 
-void pk_io_init (void);
-void pk_io_shutdown (void);
+void io_init (void);
+void io_shutdown (void);
 
 /* "IO spaces" are the entities used in poke in order to abstract the
    heterogeneous devices that are suitable to be edited, such as
@@ -78,16 +78,16 @@ void pk_io_shutdown (void);
    Since negative offsets are possible, the maximum size of any given
    IO space is 2^60 bytes.  */
 
-typedef int64_t pk_io_off;
+typedef int64_t io_off;
 
 /* The following macros should be used in order to abstract the
    internal representation of the offsets.  */
 
-#define PK_IO_O_NEW(BYTES,BITS) \
+#define IO_O_NEW(BYTES,BITS) \
   ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
 
-#define PK_IO_O_BYTES(O) ((O) >> 3)
-#define PK_IO_O_BITS(O)  ((O) & 0x3)
+#define IO_O_BYTES(O) ((O) >> 3)
+#define IO_O_BITS(O)  ((O) & 0x3)
 
 /* Open an IO space using a handler.  The handler is tried with all
    the supported backends until one recognizes it.  This can be the
@@ -96,20 +96,20 @@ typedef int64_t pk_io_off;
    Return the IO space, or NULL if some error occurred (such as an
    invalid handler).  */
 
-pk_io pk_io_open (const char *handler);
+io io_open (const char *handler);
 
 /* Return the current IO space.  */
 
-pk_io pk_io_cur (void);
+io io_cur (void);
 
 /* Set the current IO space to IO.  */
 
-void pk_io_set_cur (pk_io io);
+void io_set_cur (io io);
 
 /* Map over all the IO spaces executing a handler.  */
 
-typedef void (*pk_io_map_fn) (pk_io io, void *data);
-void pk_io_map (pk_io_map_fn cb, void *data);
+typedef void (*io_map_fn) (io io, void *data);
+void io_map (io_map_fn cb, void *data);
 
 /* XXX: peek/poke API.
    
@@ -117,48 +117,48 @@ void pk_io_map (pk_io_map_fn cb, void *data);
    hooks, and also versions bypassing the cache.
  */
 
-int32_t pk_io_peek_int (pk_io io, int bits,
-                        pk_io_off offset, pk_io_endian endian,
-                        pk_io_nenc nenc);
+int32_t io_peek_int (io io, int bits,
+                        io_off offset, io_endian endian,
+                        io_nenc nenc);
 
-uint32_t pk_io_peek_uint (pk_io io, int bits,
-                          pk_io_off offset, pk_io_endian endian);
+uint32_t io_peek_uint (io io, int bits,
+                          io_off offset, io_endian endian);
 
-int64_t pk_io_peek_long (pk_io io, int bits,
-                         pk_io_off offset, pk_io_endian endian,
-                         pk_io_nenc nenc);
+int64_t io_peek_long (io io, int bits,
+                         io_off offset, io_endian endian,
+                         io_nenc nenc);
 
-uint64_t pk_io_peek_ulong (pk_io io, int bits,
-                           pk_io_ff offset, pk_io_endian endian);
+uint64_t io_peek_ulong (io io, int bits,
+                           io_ff offset, io_endian endian);
 
-char *pk_io_peek_string (pk_io io, pk_io_off offset);
+char *io_peek_string (io io, io_off offset);
 
 /* XXX: 'update' hooks API.  */
 
 /* Type representing an IO space, and accessor macros.  */
 
-#define PK_IO_FILE(io) ((io)->file)
-#define PK_IO_FILENAME(io) ((io)->filename)
-#define PK_IO_MODE(io) ((io)->mode)
+#define IO_FILE(io) ((io)->file)
+#define IO_FILENAME(io) ((io)->filename)
+#define IO_MODE(io) ((io)->mode)
 
-struct pk_io
+struct io
 {
   /* XXX: status saved or not saved.  */
 
-  struct pk_io *next;
+  struct io *next;
 };
 
-typedef struct pk_io *pk_io;
+typedef struct io *io;
 
 /* Return the IO space with the given filename.  Return NULL if no
    such IO space exists.  */
 
-pk_io pk_io_search (const char *filename);
+io io_search (const char *filename);
 
 /* Return the Nth IO space.  If N is negative or bigger than the
    number of IO spaces, return NULL.  */
 
-pk_io pk_io_get (int n);
+io io_get (int n);
 
 
 /*********** IO backends *****************************************/
@@ -170,7 +170,7 @@ pk_io pk_io_get (int n);
    XXX: IO devices are byte-oriented, which means they are oblivious
    to endianness, alignment and negative encoding considerations.  */
 
-typedef uint64_t pk_io_boff;
+typedef uint64_t io_boff;
 
 #define PK_EOF -1
 
@@ -180,7 +180,7 @@ typedef uint64_t pk_io_boff;
 
 /* The struct below represents the interface for IO backends.  */
 
-struct pk_io_be
+struct io_be
 {
   /* Backend initialization.  This hook is invoked exactly once,
      before any other backend hook.  Return 1 if the initialization is
@@ -214,14 +214,14 @@ struct pk_io_be
   /* Return the current position in the given device.  Return -1 on
      error.  */
 
-  pk_io_boff (*tell) (void *iod);
+  io_boff (*tell) (void *iod);
 
   /* Change the current position in the given device according to
      OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
      and PK_SEEK_END.  Return 0 on successful completion, and -1 on
      error.  */
 
-  int (*seek) (void *iod, pk_io_boff offset, int whence);
+  int (*seek) (void *iod, io_boff offset, int whence);
 
   /* Read a byte from the given device at the current position.
      Return the byte in an int, or PK_EOF on error.  */
@@ -234,4 +234,4 @@ struct pk_io_be
   int (*putc) (void *iod, int c);
 };
 
-#endif /* ! PK_IO_H */
+#endif /* ! IO_H */

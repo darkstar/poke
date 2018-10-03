@@ -35,7 +35,7 @@
 #include "poke.h"
 #include "pkl.h" /* For pkl_compile_expression */
 #include "pkl-parser.h"
-#include "pk-io.h"
+#include "io.h"
 #include "pk-cmd.h"
 
 /* Table of supported commands.  */

@@ -1,4 +1,4 @@
-/* pk-io-file.c - IO backend to handle file devices.  */
+/* io-file.c - IO backend to handle file devices.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -27,7 +27,7 @@
 
 /* State associated with a file device.  */
 
-struct pk_io_file
+struct io_file
 {
   FILE *file;
   char *filename;
@@ -35,33 +35,33 @@ struct pk_io_file
 };
 
 static int
-pk_io_file_init (void)
+io_file_init (void)
 {
   /* Nothing to do here.  */
   return 1;
 }
 
 static int
-pk_io_file_fini (void)
+io_file_fini (void)
 {
   /* Nothing to do here.  */
   return 1;
 }
 
 static int
-pk_io_file_handler_p (const char *handler)
+io_file_handler_p (const char *handler)
 {
   /* XXX: implement handler formats.  */
   return 1;
 }
 
 static int
-pk_io_file_open (void *iod, const char *handler)
+io_file_open (void *iod, const char *handler)
 {
-  struct pk_io_file *iof = iod;
+  struct io_file *iof = iod;
 
   const char *mode;
-  pk_io io;
+  io io;
   FILE *f;
   mode_t fmode = 0;
 
@@ -93,9 +93,9 @@ pk_io_file_open (void *iod, const char *handler)
 }
 
 static int
-pk_io_file_close (void *iod)
+io_file_close (void *iod)
 {
-  struct pk_io_file *fio = iod;
+  struct io_file *fio = iod;
 
   if (fclose (fio->file) != 0)
     perror (fio->filename);
@@ -103,31 +103,31 @@ pk_io_file_close (void *iod)
 }
 
 static int
-pk_io_file_getc (void *iod)
+io_file_getc (void *iod)
 {
-  struct pk_io_file *fio = iod;
+  struct io_file *fio = iod;
   return fgetc (fio->file);
 }
 
 static int
-pk_io_file_putc (void *iod, int c)
+io_file_putc (void *iod, int c)
 {
-  struct pk_io_file *fio = iod;
+  struct io_file *fio = iod;
   int ret = putc (c, fio->file);
   return ret == EOF ? PK_EOF : ret;
 }
 
-static pk_io_boff
-pk_io_file_tell (void *iod)
+static io_boff
+io_file_tell (void *iod)
 {
-  struct pk_io_file *fio = iod;
+  struct io_file *fio = iod;
   return ftello (fio->file);
 }
 
 static int
-pk_io_file_seek (void *iod, pk_io_boff offset, int whence)
+io_file_seek (void *iod, io_boff offset, int whence)
 {
-  struct pk_io_file *fio = iod;
+  struct io_file *fio = iod;
   int fwhence;
 
   switch (whence)
@@ -142,12 +142,12 @@ pk_io_file_seek (void *iod, pk_io_boff offset, int whence)
   return fseeko (fio->file, offset, fwhence);
 }
 
-struct pk_io_be pk_io_file =
+struct io_be io_file =
   {
-   .open = pk_io_file_open,
-   .close = pk_io_file_close,
-   .tell = pk_io_file_tell,
-   .seek = pk_io_file_seek,
-   .getc = pk_io_file_getc,
-   .putc = pk_io_file_putc,
+   .open = io_file_open,
+   .close = io_file_close,
+   .tell = io_file_tell,
+   .seek = io_file_seek,
+   .getc = io_file_getc,
+   .putc = io_file_putc,
   };
