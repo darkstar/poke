@@ -20,6 +20,7 @@
 
 #include <fcntl.h>
 #include <stdio.h>
+#include <assert.h>
 #include <xalloc.h>
 
 #include "pk-io.h"
@@ -44,6 +45,13 @@ static int
 pk_io_file_fini (void)
 {
   /* Nothing to do here.  */
+  return 1;
+}
+
+static int
+pk_io_file_handler_p (const char *handler)
+{
+  /* XXX: implement handler formats.  */
   return 1;
 }
 
@@ -120,15 +128,26 @@ static int
 pk_io_file_seek (void *iod, pk_io_boff offset, int whence)
 {
   struct pk_io_file *fio = iod;
-  return fseeko (fio->file, offset, whence);
+  int fwhence;
+
+  switch (whence)
+    {
+    case PK_SEEK_SET: fwhence = SEEK_SET; break;
+    case PK_SEEK_CUR: fwhence = SEEK_CUR; break;
+    case PK_SEEK_END: fwhence = SEEK_END; break;
+    default:
+      assert (0);
+    }
+  
+  return fseeko (fio->file, offset, fwhence);
 }
 
 struct pk_io_be pk_io_file =
   {
-   .open_fn = pk_io_file_open,
-   .close_fn = pk_io_file_close,
-   .tell_fn = pk_io_file_tell,
-   .seek_fn = pk_io_file_seek,
-   .getc_fn = pk_io_file_getc,
-   .putc_fn = pk_io_file_putc,
+   .open = pk_io_file_open,
+   .close = pk_io_file_close,
+   .tell = pk_io_file_tell,
+   .seek = pk_io_file_seek,
+   .getc = pk_io_file_getc,
+   .putc = pk_io_file_putc,
   };

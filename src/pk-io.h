@@ -32,6 +32,8 @@ void pk_io_shutdown (void);
    heterogeneous devices that are suitable to be edited, such as
    files, filesystems, memory images of processes, etc.
 
+        "spaces"                     "devices"
+
    Space of IO objects <=======> Space of bytes
                              
                              +------+  
@@ -87,6 +89,15 @@ typedef int64_t pk_io_off;
 #define PK_IO_O_BYTES(O) ((O) >> 3)
 #define PK_IO_O_BITS(O)  ((O) & 0x3)
 
+/* Open an IO space using a handler.  The handler is tried with all
+   the supported backends until one recognizes it.  This can be the
+   name of a file to open, or an URL, a process PID, etc.  See XXX.
+
+   Return the IO space, or NULL if some error occurred (such as an
+   invalid handler).  */
+
+pk_io pk_io_open (const char *handler);
+
 /* Return the current IO space.  */
 
 pk_io pk_io_cur (void);
@@ -122,17 +133,7 @@ uint64_t pk_io_peek_ulong (pk_io io, int bits,
 
 char *pk_io_peek_string (pk_io io, pk_io_off offset);
 
-/* XXX: update hooks API.  */
-
-/* XXX: the interface and contents below should be moved to
-   pk-io-file.[ch]
-*****************************************************************/
-
-#define PK_EOF EOF
-
-#define PK_SEEK_SET SEEK_SET
-#define PK_SEEK_CUR SEEK_CUR
-#define PK_SEEK_END SEEK_END
+/* XXX: 'update' hooks API.  */
 
 /* Type representing an IO space, and accessor macros.  */
 
@@ -171,59 +172,66 @@ pk_io pk_io_get (int n);
 
 typedef uint64_t pk_io_boff;
 
+#define PK_EOF -1
+
+#define PK_SEEK_SET 0
+#define PK_SEEK_CUR 1
+#define PK_SEEK_END 2
+
 /* The struct below represents the interface for IO backends.  */
 
 struct pk_io_be
 {
   /* Backend initialization.  This hook is invoked exactly once,
-     before any other backend hook.
+     before any other backend hook.  Return 1 if the initialization is
+     successful, 0 otherwise.  */
 
-     Return 1 if the initialization is successful, 0 otherwise.  */
-
-  int (*init_fn) (void);
+  int (*init) (void);
 
   /* Backend finalization.  This hook is invoked exactly one, and
      subsequently no other backend hook is ever invoked with the
-     exception of `init'.  
+     exception of `init'.  Return 1 if the finalization is successful,
+     0 otherwise.  */
 
-     Return 1 if the finalization is successful, 0 otherwise.  */
+  int (*fini) (void);
 
-  int (*fini_fn) (void);
+  /* Determine whether the provided HANDLER is recognized as a valid
+     device by this backend.  Return 1 if the handler is recognized, 0
+     otherwise.  */
 
-  /* Open a device using the IO backend, using the provided HANDLER.
-     The contents of the handler are parsed and interpreted by the
-     backend.  This can be for example the name of a file to open, or
-     an URL, or a process PID.
+  int (*handler_p) (const char *handler);
 
-     Return the opened device, or NULL if there was an error.  */
+  /* Open a device using the provided HANDLER.  Return the opened
+     device, or NULL if there was an error, such as an unrecognized
+     handler.  */
 
-  void *(*open_fn) (const char *handler);
+  void *(*open) (const char *handler);
 
   /* Close the given device.  */
 
-  int (*close_fn) (void *iod);
+  int (*close) (void *iod);
 
   /* Return the current position in the given device.  Return -1 on
      error.  */
 
-  pk_io_boff (*tell_fn) (void *iod);
+  pk_io_boff (*tell) (void *iod);
 
   /* Change the current position in the given device according to
      OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
      and PK_SEEK_END.  Return 0 on successful completion, and -1 on
      error.  */
 
-  int (*seek_fn) (void *iod, pk_io_boff offset, int whence);
+  int (*seek) (void *iod, pk_io_boff offset, int whence);
 
   /* Read a byte from the given device at the current position.
      Return the byte in an int, or PK_EOF on error.  */
 
-  int (*getc_fn) (void *iod);
+  int (*getc) (void *iod);
 
   /* Write a byte to the given device at the current position.  Return
      the character written as an int, or PK_EOF on error.  */
 
-  int (*putc_fn) (void *iod, int c);
+  int (*putc) (void *iod, int c);
 };
 
 #endif /* ! PK_IO_H */
