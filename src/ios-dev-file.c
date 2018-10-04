@@ -1,4 +1,4 @@
-/* ios-dev-file.c - file IO devices.  */
+/* ios-dev-file.c - File IO devices.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 

@@ -1,4 +1,4 @@
-/* ios.c - IO access for poke.  */
+/* ios.c - IO spaces for poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 

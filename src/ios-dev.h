@@ -26,10 +26,6 @@ typedef uint64_t ios_dev_off;
 
 #define IOD_EOF -1
 
-#define IOD_SEEK_SET 0
-#define IOD_SEEK_CUR 1
-#define IOD_SEEK_END 2
-
 /* Each IO backend should implement the interface defined by the
    struct below.  */
 
@@ -73,6 +69,10 @@ struct ios_dev_if
      OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
      and PK_SEEK_END.  Return 0 on successful completion, and -1 on
      error.  */
+
+#define IOD_SEEK_SET 0
+#define IOD_SEEK_CUR 1
+#define IOD_SEEK_END 2
 
   int (*seek) (void *iod, ios_dev_off offset, int whence);
 
