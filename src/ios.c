@@ -51,7 +51,7 @@ struct ios
 
 /* List of IO spaces, and pointer to the current one.  */
 
-static struct ios *ios;
+static struct ios *io_list;
 static struct ios *cur_io;
 
 /* The available backends are implemented in their own files, and
@@ -110,12 +110,12 @@ ios_open (const char *handler)
 
   /* Add the newly created space to the list, and update the current
      space.  */
-  if (ios == NULL)
-    ios = io;
+  if (io_list == NULL)
+    io_list = io;
   else
     {
-      io->next = ios;
-      ios = io;
+      io->next = io_list;
+      io_list = io;
     }
 
   cur_io = io;
@@ -142,19 +142,19 @@ ios_close (ios io)
   assert (io->dev_if->close (io->dev));
 
   /* Unlink the IO from the list.  */
-  assert (ios != NULL); /* The list must contain at least io.  */
-  if (ios == io)
-    ios = ios->next;
+  assert (io_list != NULL); /* The list must contain at least io.  */
+  if (io_list == io)
+    ios = io_list->next;
   else
     {
-      for (tmp = ios; tmp->next != io; tmp = tmp->next)
+      for (tmp = io_list; tmp->next != io; tmp = tmp->next)
         ;
       tmp->next = io->next;
     }
   free (io);
   
   /* Set the new current IO.  */
-  cur_io = ios;
+  cur_io = io_list;
 }
 
 ios
@@ -183,7 +183,7 @@ ios_search (const char *handler)
 {
   ios io;
 
-  for (io = ios; io; io = io->next)
+  for (io = io_list; io; io = io->next)
     if (strcmp (io->handler, handler) == 0)
       break;
 
@@ -198,7 +198,7 @@ ios_get (int n)
   if (n < 0)
     return NULL;
 
-  for (io = ios; io && n > 0; n--, io = io->next)
+  for (io = io_list; io && n > 0; n--, io = io->next)
     ;
 
   return io;
