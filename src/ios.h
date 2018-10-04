@@ -70,6 +70,13 @@ void ios_shutdown (void);
 
 typedef struct ios *ios;
 
+/* Endianness and negative encoding.
+
+   XXX: explain.  */
+
+enum ios_nenc = { IOS_1C, IOS_2C };
+enum ios_endian = { IOS_LSB, IOS_MSB };
+
 /* IO spaces are bit-addressable.  "Offsets" characterize positions
    into IO spaces.
 
@@ -122,18 +129,22 @@ void ios_map (ios_map_fn cb, void *data);
  */
 
 int32_t ios_peek_int (ios io, int bits,
-                      ios_off offset, ios_endian endian,
-                      ios_nenc nenc);
+                      ios_off offset,
+                      enum ios_endian endian,
+                      enum ios_nenc nenc);
 
 uint32_t ios_peek_uint (ios io, int bits,
-                        ios_off offset, ios_endian endian);
+                        ios_off offset,
+                        enum ios_endian endian);
 
 int64_t ios_peek_long (ios io, int bits,
-                       ios_off offset, ios_endian endian,
-                       ios_nenc nenc);
+                       ios_off offset,
+                       enum ios_endian endian,
+                       enum ios_nenc nenc);
 
 uint64_t ios_peek_ulong (ios io, int bits,
-                         ios_off offset, ios_endian endian);
+                         ios_off offset,
+                         enum ios_endian endian);
 
 char *ios_peek_string (ios io, ios_off offset);
 
