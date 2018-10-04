@@ -59,30 +59,16 @@ static struct ios *cur_io;
 
 extern struct ios_dev_if ios_dev_file; /* ios-dev-file.c */
 
-static struct *ios_dev_ifs =
+static struct ios_dev_if *ios_dev_ifs[] =
   {
    &ios_dev_file,
    NULL,
   };
 
-void
-ios_init (void)
-{
-  /* Nothing to do here... yet.  */
-}
-
-void
-ios_shutdown (void)
-{
-  /* Close and free all open IO spaces.  */
-  while (ios)
-    ios_close (ios);
-}
-
 int
 ios_open (const char *handler)
 {
-  struct ios io = NULL;
+  struct ios *io = NULL;
   struct ios_dev_if *dev_if = NULL;
 
   /* Allocate and initialize the new IO space.  */
@@ -92,7 +78,7 @@ ios_open (const char *handler)
 
   /* Look for a device interface suitable to operate on the given
      handler.  */
-  for (dev_if = ios_dev_ifs; dev_if; ++dev_if)
+  for (dev_if = &ios_dev_ifs; *dev_if; ++dev_if)
     {
       if (dev_if->handler_p (handler))
         break;
@@ -204,3 +190,16 @@ ios_get (int n)
   return io;
 }
 
+void
+ios_init (void)
+{
+  /* Nothing to do here... yet.  */
+}
+
+void
+ios_shutdown (void)
+{
+  /* Close and free all open IO spaces.  */
+  while (io_list)
+    ios_close (io_list);
+}

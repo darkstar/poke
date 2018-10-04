@@ -98,16 +98,17 @@ typedef int64_t ios_off;
 #define IOS_O_BYTES(O) ((O) >> 3)
 #define IOS_O_BITS(O)  ((O) & 0x3)
 
-/* Open an IO space using a handler.  The handler is tried with all
-   the supported backends until one recognizes it.  This can be the
-   name of a file to open, or an URL, a process PID, etc.
+/* Open an IO space using a handler and make it the current space.
+   The handler is tried with all the supported backends until one
+   recognizes it.  This can be the name of a file to open, or an URL,
+   a process PID, etc.
 
    XXX: document device specs.
 
-   Return the IO space, or NULL if some error occurred (such as an
-   invalid handler).  */
+   Return 0 if there is an error opening the space (such as an invalid
+   handler), 1 otherwise.  */
 
-ios ios_open (const char *handler);
+int ios_open (const char *handler);
 
 /* Return the current IO space.  */
 
