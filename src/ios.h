@@ -1,4 +1,4 @@
-/* pio.h - IO spaces for poke.  Definitions.  */
+/* ios.h - IO spaces for poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PIO_H
-#define PIO_H
+#ifndef IOS_H
+#define IOS_H
 
 #include <config.h>
 #include <stdint.h>
@@ -25,8 +25,8 @@
 /* The following two functions intialize and shutdown the IO poke
    subsystem.  */
 
-void pio_init (void);
-void pio_shutdown (void);
+void ios_init (void);
+void ios_shutdown (void);
 
 /* "IO spaces" are the entities used in poke in order to abstract the
    heterogeneous devices that are suitable to be edited, such as
@@ -78,16 +78,16 @@ void pio_shutdown (void);
    Since negative offsets are possible, the maximum size of any given
    IO space is 2^60 bytes.  */
 
-typedef int64_t pio_off;
+typedef int64_t ios_off;
 
 /* The following macros should be used in order to abstract the
    internal representation of the offsets.  */
 
-#define PIO_O_NEW(BYTES,BITS) \
+#define IOS_O_NEW(BYTES,BITS) \
   ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
 
-#define PIO_O_BYTES(O) ((O) >> 3)
-#define PIO_O_BITS(O)  ((O) & 0x3)
+#define IOS_O_BYTES(O) ((O) >> 3)
+#define IOS_O_BITS(O)  ((O) & 0x3)
 
 /* Open an IO space using a handler.  The handler is tried with all
    the supported backends until one recognizes it.  This can be the
@@ -96,20 +96,20 @@ typedef int64_t pio_off;
    Return the IO space, or NULL if some error occurred (such as an
    invalid handler).  */
 
-io pio_open (const char *handler);
+io ios_open (const char *handler);
 
 /* Return the current IO space.  */
 
-io pio_cur (void);
+io ios_cur (void);
 
 /* Set the current IO space to IO.  */
 
-void pio_set_cur (pio io);
+void ios_set_cur (ios io);
 
 /* Map over all the IO spaces executing a handler.  */
 
-typedef void (*pio_map_fn) (pio io, void *data);
-void pio_map (pio_map_fn cb, void *data);
+typedef void (*ios_map_fn) (ios io, void *data);
+void ios_map (ios_map_fn cb, void *data);
 
 /* XXX: peek/poke API.
    
@@ -117,47 +117,47 @@ void pio_map (pio_map_fn cb, void *data);
    hooks, and also versions bypassing the cache.
  */
 
-int32_t pio_peek_int (pio io, int bits,
-                      pio_off offset, pio_endian endian,
-                      pio_nenc nenc);
+int32_t ios_peek_int (ios io, int bits,
+                      ios_off offset, ios_endian endian,
+                      ios_nenc nenc);
 
-uint32_t pio_peek_uint (pio io, int bits,
-                        pio_off offset, pio_endian endian);
+uint32_t ios_peek_uint (ios io, int bits,
+                        ios_off offset, ios_endian endian);
 
-int64_t pio_peek_long (pio io, int bits,
-                       pio_off offset, pio_endian endian,
-                       pio_nenc nenc);
+int64_t ios_peek_long (ios io, int bits,
+                       ios_off offset, ios_endian endian,
+                       ios_nenc nenc);
 
-uint64_t pio_peek_ulong (pio io, int bits,
-                         pio_off offset, pio_endian endian);
+uint64_t ios_peek_ulong (ios io, int bits,
+                         ios_off offset, ios_endian endian);
 
-char *pio_peek_string (pio io, pio_off offset);
+char *ios_peek_string (ios io, ios_off offset);
 
 /* XXX: 'update' hooks API.  */
 
 /* Type representing an IO space, and accessor macros.  */
 
-#define PIO_FILE(io) ((io)->file)
-#define PIO_FILENAME(io) ((io)->filename)
-#define PIO_MODE(io) ((io)->mode)
+#define IOS_FILE(io) ((io)->file)
+#define IOS_FILENAME(io) ((io)->filename)
+#define IOS_MODE(io) ((io)->mode)
 
-struct io
+struct ios
 {
   /* XXX: status saved or not saved.  */
 
   struct io *next;
 };
 
-typedef struct io *io;
+typedef struct ios *ios;
 
 /* Return the IO space with the given filename.  Return NULL if no
    such IO space exists.  */
 
-io pio_search (const char *filename);
+ios ios_search (const char *filename);
 
 /* Return the Nth IO space.  If N is negative or bigger than the
    number of IO spaces, return NULL.  */
 
-io pio_get (int n);
+ios ios_get (int n);
 
-#endif /* ! PIO_H */
+#endif /* ! IOS_H */

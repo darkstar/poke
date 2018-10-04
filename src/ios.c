@@ -1,4 +1,4 @@
-/* pio.c - IO access for poke.  */
+/* ios.c - IO access for poke.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -17,7 +17,7 @@
  */
 
 #include <config.h>
-#include "pio.h"
+#include "ios.h"
 #include <xalloc.h>
 #include <stdio.h>
 #include <gettext.h>
@@ -28,29 +28,29 @@
 
 /* List of IO spaces, and pointer to the current one.  */
 
-static struct pk_io *ios;
-static struct pk_io *cur_io;
+static struct ios *ios;
+static struct ios *cur_io;
 
 void
-pio_init (void)
+ios_init (void)
 {
   /* XXX: register the supported backends.  */
 }
 
 void
-pio_shutdown (void)
+ios_shutdown (void)
 {
   /* Close and free all open IO spaces.  */
   while (ios)
-    pio_close (ios);
+    ios_close (ios);
 }
 
 
 int
-pio_open (const char *filename)
+ios_open (const char *filename)
 {
   const char *mode;
-  pio io;
+  ios io;
   FILE *f;
   mode_t fmode = 0;
 
@@ -58,7 +58,7 @@ pio_open (const char *filename)
      corresponding hook.  */
 
   /* Allocate and initialize the new IO space.  */
-  io = xmalloc (sizeof (struct pio));
+  io = xmalloc (sizeof (struct ios));
   io->next = NULL;
   io->mode = fmode;
   io->file = f;
@@ -79,9 +79,9 @@ pio_open (const char *filename)
 }
 
 void
-pio_close (pio io)
+ios_close (ios io)
 {
-  struct pio *tmp;
+  struct ios *tmp;
   
   /* Close the file stream and free resources.  */
   /* XXX: if not saved, ask before closing.  */
@@ -105,31 +105,31 @@ pio_close (pio io)
   cur_io = ios;
 }
 
-pio
-pio_cur (void)
+ios
+ios_cur (void)
 {
   return cur_io;
 }
 
 void
-pio_set_cur (pio io)
+ios_set_cur (ios io)
 {
   cur_io = io;
 }
 
 void
-pio_map (pio_map_fn cb, void *data)
+ios_map (ios_map_fn cb, void *data)
 {
-  pio io;
+  ios io;
 
   for (io = ios; io; io = io->next)
     (*cb) (io, data);
 }
 
-pio
-pio_search (const char *filename)
+ios
+ios_search (const char *filename)
 {
-  pio io;
+  ios io;
 
   for (io = ios; io; io = io->next)
     if (strcmp (io->filename, filename) == 0)
@@ -138,10 +138,10 @@ pio_search (const char *filename)
   return io;
 }
 
-pio
-pio_get (int n)
+ios
+ios_get (int n)
 {
-  pio io;
+  ios io;
   
   if (n < 0)
     return NULL;

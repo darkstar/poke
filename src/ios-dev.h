@@ -1,4 +1,4 @@
-/* pio-be.h - IO backend interface.  */
+/* ios-dev.h - IO devices interface.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -22,18 +22,18 @@
    XXX: IO devices are byte-oriented, which means they are oblivious
    to endianness, alignment and negative encoding considerations.  */
 
-typedef uint64_t io_boff;
+typedef uint64_t ios_dev_off;
 
-#define PIO_EOF -1
+#define IOD_EOF -1
 
-#define PIO_SEEK_SET 0
-#define PIO_SEEK_CUR 1
-#define PIO_SEEK_END 2
+#define IOD_SEEK_SET 0
+#define IOD_SEEK_CUR 1
+#define IOD_SEEK_END 2
 
 /* Each IO backend should implement the interface defined by the
    struct below.  */
 
-struct pio_be
+struct ios_dev_if
 {
   /* Backend initialization.  This hook is invoked exactly once,
      before any other backend hook.  Return 1 if the initialization is
@@ -67,14 +67,14 @@ struct pio_be
   /* Return the current position in the given device.  Return -1 on
      error.  */
 
-  io_boff (*tell) (void *iod);
+  ios_dev_off (*tell) (void *iod);
 
   /* Change the current position in the given device according to
      OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
      and PK_SEEK_END.  Return 0 on successful completion, and -1 on
      error.  */
 
-  int (*seek) (void *iod, pio_boff offset, int whence);
+  int (*seek) (void *iod, ios_dev_off offset, int whence);
 
   /* Read a byte from the given device at the current position.
      Return the byte in an int, or PK_EOF on error.  */

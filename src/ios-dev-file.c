@@ -1,4 +1,4 @@
-/* pio-file.c - IO backend to handle file devices.  */
+/* ios-dev-file.c - file IO devices.  */
 
 /* Copyright (C) 2018 Jose E. Marchesi */
 
@@ -23,11 +23,11 @@
 #include <assert.h>
 #include <xalloc.h>
 
-#include "pio-be.h"
+#include "ios-dev.h"
 
 /* State associated with a file device.  */
 
-struct ppio_file
+struct ios_dev_file
 {
   FILE *file;
   char *filename;
@@ -35,33 +35,33 @@ struct ppio_file
 };
 
 static int
-pio_file_init (void)
+ios_dev_file_init (void)
 {
   /* Nothing to do here.  */
   return 1;
 }
 
 static int
-pio_file_fini (void)
+ios_dev_file_fini (void)
 {
   /* Nothing to do here.  */
   return 1;
 }
 
 static int
-pio_file_handler_p (const char *handler)
+ios_dev_file_handler_p (const char *handler)
 {
   /* XXX: implement handler formats.  */
   return 1;
 }
 
 static int
-pio_file_open (void *iod, const char *handler)
+ios_dev_file_open (void *iod, const char *handler)
 {
-  struct pio_file *iof = iod;
+  struct ios_dev_file *iof = iod;
 
   const char *mode;
-  pio io;
+  ios_dev io;
   FILE *f;
   mode_t fmode = 0;
 
@@ -93,9 +93,9 @@ pio_file_open (void *iod, const char *handler)
 }
 
 static int
-pio_file_close (void *iod)
+ios_dev_file_close (void *iod)
 {
-  struct pio_file *fio = iod;
+  struct ios_dev_file *fio = iod;
 
   if (fclose (fio->file) != 0)
     perror (fio->filename);
@@ -103,31 +103,31 @@ pio_file_close (void *iod)
 }
 
 static int
-pio_file_getc (void *iod)
+ios_dev_file_getc (void *iod)
 {
-  struct pio_file *fio = iod;
+  struct ios_dev_file *fio = iod;
   return fgetc (fio->file);
 }
 
 static int
-pio_file_putc (void *iod, int c)
+ios_dev_file_putc (void *iod, int c)
 {
-  struct pio_file *fio = iod;
+  struct ios_dev_file *fio = iod;
   int ret = putc (c, fio->file);
   return ret == EOF ? PK_EOF : ret;
 }
 
-static pio_boff
-pio_file_tell (void *iod)
+static ios_dev_off
+ios_dev_file_tell (void *iod)
 {
-  struct pio_file *fio = iod;
+  struct ios_dev_file *fio = iod;
   return ftello (fio->file);
 }
 
 static int
-pio_file_seek (void *iod, pio_boff offset, int whence)
+ios_dev_file_seek (void *iod, ios_dev_off offset, int whence)
 {
-  struct pio_file *fio = iod;
+  struct ios_dev_file *fio = iod;
   int fwhence;
 
   switch (whence)
@@ -142,12 +142,12 @@ pio_file_seek (void *iod, pio_boff offset, int whence)
   return fseeko (fio->file, offset, fwhence);
 }
 
-struct pio_be pio_file =
+struct ios_dev_be ios_dev_file =
   {
-   .open = pio_file_open,
-   .close = pio_file_close,
-   .tell = pio_file_tell,
-   .seek = pio_file_seek,
-   .getc = pio_file_getc,
-   .putc = pio_file_putc,
+   .open = ios_dev_file_open,
+   .close = ios_dev_file_close,
+   .tell = ios_dev_file_tell,
+   .seek = ios_dev_file_seek,
+   .getc = ios_dev_file_getc,
+   .putc = ios_dev_file_putc,
   };
