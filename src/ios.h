@@ -74,8 +74,17 @@ typedef struct ios *ios;
 
    XXX: explain.  */
 
-enum ios_nenc { IOS_1C, IOS_2C };
-enum ios_endian { IOS_LSB, IOS_MSB };
+enum ios_nenc
+  {
+   IOS_NENC_1, /* One's complement.  */
+   IOS_NENC_2  /* Two's complement.  */
+  };
+
+enum ios_endian
+  {
+   IOS_ENDIAN_LSB, /* Little endian.  */
+   IOS_ENDIAN_MSB  /* Big endian.  */
+  };
 
 /* IO spaces are bit-addressable.  "Offsets" characterize positions
    into IO spaces.
