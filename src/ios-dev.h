@@ -88,9 +88,3 @@ struct ios_dev_if
   int (*putc) (void *iod, int c);
 };
 
-/* The null interface instance.  Typically used to mark the end of a
-   list of valid interfaces.  */
-
-static struct ios_dev_if ios_dev_null =
-  {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-

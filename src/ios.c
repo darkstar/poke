@@ -54,10 +54,10 @@ static struct ios *cur_io;
 
 extern struct ios_dev_if ios_dev_file; /* ios-dev-file.c */
 
-static struct *ios_dev_file[] =
+static struct *ios_dev_ifs =
   {
    &ios_dev_file,
-   &ios_dev_null,
+   NULL,
   };
 
 void
@@ -75,24 +75,37 @@ ios_shutdown (void)
 }
 
 int
-ios_open (const char *filename)
+ios_open (const char *handler)
 {
-  const char *mode;
-  ios io;
-  FILE *f;
-  mode_t fmode = 0;
-
-  /* XXX file opening code was here.  Replace with a call to the
-     corresponding hook.  */
+  struct ios io = NULL;
+  struct ios_dev_if *dev_if = NULL;
 
   /* Allocate and initialize the new IO space.  */
   io = xmalloc (sizeof (struct ios));
   io->next = NULL;
-  io->mode = fmode;
   io->file = f;
   io->filename = xstrdup (filename);
 
-  /* Add it to the list, and update the current stream.  */
+  /* Look for a device interface suitable to operate on the given
+     handler.  */
+  for (dev_if = ios_de_ifs; dev_if; ++dev_if)
+    {
+      if (dev_if->handler_p (handler))
+        break;
+    }
+
+  if (dev_if == NULL)
+    goto error;
+
+  io->dev_if = dev_if;
+  
+  /* Open the device using the interface found above.  */
+  io->dev = io->dev_if->open (handler);
+  if (io->dev == NULL)
+    goto error;
+
+  /* Add the newly created space to the list, and update the current
+     space.  */
   if (ios == NULL)
     ios = io;
   else
@@ -102,8 +115,12 @@ ios_open (const char *filename)
     }
 
   cur_io = io;
-  
+
   return 1;
+
+ error:
+  free (io);
+  return 0;
 }
 
 void
