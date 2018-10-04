@@ -133,11 +133,11 @@ ios_close (ios io)
 {
   struct ios *tmp;
   
-  /* Close the file stream and free resources.  */
   /* XXX: if not saved, ask before closing.  */
 
-  /* XXX: file closing code was here.  Replace with a call to the
-     corresponding hook.  */
+  /* Close the device operated by the IO space.
+     XXX: handle errors.  */
+  assert (io->dev_if->close (io->dev));
 
   /* Unlink the IO from the list.  */
   assert (ios != NULL); /* The list must contain at least io.  */
@@ -177,12 +177,12 @@ ios_map (ios_map_fn cb, void *data)
 }
 
 ios
-ios_search (const char *filename)
+ios_search (const char *handler)
 {
   ios io;
 
   for (io = ios; io; io = io->next)
-    if (strcmp (io->filename, filename) == 0)
+    if (strcmp (io->handler, handler) == 0)
       break;
 
   return io;
