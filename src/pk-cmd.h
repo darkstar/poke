@@ -22,7 +22,7 @@
 #include <config.h>
 
 #include "pvm.h" /* For pvm_program */
-#include "pk-io.h"
+#include "ios.h"
 
 enum pk_cmd_arg_type
 {

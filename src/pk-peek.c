@@ -22,9 +22,9 @@
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
+#include "ios.h
 #include "poke.h"
 #include "pk-cmd.h"
-#include "pk-io.h"
 
 static int
 pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)

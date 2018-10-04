@@ -21,9 +21,9 @@
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
+#include "ios.h"
 #include "poke.h"
 #include "pk-cmd.h"
-#include "pk-io.h"
 
 static int
 poke_byte (pk_io_off *address, uint8_t byte)

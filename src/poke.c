@@ -31,7 +31,7 @@
 # include <readline/history.h>
 #endif
 
-#include "pk-io.h"
+#include "ios.h"
 #include "pk-cmd.h"
 #include "pkl.h"
 #include "pvm.h"
