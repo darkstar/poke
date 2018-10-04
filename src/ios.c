@@ -30,6 +30,8 @@
 
 /* The following struct implements an instance of an IO space.
 
+   HANDLER is a copy of the handler string used to open the space.
+
    DEV is the device operated by the IO space.
    DEV_IF is the interface to use when operating the device.
 
@@ -38,6 +40,7 @@
 
 struct ios
 {
+  char *handler;
   void *dev;
   struct ios_dev_if *dev_if;
 
@@ -83,8 +86,7 @@ ios_open (const char *handler)
   /* Allocate and initialize the new IO space.  */
   io = xmalloc (sizeof (struct ios));
   io->next = NULL;
-  io->file = f;
-  io->filename = xstrdup (filename);
+  io->handler = xstrdup (handler);
 
   /* Look for a device interface suitable to operate on the given
      handler.  */
@@ -120,6 +122,9 @@ ios_open (const char *handler)
 
  error:
   free (io);
+  if (io)
+    free (io->handler);
+
   return 0;
 }
 
