@@ -90,7 +90,7 @@ ios_open (const char *handler)
 
   /* Look for a device interface suitable to operate on the given
      handler.  */
-  for (dev_if = ios_de_ifs; dev_if; ++dev_if)
+  for (dev_if = ios_dev_ifs; dev_if; ++dev_if)
     {
       if (dev_if->handler_p (handler))
         break;
