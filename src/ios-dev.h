@@ -45,8 +45,8 @@ struct ios_dev_if
   int (*fini) (void);
 
   /* Determine whether the provided HANDLER is recognized as a valid
-     device by this backend.  Return 1 if the handler is recognized, 0
-     otherwise.  */
+     device spec by this backend.  Return 1 if the handler is
+     recognized, 0 otherwise.  */
 
   int (*handler_p) (const char *handler);
 

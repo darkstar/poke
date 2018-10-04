@@ -22,6 +22,8 @@
 #include <config.h>
 #include <stdint.h>
 
+#include "ios-dev.h"
+
 /* The following two functions intialize and shutdown the IO poke
    subsystem.  */
 
@@ -32,7 +34,7 @@ void ios_shutdown (void);
    heterogeneous devices that are suitable to be edited, such as
    files, filesystems, memory images of processes, etc.
 
-        "spaces"                     "devices"
+        "IO spaces"               "IO devices"
 
    Space of IO objects <=======> Space of bytes
                              
@@ -91,7 +93,9 @@ typedef int64_t ios_off;
 
 /* Open an IO space using a handler.  The handler is tried with all
    the supported backends until one recognizes it.  This can be the
-   name of a file to open, or an URL, a process PID, etc.  See XXX.
+   name of a file to open, or an URL, a process PID, etc.
+
+   XXX: document device specs.
 
    Return the IO space, or NULL if some error occurred (such as an
    invalid handler).  */

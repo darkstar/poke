@@ -18,6 +18,9 @@
 
 #include <config.h>
 
+/* We want 64-bit file offsets in all systems.  */
+#define _FILE_OFFSET_BITS 64
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <assert.h>
@@ -32,6 +35,7 @@ struct ios_dev_file
   FILE *file;
   char *filename;
   mode_t mode;
+  off_t offset;
 };
 
 static int
@@ -55,7 +59,7 @@ ios_dev_file_handler_p (const char *handler)
   return 1;
 }
 
-static int
+static void *
 ios_dev_file_open (void *iod, const char *handler)
 {
   struct ios_dev_file *iof = iod;
@@ -63,20 +67,14 @@ ios_dev_file_open (void *iod, const char *handler)
   const char *mode;
   ios_dev io;
   FILE *f;
-  mode_t fmode = 0;
+
+  /* XXX: parse the filename and the offset from HANDLER.  */
 
   /* Open the requested file.  The open mode is read-write if
      possible.  Otherwise read-only.  */
-  if (access (handler, R_OK | W_OK) != 0)
-    {
-      fmode |= O_RDONLY;
-      mode = "rb";
-    }
-  else
-    {
-      fmode |= O_RDWR;
-      mode = "r+b";
-    }
+
+  mode =
+    access (handler, R_OK | W_OK) != 0 ? "rb" : "r+b";
   
   f = fopen (handler, mode);
   if (!f)
