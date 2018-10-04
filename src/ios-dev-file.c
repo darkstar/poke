@@ -35,22 +35,7 @@ struct ios_dev_file
   FILE *file;
   char *filename;
   mode_t mode;
-  off_t offset;
 };
-
-static int
-ios_dev_file_init (void)
-{
-  /* Nothing to do here.  */
-  return 1;
-}
-
-static int
-ios_dev_file_fini (void)
-{
-  /* Nothing to do here.  */
-  return 1;
-}
 
 static int
 ios_dev_file_handler_p (const char *handler)
@@ -140,7 +125,7 @@ ios_dev_file_seek (void *iod, ios_dev_off offset, int whence)
   return fseeko (fio->file, offset, fwhence);
 }
 
-struct ios_dev_be ios_dev_file =
+struct ios_dev_if ios_dev_file =
   {
    .open = ios_dev_file_open,
    .close = ios_dev_file_close,

@@ -17,7 +17,6 @@
  */
 
 #include <config.h>
-#include "ios.h"
 #include <xalloc.h>
 #include <stdio.h>
 #include <gettext.h>
@@ -26,15 +25,45 @@
 #include <assert.h>
 #define _(str) gettext (str)
 
+#include "ios.h"
+#include "ios-dev.h"
+
+/* The following struct implements an instance of an IO space.
+
+   DEV is the device operated by the IO space.
+   DEV_IF is the interface to use when operating the device.
+
+   NEXT is a pointer to the next open IO space, or NULL.
+ */
+
+struct ios
+{
+  void *dev;
+  struct ios_dev_if *dev_if;
+
+  struct ios *next;
+};
+
 /* List of IO spaces, and pointer to the current one.  */
 
 static struct ios *ios;
 static struct ios *cur_io;
 
+/* The available backends are implemented in their own files, and
+   provide the following interfaces.  */
+
+extern struct ios_dev_if ios_dev_file; /* ios-dev-file.c */
+
+static struct *ios_dev_file[] =
+  {
+   &ios_dev_file,
+   &ios_dev_null,
+  };
+
 void
 ios_init (void)
 {
-  /* XXX: register the supported backends.  */
+  /* Nothing to do here... yet.  */
 }
 
 void
@@ -44,7 +73,6 @@ ios_shutdown (void)
   while (ios)
     ios_close (ios);
 }
-
 
 int
 ios_open (const char *filename)

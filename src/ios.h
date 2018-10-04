@@ -22,8 +22,6 @@
 #include <config.h>
 #include <stdint.h>
 
-#include "ios-dev.h"
-
 /* The following two functions intialize and shutdown the IO poke
    subsystem.  */
 
@@ -69,6 +67,10 @@ void ios_shutdown (void);
 
    IO spaces also provide caching capabilities, transactions,
    serialization of concurrent accesses, and more goodies.  */
+
+/* Opaque type, which is specified in ios.c  */
+
+typedef struct ios *ios;
 
 /* IO spaces are bit-addressable.  "Offsets" characterize positions
    into IO spaces.
