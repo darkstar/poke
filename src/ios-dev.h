@@ -24,7 +24,7 @@
 
 typedef uint64_t ios_dev_off;
 
-/* The macros below are used in the device interface.  */
+/* The following macros are part of the device interface.  */
 
 #define IOD_EOF -1
 #define IOD_SEEK_SET 0
