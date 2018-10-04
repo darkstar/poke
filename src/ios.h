@@ -68,8 +68,6 @@ void ios_shutdown (void);
    IO spaces also provide caching capabilities, transactions,
    serialization of concurrent accesses, and more goodies.  */
 
-/* Opaque type, which is specified in ios.c  */
-
 typedef struct ios *ios;
 
 /* IO spaces are bit-addressable.  "Offsets" characterize positions
@@ -102,11 +100,11 @@ typedef int64_t ios_off;
    Return the IO space, or NULL if some error occurred (such as an
    invalid handler).  */
 
-io ios_open (const char *handler);
+ios ios_open (const char *handler);
 
 /* Return the current IO space.  */
 
-io ios_cur (void);
+ios ios_cur (void);
 
 /* Set the current IO space to IO.  */
 
@@ -140,19 +138,6 @@ uint64_t ios_peek_ulong (ios io, int bits,
 char *ios_peek_string (ios io, ios_off offset);
 
 /* XXX: 'update' hooks API.  */
-
-/* Type representing an IO space, and accessor macros.  */
-
-#define IOS_FILE(io) ((io)->file)
-#define IOS_FILENAME(io) ((io)->filename)
-#define IOS_MODE(io) ((io)->mode)
-
-struct ios
-{
-  /* XXX: status saved or not saved.  */
-
-  struct io *next;
-};
 
 typedef struct ios *ios;
 

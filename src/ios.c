@@ -36,6 +36,8 @@
    DEV_IF is the interface to use when operating the device.
 
    NEXT is a pointer to the next open IO space, or NULL.
+
+   XXX: add status, saved or not saved, also mode.
  */
 
 struct ios
