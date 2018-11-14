@@ -58,7 +58,8 @@ ios_dev_file_open (void *iod, const char *handler)
   ios_dev io;
   FILE *f;
 
-  /* XXX: parse the filename and the offset from HANDLER.  */
+  /* Skip the file:// part in the handler.  */
+  handler += strlen ("file://");
 
   /* Open the requested file.  The open mode is read-write if
      possible.  Otherwise read-only.  */
