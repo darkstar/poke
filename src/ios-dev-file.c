@@ -103,7 +103,7 @@ ios_dev_file_putc (void *iod, int c)
 {
   struct ios_dev_file *fio = iod;
   int ret = putc (c, fio->file);
-  return ret == EOF ? PK_EOF : ret;
+  return ret == EOF ? IOD_EOF : ret;
 }
 
 static ios_dev_off
@@ -121,9 +121,9 @@ ios_dev_file_seek (void *iod, ios_dev_off offset, int whence)
 
   switch (whence)
     {
-    case PK_SEEK_SET: fwhence = SEEK_SET; break;
-    case PK_SEEK_CUR: fwhence = SEEK_CUR; break;
-    case PK_SEEK_END: fwhence = SEEK_END; break;
+    case IOD_SEEK_SET: fwhence = SEEK_SET; break;
+    case IOD_SEEK_CUR: fwhence = SEEK_CUR; break;
+    case IOD_SEEK_END: fwhence = SEEK_END; break;
     default:
       assert (0);
     }
