@@ -127,8 +127,9 @@ ios_close (ios io)
      XXX: handle errors.  */
   assert (io->dev_if->close (io->dev));
 
-  /* Unlink the IO from the list.  */
-  assert (io_list != NULL); /* The list must contain at least io.  */
+  /* Unlink the IOS from the list.  */
+  assert (io_list != NULL); /* The list must contain at least one
+                               ios.  */
   if (io_list == io)
     ios = io_list->next;
   else

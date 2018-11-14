@@ -113,10 +113,8 @@ typedef int64_t ios_off;
    recognizes it.  This can be the name of a file to open, or an URL,
    a process PID, etc.
 
-   XXX: document device specs.
-
-   Return 0 if there is an error opening the space (such as an invalid
-   handler), 1 otherwise.  */
+   Return 0 if there is an error opening the space (such as an
+   unrecognized handler), 1 otherwise.  */
 
 int ios_open (const char *handler);
 
