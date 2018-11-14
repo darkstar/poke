@@ -64,19 +64,19 @@ struct ios_dev_if
   ios_dev_off (*tell) (void *dev);
 
   /* Change the current position in the given device according to
-     OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
-     and PK_SEEK_END.  Return 0 on successful completion, and -1 on
-     error.  */
+     OFFSET and WHENCE.  WHENCE can be one of IOD_SEEK_SET,
+     IOD_SEEK_CUR and IOD_SEEK_END.  Return 0 on successful
+     completion, and -1 on error.  */
 
   int (*seek) (void *dev, ios_dev_off offset, int whence);
 
   /* Read a byte from the given device at the current position.
-     Return the byte in an int, or PK_EOF on error.  */
+     Return the byte in an int, or IOD_EOF on error.  */
 
   int (*getc) (void *dev);
 
   /* Write a byte to the given device at the current position.  Return
-     the character written as an int, or PK_EOF on error.  */
+     the character written as an int, or IOD_EOF on error.  */
   
   int (*putc) (void *iod, int c);
 };
