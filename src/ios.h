@@ -131,32 +131,91 @@ void ios_set_cur (ios io);
 typedef void (*ios_map_fn) (ios io, void *data);
 void ios_map (ios_map_fn cb, void *data);
 
-/* XXX: read/write API.
-   
-   This should include special versions of poke that bypass update
-   hooks, and also versions bypassing the cache => a flags argument.
- */
+/* **************** Object read/write API ****************  */
 
-#define IOS_F_BYPASS_CACHE  1
-#define IOS_F_BYPASS_UPDATE 2
+/* An integer with flags is passed to the read/write operations,
+   impacting the way the operation is performed.  */
 
-int32_t ios_read_int (ios io, ios_off offset, int flags,
-                      int bits,
-                      enum ios_endian endian,
-                      enum ios_nenc nenc);
+#define IOS_F_BYPASS_CACHE  1  /* Bypass the object cache.  XXX.  */
 
-uint32_t ios_read_uint (ios io, ios_off offset, int flags,
-                        int bits,
-                        enum ios_endian endian);
+#define IOS_F_BYPASS_UPDATE 2  /* Do not call update hooks that would
+                                  be triggered by this write
+                                  operation.  Note that this can
+                                  obviously lead to inconsistencies
+                                  ;) */
 
-char *ios_read_string (ios io, ios_off offset, int flags);
+/* The functions conforming the read/write API below return an integer
+   that reflects the state of the requested operation.  */
+           
+#define IOS_OK 0      /* The operation was performed to completion, in
+                         the expected way.  */
 
-/* XXX: Need a way to return errors, including INVALID OFFSET, i.e. an
-   underlying EOF.  */
+#define IOS_ERROR -1  /* An unspecified error condition happened.  */
 
-/* XXX: 'update' hooks API.  */
+#define IOS_EIOFF -2  /* The provided offset is invalid.  This happens
+                         for example when the offset translates intoa
+                         byte offset that exceeds the capacity of the
+                         underlying IO device, or when a negative
+                         offset is provided in the wrong context.  */
 
-typedef struct ios *ios;
+#define IOS_EIOBJ -3  /* A valid object couldn't be found at the
+                         requested offset.  This happens for example
+                         when an end-of-file condition happens in the
+                         underlying IO device.  */
+
+/* Read a signed integer of size BITS located at the given OFFSET, and
+   put its value in VALUE.  It is assumed the integer is encoded using
+   the ENDIAN byte endianness and NENC negative encoding.  */
+
+int ios_read_int (ios io, ios_off offset, int flags,
+                  int bits,
+                  enum ios_endian endian,
+                  enum ios_nenc nenc,
+                  int64_t *value);
+
+/* Read an unsigned integer of size BITS located at the given OFFSET,
+   and put its value in VALUE.  It is assumed the integer is encoded
+   using the ENDIAN byte endianness.  */
+
+int ios_read_uint (ios io, ios_off offset, int flags,
+                   int bits,
+                   enum ios_endian endian,
+                   uint64_t *value);
+
+/* Read a NULL-terminated string of bytes located at the given OFFSET,
+   and put its value in VALUE.  It is up to the caller to free the
+   memory occupied by the returned string, when no longer needed.  */
+
+int ios_read_string (ios io, ios_off offset, int flags, char *value);
+
+/* Write the signed integer of size BITS in VALUE to the space IO, at
+   the given OFFSET.  Use the byte endianness ENDIAN and encoding NENC
+   when writing the value.  */
+
+int ios_write_int (ios io, ios_off offset, int flags,
+                   int bits,
+                   enum ios_endian endian,
+                   enum ios_nenc nenc,
+                   int64_t value);
+
+/* Write the unsigned integer of size BITS in VALUE to the space IO,
+   at the given OFFSET.  Use the byte endianness ENDIAN when writing
+   the value. */
+
+int ios_write_uint (ios io, ios_off offset, int flags,
+                    int bits,
+                    enum ios_endian endian,
+                    uint64_t value);
+
+/* Write the NULL-terminated string in VALUE to the space IO, at the
+   given OFFSET.  */
+
+int ios_write_string (ios io, ios_off offset, int flags,
+                      const char *value);
+
+/* **************** Updating API **************** */
+
+/* XXX: writeme.  */
 
 /* Return the IO space with the given filename.  Return NULL if no
    such IO space exists.  */
