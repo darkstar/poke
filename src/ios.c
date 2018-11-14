@@ -65,6 +65,20 @@ static struct ios_dev_if *ios_dev_ifs[] =
    NULL,
   };
 
+void
+ios_init (void)
+{
+  /* Nothing to do here... yet.  */
+}
+
+void
+ios_shutdown (void)
+{
+  /* Close and free all open IO spaces.  */
+  while (io_list)
+    ios_close (io_list);
+}
+
 int
 ios_open (const char *handler)
 {
@@ -156,15 +170,6 @@ ios_set_cur (ios io)
   cur_io = io;
 }
 
-void
-ios_map (ios_map_fn cb, void *data)
-{
-  ios io;
-
-  for (io = io_list; io; io = io->next)
-    (*cb) (io, data);
-}
-
 ios
 ios_search (const char *handler)
 {
@@ -192,15 +197,12 @@ ios_get (int n)
 }
 
 void
-ios_init (void)
+ios_map (ios_map_fn cb, void *data)
 {
-  /* Nothing to do here... yet.  */
+  ios io;
+
+  for (io = io_list; io; io = io->next)
+    (*cb) (io, data);
 }
 
-void
-ios_shutdown (void)
-{
-  /* Close and free all open IO spaces.  */
-  while (io_list)
-    ios_close (io_list);
-}
+

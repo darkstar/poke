@@ -70,21 +70,6 @@ void ios_shutdown (void);
 
 typedef struct ios *ios;
 
-/* Endianness and negative encoding.
-   XXX explain.  */
-
-enum ios_nenc
-  {
-   IOS_NENC_1, /* One's complement.  */
-   IOS_NENC_2  /* Two's complement.  */
-  };
-
-enum ios_endian
-  {
-   IOS_ENDIAN_LSB, /* Little endian.  */
-   IOS_ENDIAN_MSB  /* Big endian.  */
-  };
-
 /* IO spaces are bit-addressable.  "Offsets" characterize positions
    into IO spaces.
 
@@ -97,28 +82,43 @@ enum ios_endian
 
 typedef int64_t ios_off;
 
-/* The following macros should be used in order to abstract the
-   internal representation of the offsets.
+/* The following status codes are used in the several APIs defined
+   below in the file.  */
 
-   XXX: how to make negative offsets with IOS_O_NEW?  */
+#define IOS_OK 0      /* The operation was performed to completion, in
+                         the expected way.  */
 
-#define IOS_O_NEW(BYTES,BITS) \
-  ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
+#define IOS_ERROR -1  /* An unspecified error condition happened.  */
 
-#define IOS_O_BYTES(O) ((O) >> 3)
-#define IOS_O_BITS(O)  ((O) & 0x3)
+/* **************** IO space collection API ****************
+
+   The collection of open IO spaces are organized in a global list.
+   At every moment some given space is the "current space", unless
+   there are no spaces open:
+
+          space1  ->  space2  ->  ...  ->  spaceN
+ 
+                        ^
+                        |
+                 
+                      current
+
+   The functions declared below are used to manage this
+   collection.  */
 
 /* Open an IO space using a handler and make it the current space.
-   The handler is tried with all the supported backends until one
-   recognizes it.  This can be the name of a file to open, or an URL,
-   a process PID, etc.
-
-   Return 0 if there is an error opening the space (such as an
-   unrecognized handler), 1 otherwise.  */
+   Return IOS_ERROR if there is an error opening the space (such as an
+   unrecognized handler), IOS_OK otherwise.  */
 
 int ios_open (const char *handler);
 
-/* Return the current IO space.  */
+/* Close the given IO space, freing all used resources and flushing
+   the space cache associated with the space.  */
+
+void ios_close (ios io);
+
+/* Return the current IO space, or NULL if there are no open
+   spaces.  */
 
 ios ios_cur (void);
 
@@ -126,7 +126,17 @@ ios ios_cur (void);
 
 void ios_set_cur (ios io);
 
-/* Map over all the IO spaces executing a handler.  */
+/* Return the IO space operating the given HANDLER.  Return NULL if no
+   such space exists.  */
+
+ios ios_search (const char *handler);
+
+/* Return the Nth IO space.  If N is negative or bigger than the
+   number of IO spaces which are currently opened, return NULL.  */
+
+ios ios_get (int n);
+
+/* Map over all the open IO spaces executing a handler.  */
 
 typedef void (*ios_map_fn) (ios io, void *data);
 void ios_map (ios_map_fn cb, void *data);
@@ -136,7 +146,10 @@ void ios_map (ios_map_fn cb, void *data);
 /* An integer with flags is passed to the read/write operations,
    impacting the way the operation is performed.  */
 
-#define IOS_F_BYPASS_CACHE  1  /* Bypass the object cache.  XXX.  */
+#define IOS_F_BYPASS_CACHE  1  /* Bypass the IO space cache.  This
+                                  makes this write operation to
+                                  immediately write to the underlying
+                                  IO device.  */
 
 #define IOS_F_BYPASS_UPDATE 2  /* Do not call update hooks that would
                                   be triggered by this write
@@ -145,13 +158,10 @@ void ios_map (ios_map_fn cb, void *data);
                                   ;) */
 
 /* The functions conforming the read/write API below return an integer
-   that reflects the state of the requested operation.  */
+   that reflects the state of the requested operation.  The following
+   values are supported, as well as the more generic IOS_OK and
+   IOS_ERROR, */
            
-#define IOS_OK 0      /* The operation was performed to completion, in
-                         the expected way.  */
-
-#define IOS_ERROR -1  /* An unspecified error condition happened.  */
-
 #define IOS_EIOFF -2  /* The provided offset is invalid.  This happens
                          for example when the offset translates intoa
                          byte offset that exceeds the capacity of the
@@ -162,6 +172,24 @@ void ios_map (ios_map_fn cb, void *data);
                          requested offset.  This happens for example
                          when an end-of-file condition happens in the
                          underlying IO device.  */
+
+/* When reading and writing integers from/to IO spaces, it is needed
+   to specify some details on how the integers values are encoded in
+   the underlying storage.  The following enumerations provide the
+   supported byte endianness and negative encodings.  The later are
+   obviously used when reading and writing signed integers.  */
+
+enum ios_nenc
+  {
+   IOS_NENC_1, /* One's complement.  */
+   IOS_NENC_2  /* Two's complement.  */
+  };
+
+enum ios_endian
+  {
+   IOS_ENDIAN_LSB, /* Byte little endian.  */
+   IOS_ENDIAN_MSB  /* Byte big endian.  */
+  };
 
 /* Read a signed integer of size BITS located at the given OFFSET, and
    put its value in VALUE.  It is assumed the integer is encoded using
@@ -200,7 +228,7 @@ int ios_write_int (ios io, ios_off offset, int flags,
 
 /* Write the unsigned integer of size BITS in VALUE to the space IO,
    at the given OFFSET.  Use the byte endianness ENDIAN when writing
-   the value. */
+   the value.  */
 
 int ios_write_uint (ios io, ios_off offset, int flags,
                     int bits,
@@ -213,18 +241,12 @@ int ios_write_uint (ios io, ios_off offset, int flags,
 int ios_write_string (ios io, ios_off offset, int flags,
                       const char *value);
 
-/* **************** Updating API **************** */
+/* **************** Update API **************** */
 
 /* XXX: writeme.  */
 
-/* Return the IO space with the given filename.  Return NULL if no
-   such IO space exists.  */
+/* **************** Transaction API **************** */
 
-ios ios_search (const char *filename);
-
-/* Return the Nth IO space.  If N is negative or bigger than the
-   number of IO spaces, return NULL.  */
-
-ios ios_get (int n);
+/* XXX: writeme.  */
 
 #endif /* ! IOS_H */
