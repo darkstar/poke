@@ -16,11 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* XXX: IO backends provide access to "devices", which can be files,
-   processes, etc.
+/* An IO space operates on one or more "IO devices", which are
+   abstractions providing byte-oriented operations, such as
+   positioning, reading bytes, and writing bytes.  Typical abstracted
+   entities are files stored in some filesystem, the memory of a
+   process, etc.
 
-   XXX: IO devices are byte-oriented, which means they are oblivious
-   to endianness, alignment and negative encoding considerations.  */
+   Since the IO devices are byte-oriented, aspects like endianness,
+   alignment and negative encoding are not of consideration.  */
 
 typedef uint64_t ios_dev_off;
 
@@ -31,60 +34,50 @@ typedef uint64_t ios_dev_off;
 #define IOD_SEEK_CUR 1
 #define IOD_SEEK_END 2
 
-/* Each IO backend should implement the following interface, by
-   filling an instance of the struct defined below.
-
-   HANDLER_P (HANDLER) -> INT
-
-     Determine whether the provided HANDLER is recognized as a valid
-     device spec by this backend.  Return 1 if the handler is
-     recognized, 0 otherwise.
-
-   OPEN (HANDLER) -> IOD
-
-     Open a device using the provided HANDLER.  Return the opened
-     device, or NULL if there was an error, such as an unrecognized
-     handler.
-
-   CLOSE (DEV) -> INT
-
-     Close the given device.  Return 0 if there was an error during
-     the operation, 1 otherwise.
-
-   TELL (DEV) -> OFFSET
-   
-     Return the current position in the given device.  Return -1 on
-     error.
-
-   SEEK (DEV, OFFSET, WHENCE) -> INT
-   
-     Change the current position in the given device according to
-     OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
-     and PK_SEEK_END.  Return 0 on successful completion, and -1 on
-     error.
-
-   GETC (DEV) -> INT
-
-     Read a byte from the given device at the current position.
-     Return the byte in an int, or PK_EOF on error.
-
-   PUTC (DEV) -> INT
-
-     Write a byte to the given device at the current position.  Return
-     the character written as an int, or PK_EOF on error.
-*/
+/* Each IO backend should implement a device interface, by filling an
+   instance of the struct defined below.  */
 
 struct ios_dev_if
 {
+  /* Determine whether the provided HANDLER is recognized as a valid
+     device spec by this backend.  Return 1 if the handler is
+     recognized, 0 otherwise.  */
+
   int (*handler_p) (const char *handler);
 
+  /* Open a device using the provided HANDLER.  Return the opened
+     device, or NULL if there was an error.  Note that this function
+     assumes that HANDLER is recognized as a handler by the backend,
+     i.e. HANDLER_P returns 1 if HANDLER is passed to it.  */
+
   void *(*open) (const char *handler);
+
+  /* Close the given device.  Return 0 if there was an error during
+
+     the operation, 1 otherwise.  */
+
   int (*close) (void *dev);
 
+  /* Return the current position in the given device.  Return -1 on
+     error.  */
+
   ios_dev_off (*tell) (void *dev);
+
+  /* Change the current position in the given device according to
+     OFFSET and WHENCE.  WHENCE can be one of PK_SEEK_SET, PK_SEEK_CUR
+     and PK_SEEK_END.  Return 0 on successful completion, and -1 on
+     error.  */
+
   int (*seek) (void *dev, ios_dev_off offset, int whence);
 
+  /* Read a byte from the given device at the current position.
+     Return the byte in an int, or PK_EOF on error.  */
+
   int (*getc) (void *dev);
+
+  /* Write a byte to the given device at the current position.  Return
+     the character written as an int, or PK_EOF on error.  */
+  
   int (*putc) (void *iod, int c);
 };
 

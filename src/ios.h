@@ -71,8 +71,7 @@ void ios_shutdown (void);
 typedef struct ios *ios;
 
 /* Endianness and negative encoding.
-
-   XXX: explain.  */
+   XXX explain.  */
 
 enum ios_nenc
   {
@@ -99,7 +98,9 @@ enum ios_endian
 typedef int64_t ios_off;
 
 /* The following macros should be used in order to abstract the
-   internal representation of the offsets.  */
+   internal representation of the offsets.
+
+   XXX: how to make negative offsets with IOS_O_NEW?  */
 
 #define IOS_O_NEW(BYTES,BITS) \
   ((((BYTES) + (BITS) / 8) << 3) | ((BITS) % 0x3))
@@ -132,31 +133,28 @@ void ios_set_cur (ios io);
 typedef void (*ios_map_fn) (ios io, void *data);
 void ios_map (ios_map_fn cb, void *data);
 
-/* XXX: peek/poke API.
+/* XXX: read/write API.
    
    This should include special versions of poke that bypass update
-   hooks, and also versions bypassing the cache.
+   hooks, and also versions bypassing the cache => a flags argument.
  */
 
-int32_t ios_peek_int (ios io, int bits,
-                      ios_off offset,
+#define IOS_F_BYPASS_CACHE  1
+#define IOS_F_BYPASS_UPDATE 2
+
+int32_t ios_read_int (ios io, ios_off offset, int flags,
+                      int bits,
                       enum ios_endian endian,
                       enum ios_nenc nenc);
 
-uint32_t ios_peek_uint (ios io, int bits,
-                        ios_off offset,
+uint32_t ios_read_uint (ios io, ios_off offset, int flags,
+                        int bits,
                         enum ios_endian endian);
 
-int64_t ios_peek_long (ios io, int bits,
-                       ios_off offset,
-                       enum ios_endian endian,
-                       enum ios_nenc nenc);
+char *ios_read_string (ios io, ios_off offset, int flags);
 
-uint64_t ios_peek_ulong (ios io, int bits,
-                         ios_off offset,
-                         enum ios_endian endian);
-
-char *ios_peek_string (ios io, ios_off offset);
+/* XXX: Need a way to return errors, including INVALID OFFSET, i.e. an
+   underlying EOF.  */
 
 /* XXX: 'update' hooks API.  */
 

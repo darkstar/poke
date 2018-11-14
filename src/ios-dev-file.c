@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <xalloc.h>
+#include <string.h>
 
 #include "ios-dev.h"
 
@@ -40,8 +41,12 @@ struct ios_dev_file
 static int
 ios_dev_file_handler_p (const char *handler)
 {
-  /* XXX: implement handler formats.  */
-  return 1;
+  /* The compiler should be able to optimize the strlen of the
+     constant string...   GCC does on -O */
+#define FILEH "file://"
+  return (strlen (handler) > strlen (FILEH)
+          && strncmp (handler, FILEH, strlen (FILEH)) == 0);
+#undef FILEH
 }
 
 static void *
