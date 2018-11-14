@@ -69,7 +69,7 @@ int
 ios_open (const char *handler)
 {
   struct ios *io = NULL;
-  struct ios_dev_if *dev_if = NULL;
+  struct ios_dev_if **dev_if = NULL;
 
   /* Allocate and initialize the new IO space.  */
   io = xmalloc (sizeof (struct ios));
@@ -78,16 +78,16 @@ ios_open (const char *handler)
 
   /* Look for a device interface suitable to operate on the given
      handler.  */
-  for (dev_if = &ios_dev_ifs; *dev_if; ++dev_if)
+  for (dev_if = ios_dev_ifs; *dev_if; ++dev_if)
     {
-      if (dev_if->handler_p (handler))
+      if ((*dev_if)->handler_p (handler))
         break;
     }
 
   if (dev_if == NULL)
     goto error;
 
-  io->dev_if = dev_if;
+  io->dev_if = *dev_if;
   
   /* Open the device using the interface found above.  */
   io->dev = io->dev_if->open (handler);
@@ -131,7 +131,7 @@ ios_close (ios io)
   assert (io_list != NULL); /* The list must contain at least one
                                ios.  */
   if (io_list == io)
-    ios = io_list->next;
+    io = io_list->next;
   else
     {
       for (tmp = io_list; tmp->next != io; tmp = tmp->next)
@@ -161,7 +161,7 @@ ios_map (ios_map_fn cb, void *data)
 {
   ios io;
 
-  for (io = ios; io; io = io->next)
+  for (io = io_list; io; io = io->next)
     (*cb) (io, data);
 }
 

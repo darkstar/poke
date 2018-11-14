@@ -17,6 +17,8 @@
  */
 
 #include <config.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /* We want 64-bit file offsets in all systems.  */
 #define _FILE_OFFSET_BITS 64
@@ -35,7 +37,7 @@ struct ios_dev_file
 {
   FILE *file;
   char *filename;
-  mode_t mode;
+  char *mode;
 };
 
 static int
@@ -50,12 +52,10 @@ ios_dev_file_handler_p (const char *handler)
 }
 
 static void *
-ios_dev_file_open (void *iod, const char *handler)
+ios_dev_file_open (const char *handler)
 {
-  struct ios_dev_file *iof = iod;
-
   const char *mode;
-  ios_dev io;
+  struct ios_dev_file *fio;
   FILE *f;
 
   /* Skip the file:// part in the handler.  */
@@ -70,15 +70,16 @@ ios_dev_file_open (void *iod, const char *handler)
   f = fopen (handler, mode);
   if (!f)
     {
-      perror (filename);
+      perror (handler);
       return 0;
     }
 
+  fio = xmalloc (sizeof (struct ios_dev_file));
   fio->file = f;
   fio->filename = xstrdup (handler);
-  fio->mode = mode;
+  fio->mode = xstrdup (mode);
 
-  return 1;
+  return fio;
 }
 
 static int
@@ -89,6 +90,9 @@ ios_dev_file_close (void *iod)
   if (fclose (fio->file) != 0)
     perror (fio->filename);
   free (fio->filename);
+  free (fio->mode);
+
+  return 1;
 }
 
 static int
@@ -133,6 +137,7 @@ ios_dev_file_seek (void *iod, ios_dev_off offset, int whence)
 
 struct ios_dev_if ios_dev_file =
   {
+   .handler_p = ios_dev_file_handler_p,
    .open = ios_dev_file_open,
    .close = ios_dev_file_close,
    .tell = ios_dev_file_tell,
