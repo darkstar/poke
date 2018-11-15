@@ -205,4 +205,148 @@ ios_map (ios_map_fn cb, void *data)
     (*cb) (io, data);
 }
 
+int
+ios_read_int (ios io, ios_off offset, int flags,
+              int bits,
+              enum ios_endian endian,
+              enum ios_nenc nenc,
+              int64_t *value)
+{
+  /* XXX: writeme  */
+  *value = 666;
+  return IOS_OK;
+}
 
+int
+ios_read_uint (ios io, ios_off offset, int flags,
+               int bits,
+               enum ios_endian endian,
+               uint64_t *value)
+{
+  /* XXX: writeme  */
+  *value = 666;
+  return IOS_OK;
+}
+
+int
+ios_read_string (ios io, ios_off offset, int flags, char **value)
+{
+  /* XXX: writeme.  */
+  *value = xstrdup ("bleh");
+  return IOS_OK;
+}
+
+int
+ios_write_int (ios io, ios_off offset, int flags,
+               int bits,
+               enum ios_endian endian,
+               enum ios_nenc nenc,
+               int64_t value)
+{
+#if 0
+  char aux;
+  int nbytes;
+  uint64_t uvalue;
+
+  uint8_t head_mask, tail_mask;
+
+  int v_head = 64 - bits;  /* Size of the unused head in the uvalue.  */
+  int o_head = offset % 8; /* Size of the unused head in the IOD.  */
+
+  /* Handle the negative encoding, changing the bits in `value' as
+     needed.  */
+
+  switch (nenc)
+    {
+    case IOS_NENC_2:
+      /* No need to convert here.  */
+      uvalue = value;
+      break;
+    case IOS_NENC_1: /* XXX supportme  */
+    default:
+      assert (1);
+      break;
+    }
+
+  /* XXX the code after this point should be the same for signed and
+     unsigned integers.  */
+  
+  /* Now shift the value in order to match the final disposition in
+     the IOD bytes.
+
+     Origin of most significant bit: 64 - bits
+     Destination of most significant bit: offset % 8
+
+                    value
+     +---------------------------------+
+     |                                 |
+     +---------------------------------+
+
+                   uvalue                   aux
+     +------+---...-------------+------+  +------+
+     | head |                   | tail |  | tail |
+     +------+---...-------------+------+  +------+
+  */
+
+  if (v_head == o_head)
+    /* No need to shift uvalue.  */
+  else if (v_head > o_head)
+    {
+      /* We have to shift left.  */
+      uvalue <<= v_head - o_head;
+    }
+  else /* v_head < o_head  */
+    {
+      /* We need to save part of the value in `aux' in this case, as
+         the final number of bytes to update in the IOD exceeds
+         64-bit.  */
+
+      aux = (char) ((uvalue & 0xff) << (8 - (o_head - v_head)));
+      uvalue >>= o_head - v_head;
+    }
+
+  /* Write the bytes of `uvalue' and `aux' to the IOD.  The bytes may
+     need to be "completed" from the existing information in the IOD,
+     using appropriate masks.  */
+
+  if (offset < 0 ||
+      io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET) == -1)
+    return IOS_EIOFF;
+
+  for (n = 0; n < 8; ++n)
+    {
+      /* Calculate mask for the current byte.  */
+
+      /* If the mask is not zero, read the byte from the IOD and
+         complete the value in uvalue.  */
+
+      /* Write the resulting byte to the IOD.  */
+      
+      if (io->dev_if->putc (io->dev, uvalue >> (64 - n) & 0xff) == IOD_EOF)
+        return IOS_EIOFF;
+    }
+
+  if (io->dev_if->putc (io->dev, tail) == IOD_EOF)
+    return IOS_EIOFF;
+#endif
+
+  return IOS_OK;
+}
+
+int
+ios_write_uint (ios io, ios_off offset, int flags,
+                int bits,
+                enum ios_endian endian,
+                uint64_t value)
+{
+  /* XXX: writeme.  */
+  return IOS_OK;
+}
+
+int
+ios_write_string (ios io, ios_off offset, int flags,
+                  const char *value)
+{
+  /* XXX: writeme.  */
+  return IOS_OK;
+}

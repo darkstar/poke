@@ -163,7 +163,7 @@ void ios_map (ios_map_fn cb, void *data);
    IOS_ERROR, */
            
 #define IOS_EIOFF -2  /* The provided offset is invalid.  This happens
-                         for example when the offset translates intoa
+                         for example when the offset translates into a
                          byte offset that exceeds the capacity of the
                          underlying IO device, or when a negative
                          offset is provided in the wrong context.  */
@@ -214,7 +214,7 @@ int ios_read_uint (ios io, ios_off offset, int flags,
    and put its value in VALUE.  It is up to the caller to free the
    memory occupied by the returned string, when no longer needed.  */
 
-int ios_read_string (ios io, ios_off offset, int flags, char *value);
+int ios_read_string (ios io, ios_off offset, int flags, char **value);
 
 /* Write the signed integer of size BITS in VALUE to the space IO, at
    the given OFFSET.  Use the byte endianness ENDIAN and encoding NENC
