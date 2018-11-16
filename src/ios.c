@@ -37,7 +37,7 @@
 
    NEXT is a pointer to the next open IO space, or NULL.
 
-   XXX: add status, saved or not saved, also mode.
+   XXX: add status, saved or not saved.
  */
 
 struct ios
@@ -45,6 +45,7 @@ struct ios
   char *handler;
   void *dev;
   struct ios_dev_if *dev_if;
+  int mode;
 
   struct ios *next;
 };
@@ -156,6 +157,12 @@ ios_close (ios io)
   
   /* Set the new current IO.  */
   cur_io = io_list;
+}
+
+int
+ios_mode (ios io)
+{
+  return io->mode;
 }
 
 ios

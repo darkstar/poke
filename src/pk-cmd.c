@@ -567,7 +567,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
   /* Process command flags.  */
   if (cmd->flags & PK_CMD_F_REQ_IO
-      && pk_io_cur () == NULL)
+      && ios_cur () == NULL)
     {
       puts (_("This command requires an IO space.  Use the `file' command."));
       return 0;
@@ -575,9 +575,9 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
   if (cmd->flags & PK_CMD_F_REQ_W)
     {
-      pk_io cur_io = pk_io_cur ();
+      ios cur_io = ios_cur ();
       if (cur_io == NULL
-          || !(PK_IO_MODE (cur_io) & O_RDWR))
+          || !(ios_mode (cur_io) & IOS_M_RDWR))
         {
           puts (_("This command requires a writable IO space."));
           return 0;

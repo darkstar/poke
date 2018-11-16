@@ -48,8 +48,8 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   char string[18];
   string[0] = ' ';
   string[17] = '\0';
-  pk_io_off address, count, top;
-  static pk_io_off last_address;
+  ios_off address, count, top;
+  static ios_off last_address;
 
   assert (argc == 2);
 
@@ -68,7 +68,6 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   /* Dump the requested address.  */
 
   last_address = address;
-  pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
   if (poke_interactive_p)
     printf ("%s87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF%s\n",
@@ -80,7 +79,19 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       for (i = 0; i < 16; i++)
         {
           if (0 <= c)
-            c = pk_io_getc ();
+            {
+              uint64_t value;
+
+              if (ios_read_uint (ios_cur (), address, 0, 8,
+                                 IOS_ENDIAN_MSB /* irrelevant */,
+                                 &value) != IOS_OK)
+                {
+                  printf ("error reading from IO\n");
+                  return 0;
+                }
+
+              c = (char) value;
+            }
           if (c < 0)
             {
               if (!i)
@@ -109,7 +120,6 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       if (i)
         printf ("%s%s%s\n", KYEL, string, KNONE);
     }
-  /* pk_io_seek (pk_io_cur (), cur, PK_SEEK_SET); */
 
   return 1;
 }
