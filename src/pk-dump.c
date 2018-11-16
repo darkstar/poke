@@ -82,7 +82,7 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
             {
               uint64_t value;
 
-              if (ios_read_uint (ios_cur (), address, 0, 8,
+              if (ios_read_uint (ios_cur (), address * 8, 0, 8,
                                  IOS_ENDIAN_MSB /* irrelevant */,
                                  &value) != IOS_OK)
                 {
