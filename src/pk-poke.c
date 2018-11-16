@@ -26,22 +26,28 @@
 #include "pk-cmd.h"
 
 static int
-poke_byte (pk_io_off *address, uint8_t byte)
+poke_byte (ios_off *address, uint8_t byte)
 {
-  if (pk_io_putc ((int) byte) == PK_EOF)
+  uint64_t value;
+
+  if (ios_read_uint (ios_cur (), *address, 0, 8,
+                     IOS_ENDIAN_MSB /* irrelevant  */,
+                     &value) != IOS_OK)
     {
-      printf (_("Error writing byte 0x%x to 0x%08jx\n"),
+      /* XXX: printing the ADDRESS as bits like this can be confusing.
+         Print an offset instead.  */
+      printf (_("Error writing byte 0x%x to 0x%08jx#b\n"),
               byte, *address);
       return 0;
     }
 
   printf ("0x%08jx <- 0x%02x\n", *address, byte);
-  *address += 1;
+  *address += 8;
   return 1;
 }
 
 static int
-poke_val (pk_io_off *address, pvm_val val)
+poke_val (ios_off *address, pvm_val val)
 {
   /* XXX: endianness and negative encoding.  */
 
@@ -126,7 +132,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* poke ADDR, VAL */
 
-  pk_io_off address;
+  ios_off address;
   pvm_program prog;
   pvm_val val;
   int pvm_ret;
@@ -158,8 +164,6 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       pvm_ret = pvm_run (poke_vm, prog, &val);
       if (pvm_ret != PVM_EXIT_OK)
         goto rterror;
-
-      pk_io_seek (pk_io_cur (), address, PK_SEEK_SET);
 
       if (!poke_val (&address, val))
         goto error;
