@@ -129,6 +129,12 @@ void ios_close (ios io);
 
 int ios_mode (ios io);
 
+/* Many IO devices are able to maintain a current read/write pointer.
+   The function below can be used to retrieve it, as an IOS
+   offset.  */
+
+ios_off ios_tell (ios io);
+
 /* Return the current IO space, or NULL if there are no open
    spaces.  */
 

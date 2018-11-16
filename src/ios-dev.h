@@ -23,7 +23,9 @@
    process, etc.
 
    Since the IO devices are byte-oriented, aspects like endianness,
-   alignment and negative encoding are not of consideration.  */
+   alignment and negative encoding are not of consideration.
+
+   IOD offsets shall always be interpreted as numbers of bytes.  */
 
 typedef uint64_t ios_dev_off;
 

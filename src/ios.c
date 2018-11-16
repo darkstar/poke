@@ -165,6 +165,13 @@ ios_mode (ios io)
   return io->mode;
 }
 
+ios_off
+ios_tell (ios io)
+{
+  ios_dev_off dev_off = io->dev_if->tell (io->dev);
+  return dev_off * 8;
+}
+
 ios
 ios_cur (void)
 {
