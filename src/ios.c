@@ -172,6 +172,12 @@ ios_tell (ios io)
   return dev_off * 8;
 }
 
+const char *
+ios_handler (ios io)
+{
+  return io->handler;
+}
+
 ios
 ios_cur (void)
 {

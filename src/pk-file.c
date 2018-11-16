@@ -38,22 +38,27 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       /* Switch to an already opened IO space.  */
 
       int io_id;
-      pk_io io;
+      ios io;
 
       io_id = PK_CMD_ARG_TAG (argv[0]);
-      io = pk_io_get (io_id);
+      io = ios_get (io_id);
       if (io == NULL)
         {
           printf (_("No such file #%d\n"), io_id);
           return 0;
         }
 
-      pk_io_set_cur (io);
+      ios_set_cur (io);
     }
   else
     {
       /* Create a new IO space.  */
-      const char *filename = PK_CMD_ARG_STR (argv[0]);
+      const char *arg_str = PK_CMD_ARG_STR (argv[0]);
+      char *filename
+        = xmalloc (strlen ("file://") + strlen (arg_str) + 1);
+
+      strcpy (filename, "file://");
+      strcat (filename, arg_str);
       
       if (access (filename, R_OK) != 0)
         {
@@ -61,18 +66,20 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
           return 0;
         }
       
-      if (pk_io_search (filename) != NULL)
+      if (ios_search (filename) != NULL)
         {
           printf (_("File %s already opened.  Use `file #N' to switch.\n"),
                   filename);
           return 0;
         }
       
-      pk_io_open (filename);
+      ios_open (filename);
+      free (filename);
     }
 
   if (poke_interactive_p)
-    printf (_("The current file is now `%s'.\n"), PK_IO_FILENAME (pk_io_cur ()));
+    printf (_("The current file is now `%s'.\n"),
+            ios_handler (ios_cur ()) + strlen ("file://"));
 
   return 1;
 }
@@ -81,18 +88,18 @@ static int
 pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* close [#ID]  */
-  pk_io io;
+  ios io;
   int changed;
 
   assert (argc == 1);
 
   if (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_NULL)
-    io = pk_io_cur ();
+    io = ios_cur ();
   else
     {
       int io_id = PK_CMD_ARG_TAG (argv[0]);
 
-      io = pk_io_get (io_id);
+      io = ios_get (io_id);
       if (io == NULL)
         {
           printf (_("No such file #%d\n"), io_id);
@@ -100,30 +107,30 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
         }
     }
 
-  changed = (io == pk_io_cur ());
-  pk_io_close (io);
+  changed = (io == ios_cur ());
+  ios_close (io);
 
   if (changed)
     {
-      if (pk_io_cur () == NULL)
+      if (ios_cur () == NULL)
         puts (_("No more IO spaces."));
       else
         printf (_("The current file is now `%s'.\n"),
-                PK_IO_FILENAME (pk_io_cur ()));
+                ios_handler (ios_cur ()));
     }
   
   return 1;
 }
 
 static void
-print_info_file (pk_io io, void *data)
+print_info_file (ios io, void *data)
 {
   int *i = (int *) data;
-  printf ("%s#%d\t%s\t0x%08jx\t%s\n",
-          io == pk_io_cur () ? "* " : "  ",
+  printf ("%s#%d\t%s\t0x%08jx#b\t%s\n",
+          io == ios_cur () ? "* " : "  ",
           (*i)++,
-          PK_IO_MODE (io) & O_RDWR ? "rw" : "r ",
-          pk_io_tell (io), PK_IO_FILENAME (io));
+          ios_mode (io) & IOS_M_RDWR ? "rw" : "r ",
+          ios_tell (io), ios_handler (io));
 }
 
 static int
@@ -135,7 +142,7 @@ pk_cmd_info_files (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   id = 0;
   printf (_("  Id\tMode\tPosition\tFilename\n"));
-  pk_io_map (print_info_file, &id);
+  ios_map (print_info_file, &id);
 
   return 1;
 }

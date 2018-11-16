@@ -120,11 +120,10 @@ void ios_close (ios io);
 /* Depending on the underlying IOD, an IO space may allow several
    operations but not others.  For example, a read-only file won't
    allow being written to.  In order to reflect this, every IO space
-   features a "mode" that can be queried by the user using the
-   function below.  The several modes in which a given IO space can be
+   features a "mode" bitmap that can be queried by the user using the
+   function below.  The several bits in which a given IO space can be
    are summarized in the IOS_M_* constants, also defined below.  */
 
-#define IOS_M_RD   0
 #define IOS_M_RDWR 1
 
 int ios_mode (ios io);
@@ -134,6 +133,11 @@ int ios_mode (ios io);
    offset.  */
 
 ios_off ios_tell (ios io);
+
+/* The following function returns the handler operated by the given IO
+   space.  */
+
+const char *ios_handler (ios io);
 
 /* Return the current IO space, or NULL if there are no open
    spaces.  */
