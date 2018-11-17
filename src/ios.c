@@ -284,7 +284,7 @@ ios_write_int (ios io, ios_off offset, int flags,
       break;
     case IOS_NENC_1: /* XXX supportme  */
     default:
-      assert (1);
+      assert (0);
       break;
     }
 
