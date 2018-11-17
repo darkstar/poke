@@ -259,7 +259,7 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
       int tl = !!((size - 1) & ~0x1f);
 
       /* XXX where is the endianness and nenc coming from?  The type,
-         or arguments to the macro-assembler?  */
+         or arguments to the macro PKL_INSN_PEEK?  */
       if (sign)
         pkl_asm_insn (pasm, peek_table[tl][sign],
                       IOS_NENC_2 /* XXX */,
