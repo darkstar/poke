@@ -131,7 +131,7 @@ ios_dev_file_seek (void *iod, ios_dev_off offset, int whence)
     default:
       assert (0);
     }
-  
+
   return fseeko (fio->file, offset, fwhence);
 }
 
