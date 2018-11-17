@@ -60,6 +60,12 @@ wrapped-functions
   pvm_allocate_struct_attrs
   pvm_make_struct_type
   pvm_typeof
+  ios_cur
+  ios_read_int
+  ios_read_uint
+  ios_read_long
+  ios_read_ulong
+  ios_read_string
 end
 
 #wrapped-globals
