@@ -239,7 +239,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
                uint64_t *value)
 {
   /* XXX: writeme  */
-  *value = 0;
+  *value = 666;
   return IOS_OK;
 }
 
