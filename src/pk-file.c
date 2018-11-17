@@ -57,14 +57,14 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       char *filename
         = xmalloc (strlen ("file://") + strlen (arg_str) + 1);
 
-      strcpy (filename, "file://");
-      strcat (filename, arg_str);
-      
-      if (access (filename, R_OK) != 0)
+      if (access (arg_str, R_OK) != 0)
         {
-          printf (_("%s: file cannot be read\n"), filename);
+          printf (_("%s: file cannot be read\n"), arg_str);
           return 0;
         }
+      
+      strcpy (filename, "file://");
+      strcat (filename, arg_str);
       
       if (ios_search (filename) != NULL)
         {

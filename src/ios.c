@@ -111,22 +111,17 @@ ios_open (const char *handler)
 
   /* Add the newly created space to the list, and update the current
      space.  */
-  if (io_list == NULL)
-    io_list = io;
-  else
-    {
-      io->next = io_list;
-      io_list = io;
-    }
+  io->next = io_list;
+  io_list = io;
 
   cur_io = io;
 
   return 1;
 
  error:
-  free (io);
   if (io)
     free (io->handler);
+  free (io);
 
   return 0;
 }
@@ -143,10 +138,10 @@ ios_close (ios io)
   assert (io->dev_if->close (io->dev));
 
   /* Unlink the IOS from the list.  */
-  assert (io_list != NULL); /* The list must contain at least one
-                               ios.  */
+  assert (io_list != NULL); /* The list must contain at least one IO
+                               space.  */
   if (io_list == io)
-    io = io_list->next;
+    io_list = io_list->next;
   else
     {
       for (tmp = io_list; tmp->next != io; tmp = tmp->next)
@@ -244,7 +239,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
                uint64_t *value)
 {
   /* XXX: writeme  */
-  *value = 666;
+  *value = 0;
   return IOS_OK;
 }
 
