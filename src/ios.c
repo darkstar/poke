@@ -18,7 +18,6 @@
 
 #include <config.h>
 #include <xalloc.h>
-#include <stdio.h>
 #include <gettext.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -239,7 +238,19 @@ ios_read_uint (ios io, ios_off offset, int flags,
                uint64_t *value)
 {
   /* XXX: writeme  */
-  *value = 666;
+
+  if (offset % 8 == 0 && bits == 8)
+    {
+      int c = io->dev_if->getc (io->dev);
+
+      if (c == IOD_EOF)
+        return IOS_EIOFF;
+
+      *value = c;
+    }
+  else
+    assert (0);
+
   return IOS_OK;
 }
 
@@ -355,6 +366,16 @@ ios_write_uint (ios io, ios_off offset, int flags,
                 uint64_t value)
 {
   /* XXX: writeme.  */
+
+  if (offset % 8 == 0 && bits == 8)
+    {
+      if (io->dev_if->putc (io->dev, (int) value)
+          == IOD_EOF)
+        return IOS_EIOBJ;
+    }
+  else
+    assert (0);
+
   return IOS_OK;
 }
 
