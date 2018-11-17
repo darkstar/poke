@@ -26,6 +26,7 @@
 #include "pkl.h"
 #include "pkl-asm.h"
 #include "pvm.h"
+#include "ios.h"
 
 #include "poke.h" /* For poke_compiler  */
 
@@ -257,8 +258,17 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
 
       int tl = !!((size - 1) & ~0x1f);
 
-      pkl_asm_insn (pasm, peek_table[tl][sign],
-                    (jitter_uint) size);
+      /* XXX where is the endianness and nenc coming from?  The type,
+         or arguments to the macro-assembler?  */
+      if (sign)
+        pkl_asm_insn (pasm, peek_table[tl][sign],
+                      IOS_NENC_2 /* XXX */,
+                      IOS_ENDIAN_MSB /* XXX */,
+                      (jitter_uint) size);
+      else
+        pkl_asm_insn (pasm, peek_table[tl][sign],
+                      IOS_ENDIAN_MSB /* XXX */,
+                      (jitter_uint) size);
     }
   else if (type_code == PKL_TYPE_STRING)
     {

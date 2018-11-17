@@ -1792,7 +1792,7 @@ end
 # peekiu ENDIAN,BITS
 # OFF -> INT
 
-instruction peekiu (?n,?n) # OFF -> UINT
+instruction peekiu (?n,?n)
   code
      enum ios_endian endian = JITTER_ARGN0;
      int bits = JITTER_ARGN1;
@@ -1816,17 +1816,58 @@ instruction peekiu (?n,?n) # OFF -> UINT
   end
 end
 
-instruction peekl (?n) # OFF -> LONG
+# peekl NENC,ENDIAN,BITS
+# OFF -> INT
+
+instruction peekl (?n,?n,?n)
   code
-    /* XXX: use IO and a base register */
-    JITTER_TOP_STACK () = pvm_make_long (0, JITTER_ARGN0);
+     enum ios_nenc nenc = JITTER_ARGN0;
+     enum ios_endian endian = JITTER_ARGN1;
+     int bits = JITTER_ARGN2;
+     int64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
+               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+
+     if (ios_read_int (ios_cur (), offset, 0,
+                       bits, endian, nenc, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_long (value, bits);
+       }
   end
 end
 
-instruction peeklu (?n) # OFF -> ULONG
+# peeklu ENDIAN,BITS
+# OFF -> ULONG
+
+instruction peeklu (?n,?n)
   code
-    /* XXX: use IO  and a base register */
-    JITTER_TOP_STACK () = pvm_make_ulong (0, JITTER_ARGN0);
+     enum ios_endian endian = JITTER_ARGN0;
+     int bits = JITTER_ARGN1;
+     uint64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
+               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+
+     if (ios_read_uint (ios_cur (), offset, 0,
+                        bits, endian, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
+       }
   end
 end
 

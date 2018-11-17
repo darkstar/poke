@@ -237,8 +237,8 @@ PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
 
 /* IO instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_PEEKI, "n", "peeki")
-PKL_DEF_INSN (PKL_INSN_PEEKIU, "n", "peekiu")
+PKL_DEF_INSN (PKL_INSN_PEEKI, "nnn", "peeki")
+PKL_DEF_INSN (PKL_INSN_PEEKIU, "nn", "peekiu")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "n", "peekl")
 PKL_DEF_INSN (PKL_INSN_PEEKLU, "n", "peeklu")
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
