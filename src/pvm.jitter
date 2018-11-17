@@ -73,6 +73,7 @@ end
 early-header-c
   code
 #   include "pvm.h"
+#   include "ios.h"
   end
 end
 
@@ -1755,19 +1756,63 @@ instruction typof () # VAL -> TYP
   end
 end
 
-# IO instructions
+## IO instructions
+#
+#
+# The following instructions operate on the global IO space.
 
-instruction peeki (?n) # OFF -> INT
+# peeki NENC,ENDIAN,BITS
+# OFF -> INT
+
+instruction peeki (?n,?n,?n)
   code
-    /* XXX: use IO and a base register */
-    JITTER_TOP_STACK () = pvm_make_int (0, JITTER_ARGN0);
+     enum ios_nenc nenc = JITTER_ARGN0;
+     enum ios_endian endian = JITTER_ARGN1;
+     int bits = JITTER_ARGN2;
+     int64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
+               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+
+     if (ios_read_int (ios_cur (), offset, 0,
+                       bits, endian, nenc, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_int (value, bits);
+       }
   end
 end
 
-instruction peekiu (?n) # OFF -> UINT
+# peekiu ENDIAN,BITS
+# OFF -> INT
+
+instruction peekiu (?n,?n) # OFF -> UINT
   code
-    /* XXX: use IO and a base register */
-    JITTER_TOP_STACK () = pvm_make_uint (0, JITTER_ARGN0);
+     enum ios_endian endian = JITTER_ARGN0;
+     int bits = JITTER_ARGN1;
+     uint64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
+               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+
+     if (ios_read_uint (ios_cur (), offset, 0,
+                        bits, endian, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_uint (value, bits);
+       }
   end
 end
 
