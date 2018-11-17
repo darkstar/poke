@@ -1778,8 +1778,8 @@ instruction peeki (?n,?n,?n)
      int64_t value;
      ios_off offset;
 
-     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
-               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
@@ -1805,8 +1805,8 @@ instruction peekiu (?n,?n)
      uint64_t value;
      ios_off offset;
 
-     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
-               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
@@ -1833,8 +1833,8 @@ instruction peekl (?n,?n,?n)
      int64_t value;
      ios_off offset;
 
-     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
-               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
@@ -1860,8 +1860,8 @@ instruction peeklu (?n,?n)
      uint64_t value;
      ios_off offset;
 
-     offset = (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ())
-               * PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
