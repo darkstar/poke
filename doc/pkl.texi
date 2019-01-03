@@ -364,11 +364,11 @@ supported types, and also elaborates on how to define new types.
 @node Type Constructors
 @section Type Constructors
 
-A @dfn{type constructor} is a syntactic construction that denotes a
-type and its properties.  Depending on the type being denoted,
-constructors can be as simple as a single keyword, or rather complex
-like a struct definition spawning several program pages.  Consider for
-example the following type constructors:
+A @dfn{type constructor} is a syntax that denotes a type and its
+properties.  Depending on the type being denoted, constructors can be
+as simple as a single keyword, or be rather complex like a structure
+definition spawning several program pages.  Consider for example the
+following type constructors:
 
 @example
 string
@@ -383,9 +383,9 @@ Since there is only one string type in Pkl, this constructor doesn't
 take any parameter.  Very simple.
 
 The second line denotes the signed 32-bit integer type.  In this case,
-it is needed to pass a parameter in order to specify the number of
-bits.  Note how @code{<} and @code{>} characters are used to enclose
-type constructor parameters.
+a parameter should be passed to the type constructor in order to
+specify the number of bits.  Note how @code{<} and @code{>} characters
+are used to enclose type constructor parameters.
 
 The third line denotes the offset type with base type unsigned 16-bit
 integer and unit 8 bits.  Note how commas (@code{,}) are used to
