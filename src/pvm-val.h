@@ -64,8 +64,7 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_ARR 0xa
 #define PVM_VAL_TAG_SCT 0xb
 #define PVM_VAL_TAG_TYP 0xc
-#define PVM_VAL_TAG_MAP 0xd
-#define PVM_VAL_TAG_CLS 0xe
+#define PVM_VAL_TAG_CLS 0xd
 
 /* Integers up to 32-bit are unboxed and encoded the following way:
 
@@ -154,7 +153,6 @@ pvm_val pvm_make_ulong (uint64_t value, int size);
 #define PVM_VAL_BOX_ARR(B) ((B)->v.array)
 #define PVM_VAL_BOX_SCT(B) ((B)->v.sct)
 #define PVM_VAL_BOX_TYP(B) ((B)->v.type)
-#define PVM_VAL_BOX_MAP(B) ((B)->v.map)
 #define PVM_VAL_BOX_CLS(B) ((B)->v.cls)
 #define PVM_VAL_BOX_OFF(B) ((B)->v.offset)
 
@@ -167,7 +165,6 @@ struct pvm_val_box
     struct pvm_array *array;
     struct pvm_struct *sct;
     struct pvm_type *type;
-    struct pvm_map *map;
     struct pvm_off *offset;
     struct pvm_cls *cls;
   } v;
@@ -251,8 +248,7 @@ enum pvm_type_code
   PVM_TYPE_STRING,
   PVM_TYPE_ARRAY,
   PVM_TYPE_STRUCT,
-  PVM_TYPE_OFFSET,
-  PVM_TYPE_MAP
+  PVM_TYPE_OFFSET
 };
 
 struct pvm_type
@@ -292,7 +288,6 @@ typedef struct pvm_type *pvm_type;
 
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
-pvm_val pvm_make_map_type (void);
 pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
@@ -302,23 +297,6 @@ void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etype
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
 pvm_val pvm_typeof (pvm_val val);
-
-/* Mappings are also boxed.  */
-
-#define PVM_VAL_MAP(V) (PVM_VAL_BOX_MAP (PVM_VAL_BOX ((V))))
-
-#define PVM_VAL_MAP_TYPE(V) (PVM_VAL_MAP((V))->type)
-#define PVM_VAL_MAP_OFFSET(V) (PVM_VAL_MAP((V))->offset)
-
-struct pvm_map
-{
-  pvm_val type;
-  pvm_val offset;
-};
-
-typedef struct pvm_map *pvm_map;
-
-pvm_val pvm_make_map (pvm_val type, pvm_val offset);
 
 /* Closures are also boxed.  */
 
@@ -391,9 +369,6 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 #define PVM_IS_TYP(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_TYP)
-#define PVM_IS_MAP(V)                                                   \
-  (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
-   && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_MAP)
 #define PVM_IS_CLS(V)                                                   \
   (PVM_VAL_TAG(V) == PVM_VAL_TAG_BOX                                    \
    && PVM_VAL_BOX_TAG (PVM_VAL_BOX ((V))) == PVM_VAL_TAG_CLS)

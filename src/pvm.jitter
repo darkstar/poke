@@ -51,11 +51,9 @@ wrapped-functions
   pvm_make_array
   pvm_make_struct
   pvm_make_offset
-  pvm_make_map
   pvm_make_integral_type
   pvm_make_string_type
   pvm_make_offset_type
-  pvm_make_map_type
   pvm_make_array_type
   pvm_allocate_struct_attrs
   pvm_make_struct_type
@@ -1652,19 +1650,6 @@ end
 
 
 
-## Map instructions
-
-instruction mkm () # TYP OFF -> MAP
-  code
-#define F(res, a, b) \
-  { res = pvm_make_map (a, b); }
-  JITTER_BINARY_STACK (F);
-#undef F
-  end
-end
-
-
-
 ## Type related instructions.
 
 # Integral types
@@ -1695,14 +1680,6 @@ instruction mktyo () # TYP INT -> TYP
   { res = pvm_make_offset_type (a, b); }
     JITTER_BINARY_STACK(F);
 #undef F
-  end
-end
-
-# Map types
-
-instruction mktym () # _ -> TYP
-  code
-    JITTER_PUSH_STACK (pvm_make_map_type ());
   end
 end
 

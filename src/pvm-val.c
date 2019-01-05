@@ -174,12 +174,6 @@ pvm_make_offset_type (pvm_val base_type, pvm_val unit)
 }
 
 pvm_val
-pvm_make_map_type (void)
-{
-  return pvm_make_type (PVM_TYPE_MAP);
-}
-
-pvm_val
 pvm_make_array_type (pvm_val nelem, pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
@@ -200,19 +194,6 @@ pvm_make_struct_type (pvm_val nelem,
   PVM_VAL_TYP_S_ETYPES (stype) = etypes;
 
   return stype;
-}
-
-pvm_val
-pvm_make_map (pvm_val type, pvm_val offset)
-{
-  pvm_val_box box = pvm_make_box (PVM_VAL_TAG_MAP);
-  pvm_map map = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_map));
-
-  map->type = type;
-  map->offset = offset;
-
-  PVM_VAL_BOX_MAP (box) = map;
-  return PVM_BOX (box);
 }
 
 pvm_val
@@ -649,9 +630,6 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         case PVM_TYPE_STRING:
           fprintf (out, "string");
           break;
-        case PVM_TYPE_MAP:
-          fprintf (out, "map");
-          break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
           fprintf (out, "[%" PRIu64 "]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
@@ -714,12 +692,6 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         default:
           assert (0);
         }
-    }
-  else if (PVM_IS_MAP (val))
-    {
-      pvm_print_val (out, PVM_VAL_MAP_TYPE (val), base);
-      fprintf (out, " @ ");
-      pvm_print_val (out, PVM_VAL_MAP_OFFSET (val), base);
     }
   else if (PVM_IS_OFF (val))
     {
