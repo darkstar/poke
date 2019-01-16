@@ -681,8 +681,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       pkl_asm_insn (pasm, PKL_INSN_MKO);
       break;
     case PKL_TYPE_ARRAY:
-      /* Generate code to create an array of maps of the given
-         type.  */
+      /* Generate code to create an array of maps of the given type.
+         Thats it: to call the array (from the type) mapping
+         function. */
       /* Handle:
 
          - If the size of the array is known, use a constant for loop.
@@ -692,7 +693,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       */
     case PKL_TYPE_STRUCT:
       /* Generate code to create a struct of maps of the appropriate
-         types.  */
+         types.  Thats it: to call the struct (from the type) mapping
+         function.  */
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,
