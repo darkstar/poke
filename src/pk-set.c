@@ -65,8 +65,13 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       else if (strcmp (arg, "big") == 0)
         endian = IOS_ENDIAN_MSB;
       else if (strcmp (arg, "host") == 0)
-        /* XXX writeme */
-        assert (endian = 0 == 100);
+        {
+#ifdef WORDS_BIGENDIAN
+          endian = IOS_ENDIAN_MSB;
+#else
+          endian = IOS_ENDIAN_LSB;
+#endif
+        }
       else
         {
           fputs ("error: endian should be one of `little', `big' or `host'.\n",

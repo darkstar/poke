@@ -69,7 +69,12 @@ if test "x$JITTER_CONFIG" = "x"; then
    AC_MSG_ERROR([you need jitter-config to compile])
 fi
 
-dnl --{enable,disable]-debug controls whether building poke in
+dnl We need to determine the endianness of the host system.  The
+dnl following macro is also supposed to work when cross-compiling.
+
+AC_C_BIGENDIAN
+
+dnl --{enable,disable}-debug controls whether building poke in
 dnl debug mode.  In particular, this causes using a more inefficient
 dnl jitter model that keeps the dwarf info of the instruction
 dnl bodies.
