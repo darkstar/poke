@@ -238,9 +238,15 @@ PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
 /* IO instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_PEEKI, "nnn", "peeki")
-PKL_DEF_INSN (PKL_INSN_PEEKIU, "nn", "peekiu")
-PKL_DEF_INSN (PKL_INSN_PEEKL, "n", "peekl")
-PKL_DEF_INSN (PKL_INSN_PEEKLU, "n", "peeklu")
+PKL_DEF_INSN (PKL_INSN_PEEKIU, "nnn", "peekiu")
+PKL_DEF_INSN (PKL_INSN_PEEKL, "nnn", "peekl")
+PKL_DEF_INSN (PKL_INSN_PEEKLU, "nnn", "peeklu")
+
+PKL_DEF_INSN (PKL_INSN_PEEKDI, "n", "peekdi")
+PKL_DEF_INSN (PKL_INSN_PEEKDIU, "n", "peekdiu")
+PKL_DEF_INSN (PKL_INSN_PEEKDL, "n", "peekdl")
+PKL_DEF_INSN (PKL_INSN_PEEKDLU, "n", "peekdlu")
+
 PKL_DEF_INSN (PKL_INSN_PEEKS, "", "peeks")
 
 /* Environment instructions.  */
@@ -270,7 +276,7 @@ PKL_DEF_INSN (PKL_INSN_PRINT, "", "print")
 PKL_DEF_INSN (PKL_INSN_EXIT, "", "exit")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
-   macro instructions, and it should not be passed to
+   macro instructions.  It should _not_ be passed to
    `pkl_asm_insn'.  */
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
@@ -283,7 +289,8 @@ PKL_DEF_INSN (PKL_INSN_SUB, "a", "sub")
 PKL_DEF_INSN (PKL_INSN_MUL, "a", "mul")
 PKL_DEF_INSN (PKL_INSN_DIV, "a", "div")
 PKL_DEF_INSN (PKL_INSN_MOD, "a", "mod")
-PKL_DEF_INSN (PKL_INSN_PEEK, "a", "peek")
+PKL_DEF_INSN (PKL_INSN_PEEK, "ann", "peek")
+PKL_DEF_INSN (PKL_INSN_PEEKD, "a", "peekd")
 PKL_DEF_INSN (PKL_INSN_BZ, "al", "bz")
 PKL_DEF_INSN (PKL_INSN_BNZ, "al", "bnz")
 

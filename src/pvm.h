@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#include "ios.h"
+
 #include "pvm-val.h"
 #include "pvm-env.h"
 
@@ -64,6 +66,14 @@ pvm_env pvm_get_env (pvm pvm);
 enum pvm_exit_code pvm_run (pvm pvm,
                             pvm_program prog,
                             pvm_val *res);
+
+/* Set the current endianness and negative encoding for PVM.  */
+
+void pvm_set_endian (pvm pvm, enum ios_endian endian);
+void pvm_set_nenc (pvm pvm, enum ios_nenc nenc);
+
+/* Set the current negative encoding for PVM.  NENC should be one of
+ * the IOS_NENC_* values defined in ios.h */
 
 /* Get a string with a description of a PVM exit code as returned by
    `pvm_run'.  */

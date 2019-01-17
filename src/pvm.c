@@ -33,6 +33,10 @@
   ((PVM)->pvm_state.pvm_state_backing.exit_code)
 #define PVM_STATE_ENV(PVM)                              \
   ((PVM)->pvm_state.pvm_state_runtime.env)
+#define PVM_STATE_ENDIAN(PVM)                           \
+  ((PVM)->pvm_state.pvm_state_runtime.endian)
+#define PVM_STATE_NENC(PVM)                             \
+  ((PVM)->pvm_state.pvm_state_runtime.nenc)
 
 struct pvm
 {
@@ -96,6 +100,18 @@ pvm_run (pvm apvm, pvm_program prog, pvm_val *res)
     *res = PVM_STATE_RESULT_VALUE (apvm);
 
   return PVM_STATE_EXIT_CODE (apvm);
+}
+
+void
+pvm_set_endian (pvm apvm, enum ios_endian endian)
+{
+  PVM_STATE_ENDIAN (apvm) = endian;
+}
+
+void
+pvm_set_nenc (pvm apvm, enum ios_nenc nenc)
+{
+  PVM_STATE_NENC (apvm) = nenc;
 }
 
 const char *

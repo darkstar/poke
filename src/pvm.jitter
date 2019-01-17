@@ -172,6 +172,8 @@ state-struct-runtime-c
   code
       pvm_env env;
       uint32_t push_hi;
+      uint32_t endian;
+      uint32_t nenc;
   end
 end
 
@@ -179,6 +181,9 @@ state-initialization-c
   code
       jitter_state_backing->exit_code = PVM_EXIT_OK;
       jitter_state_backing->result_value = PVM_NULL;
+      /* XXX: are these reasonable defaults? */
+      jitter_state_runtime->endian = IOS_ENDIAN_MSB;
+      jitter_state_runtime->nenc = IOS_NENC_2;
   end
 end
 
@@ -1854,7 +1859,120 @@ instruction peeklu (?n,?n)
   end
 end
 
-instruction peeks () # OFF -> STR
+# peekdi BITS
+# OFF -> INT
+
+instruction peekdi (?n) # XXX: avoid code duplication with peeki
+  code
+    int bits = JITTER_ARGN0;
+    enum ios_nenc nenc = jitter_state_runtime.nenc;
+    enum ios_endian endian = jitter_state_runtime.endian;
+    int64_t value;
+    ios_off offset;
+
+    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+
+    if (ios_read_int (ios_cur (), offset, 0,
+                      bits, endian, nenc, &value) != IOS_OK)
+      {
+        /* XXX: branch to error label.  */
+        JITTER_TOP_STACK () = PVM_NULL;
+      }
+    else
+      {
+        /* XXX: use IO and a base register */
+        JITTER_TOP_STACK () = pvm_make_int (value, bits);
+      }
+  end
+end
+
+# peekdiu BITS
+# OFF -> INT
+
+instruction peekdiu (?n) # XXX avoid code duplication with peekiu
+  code
+     enum ios_endian endian = jitter_state_runtime.endian;
+     int bits = JITTER_ARGN0;
+     uint64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+
+     if (ios_read_uint (ios_cur (), offset, 0,
+                        bits, endian, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_uint (value, bits);
+       }
+  end
+end
+
+# peekdl BITS
+# OFF -> INT
+
+instruction peekdl (?n) # XXX avoid duplication with peekl
+  code
+     enum ios_nenc nenc = jitter_state_runtime.nenc;
+     enum ios_endian endian = jitter_state_runtime.endian;
+     int bits = JITTER_ARGN0;
+     int64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+
+     if (ios_read_int (ios_cur (), offset, 0,
+                       bits, endian, nenc, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_long (value, bits);
+       }
+  end
+end
+
+# peekdlu BITS
+# OFF -> ULONG
+
+instruction peekdlu (?n) # XXX avoid code duplication with peeklu
+  code
+     enum ios_endian endian = jitter_state_runtime.endian;
+     int bits = JITTER_ARGN0;
+     uint64_t value;
+     ios_off offset;
+
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+
+     if (ios_read_uint (ios_cur (), offset, 0,
+                        bits, endian, &value) != IOS_OK)
+       {
+         /* XXX: branch to error label.  */
+         JITTER_TOP_STACK () = PVM_NULL;
+       }
+     else
+       {
+         /* XXX: use IO and a base register */
+         JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
+       }
+  end
+end
+
+# peeks
+# OFF -> STR
+
+instruction peeks ()
   code
     /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_string ("");

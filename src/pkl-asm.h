@@ -24,6 +24,7 @@
 #include <jitter/jitter.h>
 
 #include "pkl-ast.h"
+#include "ios.h" /* For IOS_NENC_* and IOS_ENDIAN_* */
 #include "pvm.h"
 
 /* The macro-assembler provides constants, enumerations, C macros and
@@ -39,6 +40,14 @@ enum pkl_asm_insn
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
 };
+
+/* The following values are intended to be used as arguments to
+   PKL_INSN_PEEK instructions.  */
+
+#define PKL_ASM_ENDIAN_LSB IOS_ENDIAN_LSB
+#define PKL_ASM_ENDIAN_MSB IOS_ENDIAN_MSB
+#define PKL_ASM_NENC_1 IOS_NENC_1
+#define PKL_ASM_NENC_2 IOS_NENC_2
 
 /* Enumeration with machine registers. */
 

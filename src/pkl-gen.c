@@ -670,12 +670,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
 
   switch (PKL_AST_TYPE_CODE (map_type))
     {
-    case PKL_TYPE_INTEGRAL:
     case PKL_TYPE_STRING:
-      pkl_asm_insn (pasm, PKL_INSN_PEEK, map_type);
+      pkl_asm_insn (pasm, PKL_INSN_PEEKS);
+      break;
+    case PKL_TYPE_INTEGRAL:
+      pkl_asm_insn (pasm, PKL_INSN_PEEKD, map_type);
       break;
     case PKL_TYPE_OFFSET:
-      pkl_asm_insn (pasm, PKL_INSN_PEEK,
+      pkl_asm_insn (pasm, PKL_INSN_PEEKD,
                     PKL_AST_TYPE_O_BASE_TYPE (map_type));
       PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (map_type));
       pkl_asm_insn (pasm, PKL_INSN_MKO);

@@ -234,14 +234,15 @@ pkl_asm_insn_nton  (pkl_asm pasm,
     }
 }
 
-/* Macro-instruction: PEEK type
+/* Macro-instruction: PEEK type, endian, nenc
    Stack: _ -> VAL
 
-   Generate code for a peek operation to TYPE, which should be a
-   simple type, i.e. integral or string.  */
+   Generate code for a peek operation to TYPE, which should be an
+   integral type.  */
 
 static void
-pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
+pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type,
+                   jitter_uint nenc, jitter_uint endian)
 {
   int type_code = PKL_AST_TYPE_CODE (type);
 
@@ -262,17 +263,43 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type)
          or arguments to the macro PKL_INSN_PEEK?  */
       if (sign)
         pkl_asm_insn (pasm, peek_table[tl][sign],
-                      IOS_NENC_2 /* XXX */,
-                      IOS_ENDIAN_MSB /* XXX */,
+                      nenc, endian,
                       (jitter_uint) size);
       else
         pkl_asm_insn (pasm, peek_table[tl][sign],
-                      IOS_ENDIAN_MSB /* XXX */,
+                      endian,
                       (jitter_uint) size);
     }
-  else if (type_code == PKL_TYPE_STRING)
+  else
+    assert (0);
+}
+
+/* Macro-instruction: PEEKD type
+   Stack: _ -> VAL
+
+   Generate code for a peek operation to TYPE, which should be an
+   integral type.  */
+
+static void
+pkl_asm_insn_peekd (pkl_asm pasm, pkl_ast_node type)
+{
+  int type_code = PKL_AST_TYPE_CODE (type);
+
+  if (type_code == PKL_TYPE_INTEGRAL)
     {
-      pkl_asm_insn (pasm, PKL_INSN_PEEKS);
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      static int peekd_table[2][2] =
+        {
+         {PKL_INSN_PEEKDIU, PKL_INSN_PEEKDI},
+         {PKL_INSN_PEEKDLU, PKL_INSN_PEEKDL}
+        };
+
+      int tl = !!((size - 1) & ~0x1f);
+
+      pkl_asm_insn (pasm, peekd_table[tl][sign],
+                    (jitter_uint) size);
     }
   else
     assert (0);
@@ -782,12 +809,26 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_PEEK:
           {
             pkl_ast_node peek_type;
+            jitter_uint endian, nenc;
+
+            va_start (valist, insn);
+            peek_type = va_arg (valist, pkl_ast_node);
+            nenc = va_arg (valist, jitter_uint);
+            endian = va_arg (valist, jitter_uint);
+            va_end (valist);
+
+            pkl_asm_insn_peek (pasm, peek_type, nenc, endian);
+            break;
+          }
+        case PKL_INSN_PEEKD:
+          {
+            pkl_ast_node peek_type;
 
             va_start (valist, insn);
             peek_type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_peek (pasm, peek_type);
+            pkl_asm_insn_peekd (pasm, peek_type);
             break;
           }
         case PKL_INSN_BZ:
