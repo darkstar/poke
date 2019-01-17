@@ -102,10 +102,22 @@ pvm_run (pvm apvm, pvm_program prog, pvm_val *res)
   return PVM_STATE_EXIT_CODE (apvm);
 }
 
+enum ios_endian
+pvm_endian (pvm apvm)
+{
+  return PVM_STATE_ENDIAN (apvm);
+}
+
 void
 pvm_set_endian (pvm apvm, enum ios_endian endian)
 {
   PVM_STATE_ENDIAN (apvm) = endian;
+}
+
+enum ios_nenc
+pvm_nenc (pvm apvm)
+{
+  return PVM_STATE_NENC (apvm);
 }
 
 void

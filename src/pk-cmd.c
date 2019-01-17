@@ -1,6 +1,6 @@
 /* pk-cmd.c - Poke commands.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2018, 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ extern struct pk_cmd print_cmd; /* pk-print.c */
 extern struct pk_cmd deftype_cmd; /* pk-def.c */
 extern struct pk_cmd defvar_cmd; /* pk-def.c */
 extern struct pk_cmd defun_cmd; /* pk-def.c */
+extern struct pk_cmd set_cmd; /* pk-set.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, NULL, 0, NULL, NULL};
@@ -76,6 +77,7 @@ static struct pk_cmd *cmds[] =
     &deftype_cmd,
     &defvar_cmd,
     &defun_cmd,
+    &set_cmd,
     &null_cmd
   };
 
@@ -615,6 +617,9 @@ extern struct pk_trie *vm_trie;  /* pk-vm.c  */
 extern struct pk_cmd *vm_disas_cmds[];  /* pk-vm.c */
 extern struct pk_trie *vm_disas_trie; /* pk-vm.c */
 
+extern struct pk_cmd *set_cmds[]; /* pk-set.c */
+extern struct pk_trie *set_trie; /* pk-set.c */
+
 static struct pk_trie *cmds_trie;
 
 int
@@ -708,6 +713,7 @@ pk_cmd_init (void)
   help_trie = pk_trie_from_cmds (help_cmds);
   vm_trie = pk_trie_from_cmds (vm_cmds);
   vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
+  set_trie = pk_trie_from_cmds (set_cmds);
 }
 
 void
@@ -718,4 +724,5 @@ pk_cmd_shutdown (void)
   pk_trie_free (help_trie);
   pk_trie_free (vm_trie);
   pk_trie_free (vm_disas_trie);
+  pk_trie_free (set_trie);
 }
