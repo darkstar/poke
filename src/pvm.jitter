@@ -214,6 +214,7 @@ instruction exit ()
     }
 
     /* Check for the stack centinel and pop it.  */
+    /* XXX: better: rewind and pop.  */
     pvm_assert (JITTER_TOP_STACK() == PVM_NULL);
     JITTER_DROP_STACK ();
 
