@@ -33,7 +33,9 @@ enum pvm_exit_code
   {
     PVM_EXIT_OK,
     PVM_EXIT_ERROR,
-    PVM_EXIT_EDIVZ
+    PVM_EXIT_EDIVZ,
+    PVM_EXIT_EIOOFF,
+    PVM_EXIT_EIOOBJ
   };
 
 /* Note that the jitter-generated header should be included this late

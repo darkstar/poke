@@ -130,7 +130,8 @@ const char *
 pvm_error (enum pvm_exit_code code)
 {
   static char *pvm_error_strings[]
-    = { "ok", "error", "division by zero" };
+    = { "ok", "error", "division by zero", "invalid offset in IO",
+        "invalid object read from IO" };
 
   return pvm_error_strings[code];
 }

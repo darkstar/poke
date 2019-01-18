@@ -21,6 +21,7 @@
 #define _(str) dgettext (PACKAGE, str)
 #include <assert.h>
 #include <string.h>
+#include <arpa/inet.h> /* For htonl */
 
 #include "poke.h"
 #include "pk-cmd.h"
@@ -30,7 +31,7 @@
 static int
 pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
-  /* set endian {little,big,host}  */
+  /* set endian {little,big,host,network}  */
 
   const char *arg;
 
@@ -72,9 +73,30 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
           endian = IOS_ENDIAN_LSB;
 #endif
         }
+      else if (strcmp (arg, "network") == 0)
+        {
+          uint32_t canary = 0x11223344;
+
+          if (canary == htonl (canary))
+            {
+#ifdef WORDS_BIGENDIAN
+              endian = IOS_ENDIAN_MSB;
+#else
+              endian = IOS_ENDIAN_LSB;
+#endif
+            }
+          else
+            {
+#ifdef WORDS_BIGENDIAN
+              endian = IOS_ENDIAN_LSB;
+#else
+              endian = IOS_ENDIAN_MSB;
+#endif
+            }
+        }
       else
         {
-          fputs ("error: endian should be one of `little', `big' or `host'.\n",
+          fputs ("error: endian should be one of `little', `big', `host' or `network'.\n",
                  stdout);
           return 0;
         }
