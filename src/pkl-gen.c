@@ -371,7 +371,7 @@ PKL_PHASE_END_HANDLER
  * TRY_CATCH_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_try_catch_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_try_catch_stmt)
 {
   pkl_ast_node try_catch_stmt = PKL_PASS_NODE;
   pkl_ast_node code = PKL_AST_TRY_CATCH_STMT_CODE (try_catch_stmt);
@@ -1397,7 +1397,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_ps_try_catch_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),

@@ -407,9 +407,6 @@ pkl_asm_insn_intop (pkl_asm pasm,
     case PKL_INSN_DIV:
     case PKL_INSN_MOD:
 
-      pkl_asm_insn (pasm, PKL_INSN_BZ, type,
-                    pasm->divzero_label);
-      
       if (insn == PKL_INSN_DIV)
         pkl_asm_insn (pasm, div_table[tl][signed_p]);
       else

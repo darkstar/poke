@@ -123,7 +123,7 @@ late-header-c
         JITTER_SET_HEIGHT_STACK (ehandler->stack_height);              \
         JITTER_SET_HEIGHT_RETURNSTACK (ehandler->return_stack_height); \
                                                                        \
-        JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32));            \
+        /* XXX JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32)); */           \
                                                                        \
         JITTER_BRANCH (ehandler->code);                                \
         break;                                                         \
@@ -654,8 +654,8 @@ end
 instruction divi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);\
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -665,8 +665,8 @@ end
 instruction diviu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);\
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -676,8 +676,8 @@ end
 instruction divl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);\
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -687,8 +687,8 @@ end
 instruction divlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);\
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -698,8 +698,8 @@ end
 instruction modi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);\
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_INT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -709,8 +709,8 @@ end
 instruction modiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);\
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_UINT_SIZE (a); \
+    res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -720,8 +720,8 @@ end
 instruction modl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);\
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_LONG_SIZE (a); \
+    res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
@@ -731,8 +731,8 @@ end
 instruction modlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);\
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+    res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
 #undef F
