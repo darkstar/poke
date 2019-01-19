@@ -2033,9 +2033,8 @@ end
 
 instruction pushe (?n,?l)
   code
-   /* WRITEME */
    struct pvm_exception_handler *ehandler
-      = xmalloc (sizeof (struct pvm_exception_handler));
+      = xmalloc (sizeof (struct pvm_exception_handler)); /* XXX GC */
 
    ehandler->exception = JITTER_ARGN0;
    ehandler->stack_height = JITTER_HEIGHT_STACK ();
