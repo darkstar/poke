@@ -2027,8 +2027,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("TRY_CATCH_STMT::\n");
 
       PRINT_COMMON_FIELDS;
-      PRINT_AST_SUBAST (try_catch_stmt, TRY_CATCH_STMT_CODE);
-      PRINT_AST_SUBAST (try_catch_stmt, TRY_CATCH_STMT_HANDLER);
+      PRINT_AST_SUBAST (try_catch_stmt_code, TRY_CATCH_STMT_CODE);
+      PRINT_AST_SUBAST (try_catch_stmt_handler, TRY_CATCH_STMT_HANDLER);
       break;
 
     case PKL_AST_NULL_STMT:
