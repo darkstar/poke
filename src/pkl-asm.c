@@ -260,8 +260,6 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type,
 
       int tl = !!((size - 1) & ~0x1f);
 
-      /* XXX where is the endianness and nenc coming from?  The type,
-         or arguments to the macro PKL_INSN_PEEK?  */
       if (sign)
         pkl_asm_insn (pasm, peek_table[tl][sign],
                       nenc, endian,
@@ -1012,8 +1010,8 @@ pkl_asm_try (pkl_asm pasm)
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
 
-  pkl_asm_note (pasm, "PUSH-REGISTERS");
-  pkl_asm_note (pasm, "PUSH-E-HANDLER");
+  /* pkl_asm_note (pasm, "PUSH-REGISTERS"); */
+  pkl_asm_insn (pasm, PKL_INSN_PUSHE, /* XXX */ 0, pasm->level->label1);
 }
 
 void
@@ -1021,8 +1019,8 @@ pkl_asm_catch (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_TRY);
 
-  pkl_asm_note (pasm, "POP-E-HANDLER");
-  pkl_asm_note (pasm, "POP-REGISTERS");
+  pkl_asm_insn (pasm, PKL_INSN_POPE);
+  /* XXX pkl_asm_note (pasm, "POP-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
 }

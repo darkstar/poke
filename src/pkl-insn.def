@@ -1,6 +1,6 @@
 /* pkl-insn.def - Poke macro-assembler instructions.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -270,6 +270,12 @@ PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
 PKL_DEF_INSN (PKL_INSN_PRINT, "", "print")
+
+/* Exceptions handling instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_PUSHE, "nl", "pushe")
+PKL_DEF_INSN (PKL_INSN_POPE, "", "pope")
+PKL_DEF_INSN (PKL_INSN_RAISE, "n", "raise")
 
 /* VM instructions.  */
 

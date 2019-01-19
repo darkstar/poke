@@ -20,7 +20,7 @@ vm
   set prefix "pvm"
   tos-stack "pvm_val" "stack"
   ntos-stack "jitter_uint" "returnstack"
-  ntos-stack "jitter_uint" "exceptionstack"
+  ntos-stack "struct pvm_exception_handler *" "exceptionstack"
 end
 
 
@@ -79,6 +79,14 @@ early-header-c
   code
 #   include "pvm.h"
 #   include "ios.h"
+
+    struct pvm_exception_handler
+    {
+      int exception;
+      jitter_stack_height stack_height;
+      jitter_stack_height return_stack_height;
+      pvm_program_point code;
+    };
   end
 end
 
@@ -91,6 +99,36 @@ end
 late-header-c
   code
     extern jitter_uint printer_hi;
+
+    /* Macro to raise an exception from within an instruction.  This
+       is used in the RAISE instruction itself, and also in instructions
+       that can fail, such as integer division or IO.
+
+       The code in the macro looks for the first matching exception handler
+       in the exception handlers stack.  Then it restores the heights of
+       the main stack and the return stack, and then pushes the exception
+       type as an integer in the main stack, before branching to the
+       exception handler.  */
+#define PVM_RAISE(EXCEPTION)  \
+    while (1)                    \
+    {                            \
+      struct pvm_exception_handler *ehandler \
+        = JITTER_TOP_EXCEPTIONSTACK ();      \
+      int handler_exception = ehandler->exception; \
+                                                   \
+      JITTER_DROP_EXCEPTIONSTACK ();               \
+                                                   \
+      if (handler_exception == 0 || handler_exception == (EXCEPTION)) \
+      {                                                                \
+        JITTER_SET_HEIGHT_STACK (ehandler->stack_height);              \
+        JITTER_SET_HEIGHT_RETURNSTACK (ehandler->return_stack_height); \
+                                                                       \
+        JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32));            \
+                                                                       \
+        JITTER_BRANCH (ehandler->code);                                \
+        break;                                                         \
+      }                                                                \
+    }
   end
 end
 
@@ -448,7 +486,7 @@ end
 
 instruction pop ()
   code
-    JITTER_DROP_STACK();
+    JITTER_DROP_STACK ();
   end
 end
 
@@ -1746,6 +1784,8 @@ instruction typof () # VAL -> TYP
   end
 end
 
+
+
 ## IO instructions
 #
 #
@@ -1978,6 +2018,49 @@ instruction peeks ()
   code
     /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_string ("");
+  end
+end
+
+
+
+## Exceptions handling instructions
+
+# pushe LABEL
+#
+# _ -> EXCEPTION_HANDLER
+
+instruction pushe (?n,?l)
+  code
+   /* WRITEME */
+   struct pvm_exception_handler *ehandler
+      = xmalloc (sizeof (struct pvm_exception_handler));
+
+   ehandler->exception = JITTER_ARGN0;
+   ehandler->stack_height = JITTER_HEIGHT_STACK ();
+   ehandler->return_stack_height = JITTER_HEIGHT_RETURNSTACK ();
+   ehandler->code = JITTER_ARGP1;
+
+   JITTER_PUSH_EXCEPTIONSTACK (ehandler);
+  end
+end
+
+# pope
+#
+# EXCEPTION_HANDLER -> _
+
+instruction pope ()
+  code
+    JITTER_DROP_EXCEPTIONSTACK ();
+  end
+end
+
+# raise
+#
+# _ -> _
+
+instruction raise (?n)
+  code
+    PVM_RAISE (JITTER_ARGN0);
   end
 end
 
