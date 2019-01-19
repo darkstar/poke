@@ -1,6 +1,6 @@
 /* pkl-asm.h - Macro-assembler for the poke compiler.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,6 +139,23 @@ void pkl_asm_endloop (pkl_asm pasm);
  * pkl_asm_end_loop (pasm);
  *
  */
+
+/* Try-catch blocks.
+ *
+ * pkl_asm_try (pasm);
+ * 
+ * ... stmt ...
+ *
+ * pkl_asm_catch (pasm);
+ *
+ * ... stmt ...
+ *
+ * pkl_asm_endtry (pasm);
+ */
+
+void pkl_asm_try (pkl_asm pasm);
+void pkl_asm_catch (pkl_asm pasm);
+void pkl_asm_endtry (pkl_asm pasm);
 
 /* Assembler directives:
  *

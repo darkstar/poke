@@ -1,6 +1,6 @@
 /* pkl-gen.c - Code generation phase for the poke compiler.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -362,6 +362,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 {
   /* Pop the expression from the stack.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POP);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | CODE
+ * | HANDLER
+ * TRY_CATCH_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_try_catch_stmt)
+{
+  pkl_ast_node try_catch_stmt = PKL_PASS_NODE;
+  pkl_ast_node code = PKL_AST_TRY_CATCH_STMT_CODE (try_catch_stmt);
+  pkl_ast_node handler = PKL_AST_TRY_CATCH_STMT_HANDLER (try_catch_stmt);
+
+  pkl_asm_try (PKL_GEN_ASM);
+  {
+    PKL_PASS_SUBPASS (code);
+  }
+  pkl_asm_catch (PKL_GEN_ASM);
+  {
+    PKL_PASS_SUBPASS (handler);
+  }
+  pkl_asm_endtry (PKL_GEN_ASM);
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -1371,6 +1397,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),

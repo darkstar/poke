@@ -1,6 +1,6 @@
 /* pkl-asm.c - Macro-assembler for the Poke Virtual Machine.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,9 +52,9 @@
    `pkl_asm_poplevel' functions defined below.
 
    CURRENT_ENV identifies what kind of instruction created the level.
-   This can be either PKL_ASM_ENV_NULL, PKL_ASM_ENV_CONDITIONAL or
-   PKL_ASM_ENV_LOOP.  PKL_ASM_ENV_NULL should only be used at the
-   top-level.
+   This can be either PKL_ASM_ENV_NULL, PKL_ASM_ENV_CONDITIONAL,
+   PKL_ASM_ENV_LOOP or PKL_ASM_ENV_TRY.  PKL_ASM_ENV_NULL should only
+   be used at the top-level.
 
    PARENT is the parent level, i.e. the level containing this one.
    This is NULL at the top-level.
@@ -66,6 +66,7 @@
 #define PKL_ASM_ENV_NULL 0
 #define PKL_ASM_ENV_CONDITIONAL 1
 #define PKL_ASM_ENV_LOOP 2
+#define PKL_ASM_ENV_TRY 3
 
 struct pkl_asm_level
 {
@@ -986,6 +987,51 @@ pkl_asm_endif (pkl_asm pasm)
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
   pkl_asm_poplevel (pasm);
+}
+
+/* The following functions implement try-catch blocks.  The code
+   generated is:
+
+     PUSH-REGISTERS
+     PUSH-E-HANDLER label1
+     ... code ...
+     POP-E-HANDLER
+     POP-REGISTERS
+     BA label2
+   label1:
+     ... handler ...
+   label2:
+
+   Thus, try-catch blocks use two labels.  */
+
+void
+pkl_asm_try (pkl_asm pasm)
+{
+  pkl_asm_pushlevel (pasm, PKL_ASM_ENV_TRY);
+
+  pasm->level->label1 = jitter_fresh_label (pasm->program);
+  pasm->level->label2 = jitter_fresh_label (pasm->program);
+
+  pkl_asm_note (pasm, "PUSH-REGISTERS");
+  pkl_asm_note (pasm, "PUSH-E-HANDLER");
+}
+
+void
+pkl_asm_catch (pkl_asm pasm)
+{
+  assert (pasm->level->current_env == PKL_ASM_ENV_TRY);
+
+  pkl_asm_note (pasm, "POP-E-HANDLER");
+  pkl_asm_note (pasm, "POP-REGISTERS");
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
+  pvm_append_label (pasm->program, pasm->level->label1);
+}
+
+void
+pkl_asm_endtry (pkl_asm pasm)
+{
+  assert (pasm->level->current_env == PKL_ASM_ENV_TRY);
+  pvm_append_label (pasm->program, pasm->level->label2);
 }
 
 /* The following functions implement while loops.  The code generated

@@ -20,6 +20,7 @@ vm
   set prefix "pvm"
   tos-stack "pvm_val" "stack"
   ntos-stack "jitter_uint" "returnstack"
+  ntos-stack "jitter_uint" "exceptionstack"
 end
 
 
