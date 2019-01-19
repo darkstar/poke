@@ -1,6 +1,6 @@
 /* pkl-tab.y - LALR(1) parser for Poke.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi.  */
+/* Copyright (C) 2019 Jose E. Marchesi.  */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,6 +126,8 @@ pkl_tab_error (YYLTYPE *llocp,
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
 %token STRING
+%token TRY
+%token CATCH
 
 /* Compiler builtins.  */
 

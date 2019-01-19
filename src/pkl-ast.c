@@ -1,6 +1,6 @@
 /* pkl-ast.c - Abstract Syntax Tree for Poke.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1140,7 +1140,7 @@ pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp)
   return return_stmt;
 }
 
-/* Build and return an AST node fora  "null statement".  */
+/* Build and return an AST node for a "null statement".  */
 
 pkl_ast_node
 pkl_ast_make_null_stmt (pkl_ast ast)
@@ -1162,6 +1162,23 @@ pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp)
 
   PKL_AST_EXP_STMT_EXP (exp_stmt) = ASTREF (exp);
   return exp_stmt;
+}
+
+/* Build and return an AST node for a try-catch statement.  */
+
+pkl_ast_node
+pkl_ast_make_try_catch_stmt (pkl_ast ast, pkl_ast_node code,
+                             pkl_ast_node handler)
+{
+  pkl_ast_node try_catch_stmt = pkl_ast_make_node (ast,
+                                                   PKL_AST_TRY_CATCH_STMT);
+
+  assert (code && handler);
+
+  PKL_AST_TRY_CATCH_STMT_CODE (try_catch_stmt) = ASTREF (code);
+  PKL_AST_TRY_CATCH_STMT_HANDLER (try_catch_stmt) = ASTREF (handler);
+
+  return try_catch_stmt;
 }
 
 /* Build and return an AST node for a PKL program.  */
@@ -1438,6 +1455,12 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_EXP_STMT_EXP (ast));
       break;
 
+    case PKL_AST_TRY_CATCH_STMT:
+
+      pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_CODE (ast));
+      pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_HANDLER (ast));
+      break;
+
     case PKL_AST_NULL_STMT:
       break;
 
@@ -1554,6 +1577,14 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
       break;
     case PKL_AST_DECL:
       *nframes += 1;
+      break;
+    case PKL_AST_TRY_CATCH_STMT:
+      pkl_ast_finish_returns_1 (function,
+                                PKL_AST_TRY_CATCH_STMT_CODE (stmt),
+                                nframes);
+      pkl_ast_finish_returns_1 (function,
+                                PKL_AST_TRY_CATCH_STMT_HANDLER (stmt),
+                                nframes);
       break;
     case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
@@ -1990,6 +2021,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (exp_stmt, EXP_STMT_EXP);
+      break;
+
+    case PKL_AST_TRY_CATCH_STMT:
+      IPRINTF ("TRY_CATCH_STMT::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (try_catch_stmt, TRY_CATCH_STMT_CODE);
+      PRINT_AST_SUBAST (try_catch_stmt, TRY_CATCH_STMT_HANDLER);
       break;
 
     case PKL_AST_NULL_STMT:

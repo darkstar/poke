@@ -1,6 +1,6 @@
 /* pkl-ast.h - Abstract Syntax Tree for Poke.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +72,7 @@ enum pkl_ast_code
   PKL_AST_LOOP_STMT,
   PKL_AST_RETURN_STMT,
   PKL_AST_EXP_STMT,
+  PKL_AST_TRY_CATCH_STMT,
   PKL_AST_LAST_STMT = PKL_AST_EXP_STMT,
   PKL_AST_LAST
 };
@@ -1106,6 +1107,25 @@ struct pkl_ast_exp_stmt
 
 pkl_ast_node pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp);
 
+/* PKL_AST_TRY_CATCH_STMT nodes represent try-catch statements, which
+   are used in order to support exception handlers.
+
+   CODE is a statement that is executed.
+
+   HANDLER is a statement that will be executed in case an exception
+   is raised while executing CODE.  */
+
+#define PKL_AST_TRY_CATCH_STMT_CODE(AST) ((AST)->try_catch_stmt.code)
+#define PKL_AST_TRY_CATCH_STMT_HANDLER(AST) ((AST)->try_catch_stmt.handler)
+
+struct pkl_ast_try_catch_stmt
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *code;
+  union pkl_ast_node *handler;
+};
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
@@ -1149,6 +1169,7 @@ union pkl_ast_node
   struct pkl_ast_loop_stmt loop_stmt;
   struct pkl_ast_return_stmt return_stmt;
   struct pkl_ast_exp_stmt exp_stmt;
+  struct pkl_ast_try_catch_stmt try_catch_stmt;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

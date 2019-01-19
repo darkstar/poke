@@ -1,6 +1,6 @@
 /* pkl-lex.l - Lexer for Poke.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,6 +129,8 @@ D [0-9]
 "return"        { return RETURN; }
 "string"	{ return STRING; }
 "as"		{ return AS; }
+"try"		{ return TRY; }
+"catch"		{ return CATCH; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

@@ -1,6 +1,6 @@
 /* pkl-pass.c - Support for compiler passes.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -417,6 +417,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_EXP_STMT:
       PKL_PASS (PKL_AST_EXP_STMT_EXP (node));
+      break;
+    case PKL_AST_TRY_CATCH_STMT:
+      PKL_PASS (PKL_AST_TRY_CATCH_STMT_CODE (node));
+      PKL_PASS (PKL_AST_TRY_CATCH_STMT_HANDLER (node));
       break;
     case PKL_AST_NULL_STMT:
     case PKL_AST_INTEGER:
