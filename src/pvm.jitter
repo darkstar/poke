@@ -1808,7 +1808,7 @@ instruction peeki (?n,?n,?n)
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+         /* XXX: raise an IO exception for a != EOF error.  */ 
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -1835,7 +1835,7 @@ instruction peekiu (?n,?n)
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+         /* XXX: raise an IO exception for a != EOF error.  */ 
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -1863,7 +1863,7 @@ instruction peekl (?n,?n,?n)
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+         /* XXX: raise an IO exception for a != EOF error.  */
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -1890,7 +1890,7 @@ instruction peeklu (?n,?n)
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+         /* XXX: raise an IO exception for a != EOF error.  */ 
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -1918,7 +1918,7 @@ instruction peekdi (?n) # XXX: avoid code duplication with peeki
     if (ios_read_int (ios_cur (), offset, 0,
                       bits, endian, nenc, &value) != IOS_OK)
       {
-        /* XXX: branch to error label.  */
+        /* XXX: raise an IO exception for a != EOF error.  */
         JITTER_TOP_STACK () = PVM_NULL;
       }
     else
@@ -1945,7 +1945,7 @@ instruction peekdiu (?n) # XXX avoid code duplication with peekiu
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+        /* XXX: raise an IO exception for a != EOF error.  */
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -1973,6 +1973,7 @@ instruction peekdl (?n) # XXX avoid duplication with peekl
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
        {
+        /* XXX: raise an IO exception for a != EOF error.  */
          /* XXX: branch to error label.  */
          JITTER_TOP_STACK () = PVM_NULL;
        }
@@ -2000,7 +2001,7 @@ instruction peekdlu (?n) # XXX avoid code duplication with peeklu
      if (ios_read_uint (ios_cur (), offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
-         /* XXX: branch to error label.  */
+         /* XXX: raise an IO exception for a != EOF error.  */
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -2018,6 +2019,7 @@ instruction peeks ()
   code
     /* XXX: use IO and a base register */
     JITTER_TOP_STACK () = pvm_make_string ("");
+    /* XXX: WRITEME */
   end
 end
 
