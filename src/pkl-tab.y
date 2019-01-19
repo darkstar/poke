@@ -983,6 +983,12 @@ stmt:
                                                  $2);
                   PKL_AST_LOC ($$) = @$;
                 }
+        | TRY stmt CATCH stmt
+        	{
+                  $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
+                                                    $2, $4);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | funcall ';'
         	{
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,

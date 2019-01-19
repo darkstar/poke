@@ -1126,6 +1126,9 @@ struct pkl_ast_try_catch_stmt
   union pkl_ast_node *handler;
 };
 
+pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
+                                          pkl_ast_node code, pkl_ast_node handler);
+
 /* Finally, the `pkl_ast_node' type, which represents an AST node of
    any type.  */
 
