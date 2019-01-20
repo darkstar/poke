@@ -810,6 +810,9 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($<ast>$) = @$;
 
+                  if (! pkl_env_toplevel_p (pkl_parser->env))
+                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
+
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
                                          $<ast>$))
@@ -821,8 +824,8 @@ declaration:
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       /* XXX: also, annotate the decl to be renaming a
                          toplevel variable, so the code generator can
-                         do the right thing: to generate a POPSETVAR
-                         instruction instead of a POPVAR.  */
+                         do the right thing: to generate a POPVAR
+                         instruction instead of a REGVAR.  */
                       YYERROR;
                     }
                 }
@@ -835,9 +838,6 @@ declaration:
                     = ASTREF ($5);
                   $$ = $<ast>3;
                   
-                  if (! pkl_env_toplevel_p (pkl_parser->env))
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
-
                   /* Annotate the contained RETURN statements with
                      their function and their lexical nest level
                      within the function.  */
