@@ -86,6 +86,7 @@ early-header-c
       jitter_stack_height main_stack_height;
       jitter_stack_height return_stack_height;
       pvm_program_point code;
+      pvm_env env;
     };
   end
 end
@@ -104,9 +105,10 @@ late-header-c
        is used in the RAISE instruction itself, and also in instructions
        that can fail, such as integer division or IO.
 
-       The code in the macro looks for the first matching exception handler
-       in the exception handlers stack.  Then it restores the heights of
-       the main stack and the return stack, and then pushes the exception
+       The code in the macro looks for the first matching exception
+       handler in the exception handlers stack.  Then it restores the
+       heights of the main stack and the return stack, restores the
+       original dynamic environment, and then pushes the exception
        type as an integer in the main stack, before branching to the
        exception handler.  */
 
@@ -126,6 +128,7 @@ late-header-c
                                                                        \
         /* XXX JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32)); */  \
                                                                        \
+        jitter_state_runtime.env = ehandler->env;                      \
         JITTER_BRANCH (ehandler->code);                                \
         break;                                                         \
       }                                                                \
@@ -2041,6 +2044,7 @@ instruction pushe (?n,?l)
    ehandler->main_stack_height = JITTER_HEIGHT_STACK ();
    ehandler->return_stack_height = JITTER_HEIGHT_RETURNSTACK ();
    ehandler->code = JITTER_ARGP1;
+   ehandler->env = jitter_state_runtime.env;
 
    JITTER_PUSH_EXCEPTIONSTACK (ehandler);
   end
