@@ -10,7 +10,6 @@ defun baz = (int n) : int
 
    defvar ret = 0;
 
-   
    try
      ret = foo (n);
    catch
