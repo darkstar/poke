@@ -1,6 +1,6 @@
 ## Jitter specification for the GNU Poke Virtual Machine.
 
-## Copyright (C) 2018 Jose E. Marchesi
+## Copyright (C) 2019 Jose E. Marchesi
 ## Written by Jose E. Marchesi
 
 ## This program is free software: you can redistribute it and/or modify
@@ -83,7 +83,7 @@ early-header-c
     struct pvm_exception_handler
     {
       int exception;
-      jitter_stack_height stack_height;
+      jitter_stack_height main_stack_height;
       jitter_stack_height return_stack_height;
       pvm_program_point code;
     };
@@ -109,21 +109,22 @@ late-header-c
        the main stack and the return stack, and then pushes the exception
        type as an integer in the main stack, before branching to the
        exception handler.  */
-#define PVM_RAISE(EXCEPTION)  \
-    while (1)                    \
-    {                            \
-      struct pvm_exception_handler *ehandler \
-        = JITTER_TOP_EXCEPTIONSTACK ();      \
-      int handler_exception = ehandler->exception; \
-                                                   \
-      JITTER_DROP_EXCEPTIONSTACK ();               \
-                                                   \
-      if (handler_exception == 0 || handler_exception == (EXCEPTION)) \
+
+#define PVM_RAISE(EXCEPTION)                                           \
+    while (1)                                                          \
+    {                                                                  \
+      struct pvm_exception_handler *ehandler                           \
+        = JITTER_TOP_EXCEPTIONSTACK ();                                \
+      int handler_exception = ehandler->exception;                     \
+                                                                       \
+      JITTER_DROP_EXCEPTIONSTACK ();                                   \
+                                                                       \
+      if (handler_exception == 0 || handler_exception == (EXCEPTION))  \
       {                                                                \
-        JITTER_SET_HEIGHT_STACK (ehandler->stack_height);              \
+        JITTER_SET_HEIGHT_STACK (ehandler->main_stack_height);         \
         JITTER_SET_HEIGHT_RETURNSTACK (ehandler->return_stack_height); \
                                                                        \
-        /* XXX JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32)); */           \
+        /* XXX JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32)); */  \
                                                                        \
         JITTER_BRANCH (ehandler->code);                                \
         break;                                                         \
@@ -2037,7 +2038,7 @@ instruction pushe (?n,?l)
       = xmalloc (sizeof (struct pvm_exception_handler)); /* XXX GC */
 
    ehandler->exception = JITTER_ARGN0;
-   ehandler->stack_height = JITTER_HEIGHT_STACK ();
+   ehandler->main_stack_height = JITTER_HEIGHT_STACK ();
    ehandler->return_stack_height = JITTER_HEIGHT_RETURNSTACK ();
    ehandler->code = JITTER_ARGP1;
 
