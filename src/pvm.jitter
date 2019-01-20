@@ -2028,7 +2028,7 @@ end
 
 ## Exceptions handling instructions
 
-# pushe LABEL
+# pushe EXCEPTION_TYPE, LABEL
 #
 # _ -> EXCEPTION_HANDLER
 
