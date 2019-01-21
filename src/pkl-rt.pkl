@@ -34,6 +34,9 @@ defun print = (string str) __builtin_print__;
 
 /* Default exception handler.
 
+   The default exception numbers here should match the ones defined in
+   the standard library std.pkl.
+
    Note that the code in this function should NOT raise any exception,
    or be ready to underflow the exceptions handler stack and face some
    ugly shit.  You have been warned!  */

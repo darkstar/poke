@@ -1,6 +1,6 @@
 /* std.pk - Standard definitions for poke.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi.  */
+/* Copyright (C) 2019 Jose E. Marchesi.  */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,3 +40,12 @@ deftype ushort = uint16;
 deftype short = int16;
 deftype ulong = uint64;
 deftype long = int64;
+
+/* Standard exceptions.
+
+   0 is "any exception" and should not be used.
+   XXX: use defconst.
+
+   User-defined exceptions start with 255.  */
+
+defvar E_div_by_zero = 1;
