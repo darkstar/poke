@@ -1,0 +1,26 @@
+/* { dg-do run } */
+
+defun baz = (int n) : int
+{
+   defun foo = (int n) : int
+   {
+      defvar a = 100;
+      return a / n;
+   }
+
+   defvar ret = 0;
+
+   try
+     ret = foo (n);
+   catch
+   {
+     print ("re-raising\n");
+     raise E_div_by_zero;
+   }
+
+   return ret;
+}  
+
+/* { dg-command { print baz (2) } } */
+/* { dg-command { print baz (0) } } */
+/* { dg-output "re-raising\nunhandled division by zero exception" } */

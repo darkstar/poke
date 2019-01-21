@@ -748,7 +748,8 @@ expected %s, got %s",
 PKL_PHASE_END_HANDLER
 
 /* The type of the r-value in an assignment statement should match the
-   type of the l-value.  XXX: but what about promotions.
+   type of the l-value.  XXX: but what about promotions in integers
+   and other transformations.
 
 #if 0
    Also, the type of the l-value cannot be a function: function
