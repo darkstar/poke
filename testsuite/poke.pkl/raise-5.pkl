@@ -1,0 +1,10 @@
+/* { dg-do run } */
+
+defun foo = () : int
+  {
+   raise E_div_by_zero;
+   return 666;
+  }
+
+/* { dg-command {print foo ()} } */
+/* { dg-output "unhandled division by zero exception" } */
