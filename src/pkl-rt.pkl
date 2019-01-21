@@ -34,11 +34,9 @@ defun print = (string str) __builtin_print__;
 
 /* Standard exceptions.
 
-   0 is "any exception" and should not be used.
-   XXX: use defconst.
-
    User-defined exceptions start with 255.  */
 
+defvar E_generic     = 0;
 defvar E_div_by_zero = 1;
 
 /* Default exception handler.
