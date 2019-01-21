@@ -1567,15 +1567,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
              t = PKL_AST_CHAIN (t))
           pkl_ast_finish_returns_1 (function, t, nframes);
 
-        /* Pop `N' frames, one for declaration in the compound
-           statement's body.  */
-        for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
-             t = PKL_AST_CHAIN (t))
-          {
-            if (PKL_AST_CODE (t) == PKL_AST_DECL)
-              *nframes -= 1;
-          }
-        /* And the frame of the compount itself.  */
+        /* Pop the frame of the compount itself.  */
         *nframes -= 1;
         break;
       }
@@ -1593,9 +1585,6 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
                                 PKL_AST_LOOP_STMT_BODY (stmt),
                                 nframes);
       break;
-    case PKL_AST_DECL:
-      *nframes += 1;
-      break;
     case PKL_AST_TRY_CATCH_STMT:
       pkl_ast_finish_returns_1 (function,
                                 PKL_AST_TRY_CATCH_STMT_CODE (stmt),
@@ -1604,6 +1593,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
                                 PKL_AST_TRY_CATCH_STMT_HANDLER (stmt),
                                 nframes);
       break;
+    case PKL_AST_DECL:
     case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
     case PKL_AST_RAISE_STMT:

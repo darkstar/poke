@@ -138,7 +138,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
         closure = pvm_make_cls (program);
 
         /*XXX*/
-        /* pvm_print_program (stdout, program); */
+        //        pvm_print_program (stdout, program);
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -149,14 +149,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
       break;
     }
 
-  /* If we are not at the top-level, push a new frame in the run-time
-     environment.  */
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-
-  /* Finally register the declared entity, unless it is a type.  Types
-     are not variables.  */
+  /* Register the declared entity, unless it is a type.  Types are not
+     variables.  */
   if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 }
@@ -219,8 +213,6 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
 {
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
-  pkl_ast_node comp_stmt_stmts
-    = PKL_AST_COMP_STMT_STMTS (comp_stmt);
   int comp_stmt_builtin
     = PKL_AST_COMP_STMT_BUILTIN (comp_stmt);
 
@@ -240,23 +232,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
         }
     }
   else
-    {
-      pkl_ast_node stmt_decl;
-      int num_frames = 0;
-
-      /* Pop the frames created by the declarations contained in the
-         compound statement from the enviroment.  */
-      for (stmt_decl = comp_stmt_stmts;
-           stmt_decl;
-           stmt_decl = PKL_AST_CHAIN (stmt_decl))
-        {
-          if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
-            num_frames++;
-        }
-      
-      /* Note this includes the compound statement's frame.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, num_frames + 1);
-    }
+    /* Pop the lexical frame created by the compound statement.  */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
 }
 PKL_PHASE_END_HANDLER
 

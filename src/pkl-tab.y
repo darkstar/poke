@@ -756,12 +756,7 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
                     PKL_AST_LOC ($$) = @$;
 
-                    /* XXX: pop N frames from the current environment,
-                       where N is the number of declarations in
-                       struct_elem_type_list.  */
-
-                    /* Now pop the frame introduced by the struct type
-                       definition itself.  */
+                    /* Pop the frame pushed in the `pushlevel' above.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         ;
@@ -809,9 +804,6 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($<ast>$) = @$;
 
-                  if (! pkl_env_toplevel_p (pkl_parser->env))
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
-
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
                                          $<ast>$))
@@ -854,10 +846,6 @@ declaration:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  if (! pkl_env_toplevel_p (pkl_parser->env))
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
-
-
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
                                          $$))
@@ -877,9 +865,6 @@ declaration:
                                           pkl_parser->filename);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-
-                  if (! pkl_env_toplevel_p (pkl_parser->env))
-                    pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
 
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),
@@ -902,24 +887,10 @@ declaration:
 comp_stmt:
 	  pushlevel '{' stmt_decl_list '}'
         	{
-                  pkl_ast_node stmt_decl;
-                  
                   $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $3);
                   PKL_AST_LOC ($$) = @$;
 
-                  /* Pop N frames from the current environment, where
-                     N is the number of declarations in
-                     stmt_decl_list.  */
-                  for (stmt_decl = $3;
-                       stmt_decl;
-                       stmt_decl = PKL_AST_CHAIN (stmt_decl))
-                    {
-                      if (PKL_AST_CODE (stmt_decl) == PKL_AST_DECL)
-                        pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
-                    }
-
-                  /* Now pop the frame introduced by the
-                     compound-statement itself.  */
+                  /* Pop the frame pushed by the `pushlevel' above.  */
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
          |  BUILTIN_PRINT ';'
