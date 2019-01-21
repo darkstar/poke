@@ -573,7 +573,57 @@ pvm_print_val (FILE *out, pvm_val val, int base)
         }
     }
   else if (PVM_IS_STR (val))
-    fprintf (out, "\"%s\"" , PVM_VAL_STR (val));
+    {
+      const char *str = PVM_VAL_STR (val);
+      char *str_printable;
+      size_t str_size = strlen (PVM_VAL_STR (val));
+      size_t printable_size, i;
+
+      /* Calculate the length (in bytes) of the printable string
+         corresponding to the string value.  */
+      for (printable_size = 0, i = 0; i < str_size; i++)
+        {
+          switch (str[i])
+            {
+            case '\n': printable_size += 2; break;
+            case '\t': printable_size += 2; break;
+            case '\\': printable_size += 2; break;
+            default: printable_size += 1; break;
+            }
+        }
+
+      /* Now build the printable string.  */
+      str_printable = xmalloc (printable_size + 1);
+      for (i = 0; i < printable_size; )
+        {
+          switch (str[i])
+            {
+            case '\n':
+              str_printable[i] = '\\';
+              str_printable[i+1] = 'n';
+              i += 2;
+              break;
+            case '\t':
+              str_printable[i] = '\\';
+              str_printable[i+1] = 'n';
+              i += 2;
+              break;
+            case '\\':
+              str_printable[i] = '\\';
+              str_printable[i+1] = '\\';
+              i += 2;
+              break;
+            default:
+              str_printable[i] = str[i];
+              i++;
+              break;
+            }
+        }
+      str_printable[i] = '\0';
+      
+      fprintf (out, "\"%s\"", str_printable);
+      free (str_printable);
+    }
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, idx;

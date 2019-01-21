@@ -279,6 +279,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
   char *p;
   size_t string_length, i;
 
+  /* Please keep this code in sync with the string printer in
+     pvm-val.c:pvm_print_val.  */
+  
   /* First pass: calculate the size of the resulting string after
      \-expansion, and report errors in the contents of the string.  */
   for (p = string_pointer, string_length = 0; *p != '\0'; ++p)
