@@ -86,7 +86,7 @@ pk_cmd_peek (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  rterror:
-  printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
+  printf (_("run-time error\n"));
   return 0;
 }
 

@@ -1,6 +1,6 @@
 /* pkl.c - Poke compiler.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@
 struct pkl_compiler
 {
   pkl_env env;  /* Compiler environment.  */
+  int bootstrapped;
   /* XXX: put a link to the run-time top-level closure here.  */
 };
 
@@ -81,6 +82,7 @@ pkl_new ()
         exit (1);
       }
 
+    compiler->bootstrapped = 1;
     /* XXX: disable compiler built-ins from this point on.  */
   }
   
@@ -160,7 +162,7 @@ rest_of_compilation (pkl_compiler compiler,
   };
 
   /* Initialize payloads.  */
-  pkl_gen_init_payload (&gen_payload);
+  pkl_gen_init_payload (&gen_payload, compiler);
 
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
@@ -318,6 +320,12 @@ pkl_env
 pkl_get_env (pkl_compiler compiler)
 {
   return compiler->env;
+}
+
+int
+pkl_bootstrapped_p (pkl_compiler compiler)
+{
+  return compiler->bootstrapped;
 }
 
 void

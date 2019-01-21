@@ -28,8 +28,6 @@
 #include "pvm.h"
 #include "ios.h"
 
-#include "poke.h" /* For poke_compiler  */
-
 /* In order to allow nested multi-function macros, like conditionals
    and loops, the assembler supports the notion of "nesting levels".
    For example, consider the following conditional code:
@@ -80,6 +78,8 @@ struct pkl_asm_level
 
 /* An assembler instance.
 
+   COMPILER is the PKL compiler using the macro-assembler.
+
    PROGRAM is the PVM program being assembled.
    LEVEL is a pointer to the top of a stack of levels.
 
@@ -88,19 +88,15 @@ struct pkl_asm_level
 
    START_LABEL marks the beginning of the user code.
 
-   DIVZERO_LABEL marks the division-by-zero error handler defined in
-   the standard prologue.
-
    ERROR_LABEL marks the generic error handler defined in the standard
-   prologue.
-
-   EXIT_LABEL marks the return handler defined in the standard
    prologue.  */
 
 #define PKL_ASM_LEVEL(PASM) ((PASM)->level)
 
 struct pkl_asm
 {
+  pkl_compiler compiler;
+
   pvm_program program;
   struct pkl_asm_level *level;
 
@@ -108,9 +104,7 @@ struct pkl_asm
   pkl_ast_node unit_type;
 
   jitter_label start_label;
-  jitter_label divzero_label;
   jitter_label error_label;
-  jitter_label exit_label;
 };
 
 /* Push a new level to PASM's level stack with ENV.  */
@@ -603,7 +597,8 @@ pkl_asm_insn_bnz (pkl_asm pasm,
    program.  */
 
 pkl_asm
-pkl_asm_new (pkl_ast ast, int guard_stack, int prologue)
+pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
+             int guard_stack, int prologue)
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
   pvm_program program;
@@ -611,17 +606,16 @@ pkl_asm_new (pkl_ast ast, int guard_stack, int prologue)
   memset (pasm, 0, sizeof (struct pkl_asm));
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
 
+  pasm->compiler = compiler;
   pasm->ast = ast;
   pasm->unit_type
     = pkl_ast_make_integral_type (pasm->ast, 64, 0);
 
   program = pvm_make_program ();
   pasm->start_label = jitter_fresh_label (program);
-  pasm->divzero_label = jitter_fresh_label (program);
   pasm->error_label = jitter_fresh_label (program);
-  pasm->exit_label = jitter_fresh_label (program);
   pasm->program = program;
-
+  
   if (prologue)
     {
       /* Standard prologue.  */
@@ -635,24 +629,13 @@ pkl_asm_new (pkl_ast ast, int guard_stack, int prologue)
       /* Push the stack centinel value.  */
       if (guard_stack)
         pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
-      
-      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
-      
-      pvm_append_label (program, pasm->divzero_label);
-      
-      pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                    pvm_make_int (PVM_EXIT_EDIVZ, 32));
-      
-      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->exit_label);
-      pvm_append_label (program, pasm->error_label);
-      
-      pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                    pvm_make_int (PVM_EXIT_ERROR, 32));
-      
-      pvm_append_label (program, pasm->exit_label);
-      pkl_asm_insn (pasm, PKL_INSN_EXIT);
-      pvm_append_label (program, pasm->start_label);
+      //      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
+
+      /* Install the default signal handler.  */
+      pkl_asm_insn (pasm, PKL_INSN_PUSHE, 0, pasm->error_label);
       pkl_asm_note (pasm, "#end prologue");
+
+      //      pvm_append_label (program, pasm->start_label);
     }
 
   return pasm;
@@ -670,12 +653,34 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
 
   if (epilogue)
     {
-      /* Standard epilogue.  */
       pkl_asm_note (pasm, "#begin epilogue");
+
+      /* Successful program finalization.  */
+      pkl_asm_insn (pasm, PKL_INSN_POPE);
       pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
-      
-      PVM_APPEND_INSTRUCTION (program, ba);
-      pvm_append_label_parameter (program, pasm->exit_label);
+      pkl_asm_insn (pasm, PKL_INSN_EXIT);      
+
+      /* Default signal handler.  */
+      pvm_append_label (pasm->program, pasm->error_label);
+
+      if (pkl_bootstrapped_p (pasm->compiler))
+        {
+          pkl_asm_push_val (program, pvm_make_int (0, 32)); /* XXX: exception number
+                                                               from the stack.  */
+          pkl_asm_call (pasm, "_pkl_exception_handler");
+        }
+      else
+        {
+          // XXX: discard exception number from the stack.
+          // JITTER_DROP_STACK ();
+          pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                        pvm_make_string ("unhandled exception while bootstrapping\n"));
+          pkl_asm_insn (pasm, PKL_INSN_PRINT);
+
+        }
+      pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
+      pkl_asm_insn (pasm, PKL_INSN_EXIT);  
+
       pkl_asm_note (pasm, "#end epilogue");
     }      
   
@@ -1083,7 +1088,7 @@ pkl_asm_endloop (pkl_asm pasm)
 void
 pkl_asm_call (pkl_asm pasm, const char *funcname)
 {
-  pkl_env compiler_env = pkl_get_env (poke_compiler);
+  pkl_env compiler_env = pkl_get_env (pasm->compiler);
   int back, over;
   
   assert (pkl_env_lookup (compiler_env, funcname,

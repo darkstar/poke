@@ -1,6 +1,6 @@
 /* pkl.h - Poke compiler.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,6 +94,11 @@ pvm_program pkl_compile_expression (pkl_compiler compiler,
 /* Return the current compile-time environment in COMPILER.  */
 
 pkl_env pkl_get_env (pkl_compiler compiler);
+
+/* Returns a boolean telling whether the compiler has been
+   bootstrapped.  */
+
+int pkl_bootstrapped_p (pkl_compiler compiler);
 
 /* Diagnostic routines.  */
 

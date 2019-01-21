@@ -207,7 +207,7 @@ parse_args (int argc, char *argv[])
             ret = pvm_run (poke_vm, program, &val);
             if (ret != PVM_EXIT_OK)
               {
-                fprintf (stderr, _("run-time error: %s\n"), pvm_error (ret));
+                fprintf (stderr, _("run-time error\n"));
                 exit (EXIT_FAILURE);
               }
             

@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <jitter/jitter.h>
 
+#include "pkl.h" /* For pkl_compiler */
 #include "pkl-ast.h"
 #include "ios.h" /* For IOS_NENC_* and IOS_ENDIAN_* */
 #include "pvm.h"
@@ -67,7 +68,8 @@ typedef struct pkl_asm *pkl_asm;
    for checking that the stack is empty at the end of the assembled
    program.  */
 
-pkl_asm pkl_asm_new (pkl_ast ast, int guard_stack, int prologue);
+pkl_asm pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
+                     int guard_stack, int prologue);
 
 /* Finish the assembly of the current program and return it.  This
    function frees all resources used by the assembler instance, and

@@ -1,6 +1,6 @@
 /* pk-peek.c - `print' command.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,6 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  rterror:
-  printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
   return 0;
 }
 

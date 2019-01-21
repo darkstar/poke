@@ -63,7 +63,10 @@
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_program)
 {
-  PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST, 1 /* guard_stack */, 1 /* prologue */);
+  PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST,
+                             PKL_GEN_PAYLOAD->compiler,
+                             1 /* guard_stack */,
+                             1 /* prologue */);
 }
 PKL_PHASE_END_HANDLER
 
@@ -75,7 +78,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
 {
-  PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM, 1 /* prologue */);
+  PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
+                                             1 /* prologue */);
 }
 PKL_PHASE_END_HANDLER
 
@@ -95,7 +99,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
          stack of assemblers in the payload and use it to process
          INITIAL.  */
 
-      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST, 0 /* guard_stack */,
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
+                                     PKL_GEN_PAYLOAD->compiler,
+                                     0 /* guard_stack */,
                                      0 /* prologue */));
     }
 }
@@ -123,7 +129,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
            Finalize the program and put it in a PVM closure, along
            with the current environment.  */
 
-        pvm_program program = pkl_asm_finish (PKL_GEN_ASM, 0 /* epilogue */);
+        pvm_program program = pkl_asm_finish (PKL_GEN_ASM,
+                                              0 /* epilogue */);
         pvm_val closure;
 
         PKL_GEN_POP_ASM;

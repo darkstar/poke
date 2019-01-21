@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 #include "pkl-asm.h"
@@ -37,6 +38,7 @@
 
 struct pkl_gen_payload
 {
+  pkl_compiler compiler;
   pkl_asm pasm[PKL_GEN_MAX_PASM];
   int cur_pasm;
   pvm_program program;
@@ -47,9 +49,10 @@ typedef struct pkl_gen_payload *pkl_gen_payload;
 extern struct pkl_phase pkl_phase_gen;
 
 static inline void
-pkl_gen_init_payload (pkl_gen_payload payload)
+pkl_gen_init_payload (pkl_gen_payload payload, pkl_compiler compiler)
 {
   memset (payload, 0, sizeof (struct pkl_gen_payload));
+  payload->compiler = compiler;
 }
 
 

@@ -1,6 +1,6 @@
 /* pvm.h - Poke Virtual Machine.  Definitions.   */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,15 +27,17 @@
 #include "pvm-env.h"
 
 /* The following enumeration contains every possible exit code
-   resulting from the execution of a program in the PVM.  */
+   resulting from the execution of a program in the PVM.
+
+   PVM_EXIT_OK is returned if the program was executed successfully,
+   and every raised exception was properly handled.
+
+   PVM_EXIT_ERROR is returned in case of an unhandled exception.  */
 
 enum pvm_exit_code
   {
     PVM_EXIT_OK,
-    PVM_EXIT_ERROR,
-    PVM_EXIT_EDIVZ,
-    PVM_EXIT_EIOOFF,
-    PVM_EXIT_EIOOBJ
+    PVM_EXIT_ERROR
   };
 
 /* Note that the jitter-generated header should be included this late
@@ -80,11 +82,6 @@ void pvm_set_nenc (pvm pvm, enum ios_nenc nenc);
 
 /* Set the current negative encoding for PVM.  NENC should be one of
  * the IOS_NENC_* values defined in ios.h */
-
-/* Get a string with a description of a PVM exit code as returned by
-   `pvm_run'.  */
-
-const char *pvm_error (enum pvm_exit_code code);
 
 /* The following function is to be used in pvm.jitter, because the
    system `assert' may expand to a macro and is therefore

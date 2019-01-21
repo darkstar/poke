@@ -1,6 +1,6 @@
 /* pvm.h - Poke Virtual Machine.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,16 +124,6 @@ void
 pvm_set_nenc (pvm apvm, enum ios_nenc nenc)
 {
   PVM_STATE_NENC (apvm) = nenc;
-}
-
-const char *
-pvm_error (enum pvm_exit_code code)
-{
-  static char *pvm_error_strings[]
-    = { "ok", "error", "division by zero", "invalid offset in IO",
-        "invalid object read from IO" };
-
-  return pvm_error_strings[code];
 }
 
 void

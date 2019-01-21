@@ -1,6 +1,6 @@
 /* pk-file.c - Commands for operating files.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,7 +174,7 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   pvm_ret = pvm_run (poke_vm, program, &val);
   if (pvm_ret != PVM_EXIT_OK)
     {
-      printf (_("run-time error: %s\n"), pvm_error (pvm_ret));
+      printf (_("run-time error\n"));
       return 0;
     }
 

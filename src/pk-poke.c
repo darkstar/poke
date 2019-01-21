@@ -1,6 +1,6 @@
 /* pk-poke.c - `poke' command.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,7 +172,7 @@ pk_cmd_poke (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  rterror:
-  printf ("run-time error: %s\n", pvm_error (pvm_ret));
+  printf ("run-time error\n");
  error:
   return 0;
 }
