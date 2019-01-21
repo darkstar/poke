@@ -42,7 +42,7 @@ defvar E_div_by_zero = 1;
 /* Default exception handler.
 
    Note that the code in this function should NOT raise any exception,
-   or be ready to underflow the exceptions handler stack and face some
+   or be ready to underflow the exception handlers stack and face some
    ugly shit.  You have been warned!  */
 
 defun _pkl_exception_handler = (int<32> exception)
