@@ -19,7 +19,8 @@
 /* Please note, in this file:
 
    - No standard types.
-   - Use a `_pkl_' prefix for every declaration.
+   - Use a `_pkl_' prefix for every declaration that is not defining
+     a compiler-builtin wrapper.
    - No array or struct operators, only simple values please.
    - Compiler __builtins__ can be used in this file.
 
