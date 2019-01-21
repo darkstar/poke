@@ -71,9 +71,7 @@ pvm_env
 pvm_env_pop_frame (pvm_env env)
 {
   assert (env->up != NULL);
-
-  env = env->up;
-  return env;
+  return env->up;
 }
 
 void
