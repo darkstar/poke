@@ -2,9 +2,12 @@
 
 defun foo = () : int
   {
-   raise 0;
+   try
+     raise 0;
+   catch
+   print ("got an exception\n");
    return 666;
   }
 
 /* { dg-command {print foo ()} } */
-/* { dg-output "unhandled generic exception" } */
+/* { dg-output "got an exception" } */

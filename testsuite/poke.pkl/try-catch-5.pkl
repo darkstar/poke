@@ -19,8 +19,17 @@ defun baz = (int n) : int
    }
 
    return ret;
-}  
+}
 
-/* { dg-command { print baz (2) } } */
-/* { dg-command { print baz (0) } } */
-/* { dg-output "re-raising\nunhandled division by zero exception" } */
+defun quux = (int n) : int
+  {
+   try
+     return baz (n);
+   catch
+     print ("got exception\n");
+   return 666;
+  }
+
+/* { dg-command { print quux (2) } } */
+/* { dg-command { print quux (0) } } */
+/* { dg-output "re-raising\ngot exception\n666" } */

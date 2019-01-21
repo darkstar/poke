@@ -2,9 +2,12 @@
 
 defun foo = () : int
   {
-   raise E_div_by_zero;
+   try
+     raise E_div_by_zero;
+   catch E_div_by_zero
+     print ("got division by zero exception\n");
    return 666;
   }
 
 /* { dg-command {print foo ()} } */
-/* { dg-output "unhandled division by zero exception" } */
+/* { dg-output "got division by zero exception\n" } */
