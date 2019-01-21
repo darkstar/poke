@@ -995,9 +995,9 @@ pkl_asm_endif (pkl_asm pasm)
    generated is:
 
      PUSH-REGISTERS
-     PUSH-E-HANDLER label1
+     PUSHE label1
      ... code ...
-     POP-E-HANDLER
+     POPE
      POP-REGISTERS
      BA label2
    label1:
@@ -1027,6 +1027,10 @@ pkl_asm_catch (pkl_asm pasm)
   /* XXX pkl_asm_note (pasm, "POP-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
+
+  /* XXX: at this point the exception number is at the top of the
+     stack, as an int<32>.  Depending on the catch type, proceed
+     differently.  */
 }
 
 void
