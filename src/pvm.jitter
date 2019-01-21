@@ -126,7 +126,7 @@ late-header-c
         JITTER_SET_HEIGHT_STACK (ehandler->main_stack_height);         \
         JITTER_SET_HEIGHT_RETURNSTACK (ehandler->return_stack_height); \
                                                                        \
-        /* XXX JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32)); */  \
+        JITTER_PUSH_STACK (pvm_make_int ((EXCEPTION), 32));            \
                                                                        \
         jitter_state_runtime.env = ehandler->env;                      \
         JITTER_BRANCH (ehandler->code);                                \

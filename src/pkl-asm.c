@@ -658,15 +658,10 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
          assembly.  Otherwise, call the _pkl_exception_handler
          function which is part of the compiler run-time.  */
       if (pkl_bootstrapped_p (pasm->compiler))
-        {
-          pkl_asm_push_val (program, pvm_make_int (0, 32)); /* XXX: exception number
-                                                               from the stack.  */
-          pkl_asm_call (pasm, "_pkl_exception_handler");
-        }
+        pkl_asm_call (pasm, "_pkl_exception_handler");
       else
         {
-          // XXX: discard exception number from the stack.
-          // JITTER_DROP_STACK ();
+          pkl_asm_insn (pasm, PKL_INSN_DROP); /* Discard exception number.  */
           pkl_asm_insn (pasm, PKL_INSN_PUSH,
                         pvm_make_string ("unhandled exception while bootstrapping\n"));
           pkl_asm_insn (pasm, PKL_INSN_PRINT);
@@ -1031,6 +1026,7 @@ pkl_asm_catch (pkl_asm pasm)
   /* XXX: at this point the exception number is at the top of the
      stack, as an int<32>.  Depending on the catch type, proceed
      differently.  */
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
 
 void
