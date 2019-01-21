@@ -86,8 +86,6 @@ struct pkl_asm_level
    AST is for creating ast nodes whenever needed.
    UNIT_TYPE is an AST type for an offset unit.
 
-   START_LABEL marks the beginning of the user code.
-
    ERROR_LABEL marks the generic error handler defined in the standard
    prologue.  */
 
@@ -103,7 +101,6 @@ struct pkl_asm
   pkl_ast ast;
   pkl_ast_node unit_type;
 
-  jitter_label start_label;
   jitter_label error_label;
 };
 
@@ -612,7 +609,6 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
     = pkl_ast_make_integral_type (pasm->ast, 64, 0);
 
   program = pvm_make_program ();
-  pasm->start_label = jitter_fresh_label (program);
   pasm->error_label = jitter_fresh_label (program);
   pasm->program = program;
   
@@ -621,21 +617,16 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
       /* Standard prologue.  */
       pkl_asm_note (pasm, "#begin prologue");
       
-      /* XXX: move this assembly to asm() statements in pkl-prolog.pk and
-         pkl-epilog.pk.  */
       /* XXX: initialize the base register to [0 b] and other PVM
          registers.  */
       
       /* Push the stack centinel value.  */
       if (guard_stack)
         pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
-      //      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
 
       /* Install the default signal handler.  */
       pkl_asm_insn (pasm, PKL_INSN_PUSHE, 0, pasm->error_label);
       pkl_asm_note (pasm, "#end prologue");
-
-      //      pvm_append_label (program, pasm->start_label);
     }
 
   return pasm;
@@ -660,9 +651,12 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
       pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
       pkl_asm_insn (pasm, PKL_INSN_EXIT);      
 
-      /* Default signal handler.  */
       pvm_append_label (pasm->program, pasm->error_label);
 
+      /* Default exception handler.  If we are bootstrapping the
+         compiler, then use a very simple one inlined here in
+         assembly.  Otherwise, call the _pkl_exception_handler
+         function which is part of the compiler run-time.  */
       if (pkl_bootstrapped_p (pasm->compiler))
         {
           pkl_asm_push_val (program, pvm_make_int (0, 32)); /* XXX: exception number
@@ -678,6 +672,8 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
           pkl_asm_insn (pasm, PKL_INSN_PRINT);
 
         }
+
+      /* Set the exit status to ERROR and exit the PVM.  */
       pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
       pkl_asm_insn (pasm, PKL_INSN_EXIT);  
 
