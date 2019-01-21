@@ -32,10 +32,16 @@
 
 defun print = (string str) __builtin_print__;
 
-/* Default exception handler.
+/* Standard exceptions.
 
-   The default exception numbers here should match the ones defined in
-   the standard library std.pkl.
+   0 is "any exception" and should not be used.
+   XXX: use defconst.
+
+   User-defined exceptions start with 255.  */
+
+defvar E_div_by_zero = 1;
+
+/* Default exception handler.
 
    Note that the code in this function should NOT raise any exception,
    or be ready to underflow the exceptions handler stack and face some
@@ -45,7 +51,7 @@ defun _pkl_exception_handler = (int<32> exception)
   {
    print ("unhandled exception: ");
 
-   if (exception == 1)
+   if (exception == E_div_by_zero)
      print ("division by zero");
    else
      print ("unknown");

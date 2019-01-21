@@ -2062,11 +2062,12 @@ end
 
 # raise
 #
-# _ -> _
+# EXCEPTION -> _
 
-instruction raise (?n)
+instruction raise ()
   code
-    PVM_RAISE (JITTER_ARGN0);
+    PVM_RAISE (PVM_VAL_INT (JITTER_TOP_STACK ()));
+    JITTER_DROP_STACK ();
   end
 end
 
