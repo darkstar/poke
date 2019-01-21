@@ -374,6 +374,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | [EXP]
+ * RAISE_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_raise_stmt)
+{
+  pkl_ast_node raise_stmt = PKL_PASS_NODE;
+
+  /* If the `raise' statement was anonymous, then we need to push the
+     exception to raise, which by default, is 0.  */
+  if (PKL_AST_RAISE_STMT_EXP (raise_stmt) == NULL)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (0, 32));
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | CODE
  * | HANDLER
  * TRY_CATCH_STMT
@@ -1405,6 +1423,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_gen_ps_raise_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),

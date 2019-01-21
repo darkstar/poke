@@ -54,7 +54,7 @@ defun _pkl_exception_handler = (int<32> exception)
    if (exception == E_div_by_zero)
      print ("division by zero");
    else
-     print ("unknown");
+     print ("unspecified");
 
    print ("\n");
   }

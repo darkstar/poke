@@ -2066,8 +2066,9 @@ end
 
 instruction raise ()
   code
-    PVM_RAISE (PVM_VAL_INT (JITTER_TOP_STACK ()));
+    pvm_val exception = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
+    PVM_RAISE (PVM_VAL_INT (exception));
   end
 end
 

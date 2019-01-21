@@ -126,8 +126,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
 %token STRING
-%token TRY
-%token CATCH
+%token TRY CATCH RAISE
 
 /* Compiler builtins.  */
 
@@ -987,6 +986,18 @@ stmt:
         	{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
                                                     $2, $4);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| RAISE ';'
+        	{
+                  $$ = pkl_ast_make_raise_stmt (pkl_parser->ast,
+                                                NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| RAISE expression ';'
+        	{
+                  $$ = pkl_ast_make_raise_stmt (pkl_parser->ast,
+                                                $2);
                   PKL_AST_LOC ($$) = @$;
                 }
         | funcall ';'
