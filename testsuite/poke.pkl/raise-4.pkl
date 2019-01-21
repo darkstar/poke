@@ -1,0 +1,10 @@
+/* { dg-do run } */
+
+defun foo = () : int
+  {
+   raise 1UL;
+   return 666;
+  }
+
+/* { dg-command {print foo ()} } */
+/* { dg-output "unhandled division by zero exception" } */

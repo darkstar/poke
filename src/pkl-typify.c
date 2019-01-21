@@ -978,7 +978,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+}
+PKL_PHASE_END_HANDLER
 
+/* The type of a `raise' exception number, if specified, should be
+   integral.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node raise_stmt = PKL_PASS_NODE;
+  pkl_ast_node raise_stmt_exp = PKL_AST_RAISE_STMT_EXP (raise_stmt);
+
+
+  if (raise_stmt_exp)
+    {
+      pkl_ast_node raise_stmt_exp_type
+        = PKL_AST_TYPE (raise_stmt_exp);
+
+      if (raise_stmt_exp_type
+          && PKL_AST_TYPE_CODE (raise_stmt_exp_type) != PKL_TYPE_INTEGRAL)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (raise_stmt),
+                     "exception in `raise' statement should be an integral number.");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -999,6 +1027,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_ps_loop_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
 
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_ps_op_not),

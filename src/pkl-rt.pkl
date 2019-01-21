@@ -49,14 +49,14 @@ defvar E_div_by_zero = 1;
 
 defun _pkl_exception_handler = (int<32> exception)
   {
-   print ("unhandled exception: ");
+   print ("unhandled ");
 
    if (exception == E_div_by_zero)
      print ("division by zero");
    else
-     print ("unspecified");
+     print ("generic");
 
-   print ("\n");
+   print (" exception\n");
   }
 
 /* Find the greatest common divisor of two unsigned 64-bit integrals A

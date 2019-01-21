@@ -1,0 +1,10 @@
+/* { dg-do run } */
+
+defun foo = () : int
+  {
+   raise;
+   return 666;
+  }
+
+/* { dg-command {print foo ()} } */
+/* { dg-output "unhandled generic exception" } */

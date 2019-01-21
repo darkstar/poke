@@ -622,6 +622,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_array_initializer)
 }
 PKL_PHASE_END_HANDLER
 
+/* Exception numbers in `raise' statements should be ints.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_raise_stmt)
+{
+  pkl_ast_node raise_stmt = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_RAISE_STMT_EXP (raise_stmt);
+
+  /* Note that the exception number is optional.  */
+  if (exp != NULL)
+    {
+      int restart;
+
+      if (!promote_integral (PKL_PASS_AST, 32, 1,
+                             &PKL_AST_RAISE_STMT_EXP (raise_stmt),
+                             &restart))
+        {
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                   "couldn't promote exception number to int<32>");
+          PKL_PASS_ERROR;
+        }
+
+      PKL_PASS_RESTART = restart;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
@@ -645,5 +671,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_ps_array_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_ps_array_initializer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };
