@@ -577,7 +577,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
       const char *str = PVM_VAL_STR (val);
       char *str_printable;
       size_t str_size = strlen (PVM_VAL_STR (val));
-      size_t printable_size, i;
+      size_t printable_size, i, j;
 
       /* Calculate the length (in bytes) of the printable string
          corresponding to the string value.  */
@@ -594,32 +594,32 @@ pvm_print_val (FILE *out, pvm_val val, int base)
 
       /* Now build the printable string.  */
       str_printable = xmalloc (printable_size + 1);
-      for (i = 0; i < printable_size; )
+      for (i = 0, j = 0; i < printable_size; i++)
         {
           switch (str[i])
             {
             case '\n':
-              str_printable[i] = '\\';
-              str_printable[i+1] = 'n';
-              i += 2;
+              str_printable[j] = '\\';
+              str_printable[j+1] = 'n';
+              j += 2;
               break;
             case '\t':
-              str_printable[i] = '\\';
-              str_printable[i+1] = 'n';
-              i += 2;
+              str_printable[j] = '\\';
+              str_printable[j+1] = 't';
+              j += 2;
               break;
             case '\\':
-              str_printable[i] = '\\';
-              str_printable[i+1] = '\\';
-              i += 2;
+              str_printable[j] = '\\';
+              str_printable[j+1] = '\\';
+              j += 2;
               break;
             default:
-              str_printable[i] = str[i];
-              i++;
+              str_printable[j] = str[i];
+              j++;
               break;
             }
         }
-      str_printable[i] = '\0';
+      str_printable[j] = '\0';
       
       fprintf (out, "\"%s\"", str_printable);
       free (str_printable);
