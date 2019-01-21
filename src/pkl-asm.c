@@ -603,7 +603,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
    program.  */
 
 pkl_asm
-pkl_asm_new (pkl_ast ast, int guard_stack)
+pkl_asm_new (pkl_ast ast, int guard_stack, int prologue)
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
   pvm_program program;
@@ -622,35 +622,38 @@ pkl_asm_new (pkl_ast ast, int guard_stack)
   pasm->exit_label = jitter_fresh_label (program);
   pasm->program = program;
 
-  /* Standard prologue.  */
-  pkl_asm_note (pasm, "#begin prologue");
-
-  /* XXX: move this assembly to asm() statements in pkl-prolog.pk and
-     pkl-epilog.pk.  */
-  /* XXX: initialize the base register to [0 b] and other PVM
-     registers.  */
-
-  /* Push the stack centinel value.  */
-  if (guard_stack)
-      pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
-  
-  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
-  
-  pvm_append_label (program, pasm->divzero_label);
-
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_int (PVM_EXIT_EDIVZ, 32));
-
-  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->exit_label);
-  pvm_append_label (program, pasm->error_label);
-
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_int (PVM_EXIT_ERROR, 32));
-  
-  pvm_append_label (program, pasm->exit_label);
-  pkl_asm_insn (pasm, PKL_INSN_EXIT);
-  pvm_append_label (program, pasm->start_label);
-  pkl_asm_note (pasm, "#end prologue");
+  if (prologue)
+    {
+      /* Standard prologue.  */
+      pkl_asm_note (pasm, "#begin prologue");
+      
+      /* XXX: move this assembly to asm() statements in pkl-prolog.pk and
+         pkl-epilog.pk.  */
+      /* XXX: initialize the base register to [0 b] and other PVM
+         registers.  */
+      
+      /* Push the stack centinel value.  */
+      if (guard_stack)
+        pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
+      
+      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->start_label);
+      
+      pvm_append_label (program, pasm->divzero_label);
+      
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_int (PVM_EXIT_EDIVZ, 32));
+      
+      pkl_asm_insn (pasm, PKL_INSN_BA, pasm->exit_label);
+      pvm_append_label (program, pasm->error_label);
+      
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_int (PVM_EXIT_ERROR, 32));
+      
+      pvm_append_label (program, pasm->exit_label);
+      pkl_asm_insn (pasm, PKL_INSN_EXIT);
+      pvm_append_label (program, pasm->start_label);
+      pkl_asm_note (pasm, "#end prologue");
+    }
 
   return pasm;
 }
@@ -661,18 +664,21 @@ pkl_asm_new (pkl_ast ast, int guard_stack)
    program.  */
 
 pvm_program
-pkl_asm_finish (pkl_asm pasm)
+pkl_asm_finish (pkl_asm pasm, int epilogue)
 {
   pvm_program program = pasm->program;
 
-  /* Standard epilogue.  */
-  pkl_asm_note (pasm, "#begin epilogue");
-  pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
-    
-  PVM_APPEND_INSTRUCTION (program, ba);
-  pvm_append_label_parameter (program, pasm->exit_label);
-  pkl_asm_note (pasm, "#end epilogue");
-
+  if (epilogue)
+    {
+      /* Standard epilogue.  */
+      pkl_asm_note (pasm, "#begin epilogue");
+      pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
+      
+      PVM_APPEND_INSTRUCTION (program, ba);
+      pvm_append_label_parameter (program, pasm->exit_label);
+      pkl_asm_note (pasm, "#end epilogue");
+    }      
+  
   /* Free the assembler instance and return the assembled program to
      the user.  */
   ASTREF (pasm->unit_type); pkl_ast_node_free (pasm->unit_type);

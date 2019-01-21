@@ -1,6 +1,6 @@
 /* pkl-typify.c - Type handling phases for the poke compiler.  */
 
-/* Copyright (C) 2018 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -748,7 +748,13 @@ expected %s, got %s",
 PKL_PHASE_END_HANDLER
 
 /* The type of the r-value in an assignment statement should match the
-   type of the l-value.  XXX: but what about promotions.  */
+   type of the l-value.  XXX: but what about promotions.
+
+#if 0
+   Also, the type of the l-value cannot be a function: function
+   variables in poke can't be assigned new values.  XXX: or yes?
+#endif
+*/
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
 {
@@ -777,6 +783,16 @@ expected %s, got %s",
       payload->errors++;
       PKL_PASS_ERROR;
     }
+
+#if 0
+  if (PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_FUNCTION)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+                 "l-value in assignment cannot be a function");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+#endif
 }
 PKL_PHASE_END_HANDLER
 

@@ -67,14 +67,14 @@ typedef struct pkl_asm *pkl_asm;
    for checking that the stack is empty at the end of the assembled
    program.  */
 
-pkl_asm pkl_asm_new (pkl_ast ast, int guard_stack);
+pkl_asm pkl_asm_new (pkl_ast ast, int guard_stack, int prologue);
 
 /* Finish the assembly of the current program and return it.  This
    function frees all resources used by the assembler instance, and
    `pkl_asm_new' should be called again in order to assemble another
    program.  */
 
-pvm_program pkl_asm_finish (pkl_asm pasm);
+pvm_program pkl_asm_finish (pkl_asm pasm, int epilogue);
 
 /* Assemble an instruction INSN and append it to the program being
    assembled in PASM.  If the instruction takes any argument, they
