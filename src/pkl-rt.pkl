@@ -56,6 +56,8 @@ defun _pkl_exception_handler = (Exception exception)
 
    if (exception == E_div_by_zero)
      print ("division by zero");
+   else if (exception == E_no_ios)
+     print ("no IOS");
    else
      print ("generic");
 
