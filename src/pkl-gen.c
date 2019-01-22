@@ -371,6 +371,7 @@ PKL_PHASE_END_HANDLER
 /*
  * | CODE
  * | HANDLER
+ * | [ARG]
  * TRY_CATCH_STMT
  */
 
