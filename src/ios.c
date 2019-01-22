@@ -227,7 +227,55 @@ ios_read_int (ios io, ios_off offset, int flags,
               int64_t *value)
 {
   /* XXX: writeme  */
-  *value = 666;
+
+  if (offset % 8 == 0 && bits == 8)
+    {
+      int c;
+
+      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
+          == -1)
+        return IOS_EIOFF;
+
+      c = io->dev_if->getc (io->dev);
+      if (c == IOD_EOF)
+        return IOS_EIOFF;
+
+      *value = c;
+    }
+  else if (offset % 8 == 0 && bits == 32)
+    {
+      int64_t c1, c2, c3, c4;
+
+      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
+          == -1)
+        return IOS_EIOFF;
+
+      c1 = io->dev_if->getc (io->dev);
+      if (c1 == IOD_EOF)
+        return IOS_EIOFF;
+      
+      c2 = io->dev_if->getc (io->dev);
+      if (c2 == IOD_EOF)
+        return IOS_EIOFF;
+
+      c3 = io->dev_if->getc (io->dev);
+      if (c3 == IOD_EOF)
+        return IOS_EIOFF;
+
+      c4 = io->dev_if->getc (io->dev);
+      if (c4 == IOD_EOF)
+        return IOS_EIOFF;
+
+      /* Handle negative encoding.  */
+      
+      if (endian == IOS_ENDIAN_LSB)
+        *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
+      else
+        *value = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
+    }
+  else
+    assert (0);
+
   return IOS_OK;
 }
 
