@@ -372,6 +372,7 @@ PKL_PHASE_END_HANDLER
  * | CODE
  * | HANDLER
  * | [ARG]
+ * | [EXP]
  * TRY_CATCH_STMT
  */
 
@@ -381,7 +382,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_try_catch_stmt)
   pkl_ast_node code = PKL_AST_TRY_CATCH_STMT_CODE (try_catch_stmt);
   pkl_ast_node handler = PKL_AST_TRY_CATCH_STMT_HANDLER (try_catch_stmt);
   pkl_ast_node catch_arg = PKL_AST_TRY_CATCH_STMT_ARG (try_catch_stmt);
+  pkl_ast_node catch_exp = PKL_AST_TRY_CATCH_STMT_EXP (try_catch_stmt);
 
+  /* Push the exception number that will be catched by the sentence.
+     This is EXP if it is defined, or 0 (catch-all) if it isnt.  */
+  if (catch_exp)
+    PKL_PASS_SUBPASS (catch_exp);
+  else
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (0, 32));
+  
   pkl_asm_try (PKL_GEN_ASM, catch_arg);
   {
     PKL_PASS_SUBPASS (code);

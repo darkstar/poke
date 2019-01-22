@@ -1118,11 +1118,18 @@ pkl_ast_node pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp);
 
    TYPE, if specified, is the argument to the catch clause.  The type
    of the argument must be a signed 32-bit type, which is the type
-   used to denote exception types.  */
+   used to denote exception types.
+   
+   EXP, if specified, is an expression evaluating to a 32-bit integer.
+   Exceptions having any other type won't be catched by the `catch'
+   clause of the statement.
+
+   Note that TYPE and EXP are mutually exclusive.  */
 
 #define PKL_AST_TRY_CATCH_STMT_CODE(AST) ((AST)->try_catch_stmt.code)
 #define PKL_AST_TRY_CATCH_STMT_HANDLER(AST) ((AST)->try_catch_stmt.handler)
 #define PKL_AST_TRY_CATCH_STMT_ARG(AST) ((AST)->try_catch_stmt.arg)
+#define PKL_AST_TRY_CATCH_STMT_EXP(AST) ((AST)->try_catch_stmt.exp)
 
 struct pkl_ast_try_catch_stmt
 {
@@ -1131,11 +1138,12 @@ struct pkl_ast_try_catch_stmt
   union pkl_ast_node *code;
   union pkl_ast_node *handler;
   union pkl_ast_node *arg;
+  union pkl_ast_node *exp;
 };
 
 pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
                                           pkl_ast_node code, pkl_ast_node handler,
-                                          pkl_ast_node arg);
+                                          pkl_ast_node arg, pkl_ast_node exp);
 
 /* PKL_AST_RAISE_STMT nodes represent raise statements, which are used
    in order to raise exceptions at the program level.

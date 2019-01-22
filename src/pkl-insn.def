@@ -273,7 +273,7 @@ PKL_DEF_INSN (PKL_INSN_PRINT, "", "print")
 
 /* Exceptions handling instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_PUSHE, "nl", "pushe")
+PKL_DEF_INSN (PKL_INSN_PUSHE, "l", "pushe")
 PKL_DEF_INSN (PKL_INSN_POPE, "", "pope")
 PKL_DEF_INSN (PKL_INSN_RAISE, "", "raise")
 

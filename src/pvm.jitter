@@ -2074,19 +2074,20 @@ end
 
 ## Exceptions handling instructions
 
-# pushe EXCEPTION_TYPE, LABEL
+# pushe LABEL
 #
-# _ -> EXCEPTION_HANDLER
+# EXCEPTION_TYPE -> EXCEPTION_HANDLER
 
-instruction pushe (?n,?l)
+instruction pushe (?l)
   code
    struct pvm_exception_handler *ehandler
       = xmalloc (sizeof (struct pvm_exception_handler)); /* XXX GC */
 
-   ehandler->exception = JITTER_ARGN0;
+   ehandler->exception = PVM_VAL_INT (JITTER_TOP_STACK ());
+   JITTER_DROP_STACK ();
    ehandler->main_stack_height = JITTER_HEIGHT_STACK ();
    ehandler->return_stack_height = JITTER_HEIGHT_RETURNSTACK ();
-   ehandler->code = JITTER_ARGP1;
+   ehandler->code = JITTER_ARGP0;
    ehandler->env = jitter_state_runtime.env;
 
    JITTER_PUSH_EXCEPTIONSTACK (ehandler);

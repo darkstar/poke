@@ -126,7 +126,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
 %token STRING
-%token TRY CATCH RAISE
+%token TRY CATCH WHEN RAISE
 
 /* Compiler builtins.  */
 
@@ -956,13 +956,19 @@ stmt:
         | TRY stmt CATCH comp_stmt
         	{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
-                                                    $2, $4, NULL);
+                                                    $2, $4, NULL, NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| TRY stmt CATCH WHEN expression comp_stmt
+        	{
+                  $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
+                                                    $2, $6, NULL, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
 	| TRY stmt CATCH  '(' pushlevel function_arg ')' comp_stmt
 		{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
-                                                    $2, $8, $6);
+                                                    $2, $8, $6, NULL);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'

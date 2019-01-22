@@ -625,7 +625,8 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
         pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
 
       /* Install the default signal handler.  */
-      pkl_asm_insn (pasm, PKL_INSN_PUSHE, 0, pasm->error_label);
+      pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (0, 32));
+      pkl_asm_insn (pasm, PKL_INSN_PUSHE, pasm->error_label);
       pkl_asm_note (pasm, "#end prologue");
     }
 
@@ -999,7 +1000,10 @@ pkl_asm_endif (pkl_asm pasm)
      ... handler ...
    label2:
 
-   Thus, try-catch blocks use two labels.  */
+   Thus, try-catch blocks use two labels.
+
+   Note that pkl_asm_try expects to find an exception number (a 32-bit
+   signed integer) at the top of the main stack.  */
 
 void
 pkl_asm_try (pkl_asm pasm, pkl_ast_node arg)
@@ -1012,7 +1016,7 @@ pkl_asm_try (pkl_asm pasm, pkl_ast_node arg)
   pasm->level->label2 = jitter_fresh_label (pasm->program);
 
   /* pkl_asm_note (pasm, "PUSH-REGISTERS"); */
-  pkl_asm_insn (pasm, PKL_INSN_PUSHE, /* XXX */ 0, pasm->level->label1);
+  pkl_asm_insn (pasm, PKL_INSN_PUSHE, pasm->level->label1);
 }
 
 void
