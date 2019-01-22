@@ -32,7 +32,9 @@
 
 defun print = (string str) __builtin_print__;
 
-/* Standard exceptions.
+/* Exceptions.
+
+   XXX: use an enumeration?
 
    User-defined exceptions start with 255.  */
 
