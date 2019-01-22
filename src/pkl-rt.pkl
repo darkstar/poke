@@ -36,6 +36,8 @@ defun print = (string str) __builtin_print__;
 
    User-defined exceptions start with 255.  */
 
+deftype Exception = int<32>;
+
 defvar E_generic     = 0;
 defvar E_div_by_zero = 1;
 
@@ -45,7 +47,7 @@ defvar E_div_by_zero = 1;
    or be ready to underflow the exception handlers stack and face some
    ugly shit.  You have been warned!  */
 
-defun _pkl_exception_handler = (int<32> exception)
+defun _pkl_exception_handler = (Exception exception)
   {
    print ("unhandled ");
 

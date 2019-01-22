@@ -4,7 +4,7 @@ defun foo = () : int
   {
    try
      raise 1UL;
-   catch (int<32> e)
+   catch (Exception e)
    {
      if (e == E_div_by_zero)
        print ("got division by zero exception\n");
