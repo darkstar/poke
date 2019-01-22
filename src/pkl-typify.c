@@ -1044,7 +1044,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
 
   if (try_catch_stmt_exp)
     {
-      pkl_ast_node exp_type = PKL_AST_FUNC_ARG_TYPE (try_catch_stmt_exp);
+      pkl_ast_node exp_type = PKL_AST_TYPE (try_catch_stmt_exp);
 
       if (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_INTEGRAL)
         {
