@@ -228,50 +228,118 @@ ios_read_int (ios io, ios_off offset, int flags,
 {
   /* XXX: writeme  */
 
-  if (offset % 8 == 0 && bits == 8)
+  if (offset % 8 == 0)
     {
-      int c;
-
       if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
           == -1)
         return IOS_EIOFF;
 
-      c = io->dev_if->getc (io->dev);
-      if (c == IOD_EOF)
-        return IOS_EIOFF;
+      switch (bits)
+        {
+        case 8:
+          {
+            int8_t c;
 
-      *value = c;
-    }
-  else if (offset % 8 == 0 && bits == 32)
-    {
-      int64_t c1, c2, c3, c4;
+            c = io->dev_if->getc (io->dev);
+            if (c == IOD_EOF)
+              return IOS_EIOFF;
+            
+            *value = c;
+            break;
+          }
+        case 16:
+          {
+            int16_t c1, c2;
+            
+            c1 = io->dev_if->getc (io->dev);
+            if (c1 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c2 = io->dev_if->getc (io->dev);
+            if (c2 == IOD_EOF)
+              return IOS_EIOFF;
 
-      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
-          == -1)
-        return IOS_EIOFF;
+            if (endian == IOS_ENDIAN_LSB)
+              *value = (c2 << 8) | c1;
+            else
+              *value = (c1 << 8) | c2;
 
-      c1 = io->dev_if->getc (io->dev);
-      if (c1 == IOD_EOF)
-        return IOS_EIOFF;
-      
-      c2 = io->dev_if->getc (io->dev);
-      if (c2 == IOD_EOF)
-        return IOS_EIOFF;
+            break;
+          }
+        case 32:
+          {
+            int32_t c1, c2, c3, c4;
+            
+            c1 = io->dev_if->getc (io->dev);
+            if (c1 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c2 = io->dev_if->getc (io->dev);
+            if (c2 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c3 = io->dev_if->getc (io->dev);
+            if (c3 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c4 = io->dev_if->getc (io->dev);
+            if (c4 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            if (endian == IOS_ENDIAN_LSB)
+              *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
+            else
+              *value = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
 
-      c3 = io->dev_if->getc (io->dev);
-      if (c3 == IOD_EOF)
-        return IOS_EIOFF;
+            break;
+          }
+        case 64:
+          {
+            int64_t c1, c2, c3, c4, c5, c6, c7, c8;
+            
+            c1 = io->dev_if->getc (io->dev);
+            if (c1 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c2 = io->dev_if->getc (io->dev);
+            if (c2 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c3 = io->dev_if->getc (io->dev);
+            if (c3 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            c4 = io->dev_if->getc (io->dev);
+            if (c4 == IOD_EOF)
+              return IOS_EIOFF;
 
-      c4 = io->dev_if->getc (io->dev);
-      if (c4 == IOD_EOF)
-        return IOS_EIOFF;
+            c5 = io->dev_if->getc (io->dev);
+            if (c5 == IOD_EOF)
+              return IOS_EIOFF;
 
-      /* Handle negative encoding.  */
-      
-      if (endian == IOS_ENDIAN_LSB)
-        *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
-      else
-        *value = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
+            c6 = io->dev_if->getc (io->dev);
+            if (c6 == IOD_EOF)
+              return IOS_EIOFF;
+
+            c7 = io->dev_if->getc (io->dev);
+            if (c7 == IOD_EOF)
+              return IOS_EIOFF;
+
+            c8 = io->dev_if->getc (io->dev);
+            if (c8 == IOD_EOF)
+              return IOS_EIOFF;
+            
+            if (endian == IOS_ENDIAN_LSB)
+              *value = (c8 << 56) | (c7 << 48) | (c6 << 40) | (c5 << 32) | (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
+            else
+              *value = (c1 << 56) | (c2 << 48) | (c3 << 40) | (c4 << 32) | (c5 << 24) | (c6 << 16) | (c7 << 8) | c8;
+
+            break;
+          }
+        default:
+          assert (0);
+          break;
+        }
     }
   else
     assert (0);
