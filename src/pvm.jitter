@@ -86,6 +86,20 @@ early-header-c
 #   define E_DIV_BY_ZERO 1
 #   define E_NO_IOS      2
 
+    /* Exception handlers, that are installed in the "exceptionstack".
+
+       EXCEPTION is the exception type, either one of the E_* values defined
+       above, or any integer >= 256 for user-defined exceptions.
+
+       MAIN_STACK_HEIGHT and RETURN_STACK_HEIGHT are the heights of
+       the main and return stacks, to restore before transferring
+       control to the exception handler.
+
+       CODE is the program point where the exception handler starts.
+
+       ENV is the run-time environment to restore before transferring
+       control to the exception handler.  */
+
     struct pvm_exception_handler
     {
       int exception;
