@@ -91,18 +91,23 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
+  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
 
-  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC)
+  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC
+      || (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE
+          && (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)))
     {
-      /* INITIAL is a PKL_AST_FUNC, that will compile into a program
-         containing the function code.  Push a new assembler to the
-         stack of assemblers in the payload and use it to process
-         INITIAL.  */
+      /* INITIAL is either a PKL_AST_FUNC or a PKL_AST_TYPE of type
+         struct, that will compile into a program containing the
+         function code.  Push a new assembler to the stack of
+         assemblers in the payload and use it to process INITIAL.  */
 
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                      PKL_GEN_PAYLOAD->compiler,
                                      0 /* guard_stack */,
                                      0 /* prologue */));
+
+      /* XXX: what about the struct constructor... */
     }
 }
 PKL_PHASE_END_HANDLER
@@ -115,13 +120,17 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
+  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
 
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_VAR:
-    case PKL_AST_DECL_KIND_TYPE:
-      /* Nothing to do.  */
+      /* Do nothing.  */
       break;
+    case PKL_AST_DECL_KIND_TYPE:
+      if (PKL_AST_TYPE_CODE (initial) != PKL_TYPE_STRUCT)
+        break;
+      /* fallthrough */
     case PKL_AST_DECL_KIND_FUNC:
       {
         /* At this point the code for the function specification
@@ -142,6 +151,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
+
+        /* XXX: what about the struct constructor... */
         break;
       }
     default:
@@ -151,7 +162,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 
   /* Register the declared entity, unless it is a type.  Types are not
      variables.  */
-  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE)
+  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE
+      || PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 }
 PKL_PHASE_END_HANDLER
@@ -722,6 +734,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (map_type));
       pkl_asm_insn (pasm, PKL_INSN_MKO);
       break;
+    case PKL_TYPE_STRUCT:
+      /* Call the mapper function of the struct type, whose lexical
+         address is stored in the map AST node.  The mapper will
+         return a mapped struct on the top of the stack.
+
+         XXX: install an exception handler for constraint errors
+         etc.  */
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                    PKL_AST_MAP_MAPPER_BACK (map),
+                    PKL_AST_MAP_MAPPER_OVER (map));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+      break;
     case PKL_TYPE_ARRAY:
       /* Generate code to create an array of maps of the given type.
          Thats it: to call the array (from the type) mapping
@@ -733,10 +758,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
          - If the size of the array is not specified at all ([]) then
            use a while (not EOF) loop to create the array.
       */
-    case PKL_TYPE_STRUCT:
-      /* Generate code to create a struct of maps of the appropriate
-         types.  Thats it: to call the struct (from the type) mapping
-         function.  */
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,

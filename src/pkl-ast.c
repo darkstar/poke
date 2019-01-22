@@ -1966,6 +1966,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (map_type, MAP_TYPE);
       PRINT_AST_SUBAST (offset, MAP_OFFSET);
+      PRINT_AST_IMM (mapper_back, MAP_MAPPER_BACK, "%d");
+      PRINT_AST_IMM (mapper_over, MAP_MAPPER_OVER, "%d");
       break;
 
     case PKL_AST_FUNCALL:

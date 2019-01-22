@@ -871,10 +871,17 @@ pkl_ast_node pkl_ast_make_cast (pkl_ast ast,
    some offset in IO space.
 
    TYPE is the mapped type.
-   OFFSET is the offset in IO space where the TYPE is mapped.  */
+
+   OFFSET is the offset in IO space where the TYPE is mapped.
+
+   MAPPER_BACK and MAPPER_OVER, if specified, conform the lexical
+   address of a mapper function.  See pkl-env.h for a description of
+   lexical addresses.  */
 
 #define PKL_AST_MAP_TYPE(AST) ((AST)->map.type)
 #define PKL_AST_MAP_OFFSET(AST) ((AST)->map.offset)
+#define PKL_AST_MAP_MAPPER_BACK(AST) ((AST)->map.mapper_back)
+#define PKL_AST_MAP_MAPPER_OVER(AST) ((AST)->map.mapper_over)
 
 struct pkl_ast_map
 {
@@ -882,6 +889,8 @@ struct pkl_ast_map
 
   union pkl_ast_node *type;
   union pkl_ast_node *offset;
+  int mapper_back;
+  int mapper_over;
 };
 
 pkl_ast_node pkl_ast_make_map (pkl_ast ast,

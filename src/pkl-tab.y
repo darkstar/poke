@@ -405,6 +405,38 @@ expression:
                 {
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
+
+                    /* If the type specifier is of a struct, then look
+                       for the lexical address of its mapper function
+                       in the compilation environment and set it in
+                       the map AST node.  */
+
+                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
+                      {
+                        int mapper_back;
+                        int mapper_over;
+                        
+                        const char *type_name
+                          = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
+                          
+                        char *mapper_name = xmalloc (strlen (type_name) +
+                                                     strlen ("_pkl_mapper_") + 1);
+                        
+                        pkl_ast_node mapper_decl;
+
+                        strcpy (mapper_name, "_pkl_mapper_");
+                        strcat (mapper_name, type_name);
+                        
+                        mapper_decl = pkl_env_lookup (pkl_parser->env,
+                                                      mapper_name,
+                                                      &mapper_back, &mapper_over);
+                        assert (mapper_decl);
+
+                        PKL_AST_MAP_MAPPER_BACK($$) = mapper_back;
+                        PKL_AST_MAP_MAPPER_OVER($$) = mapper_over;
+
+                        free (mapper_name);
+                      }
                 }
         | UNIT
 		{
@@ -690,6 +722,7 @@ simple_type_specifier:
                   assert (decl != NULL
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
+                  PKL_AST_TYPE_NAME($$) = ASTREF ($1);
                   PKL_AST_LOC ($$) = @$;
                 }
         | STRING
@@ -876,6 +909,65 @@ declaration:
                                  "the type `%s' is already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       YYERROR;
+                    }
+
+                  /* If the type is a struct, register the mapping and
+                     the constructor functions.  In both cases, the
+                     INITIAL of the declaration are the struct type
+                     itself.  That is what will be used by subsequent
+                     passes in the compiler to build these function
+                     bodies.  */
+                  if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
+                    {
+                      const char *type_name = PKL_AST_IDENTIFIER_POINTER ($2);
+
+                      char *mapper_name = xmalloc (strlen (type_name) +
+                                                   strlen ("_pkl_mapper_") + 1);
+                      char *constructor_name = xmalloc (strlen (type_name) +
+                                                        strlen ("_pkl_constructor_") + 1);
+
+                      
+                      strcpy (mapper_name, "_pkl_mapper_");
+                      strcat (mapper_name, type_name);
+                      
+                      strcpy (constructor_name, "_pkl_constructor_");
+                      strcat (constructor_name, type_name);
+                      
+                      {
+                        pkl_ast_node mapper_identifier
+                          = pkl_ast_make_identifier (pkl_parser->ast, mapper_name);
+                        pkl_ast_node constructor_identifier
+                          = pkl_ast_make_identifier (pkl_parser->ast, constructor_name);
+
+                        pkl_ast_node mapper_decl
+                          = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_FUNC,
+                                               mapper_identifier,
+                                               $4,
+                                               pkl_parser->filename);
+                      
+                        pkl_ast_node constructor_decl
+                          = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_FUNC,
+                                               constructor_identifier,
+                                               $4,
+                                               pkl_parser->filename);
+
+                        if (!pkl_env_register (pkl_parser->env,
+                                               mapper_name,
+                                               mapper_decl))
+                          /* This should never happen.  */
+                          assert (0);
+
+                        if (!pkl_env_register (pkl_parser->env,
+                                               constructor_name,
+                                               constructor_decl))
+                          /* This should never happen.  */
+                          assert (0);
+
+                        free (mapper_name);
+                        free (constructor_name);
+                      }
                     }
                 }
         ;

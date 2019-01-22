@@ -99,22 +99,19 @@ print_fun_decl (pkl_ast_node decl, void *data)
   pkl_ast_loc loc = PKL_AST_LOC (decl);
   char *source =  PKL_AST_DECL_SOURCE (decl);
   int back, over;
-  pvm_val val;
 
   pkl_env compiler_env = pkl_get_env (poke_compiler);
-  pvm_env runtime_env = pvm_get_env (poke_vm);
 
-  /* XXX This is not needed.  */
-  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC)
+  /* Skip mappers, i.e. function declarations whose initials are
+     actually struct types, and not function literals.  */
+
+  if (PKL_AST_CODE (func) != PKL_AST_FUNC)
     return;
-
+    
   assert (pkl_env_lookup (compiler_env,
                           PKL_AST_IDENTIFIER_POINTER (decl_name),
                           &back, &over) != NULL);
 
-  val = pvm_env_lookup (runtime_env, back, over);
-  assert (val != PVM_NULL);
-                              
   /* Print the name and the type of the function.  */
   fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
   fputs ("\t\t", stdout);
