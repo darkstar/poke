@@ -80,6 +80,12 @@ early-header-c
 #   include "pvm.h"
 #   include "ios.h"
 
+    /* Note the values for the exceptions should match the ones
+       declared in pkl-rt.pkl  */
+#   define E_GENERIC     0
+#   define E_DIV_BY_ZERO 1
+#   define E_NO_IOS      2
+
     struct pvm_exception_handler
     {
       int exception;
@@ -658,7 +664,7 @@ end
 instruction divi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_INT_SIZE (a); \
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -669,7 +675,7 @@ end
 instruction diviu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_UINT_SIZE (a); \
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
     res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -680,7 +686,7 @@ end
 instruction divl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_LONG_SIZE (a); \
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
     res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -691,7 +697,7 @@ end
 instruction divlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
     res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -702,7 +708,7 @@ end
 instruction modi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_INT_SIZE (a); \
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -713,7 +719,7 @@ end
 instruction modiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_UINT_SIZE (a); \
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -724,7 +730,7 @@ end
 instruction modl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_LONG_SIZE (a); \
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
     res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -735,7 +741,7 @@ end
 instruction modlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (0); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
     res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -1808,7 +1814,7 @@ instruction peeki (?n,?n,?n)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1839,7 +1845,7 @@ instruction peekiu (?n,?n)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1871,7 +1877,7 @@ instruction peekl (?n,?n,?n)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1902,7 +1908,7 @@ instruction peeklu (?n,?n)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1934,7 +1940,7 @@ instruction peekdi (?n) # XXX: avoid code duplication with peeki
     ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1965,7 +1971,7 @@ instruction peekdiu (?n) # XXX avoid code duplication with peekiu
      ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1997,7 +2003,7 @@ instruction peekdl (?n) # XXX avoid duplication with peekl
      ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2029,7 +2035,7 @@ instruction peekdlu (?n) # XXX avoid code duplication with peeklu
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2057,7 +2063,7 @@ instruction peeks ()
 
     /* XXX: use IO and a base register */
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (2);
+        PVM_RAISE (E_NO_IOS);
 
     JITTER_TOP_STACK () = pvm_make_string ("");
     /* XXX: WRITEME */
