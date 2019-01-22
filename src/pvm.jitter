@@ -1804,12 +1804,16 @@ instruction peeki (?n,?n,?n)
      enum ios_endian endian = JITTER_ARGN1;
      int bits = JITTER_ARGN2;
      int64_t value;
+     ios io;
      ios_off offset;
+
+     if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_int (ios_cur (), offset, 0,
+     if (ios_read_int (io, offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */ 
@@ -1831,12 +1835,16 @@ instruction peekiu (?n,?n)
      enum ios_endian endian = JITTER_ARGN0;
      int bits = JITTER_ARGN1;
      uint64_t value;
+     ios io;
      ios_off offset;
+
+     if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_uint (ios_cur (), offset, 0,
+     if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */ 
@@ -1859,12 +1867,16 @@ instruction peekl (?n,?n,?n)
      enum ios_endian endian = JITTER_ARGN1;
      int bits = JITTER_ARGN2;
      int64_t value;
+     ios io;
      ios_off offset;
+
+     if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_int (ios_cur (), offset, 0,
+     if (ios_read_int (io, offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */
@@ -1886,12 +1898,16 @@ instruction peeklu (?n,?n)
      enum ios_endian endian = JITTER_ARGN0;
      int bits = JITTER_ARGN1;
      uint64_t value;
+     ios io;
      ios_off offset;
+
+     if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_uint (ios_cur (), offset, 0,
+     if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */ 
@@ -1914,12 +1930,16 @@ instruction peekdi (?n) # XXX: avoid code duplication with peeki
     enum ios_nenc nenc = jitter_state_runtime.nenc;
     enum ios_endian endian = jitter_state_runtime.endian;
     int64_t value;
+    ios io;
     ios_off offset;
+
+    if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-    if (ios_read_int (ios_cur (), offset, 0,
+    if (ios_read_int (io, offset, 0,
                       bits, endian, nenc, &value) != IOS_OK)
       {
         /* XXX: raise an IO exception for a != EOF error.  */
@@ -1941,12 +1961,16 @@ instruction peekdiu (?n) # XXX avoid code duplication with peekiu
      enum ios_endian endian = jitter_state_runtime.endian;
      int bits = JITTER_ARGN0;
      uint64_t value;
+     ios io;
      ios_off offset;
+
+    if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_uint (ios_cur (), offset, 0,
+     if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
         /* XXX: raise an IO exception for a != EOF error.  */
@@ -1969,7 +1993,11 @@ instruction peekdl (?n) # XXX avoid duplication with peekl
      enum ios_endian endian = jitter_state_runtime.endian;
      int bits = JITTER_ARGN0;
      int64_t value;
+     ios io;
      ios_off offset;
+
+    if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1997,12 +2025,16 @@ instruction peekdlu (?n) # XXX avoid code duplication with peeklu
      enum ios_endian endian = jitter_state_runtime.endian;
      int bits = JITTER_ARGN0;
      uint64_t value;
+     ios io;
      ios_off offset;
+
+     if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
-     if (ios_read_uint (ios_cur (), offset, 0,
+     if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */
@@ -2021,7 +2053,12 @@ end
 
 instruction peeks ()
   code
+    ios io;
+
     /* XXX: use IO and a base register */
+    if ((io = ios_cur ()) == NULL)
+        PVM_RAISE (2);
+
     JITTER_TOP_STACK () = pvm_make_string ("");
     /* XXX: WRITEME */
   end

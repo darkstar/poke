@@ -40,8 +40,9 @@ defun print = (string str) __builtin_print__;
 
 deftype Exception = int<32>;
 
-defvar E_generic     = 0;
-defvar E_div_by_zero = 1;
+defvar E_generic      = 0;
+defvar E_div_by_zero  = 1;
+defvar E_no_ios       = 2;
 
 /* Default exception handler.
 
