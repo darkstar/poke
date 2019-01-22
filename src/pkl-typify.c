@@ -1015,7 +1015,7 @@ PKL_PHASE_END_HANDLER
    32-bit signed integer, which is the type currently used to denote
    an exception type.
 
-   Also, the exception expression in a CATCH-WHEN clause should be of
+   Also, the exception expression in a CATCH-IF clause should be of
    an integral type.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
@@ -1044,7 +1044,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
 
   if (try_catch_stmt_exp)
     {
-      pkl_ast_node exp_type = PKL_AST_FUNC_ARG_TYPE (try_catch_stmt_arg);
+      pkl_ast_node exp_type = PKL_AST_FUNC_ARG_TYPE (try_catch_stmt_exp);
 
       if (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_INTEGRAL)
         {

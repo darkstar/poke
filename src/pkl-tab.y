@@ -126,7 +126,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token DEFUN DEFSET DEFTYPE DEFVAR
 %token RETURN
 %token STRING
-%token TRY CATCH WHEN RAISE
+%token TRY CATCH RAISE
 
 /* Compiler builtins.  */
 
@@ -959,7 +959,7 @@ stmt:
                                                     $2, $4, NULL, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| TRY stmt CATCH WHEN expression comp_stmt
+	| TRY stmt CATCH IF expression comp_stmt
         	{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
                                                     $2, $6, NULL, $5);

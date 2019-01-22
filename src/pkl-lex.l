@@ -131,7 +131,6 @@ D [0-9]
 "as"		{ return AS; }
 "try"		{ return TRY; }
 "catch"		{ return CATCH; }
-"when"		{ return WHEN; }
 "raise"		{ return RAISE; }
 
 "uint<"         { return UINTCONSTR; }

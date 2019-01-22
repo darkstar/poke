@@ -648,7 +648,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_raise_stmt)
 }
 PKL_PHASE_END_HANDLER
 
-/* Exception numbers in try-catch-when statements should be ints.  */
+/* Exception numbers in try-catch-if statements should be ints.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_try_catch_stmt)
 {
