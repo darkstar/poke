@@ -1168,7 +1168,7 @@ pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp)
 
 pkl_ast_node
 pkl_ast_make_try_catch_stmt (pkl_ast ast, pkl_ast_node code,
-                             pkl_ast_node handler)
+                             pkl_ast_node handler, pkl_ast_node arg)
 {
   pkl_ast_node try_catch_stmt = pkl_ast_make_node (ast,
                                                    PKL_AST_TRY_CATCH_STMT);
@@ -1177,6 +1177,8 @@ pkl_ast_make_try_catch_stmt (pkl_ast ast, pkl_ast_node code,
 
   PKL_AST_TRY_CATCH_STMT_CODE (try_catch_stmt) = ASTREF (code);
   PKL_AST_TRY_CATCH_STMT_HANDLER (try_catch_stmt) = ASTREF (handler);
+  if (arg)
+    PKL_AST_TRY_CATCH_STMT_ARG (try_catch_stmt) = ASTREF (arg);
 
   return try_catch_stmt;
 }
@@ -1472,6 +1474,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_CODE (ast));
       pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_HANDLER (ast));
+      pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_ARG (ast));
       break;
 
     case PKL_AST_RAISE_STMT:
@@ -2038,6 +2041,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (try_catch_stmt_code, TRY_CATCH_STMT_CODE);
       PRINT_AST_SUBAST (try_catch_stmt_handler, TRY_CATCH_STMT_HANDLER);
+      PRINT_AST_SUBAST (try_catch_stmt_arg, TRY_CATCH_STMT_ARG);
       break;
 
     case PKL_AST_RAISE_STMT:

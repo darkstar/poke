@@ -1011,6 +1011,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* The argument to a TRY-CATCH statement, if specified, should be a
+   32-bit signed integer, which is the type currently used to denote
+   an exception type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node try_catch_stmt = PKL_PASS_NODE;
+  pkl_ast_node try_catch_stmt_arg = PKL_AST_TRY_CATCH_STMT_ARG (try_catch_stmt);
+
+  if (try_catch_stmt_arg)
+    {
+      pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (try_catch_stmt_arg);
+      
+      if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_INTEGRAL
+          || PKL_AST_TYPE_I_SIZE (arg_type) != 32
+          || PKL_AST_TYPE_I_SIGNED (arg_type) != 1)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
+                     "expected int<32> for exception type");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1029,6 +1058,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_ps_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
 
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_ps_op_not),

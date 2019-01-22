@@ -4,10 +4,24 @@ defun foo = () : int
   {
    try
      raise 1;
-   catch E_div_by_zero
-     print ("got division by zero exception\n");
+   catch (int e)
+   {
+     raise e;
+   }
    return 666;
   }
 
-/* { dg-command {print foo ()} } */
-/* { dg-output "got division by zero exception" } */
+defun bar = () : int
+  {
+   try
+     return foo ();
+   catch
+   {
+     print ("caught exception\n");
+   }
+
+   return 0;
+  }
+
+/* { dg-command {print bar ()} } */
+/* { dg-output "caught exception\n0" } */

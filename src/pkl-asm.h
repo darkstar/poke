@@ -155,7 +155,7 @@ void pkl_asm_endloop (pkl_asm pasm);
  * pkl_asm_endtry (pasm);
  */
 
-void pkl_asm_try (pkl_asm pasm);
+void pkl_asm_try (pkl_asm pasm, pkl_ast_node type);
 void pkl_asm_catch (pkl_asm pasm);
 void pkl_asm_endtry (pkl_asm pasm);
 

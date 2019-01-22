@@ -1002,10 +1002,12 @@ pkl_asm_endif (pkl_asm pasm)
    Thus, try-catch blocks use two labels.  */
 
 void
-pkl_asm_try (pkl_asm pasm)
+pkl_asm_try (pkl_asm pasm, pkl_ast_node arg)
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_TRY);
 
+  if (arg)
+    pasm->level->node1 = ASTREF (arg);
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
 
@@ -1023,16 +1025,28 @@ pkl_asm_catch (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
 
-  /* XXX: at this point the exception number is at the top of the
-     stack, as an int<32>.  Depending on the catch type, proceed
-     differently.  */
-  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  /* At this point the exception number is at the top of the stack.
+     If the catch block received an argument, push a new environment
+     and set it as a local.  Otherwise, just discard it.  */
+  
+  if (pasm->level->node1)
+    {
+      pkl_asm_insn (pasm, PKL_INSN_PUSHF);    
+      pkl_asm_insn (pasm, PKL_INSN_REGVAR);
+    }
+  else
+    pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
 
 void
 pkl_asm_endtry (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_TRY);
+
+  /* Pop the catch frame if it is was created.  */
+  if (pasm->level->node1)
+    pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
+
   pvm_append_label (pasm->program, pasm->level->label2);
 }
 

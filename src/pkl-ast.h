@@ -1114,10 +1114,15 @@ pkl_ast_node pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp);
    CODE is a statement that is executed.
 
    HANDLER is a statement that will be executed in case an exception
-   is raised while executing CODE.  */
+   is raised while executing CODE.
+
+   TYPE, if specified, is the argument to the catch clause.  The type
+   of the argument must be a signed 32-bit type, which is the type
+   used to denote exception types.  */
 
 #define PKL_AST_TRY_CATCH_STMT_CODE(AST) ((AST)->try_catch_stmt.code)
 #define PKL_AST_TRY_CATCH_STMT_HANDLER(AST) ((AST)->try_catch_stmt.handler)
+#define PKL_AST_TRY_CATCH_STMT_ARG(AST) ((AST)->try_catch_stmt.arg)
 
 struct pkl_ast_try_catch_stmt
 {
@@ -1125,10 +1130,12 @@ struct pkl_ast_try_catch_stmt
 
   union pkl_ast_node *code;
   union pkl_ast_node *handler;
+  union pkl_ast_node *arg;
 };
 
 pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
-                                          pkl_ast_node code, pkl_ast_node handler);
+                                          pkl_ast_node code, pkl_ast_node handler,
+                                          pkl_ast_node arg);
 
 /* PKL_AST_RAISE_STMT nodes represent raise statements, which are used
    in order to raise exceptions at the program level.

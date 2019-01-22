@@ -421,6 +421,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
     case PKL_AST_TRY_CATCH_STMT:
       PKL_PASS (PKL_AST_TRY_CATCH_STMT_CODE (node));
       PKL_PASS (PKL_AST_TRY_CATCH_STMT_HANDLER (node));
+      if (PKL_AST_TRY_CATCH_STMT_ARG (node))
+        PKL_PASS (PKL_AST_TRY_CATCH_STMT_ARG (node));
       break;
     case PKL_AST_RAISE_STMT:
       if (PKL_AST_RAISE_STMT_EXP (node))

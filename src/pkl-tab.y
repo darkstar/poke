@@ -953,11 +953,21 @@ stmt:
                                                  $2);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | TRY stmt CATCH stmt
+        | TRY stmt CATCH comp_stmt
         	{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
-                                                    $2, $4);
+                                                    $2, $4, NULL);
                   PKL_AST_LOC ($$) = @$;
+                }
+	| TRY stmt CATCH  '(' pushlevel function_arg ')' comp_stmt
+		{
+                  $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
+                                                    $2, $8, $6);
+                  PKL_AST_LOC ($$) = @$;
+
+                  /* Pop the frame introduced by `pushlevel'
+                     above.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	| RAISE ';'
         	{

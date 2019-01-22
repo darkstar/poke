@@ -26,7 +26,9 @@ defun quux = (int n) : int
    try
      return baz (n);
    catch
+   {
      print ("got exception\n");
+   }
    return 666;
   }
 
