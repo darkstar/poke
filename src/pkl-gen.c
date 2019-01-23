@@ -1156,6 +1156,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
       /* XXX: add mapper code for a struct elem type.  */
+      /* XXX: add constructor code for a struct elem type.  */
       /* Do not process the child nodes.  */
       PKL_PASS_BREAK;
     }
