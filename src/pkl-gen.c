@@ -33,8 +33,13 @@
 
 #define PKL_GEN_PAYLOAD ((pkl_gen_payload) PKL_PASS_PAYLOAD)
 
+/* XXX: avoid all this code duplication to support two assemblers.  */
+
 #define PKL_GEN_ASM                                     \
   (PKL_GEN_PAYLOAD->pasm[PKL_GEN_PAYLOAD->cur_pasm])
+
+#define PKL_GEN_ASM2                                    \
+  (PKL_GEN_PAYLOAD->pasm2[PKL_GEN_PAYLOAD->cur_pasm2])
 
 #define PKL_GEN_PUSH_ASM(new_pasm)                                    \
   do                                                                  \
@@ -44,12 +49,28 @@
     }                                                                 \
   while (0)
 
+#define PKL_GEN_PUSH_ASM2(new_pasm)                                     \
+  do                                                                    \
+    {                                                                   \
+      assert (PKL_GEN_PAYLOAD->cur_pasm2 < PKL_GEN_MAX_PASM);           \
+      PKL_GEN_PAYLOAD->pasm2[++(PKL_GEN_PAYLOAD->cur_pasm2)] = (new_pasm); \
+    }                                                                   \
+  while (0)
+
 #define PKL_GEN_POP_ASM                         \
   do                                            \
     {                                           \
       assert (PKL_GEN_PAYLOAD->cur_pasm > 0);   \
       PKL_GEN_PAYLOAD->cur_pasm -= 1;           \
     }                                           \
+  while (0)
+
+#define PKL_GEN_POP_ASM2                         \
+  do                                             \
+    {                                            \
+      assert (PKL_GEN_PAYLOAD->cur_pasm2 > 0);   \
+      PKL_GEN_PAYLOAD->cur_pasm2 -= 1;           \
+    }                                            \
   while (0)
 
 /*
@@ -107,12 +128,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
              Push assemblers for both functions and continue
              processing the initial.  */
 
+          /* Assembler for the mapper.  */
           PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                          PKL_GEN_PAYLOAD->compiler,
                                          0 /* guard_stack */,
                                          0 /* prologue */));
 
-          /* XXX: what about the struct constructor... */
+          /* Assembler for the constructor.  */
+          PKL_GEN_PUSH_ASM2 (pkl_asm_new (PKL_PASS_AST,
+                                          PKL_GEN_PAYLOAD->compiler,
+                                          0 /* guard_stack */,
+                                          0 /* prologue */));
 
           PKL_GEN_PAYLOAD->in_struct_decl = 1;
         }
@@ -147,12 +173,59 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_VAR:
-      /* Do nothing.  */
+      /* The value is in the stack.  Just register the variable.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       break;
     case PKL_AST_DECL_KIND_TYPE:
-      if (PKL_AST_TYPE_CODE (initial) != PKL_TYPE_STRUCT)
-        break;
-      /* fallthrough */
+      if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
+        {
+          /* Finish both the struct constructor and struct mapper
+             functions.  Note that this should be done in the same
+             order than the registration of declarations in the
+             compile-time environment (in pkl-tab.y).  */
+
+          pvm_program program;
+          pvm_val closure;
+
+          /* Finish the struct mapper.  */
+          {
+            program = pkl_asm_finish (PKL_GEN_ASM,
+                                      0 /* epilogue */);
+          
+            PKL_GEN_POP_ASM;
+            pvm_specialize_program (program);
+            closure = pvm_make_cls (program);
+          
+            /*XXX*/
+            pvm_print_program (stdout, program);
+            
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+          }
+            
+          /* Finish the struct constructor.  */
+          {
+            program = pkl_asm_finish (PKL_GEN_ASM2,
+                                      0 /* epilogue */);
+            
+            PKL_GEN_POP_ASM2;
+            pvm_specialize_program (program);
+            closure = pvm_make_cls (program);
+            
+            /*XXX*/
+            pvm_print_program (stdout, program);
+            
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+          }
+
+          PKL_GEN_PAYLOAD->in_struct_decl = 0;
+        }
+      break;
     case PKL_AST_DECL_KIND_FUNC:
       {
         /* At this point the code for the function specification
@@ -173,30 +246,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
-
-        /* XXX: what about the struct constructor... */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
         break;
       }
     default:
       assert (0);
       break;
-    }
-
-  /* Register the declared entity, unless it is a type.  Types are not
-     variables.  */
-  if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE
-      || PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
-    {
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-
-      if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE)
-        {
-          /* XXX placeholder for the struct constructor */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-        }
-
-      PKL_GEN_PAYLOAD->in_struct_decl = 0;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1001,29 +1056,48 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 {
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
-      /* This is a struct mapper prologue.  */
+      /* Generating code for the struct mapper and constructor
+         functions.  */
 
       pkl_ast_node decl_name = PKL_AST_DECL_NAME (PKL_PASS_PARENT);
       char *type_name = PKL_AST_IDENTIFIER_POINTER (decl_name);
       char *mapper_name = xmalloc (strlen (type_name) +
                                     strlen ("_pkl_mapper_") + 1);
+      char *constructor_name = xmalloc (strlen (type_name) +
+                                        strlen ("_pkl_constructor_") + 1);
 
       strcpy (mapper_name, "_pkl_mapper_");
       strcat (mapper_name, type_name);
+      strcpy (constructor_name, "_pkl_constructor_");
+      strcat (constructor_name, type_name);
 
-      pkl_asm_note (PKL_GEN_ASM, mapper_name);
-      free (mapper_name);
-      
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+      /* Build the struct mapper prologue.  */
+      {
+        pkl_asm_note (PKL_GEN_ASM, mapper_name);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+        
+        /* Push the struct environment, for the arguments and local
+           variables.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 
-      /* Push the struct environment, for the arguments and local
-         variables.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-
-      /* Put the arguments in the current environment:
+        /* Put the arguments in the current environment:
          
-         OFFSET: offset of the struct to map.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+           OFFSET: offset of the struct to map.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+      }
+
+      /* Build the struct constructor prologue.  */
+      {
+        pkl_asm_note (PKL_GEN_ASM2, constructor_name);
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_PROLOG);
+        
+        /* Push the struct environment, for the arguments and local
+           variables.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+      }
+
+      free (mapper_name);
+      free (constructor_name);
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1040,16 +1114,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 {
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
-      /* Struct mapper epilogue.  */
+      /* Generating code for the struct mapper and constructor
+         functions.  */
 
-      /* XXX: create an empty struct for the moment.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                    pvm_make_ulong (0, 64));
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+      /* Struct mapper epilogue.  */
+      {
+        /* XXX: create an empty struct for the moment.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                      pvm_make_ulong (0, 64));
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
       
-      /* Pop the struct's environment and return.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+        /* Pop the struct's environment and return.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+      }
+
+      /* Struct constructor epilogue.  */
+      {
+        /* XXX: create an empty struct for the moment.  */
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_PUSH,
+                      pvm_make_ulong (0, 64));
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_MKSCT);
+      
+        /* Pop the struct's environment and return.  */
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_POPF, 1);
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_RETURN);
+      }
     }
   else
     {

@@ -36,11 +36,16 @@
    will just increase this, thats a promise :P */
 #define PKL_GEN_MAX_PASM 25
 
+/* Document the members and the support for two concurrent
+   assemblers.  */
+
 struct pkl_gen_payload
 {
   pkl_compiler compiler;
   pkl_asm pasm[PKL_GEN_MAX_PASM];
+  pkl_asm pasm2[PKL_GEN_MAX_PASM];
   int cur_pasm;
+  int cur_pasm2;
   pvm_program program;
   int in_struct_decl;
 };
