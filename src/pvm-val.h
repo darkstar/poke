@@ -206,7 +206,7 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
    mapped.  If the structure is not mapped then this is PVM_NULL.
 
    TYPE is the type of the struct.  This includes the types of the
-   struct elements.
+   struct elements.  XXX: really needed??
 
    NELEM is the number of elements conforming the structure.
 
@@ -237,9 +237,9 @@ struct pvm_struct
    NAME is a string containing the name of the struct element.  This
    name should be unique in the struct.
 
-   VALUE is the value contained in the element.  If the element is
-   mapped then this can contain either a cached value, or
-   PVM_NULL.  */
+   VALUE is the value contained in the element.  If the struct is
+   mapped then this is the cached value, which is returned by
+   `sref'.  */
 
 #define PVM_VAL_SCT_ELEM_OFFSET(V,I) (PVM_VAL_SCT_ELEM((V),(I)).offset)
 #define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
