@@ -1024,8 +1024,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
          
          OFFSET: offset of the struct to map.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-      
-      //      PKL_PASS_BREAK;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1043,6 +1041,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
       /* Struct mapper epilogue.  */
+
       /* XXX: create an empty struct for the moment.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                     pvm_make_ulong (0, 64));
