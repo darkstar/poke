@@ -10,7 +10,7 @@
 This document describes the internals of GNU poke (version
 @value{VERSION}, @value{UPDATED}).
 
-Copyright @copyright{} 2018 Jose E. Marchesi
+Copyright @copyright{} 2019 Jose E. Marchesi
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -49,6 +49,7 @@ Documentation License''.
 * The Source Tree::
 * Poke Architecture::
 * The PKL Compiler::
+* The Poke Virtual Machine::
 * Debugging Poke::
 
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -408,6 +409,50 @@ Reverse the list of actual arguments in function calls, so the code
 generator tackles them in the right (reversed) order, as it is
 expected by the callee.
 @end itemize
+
+@node The Poke Virtual Machine
+@chapter The Poke Virtual Machine
+
+@section Exception Handling
+
+Exception types are signed 32-bit integers, and are defined in
+@file{src/pkl-rt.pkl}.
+
+There are two ways an exception can be raised in the PVM:
+
+@itemize
+@item Explicitly, when the instruction @code{raise} is executed.
+@item Implicitly, when some instruction needs to fail.  For example,
+      an integer division instruction divides by zero.
+@end itemize
+
+In either case, the treatment of a raised exception is the same:
+
+@enumerate
+@item
+Pop an exception handler from the exception handler stack.
+@item
+If the exception handler matches the raised exception type, then
+@enumerate
+@item
+Restore the heights of the main and return stacks.
+@item
+Restore the dynamic environment.
+@item
+Push the cached exception type to the stack.
+@item
+Branch to the exception handler.
+@end enumerate
+@item
+Back to 1.
+@end enumerate
+
+The default exception handler, which catches ``unhandled'' exceptions,
+is installed by the macro-assembler in
+@file{src/pkl-asm.c:pkl_asm_new} and
+@file{src/pkl-asm.c:pkl_asm_finish}.  It calls the function
+@code{_pkl_exception_handler}, that is defined in the compiler runtime
+in @file{src/pkl-rt.pkl}.
 
 @node Debugging Poke
 @chapter Debugging Poke

@@ -6,7 +6,7 @@
 @comment %**end of header
 
 @copying
-Copyright @copyright{} 2018 Jose E. Marchesi
+Copyright @copyright{} 2019 Jose E. Marchesi
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
