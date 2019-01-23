@@ -205,6 +205,9 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
    OFFSET is the offset in the current IO space where the structure is
    mapped.  If the structure is not mapped then this is PVM_NULL.
 
+   TYPE is the type of the struct.  This includes the types of the
+   struct elements.
+
    NELEM is the number of elements conforming the structure.
 
    ELEMS is a list of elements.  The order of the elements is
@@ -212,12 +215,14 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 
 #define PVM_VAL_SCT(V) (PVM_VAL_BOX_SCT (PVM_VAL_BOX ((V))))
 #define PVM_VAL_SCT_OFFSET(V) (PVM_VAL_SCT((V))->offset)
+#define PVM_VAL_SCT_TYPE(V) (PVM_VAL_SCT((V))->type)
 #define PVM_VAL_SCT_NELEM(V) (PVM_VAL_SCT((V))->nelem)
 #define PVM_VAL_SCT_ELEM(V,I) (PVM_VAL_SCT((V))->elems[(I)])
 
 struct pvm_struct
 {
   pvm_val offset;
+  pvm_val type;
   pvm_val nelem;
   struct pvm_struct_elem *elems;
 };
@@ -233,21 +238,18 @@ struct pvm_struct
    name should be unique in the struct.
 
    VALUE is the value contained in the element.  If the element is
-   mapped then this can contain either a cached value, or PVM_NULL.
-
-   TYPE is the type of the contained value.  */
+   mapped then this can contain either a cached value, or
+   PVM_NULL.  */
 
 #define PVM_VAL_SCT_ELEM_OFFSET(V,I) (PVM_VAL_SCT_ELEM((V),(I)).offset)
 #define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
 #define PVM_VAL_SCT_ELEM_VALUE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).value)
-#define PVM_VAL_SCT_ELEM_TYPE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).type)
 
 struct pvm_struct_elem
 {
   pvm_val offset;
   pvm_val name;
   pvm_val value;
-  pvm_val type;
 };
 
 typedef struct pvm_struct *pvm_struct;
@@ -265,6 +267,7 @@ pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
 #define PVM_VAL_TYP_A_NELEM(V) (PVM_VAL_TYP((V))->val.array.nelem)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
+#define PVM_VAL_TYP_S_NAME(V) (PVM_VAL_TYP((V))->val.sct.name)
 #define PVM_VAL_TYP_S_NELEM(V) (PVM_VAL_TYP((V))->val.sct.nelem)
 #define PVM_VAL_TYP_S_ENAMES(V) (PVM_VAL_TYP((V))->val.sct.enames)
 #define PVM_VAL_TYP_S_ETYPES(V) (PVM_VAL_TYP((V))->val.sct.etypes)
@@ -302,6 +305,7 @@ struct pvm_type
 
     struct
     {
+      pvm_val name;
       pvm_val nelem;
       pvm_val *enames;
       pvm_val *etypes;

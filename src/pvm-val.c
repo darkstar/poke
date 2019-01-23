@@ -104,6 +104,8 @@ pvm_make_struct (pvm_val nelem)
   pvm_struct sct = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_struct));
   size_t nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
 
+  sct->offset = PVM_NULL;
+  sct->type = PVM_NULL; /* XXX add type in constructor.  */
   sct->nelem = nelem;
   sct->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
   memset (sct->elems, 0, nbytes);
