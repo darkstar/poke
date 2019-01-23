@@ -147,7 +147,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
         closure = pvm_make_cls (program);
 
         /*XXX*/
-        //        pvm_print_program (stdout, program);
+        /*        pvm_print_program (stdout, program); */
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -164,7 +164,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
      variables.  */
   if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_TYPE
       || PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+    {
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+
+      if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE)
+        {
+          /* XXX placeholder for the struct constructor */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -947,9 +956,51 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
+  PKL_PHASE_PARENT (5,
+                    PKL_AST_DECL,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
-  /* Push a frame to the environment.  */
-  /* XXX */
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL)
+    {
+      /* This is a struct mapper prologue.  */
+
+      pkl_ast_node decl_name = PKL_AST_DECL_NAME (PKL_PASS_PARENT);
+      char *type_name = PKL_AST_IDENTIFIER_POINTER (decl_name);
+      char *mapper_name = xmalloc (strlen (type_name) +
+                                    strlen ("_pkl_mapper_") + 1);
+
+      strcpy (mapper_name, "_pkl_mapper_");
+      strcat (mapper_name, type_name);
+
+      pkl_asm_note (PKL_GEN_ASM, mapper_name);
+      free (mapper_name);
+      
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+
+      /* Push the struct environment, for the arguments and local
+         variables.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+
+      /* Put the arguments in the current environment:
+         
+         OFFSET: offset of the struct to map.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+      
+      /* XXX: create an empty struct for the moment.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                    pvm_make_ulong (0, 64));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+
+      /* Pop the struct's environment and return.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+
+      PKL_PASS_BREAK;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -968,13 +1019,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
- pkl_asm pasm = PKL_GEN_ASM;
-
- pkl_asm_insn (pasm, PKL_INSN_PUSH,
-               pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
- pkl_asm_insn (pasm, PKL_INSN_MKTYSCT);
-
- /* XXX: pop N+1 frames from the environment.  */
+  pkl_asm pasm = PKL_GEN_ASM;
+      
+  pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
+  pkl_asm_insn (pasm, PKL_INSN_MKTYSCT);
 }
 PKL_PHASE_END_HANDLER
 
