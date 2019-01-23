@@ -328,6 +328,11 @@ pkl_do_pass_1 (jmp_buf toplevel,
       PKL_PASS (PKL_AST_MAP_OFFSET (node));
 
       break;
+    case PKL_AST_SCONS:
+      PKL_PASS (PKL_AST_SCONS_TYPE (node));
+      PKL_PASS (PKL_AST_SCONS_VALUE (node));
+      
+      break;
     case PKL_AST_TYPE:
       {
         switch (PKL_AST_TYPE_CODE (node))

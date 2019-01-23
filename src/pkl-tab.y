@@ -438,6 +438,51 @@ expression:
                         free (mapper_name);
                       }
                 }
+	| TYPENAME struct
+          	{
+                  pkl_ast_node type;
+                  pkl_ast_node constructor_decl;
+                  const char *type_name;
+                  char *constructor_name;
+                  int constructor_back, constructor_over;
+
+                  pkl_ast_node decl = pkl_env_lookup (pkl_parser->env,
+                                                      PKL_AST_IDENTIFIER_POINTER ($1),
+                                                      NULL, NULL);
+                  assert (decl != NULL
+                          && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
+
+                  type = PKL_AST_DECL_INITIAL (decl);
+                  if (PKL_AST_TYPE_CODE (type) != PKL_TYPE_STRUCT)
+                    {
+                      pkl_error (pkl_parser->ast, @1,
+                                 "expected struct type in constructor");
+                      YYERROR;
+                    }
+                  PKL_AST_TYPE_NAME (type) = ASTREF ($1);
+
+                  type_name =
+                    PKL_AST_IDENTIFIER_POINTER ($1);
+
+                  constructor_name = xmalloc (strlen (type_name) +
+                                              strlen ("_pkl_constructor_") + 1);
+                  strcpy (constructor_name, "_pkl_mapper_");
+                  strcat (constructor_name, type_name);
+
+                  constructor_decl = pkl_env_lookup (pkl_parser->env,
+                                                     constructor_name,
+                                                     &constructor_back, &constructor_over);
+                  assert (constructor_decl);
+
+                  $$ = pkl_ast_make_scons (pkl_parser->ast,
+                                           type,
+                                           $2,
+                                           constructor_back,
+                                           constructor_over);
+                  PKL_AST_LOC ($$) = @$;
+
+                  free (constructor_name);
+        	}
         | UNIT
 		{
                     $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $1);

@@ -49,6 +49,7 @@ enum pkl_ast_code
   PKL_AST_OFFSET,
   PKL_AST_CAST,
   PKL_AST_MAP,
+  PKL_AST_SCONS,
   PKL_AST_FUNCALL,
   PKL_AST_FUNCALL_ARG,
   PKL_AST_VAR,
@@ -897,6 +898,37 @@ pkl_ast_node pkl_ast_make_map (pkl_ast ast,
                                pkl_ast_node type,
                                pkl_ast_node offset);
 
+/* PKL_AST_SCONS nodes represent struct constructors.
+
+   TYPE is a struct type.
+
+   VALUE is a struct value.
+
+   CONSTRUCTOR_BACK and CONSTRUCTOR_OVER conform the lexical address
+   of a constructor function.  See pkl-env.h for a description of
+   lexical addresses.  */
+
+#define PKL_AST_SCONS_TYPE(AST) ((AST)->scons.type)
+#define PKL_AST_SCONS_VALUE(AST) ((AST)->scons.value)
+#define PKL_AST_SCONS_CONSTRUCTOR_BACK(AST) ((AST)->scons.constructor_back)
+#define PKL_AST_SCONS_CONSTRUCTOR_OVER(AST) ((AST)->scons.constructor_over)
+
+struct pkl_ast_scons
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *type;
+  union pkl_ast_node *value;
+  int constructor_back;
+  int constructor_over;
+};
+
+pkl_ast_node pkl_ast_make_scons (pkl_ast ast,
+                                 pkl_ast_node type,
+                                 pkl_ast_node value,
+                                 int constructor_back,
+                                 int constructor_over);
+
 /* PKL_AST_FUNCALL nodes represent the invocation of a function.
 
    FUNCTION is a variable with the function being invoked.
@@ -1192,6 +1224,7 @@ union pkl_ast_node
   struct pkl_ast_offset offset;
   struct pkl_ast_cast cast;
   struct pkl_ast_map map;
+  struct pkl_ast_scons scons;
   struct pkl_ast_funcall funcall;
   struct pkl_ast_funcall_arg funcall_arg;
   struct pkl_ast_var var;

@@ -686,6 +686,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
     case PKL_AST_FUNC:
     case PKL_AST_FUNC_ARG:
     case PKL_AST_VAR:
+    case PKL_AST_SCONS:
     case PKL_AST_MAP:
       PKL_PASS_BREAK;
       break;
@@ -796,6 +797,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
        reorder fields.  */
     assert (0);
 
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | SCONS_VALUE
+ * SCONS
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_scons)
+{
+  pkl_ast_node scons = PKL_PASS_NODE;
+
+  /* Call the constructor function of the struct type, whose lexical
+     address is stored in the scons AST node, passing SCONS_VALUE as
+     an argument.  The constructor will return a struct on the top of
+     the stack.
+
+     XXX: install an exception handler for constraint errors, etc.  */
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                PKL_AST_SCONS_CONSTRUCTOR_BACK (scons),
+                PKL_AST_SCONS_CONSTRUCTOR_OVER (scons));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1057,9 +1081,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
         
         /* Push the struct environment, for the arguments and local
            variables.  */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_PUSHF);
 
-        /* XXX register arguments.  */
+        /* Put the arguments in the current environment:
+         
+           BASE_VALUE: struct value.  */
+        pkl_asm_insn (PKL_GEN_ASM2, PKL_INSN_REGVAR);
       }
 
       free (mapper_name);
@@ -1591,6 +1618,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_gen_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_gen_ps_cast),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_gen_ps_map),
+   PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_ps_array_ref),
    PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),

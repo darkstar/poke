@@ -940,6 +940,31 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of a struct constructor is the type specified before the
+   struct value.  It should be a struct type.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node scons = PKL_PASS_NODE;
+  pkl_ast_node scons_type = PKL_AST_SCONS_TYPE (scons);
+
+  /* This check is currently redundant, because it is already done in
+     the parser.  */
+  if (PKL_AST_TYPE_CODE (scons_type) != PKL_TYPE_STRUCT)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (scons_type),
+                 "expected struct type in constructor");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+  
+  PKL_AST_TYPE (scons) = ASTREF (scons_type);
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of a variable reference is the type of its initializer.
    Note that due to the scope rules of the language it is guaranteed
    the type of the initializer has been already calculated.  */
@@ -1064,6 +1089,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_typify1_ps_var),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_typify1_ps_cast),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_typify1_ps_map),
+   PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_typify1_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_typify1_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_typify1_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_ps_array_ref),

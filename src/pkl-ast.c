@@ -1000,6 +1000,25 @@ pkl_ast_make_map (pkl_ast ast,
   return map;
 }
 
+/* Build and return an AST node for a struct constructor.  */
+
+pkl_ast_node
+pkl_ast_make_scons (pkl_ast ast,
+                    pkl_ast_node type, pkl_ast_node value,
+                    int constructor_back, int constructor_over)
+{
+  pkl_ast_node scons = pkl_ast_make_node (ast, PKL_AST_SCONS);
+
+  assert (type && value);
+
+  PKL_AST_SCONS_TYPE (scons) = ASTREF (type);
+  PKL_AST_SCONS_VALUE (scons) = ASTREF (value);
+  PKL_AST_SCONS_CONSTRUCTOR_BACK (scons) = constructor_back;
+  PKL_AST_SCONS_CONSTRUCTOR_OVER (scons) = constructor_over;
+
+  return scons;
+}
+
 /* Build and return an AST node for a function call.  */
 
 pkl_ast_node
@@ -1411,6 +1430,12 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_MAP_TYPE (ast));
       pkl_ast_node_free (PKL_AST_MAP_OFFSET (ast));
+      break;
+
+    case PKL_AST_SCONS:
+
+      pkl_ast_node_free (PKL_AST_SCONS_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_SCONS_VALUE (ast));
       break;
 
     case PKL_AST_FUNCALL:
@@ -1968,6 +1993,17 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (offset, MAP_OFFSET);
       PRINT_AST_IMM (mapper_back, MAP_MAPPER_BACK, "%d");
       PRINT_AST_IMM (mapper_over, MAP_MAPPER_OVER, "%d");
+      break;
+
+    case PKL_AST_SCONS:
+      IPRINTF ("SCONS::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (scons_type, SCONS_TYPE);
+      PRINT_AST_SUBAST (scons_value, SCONS_VALUE);
+      PRINT_AST_IMM (constructor_back, SCONS_CONSTRUCTOR_BACK, "%d");
+      PRINT_AST_IMM (constructor_over, SCONS_CONSTRUCTOR_OVER, "%d");
       break;
 
     case PKL_AST_FUNCALL:
