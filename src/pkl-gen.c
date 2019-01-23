@@ -33,45 +33,33 @@
 
 #define PKL_GEN_PAYLOAD ((pkl_gen_payload) PKL_PASS_PAYLOAD)
 
-/* XXX: avoid all this code duplication to support two assemblers.  */
+#define PKL_GEN_AN_ASM(ASM)                             \
+  (PKL_GEN_PAYLOAD->ASM[PKL_GEN_PAYLOAD->cur_##ASM])
 
-#define PKL_GEN_ASM                                     \
-  (PKL_GEN_PAYLOAD->pasm[PKL_GEN_PAYLOAD->cur_pasm])
+#define PKL_GEN_ASM  PKL_GEN_AN_ASM(pasm)
+#define PKL_GEN_ASM2 PKL_GEN_AN_ASM(pasm2)
 
-#define PKL_GEN_ASM2                                    \
-  (PKL_GEN_PAYLOAD->pasm2[PKL_GEN_PAYLOAD->cur_pasm2])
-
-#define PKL_GEN_PUSH_ASM(new_pasm)                                    \
-  do                                                                  \
-    {                                                                 \
-      assert (PKL_GEN_PAYLOAD->cur_pasm < PKL_GEN_MAX_PASM);          \
-      PKL_GEN_PAYLOAD->pasm[++(PKL_GEN_PAYLOAD->cur_pasm)] = (new_pasm); \
-    }                                                                 \
-  while (0)
-
-#define PKL_GEN_PUSH_ASM2(new_pasm)                                     \
+#define PKL_GEN_PUSH_AN_ASM(ASM,new_pasm)                               \
   do                                                                    \
     {                                                                   \
-      assert (PKL_GEN_PAYLOAD->cur_pasm2 < PKL_GEN_MAX_PASM);           \
-      PKL_GEN_PAYLOAD->pasm2[++(PKL_GEN_PAYLOAD->cur_pasm2)] = (new_pasm); \
+      assert (PKL_GEN_PAYLOAD->cur_##ASM < PKL_GEN_MAX_PASM);           \
+      PKL_GEN_PAYLOAD->ASM[++(PKL_GEN_PAYLOAD->cur_##ASM)] = (new_pasm); \
     }                                                                   \
   while (0)
+  
+#define PKL_GEN_PUSH_ASM(new_pasm)  PKL_GEN_PUSH_AN_ASM(pasm,new_pasm)
+#define PKL_GEN_PUSH_ASM2(new_pasm) PKL_GEN_PUSH_AN_ASM(pasm2,new_pasm)
 
-#define PKL_GEN_POP_ASM                         \
-  do                                            \
-    {                                           \
-      assert (PKL_GEN_PAYLOAD->cur_pasm > 0);   \
-      PKL_GEN_PAYLOAD->cur_pasm -= 1;           \
-    }                                           \
-  while (0)
-
-#define PKL_GEN_POP_ASM2                         \
+#define PKL_GEN_POP_AN_ASM(ASM)                  \
   do                                             \
     {                                            \
-      assert (PKL_GEN_PAYLOAD->cur_pasm2 > 0);   \
-      PKL_GEN_PAYLOAD->cur_pasm2 -= 1;           \
+      assert (PKL_GEN_PAYLOAD->cur_##ASM > 0);   \
+      PKL_GEN_PAYLOAD->cur_##ASM -= 1;           \
     }                                            \
   while (0)
+
+#define PKL_GEN_POP_ASM  PKL_GEN_POP_AN_ASM(pasm)
+#define PKL_GEN_POP_ASM2 PKL_GEN_POP_AN_ASM(pasm2)
 
 /*
  * PROGRAM
