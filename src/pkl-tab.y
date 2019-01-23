@@ -466,7 +466,7 @@ expression:
 
                   constructor_name = xmalloc (strlen (type_name) +
                                               strlen ("_pkl_constructor_") + 1);
-                  strcpy (constructor_name, "_pkl_mapper_");
+                  strcpy (constructor_name, "_pkl_constructor_");
                   strcat (constructor_name, type_name);
 
                   constructor_decl = pkl_env_lookup (pkl_parser->env,
