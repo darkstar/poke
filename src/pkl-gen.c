@@ -93,21 +93,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
   pkl_ast_node decl = PKL_PASS_NODE;
   pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
 
-  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC
-      || (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE
-          && (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)))
+  switch (PKL_AST_DECL_KIND (decl))
     {
-      /* INITIAL is either a PKL_AST_FUNC or a PKL_AST_TYPE of type
-         struct, that will compile into a program containing the
-         function code.  Push a new assembler to the stack of
-         assemblers in the payload and use it to process INITIAL.  */
+    case PKL_AST_DECL_KIND_TYPE:
+      if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
+        {
+          /* INITIAL is a struct type.  We need to compile two
+             functions from it:
 
+             - A mapper function.
+             - A constructor function.
+
+             Push assemblers for both functions and continue
+             processing the initial.  */
+
+          PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
+                                         PKL_GEN_PAYLOAD->compiler,
+                                         0 /* guard_stack */,
+                                         0 /* prologue */));
+
+          /* XXX: what about the struct constructor... */
+
+          PKL_GEN_PAYLOAD->in_struct_decl = 1;
+        }
+      break;
+    case PKL_AST_DECL_KIND_FUNC:
+
+      /* INITIAL is either a PKL_AST_FUNC, that will compile into a
+         program containing the function code.  Push a new assembler
+         to the stack of assemblers in the payload and use it to
+         process INITIAL.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                      PKL_GEN_PAYLOAD->compiler,
                                      0 /* guard_stack */,
                                      0 /* prologue */));
-
-      /* XXX: what about the struct constructor... */
+      break;
+    default:
+      break;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -173,6 +195,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
         }
+
+      PKL_GEN_PAYLOAD->in_struct_decl = 0;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -975,8 +999,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL)
+  if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
       /* This is a struct mapper prologue.  */
 
@@ -1017,15 +1040,25 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 {
-  /* Struct mapper epilogue.  */
-  /* XXX: create an empty struct for the moment.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                pvm_make_ulong (0, 64));
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
-  
-  /* Pop the struct's environment and return.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+  if (PKL_GEN_PAYLOAD->in_struct_decl)
+    {
+      /* Struct mapper epilogue.  */
+      /* XXX: create an empty struct for the moment.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                    pvm_make_ulong (0, 64));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+      
+      /* Pop the struct's environment and return.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+    }
+  else
+    {
+      /* We are generating a PVM struct type.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                    pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYSCT);
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1039,9 +1072,21 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
 {
-  /* XXX: add mapper code for a struct elem type.  */
-  /* Do not process the child nodes.  */
-  PKL_PASS_BREAK;
+  if (PKL_GEN_PAYLOAD->in_struct_decl)
+    {
+      /* XXX: add mapper code for a struct elem type.  */
+      /* Do not process the child nodes.  */
+      PKL_PASS_BREAK;
+    }
+  else
+    {
+      /* We are generating a PVM struct type.  */
+
+      /* If the struct type element doesn't include a name, generate a
+         null value as expected by the mktysct instruction.  */
+      if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+    }
 }
 PKL_PHASE_END_HANDLER
 

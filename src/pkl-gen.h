@@ -42,6 +42,7 @@ struct pkl_gen_payload
   pkl_asm pasm[PKL_GEN_MAX_PASM];
   int cur_pasm;
   pvm_program program;
+  int in_struct_decl;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
