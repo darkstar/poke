@@ -198,25 +198,56 @@ typedef struct pvm_array *pvm_array;
 
 pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 
-/* Structs are also boxed.  */
+/* Struct values are boxed, and store collections of named values
+   called structure "elements".  They can be mapped in IO, or
+   unmapped.
+
+   OFFSET is the offset in the current IO space where the structure is
+   mapped.  If the structure is not mapped then this is PVM_NULL.
+
+   NELEM is the number of elements conforming the structure.
+
+   ELEMS is a list of elements.  The order of the elements is
+   relevant.  */
 
 #define PVM_VAL_SCT(V) (PVM_VAL_BOX_SCT (PVM_VAL_BOX ((V))))
+#define PVM_VAL_SCT_OFFSET(V) (PVM_VAL_SCT((V))->offset)
 #define PVM_VAL_SCT_NELEM(V) (PVM_VAL_SCT((V))->nelem)
 #define PVM_VAL_SCT_ELEM(V,I) (PVM_VAL_SCT((V))->elems[(I)])
 
 struct pvm_struct
 {
+  pvm_val offset;
   pvm_val nelem;
   struct pvm_struct_elem *elems;
 };
 
+/* Struct elements hold the data of the elements, and/or information
+   on how to obtain these values.
+
+   OFFSET is the offset, relative to the struct's offset, where the
+   struct element is mapped.  If the structure is not mapped then this
+   is PVM_NULL.
+
+   NAME is a string containing the name of the struct element.  This
+   name should be unique in the struct.
+
+   VALUE is the value contained in the element.  If the element is
+   mapped then this can contain either a cached value, or PVM_NULL.
+
+   TYPE is the type of the contained value.  */
+
+#define PVM_VAL_SCT_ELEM_OFFSET(V,I) (PVM_VAL_SCT_ELEM((V),(I)).offset)
 #define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
 #define PVM_VAL_SCT_ELEM_VALUE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).value)
+#define PVM_VAL_SCT_ELEM_TYPE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).type)
 
 struct pvm_struct_elem
 {
+  pvm_val offset;
   pvm_val name;
   pvm_val value;
+  pvm_val type;
 };
 
 typedef struct pvm_struct *pvm_struct;
