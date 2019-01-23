@@ -147,7 +147,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
         closure = pvm_make_cls (program);
 
         /*XXX*/
-        /*        pvm_print_program (stdout, program); */
+        /* pvm_print_program (stdout, program); */
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -598,18 +598,30 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
 {
-  /* Avoid generating type nodes in certain circumstances.  */
-  if (PKL_PASS_PARENT
-      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRUCT
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_INTEGER
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_STRING
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_OFFSET
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_ARG
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_VAR
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_MAP))
-    PKL_PASS_BREAK;
+  /* Type nodes are handled by the code generator only in certain
+     circumstances.  In any other cases, break the pass to avoid
+     post-order hooks to be invoked.  */
+
+  switch (PKL_AST_CODE (PKL_PASS_PARENT))
+    {
+    case PKL_AST_DECL:
+      /* Declared struct type nodes should be processed in order to
+         generate the code for mapper and construction functions.  */
+      if (PKL_AST_TYPE_CODE (PKL_PASS_NODE) == PKL_TYPE_STRUCT)
+        break;
+    case PKL_AST_STRUCT:
+    case PKL_AST_INTEGER:
+    case PKL_AST_STRING:
+    case PKL_AST_OFFSET:
+    case PKL_AST_FUNC:
+    case PKL_AST_FUNC_ARG:
+    case PKL_AST_VAR:
+    case PKL_AST_MAP:
+      PKL_PASS_BREAK;
+      break;
+    default:
+      break;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -990,16 +1002,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
          OFFSET: offset of the struct to map.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       
-      /* XXX: create an empty struct for the moment.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                    pvm_make_ulong (0, 64));
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
-
-      /* Pop the struct's environment and return.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
-
-      PKL_PASS_BREAK;
+      //      PKL_PASS_BREAK;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1013,17 +1016,16 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_asm pasm = PKL_GEN_ASM;
-      
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
-  pkl_asm_insn (pasm, PKL_INSN_MKTYSCT);
+  /* Struct mapper epilogue.  */
+  /* XXX: create an empty struct for the moment.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                pvm_make_ulong (0, 64));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+  
+  /* Pop the struct's environment and return.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1036,16 +1038,10 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
-  /* If the struct type element doesn't include a name, generate a
-     null value as expected by the mktysct instruction.  */
-  if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+  /* XXX: add mapper code for a struct elem type.  */
+  /* Do not process the child nodes.  */
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
