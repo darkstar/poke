@@ -517,7 +517,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall_arg)
 PKL_PHASE_END_HANDLER
 
 /*
- * | [ARG]...
+ * | [ARG]
+ * | ...
  * | FUNCTION
  * FUNCALL
  */
@@ -534,7 +535,8 @@ PKL_PHASE_END_HANDLER
 /*
  * FUNC
  * | [TYPE]
- * | [FUNC_ARG]...
+ * | [FUNC_ARG]
+ * | ...
  * | BODY
  */
 
@@ -577,7 +579,8 @@ PKL_PHASE_END_HANDLER
 
 /*
  * | [TYPE]
- * | [FUNC_ARG]...
+ * | [FUNC_ARG]
+ * | ...
  * | BODY
  * FUNC
  */
@@ -958,9 +961,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 PKL_PHASE_END_HANDLER
 
 /*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
-    PKL_AST_STRUCT_ELEM_TYPE)
- * | TYPE_INTEGRAL
+ * TYPE_INTEGRAL
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
@@ -984,11 +985,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
 PKL_PHASE_END_HANDLER
 
 /*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
-    PKL_AST_STRUCT_ELEM_TYPE)
- * | | ETYPE
- * | | NELEM
- * | TYPE_ARRAY
+ * | ETYPE
+ * | NELEM
+ * TYPE_ARRAY
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
@@ -1003,9 +1002,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
 PKL_PHASE_END_HANDLER
 
 /*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
- *  PKL_AST_STRUCT_ELEM_TYPE)
- * | TYPE_STRING
+ * TYPE_STRING
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
@@ -1018,27 +1015,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
 PKL_PHASE_END_HANDLER
-
-#if 0
-/*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
- *  PKL_AST_STRUCT_ELEM_TYPE)
- * | | BASE_TYPE
- * | | UNIT
- * | TYPE_OFFSET
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
-{
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYO);
-}
-PKL_PHASE_END_HANDLER
-#endif
 
 /*
  * TYPE_STRUCT
@@ -1094,6 +1070,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
         /* Push the struct environment, for the arguments and local
            variables.  */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+
+        /* XXX register arguments.  */
       }
 
       free (mapper_name);
@@ -1103,11 +1081,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
- *  PKL_AST_STRUCT_ELEM_TYPE)
- * | | STRUCT_ELEM_TYPE
- * | | ...
- * | TYPE_STRUCT
+ * | STRUCT_ELEM_TYPE
+ * | ...
+ * TYPE_STRUCT
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
@@ -1152,11 +1128,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * (PKL_AST_ARRAY, PKL_AST_OFFSET, PKL_AST_TYPE,
- *  PKL_AST_STRUCT_ELEM_TYPE)
- * | STRUCT_ELEM_TYPE
- * | | [STRUCT_ELEM_TYPE_NAME]
- * | | STRUCT_ELEM_TYPE_TYPE
+ * STRUCT_ELEM_TYPE
+ * | [STRUCT_ELEM_TYPE_NAME]
+ * | STRUCT_ELEM_TYPE_TYPE
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
