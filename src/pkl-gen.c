@@ -1114,6 +1114,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                       pvm_make_ulong (0, 64));
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+
+        /* XXX: register IOS callback for updates, covering the whole
+           mapped area, i.e. [base-offset,current-offset].  */
       
         /* Pop the struct's environment and return.  */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
