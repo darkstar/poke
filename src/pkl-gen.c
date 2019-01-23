@@ -345,6 +345,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
   
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
                 PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
+
+  /* XXX: handle assignments to structs and struct fields.  This
+     should use the struct writer functions.  */
 }
 PKL_PHASE_END_HANDLER
 

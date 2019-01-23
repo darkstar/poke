@@ -27,7 +27,7 @@ end
 
 ## Register classes.
 
-register-class r 2
+register-class r 1
   code
     union jitter_word
   end
@@ -534,19 +534,39 @@ instruction pop ()
   end
 end
 
-instruction popr (!R)
-  code
-    pvm_val top = JITTER_TOP_STACK();
-    JITTER_DROP_STACK();
-    JITTER_ARGN0 = top;
-  end
-end
+# XXX: register_t in pvm_val? i.e. in 64 bits?
 
-instruction setr (!R)
-  code
-    JITTER_ARGN0 = JITTER_TOP_STACK();
-  end
-end
+#instruction pushr (?R)
+#  code
+#    JITTER_PUSH_STACK (JITTER_ARG0);
+#  end
+#end
+
+#instruction popr (!R)
+#  code
+#    JITTER_ARGN0 = JITTER_TOP_STACK ();
+#    JITTER_DROP_STACK ();
+#  end
+#end
+
+#instruction setr (!R)
+#  code
+#    JITTER_ARGN0 = JITTER_TOP_STACK();
+#  end
+#end
+
+#instruction saver (?R)
+#  code
+#    JITTER_PUSH_RETURNSTACK (JITTER_ARG0);
+#  end
+#end
+
+#instruction restorer (!R)
+#  code
+#    JITTER_ARG0 = JITTER_TOP_RETURNSTACK ();
+#    JITTER_DROP_RETURNSTACK ();
+#  end
+#end
 
 instruction sel () # VAL -> ULONG
   code
