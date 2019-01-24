@@ -265,6 +265,34 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+/* Variables that refer to parameterless functions are transformed
+   into funcalls to these functions, but only if the variables are not
+   part of funcall themselves! :) */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
+{
+  if (PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_FUNCALL)
+    {
+      pkl_ast_node var = PKL_PASS_NODE;
+      pkl_ast_node decl = PKL_AST_VAR_DECL (var);
+      pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
+      pkl_ast_node initial_type = PKL_AST_TYPE (initial);
+
+      if (PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_FUNCTION
+          && (PKL_AST_TYPE_F_NARG (initial_type) == 0))
+        {
+          pkl_ast_node funcall = pkl_ast_make_funcall (PKL_PASS_AST,
+                                                       var,
+                                                       NULL /* args */);
+          
+          PKL_AST_LOC (funcall) = PKL_AST_LOC (var);
+          PKL_PASS_NODE = funcall;
+          PKL_PASS_RESTART = 1;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* Finish strings, by expanding \-sequences, and emit errors if an
    invalid \-sequence is found.  */
 
@@ -342,6 +370,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans1_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_trans1_ps_string),
+   PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_trans1_ps_var),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
   };
