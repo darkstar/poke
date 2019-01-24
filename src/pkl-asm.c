@@ -1034,7 +1034,7 @@ pkl_asm_catch (pkl_asm pasm)
   /* XXX pkl_asm_note (pasm, "POP-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
-
+  
   /* At this point the exception number is at the top of the stack.
      If the catch block received an argument, push a new environment
      and set it as a local.  Otherwise, just discard it.  */

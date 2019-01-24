@@ -507,6 +507,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall_arg)
 }
 PKL_PHASE_END_HANDLER
 
+/* FUNCALL
+ * | [ARG]
+ * | ...
+ * | FUNCTION
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
+{
+  /* Save the used registers before calling the function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
+}
+PKL_PHASE_END_HANDLER
+
 /*
  * | [ARG]
  * | ...
@@ -520,6 +533,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
      in the stack.  Just call the bloody function.  */
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+
+  /* Restore the used registers after calling the function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 }
 PKL_PHASE_END_HANDLER
 
@@ -537,7 +553,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
   pkl_asm_note (PKL_GEN_ASM,
                 PKL_AST_FUNC_NAME (PKL_PASS_NODE));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
-  
+
   /* Push the function environment, for the arguments.  The
      compound-statement that is the body for the function will create
      it's own frame.  */
@@ -1609,6 +1625,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_gen_ps_raise_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL, pkl_gen_pr_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),

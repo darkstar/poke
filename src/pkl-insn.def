@@ -54,6 +54,8 @@ PKL_DEF_INSN (PKL_INSN_NIP, "", "nip")
 PKL_DEF_INSN (PKL_INSN_DUP, "", "dup")
 PKL_DEF_INSN (PKL_INSN_ROT, "", "rot")
 PKL_DEF_INSN (PKL_INSN_NROT, "", "nrot")
+PKL_DEF_INSN (PKL_INSN_SAVER, "r", "saver")
+PKL_DEF_INSN (PKL_INSN_RESTORER, "r", "restorer")
 
 /* Conversion instructions.  */
 
