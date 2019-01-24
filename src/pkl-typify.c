@@ -1178,19 +1178,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_return_stmt)
   returned_type = PKL_AST_TYPE (exp);
   expected_type = PKL_AST_FUNC_RET_TYPE (function);
 
-  if (expected_type
+  if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
       && !pkl_ast_type_equal (returned_type, expected_type))
     {
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
-      
+
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                  "returning an expression of the wrong type\n\
 expected %s, got %s",
                  expected_type_str, returned_type_str);
       free (expected_type_str);
       free (returned_type_str);
-
+      
       payload->errors++;
       PKL_PASS_ERROR;
     }
