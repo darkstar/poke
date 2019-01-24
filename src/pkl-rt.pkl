@@ -30,7 +30,7 @@
 
 /* Compiler built-ins.  */
 
-defun print = (string str) void : __builtin_print__;
+defun print = (string str) void: __builtin_print__;
 
 /* Exceptions.
 
@@ -51,7 +51,7 @@ defvar E_no_return    = 3;
    or be ready to underflow the exception handlers stack and face some
    ugly shit.  You have been warned!  */
 
-defun _pkl_exception_handler = (Exception exception) void :
+defun _pkl_exception_handler = (Exception exception) void:
   {
    print ("unhandled ");
 

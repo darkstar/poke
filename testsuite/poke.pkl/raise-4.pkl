@@ -14,5 +14,5 @@ defun foo = int:
    return 666;
   }
 
-/* { dg-command {print foo ()} } */
+/* { dg-command {print foo} } */
 /* { dg-output "got division by zero exception\n666" } */

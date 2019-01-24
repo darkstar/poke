@@ -2,5 +2,5 @@
 
 defun bomb = int:
   {
-   return bomb ();
+   return bomb;
   }

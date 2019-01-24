@@ -14,7 +14,7 @@ defun foo = int:
 defun bar = () int:
   {
    try
-     return foo ();
+     return foo;
    catch
    {
      print ("caught exception\n");
@@ -23,5 +23,5 @@ defun bar = () int:
    return 0;
   }
 
-/* { dg-command {print bar ()} } */
+/* { dg-command {print bar} } */
 /* { dg-output "caught exception\n0" } */
