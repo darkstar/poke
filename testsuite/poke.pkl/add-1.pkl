@@ -1,6 +1,6 @@
 /* { dg-do compile } */
 
-defun add_wrong = () void:
+defun add_wrong = void:
   {
    defvar a = 10;
    return a + "foo"; /* { dg-error "invalid operands" } */
