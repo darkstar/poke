@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun anoffset = () offset<int,B>:
+defun anoffset = offset<int,B>:
   {
    return 2#B;
   }
