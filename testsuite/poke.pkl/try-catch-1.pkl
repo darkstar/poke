@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun baz = (int n) : int
+defun baz = (int n) int:
 {
  defvar a = 100;
 

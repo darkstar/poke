@@ -1,12 +1,12 @@
 /* { dg-do run } */
 
-defun foo = (int n) : int
+defun foo = (int n) int:
 {
    defvar a = 100;
    return a / n;
 }
 
-defun baz = (int n) : int
+defun baz = (int n) int:
 {
    defvar ret = 0;
    

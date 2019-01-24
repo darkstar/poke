@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun defun_4 = (int i) : int
+defun defun_4 = (int i) int:
   {
    return i + 1;
   }

@@ -7,7 +7,7 @@ deftype Inode =
     uint32 next;
   };
 
-defun print_inodes = (inode)
+defun print_inodes = (inode) void:
 {
   print ("Perms: " + inode.perms);
   print_inode_data (inode.data);
@@ -16,7 +16,7 @@ defun print_inodes = (inode)
     print_inodes (Inode @ inode.next);
 }
 
-defun delete_second = (a)
+defun delete_second = (a) void:
 {
   return a[0]::a[2:];
 }

@@ -127,6 +127,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %token RETURN
 %token STRING
 %token TRY CATCH RAISE
+%token VOID
 
 /* Compiler builtins.  */
 
@@ -675,23 +676,10 @@ array_initializer:
  */
 
 function_specifier:
-          '(' pushlevel function_arg_list ')' comp_stmt
-          	{
-                  $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          NULL /* ret_type */,
-                                          $3, $5);
-                  /* XXX: create a function type and set $$'s type
-                     with it.  */
-                  PKL_AST_LOC ($$) = @$;
-
-                  /* Pop the frame introduced by `pushlevel'
-                     above.  */
-                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
-                }
-        | '(' pushlevel function_arg_list ')' ':' simple_type_specifier comp_stmt
+	  '(' pushlevel function_arg_list ')' simple_type_specifier ':' comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $6, $3, $7);
+                                          $5, $3, $7);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
@@ -768,6 +756,11 @@ simple_type_specifier:
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
                   PKL_AST_TYPE_NAME($$) = ASTREF ($1);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| VOID
+        	{
+                  $$ = pkl_ast_make_void_type (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
         | STRING

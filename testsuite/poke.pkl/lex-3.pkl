@@ -2,13 +2,13 @@
 
 defvar global = 0;
 
-defun increase = (int n) : int
+defun increase = (int n) int:
   {
    global = global + n;
    return 0;
   }
 
-defun indirect = (int n) : int
+defun indirect = (int n) int:
   {
    return increase (n);
   }

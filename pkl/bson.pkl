@@ -223,7 +223,7 @@ deftype bson_doc =
     byte endmark = 0x0;
   };
 
-defun print_bson_elements (bson_doc doc)
+defun print_bson_elements (bson_doc doc) void:
 {
   print ("size: " + doc.size);
   

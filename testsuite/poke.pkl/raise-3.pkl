@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = () : int
+defun foo = () int:
   {
    try
      raise 1;
@@ -11,7 +11,7 @@ defun foo = () : int
    return 666;
   }
 
-defun bar = () : int
+defun bar = () int:
   {
    try
      return foo ();

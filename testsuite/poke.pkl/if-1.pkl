@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun if_1 = (int i) : int
+defun if_1 = (int i) int:
 {
  defvar res = 0;
 

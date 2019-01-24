@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = (Exception e) : int
+defun foo = (Exception e) int:
   {
    try
      raise e;
@@ -12,7 +12,7 @@ defun foo = (Exception e) : int
    return 0;
   }
 
-defun bar = (Exception e) : int
+defun bar = (Exception e) int:
   {
    try
      return foo (e);

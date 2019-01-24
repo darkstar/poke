@@ -1,8 +1,8 @@
 /* { dg-do run } */
 
-defun baz = (int n) : int
+defun baz = (int n) int:
 {
-   defun foo = (int n) : int
+   defun foo = (int n) int:
    {
       defvar a = 100;
       if (n == 0)

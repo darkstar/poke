@@ -1,6 +1,6 @@
 /* { dg-do compile } */
 
-defun bomb = () : int
+defun bomb = () int:
   {
    return bomb ();
   }

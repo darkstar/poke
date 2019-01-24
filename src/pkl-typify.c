@@ -719,13 +719,12 @@ expected %s, got %s",
   PKL_AST_TYPE (funcall)
     = ASTREF (PKL_AST_TYPE_F_RTYPE (funcall_function_type));
 
-  /* If the called function is a void function, i.e. it doesn't return
-     any type, the parent of this funcall shouldn't expect a
-     value.  */
+  /* If the called function is a void function then the parent of this
+     funcall shouldn't expect a value.  */
   {
     int parent_code = PKL_AST_CODE (PKL_PASS_PARENT);
 
-    if (PKL_AST_TYPE (funcall) == NULL
+    if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (funcall)) == PKL_TYPE_VOID
         && (parent_code == PKL_AST_EXP
             || parent_code == PKL_AST_COND_EXP
             || parent_code == PKL_AST_ARRAY_INITIALIZER

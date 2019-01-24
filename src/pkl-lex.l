@@ -132,6 +132,7 @@ D [0-9]
 "try"		{ return TRY; }
 "catch"		{ return CATCH; }
 "raise"		{ return RAISE; }
+"void"		{ return VOID; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

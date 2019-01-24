@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun loop_3 = (int i) : int
+defun loop_3 = (int i) int:
   {
    if (i == 0)
      return 666;

@@ -600,15 +600,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func)
   pkl_ast_node function_type = PKL_AST_TYPE (function);
 
 
-  /* If the function returns a value, it is a run-time error to
-     reach this point.  */
-
-  /* XXX  */
-  
-  /* In a void function, return PVM_NULL in the stack.  */
-  if (!PKL_AST_TYPE_F_RTYPE (function_type))
+  /* In a void function, return PVM_NULL in the stack.  Otherwise, it
+     is a run-time error to reach this point.  */
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE_F_RTYPE (function_type))
+      == PKL_TYPE_VOID)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-
+  else
+    {
+      /* XXX: 3 is E_NO_RETURN  defined in pvm.jitter */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (3, 32));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+    }
+     
   /* Pop the function's environment and return.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);

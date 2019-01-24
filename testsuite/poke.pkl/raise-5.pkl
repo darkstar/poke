@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = () : int
+defun foo = () int:
   {
    try
      raise E_div_by_zero;

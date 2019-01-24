@@ -85,6 +85,7 @@ early-header-c
 #   define E_GENERIC     0
 #   define E_DIV_BY_ZERO 1
 #   define E_NO_IOS      2
+#   define E_NO_RETURN   3
 
     /* Exception handlers, that are installed in the "exceptionstack".
 

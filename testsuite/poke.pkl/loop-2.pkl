@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun loop_2 = (int i) : int
+defun loop_2 = (int i) int:
   {
    defvar n = 0;
    defvar res = 0;

@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun hello = () : string
+defun hello = () string:
   {
     return "hello";
   }

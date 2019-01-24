@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun if_2 = (uint<64> a, uint<64> b) : uint<64>
+defun if_2 = (uint<64> a, uint<64> b) uint<64>:
 {
    if (b == 0)
      return a;

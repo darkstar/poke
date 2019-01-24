@@ -130,6 +130,7 @@ enum pkl_ast_type_code
 {
   PKL_TYPE_INTEGRAL,
   PKL_TYPE_STRING,
+  PKL_TYPE_VOID,
   PKL_TYPE_ARRAY,
   PKL_TYPE_STRUCT,
   PKL_TYPE_FUNCTION,
@@ -749,6 +750,7 @@ struct pkl_ast_type
 
 pkl_ast_node pkl_ast_make_named_type (pkl_ast ast, pkl_ast_node name);
 pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p);
+pkl_ast_node pkl_ast_make_void_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);

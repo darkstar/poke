@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun defun_5 = (int i, long l) : long
+defun defun_5 = (int i, long l) long:
   {
    return i + l;
   }

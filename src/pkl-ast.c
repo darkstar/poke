@@ -333,6 +333,17 @@ pkl_ast_make_string_type (pkl_ast ast)
 }
 
 pkl_ast_node
+pkl_ast_make_void_type (pkl_ast ast)
+{
+  pkl_ast_node type = pkl_ast_make_type (ast);
+
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_VOID;
+  PKL_AST_TYPE_COMPLETE (type)
+    = PKL_AST_TYPE_COMPLETE_NO;
+  return type;
+}
+
+pkl_ast_node
 pkl_ast_make_offset_type (pkl_ast ast,
                           pkl_ast_node base_type,
                           pkl_ast_node unit)
@@ -788,6 +799,9 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         fputc ('>', out);
         break;
       }
+    case PKL_TYPE_VOID:
+      fprintf (out, "void");
+      break;
     case PKL_TYPE_NOTYPE:
     default:
       assert (0);
