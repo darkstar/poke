@@ -1864,15 +1864,13 @@ instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
      int bits = JITTER_ARGN2;
      int64_t value;
      ios io;
-     ios_off base, offset;
+     ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-     base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-             * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-     offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                      * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
 
      if (ios_read_int (io, offset, 0,
@@ -1882,10 +1880,7 @@ instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_int (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_int (value, bits);
   end
 end
 
@@ -1898,16 +1893,14 @@ instruction peekiu (?n endian_printer,?n bits_printer)
      int bits = JITTER_ARGN1;
      uint64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
 
-     base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-             * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-     offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                      * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
@@ -1916,10 +1909,7 @@ instruction peekiu (?n endian_printer,?n bits_printer)
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_uint (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_uint (value, bits);
   end
 end
 
@@ -1933,15 +1923,13 @@ instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
      int bits = JITTER_ARGN2;
      int64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-     base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-             * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-     offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                      * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_int (io, offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
@@ -1950,10 +1938,7 @@ instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_long (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_long (value, bits);
   end
 end
 
@@ -1966,15 +1951,13 @@ instruction peeklu (?n endian_printer,?n bits_printer)
      int bits = JITTER_ARGN1;
      uint64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-     base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-             * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-     offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                      * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
@@ -1983,10 +1966,7 @@ instruction peeklu (?n endian_printer,?n bits_printer)
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
   end
 end
 
@@ -2000,15 +1980,13 @@ instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
     enum ios_endian endian = jitter_state_runtime.endian;
     int64_t value;
     ios io;
-    ios_off offset, base;
+    ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-    base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-             * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-    offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                     * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
     if (ios_read_int (io, offset, 0,
                       bits, endian, nenc, &value) != IOS_OK)
@@ -2017,10 +1995,7 @@ instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
         JITTER_TOP_STACK () = PVM_NULL;
       }
     else
-      {
-        /* XXX: use IO and a base register */
-        JITTER_TOP_STACK () = pvm_make_int (value, bits);
-      }
+      JITTER_TOP_STACK () = pvm_make_int (value, bits);
   end
 end
 
@@ -2033,15 +2008,13 @@ instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
      int bits = JITTER_ARGN0;
      uint64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-    base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-            * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-    offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                     * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
@@ -2050,10 +2023,7 @@ instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_uint (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_uint (value, bits);
   end
 end
 
@@ -2067,16 +2037,13 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
      int bits = JITTER_ARGN0;
      int64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-    base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-            * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-
-    offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                     * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_int (ios_cur (), offset, 0,
                        bits, endian, nenc, &value) != IOS_OK)
@@ -2086,10 +2053,7 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_long (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_long (value, bits);
   end
 end
 
@@ -2102,15 +2066,13 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
      int bits = JITTER_ARGN0;
      uint64_t value;
      ios io;
-     ios_off offset, base;
+     ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
-      base = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_REGISTER_r_0))
-              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_REGISTER_r_0)));
-     offset = base + (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-                      * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
 
      if (ios_read_uint (io, offset, 0,
                         bits, endian, &value) != IOS_OK)
@@ -2119,10 +2081,7 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       {
-         /* XXX: use IO and a base register */
-         JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
-       }
+       JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
   end
 end
 
@@ -2133,7 +2092,6 @@ instruction peeks ()
   code
     ios io;
 
-    /* XXX: use IO and a base register */
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (E_NO_IOS);
 
