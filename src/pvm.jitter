@@ -29,7 +29,7 @@ end
 
 register-class r 1
   code
-    union jitter_word
+    pvm_val
   end
 end
 
@@ -448,10 +448,16 @@ instruction drop () # A -> _
   end
 end
 
-instruction push (?Rnl pvm_literal_printer) # _ -> A
+instruction push (?nl pvm_literal_printer) # _ -> A
   code
     pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
+  end
+end
+
+instruction pushr (?R)
+  code
+    JITTER_PUSH_STACK (JITTER_ARG0);
   end
 end
 
@@ -505,14 +511,14 @@ instruction nrot () # A B C -> C A B
   end
 end
 
-instruction pushhi (?Rnl pvm_literal_printer_hi)
+instruction pushhi (?nl pvm_literal_printer_hi)
   code
      jitter_state_runtime.push_hi
        = JITTER_ARGN0;
   end
 end
 
-instruction pushlo (?Rnl pvm_literal_printer_lo)
+instruction pushlo (?nl pvm_literal_printer_lo)
   code
      pvm_val k
        = ((pvm_val) jitter_state_runtime.push_hi << 32)
@@ -521,7 +527,7 @@ instruction pushlo (?Rnl pvm_literal_printer_lo)
   end
 end
 
-instruction push32 (?Rnl pvm_literal_printer)
+instruction push32 (?nl pvm_literal_printer)
   code
     pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK (k);
@@ -534,39 +540,31 @@ instruction pop ()
   end
 end
 
-# XXX: register_t in pvm_val? i.e. in 64 bits?
+instruction popr (!R)
+  code
+    JITTER_ARG0 = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+  end
+end
 
-#instruction pushr (?R)
-#  code
-#    JITTER_PUSH_STACK (JITTER_ARG0);
-#  end
-#end
+instruction setr (!R)
+  code
+    JITTER_ARG0 = JITTER_TOP_STACK();
+  end
+end
 
-#instruction popr (!R)
-#  code
-#    JITTER_ARGN0 = JITTER_TOP_STACK ();
-#    JITTER_DROP_STACK ();
-#  end
-#end
+instruction saver (?R)
+  code
+    JITTER_PUSH_RETURNSTACK (JITTER_ARG0);
+  end
+end
 
-#instruction setr (!R)
-#  code
-#    JITTER_ARGN0 = JITTER_TOP_STACK();
-#  end
-#end
-
-#instruction saver (?R)
-#  code
-#    JITTER_PUSH_RETURNSTACK (JITTER_ARG0);
-#  end
-#end
-
-#instruction restorer (!R)
-#  code
-#    JITTER_ARG0 = JITTER_TOP_RETURNSTACK ();
-#    JITTER_DROP_RETURNSTACK ();
-#  end
-#end
+instruction restorer (!R)
+  code
+    JITTER_ARG0 = JITTER_TOP_RETURNSTACK ();
+    JITTER_DROP_RETURNSTACK ();
+  end
+end
 
 instruction sel () # VAL -> ULONG
   code
