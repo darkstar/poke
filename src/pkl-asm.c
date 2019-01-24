@@ -617,8 +617,11 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
       /* Standard prologue.  */
       pkl_asm_note (pasm, "#begin prologue");
       
-      /* XXX: initialize the base register to [0 b] and other PVM
-         registers.  */
+      /* Initialize the IO base register to [0 b].  */
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_offset (pvm_make_int (0, 32),
+                                     pvm_make_ulong (1, 64)));
+      pkl_asm_insn (pasm, PKL_INSN_POPR, 0);
       
       /* Push the stack centinel value.  */
       if (guard_stack)
@@ -764,8 +767,11 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
               assert (0); /* XXX */
               break;
             case 'r':
-              assert (0); /* XXX */
-              break;
+              {
+                jitter_uint reg = va_arg (valist, jitter_uint);
+                PVM_APPEND_REGISTER_PARAMETER (pasm->program, r, reg);
+                break;
+              }
             }
         }
       va_end (valist);

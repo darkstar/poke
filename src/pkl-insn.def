@@ -30,7 +30,7 @@
    `v' is for a pvm_val.
    `l' is for a label.
    `n' is for an immediate.
-   `r' is for a register.
+   `r' is for a general-purpose register.
 
    `a' is for a pkl_ast_node.
        AST node arguments are only valid in macro-instructions.
@@ -45,7 +45,9 @@
 /* Stack manipulation instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_PUSH, "v", "push")
-PKL_DEF_INSN (PKL_INSN_POP, "", "pop")  
+PKL_DEF_INSN (PKL_INSN_POP, "", "pop")
+PKL_DEF_INSN (PKL_INSN_PUSHR, "r", "pushr")
+PKL_DEF_INSN (PKL_INSN_POPR, "r", "popr")
 PKL_DEF_INSN (PKL_INSN_DROP, "", "drop")
 PKL_DEF_INSN (PKL_INSN_SWAP, "", "swap")
 PKL_DEF_INSN (PKL_INSN_NIP, "", "nip")
