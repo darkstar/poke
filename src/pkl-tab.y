@@ -170,6 +170,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %right UNARY INC DEC AS
 %left HYPERUNARY
 %left '.'
+%left '\''
 
 %type <opcode> unary_operator
 
@@ -288,6 +289,13 @@ expression:
         	{
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
+                }
+        | expression '\'' IDENTIFIER
+        	{
+                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_ATTR,
+                                                $1, $3);
+                  PKL_AST_LOC ($3) = @3;
+                  PKL_AST_LOC ($$) = @$;
                 }
         | expression '+' expression
         	{

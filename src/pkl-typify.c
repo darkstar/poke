@@ -1081,6 +1081,145 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* Check that attribute expressions are applied to the proper types,
+   and then determine the type of the attribute expression itself.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node operand = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node operand_type = PKL_AST_TYPE (operand);
+  enum pkl_ast_attr attr = PKL_AST_EXP_ATTR (exp);
+
+  pkl_ast_node exp_type;
+
+  switch (attr)
+    {
+    case PKL_AST_ATTR_SIZE:
+      /* 'size is defined for integral values, string values, array
+         values, struct values and offset values.  */
+      switch (PKL_AST_TYPE_CODE (operand_type))
+        {
+        case PKL_TYPE_INTEGRAL:
+        case PKL_TYPE_STRING:
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+        case PKL_TYPE_OFFSET:
+          break;
+        default:
+          goto invalid_attribute;
+          break;
+        }
+
+      /* The type of 'size is offset<uint<64>,1>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                           exp_type,
+                                           pkl_ast_make_integer (PKL_PASS_AST,
+                                                                 1));
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_SIGN:
+      /* 'sign is defined for integral values.  */
+      if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_INTEGRAL)
+        goto invalid_attribute;
+
+      /* The type of 'sign is uint<32> */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 0);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_BITS:
+      /* 'bits is defined for offset values.  */
+      if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_OFFSET)
+        goto invalid_attribute;
+
+      /* The type of 'bits is uint<32> */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 0);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_UNIT:
+      /* 'unit is defined for offset values.  */
+      if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_OFFSET)
+        goto invalid_attribute;      
+
+      /* The type of 'unit is uint<64>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_LENGTH:
+      /* 'length is defined for array, struct and string values.  */
+      switch (PKL_AST_TYPE_CODE (operand_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+        case PKL_TYPE_STRING:
+          break;
+        default:
+          goto invalid_attribute;
+          break;
+        }
+
+      /* The type of 'length is uint<64>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_ALIGNMENT:
+      /* 'alignment is defined for struct values.  */
+      if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_STRUCT)
+        goto invalid_attribute;
+
+      /* The type of 'alignment is uint<64>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    case PKL_AST_ATTR_OFFSET:
+      /* 'offset is defined for struct and array values.  */
+      switch (PKL_AST_TYPE_CODE (operand_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+          break;
+        default:
+          goto invalid_attribute;
+          break;
+        }
+
+      /* The type of 'offset is an offset<uint<64>,1>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                           exp_type,
+                                           pkl_ast_make_integer (PKL_PASS_AST,
+                                                                 1));
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
+    default:
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+               "unhandled attribute expression code #%d in typify1",
+               attr);
+      break;
+    }
+
+  PKL_PASS_DONE;
+
+ invalid_attribute:
+  {
+    char *operand_type_str = pkl_type_str (operand_type, 1);
+
+    pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+               "attribute '%s is not defined for values of type %s",
+               pkl_attr_name (attr),
+               operand_type_str);
+    free (operand_type_str);
+
+    payload->errors++;
+    PKL_PASS_ERROR;
+  }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1122,6 +1261,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IOR, pkl_typify1_ps_ior),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_XOR, pkl_typify1_ps_xor),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BAND, pkl_typify1_ps_band),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_typify1_ps_attr),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),

@@ -103,6 +103,19 @@ enum pkl_ast_op
 };
 #undef PKL_DEF_OP
 
+/* Similarly, attribute operators are characterized by an attribute.
+   The following enumeration defines the attribute codes.
+
+   The definitions of the attributes are in pkl-attrs.def.  */
+
+#define PKL_DEF_ATTR(SYM, STRING) SYM,
+enum pkl_ast_attr
+{
+#include "pkl-attrs.def"
+ PKL_AST_ATTR_NONE
+};
+#undef PKL_DEF_ATTR
+
 /* Certain AST nodes can be characterized of featuring a byte
    endianness.  The following values are supported:
 
@@ -403,18 +416,25 @@ pkl_ast_node pkl_ast_make_struct_elem (pkl_ast ast,
    consisting on an operator and one or two operators, respectively.
 
    The supported operators are specified in pkl-ops.def.
+   The supported attributes are defined in pkl-attrs.def.
+   
+   In PKL_AST_OP_ATTR exprssions, ATTR contains the code for the
+   invoked attribute.
 
    There are two constructors for this node type: one for unary
-   expressions and another for binary expressions.  */
+   expressions, another for binary expressions.  */
 
 #define PKL_AST_EXP_CODE(AST) ((AST)->exp.code)
+#define PKL_AST_EXP_ATTR(AST) ((AST)->exp.attr)
 #define PKL_AST_EXP_NUMOPS(AST) ((AST)->exp.numops)
 #define PKL_AST_EXP_OPERAND(AST, I) ((AST)->exp.operands[(I)])
 
 struct pkl_ast_exp
 {
   struct pkl_ast_common common;
+
   enum pkl_ast_op code;
+  enum pkl_ast_attr attr;
   uint8_t numops : 8;
   union pkl_ast_node *operands[2];
 };
@@ -426,6 +446,8 @@ pkl_ast_node pkl_ast_make_binary_exp (pkl_ast ast,
                                       enum pkl_ast_op code,
                                       pkl_ast_node op1,
                                       pkl_ast_node op2);
+
+const char *pkl_attr_name (enum pkl_ast_attr attr);
 
 /* PKL_AST_COND_EXP nodes represent conditional expressions, having
    exactly the same semantics than the C tertiary operator:

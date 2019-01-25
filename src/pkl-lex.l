@@ -187,6 +187,7 @@ D [0-9]
 "~"		{ return '~'; }
 "."		{ return '.'; }
 "@"		{ return '@'; }
+"'"		{ return '\''; }
 
 #{L}({L}|{D})* {
    pkl_ast_node decl

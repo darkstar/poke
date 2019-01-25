@@ -172,6 +172,7 @@ pkl_ast_make_binary_exp (pkl_ast ast,
   assert (op1 && op2);
 
   PKL_AST_EXP_CODE (exp) = code;
+  PKL_AST_EXP_ATTR (exp) = PKL_AST_ATTR_NONE;
   PKL_AST_EXP_NUMOPS (exp) = 2;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op1);
   PKL_AST_EXP_OPERAND (exp, 1) = ASTREF (op2);
@@ -180,6 +181,23 @@ pkl_ast_make_binary_exp (pkl_ast ast,
     = PKL_AST_LITERAL_P (op1) && PKL_AST_LITERAL_P (op2);
 
   return exp;
+}
+
+/* Return the written form of the given attribute code.  This returns
+   NULL for PKL_AST_ATTR_NONE */
+
+const char *
+pkl_attr_name (enum pkl_ast_attr attr)
+{
+#define PKL_DEF_ATTR(SYM, STRING) STRING,
+  static const char* attr_names[] =
+    {
+#include "pkl-attrs.def"
+     NULL
+    };
+#undef PKL_DEF_ATTR
+
+  return attr_names[attr];
 }
 
 /* Build and return an AST node for an unary expression.  */
@@ -192,6 +210,7 @@ pkl_ast_make_unary_exp (pkl_ast ast,
   pkl_ast_node exp = pkl_ast_make_node (ast, PKL_AST_EXP);
 
   PKL_AST_EXP_CODE (exp) = code;
+  PKL_AST_EXP_ATTR (exp) = PKL_AST_ATTR_NONE;
   PKL_AST_EXP_NUMOPS (exp) = 1;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op);
   PKL_AST_LITERAL_P (exp) = PKL_AST_LITERAL_P (op);
@@ -1782,17 +1801,27 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       {
 
 #define PKL_DEF_OP(SYM, STRING) STRING,
-        static char *pkl_ast_op_name[] =
+        static const char *pkl_ast_op_name[] =
           {
 #include "pkl-ops.def"
           };
 #undef PKL_DEF_OP
+
+#define PKL_DEF_ATTR(SYM, STRING) STRING,
+        static const char *pkl_ast_attr_name[] =
+          {
+#include "pkl-attrs.def"
+          };
+#undef PKL_DEF_ATTR
 
         IPRINTF ("EXPRESSION::\n");
 
         PRINT_COMMON_FIELDS;
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
+        if (PKL_AST_EXP_ATTR (ast) != PKL_AST_ATTR_NONE)
+          IPRINTF ("attr: %s\n",
+                   pkl_ast_attr_name[PKL_AST_EXP_ATTR (ast)]);
         IPRINTF ("literal_p: %d\n", PKL_AST_LITERAL_P (ast));
         PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");

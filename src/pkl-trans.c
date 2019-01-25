@@ -362,6 +362,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
 }
 PKL_PHASE_END_HANDLER
 
+/* Determine the attribute code of attribute expressions, emitting an
+   error if the given attribute name is not defined.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
+{
+  pkl_trans_payload payload
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+  pkl_ast_node exp = PKL_PASS_NODE;
+
+  pkl_ast_node identifier = PKL_AST_EXP_OPERAND (exp, 1);
+  const char *identifier_name = PKL_AST_IDENTIFIER_POINTER (identifier);
+  enum pkl_ast_attr attr = PKL_AST_ATTR_NONE;
+
+  for (attr = 0; pkl_attr_name (attr); ++attr)
+    {
+      if (strcmp (pkl_attr_name (attr), identifier_name) == 0)
+        break;
+    }
+
+  if (attr == PKL_AST_ATTR_NONE)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (identifier),
+                 "invalid attribute '%s", identifier_name);
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  PKL_AST_EXP_ATTR (exp) = attr;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
@@ -371,6 +402,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_trans1_ps_string),
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_trans1_ps_var),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
   };
