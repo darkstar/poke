@@ -771,7 +771,6 @@ simple_type_specifier:
                   assert (decl != NULL
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
-                  PKL_AST_TYPE_NAME($$) = ASTREF ($1);
                   PKL_AST_LOC ($$) = @$;
                 }
 	| VOID
@@ -953,6 +952,8 @@ declaration:
                                           pkl_parser->filename);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
+
+                  PKL_AST_TYPE_NAME ($4) = ASTREF ($2);
 
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($2),

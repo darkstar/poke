@@ -539,20 +539,13 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
       }
     case PKL_TYPE_STRUCT:
       {
-        pkl_ast_node sa, sb;
-  
-        if (PKL_AST_TYPE_S_NELEM (a) != PKL_AST_TYPE_S_NELEM (b))
+        /* Anonymous structs are always unequal.  */
+        if (PKL_AST_TYPE_NAME (a) == NULL || PKL_AST_TYPE_NAME (b) == NULL)
           return 0;
-        for (sa = PKL_AST_TYPE_S_ELEMS (a), sb = PKL_AST_TYPE_S_ELEMS (b);
-             sa && sb;
-             sa = PKL_AST_CHAIN (sa), sb = PKL_AST_CHAIN (sb))
-          {
-            if (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (sa)),
-                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_STRUCT_ELEM_TYPE_NAME (sb)))
-                || !pkl_ast_type_equal (PKL_AST_STRUCT_ELEM_TYPE_TYPE (sa),
-                                        PKL_AST_STRUCT_ELEM_TYPE_TYPE (sb)))
-              return 0;
-          }
+
+        /* Struct types are compared by name.  */
+        return (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (a)),
+                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (b))) == 0);
         break;
       }
     case PKL_TYPE_FUNCTION:
