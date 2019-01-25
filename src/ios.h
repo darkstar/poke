@@ -267,6 +267,9 @@ int ios_write_string (ios io, ios_off offset, int flags,
 
 /* XXX: writeme.  */
 
+/* XXX: we need functions to temporarily disable updates in a given IO
+   range, to be used by the struct writer functions.  */
+
 /* **************** Transaction API **************** */
 
 /* XXX: writeme.  */
