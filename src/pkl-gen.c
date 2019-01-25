@@ -1593,6 +1593,8 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node operand = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node operand_type = PKL_AST_TYPE (operand);
   enum pkl_ast_attr attr = PKL_AST_EXP_ATTR (exp);
 
   switch (attr)
@@ -1600,7 +1602,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
     case PKL_AST_ATTR_SIZE:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
       break;
-    case PKL_AST_ATTR_BITS:
+    case PKL_AST_ATTR_BITS: /* XXX ??? */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
@@ -1610,7 +1612,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
       break;
-    case PKL_AST_ATTR_SIGN:
+    case PKL_AST_ATTR_SIGNED:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      if (PKL_AST_TYPE_I_SIGNED (operand_type))
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (1, 32));
+      else
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (0, 32));
+      break;
     case PKL_AST_ATTR_LENGTH:
     case PKL_AST_ATTR_ALIGNMENT:
     case PKL_AST_ATTR_OFFSET:

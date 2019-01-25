@@ -1122,13 +1122,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
                                                                  1));
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
-    case PKL_AST_ATTR_SIGN:
-      /* 'sign is defined for integral values.  */
+    case PKL_AST_ATTR_SIGNED:
+      /* 'signed is defined for integral values.  */
       if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_INTEGRAL)
         goto invalid_attribute;
 
-      /* The type of 'sign is uint<32> */
-      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 0);
+      /* The type of 'signed is int<32> */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
     case PKL_AST_ATTR_BITS:

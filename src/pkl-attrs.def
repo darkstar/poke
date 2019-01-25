@@ -21,7 +21,7 @@
    in the program code to invoke the attribute.  */
 
 PKL_DEF_ATTR (PKL_AST_ATTR_SIZE, "size")
-PKL_DEF_ATTR (PKL_AST_ATTR_SIGN, "sign")
+PKL_DEF_ATTR (PKL_AST_ATTR_SIGNED, "signed")
 PKL_DEF_ATTR (PKL_AST_ATTR_BITS, "bits")
 PKL_DEF_ATTR (PKL_AST_ATTR_UNIT, "unit")
 PKL_DEF_ATTR (PKL_AST_ATTR_LENGTH, "length")
