@@ -581,6 +581,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
                                            ASTREF (struct_elem_type));
     }
 
+  /* Reverse.  */
+  struct_elem_types = pkl_ast_reverse (struct_elem_types);
+
   /* Build the type of the struct.  */
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),
@@ -612,10 +615,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
       PKL_AST_LOC (func_arg_type) = PKL_AST_LOC (t);
 
       func_arg_types = pkl_ast_chainon (func_arg_types,
-                                            ASTREF (func_arg_type));
+                                        ASTREF (func_arg_type));
       nargs++;
     }
 
+  /* XXX: reverse?  */
+  
   /* Make the type of the function.  */
   type = pkl_ast_make_function_type (PKL_PASS_AST,
                                      PKL_AST_FUNC_RET_TYPE (node),

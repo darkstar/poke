@@ -175,6 +175,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
           pvm_program program;
           pvm_val closure;
 
+          
+          /* XXX */
+          /*          {
+            char *foo = pkl_type_str (initial, 0);
+            
+            pkl_print_type (stdout,initial, 0);
+            printf ("\n%s\n", foo);
+            free (foo);
+            } */
+
           /* Finish the struct mapper.  */
           {
             program = pkl_asm_finish (PKL_GEN_ASM,
