@@ -607,8 +607,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   else
     {
-      /* XXX: 3 is E_NO_RETURN  defined in pvm.jitter */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (3, 32));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                    pvm_make_int (PVM_E_NO_RETURN, 32));
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
     }
      

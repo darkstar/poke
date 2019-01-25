@@ -80,13 +80,6 @@ early-header-c
 #   include "pvm.h"
 #   include "ios.h"
 
-    /* Note the values for the exceptions should match the ones
-       declared in pkl-rt.pkl  */
-#   define E_GENERIC     0
-#   define E_DIV_BY_ZERO 1
-#   define E_NO_IOS      2
-#   define E_NO_RETURN   3
-
     /* Exception handlers, that are installed in the "exceptionstack".
 
        EXCEPTION is the exception type, either one of the E_* values defined
@@ -717,7 +710,7 @@ end
 instruction divi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -728,7 +721,7 @@ end
 instruction diviu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
     res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -739,7 +732,7 @@ end
 instruction divl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
     res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -750,7 +743,7 @@ end
 instruction divlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
     res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -761,7 +754,7 @@ end
 instruction modi () # INT INT -> INT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
+  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -772,7 +765,7 @@ end
 instruction modiu () # UINT UINT -> UINT
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
+  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
     res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -783,7 +776,7 @@ end
 instruction modl () # LONG LONG -> LONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
+  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
     res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -794,7 +787,7 @@ end
 instruction modlu () # ULONG ULONG -> ULONG
   code
 #define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
+  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
     res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);}\
   }
   JITTER_BINARY_STACK(F);
@@ -1657,14 +1650,21 @@ instruction aset () # ARR ULONG VAL -> ARR
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
 
-    /* XXX: Jump to Eabounds if index out of range.  */
+    if (idx < 0 ||
+        idx >= PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (JITTER_TOP_STACK ())))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
     PVM_VAL_ARR_ELEM (JITTER_TOP_STACK (), idx) = val;
   end
 end
 
 instruction aref () # ARR ULONG -> VAL
   code
-    /* XXX: Jump to Eabounds if index out of range.  */
+    if (PVM_VAL_ULONG (JITTER_TOP_STACK ()) < 0
+        || (PVM_VAL_ULONG (JITTER_TOP_STACK ()) >=
+            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (JITTER_UNDER_TOP_STACK ()))))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
 #define F(res, a, b) \
   { res = PVM_VAL_ARR_ELEM (a, PVM_VAL_ULONG (b)); }
     JITTER_BINARY_STACK(F);
@@ -1859,7 +1859,7 @@ instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1888,7 +1888,7 @@ instruction peekiu (?n endian_printer,?n bits_printer)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
@@ -1918,7 +1918,7 @@ instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1946,7 +1946,7 @@ instruction peeklu (?n endian_printer,?n bits_printer)
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -1975,7 +1975,7 @@ instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
     ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2003,7 +2003,7 @@ instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
      ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2032,7 +2032,7 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
      ios_off offset;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2041,7 +2041,6 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
                        bits, endian, nenc, &value) != IOS_OK)
        {
         /* XXX: raise an IO exception for a != EOF error.  */
-         /* XXX: branch to error label.  */
          JITTER_TOP_STACK () = PVM_NULL;
        }
      else
@@ -2061,7 +2060,7 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
      ios_off offset;
 
      if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
      offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
                * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
@@ -2085,7 +2084,7 @@ instruction peeks ()
     ios io;
 
     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (E_NO_IOS);
+        PVM_RAISE (PVM_E_NO_IOS);
 
     JITTER_TOP_STACK () = pvm_make_string ("");
     /* XXX: WRITEME */

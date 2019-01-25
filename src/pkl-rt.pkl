@@ -40,10 +40,11 @@ defun print = (string str) void: __builtin_print__;
 
 deftype Exception = int<32>;
 
-defvar E_generic      = 0;
-defvar E_div_by_zero  = 1;
-defvar E_no_ios       = 2;
-defvar E_no_return    = 3;
+defvar E_generic       = 0;
+defvar E_div_by_zero   = 1;
+defvar E_no_ios        = 2;
+defvar E_no_return     = 3;
+defvar E_out_of_bounds = 4;
 
 /* Default exception handler.
 
@@ -55,7 +56,9 @@ defun _pkl_exception_handler = (Exception exception) void:
   {
    print ("unhandled ");
 
-   if (exception == E_div_by_zero)
+   if (exception == E_out_of_bounds)
+     print ("out of bounds");
+   else if (exception == E_div_by_zero)
      print ("division by zero");
    else if (exception == E_no_ios)
      print ("no IOS");
