@@ -129,6 +129,10 @@ pkl_tab_error (YYLTYPE *llocp,
 %token TRY CATCH RAISE
 %token VOID
 
+/* ATTRIBUTE operator.  */
+
+%token <ast> ATTR
+
 /* Compiler builtins.  */
 
 %token BUILTIN_PRINT
@@ -170,7 +174,7 @@ pkl_tab_error (YYLTYPE *llocp,
 %right UNARY INC DEC AS
 %left HYPERUNARY
 %left '.'
-%left '\''
+%left ATTR
 
 %type <opcode> unary_operator
 
@@ -290,11 +294,11 @@ expression:
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
                   PKL_AST_LOC ($$) = @1;
                 }
-        | expression '\'' IDENTIFIER
+        | expression ATTR
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_ATTR,
-                                                $1, $3);
-                  PKL_AST_LOC ($3) = @3;
+                                                $1, $2);
+                  PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
         | expression '+' expression

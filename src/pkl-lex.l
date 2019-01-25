@@ -187,7 +187,11 @@ D [0-9]
 "~"		{ return '~'; }
 "."		{ return '.'; }
 "@"		{ return '@'; }
-"'"		{ return '\''; }
+
+'{L}({L}|{D})* {
+  yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
+  return ATTR;
+}
 
 #{L}({L}|{D})* {
    pkl_ast_node decl
