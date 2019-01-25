@@ -243,6 +243,8 @@ pvm_elemsof (pvm_val val)
     return PVM_VAL_ARR_NELEM (val);
   else if (PVM_IS_SCT (val))
     return PVM_VAL_SCT_NELEM (val);
+  else if (PVM_IS_STR (val))
+    return pvm_make_ulong (strlen (PVM_VAL_STR (val)) + 1, 64);
   else
     return pvm_make_ulong (1, 64);
 }

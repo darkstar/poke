@@ -426,8 +426,8 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 /* Return an offset with the size of VAL.  */
 pvm_val pvm_sizeof (pvm_val val);
 
-/* For arrays and structs, return the number of elements stored.
-   Return 1 otherwise.  */
+/* For strings, arrays and structs, return the number of elements
+   stored, as an unsigned 64-bits long.  Return 1 otherwise.  */
 pvm_val pvm_elemsof (pvm_val val);
 
 /* Print a pvm_val to the given file descriptor. */

@@ -202,6 +202,10 @@ PKL_DEF_INSN (PKL_INSN_OGETM, "", "ogetm")
 PKL_DEF_INSN (PKL_INSN_OGETU, "", "ogetu")
 PKL_DEF_INSN (PKL_INSN_OGETBT, "", "ogetbt")
 
+/* Containers instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_SEL, "", "sel")
+
 /* Array instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKA, "", "mka")
