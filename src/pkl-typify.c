@@ -696,8 +696,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               char *passed_type = pkl_type_str (aa_type, 1);
               char *expected_type = pkl_type_str (fa_type, 1);
 
-              if (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
-                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+              if ((PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
+                   && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+                  || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
+                      && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
                 /* Integers and offsets can be promoted.  */
                 ;
               else

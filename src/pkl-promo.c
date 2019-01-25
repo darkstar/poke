@@ -711,11 +711,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
                                      &restart))
                 {
                   pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
-                           "couldn't promote funcall argument to int<32>");
+                           "couldn't promote funcall argument");
                   PKL_PASS_ERROR;
                 }
               break;
             case PKL_TYPE_OFFSET:
+              if (!promote_offset (PKL_PASS_AST,
+                                   PKL_AST_TYPE_O_BASE_TYPE (fa_type),
+                                   PKL_AST_TYPE_O_UNIT (fa_type),
+                                   &PKL_AST_FUNCALL_ARG_EXP (aa),
+                                   &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
+                           "couldn't promote funcall argument");
+                  PKL_PASS_ERROR;
+                }
               break;
             default:
               pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),

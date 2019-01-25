@@ -17,4 +17,8 @@ defun foo = (long l) long: { return l; }
 /* { dg-command { print foo (2 as uint<3>) } } */
 /* { dg-output "\n2L" } */
 
+defun bar = (offset<uint,B> o) offset<uint,B>: { return o; }
 
+/* Coercion from offset with different base type and unit. */
+/* { dg-command { print bar (32#b) } } */
+/* { dg-output "\n4U#B" } */
