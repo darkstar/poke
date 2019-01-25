@@ -478,8 +478,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_offset)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of an ARRAY is determined from the number and the type of
-   its initializers.  */
+/* The type of an ARRAY is derived from the type of its initializers,
+   which should be all of the same type.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 {
@@ -489,7 +489,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
   pkl_ast_node array = PKL_PASS_NODE;
   pkl_ast_node initializers = PKL_AST_ARRAY_INITIALIZERS (array);
   
-  pkl_ast_node tmp, type = NULL, array_nelem, array_nelem_type;
+  pkl_ast_node tmp, type = NULL;
 
   /* Check that the types of all the array elements are the same, and
      derive the type of the array from the first of them.  */
@@ -509,18 +509,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
     }
 
   /* Build the type of the array. */
-  array_nelem = pkl_ast_make_integer (PKL_PASS_AST,
-                                      PKL_AST_ARRAY_NELEM (array));
-  PKL_AST_LOC (array_nelem) = PKL_AST_LOC (PKL_PASS_NODE);
-
-  array_nelem_type = pkl_ast_make_integral_type (PKL_PASS_AST,
-                                                 64, 0);
-  PKL_AST_LOC (array_nelem_type) = PKL_AST_LOC (PKL_PASS_NODE);
-  
-  PKL_AST_TYPE (array_nelem) = ASTREF (array_nelem_type);
-
-  type = pkl_ast_make_array_type (PKL_PASS_AST,
-                                  array_nelem, type);
+  type = pkl_ast_make_array_type (PKL_PASS_AST, type);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_TYPE (array) = ASTREF (type);
 
@@ -1273,12 +1262,30 @@ struct pkl_phase pkl_phase_typify1 =
 
 
 
-/* Determine the completeness of a type node.  */
+/* Determine the completeness of a type node.
+
+   Also, the only context where an array type is allowed to have a
+   non-NULL NELEM (like in int[3]) is in the definition of a struct
+   element.  Make sure of that.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
+
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
+      && PKL_AST_TYPE_A_NELEM (type) != NULL
+      && (!PKL_PASS_PARENT
+          || PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_STRUCT_ELEM_TYPE))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
+                 "array types can only include a size when defining struct elements");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1289,10 +1296,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_op_sizeof)
 {
   pkl_ast_node op
     = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
-
-  if (PKL_AST_CODE (op) != PKL_AST_TYPE)
-    /* This is a SIZEOF (VALUE).  Nothing to do.  */
-    PKL_PASS_DONE;
 
   PKL_AST_TYPE_COMPLETE (op) = pkl_ast_type_is_complete (op);
 }

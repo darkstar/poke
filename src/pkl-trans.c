@@ -548,10 +548,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
   pkl_ast_node op = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node offset, offset_type, unit, unit_type;
 
-  if (PKL_AST_CODE (op) != PKL_AST_TYPE)
-    /* This is a TYPEOF (VALUE).  Nothing to do.  */
-    PKL_PASS_DONE;
-
   if (PKL_AST_TYPE_COMPLETE (op)
       != PKL_AST_TYPE_COMPLETE_YES)
     {

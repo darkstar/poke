@@ -687,7 +687,8 @@ pkl_ast_node pkl_ast_make_func_arg_type (pkl_ast ast,
    of type.
 
    In array types, ETYPE is a PKL_AST_TYPE node.  If NELEM is present
-   then it is the number of elements in the array.
+   then it is the number of elements in the array.  NELEM is only
+   used when defining struct elements.
 
    In struct types, NELEM is the number of elements in the struct type.
    ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.
@@ -774,7 +775,7 @@ pkl_ast_node pkl_ast_make_named_type (pkl_ast ast, pkl_ast_node name);
 pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p);
 pkl_ast_node pkl_ast_make_void_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
-pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
 pkl_ast_node pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,

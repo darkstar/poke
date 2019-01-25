@@ -6,19 +6,7 @@
 /* { dg-command { print sizeof (long) } } */
 /* { dg-output "\n64UL#b" } */
 
-/* { dg-command { print sizeof (int[2UL]) } } */
-/* { dg-output "\n64UL#b" } */
-
-/* { dg-command { print sizeof (int[2]) } } */
-/* { dg-output "\n64UL#b" } */
-
-/* { dg-command { print sizeof (int[2][2]) } } */
-/* { dg-output "\n128UL#b" } */
-
 deftype array_of_struct = struct {int; int;};
-
-/* { dg-command { print sizeof (array_of_struct[2]) } } */
-/* { dg-output "\n128UL#b" } */
 
 deftype struct_empty = struct {};
 

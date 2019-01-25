@@ -1793,17 +1793,9 @@ end
 
 # Array types
 
-instruction mktya () # TYP ULONG -> TYP
+instruction mktya () # TYP -> TYP
   code
-#define F(res, a, b) { res = pvm_make_array_type (b, a); }
-    JITTER_BINARY_STACK (F);  
-#undef F
-  end
-end
-
-instruction tyagetn () # TYP -> TYP TYP
-  code
-    JITTER_PUSH_STACK (PVM_VAL_TYP_A_NELEM (JITTER_TOP_STACK ()));
+    JITTER_TOP_STACK () = pvm_make_array_type (JITTER_TOP_STACK ());
   end
 end
 

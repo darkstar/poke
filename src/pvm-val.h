@@ -265,7 +265,6 @@ pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 #define PVM_VAL_TYP_CODE(V) (PVM_VAL_TYP((V))->code)
 #define PVM_VAL_TYP_I_SIZE(V) (PVM_VAL_TYP((V))->val.integral.size)
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
-#define PVM_VAL_TYP_A_NELEM(V) (PVM_VAL_TYP((V))->val.array.nelem)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
 #define PVM_VAL_TYP_S_NAME(V) (PVM_VAL_TYP((V))->val.sct.name)
 #define PVM_VAL_TYP_S_NELEM(V) (PVM_VAL_TYP((V))->val.sct.nelem)
@@ -299,7 +298,6 @@ struct pvm_type
 
     struct
     {
-      pvm_val nelem;
       pvm_val etype;
     } array;
 
@@ -323,14 +321,13 @@ typedef struct pvm_type *pvm_type;
 
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
-pvm_val pvm_make_array_type (pvm_val nelem, pvm_val type);
+pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
 
 void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
 
 pvm_val pvm_dup_type (pvm_val type);
-pvm_val pvm_type_equal (pvm_val t1, pvm_val t2);
 pvm_val pvm_typeof (pvm_val val);
 
 /* Closures are also boxed.  */

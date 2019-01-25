@@ -1576,13 +1576,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
 PKL_PHASE_END_HANDLER
 
 #undef RELA_EXP_HANDLER
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sizeof)
-{
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
-}
-PKL_PHASE_END_HANDLER
-
 #undef BIN_INTEGRAL_EXP_HANDLER
 
 /*
@@ -1735,7 +1728,6 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LE, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
-   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_gen_ps_op_sizeof),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),

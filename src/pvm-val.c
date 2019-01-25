@@ -176,11 +176,10 @@ pvm_make_offset_type (pvm_val base_type, pvm_val unit)
 }
 
 pvm_val
-pvm_make_array_type (pvm_val nelem, pvm_val type)
+pvm_make_array_type (pvm_val type)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
 
-  PVM_VAL_TYP_A_NELEM (atype) = nelem;
   PVM_VAL_TYP_A_ETYPE (atype) = type;
   return atype;
 }
@@ -308,7 +307,7 @@ pvm_sizeof (pvm_val val)
                               pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
     }
   else if (PVM_IS_OFF (val))
-    return pvm_sizeof (PVM_VAL_OFF_BASE_TYPE (val));
+    return pvm_sizeof (PVM_VAL_OFF_MAGNITUDE (val));
   else if (PVM_IS_TYP (val))
     {
       size_t size;
@@ -686,7 +685,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
-          fprintf (out, "[%" PRIu64 "]", PVM_VAL_ULONG (PVM_VAL_TYP_A_NELEM (val)));
+          fprintf (out, "[]");
           break;
         case PVM_TYPE_OFFSET:
           fprintf (out, "[");
@@ -816,8 +815,7 @@ pvm_typeof (pvm_val val)
     type = pvm_make_offset_type (PVM_VAL_OFF_BASE_TYPE (val),
                                  PVM_VAL_OFF_UNIT (val));
   else if (PVM_IS_ARR (val))
-    type = pvm_make_array_type (PVM_VAL_ARR_NELEM (val),
-                                PVM_VAL_ARR_TYPE (val));
+    type = pvm_make_array_type (PVM_VAL_ARR_TYPE (val));
   else if (PVM_IS_SCT (val))
     {
       size_t i;

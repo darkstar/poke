@@ -327,14 +327,14 @@ pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 }
 
 pkl_ast_node
-pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node nelem, pkl_ast_node etype)
+pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
 
   assert (etype);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_ARRAY;
-  PKL_AST_TYPE_A_NELEM (type) = ASTREF (nelem);
+  PKL_AST_TYPE_A_NELEM (type) = NULL;
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
 
   return type;
@@ -528,20 +528,13 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
   switch (PKL_AST_TYPE_CODE (a))
     {
     case PKL_TYPE_INTEGRAL:
-      if (PKL_AST_TYPE_I_SIZE (a) != PKL_AST_TYPE_I_SIZE (b)
-          || PKL_AST_TYPE_I_SIGNED (a) != PKL_AST_TYPE_I_SIGNED (b))
-        return 0;
+      return (PKL_AST_TYPE_I_SIZE (a) == PKL_AST_TYPE_I_SIZE (b)
+              && PKL_AST_TYPE_I_SIGNED (a) == PKL_AST_TYPE_I_SIGNED (b));
       break;
     case PKL_TYPE_ARRAY:
       {
-        pkl_ast_node a_nelem = PKL_AST_TYPE_A_NELEM (a);
-        pkl_ast_node b_nelem = PKL_AST_TYPE_A_NELEM (b);
-
-        if ((PKL_AST_INTEGER_VALUE (a_nelem)
-             != PKL_AST_INTEGER_VALUE (b_nelem))
-            || !pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
-                                    PKL_AST_TYPE_A_ETYPE (b)))
-          return 0;
+        return pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
+                                   PKL_AST_TYPE_A_ETYPE (b));
         break;
       }
     case PKL_TYPE_STRUCT:

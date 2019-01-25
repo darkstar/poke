@@ -283,12 +283,6 @@ expression:
                                                $1, $2);
                   PKL_AST_LOC ($$) = @1;
                 }
-        | SIZEOF '(' expression ')' %prec UNARY
-        	{
-                  $$ = pkl_ast_make_unary_exp (pkl_parser->ast,
-                                               PKL_AST_OP_SIZEOF, $3);
-                  PKL_AST_LOC ($$) = @1;
-                }
 	| SIZEOF '(' simple_type_specifier ')' %prec HYPERUNARY
         	{
                   $$ = pkl_ast_make_unary_exp (pkl_parser->ast, PKL_AST_OP_SIZEOF, $3);
@@ -822,12 +816,13 @@ simple_type_specifier:
 
         | simple_type_specifier '[' expression ']'
           	{
-                    $$ = pkl_ast_make_array_type (pkl_parser->ast, $3, $1);
+                    $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
+                    PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
                     PKL_AST_LOC ($$) = @$;
                 }
 	| simple_type_specifier '[' ']'
         	{
-                    $$ = pkl_ast_make_array_type (pkl_parser->ast, NULL, $1);
+                    $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
