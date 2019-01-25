@@ -254,16 +254,16 @@ pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_INT (val))
     return pvm_make_offset (pvm_make_ulong (PVM_VAL_INT_SIZE (val), 64),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
   else if (PVM_IS_UINT (val))
     return pvm_make_offset (pvm_make_ulong (PVM_VAL_UINT_SIZE (val), 64),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
   else if (PVM_IS_LONG (val))
     return pvm_make_offset (pvm_make_ulong (PVM_VAL_LONG_SIZE (val), 64),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
   else if (PVM_IS_ULONG (val))
     return pvm_make_offset (pvm_make_ulong (PVM_VAL_ULONG_SIZE (val), 64),
-                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
+                            pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
   else if (PVM_IS_STR (val))
     {
       size_t size = (strlen (PVM_VAL_STR (val)) + 1) * 8;
