@@ -1807,21 +1807,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           };
 #undef PKL_DEF_OP
 
-#define PKL_DEF_ATTR(SYM, STRING) STRING,
-        static const char *pkl_ast_attr_name[] =
-          {
-#include "pkl-attrs.def"
-          };
-#undef PKL_DEF_ATTR
-
         IPRINTF ("EXPRESSION::\n");
 
         PRINT_COMMON_FIELDS;
         IPRINTF ("opcode: %s\n",
                  pkl_ast_op_name[PKL_AST_EXP_CODE (ast)]);
         if (PKL_AST_EXP_ATTR (ast) != PKL_AST_ATTR_NONE)
-          IPRINTF ("attr: %s\n",
-                   pkl_ast_attr_name[PKL_AST_EXP_ATTR (ast)]);
+          IPRINTF ("attr: %s\n", pkl_attr_name (PKL_AST_EXP_ATTR (ast)));
         IPRINTF ("literal_p: %d\n", PKL_AST_LITERAL_P (ast));
         PRINT_AST_SUBAST (type, TYPE);
         PRINT_AST_IMM (numops, EXP_NUMOPS, "%d");
