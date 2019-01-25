@@ -720,6 +720,9 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         fputc ('u', out);
       fprintf (out, "int<%zd>", PKL_AST_TYPE_I_SIZE (type));
       break;
+    case PKL_TYPE_VOID:
+      fprintf (out, "void");
+      break;
     case PKL_TYPE_STRING:
       fprintf (out, "string");
       break;
@@ -753,29 +756,30 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
       }
     case PKL_TYPE_FUNCTION:
       {
-        pkl_ast_node rtype = PKL_AST_TYPE_F_RTYPE (type);
         pkl_ast_node t;
 
-        fputc ('(', out);
-
-        for (t = PKL_AST_TYPE_F_ARGS (type); t;
-             t = PKL_AST_CHAIN (t))
+        if (PKL_AST_TYPE_F_NARG (type) > 0)
           {
-            pkl_ast_node atype
-              = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
-
-            if (t != PKL_AST_TYPE_F_ARGS (type))
-              fputc (',', out);
-            pkl_print_type (out, atype, use_given_name);
+            fputc ('(', out);
+            
+            for (t = PKL_AST_TYPE_F_ARGS (type); t;
+                 t = PKL_AST_CHAIN (t))
+              {
+                pkl_ast_node atype
+                  = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
+                
+                if (t != PKL_AST_TYPE_F_ARGS (type))
+                  fputc (',', out);
+                pkl_print_type (out, atype, use_given_name);
+              }
+            
+            fputc (')', out);
           }
-        
-        fputc (')', out);
 
-        if (rtype)
-          {
-            fputc (':', out);
-            pkl_print_type (out, rtype, use_given_name);
-          }
+        pkl_print_type (out,
+                        PKL_AST_TYPE_F_RTYPE (type),
+                        use_given_name);
+        fputc (':', out);
         break;
       }
     case PKL_TYPE_OFFSET:
@@ -799,9 +803,6 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         fputc ('>', out);
         break;
       }
-    case PKL_TYPE_VOID:
-      fprintf (out, "void");
-      break;
     case PKL_TYPE_NOTYPE:
     default:
       assert (0);
