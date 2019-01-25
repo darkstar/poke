@@ -1585,6 +1585,45 @@ PKL_PHASE_END_HANDLER
 
 #undef BIN_INTEGRAL_EXP_HANDLER
 
+/*
+ * | OPERAND1
+ * EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  enum pkl_ast_attr attr = PKL_AST_EXP_ATTR (exp);
+
+  switch (attr)
+    {
+    case PKL_AST_ATTR_SIZE:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
+      break;
+    case PKL_AST_ATTR_BITS:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      break;
+    case PKL_AST_ATTR_UNIT:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      break;
+    case PKL_AST_ATTR_SIGN:
+    case PKL_AST_ATTR_LENGTH:
+    case PKL_AST_ATTR_ALIGNMENT:
+    case PKL_AST_ATTR_OFFSET:
+    default:
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+               "unhandled attribute expression code #%d in code generator",
+               attr);
+      PKL_PASS_ERROR;
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* The handler below generates and ICE if a given node isn't handled
    by the code generator.  */
 
@@ -1675,6 +1714,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_gen_ps_op_sizeof),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_ps_type_string),

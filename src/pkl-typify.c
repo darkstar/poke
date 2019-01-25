@@ -1136,8 +1136,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_OFFSET)
         goto invalid_attribute;
 
-      /* The type of 'bits is uint<32> */
-      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 0);
+      /* The type of 'bits is uint<64> */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
     case PKL_AST_ATTR_UNIT:
@@ -1199,6 +1199,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
                "unhandled attribute expression code #%d in typify1",
                attr);
+      PKL_PASS_ERROR;
       break;
     }
 

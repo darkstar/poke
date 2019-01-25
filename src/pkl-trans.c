@@ -363,7 +363,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
 PKL_PHASE_END_HANDLER
 
 /* Determine the attribute code of attribute expressions, emitting an
-   error if the given attribute name is not defined.  */
+   error if the given attribute name is not defined.  Finally, turn
+   the binary expression into an unary expression.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 {
@@ -390,6 +391,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
     }
 
   PKL_AST_EXP_ATTR (exp) = attr;
+
+  /* Turn the binary expression into an unary expression.  */
+  PKL_AST_EXP_NUMOPS (exp) = 1;
+  pkl_ast_node_free (PKL_AST_EXP_OPERAND (exp, 1));
 }
 PKL_PHASE_END_HANDLER
 
