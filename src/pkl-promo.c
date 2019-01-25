@@ -734,8 +734,73 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
               break;
             }
 
-          PKL_PASS_RESTART = restart;
+          PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
         }
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* The value returned from a function can be promoted in certain
+   circumstances.  Do it!  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
+{
+  pkl_ast_node return_stmt = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
+  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
+
+  pkl_ast_node returned_type;
+  pkl_ast_node expected_type;
+
+  if (exp == NULL)
+    PKL_PASS_DONE;
+
+  returned_type = PKL_AST_TYPE (exp);
+  expected_type = PKL_AST_FUNC_RET_TYPE (function);
+
+  /* At this point it is assured that the expected type and returned
+     type are promoteable, or typify wouldn't have allowed it to pass.
+     If both types are equal, then we have got nothing to to.  */
+
+  if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
+      && !pkl_ast_type_equal (returned_type, expected_type))
+    {
+      int restart;
+      
+      switch (PKL_AST_TYPE_CODE (expected_type))
+        {
+        case PKL_TYPE_INTEGRAL:
+          if (!promote_integral (PKL_PASS_AST,
+                                 PKL_AST_TYPE_I_SIZE (expected_type),
+                                 PKL_AST_TYPE_I_SIGNED (expected_type),
+                                 &PKL_AST_RETURN_STMT_EXP (return_stmt),
+                                 &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                           "couldn't promote return expression");
+                  PKL_PASS_ERROR;
+                }
+              break;
+        case PKL_TYPE_OFFSET:
+              if (!promote_offset (PKL_PASS_AST,
+                                   PKL_AST_TYPE_O_BASE_TYPE (expected_type),
+                                   PKL_AST_TYPE_O_UNIT (expected_type),
+                                   &PKL_AST_RETURN_STMT_EXP (return_stmt),
+                                   &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                           "couldn't promote return expression");
+                  PKL_PASS_ERROR;
+                }
+              break;
+        default:
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (return_stmt),
+                   "return statement non-promoteable arguments at promo time");
+          PKL_PASS_ERROR;
+          break;
+        }
+
+      PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -766,5 +831,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_promo_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_promo_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_promo_ps_return_stmt),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };

@@ -22,3 +22,15 @@ defun bar = (offset<uint,B> o) offset<uint,B>: { return o; }
 /* Coercion from offset with different base type and unit. */
 /* { dg-command { print bar (32#b) } } */
 /* { dg-output "\n4U#B" } */
+
+defun baz = (int i) long: { return i; }
+
+/* Coercion of integral return value.  */
+/* { dg-command { print baz (10U) } } */
+/* { dg-output "\n10L" } */
+
+defun quux = (offset<uint,B> o) offset<long,b>: { return o; }
+
+/* Coercion of offset return value.  */
+/* { dg-command { print quux ((2 as uint<3>)#B) } } */
+/* { dg-output "\n16L#b" } */

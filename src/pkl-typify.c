@@ -1344,15 +1344,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_return_stmt)
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
-                 "returning an expression of the wrong type\n\
+      if ((PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
+           && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
+          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_OFFSET
+              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_OFFSET))
+        /* Integers and offsets can be promoted.  */
+        ;
+      else
+      {
+        pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                   "returning an expression of the wrong type\n\
 expected %s, got %s",
-                 expected_type_str, returned_type_str);
-      free (expected_type_str);
-      free (returned_type_str);
-      
-      payload->errors++;
-      PKL_PASS_ERROR;
+                   expected_type_str, returned_type_str);
+        free (expected_type_str);
+        free (returned_type_str);
+        
+        payload->errors++;
+        PKL_PASS_ERROR;
+      }
     }
 }
 PKL_PHASE_END_HANDLER
