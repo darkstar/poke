@@ -1131,12 +1131,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
-    case PKL_AST_ATTR_BITS:
-      /* 'bits is defined for offset values.  */
+    case PKL_AST_ATTR_MAGNITUDE:
+      /* 'magnitude is defined for offset values.  */
       if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_OFFSET)
         goto invalid_attribute;
 
-      /* The type of 'bits is uint<64> */
+      /* The type of 'magnitude is uint<64> */
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;

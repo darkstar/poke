@@ -1602,7 +1602,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
     case PKL_AST_ATTR_SIZE:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
       break;
-    case PKL_AST_ATTR_BITS: /* XXX ??? */
+    case PKL_AST_ATTR_MAGNITUDE:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
