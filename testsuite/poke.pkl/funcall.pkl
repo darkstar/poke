@@ -1,0 +1,20 @@
+/* { dg-do run } */
+
+defun foo = (long l) long: { return l; }
+
+/* { dg-command { print foo (10L) } } */
+/* { dg-output "10L" } */
+
+/* Coercion from int.  */
+/* { dg-command { print foo (10) } } */
+/* { dg-output "\n10L" } */
+
+/* Coercion from uint.  */
+/* { dg-command { print foo (10U) } } */
+/* { dg-output "\n10L" } */
+
+/* Coercion from small int.  */
+/* { dg-command { print foo (2 as uint<3>) } } */
+/* { dg-output "\n2L" } */
+
+

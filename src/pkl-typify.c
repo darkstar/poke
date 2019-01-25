@@ -31,7 +31,9 @@
    if complete if its size in bits can be determined at compile-time,
    and that size is constant.  Note that not-complete types are legal
    poke entities, but certain operations are not allowed on them.
-*/
+
+   Both phases perform general type checking, and they conform the
+   implementation of the language's type system.  */
 
 #include <config.h>
 
@@ -656,7 +658,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       PKL_PASS_ERROR;
     }
 
-  /* XXX: check the types of the function and the funcall.  */
+  /* Check the types of the function and the funcall.  */
   if (PKL_AST_FUNCALL_NARG (funcall) <
       PKL_AST_TYPE_F_NARG (funcall_function_type))
     {
@@ -694,15 +696,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               char *passed_type = pkl_type_str (aa_type, 1);
               char *expected_type = pkl_type_str (fa_type, 1);
 
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                         "function argument %d has the wrong type\n\
+              if (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
+                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+                /* Integers and offsets can be promoted.  */
+                ;
+              else
+                {
+                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                             "function argument %d has the wrong type\n\
 expected %s, got %s",
-                         narg, expected_type, passed_type);
-              free (expected_type);
-              free (passed_type);
-
-              payload->errors++;
-              PKL_PASS_ERROR;
+                             narg, expected_type, passed_type);
+                  free (expected_type);
+                  free (passed_type);
+                  
+                  payload->errors++;
+                  PKL_PASS_ERROR;
+                }
             }
 
           narg++;

@@ -673,6 +673,63 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_try_catch_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* In function calls, the actual arguments should be promoted to the
+   type of the formal arguments, if that is suitable.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
+{
+  pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
+  pkl_ast_node function_type = PKL_AST_TYPE (function);
+
+  pkl_ast_node fa, aa;
+
+  for (fa = PKL_AST_TYPE_F_ARGS (function_type),
+       aa = PKL_AST_FUNCALL_ARGS (funcall);
+       fa && aa;
+       fa = PKL_AST_CHAIN (fa), aa = PKL_AST_CHAIN (aa))
+    {
+      pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
+      pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
+      pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
+
+      /* At this point it is assured that the types of the actual
+         argument and the formal argument are promoteable, or typify
+         wouldn't have allowed it to pass.  If both types are equal,
+         we have got nothing to do.  */
+      if (!pkl_ast_type_equal (fa_type, aa_type))
+        {
+          int restart;
+          
+          switch (PKL_AST_TYPE_CODE (fa_type))
+            {
+            case PKL_TYPE_INTEGRAL:
+              if (!promote_integral (PKL_PASS_AST,
+                                     PKL_AST_TYPE_I_SIZE (fa_type),
+                                     PKL_AST_TYPE_I_SIGNED (fa_type),
+                                     &PKL_AST_FUNCALL_ARG_EXP (aa),
+                                     &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
+                           "couldn't promote funcall argument to int<32>");
+                  PKL_PASS_ERROR;
+                }
+              break;
+            case PKL_TYPE_OFFSET:
+              break;
+            default:
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),
+                       "funcall contains non-promoteable arguments at promo time");
+              PKL_PASS_ERROR;
+              break;
+            }
+
+          PKL_PASS_RESTART = restart;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
@@ -698,5 +755,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_promo_ps_try_catch_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_promo_ps_funcall),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };
