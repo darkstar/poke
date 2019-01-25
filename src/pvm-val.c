@@ -266,7 +266,7 @@ pvm_sizeof (pvm_val val)
                             pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 32));
   else if (PVM_IS_STR (val))
     {
-      size_t size = strlen (PVM_VAL_STR (val)) + 1;
+      size_t size = (strlen (PVM_VAL_STR (val)) + 1) * 8;
 
       return pvm_make_offset (pvm_make_ulong (size, 64),
                               pvm_make_ulong (PVM_VAL_OFF_UNIT_BITS, 64));
