@@ -19,6 +19,7 @@
 #include <config.h>
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
@@ -81,12 +82,12 @@ print_var_decl (pkl_ast_node decl, void *data)
   fputs ("\t\t", stdout);
   /* XXX: support different bases with a /[xbo] cmd flag.  */
   pvm_print_val (stdout, val, 10);
-  fputs ("\t\t\t", stdout);
+  fputs ("\t\t", stdout);
 
   /* Print information about the site where the variable was
      declared.  */
   if (source)
-    printf ("%s:%d\n", source, loc.first_line);
+    printf ("%s:%d\n", basename (source), loc.first_line);
   else
     fputs ("<stdin>\n", stdout);
 }
@@ -114,14 +115,14 @@ print_fun_decl (pkl_ast_node decl, void *data)
 
   /* Print the name and the type of the function.  */
   fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
-  fputs ("\t\t", stdout);
+  fputs ("  ", stdout);
   pkl_print_type (stdout, PKL_AST_TYPE (func), 1);
-  fputs ("\t\t\t", stdout);
+  fputs ("  ", stdout);
 
   /* Print information about the site where the function was
      declared.  */
   if (source)
-    printf ("%s:%d\n", source, loc.first_line);
+    printf ("%s:%d\n", basename (source), loc.first_line);
   else
     fputs ("<stdin>\n", stdout);
 }
@@ -138,8 +139,6 @@ pk_cmd_info_var (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 static int
 pk_cmd_info_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
-  /* XXX: print function arguments, return type, etc.  */
-  printf (_("Name\t\tType\t\t\tDeclared at\n"));
   pkl_env_map_decls (pkl_get_env (poke_compiler), PKL_AST_DECL_KIND_FUNC,
                      print_fun_decl, NULL);
 
