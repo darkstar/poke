@@ -1180,25 +1180,69 @@ stmt:
                                                $5);  /* body */
                   PKL_AST_LOC ($$) = @$;
                 }
-	| FOR '(' IDENTIFIER IN expression ')' stmt
+	| FOR '(' IDENTIFIER IN expression pushlevel
+        	{
+                  /* Push a new lexical level and register a variable
+                     with name IDENTIFIER.  Note that the variable is
+                     created without INITIAL, as there is none.  */
+
+                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                         PKL_AST_DECL_KIND_VAR,
+                                                         $3,
+                                                         NULL, /* initial */
+                                                         pkl_parser->filename);
+
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($3),
+                                         decl))
+                    /* This should never happen.  */
+                    assert (0);
+                }
+	  ')' stmt
         	{
                   $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
                                                NULL, /* condition */
                                                $3,   /* iterator */
                                                $5,   /* container */
-                                               $7);  /* body */
+                                               $9);  /* body */
                   PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Pop the frame introduced by `pushlevel'
+                     above.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | FOR '(' IDENTIFIER IN expression WHERE expression ')' stmt
+	| FOR '(' IDENTIFIER IN expression pushlevel
+        	{
+                  /* Push a new lexical level and register a variable
+                     with name IDENTIFIER.  Note that the variable is
+                     created without INITIAL, as there is none.  */
+
+                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                         PKL_AST_DECL_KIND_VAR,
+                                                         $3,
+                                                         NULL, /* initial */
+                                                         pkl_parser->filename);
+
+                  if (!pkl_env_register (pkl_parser->env,
+                                         PKL_AST_IDENTIFIER_POINTER ($3),
+                                         decl))
+                    /* This should never happen.  */
+                    assert (0);
+                }
+	  WHERE expression ')' stmt
         	{
                   $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
-                                               $7,  /* condition */
-                                               $3,  /* iterator */
-                                               $5,  /* container */
-                                               $9); /* body */
+                                               $9,   /* condition */
+                                               $3,   /* iterator */
+                                               $5,   /* container */
+                                               $11); /* body */
                   PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Pop the frame introduced by `pushlevel'
+                     above.  */
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
         | RETURN ';'
         	{
