@@ -411,6 +411,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_func)
 }
 PKL_PHASE_END_HANDLER
 
+/* Function types from function type literals don't have the number of
+   elements set.  Do it here.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
+{
+  pkl_ast_node function_type = PKL_PASS_NODE;
+
+  pkl_ast_node arg;
+  size_t nargs = 0;
+
+  for (arg = PKL_AST_TYPE_F_ARGS (function_type);
+       arg;
+       arg = PKL_AST_CHAIN (arg))
+    nargs++;
+
+  PKL_AST_TYPE_F_NARG (function_type) = nargs;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
@@ -424,6 +443,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_trans1_ps_type_function),
   };
 
 
