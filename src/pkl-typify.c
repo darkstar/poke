@@ -1248,6 +1248,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 }
 PKL_PHASE_END_HANDLER
 
+/* Function types cannot appear in the definition of a struct type
+   element.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node elem = PKL_PASS_NODE;
+  pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
+
+  if (PKL_AST_TYPE_CODE (elem_type) == PKL_TYPE_FUNCTION)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_type),
+                 "invalid type in struct element");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1268,6 +1289,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_ps_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_typify1_ps_struct_elem_type),
 
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_ps_op_not),
