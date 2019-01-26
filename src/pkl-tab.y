@@ -67,6 +67,48 @@ pkl_tab_error (YYLTYPE *llocp,
     pkl_error (pkl_parser->ast, *llocp, "%s", err);
 }
 
+/* Register a list of arguments in the compile-time environment.  This
+   is used by function specifiers and try-catch statements.
+
+   Return 0 if there was an error registering, 1 otherwise.  */
+
+int
+pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
+{
+  pkl_ast_node arg;
+
+  for (arg = arg_list; arg; arg = PKL_AST_CHAIN (arg))
+    {
+      pkl_ast_node arg_decl;
+      pkl_ast_node arg_identifier = PKL_AST_FUNC_ARG_IDENTIFIER (arg);
+
+      pkl_ast_node dummy
+        = pkl_ast_make_integer (parser->ast, 0);
+      PKL_AST_TYPE (dummy) = ASTREF (PKL_AST_FUNC_ARG_TYPE (arg));
+
+      arg_decl = pkl_ast_make_decl (parser->ast,
+                                    PKL_AST_DECL_KIND_VAR,
+                                    arg_identifier,
+                                    dummy,
+                                    NULL /* source */);
+      PKL_AST_LOC (arg_decl) = PKL_AST_LOC (arg);
+
+      if (!pkl_env_register (parser->env,
+                             PKL_AST_IDENTIFIER_POINTER (arg_identifier),
+                             arg_decl))
+        {
+          pkl_error (parser->ast, PKL_AST_LOC (arg_identifier),
+                     "duplicated argument name `%s' in function declaration",
+                     PKL_AST_IDENTIFIER_POINTER (arg_identifier));
+          /* Make sure to pop the function frame.  */
+          parser->env = pkl_env_pop_frame (parser->env);
+          return 0;
+        }
+    }
+
+  return 1;
+}
+
 %}
 
 %union {
@@ -682,10 +724,21 @@ array_initializer:
  */
 
 function_specifier:
-	  '(' pushlevel function_arg_list ')' simple_type_specifier ':' comp_stmt
+	  '(' pushlevel function_arg_list ')'
+                {
+                    /* Register the function arguments in the
+                       compile-time environment.  This is done here
+                       and not in the function_arg rule because it
+                       should be done in reverse-order, because the
+                       callee gets the arguments in a LIFO order.  */
+
+                  if (!pkl_register_args (pkl_parser, $3))
+                    YYERROR;
+                }
+          simple_type_specifier ':' comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $5, $3, $7);
+                                          $6, $3, $8);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
@@ -708,9 +761,10 @@ function_arg_list:
 	  %empty
 		{ $$ = NULL; }
 	| function_arg
-        | function_arg_list ',' function_arg
+        | function_arg ',' function_arg_list
           	{
-                  $$ = pkl_ast_chainon ($1, $3);
+                  /* Note this is in reverse order.  */
+                  $$ = pkl_ast_chainon ($3, $1);
                 }
         ;
 
@@ -722,34 +776,9 @@ function_arg:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  /* Register the argument in the current environment,
-                     which is the function's environment pushed in
-                     `function_specifier'.  */
-
-                  pkl_ast_node arg_decl;
-
-                  pkl_ast_node dummy
-                    = pkl_ast_make_integer (pkl_parser->ast, 0);
-                  PKL_AST_TYPE (dummy) = ASTREF ($1);
-                  
-                  arg_decl = pkl_ast_make_decl (pkl_parser->ast,
-                                                PKL_AST_DECL_KIND_VAR,
-                                                $2,
-                                                dummy,
-                                                NULL /* source */);
-                  PKL_AST_LOC (arg_decl) = @$;
-
-                  if (!pkl_env_register (pkl_parser->env,
-                                         PKL_AST_IDENTIFIER_POINTER ($2),
-                                         arg_decl))
-                    {
-                      pkl_error (pkl_parser->ast, @2,
-                                 "duplicated argument name `%s' in function declaration",
-                                 PKL_AST_IDENTIFIER_POINTER ($2));
-                      /* Make sure to pop the function frame.  */
-                      pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
-                      YYERROR;
-                    }
+                  /* Note the arguments are registered in the lexical
+                     environment in a mid-term action in the
+                     `function_specifier' rule, not here.  */
                 }
         ;
 
@@ -1113,10 +1142,16 @@ stmt:
                                                     $2, $6, NULL, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| TRY stmt CATCH  '(' pushlevel function_arg ')' comp_stmt
+	| TRY stmt CATCH  '(' pushlevel function_arg
+        	{
+                  /* Register the argument in the lexical environment.  */
+                  if (!pkl_register_args (pkl_parser, $6))
+                    YYERROR;
+                }
+	  ')' comp_stmt
 		{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
-                                                    $2, $8, $6, NULL);
+                                                    $2, $9, $6, NULL);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'

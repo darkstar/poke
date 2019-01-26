@@ -398,6 +398,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 }
 PKL_PHASE_END_HANDLER
 
+/* The parser emits the formal arguments of functions in
+   reverse-order.  Reverse them again here.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_func)
+{
+  pkl_ast_node func = PKL_PASS_NODE;
+  pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
+
+  func_args = pkl_ast_reverse (func_args);
+  PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
@@ -407,6 +420,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_trans1_ps_string),
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_trans1_ps_var),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans1_ps_func),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
@@ -675,22 +689,21 @@ struct pkl_phase pkl_phase_trans3 =
 
 
 
-/* Reverse the order of the function arguments, as the callee expects
-   them in reverse order in the stack.  */
+/* Reverse the order of the function arguments, as the callee access
+   them in LIFO order.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_funcall)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_func)
 {
-  pkl_ast_node funcall = PKL_PASS_NODE;
-  pkl_ast_node funcall_args = PKL_AST_FUNCALL_ARGS (funcall);
+  pkl_ast_node func = PKL_PASS_NODE;
+  pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
 
-  funcall_args = pkl_ast_reverse (funcall_args);
-  PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (funcall_args);
+  func_args = pkl_ast_reverse (func_args);
+  PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
 }
 PKL_PHASE_END_HANDLER
-
 
 struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_trans4_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans4_ps_func),
   };
