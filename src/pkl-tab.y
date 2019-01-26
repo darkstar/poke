@@ -1062,14 +1062,22 @@ declaration:
  */
 
 comp_stmt:
-	  pushlevel '{' stmt_decl_list '}'
-        	{
-                  $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $3);
-                  PKL_AST_LOC ($$) = @$;
+	  pushlevel '{' '}'
+            {
+              $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, NULL);
+              PKL_AST_LOC ($$) = @$;
 
-                  /* Pop the frame pushed by the `pushlevel' above.  */
-                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
-                }
+              /* Pop the frame pushed by the `pushlevel' above.  */
+              pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+            }
+         |  pushlevel '{' stmt_decl_list '}'
+            {
+              $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $3);
+              PKL_AST_LOC ($$) = @$;
+              
+              /* Pop the frame pushed by the `pushlevel' above.  */
+              pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+            }
          |  BUILTIN_PRINT ';'
         	{
                   $$ = pkl_ast_make_builtin (pkl_parser->ast,
