@@ -91,7 +91,7 @@ dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile
                 src/Makefile
-                pkl/Makefile
+                pickles/Makefile
                 doc/Makefile
                 po/Makefile.in
                 testsuite/Makefile)
