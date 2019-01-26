@@ -843,10 +843,6 @@ simple_type_specifier:
                                                    $2, $4);
                     PKL_AST_LOC ($$) = @$;
                 }
-/*XXX        | '[' expression ']' simple_type_specifier
-          	{
-
-                    } */
 	| '[' ']' simple_type_specifier
         	{
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $3);
