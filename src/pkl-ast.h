@@ -1114,12 +1114,21 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
 
    CONDITION is an expression that should evaluate to a boolean, that
    is evaluated at the beginning of the loop.  If it evals to false,
-   the loop is exited.
+   the loop is exited.  This is used in WHILE, FOR-IN and FOR-IN-WHERE
+   loops.  In loops with an iterator, the iterator variable is
+   available in the scope where CONDITION is evaluated.
 
-   BODY is a statement, which is the body of the loop.
-*/
+   ITERATOR is an identifier that will name a variable created in a
+   new lexical scope.
+
+   CONTAINER is an expression that evaluates to an array.  This is
+   used in FOR-IN and FOR-IN-HWERE loops.
+
+   BODY is a statement, which is the body of the loop.  */
 
 #define PKL_AST_LOOP_STMT_CONDITION(AST) ((AST)->loop_stmt.condition)
+#define PKL_AST_LOOP_STMT_ITERATOR(AST) ((AST)->loop_stmt.iterator)
+#define PKL_AST_LOOP_STMT_CONTAINER(AST) ((AST)->loop_stmt.container)
 #define PKL_AST_LOOP_STMT_BODY(AST) ((AST)->loop_stmt.body)
 
 struct pkl_ast_loop_stmt
@@ -1127,11 +1136,15 @@ struct pkl_ast_loop_stmt
   struct pkl_ast_common COMMON;
 
   union pkl_ast_node *condition;
+  union pkl_ast_node *iterator;
+  union pkl_ast_node *container;
   union pkl_ast_node *body;
 };
 
 pkl_ast_node pkl_ast_make_loop_stmt (pkl_ast ast,
                                      pkl_ast_node condition,
+                                     pkl_ast_node iterator,
+                                     pkl_ast_node container,
                                      pkl_ast_node body);
 
 /* PKL_AST_RETURN_STMT nodes represent return statements.

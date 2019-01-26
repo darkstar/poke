@@ -121,6 +121,9 @@ D [0-9]
 "struct"	{ return STRUCT; }
 "else"		{ return ELSE; }
 "while"		{ return WHILE; }
+"for"		{ return FOR; }
+"in"		{ return IN; }
+"where"		{ return WHERE; }
 "if"		{ return IF; }
 "sizeof"	{ return SIZEOF; }
 "defun"		{ return DEFUN; }

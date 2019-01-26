@@ -158,9 +158,11 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token CONST
 %token CONTINUE
 %token ELSE
-%token FOR
 %token IF
 %token WHILE
+%token FOR
+%token IN
+%token WHERE
 %token SIZEOF
 %token ASSERT
 %token ERR
@@ -1172,7 +1174,30 @@ stmt:
 	| WHILE '(' expression ')' stmt
         	{
                   $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
-                                               $3, $5);
+                                               $3,   /* condition */
+                                               NULL, /* iterator */
+                                               NULL, /* container */
+                                               $5);  /* body */
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| FOR '(' IDENTIFIER IN expression ')' stmt
+        	{
+                  $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
+                                               NULL, /* condition */
+                                               $3,   /* iterator */
+                                               $5,   /* container */
+                                               $7);  /* body */
+                  PKL_AST_LOC ($3) = @3;
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | FOR '(' IDENTIFIER IN expression WHERE expression ')' stmt
+        	{
+                  $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
+                                               $7,  /* condition */
+                                               $3,  /* iterator */
+                                               $5,  /* container */
+                                               $9); /* body */
+                  PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
                 }
         | RETURN ';'
