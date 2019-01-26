@@ -1,7 +1,7 @@
 /* { dg-do run} */
 
 defun double = (int a) int: { return a * 2; }
-defun foo = fun(int)int:: { return double; }
+defun foo = fun(int)int: { return double; }
 
 /* {dg-command { print foo()(10) } } */
 /* {dg-output "20"} */

@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = (fun(int)int: bar) int: { return bar (10); }
+defun foo = (fun(int)int bar) int: { return bar (10); }
 defun double = (int a) int: { return a * 2; }
   
 /* { dg-command { print foo (double) } } */

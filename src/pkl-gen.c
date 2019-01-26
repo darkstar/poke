@@ -195,7 +195,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
             closure = pvm_make_cls (program);
           
             /*XXX*/
-            pvm_print_program (stdout, program);
+            /* pvm_print_program (stdout, program); */
             
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -213,7 +213,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
             closure = pvm_make_cls (program);
             
             /*XXX*/
-            pvm_print_program (stdout, program);
+            /* pvm_print_program (stdout, program); */
             
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);

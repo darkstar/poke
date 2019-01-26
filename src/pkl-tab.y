@@ -843,19 +843,16 @@ simple_type_specifier:
                                                    $2, $4);
                     PKL_AST_LOC ($$) = @$;
                 }
-
-        | simple_type_specifier '[' expression ']'
+/*XXX        | '[' expression ']' simple_type_specifier
           	{
-                    $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
-                    PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
-                    PKL_AST_LOC ($$) = @$;
-                }
-	| simple_type_specifier '[' ']'
+
+                    } */
+	| '[' ']' simple_type_specifier
         	{
-                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
+                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| FUN '(' function_type_arg_list ')' simple_type_specifier ':'
+	| FUN '(' function_type_arg_list ')' simple_type_specifier
         	{
                   $$ = pkl_ast_make_function_type (pkl_parser->ast,
                                                    $5, 0 /* narg */,
@@ -916,17 +913,43 @@ struct_elem_type_list:
 struct_elem_type:
 	  type_specifier identifier ';'
           	{
-                    $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
-                    PKL_AST_LOC ($$) = @$;
-                    PKL_AST_LOC ($2) = @2;
-                    PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
-                    ASTREF (PKL_AST_TYPE ($2));
-                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
+                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
+                  ASTREF (PKL_AST_TYPE ($2));
+                  PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                }
+	| '[' expression ']' simple_type_specifier identifier ';'
+        	{
+                  /* Make the array type, with initialized size.  */
+                  pkl_ast_node atype = pkl_ast_make_array_type (pkl_parser->ast, $4);
+                  PKL_AST_TYPE_A_NELEM (atype) = ASTREF ($2);
+                  PKL_AST_LOC (atype) = @$;
+
+                  /* Make the struct elem type, with that type.  */
+                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $5, atype);
+                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($5) = @5;
+                  PKL_AST_TYPE ($5) = pkl_ast_make_string_type (pkl_parser->ast);
+                  ASTREF (PKL_AST_TYPE ($5));
+                  PKL_AST_LOC (PKL_AST_TYPE ($5)) = @5;
                 }
         | type_specifier ';'
         	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1);
                     PKL_AST_LOC ($$) = @$;
+                }
+	| '[' expression ']' simple_type_specifier ';'
+        	{
+                  /* Make the array type, with initialized size.  */
+                  pkl_ast_node atype = pkl_ast_make_array_type (pkl_parser->ast, $4);
+                  PKL_AST_TYPE_A_NELEM (atype) = ASTREF ($2);
+                  PKL_AST_LOC (atype) = @$;
+
+                  /* Make the struct elem type, with that type.  */
+                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, atype);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
