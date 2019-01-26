@@ -72,7 +72,7 @@ pkl_new ()
     pvm_program pkl_prog
       = pkl_compile_file (compiler,
                           /* XXX: use datadir/bleh */
-                          "/home/jemarch/gnu/hacks/poke/src/pkl-rt.pkl");
+                          "/home/jemarch/gnu/hacks/poke/src/pkl-rt.pk");
 
     if (pkl_prog == NULL
         || (pvm_run (poke_vm, pkl_prog, &val) != PVM_EXIT_OK))
