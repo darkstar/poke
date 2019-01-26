@@ -1,0 +1,8 @@
+/* { dg-do compile } */
+
+defun bar = void: {}
+
+defun foo = void:
+  {
+   defvar v = bar as int<32>; /* { dg-error "" } */
+  }
