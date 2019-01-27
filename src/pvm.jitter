@@ -1445,12 +1445,10 @@ end
 
 ## Offset instructions.
 
-instruction mko () # ( EXP ULONG -- OFF )
+instruction mko () # ( EXP ULONG -- EXP ULONG OFF )
   code
-#define F(res, a, b) \
-  { res = pvm_make_offset (a, b); }
-  JITTER_BINARY_STACK (F);
-#undef F
+   JITTER_PUSH_STACK (pvm_make_offset (JITTER_UNDER_TOP_STACK (),
+                                       JITTER_TOP_STACK ()));
   end
 end
 

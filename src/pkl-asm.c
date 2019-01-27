@@ -527,24 +527,43 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 {
   /* Stack: OFF TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
-  pkl_asm_insn (pasm, PKL_INSN_DUP);
-
-  /* Stack: TOUNIT OFF OFF */
   pkl_asm_insn (pasm, PKL_INSN_OGETM);
+
+  /* Stack: TOUNIT OFF MAGNITUDE */
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
+
+  /* Stack: TOUNIT MAGNITUDE OFF */
   pkl_asm_insn (pasm, PKL_INSN_OGETU);
+
+  /* Stack: TOUNIT MAGNITUDE OFF UNIT */
   pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
   pkl_asm_insn (pasm, PKL_INSN_NIP);
 
-  /* Stack: TOUNIT OFF MAGNITUDE UNIT */
+  /* Stack: TOUNIT MAGNITUDE OFF UNIT */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+
+  /* Stack: TOUNIT OFF UNIT MAGNITUDE */
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
 
-  /* Stack: TOUNIT OFF (MAGNITUDE*UNIT) */
+  /* Stack: TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE) */
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+  /* Stack: TOUNIT OFF (UNIT*MAGNITUDE) */
   pkl_asm_insn (pasm, PKL_INSN_ROT);
 
   /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+  /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT */
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
+
+  /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT (MAGNITUDE*UNIT/TOUNIT) */
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+  /* Stack: OFF (MAGNITUDE*UNIT/TOUNIT) */
 }
 
 /* Macro-instruction: BZ type, label
