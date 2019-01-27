@@ -1012,9 +1012,13 @@ PKL_PHASE_END_HANDLER
 /* The type of the condition of a loop statement should be a boolean.
    Also, determine the type of the iterator from the type of the
    container and install a dummy value with the right type in it's
-   initializer.  */
+   initializer.
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
+   Note that this handler uses subpasses.  This is because the type of
+   the iterator's initial should be determined before the condition
+   and the body.  Ugly, but it works.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
@@ -1023,21 +1027,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
   pkl_ast_node condition = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
   pkl_ast_node iterator = PKL_AST_LOOP_STMT_ITERATOR (loop_stmt);
   pkl_ast_node container = PKL_AST_LOOP_STMT_CONTAINER (loop_stmt);
-
-  /* The type of the loop condition should be a boolean.  */
-  if (condition)
+  pkl_ast_node body = PKL_AST_LOOP_STMT_BODY (loop_stmt);
+  
+  if (container)
     {
-      pkl_ast_node condition_type = PKL_AST_TYPE (condition);
-      
-      if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
-          || PKL_AST_TYPE_I_SIZE (condition_type) != 32
-          || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
-        {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
-                     "expected boolean expression");
-          payload->errors++;
-          PKL_PASS_ERROR;
-        }
+      PKL_PASS_SUBPASS (container);
+      if (payload->errors > 0)
+        PKL_PASS_ERROR;
     }
 
   if (iterator)
@@ -1046,7 +1042,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
     pkl_ast_node container_elem_type;
 
     /* At this point the type of the container has been already
-       calculated, by virtue of the pass logic.  */
+       calculated, by virtue of the subpass above.  */
     assert (container_type != NULL);
 
     /* The type of the container should be a container type.  */
@@ -1064,6 +1060,33 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
     PKL_AST_TYPE (PKL_AST_DECL_INITIAL (iterator))
       = ASTREF (container_elem_type);
   }
+
+  /* The type of the loop condition should be a boolean.  */
+  if (condition)
+    {
+      pkl_ast_node condition_type;
+
+      PKL_PASS_SUBPASS (condition);
+      if (payload->errors > 0)
+        PKL_PASS_ERROR;
+      
+      condition_type = PKL_AST_TYPE (condition);
+      
+      if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
+          || PKL_AST_TYPE_I_SIZE (condition_type) != 32
+          || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
+                     "expected boolean expression");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+
+  PKL_PASS_SUBPASS (body);
+  if (payload->errors > 0)
+        PKL_PASS_ERROR;
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -1320,7 +1343,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_typify1_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
-   PKL_PHASE_PS_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_ps_loop_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_typify1_ps_struct_elem_type),
