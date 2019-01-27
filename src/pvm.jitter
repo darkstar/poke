@@ -983,274 +983,168 @@ end
 
 # Logical instructions.
 
-instruction and () # ( INT INT -- INT )
+instruction and () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { res = pvm_make_int ((PVM_VAL_INT (a) && PVM_VAL_INT (b)), 32);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BOOL_BINOP (INT, &&);
   end
 end
 
-instruction or () # ( INT INT -- INT )
+instruction or () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { res = pvm_make_int ((PVM_VAL_INT (a) || PVM_VAL_INT (b)), 32);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BOOL_BINOP (INT, ||);
   end
 end
 
-instruction not () # ( INT -- INT )
+instruction not () # ( INT -- INT INT )
   code
-    JITTER_TOP_STACK()
-      = pvm_make_int (! PVM_VAL_INT(JITTER_TOP_STACK()), 32);
+    pvm_val res = pvm_make_int (! PVM_VAL_INT (JITTER_TOP_STACK ()), 32);
+    JITTER_PUSH_STACK (res);
   end
 end
 
 # Bitwise operators.
 
-instruction bxori () # ( INT INT -- INT )
+instruction bxori () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a);                             \
-    res = pvm_make_int (PVM_VAL_INT (a) ^ PVM_VAL_INT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int, ^);
   end
 end
 
-instruction bxoriu () # ( UINT UINT -- UINT )
+instruction bxoriu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint (PVM_VAL_UINT (a) ^ PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint, ^);
   end
 end
 
-instruction bxorl () # ( LONG LONG -- LONG )
+instruction bxorl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_LONG (a) ^ PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long, ^);
   end
 end
 
-instruction bxorlu () # ( ULONG ULONG -- ULONG )
+instruction bxorlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_ULONG (a) ^ PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong, ^);
   end
 end
 
 instruction bori () # ( INT INT -- INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a);                                     \
-    res = pvm_make_int (PVM_VAL_INT (a) | PVM_VAL_INT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int, |);
   end
 end
 
-instruction boriu () # ( UINT UINT -- UINT )
+instruction boriu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint (PVM_VAL_UINT (a) | PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint, |);
   end
 end
 
-instruction borl () # ( LONG LONG -- LONG )
+instruction borl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_LONG (a) | PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long, |);
   end
 end
 
-instruction borlu () # ( ULONG ULONG -- ULONG )
+instruction borlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_ULONG (a) | PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong, |);
   end
 end
 
-instruction bandi () # ( INT INT -- INT )
+instruction bandi () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a);                                     \
-    res = pvm_make_int (PVM_VAL_INT (a) & PVM_VAL_INT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int, &);
   end
 end
 
-instruction bandiu () # ( UINT UINT -- UINT )
+instruction bandiu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint (PVM_VAL_UINT (a) & PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint, &);
   end
 end
 
-instruction bandl () # ( LONG LONG -- LONG )
+instruction bandl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_LONG (a) & PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long, &);
   end
 end
 
-instruction bandlu () # ( ULONG ULONG -- ULONG )
+instruction bandlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) & PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong, &);
   end
 end
 
-instruction bnoti () # ( INT -- INT )
+instruction bnoti () # ( INT -- INT INT )
   code
-    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()), size);
+    PVM_UNOP (INT, INT, int, ~);
   end
 end
 
-instruction bnotiu () # ( UINT -- UINT )
+instruction bnotiu () # ( UINT -- UINT UINT )
   code
-    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK() = pvm_make_uint (~PVM_VAL_UINT (JITTER_TOP_STACK()), size);
+    PVM_UNOP (UINT, UINT, uint, ~);
   end
 end
 
-instruction bnotl () # ( LONG -- LONG )
+instruction bnotl () # ( LONG -- LONG LONG )
   code
-    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK() = pvm_make_long (~PVM_VAL_LONG (JITTER_TOP_STACK()), size);
+    PVM_UNOP (LONG, LONG, long, ~);
   end
 end
 
-instruction bnotlu () # ( ULONG -- ULONG )
+instruction bnotlu () # ( ULONG -- ULONG ULONG )
   code
-   int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
-   JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()), size);
+    PVM_UNOP (ULONG, ULONG, ulong, ~);
   end
 end
 
-instruction bsli () # ( INT UINT -- INT )
+instruction bsli () # ( INT UINT -- INT UINT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a);                                     \
-    res = pvm_make_int (PVM_VAL_INT (a) << PVM_VAL_UINT (b), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, UINT, INT, int, <<);
   end
 end
 
-instruction bsliu () # ( UINT UINT -- UINT )
+instruction bsliu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint ((PVM_VAL_UINT (a) << PVM_VAL_UINT (b))           \
-                         % PVM_MAX_UINT (size), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint, <<);
   end
 end
 
-instruction bsll () # ( LONG UINT -- LONG )
+instruction bsll () # ( LONG UINT -- LONG UINT LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_LONG (a) << PVM_VAL_UINT (b), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, UINT, LONG, long, <<);
   end
 end
 
-instruction bsllu () # ( ULONG UINT -- ULONG )
+instruction bsllu () # ( ULONG UINT -- ULONG UINT ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_ulong ((PVM_VAL_ULONG (a) << PVM_VAL_UINT (b))          \
-                          % PVM_MAX_ULONG (size), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, UINT, ULONG, ulong, <<);
   end
 end
 
-instruction bsri () # ( INT UINT -- INT )
+instruction bsri () # ( INT UINT -- INT UINT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a);                                     \
-    res = pvm_make_int (PVM_VAL_INT (a) >> PVM_VAL_UINT (b), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, UINT, INT, int, >>);
   end
 end
 
-instruction bsriu () # ( UINT UINT -- UINT )
+instruction bsriu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a);                                     \
-    res = pvm_make_uint (PVM_VAL_UINT (a) >> PVM_VAL_UINT (b), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint, >>);
   end
 end
 
-instruction bsrl () # ( LONG UINT -- LONG )
+instruction bsrl () # ( LONG UINT -- LONG UINT LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a);                                     \
-    res = pvm_make_long (PVM_VAL_LONG (a) >> PVM_VAL_UINT (b), size); }
-    JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, UINT, LONG, long, >>);
   end
 end
 
-instruction bsrlu () # ( ULONG UINT -- ULONG )
+instruction bsrlu () # ( ULONG UINT -- ULONG UINT ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a);                                     \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) >> PVM_VAL_UINT (b), size); }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, UINT, ULONG, ulong, >>);
   end
 end
 

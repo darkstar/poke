@@ -1562,18 +1562,23 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_and)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AND);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_or)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_not)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NOT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
 }
 PKL_PHASE_END_HANDLER
 
