@@ -826,41 +826,75 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       /* XXX: we have to do the arithmetic in base_unit_types, then
          convert to to_base_type, to assure that to_base_type can hold
          the to_base_unit.  Otherwise weird division by zero occurs.  */
+
+      /* Stack: OFFSET */
       pkl_asm_insn (pasm, PKL_INSN_OGETM);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NTON,
-                    from_base_type, to_base_type);
+
+      /* Stack: OFFSET MAGNITUDE */
       pkl_asm_insn (pasm, PKL_INSN_NIP);
 
+      if (!pkl_ast_type_equal (from_base_type, to_base_type))
+        {
+          pkl_asm_insn (pasm, PKL_INSN_NTON,
+                        from_base_type, to_base_type);
+          pkl_asm_insn (pasm, PKL_INSN_NIP);
+        }
+
+      /* Stack: OFFSET MAGNITUDE */
       PKL_PASS_SUBPASS (from_base_unit);
-      pkl_asm_insn (pasm, PKL_INSN_NTON,
-                    from_base_unit_type, to_base_type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
+      /* Stack: OFFSET MAGNITUDE UNIT */
+      if (!pkl_ast_type_equal (from_base_unit_type, to_base_type))
+        {
+          pkl_asm_insn (pasm, PKL_INSN_NTON,
+                        from_base_unit_type, to_base_type);
+          pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+        }
+
+      /* Stack: OFFSET MAGNITUDE UNIT */
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
 
+      /* Stack: OFFSET (MAGNITUDE*UNIT) */
       PKL_PASS_SUBPASS (to_base_unit);
-      pkl_asm_insn (pasm, PKL_INSN_NTON,
-                    to_base_unit_type, to_base_type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
+      /* Stack: OFFSET (MAGNITUDE*UNIT) NEWUNIT */
+      if (!pkl_ast_type_equal (to_base_unit_type, to_base_type))
+        {
+          pkl_asm_insn (pasm, PKL_INSN_NTON,
+                        to_base_unit_type, to_base_type);
+          pkl_asm_insn (pasm, PKL_INSN_NIP);
+        }
+
+      /* Stack: OFFSET (MAGNITUDE*UNIT) NEWUNIT */
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+      /* Stack: OFFSET (MAGNITUDE*UNIT/NEWUNIT) */
       pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
       /* Push the new unit.  */
+
+      /* Stack: (MAGNITUDE*UNIT/NEWUNIT) OFFSET */
       PKL_PASS_SUBPASS (to_base_unit);
-      pkl_asm_insn (pasm, PKL_INSN_SWAP);
+
+      /* Stack: (MAGNITUDE*UNIT/NEWUNIT) OFFSET NEWUNIT */
 
       /* Get rid of the original offset.  */
+      pkl_asm_insn (pasm, PKL_INSN_SWAP);
       pkl_asm_insn (pasm, PKL_INSN_DROP);
+
+      /* Stack: (MAGNITUDE*UNIT/NEWUNIT) NEWUNIT */
+
       /* And create the new one.  */
       pkl_asm_insn (pasm, PKL_INSN_MKO);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
+
+      /* Stack: OFFSET */
     }
   else
     /* XXX: handle casts to structs and arrays.  For structs,

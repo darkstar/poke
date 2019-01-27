@@ -164,7 +164,7 @@ pkl_asm_push_val (pvm_program program, pvm_val val)
 }
 
 /* Macro-instruction: NTON from_type, to_type
-   Stack: VAL(from_type) -> VAL(to_type)
+   Stack: VAL(from_type) -> VAL(from_type) VAL(to_type)
 
    Generate code to convert an integer value from FROM_TYPE to
    TO_TYPE.  Both types should be integral types.  */
@@ -182,8 +182,11 @@ pkl_asm_insn_nton  (pkl_asm pasm,
   
   if (from_type_size == to_type_size
       && from_type_sign == to_type_sign)
-    /* Wheee, nothing to do.  */
-    return;
+    {
+      /* Wheee, nothing to convert.  Just dup.  */
+      pkl_asm_insn (pasm, PKL_INSN_DUP);
+      return;
+    }
   else
     {
       static int cast_table[2][2][2][2] =
