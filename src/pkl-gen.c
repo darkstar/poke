@@ -805,6 +805,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
     {
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     from_type, to_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
     }
   else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
@@ -826,10 +827,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       pkl_asm_insn (pasm, PKL_INSN_OGETM);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     from_base_type, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
       PKL_PASS_SUBPASS (from_base_unit);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     from_base_unit_type, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
@@ -838,6 +841,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       PKL_PASS_SUBPASS (to_base_unit);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     to_base_unit_type, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
