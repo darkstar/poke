@@ -403,20 +403,45 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
 {
   pkl_ast_node loop_stmt = PKL_PASS_NODE;
-  pkl_ast_node loop_stmt_condition
-    = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
-  pkl_ast_node loop_stmt_body
-    = PKL_AST_LOOP_STMT_BODY (loop_stmt);
+  pkl_ast_node condition = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
+  pkl_ast_node iterator = PKL_AST_LOOP_STMT_ITERATOR (loop_stmt);
+  pkl_ast_node container = PKL_AST_LOOP_STMT_CONTAINER (loop_stmt);
+  pkl_ast_node body = PKL_AST_LOOP_STMT_BODY (loop_stmt);
 
-  pkl_asm_while (PKL_GEN_ASM);
-  {
-    PKL_PASS_SUBPASS (loop_stmt_condition);
-  }
-  pkl_asm_loop (PKL_GEN_ASM);
-  {
-    PKL_PASS_SUBPASS (loop_stmt_body);
-  }
-  pkl_asm_endloop (PKL_GEN_ASM);
+  if (condition && !iterator  && !container)
+    {
+      /* This is a WHILE loop.  */
+      pkl_asm_while (PKL_GEN_ASM);
+      {
+        PKL_PASS_SUBPASS (condition);
+      }
+      pkl_asm_loop (PKL_GEN_ASM);
+      {
+        PKL_PASS_SUBPASS (body);
+      }
+      pkl_asm_endloop (PKL_GEN_ASM);
+    }
+  else if (iterator && container)
+    {
+      /* This is a FOR-IN[-WHERE] loop.  */
+      pkl_asm_for (PKL_GEN_ASM, condition);
+      {
+        PKL_PASS_SUBPASS (container);
+      }
+      pkl_asm_for_where (PKL_GEN_ASM);
+      {
+        if (condition)
+          PKL_PASS_SUBPASS (condition);
+      }
+      pkl_asm_for_loop (PKL_GEN_ASM);
+      {
+        PKL_PASS_SUBPASS (body);
+      }
+      pkl_asm_for_endloop (PKL_GEN_ASM);
+    }
+  else
+    /* This should not happen.  */
+    assert (0);
 
   PKL_PASS_BREAK;
 }
@@ -957,6 +982,8 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1225,6 +1252,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
       break;
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, PKL_INSN_SCONC);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1547,6 +1576,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
     case PKL_TYPE_INTEGRAL:
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, rela_insn, op1_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1574,6 +1605,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         pkl_asm_insn (pasm, rela_insn, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
       }
@@ -1629,6 +1662,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
         case PKL_TYPE_ARRAY:
         case PKL_TYPE_STRUCT:
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
           break;
         default:
           /* This should not happen.  */

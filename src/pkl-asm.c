@@ -51,8 +51,8 @@
 
    CURRENT_ENV identifies what kind of instruction created the level.
    This can be either PKL_ASM_ENV_NULL, PKL_ASM_ENV_CONDITIONAL,
-   PKL_ASM_ENV_LOOP or PKL_ASM_ENV_TRY.  PKL_ASM_ENV_NULL should only
-   be used at the top-level.
+   PKL_ASM_ENV_LOOP, PKL_ASM_ENV_FOR_LOOP, PKL_ASM_ENV_TRY.
+   PKL_ASM_ENV_NULL should only be used at the top-level.
 
    PARENT is the parent level, i.e. the level containing this one.
    This is NULL at the top-level.
@@ -65,6 +65,7 @@
 #define PKL_ASM_ENV_CONDITIONAL 1
 #define PKL_ASM_ENV_LOOP 2
 #define PKL_ASM_ENV_TRY 3
+#define PKL_ASM_ENV_FOR_LOOP 4
 
 struct pkl_asm_level
 {
@@ -1103,6 +1104,134 @@ pkl_asm_endloop (pkl_asm pasm)
 
   /* Cleanup and pop the current level.  */
   pkl_asm_poplevel (pasm);
+}
+
+/* The following functions implement for-in-where loops.  The code
+   generated is:
+
+   FOR (VAR in CONTAINER where CONDITION) { BODY }
+
+   State to keep: CONTAINER length. index in CONTAINER.
+
+              ; CONTAINER
+ label1:
+   PUSHF
+   PUSH NULL  ; CONTAINER NULL
+   REGVAR     ; CONTAINER
+   SEL        ; CONTAINER NELEMS
+   PUSH 0UL   ; CONTAINER NELEMS 0
+   SWAP       ; CONTAINER 0 NELEMS   
+   PUSH NULL  ; CONTAINER 0 NELEMS NULL
+ label2:
+   DROP       ; CONTAINER I NELEMS
+   EQLU       ; CONTAINER I NELEMS BOOL
+   BNZI label3
+   POP        ; CONTAINER I NELEMS
+   ; Set the iterator for this iteration.
+   ROT        ; I NELEMS CONTAINER
+   ROT        ; NELEMS CONTAINER I
+   AREF       ; NELEMS CONTAINER I IVAL
+   POPVAR 0,0 ; NELEMS CONTAINER I
+   ROT        ; CONTAINER I NELEMS
+   ; Increase the iterator counter
+   SWAP       ; CONTAINER NELEMS I
+   PUSH 1UL   ; CONTAINER NELEMS I 1
+   ADDLU      ; CONTAINER NELEMS I
+   SWAP       ; CONTAINER I NELEMS
+#if SELECTOR
+   ; Evaluate the selector and skip this iteration if it is
+   ; not true
+
+   ... CONDITION ... ; CONTAINER I NELEMS BOOL
+   BZ label2;
+   DROP       ; CONTAINER I NELEMS
+#endif
+
+   ... BODY ...
+    
+   BA label2
+ label3:
+   DROP       ; CONTAINER I NELEMS
+   DROP       ; CONTAINER I
+   DROP       ; CONTAINER
+   DROP       ; _
+   POPF
+*/
+
+void
+pkl_asm_for (pkl_asm pasm, pkl_ast_node selector)
+{
+  pkl_asm_pushlevel (pasm, PKL_ASM_ENV_FOR_LOOP);
+
+  pasm->level->label1 = jitter_fresh_label (pasm->program);
+  pasm->level->label2 = jitter_fresh_label (pasm->program);
+  pasm->level->label3 = jitter_fresh_label (pasm->program);
+
+  if (selector)
+    pasm->level->node1 = ASTREF (selector);
+}
+
+void
+pkl_asm_for_where (pkl_asm pasm)
+{
+  pvm_append_label (pasm->program, pasm->level->label1);
+
+  pkl_asm_insn (pasm, PKL_INSN_PUSHF);
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
+  pkl_asm_insn (pasm, PKL_INSN_REGVAR);
+  pkl_asm_insn (pasm, PKL_INSN_SEL);
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
+
+  pvm_append_label (pasm->program, pasm->level->label2);
+
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pkl_asm_insn (pasm, PKL_INSN_EQLU);
+  pkl_asm_insn (pasm, PKL_INSN_BNZI, pasm->level->label3);
+  pkl_asm_insn (pasm, PKL_INSN_POP);
+
+  /* Set the iterator for this iteration.  */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+  pkl_asm_insn (pasm, PKL_INSN_AREF);
+  pkl_asm_insn (pasm, PKL_INSN_POPVAR, 0, 0);
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+
+  /* Increase the iterator counter.  */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
+  pkl_asm_insn (pasm, PKL_INSN_ADDLU);
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);
+}
+
+void
+pkl_asm_for_loop (pkl_asm pasm)
+{
+  if (pasm->level->node1)
+    {
+      /* A selector condition has been evaluated and it is at the top
+         of the stack.  */
+      pkl_asm_insn (pasm, PKL_INSN_BZ,
+                    PKL_AST_TYPE (pasm->level->node1),
+                    pasm->level->label2);
+      pkl_asm_insn (pasm, PKL_INSN_DROP);
+    }
+}
+
+void
+pkl_asm_for_endloop (pkl_asm pasm)
+{
+  pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
+
+  pvm_append_label (pasm->program, pasm->level->label3);
+
+  /* Cleanup the stack, and pop the current frame from the
+     environment.  */
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
 }
 
 void

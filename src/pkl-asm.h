@@ -128,19 +128,28 @@ void pkl_asm_while (pkl_asm pasm);
 void pkl_asm_loop (pkl_asm pasm);
 void pkl_asm_endloop (pkl_asm pasm);
 
-/* For loop:
+/* For-in-where loops.
  *
- * pkl_asm_dotimes (pasm)
+ * pkl_asm_for (pasm, selector)
  *
- * ... integral ...
+ * ... container ...
  *
- * pkl_asm_loop (pasm);
+ * pkl_asm_for_where (pasm);
  *
- * ... loop body ...
+ * ... selector ...
  *
- * pkl_asm_end_loop (pasm);
+ * pkl_asm_for_loop (pasm);
+ *
+ * ... body ...
+ *
+ * pkl_asm_for_endloop (pasm);
  *
  */
+
+void pkl_asm_for (pkl_asm pasm, pkl_ast_node);
+void pkl_asm_for_where (pkl_asm pasm);
+void pkl_asm_for_loop (pkl_asm pasm);
+void pkl_asm_for_endloop (pkl_asm pasm);
 
 /* Try-catch blocks.
  *
