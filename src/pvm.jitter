@@ -151,7 +151,8 @@ late-header-c
     /* Macros to implement different kind of instructions.  These are to
        avoid flagrant code replication below.  */
 
-/* Binary operations with stack: TYPE TYPE - TYPE TYPE INT */
+/* Binary numeric operations generating a boolean in the stack.
+   TYPE TYPE - TYPE TYPE INT */
 # define PVM_BOOL_BINOP(TYPE,OP)                                             \
    do                                                                        \
     {                                                                        \
@@ -384,7 +385,7 @@ instruction popf (?n popf_printer)
 end
 
 # pushvar BACK, OVER
-instruction pushvar (?n, ?n) #  _ -> VAL
+instruction pushvar (?n, ?n) #  ( -- VAL )
   code
     JITTER_PUSH_STACK (pvm_env_lookup (jitter_state_runtime.env,
                                        (int) JITTER_ARGN0,
@@ -392,7 +393,7 @@ instruction pushvar (?n, ?n) #  _ -> VAL
   end
 end
 
-instruction popvar (?n, ?n) # VAL -> _
+instruction popvar (?n, ?n) # ( VAL -- )
   code
     pvm_env_set_var (jitter_state_runtime.env,
                      (int) JITTER_ARGN0,
@@ -402,7 +403,7 @@ instruction popvar (?n, ?n) # VAL -> _
   end
 end
 
-instruction regvar () # VAL -> _
+instruction regvar () # ( VAL -- )
   code
     pvm_env_register (jitter_state_runtime.env,
                       JITTER_TOP_STACK ());
@@ -411,7 +412,7 @@ instruction regvar () # VAL -> _
 end
 
 # Put Environment in Closure
-instruction pec () # CLS -> CLS (+ current environment)
+instruction pec () # ( CLS -- CLS )
   code
     pvm_val cls = JITTER_TOP_STACK ();
     PVM_VAL_CLS_ENV (cls) = jitter_state_runtime.env;
@@ -432,13 +433,13 @@ instruction note (?n pvm_literal_printer)
   end
 end
 
-instruction siz () # VAL -> ULONG
+instruction siz () # ( VAL -- ULONG )
   code
     JITTER_TOP_STACK () = pvm_sizeof (JITTER_TOP_STACK ());
   end
 end
 
-instruction print () # STR -> _
+instruction print () # ( STR -- )
   code
     pvm_print_string (stdout, JITTER_TOP_STACK ());
     JITTER_DROP_STACK ();
@@ -449,13 +450,13 @@ end
 
 ## Stack manipulation instructions
 
-instruction drop () # A -> _
+instruction drop () # ( A -- )
   code
     JITTER_DROP_STACK();
   end
 end
 
-instruction push (?nl pvm_literal_printer) # _ -> A
+instruction push (?nl pvm_literal_printer) # ( -- A )
   code
     pvm_val k = JITTER_ARGN0;
     JITTER_PUSH_STACK(k);
@@ -468,7 +469,7 @@ instruction pushr (?R)
   end
 end
 
-instruction swap () # A B -> B A
+instruction swap () # ( A B -- B A )
   code
     pvm_val tmp = JITTER_UNDER_TOP_STACK ();
     JITTER_UNDER_TOP_STACK () = JITTER_TOP_STACK ();
@@ -476,19 +477,19 @@ instruction swap () # A B -> B A
   end
 end
 
-instruction nip () # A B -> B
+instruction nip () # ( A B -- B )
   code
     JITTER_NIP_STACK();
   end
 end
 
-instruction dup () # A -> A A
+instruction dup () # ( A -- A A )
   code
     JITTER_DUP_STACK ();
   end
 end
 
-instruction rot () # A B C -> B C A
+instruction rot () # ( A B C -- B C A )
   code
    pvm_val a, b, c;
 
@@ -503,7 +504,7 @@ instruction rot () # A B C -> B C A
   end
 end
 
-instruction nrot () # A B C -> C A B
+instruction nrot () # ( A B C -- C A B )
   code
    pvm_val a, b, c;
 
@@ -573,7 +574,7 @@ instruction restorer (!R)
   end
 end
 
-instruction sel () # VAL -> VAL ULONG
+instruction sel () # ( VAL -- VAL ULONG )
   code
     JITTER_PUSH_STACK (pvm_elemsof (JITTER_TOP_STACK ()));
   end
@@ -588,7 +589,7 @@ end
 # The following instructions assume that both operands have the same
 # size in bits.
 
-instruction addi () # INT INT -> INT
+instruction addi () # ( INT INT -- INT )
   code
 #define F(res, a, b)                                                     \
   { int size = PVM_VAL_INT_SIZE (a);                                     \
@@ -599,7 +600,7 @@ instruction addi () # INT INT -> INT
   end
 end
 
-instruction addiu () # UINT UINT -> UINT
+instruction addiu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a); \
@@ -610,7 +611,7 @@ instruction addiu () # UINT UINT -> UINT
   end
 end
 
-instruction addl () # LONG LONG -> LONG
+instruction addl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b)                                                       \
   { int size = PVM_VAL_LONG_SIZE (a); \
@@ -621,7 +622,7 @@ instruction addl () # LONG LONG -> LONG
   end
 end
 
-instruction addlu () # ULONG ULONG -> ULONG
+instruction addlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
@@ -632,7 +633,7 @@ instruction addlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction subi () # INT INT -> INT
+instruction subi () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a); \
@@ -643,7 +644,7 @@ instruction subi () # INT INT -> INT
   end
 end
 
-instruction subiu () # UINT UINT -> UINT
+instruction subiu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a); \
@@ -654,7 +655,7 @@ instruction subiu () # UINT UINT -> UINT
   end
 end
 
-instruction subl () # LONG LONG -> LONG
+instruction subl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a); \
@@ -665,7 +666,7 @@ instruction subl () # LONG LONG -> LONG
   end
 end
 
-instruction sublu () # ULONG ULONG -> ULONG
+instruction sublu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
@@ -676,7 +677,7 @@ instruction sublu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction muli () # INT INT -> INT
+instruction muli () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a); \
@@ -687,7 +688,7 @@ instruction muli () # INT INT -> INT
   end
 end
 
-instruction muliu () # UINT UINT -> UINT
+instruction muliu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a); \
@@ -698,7 +699,7 @@ instruction muliu () # UINT UINT -> UINT
   end
 end
 
-instruction mull () # LONG LONG -> LONG
+instruction mull () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a); \
@@ -709,7 +710,7 @@ instruction mull () # LONG LONG -> LONG
   end
 end
 
-instruction mullu () # ULONG ULONG -> ULONG
+instruction mullu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a); \
@@ -720,7 +721,7 @@ instruction mullu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction divi () # INT INT -> INT
+instruction divi () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
@@ -731,7 +732,7 @@ instruction divi () # INT INT -> INT
   end
 end
 
-instruction diviu () # UINT UINT -> UINT
+instruction diviu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
@@ -742,7 +743,7 @@ instruction diviu () # UINT UINT -> UINT
   end
 end
 
-instruction divl () # LONG LONG -> LONG
+instruction divl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
@@ -753,7 +754,7 @@ instruction divl () # LONG LONG -> LONG
   end
 end
 
-instruction divlu () # ULONG ULONG -> ULONG
+instruction divlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
@@ -764,7 +765,7 @@ instruction divlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction modi () # INT INT -> INT
+instruction modi () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
@@ -775,7 +776,7 @@ instruction modi () # INT INT -> INT
   end
 end
 
-instruction modiu () # UINT UINT -> UINT
+instruction modiu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
@@ -786,7 +787,7 @@ instruction modiu () # UINT UINT -> UINT
   end
 end
 
-instruction modl () # LONG LONG -> LONG
+instruction modl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
@@ -797,7 +798,7 @@ instruction modl () # LONG LONG -> LONG
   end
 end
 
-instruction modlu () # ULONG ULONG -> ULONG
+instruction modlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
@@ -808,7 +809,7 @@ instruction modlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction negi () # INT -> INT
+instruction negi () # ( INT -- INT )
   code
     int size = PVM_VAL_INT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
@@ -816,7 +817,7 @@ instruction negi () # INT -> INT
   end
 end
 
-instruction negiu () # UINT -> UINT
+instruction negiu () # ( UINT -- UINT )
   code
     int size = PVM_VAL_UINT_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
@@ -824,7 +825,7 @@ instruction negiu () # UINT -> UINT
   end
 end
 
-instruction negl () # LONG -> LONG
+instruction negl () # ( LONG -- LONG )
   code
     int size = PVM_VAL_LONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
@@ -832,7 +833,7 @@ instruction negl () # LONG -> LONG
   end
 end
 
-instruction neglu () # LONG -> LONG
+instruction neglu () # ( LONG -- LONG )
   code
     int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK()
@@ -842,43 +843,43 @@ end
 
 # Equality/inequality
 
-instruction eqi () # INT INT -> INT INT INT
+instruction eqi () # ( INT INT -- INT INT INT )
   code
      PVM_BOOL_BINOP (INT, ==);
   end
 end
 
-instruction eqiu () # UINT UINT -> UINT UINT INT
+instruction eqiu () # ( UINT UINT -- UINT UINT INT )
   code
      PVM_BOOL_BINOP (UINT, ==);
   end
 end
 
-instruction eql () # LONG LONG -> LONG LONG INT
+instruction eql () # ( LONG LONG -- LONG LONG INT )
   code
      PVM_BOOL_BINOP (LONG, ==);
   end
 end
 
-instruction eqlu () # ULONG ULONG -> ULONG ULONG INT
+instruction eqlu () # ( ULONG ULONG -- ULONG ULONG INT )
   code
      PVM_BOOL_BINOP (ULONG, ==);
   end
 end
 
-instruction nei () # INT INT -> INT INT INT
+instruction nei () # ( INT INT -- INT INT INT )
   code
      PVM_BOOL_BINOP (INT, !=);
   end
 end
 
-instruction neiu () # UINT UINT -> UINT UINT INT
+instruction neiu () # ( UINT UINT -- UINT UINT INT )
   code
      PVM_BOOL_BINOP (UINT, !=);
   end
 end
 
-instruction nel () # LONG LONG -> LONG LONG INT
+instruction nel () # ( LONG LONG -- LONG LONG INT )
   code
      PVM_BOOL_BINOP (LONG, !=);
   end
@@ -890,7 +891,7 @@ instruction nelu () # ULONG ULONG - ULONG ULONG INT
   end
 end
 
-instruction eqs () # STR STR -> STR STR INT
+instruction eqs () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) == 0,
@@ -899,7 +900,7 @@ instruction eqs () # STR STR -> STR STR INT
   end
 end
 
-instruction nes () # STR STR -> STR STR INT
+instruction nes () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) != 0,
@@ -910,133 +911,103 @@ end
 
 # Comparison instructions.
 
-instruction lti () # INT INT -> INT INT INT
+instruction lti () # ( INT INT -- INT INT INT )
   code
      PVM_BOOL_BINOP (INT, <);
   end
 end
 
-instruction ltiu () # UINT UINT -> UINT UINT INT
+instruction ltiu () # ( UINT UINT -- UINT UINT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_UINT (JITTER_UNDER_TOP_STACK ())
-                                < PVM_VAL_UINT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (UINT, <);
   end
 end
 
-instruction ltl () # LONG LONG -> LONG LONG INT
+instruction ltl () # ( LONG LONG -- LONG LONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_LONG (JITTER_UNDER_TOP_STACK ())
-                                < PVM_VAL_LONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (LONG, <);
   end
 end
 
-instruction ltlu () # ULONG ULONG -> ULONG ULONG INT
+instruction ltlu () # ( ULONG ULONG -- ULONG ULONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ())
-                                < PVM_VAL_ULONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (ULONG, <);
   end
 end
 
-instruction lei () # INT INT -> INT INT INT
+instruction lei () # ( INT INT -- INT INT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_INT (JITTER_UNDER_TOP_STACK ())
-                                <= PVM_VAL_INT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (INT, <=);
   end
 end
 
-instruction leiu () # UINT UINT -> UINT UINT INT
+instruction leiu () # ( UINT UINT -- UINT UINT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_UINT (JITTER_UNDER_TOP_STACK ())
-                                <= PVM_VAL_UINT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (UINT, <=);
   end
 end
 
-instruction lel () # LONG LONG -> LONG LONG INT
+instruction lel () # ( LONG LONG -- LONG LONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_LONG (JITTER_UNDER_TOP_STACK ())
-                                <= PVM_VAL_LONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (LONG, <=);
   end
 end
 
-instruction lelu () # ULONG ULONG -> ULONG ULONG INT
+instruction lelu () # ( ULONG ULONG -- ULONG ULONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ())
-                                <= PVM_VAL_ULONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (ULONG, <=);
   end
 end
 
-instruction gti () # INT INT -> INT INT INT
+instruction gti () # ( INT INT -- INT INT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_INT (JITTER_UNDER_TOP_STACK ())
-                                > PVM_VAL_INT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (INT, >);
   end
 end
 
-instruction gtiu () # UINT UINT -> UINT UINT INT
+instruction gtiu () # ( UINT UINT -- UINT UINT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_UINT (JITTER_UNDER_TOP_STACK ())
-                                > PVM_VAL_UINT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (UINT, >);
   end
 end
 
-instruction gtl () # LONG LONG -> LONG LONG INT
+instruction gtl () # ( LONG LONG -- LONG LONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_LONG (JITTER_UNDER_TOP_STACK ())
-                                > PVM_VAL_LONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (LONG, >);
   end
 end
 
-instruction gtlu () # ULONG ULONG -> ULONG ULONG INT
+instruction gtlu () # ( ULONG ULONG -- ULONG ULONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ())
-                                > PVM_VAL_ULONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (ULONG, >);
   end
 end
 
-instruction gei () # INT INT -> INT INT INT
+instruction gei () # ( INT INT -- INT INT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_INT (JITTER_UNDER_TOP_STACK ())
-                                >= PVM_VAL_INT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (INT, >=);
   end
 end
 
-instruction geiu () # UINT UINT -> UINT UINT INT
+instruction geiu () # ( UINT UINT -- UINT UINT INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_UINT (JITTER_UNDER_TOP_STACK ())
-                                >= PVM_VAL_UINT (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (UINT, >=);
   end
 end
 
-instruction gel () # LONG LONG -> LONG LONG INT
+instruction gel () # ( LONG LONG -- LONG LONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_LONG (JITTER_UNDER_TOP_STACK ())
-                                >= PVM_VAL_LONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (LONG, >=);
   end
 end
 
-instruction gelu () # ULONG ULONG -> ULONG ULONG INT
+instruction gelu () # ( ULONG ULONG -- ULONG ULONG INT )
   code
-    pvm_val res = pvm_make_int (PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ())
-                                >= PVM_VAL_ULONG (JITTER_TOP_STACK ()), 32);
-    JITTER_PUSH_STACK (res);
+     PVM_BOOL_BINOP (ULONG, >=);
   end
 end
 
-instruction lts () # STR STR -> STR STR INT
+instruction lts () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) < 0, 32);
@@ -1044,7 +1015,7 @@ instruction lts () # STR STR -> STR STR INT
   end
 end
 
-instruction gts () # STR STR -> STR STR INT
+instruction gts () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) > 0, 32);
@@ -1052,7 +1023,7 @@ instruction gts () # STR STR -> STR STR INT
   end
 end
 
-instruction ges () # STR STR -> STR STR INT
+instruction ges () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) >= 0, 32);
@@ -1060,7 +1031,7 @@ instruction ges () # STR STR -> STR STR INT
   end
 end
 
-instruction les () # STR STR -> STR STR INT
+instruction les () # ( STR STR -- STR STR INT )
   code
     pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
                                         PVM_VAL_STR (JITTER_TOP_STACK ())) <= 0, 32);
@@ -1070,7 +1041,7 @@ end
 
 # Concatenation instructions.
 
-instruction sconc () # STR STR -> STR STR STR
+instruction sconc () # ( STR STR -- STR STR STR )
   code
      pvm_val res;
      char *sa = PVM_VAL_STR (JITTER_UNDER_TOP_STACK ());
@@ -1087,7 +1058,7 @@ end
 
 # Logical instructions.
 
-instruction and () # INT INT -> INT
+instruction and () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { res = pvm_make_int ((PVM_VAL_INT (a) && PVM_VAL_INT (b)), 32);\
@@ -1097,7 +1068,7 @@ instruction and () # INT INT -> INT
   end
 end
 
-instruction or () # INT INT -> INT
+instruction or () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { res = pvm_make_int ((PVM_VAL_INT (a) || PVM_VAL_INT (b)), 32);\
@@ -1107,7 +1078,7 @@ instruction or () # INT INT -> INT
   end
 end
 
-instruction not () # INT -> INT
+instruction not () # ( INT -- INT )
   code
     JITTER_TOP_STACK()
       = pvm_make_int (! PVM_VAL_INT(JITTER_TOP_STACK()), 32);
@@ -1116,7 +1087,7 @@ end
 
 # Bitwise operators.
 
-instruction bxori () # INT INT -> INT
+instruction bxori () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a);                             \
@@ -1127,7 +1098,7 @@ instruction bxori () # INT INT -> INT
   end
 end
 
-instruction bxoriu () # UINT UINT -> UINT
+instruction bxoriu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
@@ -1138,7 +1109,7 @@ instruction bxoriu () # UINT UINT -> UINT
   end
 end
 
-instruction bxorl () # LONG LONG -> LONG
+instruction bxorl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a);                                     \
@@ -1149,7 +1120,7 @@ instruction bxorl () # LONG LONG -> LONG
   end
 end
 
-instruction bxorlu () # ULONG ULONG -> ULONG
+instruction bxorlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
@@ -1160,7 +1131,7 @@ instruction bxorlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction bori () # INT INT -> INT
+instruction bori () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a);                                     \
@@ -1171,7 +1142,7 @@ instruction bori () # INT INT -> INT
   end
 end
 
-instruction boriu () # UINT UINT -> UINT
+instruction boriu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
@@ -1182,7 +1153,7 @@ instruction boriu () # UINT UINT -> UINT
   end
 end
 
-instruction borl () # LONG LONG -> LONG
+instruction borl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a);                                     \
@@ -1193,7 +1164,7 @@ instruction borl () # LONG LONG -> LONG
   end
 end
 
-instruction borlu () # ULONG ULONG -> ULONG
+instruction borlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
@@ -1204,7 +1175,7 @@ instruction borlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction bandi () # INT INT -> INT
+instruction bandi () # ( INT INT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a);                                     \
@@ -1215,7 +1186,7 @@ instruction bandi () # INT INT -> INT
   end
 end
 
-instruction bandiu () # UINT UINT -> UINT
+instruction bandiu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
@@ -1226,7 +1197,7 @@ instruction bandiu () # UINT UINT -> UINT
   end
 end
 
-instruction bandl () # LONG LONG -> LONG
+instruction bandl () # ( LONG LONG -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a);                                     \
@@ -1237,7 +1208,7 @@ instruction bandl () # LONG LONG -> LONG
   end
 end
 
-instruction bandlu () # ULONG ULONG -> ULONG
+instruction bandlu () # ( ULONG ULONG -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
@@ -1248,35 +1219,35 @@ instruction bandlu () # ULONG ULONG -> ULONG
   end
 end
 
-instruction bnoti () # INT -> INT
+instruction bnoti () # ( INT -- INT )
   code
     int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK() = pvm_make_int (~PVM_VAL_INT (JITTER_TOP_STACK()), size);
   end
 end
 
-instruction bnotiu () # UINT -> UINT
+instruction bnotiu () # ( UINT -- UINT )
   code
     int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK() = pvm_make_uint (~PVM_VAL_UINT (JITTER_TOP_STACK()), size);
   end
 end
 
-instruction bnotl () # LONG -> LONG
+instruction bnotl () # ( LONG -- LONG )
   code
     int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
     JITTER_TOP_STACK() = pvm_make_long (~PVM_VAL_LONG (JITTER_TOP_STACK()), size);
   end
 end
 
-instruction bnotlu () # ULONG -> ULONG
+instruction bnotlu () # ( ULONG -- ULONG )
   code
    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
    JITTER_TOP_STACK() = pvm_make_ulong (~PVM_VAL_ULONG (JITTER_TOP_STACK()), size);
   end
 end
 
-instruction bsli () # INT UINT -> INT
+instruction bsli () # ( INT UINT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a);                                     \
@@ -1286,7 +1257,7 @@ instruction bsli () # INT UINT -> INT
   end
 end
 
-instruction bsliu () # UINT UINT -> UINT
+instruction bsliu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
@@ -1297,7 +1268,7 @@ instruction bsliu () # UINT UINT -> UINT
   end
 end
 
-instruction bsll () # LONG UINT -> LONG
+instruction bsll () # ( LONG UINT -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a);                                     \
@@ -1307,7 +1278,7 @@ instruction bsll () # LONG UINT -> LONG
   end
 end
 
-instruction bsllu () # ULONG UINT -> ULONG
+instruction bsllu () # ( ULONG UINT -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
@@ -1318,7 +1289,7 @@ instruction bsllu () # ULONG UINT -> ULONG
   end
 end
 
-instruction bsri () # INT UINT -> INT
+instruction bsri () # ( INT UINT -- INT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_INT_SIZE (a);                                     \
@@ -1328,7 +1299,7 @@ instruction bsri () # INT UINT -> INT
   end
 end
 
-instruction bsriu () # UINT UINT -> UINT
+instruction bsriu () # ( UINT UINT -- UINT )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_UINT_SIZE (a);                                     \
@@ -1338,7 +1309,7 @@ instruction bsriu () # UINT UINT -> UINT
   end
 end
 
-instruction bsrl () # LONG UINT -> LONG
+instruction bsrl () # ( LONG UINT -- LONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_LONG_SIZE (a);                                     \
@@ -1348,7 +1319,7 @@ instruction bsrl () # LONG UINT -> LONG
   end
 end
 
-instruction bsrlu () # ULONG UINT -> ULONG
+instruction bsrlu () # ( ULONG UINT -- ULONG )
   code
 #define F(res, a, b) \
   { int size = PVM_VAL_ULONG_SIZE (a);                                     \
@@ -1428,7 +1399,7 @@ end
 
 ## Conversion instructions.
 
-instruction itoi (?n pvm_literal_printer_cast) # INT -> INT
+instruction itoi (?n pvm_literal_printer_cast) # ( INT -- INT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
@@ -1437,7 +1408,7 @@ instruction itoi (?n pvm_literal_printer_cast) # INT -> INT
   end
 end
 
-instruction itoiu (?n pvm_literal_printer_cast) # INT -> UINT
+instruction itoiu (?n pvm_literal_printer_cast) # ( INT -- UINT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
@@ -1446,7 +1417,7 @@ instruction itoiu (?n pvm_literal_printer_cast) # INT -> UINT
   end
 end
 
-instruction itol (?n pvm_literal_printer_cast) # INT -> LONG
+instruction itol (?n pvm_literal_printer_cast) # ( INT -- LONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
@@ -1455,7 +1426,7 @@ instruction itol (?n pvm_literal_printer_cast) # INT -> LONG
   end
 end
 
-instruction itolu (?n pvm_literal_printer_cast) # INT -> ULONG
+instruction itolu (?n pvm_literal_printer_cast) # ( INT -- ULONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
@@ -1464,7 +1435,7 @@ instruction itolu (?n pvm_literal_printer_cast) # INT -> ULONG
   end
 end
 
-instruction iutoi (?n pvm_literal_printer_cast) # UINT -> INT
+instruction iutoi (?n pvm_literal_printer_cast) # ( UINT -- INT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1473,7 +1444,7 @@ instruction iutoi (?n pvm_literal_printer_cast) # UINT -> INT
   end
 end
 
-instruction iutoiu (?n pvm_literal_printer_cast) # UINT -> UINT
+instruction iutoiu (?n pvm_literal_printer_cast) # ( UINT -- UINT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1482,7 +1453,7 @@ instruction iutoiu (?n pvm_literal_printer_cast) # UINT -> UINT
   end
 end
 
-instruction iutol (?n pvm_literal_printer_cast) # UINT -> LONG
+instruction iutol (?n pvm_literal_printer_cast) # ( UINT -- LONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1491,7 +1462,7 @@ instruction iutol (?n pvm_literal_printer_cast) # UINT -> LONG
   end
 end
 
-instruction iutolu (?n pvm_literal_printer_cast) # UINT -> ULONG
+instruction iutolu (?n pvm_literal_printer_cast) # ( UINT -- ULONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint32_t val = PVM_VAL_UINT (JITTER_TOP_STACK ());
@@ -1500,7 +1471,7 @@ instruction iutolu (?n pvm_literal_printer_cast) # UINT -> ULONG
   end
 end
 
-instruction ltoi (?n pvm_literal_printer_cast) # LONG -> INT
+instruction ltoi (?n pvm_literal_printer_cast) # ( LONG -- INT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
@@ -1509,7 +1480,7 @@ instruction ltoi (?n pvm_literal_printer_cast) # LONG -> INT
   end
 end
 
-instruction ltoiu (?n pvm_literal_printer_cast) # LONG -> UINT
+instruction ltoiu (?n pvm_literal_printer_cast) # ( LONG -- UINT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
@@ -1518,7 +1489,7 @@ instruction ltoiu (?n pvm_literal_printer_cast) # LONG -> UINT
   end
 end
 
-instruction ltol (?n pvm_literal_printer_cast) # LONG -> LONG
+instruction ltol (?n pvm_literal_printer_cast) # ( LONG -- LONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
@@ -1527,7 +1498,7 @@ instruction ltol (?n pvm_literal_printer_cast) # LONG -> LONG
   end
 end
 
-instruction ltolu (?n pvm_literal_printer_cast) # LONG -> ULONG
+instruction ltolu (?n pvm_literal_printer_cast) # ( LONG -- ULONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     int64_t val = PVM_VAL_LONG (JITTER_TOP_STACK ());
@@ -1536,7 +1507,7 @@ instruction ltolu (?n pvm_literal_printer_cast) # LONG -> ULONG
   end
 end
 
-instruction lutoi (?n pvm_literal_printer_cast) # ULONG -> INT
+instruction lutoi (?n pvm_literal_printer_cast) # ( ULONG -- INT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
@@ -1545,7 +1516,7 @@ instruction lutoi (?n pvm_literal_printer_cast) # ULONG -> INT
   end
 end
 
-instruction lutoiu (?n pvm_literal_printer_cast) # ULONG -> UINT
+instruction lutoiu (?n pvm_literal_printer_cast) # ( ULONG -- UINT )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
@@ -1554,7 +1525,7 @@ instruction lutoiu (?n pvm_literal_printer_cast) # ULONG -> UINT
   end
 end
 
-instruction lutol (?n pvm_literal_printer_cast) # ULONG -> LONG
+instruction lutol (?n pvm_literal_printer_cast) # ( ULONG -- LONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
@@ -1563,7 +1534,7 @@ instruction lutol (?n pvm_literal_printer_cast) # ULONG -> LONG
   end
 end
 
-instruction lutolu (?n pvm_literal_printer_cast) # ULONG -> ULONG
+instruction lutolu (?n pvm_literal_printer_cast) # ( ULONG -- ULONG )
   code
     jitter_uint tsize = JITTER_ARGN0;
     uint64_t val = PVM_VAL_ULONG (JITTER_TOP_STACK ());
@@ -1576,7 +1547,7 @@ end
 
 ## Array instructions.
 
-# TYP [IDX VAL]... ULONG(nelem) ULONG(ninitializer) -> ARR
+# ( TYP [IDX VAL]... ULONG(nelem) ULONG(ninitializer) -- ARR )
 instruction mka ()
   code
     size_t i;
@@ -1606,7 +1577,7 @@ instruction mka ()
   end
 end
 
-instruction aset () # ARR ULONG VAL -> ARR
+instruction aset () # ( ARR ULONG VAL -- ARR )
   code
     uint64_t idx;
     pvm_val val;
@@ -1624,7 +1595,7 @@ instruction aset () # ARR ULONG VAL -> ARR
   end
 end
 
-instruction aref () # ARR ULONG -> ARR ULONG VAL
+instruction aref () # ( ARR ULONG -- ARR ULONG VAL )
   code
     if (PVM_VAL_ULONG (JITTER_TOP_STACK ()) < 0
         || (PVM_VAL_ULONG (JITTER_TOP_STACK ()) >=
@@ -1636,7 +1607,7 @@ instruction aref () # ARR ULONG -> ARR ULONG VAL
   end
 end
 
-instruction alen () # ARR -> ULONG
+instruction alen () # ( ARR -- ULONG )
   code
     JITTER_TOP_STACK ()
       = PVM_VAL_ARR_NELEM (JITTER_TOP_STACK());
@@ -1647,7 +1618,7 @@ end
 
 ## Struct instructions.
 
-instruction mksct () # [STR VAL]... ULONG -> SCT
+instruction mksct () # ( [STR VAL]... ULONG -- SCT )
   code
     size_t e;
     pvm_val nelem, sct;
@@ -1670,18 +1641,18 @@ instruction mksct () # [STR VAL]... ULONG -> SCT
   end
 end
 
-instruction revsct () # SCT -> SCT
+instruction revsct () # ( SCT -- SCT )
   code
     pvm_reverse_struct (JITTER_TOP_STACK ());
   end
 end
 
-instruction sctset () # SCT VAL STR -> SCT
+instruction sctset () # ( SCT VAL STR -- SCT )
   code
   end
 end
 
-instruction sref () # SCT STR -> VAL
+instruction sref () # ( SCT STR -- VAL )
   code
 #define F(res, a, b) { res = pvm_ref_struct (a, b); }
     JITTER_BINARY_STACK (F);  
@@ -1693,7 +1664,7 @@ end
 
 ## Offset instructions.
 
-instruction mko () # EXP ULONG -> OFF
+instruction mko () # ( EXP ULONG -- OFF )
   code
 #define F(res, a, b) \
   { res = pvm_make_offset (a, b); }
@@ -1702,19 +1673,19 @@ instruction mko () # EXP ULONG -> OFF
   end
 end
 
-instruction ogetm () # OFF -> OFF (INT|LONG|UINT|ULONG)
+instruction ogetm () # ( OFF -- OFF (INT|LONG|UINT|ULONG) )
   code
     JITTER_PUSH_STACK (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()));
   end
 end
 
-instruction ogetu () # OFF -> OFF UINT
+instruction ogetu () # ( OFF -- OFF UINT )
   code
     JITTER_PUSH_STACK (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
   end
 end
 
-instruction ogetbt () # OFF -> OFF BT
+instruction ogetbt () # ( OFF -- OFF BT )
   code
     JITTER_PUSH_STACK (PVM_VAL_OFF_BASE_TYPE (JITTER_TOP_STACK ()));
   end
@@ -1726,7 +1697,7 @@ end
 
 # Integral types
 
-instruction mktyi () # ULONG UINT -> TYP
+instruction mktyi () # ( ULONG UINT -- TYP )
   code
     pvm_val size = JITTER_UNDER_TOP_STACK ();
     pvm_val signed_p = JITTER_TOP_STACK ();
@@ -1738,7 +1709,7 @@ end
 
 # String types
 
-instruction mktys () # _ -> TYP
+instruction mktys () # ( _ -- TYP )
   code
     JITTER_PUSH_STACK (pvm_make_string_type ());
   end
@@ -1746,7 +1717,7 @@ end
 
 # Offset types
 
-instruction mktyo () # TYP INT -> TYP
+instruction mktyo () # ( TYP INT -- TYP )
   code
 #define F(res, a, b) \
   { res = pvm_make_offset_type (a, b); }
@@ -1757,13 +1728,13 @@ end
 
 # Array types
 
-instruction mktya () # TYP -> TYP
+instruction mktya () # ( TYP -- TYP )
   code
     JITTER_TOP_STACK () = pvm_make_array_type (JITTER_TOP_STACK ());
   end
 end
 
-instruction tyagett () # TYP -> TYP TYP
+instruction tyagett () # ( TYP -- TYP TYP )
   code
     JITTER_PUSH_STACK (PVM_VAL_TYP_A_ETYPE (JITTER_TOP_STACK ()));
   end
@@ -1771,7 +1742,7 @@ end
 
 # Struct types
 
-instruction mktysct () # [STRING TYP]... NLONG -> TYP
+instruction mktysct () # ( [STRING TYP]... NLONG -- TYP )
   code
     size_t i;
     pvm_val nelem, *etypes, *enames;
@@ -1797,7 +1768,7 @@ instruction mktysct () # [STRING TYP]... NLONG -> TYP
   end
 end
 
-instruction typof () # VAL -> TYP
+instruction typof () # ( VAL -- TYP )
   code
     JITTER_TOP_STACK () = pvm_typeof (JITTER_TOP_STACK ());
   end
@@ -1811,7 +1782,7 @@ end
 # The following instructions operate on the global IO space.
 
 # peeki NENC,ENDIAN,BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
   code
@@ -1841,7 +1812,7 @@ instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
 end
 
 # peekiu ENDIAN,BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peekiu (?n endian_printer,?n bits_printer)
   code
@@ -1870,7 +1841,7 @@ instruction peekiu (?n endian_printer,?n bits_printer)
 end
 
 # peekl NENC,ENDIAN,BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
   code
@@ -1899,7 +1870,7 @@ instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
 end
 
 # peeklu ENDIAN,BITS
-# OFF -> ULONG
+# ( OFF -- ULONG )
 
 instruction peeklu (?n endian_printer,?n bits_printer)
   code
@@ -1927,7 +1898,7 @@ instruction peeklu (?n endian_printer,?n bits_printer)
 end
 
 # peekdi BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
   code
@@ -1956,7 +1927,7 @@ instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
 end
 
 # peekdiu BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
   code
@@ -1984,7 +1955,7 @@ instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
 end
 
 # peekdl BITS
-# OFF -> INT
+# ( OFF -- INT )
 
 instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
   code
@@ -2013,7 +1984,7 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
 end
 
 # peekdlu BITS
-# OFF -> ULONG
+# ( OFF -- ULONG )
 
 instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
   code
@@ -2041,7 +2012,7 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
 end
 
 # peeks
-# OFF -> STR
+# ( OFF -- STR )
 
 instruction peeks ()
   code
@@ -2061,7 +2032,7 @@ end
 
 # pushe LABEL
 #
-# EXCEPTION_TYPE -> EXCEPTION_HANDLER
+# ( EXCEPTION_TYPE -- EXCEPTION_HANDLER )
 
 instruction pushe (?l)
   code
@@ -2081,7 +2052,7 @@ end
 
 # pope
 #
-# EXCEPTION_HANDLER -> _
+# ( EXCEPTION_HANDLER -- _ )
 
 instruction pope ()
   code
@@ -2091,7 +2062,7 @@ end
 
 # raise
 #
-# EXCEPTION -> _
+# ( EXCEPTION -- )
 
 instruction raise ()
   code
