@@ -618,7 +618,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
 
 pkl_asm
 pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
-             int guard_stack, int prologue)
+             int prologue)
 {
   pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
   pvm_program program;
@@ -639,16 +639,15 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
     {
       /* Standard prologue.  */
       pkl_asm_note (pasm, "#begin prologue");
-      
+
+      /* Install the stack canary.  */
+      pkl_asm_insn (pasm, PKL_INSN_CANARY);
+
       /* Initialize the IO base register to [0 b].  */
       pkl_asm_insn (pasm, PKL_INSN_PUSH,
                     pvm_make_offset (pvm_make_int (0, 32),
                                      pvm_make_ulong (1, 64)));
       pkl_asm_insn (pasm, PKL_INSN_POPR, 0);
-      
-      /* Push the stack centinel value.  */
-      if (guard_stack)
-        pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
 
       /* Install the default signal handler.  */
       pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (0, 32));

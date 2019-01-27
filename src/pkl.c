@@ -45,10 +45,14 @@
 #include "pvm.h"
 #include "poke.h"
 
+#define PKL_COMPILING_EXPRESSION 0
+#define PKL_COMPILING_PROGRAM    1
+
 struct pkl_compiler
 {
   pkl_env env;  /* Compiler environment.  */
   int bootstrapped;
+  int compiling;
   /* XXX: put a link to the run-time top-level closure here.  */
 };
 
@@ -214,6 +218,8 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   int ret;
   pkl_env env = NULL;
 
+  compiler->compiling = PKL_COMPILING_PROGRAM;
+
   env = pkl_env_dup_toplevel (compiler->env);
   
   /* Parse the input program into an AST.  */
@@ -233,7 +239,7 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   compiler->env = env;
   pvm_specialize_program (program);
   /* XXX */
-  /* pvm_print_program (stdout, program); */
+  pvm_print_program (stdout, program);
   return program;
 
  error:
@@ -249,6 +255,8 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   pvm_program program;
   FILE *fd;
   pkl_env env = NULL;
+
+  compiler->compiling = PKL_COMPILING_PROGRAM;
 
   fd = fopen (fname, "rb");
   if (!fd)
@@ -293,6 +301,8 @@ pkl_compile_expression (pkl_compiler compiler,
   pvm_program program;
   int ret;
 
+  compiler->compiling = PKL_COMPILING_EXPRESSION;
+  
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&compiler->env,
                           &ast,
@@ -509,4 +519,10 @@ pkl_ice (pkl_ast ast,
   fprintf (stderr, "Important information has been dumped in %s.\n",
            tmpfile);
   fputs ("Please attach it to a bug report and send it to bug-poke@gnu.org.\n", stderr);
+}
+
+int
+pkl_compiling_expression_p (pkl_compiler compiler)
+{
+  return compiler->compiling == PKL_COMPILING_EXPRESSION;
 }

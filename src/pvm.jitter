@@ -299,6 +299,7 @@ state-struct-backing-c
   code
       enum pvm_exit_code exit_code;
       pvm_val result_value;
+      jitter_stack_height canary;
   end
 end
 
@@ -313,6 +314,7 @@ end
 
 state-initialization-c
   code
+      jitter_state_backing->canary = NULL;
       jitter_state_backing->exit_code = PVM_EXIT_OK;
       jitter_state_backing->result_value = PVM_NULL;
       /* XXX: are these reasonable defaults? */
@@ -331,26 +333,32 @@ end
 
 ## VM instructions
 
+instruction canary ()
+  code
+     jitter_original_state->pvm_state_backing.canary
+      = JITTER_HEIGHT_STACK ();
+  end
+end
+
 instruction exit ()
   code
     /* The element at the top of the stack is the exit
        code to report to the PVM caller.  */
     jitter_original_state->pvm_state_backing.exit_code
       = PVM_VAL_INT (JITTER_TOP_STACK());
+
     JITTER_DROP_STACK ();
 
     /* Get the result of the execution, if any.  */
-    if (JITTER_TOP_STACK() != PVM_NULL)
-    {
-      jitter_original_state->pvm_state_backing.result_value
-        = JITTER_TOP_STACK();
-      JITTER_DROP_STACK ();
-    }
-
-    /* Check for the stack centinel and pop it.  */
-    /* XXX: better: rewind and pop.  */
-    pvm_assert (JITTER_TOP_STACK() == PVM_NULL);
+    jitter_original_state->pvm_state_backing.result_value
+                = JITTER_TOP_STACK();
     JITTER_DROP_STACK ();
+
+    /* Check for the stack centinel, but only if it was
+       installed.  */
+    if (jitter_original_state->pvm_state_backing.canary != NULL)
+      assert (jitter_original_state->pvm_state_backing.canary
+              == JITTER_HEIGHT_STACK ());
 
     JITTER_EXIT ();
   end
@@ -478,7 +486,7 @@ end
 
 instruction siz () # ( VAL -- ULONG )
   code
-    JITTER_TOP_STACK () = pvm_sizeof (JITTER_TOP_STACK ());
+    JITTER_PUSH_STACK (pvm_sizeof (JITTER_TOP_STACK ()));
   end
 end
 

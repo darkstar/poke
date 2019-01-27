@@ -100,6 +100,11 @@ pkl_env pkl_get_env (pkl_compiler compiler);
 
 int pkl_bootstrapped_p (pkl_compiler compiler);
 
+/* Returns a boolean telling whether the compiler is compiling an
+   expression.  */
+
+int pkl_compiling_expression_p (pkl_compiler compiler);
+
 /* Diagnostic routines.  */
 
 void pkl_error (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);

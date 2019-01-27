@@ -74,7 +74,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_program)
 {
   PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST,
                              PKL_GEN_PAYLOAD->compiler,
-                             1 /* guard_stack */,
                              1 /* prologue */);
 }
 PKL_PHASE_END_HANDLER
@@ -87,6 +86,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
 {
+  /* Make sure there is always some value returned in the stack, since
+     that is expected in the PVM.  */
+  if (!pkl_compiling_expression_p (PKL_GEN_PAYLOAD->compiler))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+  
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
                                              1 /* prologue */);
 }
@@ -119,13 +123,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
           /* Assembler for the mapper.  */
           PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                          PKL_GEN_PAYLOAD->compiler,
-                                         0 /* guard_stack */,
                                          0 /* prologue */));
 
           /* Assembler for the constructor.  */
           PKL_GEN_PUSH_ASM2 (pkl_asm_new (PKL_PASS_AST,
                                           PKL_GEN_PAYLOAD->compiler,
-                                          0 /* guard_stack */,
                                           0 /* prologue */));
 
           PKL_GEN_PAYLOAD->in_struct_decl = 1;
@@ -139,7 +141,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
          process INITIAL.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                      PKL_GEN_PAYLOAD->compiler,
-                                     0 /* guard_stack */,
                                      0 /* prologue */));
       break;
     default:
@@ -831,8 +832,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       pkl_asm_insn (pasm, PKL_INSN_OGETM);
 
       /* Stack: OFFSET MAGNITUDE */
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-
       if (!pkl_ast_type_equal (from_base_type, to_base_type))
         {
           pkl_asm_insn (pasm, PKL_INSN_NTON,
@@ -842,7 +841,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
       /* Stack: OFFSET MAGNITUDE */
       PKL_PASS_SUBPASS (from_base_unit);
-
+      
       /* Stack: OFFSET MAGNITUDE UNIT */
       if (!pkl_ast_type_equal (from_base_unit_type, to_base_type))
         {
@@ -884,8 +883,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       /* Stack: (MAGNITUDE*UNIT/NEWUNIT) OFFSET NEWUNIT */
 
       /* Get rid of the original offset.  */
-      pkl_asm_insn (pasm, PKL_INSN_SWAP);
-      pkl_asm_insn (pasm, PKL_INSN_DROP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
       /* Stack: (MAGNITUDE*UNIT/NEWUNIT) NEWUNIT */
 
@@ -1721,18 +1719,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
     {
     case PKL_AST_ATTR_SIZE:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
       break;
     case PKL_AST_ATTR_MAGNITUDE:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
       break;
     case PKL_AST_ATTR_UNIT:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
       break;
     case PKL_AST_ATTR_SIGNED:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);

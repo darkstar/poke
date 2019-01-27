@@ -24,11 +24,3 @@
 /* { dg-command { print 1 as uint<4> <<. 3 } } */
 /* { dg-output "\n8UN" } */
 
-/* { dg-command { print 1 as uint<4> <<. 4 } } */
-/* { dg-output "\n1UN" } */
-
-/* { dg-command { print 1 as uint<4> <<. 5 } } */
-/* { dg-output "\n2UN" } */
-
-/* { dg-command { print 1 as uint<34> <<. 34 } } */
-/* { dg-output "\n\\(uint<34>\\) 1" } */
