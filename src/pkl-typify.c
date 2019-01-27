@@ -1009,8 +1009,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_var)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of the condition of a loop statement should be a
-   boolean.  */
+/* The type of the condition of a loop statement should be a boolean.
+   Also, determine the type of the iterator from the type of the
+   container and install a dummy value with the right type in it's
+   initializer.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
 {
@@ -1019,17 +1021,49 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_loop_stmt)
 
   pkl_ast_node loop_stmt = PKL_PASS_NODE;
   pkl_ast_node condition = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
-  pkl_ast_node condition_type = PKL_AST_TYPE (condition);
+  pkl_ast_node iterator = PKL_AST_LOOP_STMT_ITERATOR (loop_stmt);
+  pkl_ast_node container = PKL_AST_LOOP_STMT_CONTAINER (loop_stmt);
 
-  if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
-      || PKL_AST_TYPE_I_SIZE (condition_type) != 32
-      || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
+  /* The type of the loop condition should be a boolean.  */
+  if (condition)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
-                 "expected boolean expression in loop");
-      payload->errors++;
-      PKL_PASS_ERROR;
+      pkl_ast_node condition_type = PKL_AST_TYPE (condition);
+      
+      if (PKL_AST_TYPE_CODE (condition_type) != PKL_TYPE_INTEGRAL
+          || PKL_AST_TYPE_I_SIZE (condition_type) != 32
+          || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
+                     "expected boolean expression");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
     }
+
+  if (iterator)
+  {
+    pkl_ast_node container_type = PKL_AST_TYPE (container);
+    pkl_ast_node container_elem_type;
+
+    /* At this point the type of the container has been already
+       calculated, by virtue of the pass logic.  */
+    assert (container_type != NULL);
+
+    /* The type of the container should be a container type.  */
+    if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY)
+      {
+        pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
+                   "expected array");
+        payload->errors++;
+        PKL_PASS_ERROR;
+      }
+
+    /* The type of the iterator is the type of the elements contained
+       in the container.  */
+    container_elem_type = PKL_AST_TYPE_A_ETYPE (container_type);
+    PKL_AST_TYPE (PKL_AST_DECL_INITIAL (iterator))
+      = ASTREF (container_elem_type);
+  }
 }
 PKL_PHASE_END_HANDLER
 

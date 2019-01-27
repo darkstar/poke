@@ -1184,17 +1184,22 @@ stmt:
         	{
                   /* Push a new lexical level and register a variable
                      with name IDENTIFIER.  Note that the variable is
-                     created without INITIAL, as there is none.  */
+                     created with a dummy INITIAL, as there is none.  */
 
-                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
-                                                         PKL_AST_DECL_KIND_VAR,
-                                                         $3,
-                                                         NULL, /* initial */
-                                                         pkl_parser->filename);
+                  pkl_ast_node dummy = pkl_ast_make_integer (pkl_parser->ast,
+                                                             0);
+                  PKL_AST_LOC (dummy) = @3;
+
+                  $<ast>$ = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_VAR,
+                                               $3,
+                                               dummy,
+                                               pkl_parser->filename);
+                  PKL_AST_LOC ($<ast>$) = @3;
 
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($3),
-                                         decl))
+                                         $<ast>$))
                     /* This should never happen.  */
                     assert (0);
                 }
@@ -1202,11 +1207,13 @@ stmt:
         	{
                   $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
                                                NULL, /* condition */
-                                               $3,   /* iterator */
+                                               $<ast>7, /* iterator */
                                                $5,   /* container */
                                                $9);  /* body */
-                  PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Free the identifier.  */
+                  ASTREF ($3); pkl_ast_node_free ($3);
 
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
@@ -1214,19 +1221,26 @@ stmt:
                 }
 	| FOR '(' IDENTIFIER IN expression pushlevel
         	{
+                  /* XXX: avoid code replication here.  */
+
                   /* Push a new lexical level and register a variable
                      with name IDENTIFIER.  Note that the variable is
-                     created without INITIAL, as there is none.  */
+                     created with a dummy INITIAL, as there is none.  */
 
-                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
-                                                         PKL_AST_DECL_KIND_VAR,
-                                                         $3,
-                                                         NULL, /* initial */
-                                                         pkl_parser->filename);
-
+                  pkl_ast_node dummy = pkl_ast_make_integer (pkl_parser->ast,
+                                                             0);
+                  PKL_AST_LOC (dummy) = @3;
+                  
+                  $<ast>$ = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_VAR,
+                                               $3,
+                                               dummy,
+                                               pkl_parser->filename);
+                  PKL_AST_LOC ($<ast>$) = @3;
+                  
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($3),
-                                         decl))
+                                         $<ast>$))
                     /* This should never happen.  */
                     assert (0);
                 }
@@ -1234,7 +1248,7 @@ stmt:
         	{
                   $$ = pkl_ast_make_loop_stmt (pkl_parser->ast,
                                                $9,   /* condition */
-                                               $3,   /* iterator */
+                                               $<ast>7,   /* iterator */
                                                $5,   /* container */
                                                $11); /* body */
                   PKL_AST_LOC ($3) = @3;

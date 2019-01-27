@@ -1513,7 +1513,10 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_LOOP_STMT:
 
       pkl_ast_node_free (PKL_AST_LOOP_STMT_CONDITION (ast));
+      pkl_ast_node_free (PKL_AST_LOOP_STMT_ITERATOR (ast));
+      pkl_ast_node_free (PKL_AST_LOOP_STMT_CONTAINER (ast));
       pkl_ast_node_free (PKL_AST_LOOP_STMT_BODY (ast));
+
       break;
 
     case PKL_AST_RETURN_STMT:
@@ -2090,6 +2093,8 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (condition, LOOP_STMT_CONDITION);
+      PRINT_AST_SUBAST (iterator, LOOP_STMT_ITERATOR);
+      PRINT_AST_SUBAST (container, LOOP_STMT_CONTAINER);
       PRINT_AST_SUBAST (body, LOOP_STMT_BODY);
       break;
 

@@ -1116,13 +1116,18 @@ pkl_ast_node pkl_ast_make_if_stmt (pkl_ast ast,
    is evaluated at the beginning of the loop.  If it evals to false,
    the loop is exited.  This is used in WHILE, FOR-IN and FOR-IN-WHERE
    loops.  In loops with an iterator, the iterator variable is
-   available in the scope where CONDITION is evaluated.
+   available in the scope where CONDITION is evaluated, and CONDITION
+   determines whether BODY is executed in the current iteration.
 
-   ITERATOR is an identifier that will name a variable created in a
-   new lexical scope.
+   ITERATOR is a declaration for a variable created in a new lexical
+   scope.
 
    CONTAINER is an expression that evaluates to an array.  This is
    used in FOR-IN and FOR-IN-HWERE loops.
+
+   SELECTOR is an expression that should evaluate to a boolean.  It is
+   evaluated at the beginning of the loop, and determines whether the
+   BODY is executed for the current iterator.
 
    BODY is a statement, which is the body of the loop.  */
 
