@@ -832,12 +832,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
                     from_base_unit_type, to_base_type);
 
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
 
       PKL_PASS_SUBPASS (to_base_unit);
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     to_base_unit_type, to_base_type);
 
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
       /* Push the new unit.  */
@@ -1249,6 +1253,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_ADD, type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, PKL_INSN_SCONC);
@@ -1285,6 +1291,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_ADD, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         /* PKL_PASS_SUBPASS (res_unit); */
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
@@ -1310,6 +1318,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_SUB, type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1329,6 +1339,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_SUB, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         PKL_PASS_SUBPASS (res_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
@@ -1351,6 +1363,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_MUL, type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_OFFSET:
       {       
@@ -1391,6 +1405,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
         base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
 
         pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
           
         PKL_PASS_SUBPASS (offset_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
@@ -1436,11 +1452,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_div)
             pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             pkl_asm_insn (pasm, PKL_INSN_DIV, type);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
           }
         else
-          pkl_asm_insn (pasm, PKL_INSN_DIV, type);
+          {
+            pkl_asm_insn (pasm, PKL_INSN_DIV, type);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
+            pkl_asm_insn (pasm, PKL_INSN_NIP);
+          }
         break;
       }
     default:
@@ -1463,6 +1485,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_MOD, type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1483,6 +1507,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         pkl_asm_insn (pasm, PKL_INSN_MOD, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         PKL_PASS_SUBPASS (op1_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
@@ -1522,6 +1548,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, insn, type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      if (insn != PKL_INSN_NEG)
+        pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     default:
       assert (0);

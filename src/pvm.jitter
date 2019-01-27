@@ -152,7 +152,7 @@ late-header-c
        avoid flagrant code replication below.  */
 
 /* Binary numeric operations generating a boolean in the stack.
-   TYPE TYPE - TYPE TYPE INT */
+   ( TYPE TYPE -- TYPE TYPE INT ) */
 # define PVM_BOOL_BINOP(TYPE,OP)                                             \
    do                                                                        \
     {                                                                        \
@@ -160,6 +160,39 @@ late-header-c
                                   OP PVM_VAL_##TYPE (JITTER_TOP_STACK ()), 32); \
       JITTER_PUSH_STACK (res);                                               \
     } while (0)
+
+/* Unary numeric operations.
+   ( TYPE -- TYPE TYPE) */
+# define PVM_UNOP(TYPE,TYPER,TYPERLC,OP)                                     \
+   do                                                                        \
+    {                                                                        \
+      int size = PVM_VAL_##TYPER##_SIZE (JITTER_TOP_STACK ());               \
+      pvm_val res = pvm_make_##TYPERLC (OP PVM_VAL_##TYPE (JITTER_TOP_STACK ()), size); \
+      JITTER_PUSH_STACK (res);                                               \
+    } while (0)
+   
+
+/* Binary numeric operations.
+  ( TYPE TYPE -- TYPE TYPE TYPE ) */
+# define PVM_BINOP(TYPEA,TYPEB,TYPER,TYPERLC,OP)                             \
+   do                                                                        \
+    {                                                                        \
+      int size = PVM_VAL_##TYPER##_SIZE (JITTER_UNDER_TOP_STACK ());       \
+      pvm_val res = pvm_make_##TYPERLC (PVM_VAL_##TYPEA (JITTER_UNDER_TOP_STACK ()) \
+                                        OP PVM_VAL_##TYPEB (JITTER_TOP_STACK ()), size); \
+      JITTER_PUSH_STACK (res);                                               \
+    } while (0)
+
+/* Same, but with division by zero run-time check.  */
+# define PVM_CHECKED_BINOP(TYPEA,TYPEB,TYPER,TYPERLC,OP)                     \
+   if (PVM_VAL_##TYPEB (JITTER_TOP_STACK ()) == 0)                           \
+   {                                                                         \
+      PVM_RAISE (PVM_E_DIV_BY_ZERO);                                         \
+   }                                                                         \
+   else                                                                      \
+   {                                                                         \
+      PVM_BINOP (TYPEA, TYPEB, TYPER, TYPERLC, OP);                          \
+   }
 
   end
 end
@@ -589,255 +622,147 @@ end
 # The following instructions assume that both operands have the same
 # size in bits.
 
-instruction addi () # ( INT INT -- INT )
+instruction addi () # ( INT INT -- INT INT INT)
   code
-#define F(res, a, b)                                                     \
-  { int size = PVM_VAL_INT_SIZE (a);                                     \
-    res = pvm_make_int (PVM_VAL_INT (a) + PVM_VAL_INT (b), size);        \
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int,  +);
   end
 end
 
-instruction addiu () # ( UINT UINT -- UINT )
+instruction addiu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_uint (PVM_VAL_UINT (a) + PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint,  +);
   end
 end
 
-instruction addl () # ( LONG LONG -- LONG )
+instruction addl () # ( LONG LONG -- LONG LONG LONG)
   code
-#define F(res, a, b)                                                       \
-  { int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) + PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long,  +);
   end
 end
 
-instruction addlu () # ( ULONG ULONG -- ULONG )
+instruction addlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) + PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong,  +);
   end
 end
 
-instruction subi () # ( INT INT -- INT )
+instruction subi () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) - PVM_VAL_INT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int,  -);
   end
 end
 
-instruction subiu () # ( UINT UINT -- UINT )
+instruction subiu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_uint (PVM_VAL_UINT (a) - PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint,  -);
   end
 end
 
-instruction subl () # ( LONG LONG -- LONG )
+instruction subl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) - PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long,  -);
   end
 end
 
-instruction sublu () # ( ULONG ULONG -- ULONG )
+instruction sublu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) - PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong,  -);
   end
 end
 
-instruction muli () # ( INT INT -- INT )
+instruction muli () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) * PVM_VAL_INT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (INT, INT, INT, int,  *);
   end
 end
 
-instruction muliu () # ( UINT UINT -- UINT )
+instruction muliu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_uint (PVM_VAL_UINT (a) * PVM_VAL_UINT (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (UINT, UINT, UINT, uint,  *);
   end
 end
 
-instruction mull () # ( LONG LONG -- LONG )
+instruction mull () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) * PVM_VAL_LONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (LONG, LONG, LONG, long,  *);
   end
 end
 
-instruction mullu () # ( ULONG ULONG -- ULONG )
+instruction mullu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) * PVM_VAL_ULONG (b), size);\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_BINOP (ULONG, ULONG, ULONG, ulong,  *);
   end
 end
 
-instruction divi () # ( INT INT -- INT )
+instruction divi () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) / PVM_VAL_INT (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (INT, INT, INT, int, /);
   end
 end
 
-instruction diviu () # ( UINT UINT -- UINT )
+instruction diviu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_uint (PVM_VAL_UINT (a) / PVM_VAL_UINT (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (UINT, UINT, UINT, uint, /);
   end
 end
 
-instruction divl () # ( LONG LONG -- LONG )
+instruction divl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) / PVM_VAL_LONG (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (LONG, LONG, LONG, long, /);
   end
 end
 
-instruction divlu () # ( ULONG ULONG -- ULONG )
+instruction divlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) / PVM_VAL_ULONG (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (ULONG, ULONG, ULONG, ulong, /);
   end
 end
 
-instruction modi () # ( INT INT -- INT )
+instruction modi () # ( INT INT -- INT INT INT )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_INT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_INT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_INT (a) % PVM_VAL_INT (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (INT, INT, INT, int, %);
   end
 end
 
-instruction modiu () # ( UINT UINT -- UINT )
+instruction modiu () # ( UINT UINT -- UINT UINT UINT )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_UINT (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_UINT_SIZE (a); \
-    res = pvm_make_int (PVM_VAL_UINT (a) % PVM_VAL_UINT (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (UINT, UINT, UINT, uint, %);
   end
 end
 
-instruction modl () # ( LONG LONG -- LONG )
+instruction modl () # ( LONG LONG -- LONG LONG LONG )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_LONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_LONG_SIZE (a); \
-    res = pvm_make_long (PVM_VAL_LONG (a) % PVM_VAL_LONG (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (LONG, LONG, LONG, long, %);
   end
 end
 
-instruction modlu () # ( ULONG ULONG -- ULONG )
+instruction modlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   code
-#define F(res, a, b) \
-  { if (PVM_VAL_ULONG (b) == 0) { PVM_RAISE (PVM_E_DIV_BY_ZERO); } else {int size = PVM_VAL_ULONG_SIZE (a); \
-    res = pvm_make_ulong (PVM_VAL_ULONG (a) % PVM_VAL_ULONG (b), size);}\
-  }
-  JITTER_BINARY_STACK(F);
-#undef F
+    PVM_CHECKED_BINOP (ULONG, ULONG, ULONG, ulong, %);
   end
 end
 
-instruction negi () # ( INT -- INT )
+instruction negi () # ( INT -- INT INT )
   code
-    int size = PVM_VAL_INT_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK()
-      = pvm_make_int (- PVM_VAL_INT (JITTER_TOP_STACK()), size);
+    PVM_UNOP (INT, INT, int, -);
   end
 end
 
-instruction negiu () # ( UINT -- UINT )
+instruction negiu () # ( UINT -- UINT UINT )
   code
-    int size = PVM_VAL_UINT_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK()
-      = pvm_make_uint ((uint32_t) (- PVM_VAL_INT (JITTER_TOP_STACK())), size);
+    PVM_UNOP (UINT, UINT, uint, -);
   end
 end
 
-instruction negl () # ( LONG -- LONG )
+instruction negl () # ( LONG -- LONG LONG )
   code
-    int size = PVM_VAL_LONG_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK()
-      = pvm_make_long (- PVM_VAL_LONG (JITTER_TOP_STACK()), size);
+    PVM_UNOP (LONG, LONG, long, -);
   end
 end
 
 instruction neglu () # ( LONG -- LONG )
   code
-    int size = PVM_VAL_ULONG_SIZE (JITTER_TOP_STACK());
-    JITTER_TOP_STACK()
-      = pvm_make_ulong ((uint64_t) (- PVM_VAL_ULONG (JITTER_TOP_STACK())), size);
+    PVM_UNOP (ULONG, ULONG, ulong, -);
   end
 end
 
