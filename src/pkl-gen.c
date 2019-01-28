@@ -955,19 +955,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
       break;
     case PKL_TYPE_ARRAY:
-      /* Generate code to create an array of maps of the given type.
-         Thats it: to call the array (from the type) mapping
-         function. */
-      /* Compile a one-time use mapper closure for the array, and call
-         it.  */
-      /* Handle:
+      /* Generate code to create a mapped array of the given type.
+         Handle:
 
          - If the size of the array is known, use a constant for loop.
          - If the size of the array is variable (number of elems or
            offset) use a for loop.
          - If the size of the array is not specified at all ([]) then
-           use a while (not EOF) loop to create the array.
-      */
+           use a while (not EOF=null) loop to create the array.
+
+         XXX: handle constraints errors, etc.  */
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,
