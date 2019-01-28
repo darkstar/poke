@@ -157,6 +157,8 @@ Extending Poke
 @c * Writing commands in C::
 @c * Writing commands in Poke::
 
+@c XXX: document promotions
+
 * GNU Free Documentation License:: Distribution terms for this document.
 
 Indexes
