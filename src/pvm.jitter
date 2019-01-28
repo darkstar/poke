@@ -534,6 +534,13 @@ instruction nip () # ( A B -- B )
   end
 end
 
+instruction nip2 () # ( A B C -- C )
+  code
+    JITTER_NIP_STACK ();
+    JITTER_NIP_STACK ();
+  end
+end
+
 instruction dup () # ( A -- A A )
   code
     JITTER_DUP_STACK ();
@@ -1866,4 +1873,10 @@ rule rot-rot-to-nrot rewrite
   rot; rot
 into
   nrot
+end
+
+rule nip-nip-to-nip2 rewrite
+  nip; nip
+into
+  nip2
 end
