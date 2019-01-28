@@ -976,6 +976,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
                "unhandled node type in codegen for node map #%" PRIu64,
                PKL_AST_UID (map));
+      PKL_PASS_ERROR;
       break;
     }
 }

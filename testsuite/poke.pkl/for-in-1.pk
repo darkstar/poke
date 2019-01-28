@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = ([]string array) void:
+defun foo = (string[] array) void:
   {
    for (a in array)
      print (a + "\n");

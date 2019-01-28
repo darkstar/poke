@@ -1437,32 +1437,29 @@ struct pkl_phase pkl_phase_typify1 =
 
 
 /* Determine the completeness of a type node.
-
-   Also, the only context where an array type is allowed to have a
-   non-NULL NELEM (like in int[3]) is in the definition of a struct
-   element.  Make sure of that.  */
+  
+   Also, sized array types are not allowed in certain contexts.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
+  pkl_typify_payload payload
+        = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
 
-  /* XXX: this is now assured by the parser.  To remove.  */
-#if 0
+  /* XXX: this doesn't cover all possibilities: what about
+     sub-arrays.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
       && PKL_AST_TYPE_A_NELEM (type) != NULL
-      && (!PKL_PASS_PARENT
-          || PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_STRUCT_ELEM_TYPE))
+      && PKL_PASS_PARENT
+      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_ARG_TYPE))
     {
-      pkl_typify_payload payload
-        = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
-                 "array types can only include a size when defining struct elements");
+                 "sized array types not allowed in this context");
       payload->errors++;
       PKL_PASS_ERROR;
     }
-#endif
 }
 PKL_PHASE_END_HANDLER
 

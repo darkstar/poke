@@ -1,4 +1,0 @@
-/* { dg-do compile } */
-
-deftype at3 = int[2 + 1]; /* { dg-error "" } */
-

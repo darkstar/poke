@@ -53,8 +53,8 @@ deftype struct_with_array =
   struct
   {
     int;
-    [5]int;
-    [3]int;
+    int[5];
+    int[3];
   };
 
 /* { dg-command { print sizeof (struct_with_array) } } */

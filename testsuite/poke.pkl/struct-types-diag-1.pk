@@ -1,4 +1,0 @@
-/* { dg-do compile } */
-
-deftype Packet = struct {[][]int; [2][1]int foo;}; /* { dg-error "" } */
-

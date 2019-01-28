@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defun foo = ([]int array) int:
+defun foo = (int[] array) int:
   {
    defvar sum = 0;
    
