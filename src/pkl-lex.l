@@ -154,6 +154,7 @@ D [0-9]
 "&="		{ return BANDA; }
 "|="		{ return IORA; }
 "^="		{ return XORA; }
+"::"		{ return BCONC; }
 
 "||"		{ return OR; }
 "&&"		{ return AND; }

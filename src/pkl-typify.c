@@ -460,6 +460,58 @@ PKL_PHASE_END_HANDLER
 #undef CAST_OFFSET
 #undef TYPIFY_BIN
 
+/* When applied to integral arguments, the type of a bit-concatenation
+   :: is an integral type with the following characteristics: the
+   width of the operation is the sum of the widths of the operands,
+   which in no case can exceed 64-bits.  The sign of the operation is
+   the sign of the first argument.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);
+  pkl_ast_node t2 = PKL_AST_TYPE (op2);
+
+  pkl_ast_node exp_type;
+
+  /* This operation is only defined for integral arguments, of any
+     width.  */
+  if (PKL_AST_TYPE_CODE (t1) != PKL_TYPE_INTEGRAL
+      || PKL_AST_TYPE_CODE (t2) != PKL_TYPE_INTEGRAL)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                 "operator requires integral arguments");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* The sum of the width of the operators should never exceed
+     64-bit.  */
+  if (PKL_AST_TYPE_I_SIZE (t1) + PKL_AST_TYPE_I_SIZE (t2)
+      > 64)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                 "the sum of the width o the operators should not exceed 64-bit");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* Allright, make the new type.  */
+  exp_type = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                         PKL_AST_TYPE_I_SIZE (t1)
+                                         + PKL_AST_TYPE_I_SIZE (t2),
+                                         PKL_AST_TYPE_I_SIGNED (t1));
+  PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
+
+  PKL_AST_TYPE (exp) = ASTREF (exp_type);
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of a SIZEOF operation is an offset type with an unsigned
    64-bit magnitude and units bits.  */
 
@@ -1376,6 +1428,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_typify1_ps_op_bconc),
 
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),

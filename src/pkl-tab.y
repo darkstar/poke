@@ -214,6 +214,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %left SL SR
 %left '+' '-'
 %left '*' '/' '%'
+%left BCONC
 %right '@'
 %nonassoc UNIT
 %right UNARY INC DEC AS
@@ -368,6 +369,12 @@ expression:
         | expression '%' expression
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_MOD,
+                                                $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| expression BCONC expression
+        	{
+                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_BCONC,
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
