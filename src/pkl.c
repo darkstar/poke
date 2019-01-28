@@ -68,9 +68,8 @@ pkl_new ()
      for as long as the incremental compiler lives.  */
   compiler->env = pkl_env_new ();
 
-  /* XXX: bootstrap the compiler: Load pkl-rt.pk and execute it.  An
-     error bootstraping is an internal error and should be reported as
-     such.  */
+  /* Bootstrap the compiler.  An error bootstraping is an internal
+     error and should be reported as such.  */
   {
     pvm_val val;
     pvm_program pkl_prog
@@ -169,7 +168,7 @@ rest_of_compilation (pkl_compiler compiler,
   pkl_gen_init_payload (&gen_payload, compiler);
 
   /* XXX */
-  /* pkl_ast_print (stdout, ast->ast); */
+  /* pkl_ast_print (stdout, ast->ast);*/
       
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
     goto error;

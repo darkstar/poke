@@ -1200,6 +1200,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 
       /* The type of 'size is offset<uint<64>,1>  */
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
       exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
                                            exp_type,
                                            pkl_ast_make_integer (PKL_PASS_AST,
@@ -1273,6 +1274,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 
       /* The type of 'offset is an offset<uint<64>,1>  */
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
       exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
                                            exp_type,
                                            pkl_ast_make_integer (PKL_PASS_AST,
@@ -1286,6 +1288,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       PKL_PASS_ERROR;
       break;
     }
+
+  PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
 
   PKL_PASS_DONE;
 
