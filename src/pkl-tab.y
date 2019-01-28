@@ -866,7 +866,6 @@ simple_type_specifier:
                 }
         ;
 
-
 function_type_specifier:
 	   '(' function_type_arg_list ')' simple_type_specifier
         	{

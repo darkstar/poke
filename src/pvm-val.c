@@ -201,6 +201,19 @@ pvm_make_struct_type (pvm_val nelem,
 }
 
 pvm_val
+pvm_make_closure_type (pvm_val rtype,
+                       pvm_val nargs, pvm_val *atypes)
+{
+  pvm_val ctype = pvm_make_type (PVM_TYPE_CLOSURE);
+
+  PVM_VAL_TYP_C_RETURN_TYPE (ctype) = rtype;
+  PVM_VAL_TYP_C_NARGS (ctype) = nargs;
+  PVM_VAL_TYP_C_ATYPES (ctype) = atypes;
+
+  return ctype;
+}
+
+pvm_val
 pvm_make_cls (pvm_program program)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
@@ -236,6 +249,13 @@ pvm_allocate_struct_attrs (pvm_val nelem,
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
   *enames = GC_MALLOC_UNCOLLECTABLE (nbytes);
   *etypes = GC_MALLOC_UNCOLLECTABLE (nbytes);
+}
+
+void
+pvm_allocate_closure_attrs (pvm_val nargs, pvm_val **atypes)
+{
+  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nargs);
+  *atypes = GC_MALLOC_UNCOLLECTABLE (nbytes);
 }
 
 pvm_val

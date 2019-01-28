@@ -274,6 +274,10 @@ pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 #define PVM_VAL_TYP_S_ETYPE(V,I) (PVM_VAL_TYP_S_ETYPES((V))[(I)])
 #define PVM_VAL_TYP_O_UNIT(V) (PVM_VAL_TYP((V))->val.off.unit)
 #define PVM_VAL_TYP_O_BASE_TYPE(V) (PVM_VAL_TYP((V))->val.off.base_type)
+#define PVM_VAL_TYP_C_RETURN_TYPE(V) (PVM_VAL_TYP((V))->val.cls.return_type)
+#define PVM_VAL_TYP_C_NARGS(V) (PVM_VAL_TYP((V))->val.cls.nargs)
+#define PVM_VAL_TYP_C_ATYPES(V) (PVM_VAL_TYP((V))->val.cls.atypes)
+#define PVM_VAL_TYP_C_ATYPE(V,I) (PVM_VAL_TYP_C_ATYPES((V))[(I)])
 
 enum pvm_type_code
 {
@@ -281,7 +285,8 @@ enum pvm_type_code
   PVM_TYPE_STRING,
   PVM_TYPE_ARRAY,
   PVM_TYPE_STRUCT,
-  PVM_TYPE_OFFSET
+  PVM_TYPE_OFFSET,
+  PVM_TYPE_CLOSURE
 };
 
 struct pvm_type
@@ -314,6 +319,13 @@ struct pvm_type
       pvm_val base_type;
       pvm_val unit;
     } off;
+
+    struct
+    {
+      pvm_val nargs;
+      pvm_val return_type;
+      pvm_val *atypes;
+    } cls;
   } val;
 };
 
@@ -324,8 +336,10 @@ pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
+pvm_val pvm_make_closure_type (pvm_val rtype, pvm_val nargs, pvm_val *atypes);
 
 void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
+void pvm_allocate_closure_attrs (pvm_val nargs, pvm_val **atypes);
 
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_typeof (pvm_val val);
