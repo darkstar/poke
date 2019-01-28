@@ -723,8 +723,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_func)
 }
 PKL_PHASE_END_HANDLER
 
+/* Reverse the list of initializers in array literals.
+
+   This is because at code generation time, the mka instruction
+   processes initializers from top to bottom of the stack.  Since
+   several initializers can refer to the same array element, they
+   should be processed in the right order.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_array)
+{
+  pkl_ast_node array = PKL_PASS_NODE;
+  pkl_ast_node initializers = PKL_AST_ARRAY_INITIALIZERS (array);
+
+  initializers = pkl_ast_reverse (initializers);
+  PKL_AST_ARRAY_INITIALIZERS (array) = ASTREF (initializers);
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans4_ps_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans4_ps_array),
   };

@@ -87,11 +87,14 @@ pvm_make_array (pvm_val nelem, pvm_val type)
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ARR);
   pvm_array arr = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_array));
   size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem);
+  size_t i;
 
   arr->nelem = nelem;
   arr->type = type;
   arr->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
-  memset (arr->elems, 0, nbytes);
+
+  for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
+    arr->elems[i] = PVM_NULL;
   
   PVM_VAL_BOX_ARR (box) = arr;
   return PVM_BOX (box);
