@@ -350,6 +350,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
           case PKL_TYPE_FUNCTION:
             if (PKL_AST_TYPE_F_ARGS (node))
               PKL_PASS_CHAIN (PKL_AST_TYPE_F_ARGS (node));
+            PKL_PASS (PKL_AST_TYPE_F_RTYPE (node));
             break;
           case PKL_TYPE_OFFSET:
             PKL_PASS (PKL_AST_TYPE_O_BASE_TYPE (node));

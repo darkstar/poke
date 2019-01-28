@@ -720,27 +720,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
      circumstances.  In any other cases, break the pass to avoid
      post-order hooks to be invoked.  */
 
-  switch (PKL_AST_CODE (PKL_PASS_PARENT))
+  if (PKL_PASS_PARENT)
     {
-    case PKL_AST_DECL:
-      /* Declared struct type nodes should be processed in order to
-         generate the code for mapper and construction functions.  */
-      if (PKL_AST_TYPE_CODE (PKL_PASS_NODE) == PKL_TYPE_STRUCT)
-        break;
-    case PKL_AST_STRUCT:
-    case PKL_AST_INTEGER:
-    case PKL_AST_STRING:
-    case PKL_AST_OFFSET:
-    case PKL_AST_FUNC:
-    case PKL_AST_FUNC_ARG:
-    case PKL_AST_FUNC_TYPE_ARG:
-    case PKL_AST_VAR:
-    case PKL_AST_SCONS:
-    case PKL_AST_MAP:
-      PKL_PASS_BREAK;
-      break;
-    default:
-      break;
+      switch (PKL_AST_CODE (PKL_PASS_PARENT))
+        {
+        case PKL_AST_DECL:
+          /* Declared struct type nodes should be processed in order to
+             generate the code for mapper and construction functions.  */
+          if (PKL_AST_TYPE_CODE (PKL_PASS_NODE) == PKL_TYPE_STRUCT)
+            break;
+        case PKL_AST_STRUCT:
+        case PKL_AST_INTEGER:
+        case PKL_AST_STRING:
+        case PKL_AST_OFFSET:
+        case PKL_AST_FUNC:
+        case PKL_AST_FUNC_ARG:
+        case PKL_AST_VAR:
+        case PKL_AST_SCONS:
+        case PKL_AST_MAP:
+          PKL_PASS_BREAK;
+          break;
+        default:
+          break;
+        }
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1089,20 +1091,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
 PKL_PHASE_END_HANDLER
 
 /*
- * | FUNC_TYPE_ARG_TYPE
  * FUNC_TYPE_ARG
+ * | FUNC_TYPE_ARG_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_type_arg)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_type_arg)
 {
-  /* Nothing to do here.  */
-  //  assert (0);
+  PKL_PASS_SUBPASS (PKL_AST_FUNC_TYPE_ARG_TYPE (PKL_PASS_NODE));
 }
 PKL_PHASE_END_HANDLER
 
 /*
  * | FUNC_TYPE_ARG
  * | ...
+ * | FUNC_TYPE_RTYPE
  * TYPE_FUNCTION
  */
 
@@ -1826,7 +1828,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_ps_func_arg),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_TYPE_ARG, pkl_gen_ps_func_type_arg),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNC_TYPE_ARG, pkl_gen_pr_func_type_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_gen_pr_type),
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_gen_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_PROGRAM, pkl_gen_ps_program),

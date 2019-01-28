@@ -1565,12 +1565,15 @@ end
 
 # Function types
 
-instruction mktyc () # ( RTYPE ATYPE... NARGS -- TYP )
+instruction mktyc () # ( ATYPE... RTYPE NARGS -- TYP )
   code
     size_t i;
     pvm_val nargs, rtype, *atypes;
 
     nargs = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+
+    rtype = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
     pvm_allocate_closure_attrs (nargs, &atypes);
@@ -1580,9 +1583,6 @@ instruction mktyc () # ( RTYPE ATYPE... NARGS -- TYP )
       atypes[i] = JITTER_TOP_STACK ();
       JITTER_DROP_STACK ();
     }
-
-    rtype = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
 
     JITTER_PUSH_STACK (pvm_make_closure_type (rtype,
                                               nargs, atypes));
