@@ -1078,6 +1078,17 @@ instruction bxorlu () # ( ULONG ULONG -- ULONG ULONG ULONG )
   end
 end
 
+instruction bconciii () # ( INT INT -- INT )
+  code
+  end
+end
+
+instruction bconciil () # ( INT INT -- LONG )
+  code
+  end
+end
+
+
 instruction bori () # ( INT INT -- INT )
   code
     PVM_BINOP (INT, INT, INT, int, |);

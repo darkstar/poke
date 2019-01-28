@@ -1739,6 +1739,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
 }
 PKL_PHASE_END_HANDLER
 
+/* | OPERAND1
+ * | OPERAND2
+ * EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_bconc)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+  pkl_ast_node exp_type = PKL_AST_TYPE (exp);
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BCONC,
+                op1_type, op2_type, exp_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+}
+PKL_PHASE_END_HANDLER
+
 /* The handler below generates and ICE if a given node isn't handled
    by the code generator.  */
 
@@ -1829,6 +1850,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GT, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_gen_ps_op_bconc),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_ps_type_string),

@@ -111,7 +111,7 @@ PKL_DEF_INSN (PKL_INSN_MODI, "", "modi")
 PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
 PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
 PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
-
+  
 /* Shift instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SLI, "", "bsli")
@@ -324,6 +324,7 @@ PKL_DEF_INSN (PKL_INSN_BNOT, "a", "bnot")
 PKL_DEF_INSN (PKL_INSN_BAND, "a", "band")
 PKL_DEF_INSN (PKL_INSN_BOR, "a", "bor")
 PKL_DEF_INSN (PKL_INSN_BXOR, "a", "bxor")
+PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
 
 /*
 Local variables:
