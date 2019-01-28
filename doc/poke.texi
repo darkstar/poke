@@ -66,6 +66,7 @@ Poke Language Reference Manual
 * Introduction::
 * Data Types::			Data types of values.
 * Integers::			Whole numbers.
+* Strings::			Strings of characters.
 * Arrays::			Sequences of values.
 * Structs and Unions::
 * The Standard Library::	Predefined goodies!
@@ -93,14 +94,14 @@ Poke Language Reference Manual
 @c       Arithmetic Operations
 @c       Bitwise Operations
 @c       Integer Attributes
-@c   Arrays
-@c       Array Literals
-@c       Array Attributes
 @c   Strings
 @c       String Literals
 @c       Comparison of Strings
 @c       String Formatting
 @c       String Attributes
+@c   Arrays
+@c       Array Literals
+@c       Array Attributes
 @c   Structs and Unions
 @c       Fields
 @c       Anonymous Fields
@@ -131,7 +132,6 @@ Poke Language Reference Manual
 @c       Integer Standard Types
 
 Old
-* Strings::
 * Structs::
 * Unions::
 * Enumerations::
@@ -1075,6 +1075,49 @@ Examples:
 The type of a character literal is always @code{char}, aka
 @code{uint<8>}.
 
+@node Strings
+@chapter Strings
+
+@menu
+* String Literals::		Writing string values.
+@end menu
+
+@node String Literals
+@section String Literals
+
+NULL-terminated sequences of ASCII codes can be denoted using the
+following syntax:
+
+@example
+"foo"
+@end example
+
+The above string is of type @code{string}.
+
+Note that the empty string @code{""} corresponds to the array
+@code{[0x0]}, which is a valid array containing at least one
+element.
+
+The following escape sequences are supported inside string literals:
+
+@table @code
+@item \DDD
+Where @var{ddd} is a one to three digits octal number.  The escape
+sequence denotes the ASCII character having that code.  It must be in
+the range @code{0-127}.  For example @code{\000} denotes the ASCII
+@code{NULL} character.
+@item \xHH
+Where @var{hh} is a one to two digits hexadecimal number.  The escape
+sequence denotes the ASCII character having that code.  For example
+@code{\x38} denotes the @code{8} character.
+@item \"
+Denotes a double quote.
+@item \n
+Denotes a new line character.
+@item \t
+Denotes an horizontal tab.
+@end table
+
 @node Arrays
 @chapter Arrays
 
@@ -1414,54 +1457,6 @@ Allow constant expressions in integral type constructors, like
 @c     Note that if LEN is not achieved because of an union constraint
 @c     failure, this will catch the error (the union constraint failure
 @c     won't.)  Put an example.
-
-@node Strings
-@chapter Strings
-
-Arrays of ASCII codes can be denoted using an alternative literal
-notation that is useful when working with ASCII null-terminated
-strings:
-
-@example
-"foo"
-@end example
-
-The above string is of type @code{[]char} or @code{string}, and is
-equivalent to:
-
-@example
-[0x66, 0x6f, 0x6f, null]
-@end example
-
-or to:
-
-@example
-[0x66, 0x6f, 0x6f, 0x0]
-@end example
-
-Note that the empty string @code{""} corresponds to the array
-@code{[0x0]}, which is a valid array containing at least one
-element.
-
-The following escape sequences are supported inside string literals:
-
-@table @code
-@item \DDD
-Where @var{ddd} is a one to three digits octal number.  The escape
-sequence denotes the ASCII character having that code.  It must be in
-the range @code{0-127}.  For example @code{\000} denotes the ASCII
-@code{NULL} character.
-@item \xHH
-Where @var{hh} is a one to two digits hexadecimal number.  The escape
-sequence denotes the ASCII character having that code.  For example
-@code{\x38} denotes the @code{8} character.
-@item \"
-Denotes a double quote.
-@item \n
-Denotes a new line character.
-@item \t
-Denotes an horizontal tab.
-@end table
 
 @node Structs
 @chapter Structs
