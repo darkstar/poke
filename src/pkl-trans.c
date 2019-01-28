@@ -725,7 +725,7 @@ PKL_PHASE_END_HANDLER
 
 /* Reverse the list of initializers in array literals.
 
-   This is because at code generation time, the mka instruction
+   This is needed because at code generation time, the mka instruction
    processes initializers from top to bottom of the stack.  Since
    several initializers can refer to the same array element, they
    should be processed in the right order.  */
