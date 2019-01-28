@@ -239,7 +239,7 @@ pkl_compile_buffer (pkl_compiler compiler, char *buffer,
   compiler->env = env;
   pvm_specialize_program (program);
   /* XXX */
-  pvm_print_program (stdout, program);
+  /* pvm_print_program (stdout, program); */
   return program;
 
  error:

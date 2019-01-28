@@ -271,7 +271,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
 {
-  if (PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_FUNCALL)
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_FUNCALL)
     {
       pkl_ast_node var = PKL_PASS_NODE;
       pkl_ast_node decl = PKL_AST_VAR_DECL (var);

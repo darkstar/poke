@@ -1396,13 +1396,6 @@ instruction aref () # ( ARR ULONG -- ARR ULONG VAL )
   end
 end
 
-instruction alen () # ( ARR -- ULONG )
-  code
-    JITTER_TOP_STACK ()
-      = PVM_VAL_ARR_NELEM (JITTER_TOP_STACK());
-  end
-end
-
 
 
 ## Struct instructions.

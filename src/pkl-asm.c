@@ -1157,19 +1157,22 @@ pkl_asm_endloop (pkl_asm pasm)
    ; Increase the iterator counter
    SWAP       ; CONTAINER NELEMS I
    PUSH 1UL   ; CONTAINER NELEMS I 1
-   ADDLU      ; CONTAINER NELEMS I
-   SWAP       ; CONTAINER I NELEMS
+   ADDLU      ; CONTAINER NELEMS I 1 (I+1)
+   NIP        ; CONTAINER NELEMS I (I+1)
+   NIP        ; CONTAINER NELEMS (I+1)
+   SWAP       ; CONTAINER (I+1) NELEMS
 #if SELECTOR
    ; Evaluate the selector and skip this iteration if it is
    ; not true
 
-   ... CONDITION ... ; CONTAINER I NELEMS BOOL
+   ... CONDITION ... ; CONTAINER (I+1) NELEMS BOOL
    BZ label2;
-   DROP       ; CONTAINER I NELEMS
+   DROP       ; CONTAINER (I+1) NELEMS
 #endif
 
    ... BODY ...
-    
+
+   PUSH null ; CONTAINER (I+1) NELEMS null
    BA label2
  label3:
    DROP       ; CONTAINER I NELEMS
@@ -1202,6 +1205,7 @@ pkl_asm_for_where (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_REGVAR);
   pkl_asm_insn (pasm, PKL_INSN_SEL);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
 
   pvm_append_label (pasm->program, pasm->level->label2);
@@ -1222,6 +1226,8 @@ pkl_asm_for_where (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
   pkl_asm_insn (pasm, PKL_INSN_ADDLU);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP);
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
 }
 
@@ -1242,6 +1248,7 @@ pkl_asm_for_loop (pkl_asm pasm)
 void
 pkl_asm_for_endloop (pkl_asm pasm)
 {
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
 
   pvm_append_label (pasm->program, pasm->level->label3);
