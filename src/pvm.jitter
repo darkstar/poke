@@ -507,6 +507,31 @@ instruction drop () # ( A -- )
   end
 end
 
+instruction drop2 () # ( A B -- )
+  code
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+  end
+end
+
+instruction drop3 () # ( A B C -- )
+  code
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+  end
+end
+
+instruction drop4 () # ( A B C D -- )
+  code
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+    JITTER_DROP_STACK();
+  end
+end
+
+
 instruction push (?nl pvm_literal_printer) # ( -- A )
   code
     pvm_val k = JITTER_ARGN0;
@@ -1880,3 +1905,22 @@ rule nip-nip-to-nip2 rewrite
 into
   nip2
 end
+
+rule drop-drop-to-drop2 rewrite
+  drop; drop
+into
+  drop2
+end
+
+rule drop2-drop-to-drop3 rewrite
+  drop2; drop
+into
+  drop3
+end
+
+rule drop3-drop-to-drop4 rewrite
+  drop3; drop
+into
+  drop4
+end
+

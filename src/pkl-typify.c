@@ -729,7 +729,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
                   pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                              "function argument %d has the wrong type\n\
 expected %s, got %s",
-                             narg, expected_type, passed_type);
+                             narg + 1, expected_type, passed_type);
                   free (expected_type);
                   free (passed_type);
                   
