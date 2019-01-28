@@ -8,3 +8,9 @@
 
 /* { dg-command { print [{.foo=10}] } } */
 /* { dg-output "\n\\\[\\{.foo=10\\}\\\]" } */
+
+/* { dg-command { print [.[2]=10] } } */
+/* { dg-output "\n\\\[null,null,10\\\]" } */
+
+/* { dg-command { print [0,1,2,.[1]=666] } } */
+/* { dg-output "\n\\\[1,666,2\\\]" } */
