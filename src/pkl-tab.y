@@ -496,6 +496,11 @@ expression:
 
                         free (mapper_name);
                       }
+
+                    /* XXX if the type specifier is of an array, then
+                       what?? We need to declare an anonymous mapper
+                       function, and make it available in a new
+                       scope.  */
                 }
 	| TYPENAME struct
           	{
