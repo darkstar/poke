@@ -172,7 +172,6 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token STRING
 %token TRY CATCH RAISE
 %token VOID
-%token FUN
 
 /* ATTRIBUTE operator.  */
 
@@ -230,7 +229,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
 %type <ast> type_specifier simple_type_specifier
-%type <ast> function_type_arg_list function_type_arg
+%type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
@@ -800,6 +799,7 @@ function_arg:
 type_specifier:
 	  simple_type_specifier
         | struct_type_specifier
+        | function_type_specifier
         ;
 
 simple_type_specifier:
@@ -864,15 +864,18 @@ simple_type_specifier:
                   PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
                   PKL_AST_LOC ($$) = @$;
                 }
+        ;
 
-	| FUN '(' function_type_arg_list ')' simple_type_specifier
+
+function_type_specifier:
+	   '(' function_type_arg_list ')' simple_type_specifier
         	{
                   $$ = pkl_ast_make_function_type (pkl_parser->ast,
-                                                   $5, 0 /* narg */,
-                                                   $3);
+                                                   $4, 0 /* narg */,
+                                                   $2);
                   PKL_AST_LOC ($$) = @$;
                 }
-        ;
+	;
 
 function_type_arg_list:
 	  %empty

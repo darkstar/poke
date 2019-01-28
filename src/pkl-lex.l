@@ -136,7 +136,6 @@ D [0-9]
 "catch"		{ return CATCH; }
 "raise"		{ return RAISE; }
 "void"		{ return VOID; }
-"fun"		{ return FUN; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

@@ -3576,30 +3576,6 @@ Then process raw.log with the
 as much as you can, and append the results to
 @file{etc/boehm-gc.suppressions}.
 
-
-@c XXX
-@c In function types, document ambiguity in grammar:
-@c
-@c reading ']'
-@c 
-@c shift to:       89 simple_type_specifier: '[' expression ']' . simple_type_specifier
-@c reduce to:   70 array_initializer: expression
-@c 
-@c fun()int[] ->   array of fun()int
-@c            or   fun returning int[]
-@c            ?
-@c 
-@c By default:
-@c 
-@c fun()int[] -> fun returning array of integers.
-@c 
-@c For an array of functions you should use:
-@c 
-@c deftype myfunc = fun()int
-
-myfunc[]
-
-
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
 @cindex license, GNU Free Documentation License

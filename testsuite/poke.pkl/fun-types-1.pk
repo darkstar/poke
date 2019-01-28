@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-deftype Callback = fun(int)int;
+deftype Callback = (int)int;
 
 defun call_cb = (int[] a, Callback cb) int:
   {
