@@ -66,6 +66,7 @@ Poke Language Reference Manual
 * Introduction::
 * Data Types::			Data types of values.
 * Integers::			Whole numbers.
+* Arrays::			Sequences of values.
 * Structs and Unions::
 * The Standard Library::	Predefined goodies!
 
@@ -92,6 +93,9 @@ Poke Language Reference Manual
 @c       Arithmetic Operations
 @c       Bitwise Operations
 @c       Integer Attributes
+@c   Arrays
+@c       Array Literals
+@c       Array Attributes
 @c   Strings
 @c       String Literals
 @c       Comparison of Strings
@@ -107,9 +111,6 @@ Poke Language Reference Manual
 @c       Struct Literals
 @c       Struct and Union Arguments
 @c       Struct and Union Attributes
-@c   Arrays
-@c       Array Literals
-@c       Array Attributes
 @c   Sets
 @c       Enumerations
 @c       Bitmasks
@@ -130,8 +131,6 @@ Poke Language Reference Manual
 @c       Integer Standard Types
 
 Old
-* Metatypes::
-* Arrays::
 * Strings::
 * Structs::
 * Unions::
@@ -779,6 +778,38 @@ reserved word @code{string}.
 @node Array Types
 @section Array Types
 
+Arrays type constructors are denoted using the following syntax:
+
+@example
+[]@var{type}
+@end example
+
+Where @var{type} is the type of the elements contained in the
+array.
+
+Examples:
+
+@example
+[]int32
+[]uint64
+[]string
+[]char
+@end example
+
+The elements contained in an array can be arrays themselves.  This is
+how you would declare a type of such an array:
+
+@example
+[][]int
+@end example
+
+Note that, unlike in many other programming languages, no boundaries
+are expressed in the array type definitions.  This is because in poke
+the actual size of an array is not part of its type.  This means that,
+for example, an array containing four 32-bit integers has the same
+type than an array containing four hundred 32-bit integers:
+@code{[]int}.  See the section on type equivalence below for details.
+
 @node Type Equivalence
 @section Type Equivalence
 
@@ -1018,7 +1049,19 @@ space, and their encoding.
 
 8-bit unsigned integers can use an alternative literal notation that
 is useful when working with @emph{ASCII character codes}.  Printable
-character codes can be denoted with @code{'c'}
+character codes can be denoted with @code{'c'}.
+
+Non-printable characters can be expressed using escape-sequences.  The
+allowed sequences are:
+
+@table @code
+@item \n
+New-line character (ASCII 012).
+@item \t
+Tab character (ASCII 011).
+@item \[0-9][0-9][0-9]
+Character whose ASCII code is the specified number, in octal.
+@end table
 
 Examples:
 
@@ -1031,6 +1074,63 @@ Examples:
 
 The type of a character literal is always @code{char}, aka
 @code{uint<8>}.
+
+@node Arrays
+@chapter Arrays
+
+@menu
+* Array Literals::		Writing array values.
+@end menu
+
+@node Array Literals
+@section Array Literals
+
+Array literals are constructed using the following syntax:
+
+@example
+[<exp>, <exp>, ..., <exp>]
+@end example
+
+Where @code{<exp>} is an arbitrary expression.
+
+For example, @code{[1,2,3]} constructs an array of type
+@code{[]int<32>} containing three elements.  Likewise,
+@code{['a','b','c']} constructs an array of type @code{[]uint<8>}
+containing three elements.
+
+The type of the array literal is inferred from the type of its
+elements.  Accordingly, all the elements in an array literal must be
+of the same type.  Examples of invalid array literals, that will raise
+a compilation-time error if evaluated, are:
+
+@example
+[1,2u,3]
+[1,0xffff_ffff,3]
+['a',"b",'c']
+@end example
+
+Arrays must contain at least one element.  Accordingly, @code{[]} is
+not a valid array literal.
+
+This is how a @code{3x3} matrix could be constructed using an array of
+arrays:
+
+@example
+[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+@end example
+
+It is possible to refer to specific elements when constructing array
+literals.  For example, @code{[1, 2, 3, .[3] = 4]} denotes the same
+array than @code{[1, 2, 3, 4]}.
+
+This allows creating arrays without having to specify all its
+elements.  Unspecified elements have the value @code{null}.  For
+example, @code{[.[2] = 2]} denotes the same array than @code{[null,
+null, 20]}.
+
+@c XXX
+Note that an array element should only be referred once.  Accordingly,
+@code{[1, 2, 3, .[1] = 10]} is not a valid array literal.
 
 @node Structs and Unions
 @chapter Structs and Unions
@@ -1281,153 +1381,39 @@ Allow constant expressions in integral type constructors, like
 @code{uint<2+3>}.
 @end itemize
 
-@node Metatypes
-@chapter Metatypes
-
-Bit types and sets.
-
-@example
-deftype int32 = sbit<32>;
-deftype uint32 = ubit<32>;
-
-defset foo = enum @{ a = 1, b = 2 @};
-defset bar = bitmask @{ a = 0x1, b = 0x4 @};
-
-foo<int>
-bar<bit<32>>
-@end example
-
-XXX we need a new boxed value for non 8,16,32,64 integral values.  And
-    to implement the promotion types for operators.
-
-@node Arrays
-@chapter Arrays
-
-Arrays types are denoted using the following syntax:
-
-@example
-@var{type}[]
-@end example
-
-Where @var{type} is the type of the elements contained in the
-array.
-
-Examples:
-
-@example
-int32[]
-uint64[]
-string[]
-char[]
-@end example
-
-The elements contained in an array can be arrays themselves.  This is
-how you would declare a type of such an array:
-
-@example
-int[][]
-@end example
-
-Note that, unlike in many other programming languages, no boundaries
-are expressed in the array type definitions.  This is because in poke
-the actual size of an array is not part of its type.  This means that,
-for example, an array containing four 32-bit integers has the same
-type than an array containing four hundred 32-bit integers:
-@code{int[]}.
-
-XXX: operator '+' concatenates arrays.
-XXX: operator '~' reverses arrays.
-
-XXX: empty arrays are supported, but not literals of empty arrays.
-
-XXX: explain how unbounded arrays play the declarative role of
-     iteration.
-
-Array literals are constructed using the following syntax:
-
-@example
-[<exp>, <exp>, ..., <exp>]
-@end example
-
-Where @code{<exp>} is an arbitrary expression.
-
-For example, @code{[1,2,3]} constructs an array of type
-@code{int32[]} containing three elements.  Likewise,
-@code{['a','b','c']} constructs an array of type @code{char[]}
-containing three elements.
-
-The type of the array literal is inferred from the type of its
-elements.  Accordingly, all the elements in an array literal must be
-of the same type.  Examples of invalid array literals, that will raise
-an error if evaluated, are:
-
-@example
-[1,2u,3]
-[1,0xffff_ffff,3]
-['a',"b",'c']
-@end example
-
-Arrays must contain at least one element.  Accordingly, @code{[]} is
-not a valid array literal.
-
-This is how a @code{3x3} matrix could be constructed using an array of
-arrays:
-
-@example
-[[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-@end example
-
-It is possible to refer to specific elements when constructing array
-literals.  For example, @code{[1, 2, 3, .[3] = 4]} denotes the same
-array than @code{[1, 2, 3, 4]}.
-
-XXX: in GNU C the array size for [[1] = 10, 20, [4] = 40] would be 5.
-
-This allows creating arrays without having to specify all its
-elements.  Unspecified elements have the value @code{null}.  For
-example, @code{[.[2] = 2]} denotes the same array than @code{[null,
-null, 20]}.
-
-Note that an array element should only be referred once.  Accordingly,
-@code{[1, 2, 3, .[1] = 10]} is not a valid array literal.
-
-XXX: Array subscripts are promoted to unsigned 64-bit integers.
-
-@section Declaring the size of an array in bytes
-
-XXX: We need to be able to specify that an unbounded array is of some given
-     size (sizeof) i.e. the array elem type is applied until: a constraint
-     fails or the byte size of the array is achieved or EOF is found.  Very
-     interesting :)  Sometimes you don't know the number of elements, but you
-     know the total size of the array.
-
-     This is because array elements, despite all being of the same
-     type, can have different sizes if they are structs or unions.
-
-@example
-defvar int[32] a;  /* Array of 100 integers.  */
-defvar int[#128] a; /* Array of 128 bytes, i.e. 100 integers.  */
-@end example
-
-     XXX How to specify the maximum size in bits?  This may be needed
-     for some bit-oriented formats like deflate.
-
-     Example: dwarf CFA expression:
-
-@example
-deftype dwarf_cfa_expression =
-  struct
-  @{
-    uint128 reg;
-    uint128 len;
-    dwarf_op[#len] expr; /* An error is raised if the elements
-                            of EXPR do not sum exactly LEN bytes.  */
-  @};
-@end example
-
-    Note that if LEN is not achieved because of an union constraint
-    failure, this will catch the error (the union constraint failure
-    won't.)  Put an example.
+@c XXX: for the struct chapter
+@c XXX: We need to be able to specify that an unbounded array is of some given
+@c     size (sizeof) i.e. the array elem type is applied until: a constraint
+@c     fails or the byte size of the array is achieved or EOF is found.  Very
+@c     interesting :)  Sometimes you don't know the number of elements, but you
+@c     know the total size of the array.
+@c
+@c          [OFFSET]TYPE
+@c
+@c     This is because array elements, despite all being of the same
+@c     type, can have different sizes if they are structs or unions.
+@c
+@c @example
+@c defvar int[32] a;  /* Array of 100 integers.  */
+@c defvar int[128#B] a; /* Array of 128 bytes, i.e. 100 integers.  */
+@c @end example
+@c
+@c    Example: dwarf CFA expression:
+@c
+@c @example
+@c deftype dwarf_cfa_expression =
+@c   struct
+@c   @{
+@c     uint128 reg;
+@c     uint128 len;
+@c     dwarf_op[#len] expr; /* An error is raised if the elements
+@c                             of EXPR do not sum exactly LEN bytes.  */
+@c   @};
+@c @end example
+@c 
+@c     Note that if LEN is not achieved because of an union constraint
+@c     failure, this will catch the error (the union constraint failure
+@c     won't.)  Put an example.
 
 @node Strings
 @chapter Strings
@@ -1440,7 +1426,7 @@ strings:
 "foo"
 @end example
 
-The above string is of type @code{char[]} or @code{string}, and is
+The above string is of type @code{[]char} or @code{string}, and is
 equivalent to:
 
 @example
@@ -2483,7 +2469,7 @@ XXX quantified ternary expressions
     It is true iff BOOLEAN_EXPR is true for all index ID in the array.
 
 @example
-   int[] a : forall i in a : (i == 0) || (a[i] == a[i-1]+1);
+   []int a : forall i in a : (i == 0) || (a[i] == a[i-1]+1);
 @end example
 
 XXX ternary inclusion operator (useful with enums):
