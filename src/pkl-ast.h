@@ -908,6 +908,9 @@ pkl_ast_node pkl_ast_make_cast (pkl_ast ast,
 #define PKL_AST_MAP_OFFSET(AST) ((AST)->map.offset)
 #define PKL_AST_MAP_MAPPER_BACK(AST) ((AST)->map.mapper_back)
 #define PKL_AST_MAP_MAPPER_OVER(AST) ((AST)->map.mapper_over)
+#define PKL_AST_MAP_MAPPER_P(AST)                                       \
+  ((AST)->map.mapper_back != -1 && (AST)->map.mapper_over != -1)
+    
 
 struct pkl_ast_map
 {

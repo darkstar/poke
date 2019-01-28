@@ -1016,6 +1016,8 @@ pkl_ast_make_map (pkl_ast ast,
 
   PKL_AST_MAP_TYPE (map) = ASTREF (type);
   PKL_AST_MAP_OFFSET (map) = ASTREF (offset);
+  PKL_AST_MAP_MAPPER_BACK (map) = -1;
+  PKL_AST_MAP_MAPPER_OVER (map) = -1;
 
   return map;
 }

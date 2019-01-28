@@ -737,7 +737,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
         case PKL_AST_FUNC_ARG:
         case PKL_AST_VAR:
         case PKL_AST_SCONS:
-        case PKL_AST_MAP:
           PKL_PASS_BREAK;
           break;
         default:
@@ -755,8 +754,26 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
 {
-  /* We do not need to generate code for the offset type.  */
-  PKL_PASS_BREAK;
+  /* XXX: is this break really necessary considering the break in
+     pkl_gen_pr_type?  */
+  if (!PKL_GEN_PAYLOAD->in_map)
+    PKL_PASS_BREAK;    
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | BASE_TYPE
+ * | UNIT
+ * TYPE_OFFSET
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
+{
+  if (PKL_GEN_PAYLOAD->in_map)
+    {
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -915,63 +932,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_scons)
 PKL_PHASE_END_HANDLER
 
 /*
- * | MAP_OFFSET
  * MAP
+ * | MAP_OFFSET
+ * | MAP_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
 {
-  pkl_asm pasm = PKL_GEN_ASM;
-
   pkl_ast_node map = PKL_PASS_NODE;
-  pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
 
-  switch (PKL_AST_TYPE_CODE (map_type))
+  /* XXX: install exception handlers for constraints etc.  */
+
+  /* If there is a lexical address stored in the map AST node, then it
+     refers to a mapper function.  In that case, we should call the
+     mapper function.  The map's offset is passed to the function,
+     which will return the mapped value.
+
+     Otherwise (there is not a lexical address in the map AST node)
+     let the code generator generate code for peeking the mapped type.
+     The generated code expects the map offset at the top of the
+     stack.  */
+
+  if (PKL_AST_MAP_MAPPER_P (map))
     {
-    case PKL_TYPE_STRING:
-      pkl_asm_insn (pasm, PKL_INSN_PEEKS);
-      break;
-    case PKL_TYPE_INTEGRAL:
-      pkl_asm_insn (pasm, PKL_INSN_PEEKD, map_type);
-      break;
-    case PKL_TYPE_OFFSET:
-      pkl_asm_insn (pasm, PKL_INSN_PEEKD,
-                    PKL_AST_TYPE_O_BASE_TYPE (map_type));
-      PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (map_type));
-      pkl_asm_insn (pasm, PKL_INSN_MKO);
-      pkl_asm_insn (pasm, PKL_INSN_NIP2);
-      break;
-    case PKL_TYPE_STRUCT:
-      /* Call the mapper function of the struct type, whose lexical
-         address is stored in the map AST node.  The mapper will
-         return a mapped struct on the top of the stack.
-
-         XXX: install an exception handler for constraint errors
-         etc.  */
-
+      int mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
+      int mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
+      
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                    PKL_AST_MAP_MAPPER_BACK (map),
-                    PKL_AST_MAP_MAPPER_OVER (map));
+                    mapper_back, mapper_over);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
-      break;
-    case PKL_TYPE_ARRAY:
-      /* Generate code to create a mapped array of the given type.
-         Handle:
-
-         - If the size of the array is known, use a constant for loop.
-         - If the size of the array is variable (number of elems or
-           offset) use a for loop.
-         - If the size of the array is not specified at all ([]) then
-           use a while (not EOF=null) loop to create the array.
-
-         XXX: handle constraints errors, etc.  */
-    default:
-      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_type),
-               "unhandled node type in codegen for node map #%" PRIu64,
-               PKL_AST_UID (map));
-      PKL_PASS_ERROR;
-      break;
+      PKL_PASS_BREAK;
     }
+
+  PKL_PASS_SUBPASS (PKL_AST_MAP_OFFSET (map));
+  PKL_GEN_PAYLOAD->in_map = 1;
+  PKL_PASS_SUBPASS (PKL_AST_MAP_TYPE (map));
+  PKL_GEN_PAYLOAD->in_map = 0;
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -1071,22 +1068,30 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
-  PKL_PHASE_PARENT (4,
+  PKL_PHASE_PARENT (5,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
                     PKL_AST_TYPE,
+                    PKL_AST_MAP,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_asm pasm = PKL_GEN_ASM;
-  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node integral_type = PKL_PASS_NODE;
 
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_TYPE_I_SIZE (node), 64));
+  if (PKL_GEN_PAYLOAD->in_map)
+    pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+  else
+    {
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_ulong (PKL_AST_TYPE_I_SIZE (integral_type),
+                                    64));
 
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 32));
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_uint (PKL_AST_TYPE_I_SIGNED (integral_type),
+                                   32));
 
-  pkl_asm_insn (pasm, PKL_INSN_MKTYI);
+      pkl_asm_insn (pasm, PKL_INSN_MKTYI);
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1133,7 +1138,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
+  if (PKL_GEN_PAYLOAD->in_map)
+    {
+      /* Generate code to create a mapped array of the given type.
+         Handle:
+
+         - If the size of the array is known, use a constant for loop.
+         - If the size of the array is variable (number of elems or
+           offset) use a for loop.
+         - If the size of the array is not specified at all ([]) then
+           use a while (not EOF=null) loop to create the array.
+
+         XXX: handle constraints errors, etc.  */
+      assert (0);
+    }
+  else
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1148,7 +1168,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
+  if (PKL_GEN_PAYLOAD->in_map)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
+  else
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1166,6 +1189,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
+  if (PKL_GEN_PAYLOAD->in_map)
+    {
+      /* XXX: Generate code like in the case below for in_struct_decl.
+         The code should expect the offset in the stack, followed by
+         the struct arguments, and should build a mapped struct at the
+         top of the main stack.
+
+         In this schema, in_struct_decl is only used to emit the
+         FUNCTION prologue and epilogue in the PS handler.  The code
+         in between is common (for function and inline cases.)  */
+
+      assert (0);
+    }
+  
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
       /* Generating code for the struct mapper and constructor
@@ -1196,6 +1233,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
          
            OFFSET: offset of the struct to map.  */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+
+        /* Push the offset to the stack.  */
+        //        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
       }
 
       /* Build the struct constructor prologue.  */
@@ -1838,9 +1878,10 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_IDENTIFIER, pkl_gen_ps_identifier),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_gen_ps_string),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_pr_type_offset),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_ps_type_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_gen_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_gen_ps_cast),
-   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_gen_ps_map),
+   PKL_PHASE_PR_HANDLER (PKL_AST_MAP, pkl_gen_pr_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_ps_array_ref),

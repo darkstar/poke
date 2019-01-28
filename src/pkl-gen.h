@@ -67,6 +67,7 @@ struct pkl_gen_payload
   int cur_pasm2;
   pvm_program program;
   int in_struct_decl;
+  int in_map;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
