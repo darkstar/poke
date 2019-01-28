@@ -958,10 +958,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
       /* Generate code to create an array of maps of the given type.
          Thats it: to call the array (from the type) mapping
          function. */
+      /* Compile a one-time use mapper closure for the array, and call
+         it.  */
       /* Handle:
 
          - If the size of the array is known, use a constant for loop.
-         - If the size of the array is variable, use a for loop.
+         - If the size of the array is variable (number of elems or
+           offset) use a for loop.
          - If the size of the array is not specified at all ([]) then
            use a while (not EOF) loop to create the array.
       */
