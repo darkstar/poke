@@ -3,6 +3,12 @@
 /* { dg-command { print 6n } } */
 /* { dg-output 6N } */
 
+/* { dg-command { print 10LU } } */
+/* { dg-output "\n10UL" } */
+
+/* { dg-command { print 10UL } } */
+/* { dg-output "\n10UL" } */
+
 /* { dg-command { print 6h } } */
 /* { dg-output "\n6H" } */
 

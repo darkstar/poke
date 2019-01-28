@@ -52,12 +52,23 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
-Writing Struct Descriptions
+Writing Poke Programs (tutorial)
+
+Advanced Editing
+@c Searching
+
+@c Marks
+@c Useful Idioms
+
+Reverse Engineering
 
 Poke Language Reference Manual
 * Introduction::
-* Data Types::		Data types of values.
+* Data Types::			Data types of values.
+* Integers::			Whole numbers.
 * Structs and Unions::
+* The Standard Library::	Predefined goodies!
+
 @c * Grammar
 * Future Extensions::
 
@@ -76,6 +87,7 @@ Poke Language Reference Manual
 @c       Type Attributes
 @c   Integers
 @c       Integer Literals
+@c       Characters
 @c       Comparison of Integers
 @c       Arithmetic Operations
 @c       Bitwise Operations
@@ -114,10 +126,10 @@ Poke Language Reference Manual
 @c   Mapping  (Accessing the IO space)
 @c   Searching and Patterns
 @c   Modules and Files
-@c   The Poke Standard Library
-@c       Standard Types
+@c   The Standard Library
+@c       Integer Standard Types
 
-* Numbers::
+Old
 * Metatypes::
 * Arrays::
 * Strings::
@@ -141,14 +153,6 @@ Hacking Poke
 * The PKL Compiler::
 * The Poke Virtual Machine::
 * Debugging Poke::
-
-Advanced Editing
-@c Searching
-
-@c Marks
-@c Useful Idioms
-
-Reverse Engineering
 
 Extending Poke
 @c * Writing commands in C::
@@ -920,6 +924,114 @@ s = @{.foo=30,.bar=40@};  /* Type error.  */
 
 @c XXX document promotion rules here.
 
+@node Integers
+@chapter Integers
+
+@c       Integer Literals
+@c       Comparison of Integers
+@c       Arithmetic Operations
+@c       Bitwise Operations
+@c       Integer Attributes
+
+@menu
+* Integer Literals::		Writing integers in different bases.
+* Characters::		        Another way to write little integers.
+@end menu
+
+@node Integer Literals
+@section Integer Literals
+
+Integers literals can be expressed in several numeration bases.
+
+@emph{Decimal numbers} use the usual syntax @code{[1-9][0-9]*}.  For
+example, @code{2345}.
+
+@emph{Octal numbers} are expressed using a prefix of zero or more
+@code{0} digits with syntax @code{0[0-9]+}.  Examples are @code{00},
+@code{0100} and @code{0777}.
+
+@emph{Hexadecimal numbers} are expressed using the syntax
+@code{0[xX][0-9a-fA-F]+}.  Examples are @code{0x0} and
+@code{0xfe00ffff}.  Note that both the @code{x} in the prefix and the
+letters in the hexadecimal number are case insensitive.  Thus,
+@code{0XdeadBEEF} is a valid (but ugly as hell) literal.
+
+@emph{Binary numbers} are expressed using the syntax
+@code{0[bB][01]+}.  Again, the @code{b} in the prefix is
+case-insensitive.  Examples of binary literals are @code{0b0} and
+@code{0B010}.
+
+Note that negative numbers, of any numeration base, are constructed
+using the minus operator as explained below.
+
+@subsection The digits separator @code{_}
+
+The character @code{_} can appear anywhere in a numeric literal other
+than leading them.  It is ignored, and its purpose is to make it
+easier for programmers to read them:
+
+@example
+0xf000_0000_0000_0000
+0b0000_0001_0000_0001
+@end example
+
+@subsection Types of integer literals
+
+The type of a numeric literal is the smallest signed integer capable
+of holding it, starting with 32 bits, in steps of powers of two and up
+to 64 bits.@footnote{Rationale: the width of a C ``int'' is 32 bits in
+most currently used architectures, and binary data formats are usually
+modeled after C.}
+
+So, for example, the value @code{2} has type @code{int<32>}, but the
+value @code{0xffff_ffff} has type @code{int<64>}, because it is out of
+the range of signed 32-bit numbers.
+
+A set of suffixes can be used to construct integer literals of certain
+types explicitly.  @code{L} or @code{l} is for 64-bit integers.
+@code{H} or @code{h} is for 16-bit integers (also known as
+@dfn{halves}), @code{B} or @code{b} is for 8-bit integers (also known
+as @dfn{bytes}) and @code{n} or @code{N} is for 4-bit integers (algo
+known as @dfn{nibbles}).
+
+Thus, @code{10L} is a 64-bit integer with value
+@code{0x0000_0000_0000_000A}, @code{10H} is a 16-bit integer with
+value @code{0x000A} and @code{10b} is a 8-bit integer with value
+@code{0x0A}.
+
+Similarly, the signed or unsigned attribute of an integer can be
+explicitly specified using the suffix @code{u} or @code{U} (the
+default are signed types).  For example @code{0xffff_ffffU} has type
+@code{uint<32>} and @code{0ub} has type @code{uint<8>}.  It is possible
+to combine width-indicating suffixes with signedness suffixes:
+@code{10UL} denotes the same literal than @code{10LU}.
+
+The above rules guarantee that it is always possible to determine the
+width and signedness of an integer constant just by looking at it,
+with no ambiguity.  This is important, because very often numbers are
+used in commands like @code{poke} and @code{peek} where these
+attributes determine the number of bytes written/read to/from the IO
+space, and their encoding.
+
+@node Characters
+@section Characters
+
+8-bit unsigned integers can use an alternative literal notation that
+is useful when working with @emph{ASCII character codes}.  Printable
+character codes can be denoted with @code{'c'}
+
+Examples:
+
+@example
+'o'
+'\n'
+'\t'
+'\0'
+@end example
+
+The type of a character literal is always @code{char}, aka
+@code{uint<8>}.
+
 @node Structs and Unions
 @chapter Structs and Unions
 
@@ -1105,6 +1217,41 @@ deftype relocs =
   @};
 @end example
 
+@node The Standard Library
+@chapter The Standard Library
+
+@menu
+* Integer Standard Types::	@code{int}, @code{long} and friends.
+@end menu
+
+@node Integer Standard Types
+@section Integer Standard Types
+
+@table @code
+@item char
+8-bit ASCII code.
+@item byte
+@item uint8
+Unsigned 8-bit integer.
+@item int8
+Signed 8-bit integer.
+@item uint16
+Unsigned 16-bit integer.
+@item short
+@item int16
+Signed 16-bit integer.
+@item int
+@item int32
+Signed 32-bit integer.
+@item uint32
+Unsigned 32-bit integer.
+@item long
+@item int64
+Signed 64-bit integer.
+@item uint64
+Unsigned 64-bit integer.
+@end table
+
 @node Future Extensions
 @chapter Future Extensions
 
@@ -1133,174 +1280,6 @@ keeping the control and efficiency associated with static typing.
 Allow constant expressions in integral type constructors, like
 @code{uint<2+3>}.
 @end itemize
-
-@node Numbers
-@chapter Numbers
-
-@menu
-* Integers::			Integer numbers.
-@end menu
-
-@node Integers
-@section Integers
-
-Whole numbers, also known as integers, are ubiquitous in binary
-formats.
-
-Poke supports the following primitive types for integers:
-
-@table @code
-@item char
-8-bit ASCII code.
-@item byte
-@item uint8
-Unsigned 8-bit integer.
-@item int8
-Signed 8-bit integer.
-@item uint16
-Unsigned 16-bit integer.
-@item short
-@item int16
-Signed 16-bit integer.
-@item int
-@item int32
-Signed 32-bit integer.
-@item uint32
-Unsigned 32-bit integer.
-@item long
-@item int64
-Signed 64-bit integer.
-@item uint64
-Unsigned 64-bit integer.
-@end table
-
-XXX: discuss bit-field types: signed and unsigned bit:N.  But then,
-     what about the VM?  Bit-fields are better supported in struct
-     fields... but using what syntax?  The usual ': BITS' is already
-     used by constraints.  Using Ada's `at N range N .. M'?
-
-     Also, since IO offsets are bit-oriented, and since poke variables
-     do not have addresses, bit fields can be used like any other
-     variable, mapped or not: no alignment issues.
-
-     Making offsetof to work on bits?  Or having both offsetof and
-     boffsetof.  But then what about labels?
-
-     Also, support variable bit field types, like bit<EXPR> in
-     datascript.  Maybe even bit<EXPR>? :D But then types are not
-     static.  Unless bitfield type sizes are _not_ part of the type =>
-     bitfield VM instructions should check size.
-
-Integers literals can be expressed in several numeration bases.
-
-@emph{Decimal numbers} use the usual syntax @code{[1-9][0-9]*}.  For
-example, @code{2345}.
-
-@emph{Octal numbers} are expressed using a prefix of zero or more
-@code{0} digits with syntax @code{0[0-9]+}.  Examples are @code{00},
-@code{0100} and @code{0777}.
-
-@emph{Hexadecimal numbers} are expressed using the syntax
-@code{0[xX][0-9a-fA-F]+}.  Examples are @code{0x0} and
-@code{0xfe00ffff}.  Note that both the @code{x} in the prefix and the
-letters in the hexadecimal number are case insensitive.  Thus,
-@code{0XdeadBEEF} is a valid (but ugly as hell) literal.
-
-@emph{Binary numbers} are expressed using the syntax
-@code{0[bB][01]+}.  Again, the @code{b} in the prefix is
-case-insensitive.  Examples of binary literals are @code{0b0} and
-@code{0B010}.
-
-Note that negative numbers, of any numeration base, are constructed
-using the minus operator as explained below.
-
-@subsection Characters
-
-8-bit unsigned integers can use an alternative literal notation that
-is useful when working with @emph{ASCII character codes}.  Printable
-character codes can be denoted with @code{'c'}
-
-Examples:
-
-@example
-'o'
-'\n'
-'\t'
-'\0'
-@end example
-
-The type of a character literal is always @code{char}.
-
-@subsection The digits separator @code{_}
-
-The character @code{_} can appear anywhere in a numeric literal other
-than leading them.  It is ignored, and its purpose is to make it
-easier for programmers to read them:
-
-@example
-0xf000_0000_0000_0000
-0b0000_0001_0000_0001
-@end example
-
-@subsection Types of integer literals
-
-The type of a numeric literal is the smallest signed integer capable
-of holding it, starting with 32 bits, in steps of powers of two and up
-to 64 bits.@footnote{Rationale: the width of a C ``int'' is 32 bits in
-most currently used architectures, and binary data formats are usually
-modeled after C.}
-
-So, for example, the value @code{2} has type @code{int32}, but the
-value @code{0xffff_ffff} has type @code{int64}, because it is out of
-the range of signed 32-bit numbers.
-
-A set of suffixes can be used to construct integer literals of certain
-types explicitly.  @code{L} or @code{l} is for 64-bit integers.
-@code{H} or @code{h} is for 16-bit integers (also known as
-@dfn{halves}) and @code{B} or @code{b} is for 8-bit integers (also
-known as @dfn{bytes}).  @code{10L} is a 64-bit integer with value
-@code{0x0000_0000_0000_000A}, @code{10H} is a 16-bit integer with
-value @code{0x000A} and @code{10b} is a 8-bit integer with value
-@code{0x0A}.
-
-Similarly, the signed or unsigned attribute of an integer can be
-explicitly specified using the suffix @code{u} or @code{U} (the
-default are signed types).  For example @code{0xffff_ffffU} has type
-@code{uint32} and @code{0ub} has type @code{uint8}.
-
-The above rules guarantee that it is always possible to determine the
-width and signedness of an integer constant just by looking at it,
-with no ambiguity.  This is important, because very often numbers are
-used in commands like @code{poke} and @code{peek} where these
-attributes determine the number of bytes written/read to/from the IO
-space, and their encoding.
-
-For example, the following command writes four byte in IO offset 0x0:
-
-@example
-(poke) poke 0x0, 10
-0x00000000 <- 0x00
-0x00000001 <- 0x00
-0x00000002 <- 0x00
-0x00000003 <- 0x0a
-@end example
-
-But the following command writes just one byte:
-
-@example
-(poke) poke 0x0, 10b
-0x00000000 <- 0x0a
-@end example
-
-Note that the operation above can also be achieved by using a cast
-(XXX: xref to casts), like in:
-
-@example
-(poke) poke 0x0, (int8) 10
-0x00000000 <- 0x0a
-@end example
-
-However using suffixes requires less keystrokes.
 
 @node Metatypes
 @chapter Metatypes
