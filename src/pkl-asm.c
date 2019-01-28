@@ -1176,7 +1176,7 @@ pkl_asm_endloop (pkl_asm pasm)
    DROP       ; CONTAINER I
    DROP       ; CONTAINER
    DROP       ; _
-   POPF
+   POPF 1
 */
 
 void
