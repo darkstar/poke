@@ -742,6 +742,21 @@ pvm_print_val (FILE *out, pvm_val val, int base)
             }
           fprintf (out, "]");
           break;
+        case PVM_TYPE_CLOSURE:
+          {
+            size_t i, nargs;
+
+            nargs = PVM_VAL_ULONG (PVM_VAL_TYP_C_NARGS (val));
+
+            fprintf (out, "(");
+            for (i = 0; i < nargs; ++i)
+              {
+                pvm_val atype = PVM_VAL_TYP_C_ATYPE (val, i);
+                pvm_print_val (out, atype, base);
+              }
+            pvm_print_val (out, PVM_VAL_TYP_C_RETURN_TYPE (val), 10);
+            break;
+          }
         case PVM_TYPE_STRUCT:
           {
             size_t i, nelem;
