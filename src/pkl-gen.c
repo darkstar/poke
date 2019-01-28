@@ -779,8 +779,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
   pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_asm_insn (pasm, PKL_INSN_MKO);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
@@ -853,8 +852,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
       /* Stack: OFFSET MAGNITUDE UNIT */
       pkl_asm_insn (pasm, PKL_INSN_MUL, to_base_type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
       /* Stack: OFFSET (MAGNITUDE*UNIT) */
       PKL_PASS_SUBPASS (to_base_unit);
@@ -869,8 +867,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
       /* Stack: OFFSET (MAGNITUDE*UNIT) NEWUNIT */
       pkl_asm_insn (pasm, PKL_INSN_DIV, to_base_type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
       /* Stack: OFFSET (MAGNITUDE*UNIT/NEWUNIT) */
       pkl_asm_insn (pasm, PKL_INSN_SWAP);
@@ -889,8 +886,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
       /* And create the new one.  */
       pkl_asm_insn (pasm, PKL_INSN_MKO);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
       /* Stack: OFFSET */
     }
@@ -950,8 +946,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_map)
                     PKL_AST_TYPE_O_BASE_TYPE (map_type));
       PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (map_type));
       pkl_asm_insn (pasm, PKL_INSN_MKO);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_STRUCT:
       /* Call the mapper function of the struct type, whose lexical
@@ -1029,8 +1024,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1296,13 +1290,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_ADD, type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, PKL_INSN_SCONC);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1334,16 +1326,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_ADD, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
         /* PKL_PASS_SUBPASS (res_unit); */
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
         pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
@@ -1363,8 +1353,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_SUB, type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1384,13 +1373,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
         pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP);
         pkl_asm_insn (pasm, PKL_INSN_SUB, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
         PKL_PASS_SUBPASS (res_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
@@ -1410,8 +1397,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_MUL, type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
       {       
@@ -1449,13 +1435,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
         base_type = PKL_AST_TYPE_O_BASE_TYPE (offset_type);
 
         pkl_asm_insn (pasm, PKL_INSN_MUL, base_type); /* M2 M1 MR */
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP); /* MR */
+        pkl_asm_insn (pasm, PKL_INSN_NIP2); /* MR */
           
         PKL_PASS_SUBPASS (offset_unit); /* MR UNIT */
         pkl_asm_insn (pasm, PKL_INSN_MKO); /* MR UNIT OFFSET */
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP); /* OFFSET */
+        pkl_asm_insn (pasm, PKL_INSN_NIP2); /* OFFSET */
       }
       break;
     default:
@@ -1498,16 +1482,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_div)
             pkl_asm_insn (pasm, PKL_INSN_NIP);
 
             pkl_asm_insn (pasm, PKL_INSN_DIV, type);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
+            pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
             ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
           }
         else
           {
             pkl_asm_insn (pasm, PKL_INSN_DIV, type);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
+            pkl_asm_insn (pasm, PKL_INSN_NIP2);
           }
         break;
       }
@@ -1531,8 +1513,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
     {
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, PKL_INSN_MOD, type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1553,13 +1534,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         pkl_asm_insn (pasm, PKL_INSN_MOD, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
         PKL_PASS_SUBPASS (op1_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
@@ -1610,16 +1589,14 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_and)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AND);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_or)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1658,8 +1635,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
     case PKL_TYPE_INTEGRAL:
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, rela_insn, op1_type);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
-      pkl_asm_insn (pasm, PKL_INSN_NIP);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
       {
@@ -1687,8 +1663,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
 
         pkl_asm_insn (pasm, rela_insn, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
         ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
       }

@@ -549,8 +549,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_MUL, base_type);
 
   /* Stack: TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE) */
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
   /* Stack: TOUNIT OFF (UNIT*MAGNITUDE) */
   pkl_asm_insn (pasm, PKL_INSN_ROT);
@@ -563,8 +562,7 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   pkl_asm_insn (pasm, PKL_INSN_DIV, base_type);
 
   /* Stack: OFF (MAGNITUDE*UNIT) TOUNIT (MAGNITUDE*UNIT/TOUNIT) */
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
   /* Stack: OFF (MAGNITUDE*UNIT/TOUNIT) */
 }
@@ -1158,8 +1156,7 @@ pkl_asm_endloop (pkl_asm pasm)
    SWAP       ; CONTAINER NELEMS I
    PUSH 1UL   ; CONTAINER NELEMS I 1
    ADDLU      ; CONTAINER NELEMS I 1 (I+1)
-   NIP        ; CONTAINER NELEMS I (I+1)
-   NIP        ; CONTAINER NELEMS (I+1)
+   NIP2       ; CONTAINER NELEMS (I+1)
    SWAP       ; CONTAINER (I+1) NELEMS
 #if SELECTOR
    ; Evaluate the selector and skip this iteration if it is
@@ -1226,8 +1223,7 @@ pkl_asm_for_where (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
   pkl_asm_insn (pasm, PKL_INSN_ADDLU);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
 }
 
