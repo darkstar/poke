@@ -14,6 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-info_TEXINFOS = poke.texi pokeint.texi pkl.texi
+info_TEXINFOS = poke.texi
 poke_TEXINFOS = fdl.texi
 
