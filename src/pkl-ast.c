@@ -425,14 +425,14 @@ pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
 }
 
 pkl_ast_node
-pkl_ast_make_func_arg_type (pkl_ast ast, pkl_ast_node type)
+pkl_ast_make_func_type_arg (pkl_ast ast, pkl_ast_node type)
 {
   pkl_ast_node function_type_arg
-    = pkl_ast_make_node (ast, PKL_AST_FUNC_ARG_TYPE);
+    = pkl_ast_make_node (ast, PKL_AST_FUNC_TYPE_ARG);
 
   assert (type);
 
-  PKL_AST_FUNC_ARG_TYPE_TYPE (function_type_arg)
+  PKL_AST_FUNC_TYPE_ARG_TYPE (function_type_arg)
     = ASTREF (type);
 
   return function_type_arg;
@@ -493,11 +493,11 @@ pkl_ast_dup_type (pkl_ast_node type)
       for (t = PKL_AST_TYPE_F_ARGS (type); t; t = PKL_AST_CHAIN (t))
         {
           pkl_ast_node fun_type_arg_type
-            = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
+            = PKL_AST_FUNC_TYPE_ARG_TYPE (t);
 
           pkl_ast_node function_type_arg
-            = pkl_ast_make_func_arg_type (PKL_AST_AST (new),
-                                              fun_type_arg_type);
+            = pkl_ast_make_func_type_arg (PKL_AST_AST (new),
+                                          fun_type_arg_type);
 
           PKL_AST_TYPE_F_ARGS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_F_ARGS (new),
@@ -558,8 +558,8 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
              fa && fb;
              fa = PKL_AST_CHAIN (fa), fb = PKL_AST_CHAIN (fb))
           {
-            if (!pkl_ast_type_equal (PKL_AST_FUNC_ARG_TYPE_TYPE (fa),
-                                     PKL_AST_FUNC_ARG_TYPE_TYPE (fb)))
+            if (!pkl_ast_type_equal (PKL_AST_FUNC_TYPE_ARG_TYPE (fa),
+                                     PKL_AST_FUNC_TYPE_ARG_TYPE (fb)))
               return 0;
           }
         break;
@@ -771,7 +771,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
                  t = PKL_AST_CHAIN (t))
               {
                 pkl_ast_node atype
-                  = PKL_AST_FUNC_ARG_TYPE_TYPE (t);
+                  = PKL_AST_FUNC_TYPE_ARG_TYPE (t);
                 
                 if (t != PKL_AST_TYPE_F_ARGS (type))
                   fputc (',', out);
@@ -1359,9 +1359,9 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_TYPE (ast));
       break;
 
-    case PKL_AST_FUNC_ARG_TYPE:
+    case PKL_AST_FUNC_TYPE_ARG:
 
-      pkl_ast_node_free (PKL_AST_FUNC_ARG_TYPE_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_FUNC_TYPE_ARG_TYPE (ast));
       break;
       
     case PKL_AST_ARRAY_REF:
@@ -1945,11 +1945,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, STRUCT_ELEM_TYPE_TYPE);
       break;
 
-    case PKL_AST_FUNC_ARG_TYPE:
-      IPRINTF ("FUNC_ARG_TYPE::\n");
+    case PKL_AST_FUNC_TYPE_ARG:
+      IPRINTF ("FUNC_TYPE_ARG::\n");
 
       PRINT_COMMON_FIELDS;
-      PRINT_AST_SUBAST (type, FUNC_ARG_TYPE_TYPE);
+      PRINT_AST_SUBAST (type, FUNC_TYPE_ARG_TYPE);
       break;
       
     case PKL_AST_ARRAY_REF:

@@ -678,30 +678,30 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
-  pkl_ast_node t, func_arg_types = NULL;
+  pkl_ast_node t, func_type_args = NULL;
   size_t nargs = 0;
 
   /* Build a chain with the types of the function arguments.  */
   for (t = PKL_AST_FUNC_ARGS (node); t; t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node func_arg_type
-        = pkl_ast_make_func_arg_type (PKL_PASS_AST,
+      pkl_ast_node func_type_arg
+        = pkl_ast_make_func_type_arg (PKL_PASS_AST,
                                       PKL_AST_FUNC_ARG_TYPE (t));
-      PKL_AST_LOC (func_arg_type) = PKL_AST_LOC (t);
+      PKL_AST_LOC (func_type_arg) = PKL_AST_LOC (t);
 
-      func_arg_types = pkl_ast_chainon (func_arg_types,
-                                        ASTREF (func_arg_type));
+      func_type_args = pkl_ast_chainon (func_type_args,
+                                        ASTREF (func_type_arg));
       nargs++;
     }
 
   /* Reverse.  */
-  func_arg_types = pkl_ast_reverse (func_arg_types);
+  func_type_args = pkl_ast_reverse (func_type_args);
   
   /* Make the type of the function.  */
   type = pkl_ast_make_function_type (PKL_PASS_AST,
                                      PKL_AST_FUNC_RET_TYPE (node),
                                      nargs,
-                                     func_arg_types);
+                                     func_type_args);
   PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
 }
@@ -1453,7 +1453,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
       && PKL_AST_TYPE_A_NELEM (type) != NULL
       && PKL_PASS_PARENT
-      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_ARG_TYPE))
+      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_TYPE_ARG))
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
                  "sized array types not allowed in this context");

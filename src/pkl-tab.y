@@ -891,7 +891,7 @@ function_type_arg_list:
 function_type_arg:
 	  simple_type_specifier
           	{
-                  $$ = pkl_ast_make_func_arg_type (pkl_parser->ast,
+                  $$ = pkl_ast_make_func_type_arg (pkl_parser->ast,
                                                    $1);
                   PKL_AST_LOC ($$) = @$;
                 }

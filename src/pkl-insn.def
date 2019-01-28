@@ -223,6 +223,7 @@ PKL_DEF_INSN (PKL_INSN_MKTYI, "", "mktyi")
 PKL_DEF_INSN (PKL_INSN_MKTYS, "", "mktys")
 PKL_DEF_INSN (PKL_INSN_MKTYO, "", "mktyo")
 PKL_DEF_INSN (PKL_INSN_MKTYSCT, "", "mktysct")
+PKL_DEF_INSN (PKL_INSN_MKTYC, "", "mktyc")
 
 PKL_DEF_INSN (PKL_INSN_MKTYA, "", "mktya")
 PKL_DEF_INSN (PKL_INSN_TYAGETN, "", "tyagetn")

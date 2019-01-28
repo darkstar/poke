@@ -611,16 +611,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_arg)
 PKL_PHASE_END_HANDLER
 
 /*
- * FUNC_ARG_TYPE
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_arg_type)
-{
-  /* Nothing to do here.  */
-}
-PKL_PHASE_END_HANDLER
-
-/*
  * | [TYPE]
  * | [FUNC_ARG]
  * | ...
@@ -743,6 +733,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
     case PKL_AST_OFFSET:
     case PKL_AST_FUNC:
     case PKL_AST_FUNC_ARG:
+    case PKL_AST_FUNC_TYPE_ARG:
     case PKL_AST_VAR:
     case PKL_AST_SCONS:
     case PKL_AST_MAP:
@@ -1094,6 +1085,34 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
                 pvm_make_uint (PKL_AST_TYPE_I_SIGNED (node), 32));
 
   pkl_asm_insn (pasm, PKL_INSN_MKTYI);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | FUNC_TYPE_ARG_TYPE
+ * FUNC_TYPE_ARG
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_type_arg)
+{
+  /* Nothing to do here.  */
+  //  assert (0);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | FUNC_TYPE_ARG
+ * | ...
+ * TYPE_FUNCTION
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_function)
+{
+  pkl_ast_node ftype = PKL_PASS_NODE;
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                pvm_make_ulong (PKL_AST_TYPE_F_NARG (ftype), 64));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYC);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1807,7 +1826,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_ps_func_arg),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG_TYPE, pkl_gen_ps_func_arg_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_TYPE_ARG, pkl_gen_ps_func_type_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_gen_pr_type),
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_gen_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_PROGRAM, pkl_gen_ps_program),
@@ -1850,6 +1869,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_gen_ps_op_bconc),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_gen_ps_type_function),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_ps_type_string),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_pr_type_struct),
