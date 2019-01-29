@@ -204,6 +204,26 @@ late-header-c
       JITTER_PUSH_STACK (pvm_make_##RTYPELC ((RTYPEC) val, tsize));          \
     } while (0)
 
+/* Macro to call to a closure.  This is used in the isntruction CALL,
+   and also other instructions required to... call :D The argument
+   should be a closure (surprise.)  */
+
+#define PVM_CALL(CLS)                                                        \
+   do                                                                        \
+    {                                                                        \
+       /* Make place for the return address in the return stack.  */         \
+       /* actual value will be written by the callee. */                     \
+       JITTER_PUSH_UNSPECIFIED_RETURNSTACK();                                \
+                                                                             \
+       /* Save the current environment and use the callee's environment. */     \
+       JITTER_PUSH_RETURNSTACK ((jitter_uint) (uintptr_t) jitter_state_runtime.env); \
+       jitter_state_runtime.env = PVM_VAL_CLS_ENV (closure);                 \
+                                                                             \
+       /* Branch-and-link to the native code, whose first instruction will */ \
+       /*  be a prolog. */                                                   \
+       JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));           \
+    } while (0)
+
   end
 end
 
@@ -373,19 +393,7 @@ instruction call () # ARG1 ... ARGN CLOSURE -> RETVAL
   code
     pvm_val closure = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
-  
-    /* Make place for the return address in the return stack.  The
-       actual value will be written by the callee. */
-    JITTER_PUSH_UNSPECIFIED_RETURNSTACK();
-
-    /* Save the current environment and use the callee's environment.
-     */
-    JITTER_PUSH_RETURNSTACK ((jitter_uint) (uintptr_t) jitter_state_runtime.env);
-    jitter_state_runtime.env = PVM_VAL_CLS_ENV (closure);
-
-    /* Branch-and-link to the native code, whose first instruction will
-       be a prolog. */
-    JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));
+    PVM_CALL (closure);
   end
 end
 
@@ -1512,13 +1520,29 @@ end
 
 instruction aref () # ( ARR ULONG -- ARR ULONG VAL )
   code
-    if (PVM_VAL_ULONG (JITTER_TOP_STACK ()) < 0
-        || (PVM_VAL_ULONG (JITTER_TOP_STACK ()) >=
-            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (JITTER_UNDER_TOP_STACK ()))))
+    pvm_val array = JITTER_UNDER_TOP_STACK ();
+    pvm_val index = JITTER_TOP_STACK ();
+    pvm_val val;
+    pvm_val mapper;
+
+    if (PVM_VAL_ULONG (index) < 0
+        || (PVM_VAL_ULONG (index) >=
+            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (array))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    JITTER_PUSH_STACK (PVM_VAL_ARR_ELEM_VALUE (JITTER_UNDER_TOP_STACK (),
-                                               PVM_VAL_ULONG (JITTER_TOP_STACK ())));
+    mapper = pvm_val_mapper (array);
+    if (mapper != PVM_NULL /* XXX && !pvm_val_up_to_date (array) */)
+      {
+         /* Call the array's mapper function.
+
+            XXX: catch constraint exception, abort the aref and
+            re-raise it.  */
+      }
+    else
+      val = PVM_VAL_ARR_ELEM_VALUE (array,
+                                    PVM_VAL_ULONG (index));
+
+    JITTER_PUSH_STACK (val);
   end
 end
 
