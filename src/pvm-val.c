@@ -673,7 +673,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
           if (flags & PVM_PRINT_F_MAPS && elem_offset != PVM_NULL)
             {
-              fprintf (out, " @ ");
+              fputc ('@', out);
               pvm_print_val (out, elem_offset, 10, flags);
             }
         }
@@ -681,7 +681,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
       if (flags & PVM_PRINT_F_MAPS && array_offset != PVM_NULL)
         {
-          fprintf (out, " @ ");
+          fputc ('@', out);
           pvm_print_val (out, array_offset, base, flags);
         }      
     }

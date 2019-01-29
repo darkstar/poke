@@ -742,6 +742,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
         case PKL_AST_FUNC:
         case PKL_AST_FUNC_ARG:
         case PKL_AST_VAR:
+        case PKL_AST_ARRAY_REF:
         case PKL_AST_SCONS:
           PKL_PASS_BREAK;
           break;
