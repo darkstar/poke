@@ -27,7 +27,7 @@ end
 
 ## Register classes.
 
-register-class r 1
+register-class r 3
   code
     pvm_val
   end
@@ -565,6 +565,15 @@ instruction nip2 () # ( A B C -- C )
     JITTER_NIP_STACK ();
   end
 end
+
+instruction nip3 () # ( A B C D -- D )
+  code
+    JITTER_NIP_STACK ();
+    JITTER_NIP_STACK ();
+    JITTER_NIP_STACK ();
+  end
+end
+
 
 instruction dup () # ( A -- A A )
   code

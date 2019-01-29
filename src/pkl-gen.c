@@ -553,6 +553,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
 {
   /* Save the used registers before calling the function.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
 }
 PKL_PHASE_END_HANDLER
 
@@ -571,6 +572,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
 
   /* Restore the used registers after calling the function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 }
 PKL_PHASE_END_HANDLER
@@ -1140,17 +1142,150 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
   if (PKL_GEN_PAYLOAD->in_map)
     {
-      /* Generate code to create a mapped array of the given type.
-         Handle:
+      /* Generate code to create a mapped array of the given type.  At
+         this point the offset to use is in the top of the stack.  */
 
-         - If the size of the array is known, use a constant for loop.
-         - If the size of the array is variable (number of elems or
-           offset) use a for loop.
-         - If the size of the array is not specified at all ([]) then
-           use a while (not EOF=null) loop to create the array.
+      pkl_ast_node array_type = PKL_PASS_NODE;
+      pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
-         XXX: handle constraints errors, etc.  */
-      assert (0);
+      if (array_type_nelem)
+        {
+          /* The size of the array is variable.  Peek that many
+             elements.
+
+                                      ; OFF
+             SAVER %off
+             SAVER %idx
+             SAVER %nelem
+             
+             ; Initialize registers.
+             DUP                      ; OFF OFF
+             POPR %off                ; OFF
+             PUSH 0UL
+             POPR %idx
+             SUBPASS array_type_nelem ; OFF NELEM
+             SUBPASS array_type       ; OFF NELEM ATYPE
+             SWAP                     ; OFF ATYPE NELEM
+             POPR %nelem              ; OFF ATYPE
+
+           .while
+             PUSHR %nelemd            ; OFF ATYPE NELEM
+             PUSHR %idx               ; OFF ATYPE NELEM I
+             EQLU                     ; OFF ATYPE NELEM I (NELEM==I)
+             NOT                      ; OFF ATYPE NELEM I (NELEM==I) !(NELEM==I)
+             NIP2                     ; OFF ATYPE NELEM !(NELEM==I)
+             NIP                      ; OFF ATYPE !(NELEM==I)
+           .loop
+                                      ; OFF ATYPE
+
+             ; Mount the Ith element triplet: [EOFF EIDX EVAL]
+             PUSHR %off               ; ... EOFF
+             SUBPASS array_type       ; ... EOFF EVAL
+
+             ; Update the current offset with the size of the value just
+             ; peeked.
+             SIZ                      ; ... EOFF EVAL ESIZ
+             ROT                      ; ... EVAL ESIZ EOFF
+             ADDO                     ; ... EVAL ESIZ EOFF (ESIZ+EOFF)
+             POPR %off                ; ... EVAL ESIZ EOFF
+             NIP                      ; ... EVAL EOFF
+             PUSHR %idx               ; ... EVAL EOFF EIDX
+             ROT                      ; ... EOFF EIDX EVAL
+
+             ; Increase the current index and process the next
+             ; element.
+             PUSHR %idx              ; ... EOFF EIDX EVAL EIDX
+             PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
+             ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
+             NIP2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
+             POPR %idx               ; ... EOFF EIDX EVAL
+           .endloop                                     
+                                  
+             PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+             MKMA                    ; ARRAY
+
+             RESTORER %nelem
+             RESTORER %idx
+             RESTORER %off  */
+
+          int offreg = 0;
+          int idxreg = 1;
+          int nelemreg = 2;
+          
+          /* Save used scratch registers.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
+
+          /* We will be using %r0 to hold the current offset, %r1 to
+             hold the current index into the array, and %r2 to hold
+             the total number of elements in the array.  Initialize
+             them.  */
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        pvm_make_ulong (0, 64));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+
+          PKL_GEN_PAYLOAD->in_map = 0;
+          PKL_PASS_SUBPASS (array_type_nelem);
+          PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+          PKL_GEN_PAYLOAD->in_map = 1;
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
+
+          pkl_asm_while (PKL_GEN_ASM);
+          {
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_EQLU);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NOT);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+          }
+          pkl_asm_loop (PKL_GEN_ASM);
+          {
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);
+            PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+            //            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDO,
+            //                          offset_type, offset_type,
+            //                          offset_type);
+            pkl_asm_note (PKL_GEN_ASM, "addo");
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+
+            /* Increase the index.  */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+          }
+          pkl_asm_endloop (PKL_GEN_ASM);
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);
+          pkl_asm_note (PKL_GEN_ASM, "mkma");
+          
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
+        }
+      else
+        {
+          /* The size of the array is unspecified.  Peek array
+             elements until EOF(=null).  XXX: or until a constraint
+             exception is raised.  */
+
+        }
 
       PKL_PASS_BREAK;
     }
