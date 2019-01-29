@@ -1267,11 +1267,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           int idxreg = 2;
           int nelemreg = 3;
 
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
-
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);
@@ -1309,9 +1304,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
 
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
+
             //            pkl_asm_note (PKL_GEN_ASM, "before array_type"); /* XXX */
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
             //            pkl_asm_note (PKL_GEN_ASM, "after array_type"); /* XXX */
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
@@ -1338,11 +1344,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);
-
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
         }
       else
         {
@@ -1377,7 +1378,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* CLS ARR */
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETM);                /* ARR */
 
