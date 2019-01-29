@@ -1708,7 +1708,7 @@ instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
 end
 
 # peekiu ENDIAN,BITS
-# ( OFF -- INT )
+# ( OFF -- UINT )
 
 instruction peekiu (?n endian_printer,?n bits_printer)
   code
@@ -1737,7 +1737,7 @@ instruction peekiu (?n endian_printer,?n bits_printer)
 end
 
 # peekl NENC,ENDIAN,BITS
-# ( OFF -- INT )
+# ( OFF -- LONG )
 
 instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
   code
@@ -1794,7 +1794,7 @@ instruction peeklu (?n endian_printer,?n bits_printer)
 end
 
 # peekdi BITS
-# ( OFF -- OFF INT )
+# ( OFF -- INT )
 
 instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
   code
@@ -1815,15 +1815,15 @@ instruction peekdi (?n bits_printer) # XXX: avoid code duplication with peeki
                       bits, endian, nenc, &value) != IOS_OK)
       {
         /* XXX: raise an IO exception for a != EOF error.  */
-        JITTER_PUSH_STACK (PVM_NULL);
+        JITTER_TOP_STACK () = PVM_NULL;
       }
     else
-      JITTER_PUSH_STACK (pvm_make_int (value, bits));
+      JITTER_TOP_STACK () = pvm_make_int (value, bits);
   end
 end
 
 # peekdiu BITS
-# ( OFF -- OFF UINT )
+# ( OFF -- UINT )
 
 instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
   code
@@ -1843,15 +1843,15 @@ instruction peekdiu (?n bits_printer) # XXX avoid code duplication with peekiu
                         bits, endian, &value) != IOS_OK)
        {
         /* XXX: raise an IO exception for a != EOF error.  */
-         JITTER_PUSH_STACK (PVM_NULL);
+         JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       JITTER_PUSH_STACK (pvm_make_uint (value, bits));
+       JITTER_TOP_STACK () = pvm_make_uint (value, bits);
   end
 end
 
 # peekdl BITS
-# ( OFF -- OFF LONG )
+# ( OFF -- LONG )
 
 instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
   code
@@ -1872,15 +1872,15 @@ instruction peekdl (?n bits_printer) # XXX avoid duplication with peekl
                        bits, endian, nenc, &value) != IOS_OK)
        {
         /* XXX: raise an IO exception for a != EOF error.  */
-         JITTER_PUSH_STACK (PVM_NULL);
+         JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       JITTER_PUSH_STACK (pvm_make_long (value, bits));
+       JITTER_TOP_STACK () = pvm_make_long (value, bits);
   end
 end
 
 # peekdlu BITS
-# ( OFF -- OFF ULONG )
+# ( OFF -- ULONG )
 
 instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
   code
@@ -1900,15 +1900,15 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
                         bits, endian, &value) != IOS_OK)
        {
          /* XXX: raise an IO exception for a != EOF error.  */
-         JITTER_PUSH_STACK (PVM_NULL);
+         JITTER_TOP_STACK () = PVM_NULL;
        }
      else
-       JITTER_PUSH_STACK (pvm_make_ulong (value, bits));
+       JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
   end
 end
 
 # peeks
-# ( OFF -- OFF STR )
+# ( OFF -- STR )
 
 instruction peeks ()
   code
@@ -1917,7 +1917,7 @@ instruction peeks ()
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (PVM_E_NO_IOS);
 
-    JITTER_PUSH_STACK (pvm_make_string (""));
+    JITTER_TOP_STACK () = pvm_make_string ("");
     /* XXX: WRITEME */
   end
 end

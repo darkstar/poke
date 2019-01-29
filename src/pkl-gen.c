@@ -959,7 +959,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
       int mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
       int mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
 
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP); /* Dup the offset.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
                     mapper_back, mapper_over);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
@@ -970,9 +969,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
       PKL_PASS_SUBPASS (PKL_AST_MAP_TYPE (map));
       PKL_GEN_PAYLOAD->in_map = 0;
     }
-
-  /* Stack: OFF VAL */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
   
   PKL_PASS_BREAK;
 }
@@ -1168,28 +1164,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              SAVER %nelem
 
                                       ; OFF (must be offset<uint<64>,1>)          
-             DUP                      ; OFF OFF
              ; Initialize registers.
-             PUSH 0UL                 ; OFF OFF 0UL
-             POPR %off                ; OFF OFF
+             PUSH 0UL                 ; OFF 0UL
+             POPR %off                ; OFF
              PUSH 0UL
              POPR %idx
-             SUBPASS array_type_nelem ; OFF OFF NELEM
-             POPR %nelem              ; OFF OFF ATYPE
-             SUBPASS array_type       ; OFF OFF ATYPE
+             SUBPASS array_type_nelem ; OFF NELEM
+             POPR %nelem              ; OFF ATYPE
+             SUBPASS array_type       ; OFF ATYPE
 
            .while
-             PUSHR %idx               ; OFF OFF ATYPE I
-             PUSHR %nelemd            ; OFF OFF ATYPE I NELEM
-             LTLU                     ; OFF OFF ATYPE NELEM I (NELEM<I)
-             NIP2                     ; OFF OFF ATYPE (NELEM<I)
+             PUSHR %idx               ; OFF ATYPE I
+             PUSHR %nelemd            ; OFF ATYPE I NELEM
+             LTLU                     ; OFF ATYPE NELEM I (NELEM<I)
+             NIP2                     ; OFF ATYPE (NELEM<I)
            .loop
-                                      ; OFF OFF ATYPE
+                                      ; OFF ATYPE
 
              ; Mount the Ith element triplet: [EOFF EIDX EVAL]
              PUSHR %off               ; ... EOMAG
              PUSH 1UL                 ; ... EOMAG EOUNIT
              MKO                      ; ... EOFF
+             DUP                      ; ... EOFF EOFF
              SUBPASS array_type       ; ... EOFF EVAL
 
              ; Update the current offset with the size of the value just
@@ -1217,9 +1213,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              POPR %idx               ; ... EOFF EIDX EVAL
            .endloop                                     
                                   
-             PUSHR %nelem            ; OFF OFF ATYPE [EOFF EIDX EVAL]... NELEM
-             DUP                     ; OFF OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
-             MKMA                    ; OFF ARRAY
+             PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+             DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
+             MKMA                    ; ARRAY
 
              RESTORER %nelem
              RESTORER %idx
@@ -1229,8 +1225,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           int idxreg = 1;
           int nelemreg = 2;
 
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
-          
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
@@ -1260,6 +1254,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
 
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
