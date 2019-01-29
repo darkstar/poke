@@ -212,6 +212,8 @@ PKL_DEF_INSN (PKL_INSN_SEL, "", "sel")
 PKL_DEF_INSN (PKL_INSN_MKA, "", "mka")
 PKL_DEF_INSN (PKL_INSN_MKMA, "", "mkma")
 PKL_DEF_INSN (PKL_INSN_AREF, "", "aref")
+PKL_DEF_INSN (PKL_INSN_ASETM, "", "asetm")
+PKL_DEF_INSN (PKL_INSN_ASETW, "", "asetw")
 
 /* Struct instructions.  */
 

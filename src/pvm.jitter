@@ -1476,6 +1476,22 @@ instruction mkma ()
   end
 end
 
+instruction asetm () #  (ARR CLS -- ARR)
+  code
+    PVM_VAL_ARR_MAPPER (JITTER_UNDER_TOP_STACK ())
+              = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();           
+  end
+end
+
+instruction asetw () #  (ARR CLS -- ARR)
+  code
+    PVM_VAL_ARR_WRITER (JITTER_UNDER_TOP_STACK ())
+              = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();           
+  end
+end
+
 instruction aset () # ( ARR ULONG VAL -- ARR )
   code
     uint64_t idx;

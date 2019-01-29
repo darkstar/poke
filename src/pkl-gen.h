@@ -56,7 +56,13 @@
    to be used.
 
    IN_STRUCT_DECL is 1 when a struct declaration is being generated.
-   0 otherwise.  */
+   0 otherwise.
+
+   IN_MAPPER is 1 when a mapper function for an array or a struct type
+   is being generated.  0 otherwise.
+
+   IN_WRITER is 1 when a writer function for an array or a struct type
+   is begin generated.  0 otherwise. */
 
 struct pkl_gen_payload
 {
@@ -67,7 +73,8 @@ struct pkl_gen_payload
   int cur_pasm2;
   pvm_program program;
   int in_struct_decl;
-  int in_map;
+  int in_mapper;
+  int in_writer;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;

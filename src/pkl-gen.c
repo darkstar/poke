@@ -763,7 +763,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
 {
   /* XXX: is this break really necessary considering the break in
      pkl_gen_pr_type?  */
-  if (!PKL_GEN_PAYLOAD->in_map)
+  if (!PKL_GEN_PAYLOAD->in_mapper)
     PKL_PASS_BREAK;    
 }
 PKL_PHASE_END_HANDLER
@@ -776,7 +776,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
 {
-  if (PKL_GEN_PAYLOAD->in_map)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
 }
 PKL_PHASE_END_HANDLER
@@ -942,9 +942,11 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
 {
   pkl_ast_node map = PKL_PASS_NODE;
+  pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
+  pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
 
-  /* Generate code for the map offset.  */
-  PKL_PASS_SUBPASS (PKL_AST_MAP_OFFSET (map));
+  /* Push the offset of the map.  */
+  PKL_PASS_SUBPASS (map_offset);
 
   /* Generate code to peek from the offset generated above.
 
@@ -970,11 +972,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
     }
   else
     {
-      PKL_GEN_PAYLOAD->in_map = 1;
-      PKL_PASS_SUBPASS (PKL_AST_MAP_TYPE (map));
-      PKL_GEN_PAYLOAD->in_map = 0;
+      PKL_GEN_PAYLOAD->in_mapper = 1;
+      PKL_PASS_SUBPASS (map_type);
+      PKL_GEN_PAYLOAD->in_mapper = 0;
     }
-  
+        
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
@@ -1085,7 +1087,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node integral_type = PKL_PASS_NODE;
 
-  if (PKL_GEN_PAYLOAD->in_map)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
   else
     {
@@ -1140,13 +1142,31 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
-  if (PKL_GEN_PAYLOAD->in_map)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* Generate code to create a mapped array of the given type.  At
          this point the offset to use is in the top of the stack.  */
 
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
+
+      pvm_program mapper_program;
+      pvm_val mapper_closure;
+
+      /* Compile a mapper function to a closure.  */
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
+                                     PKL_GEN_PAYLOAD->compiler,
+                                     0 /* prologue */));
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+
+      /* Push a new frame and register the passed object as a local
+         variable.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                    0, 0); /* XXX: use this variable in the code
+                              below, instead of %aoff.  */
 
       if (array_type_nelem)
         {
@@ -1266,11 +1286,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
                         pvm_make_ulong (0, 64));
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
 
-          PKL_GEN_PAYLOAD->in_map = 0;
+          PKL_GEN_PAYLOAD->in_mapper = 0;
           PKL_PASS_SUBPASS (array_type_nelem);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
           PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
-          PKL_GEN_PAYLOAD->in_map = 1;
+          PKL_GEN_PAYLOAD->in_mapper = 1;
 
           pkl_asm_while (PKL_GEN_ASM);
           {
@@ -1288,7 +1308,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+
+            //            pkl_asm_note (PKL_GEN_ASM, "before array_type"); /* XXX */
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+            //            pkl_asm_note (PKL_GEN_ASM, "after array_type"); /* XXX */
+
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
@@ -1329,6 +1353,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           assert (0); /* WRITEME */
         }
 
+      /* Finish the mapper function.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+
+      /* All right, the mapper function is compiled.  */
+      mapper_program = pkl_asm_finish (PKL_GEN_ASM,
+                                       0 /* epilogue */);
+      
+      PKL_GEN_POP_ASM;
+      pvm_specialize_program (mapper_program);
+      mapper_closure = pvm_make_cls (mapper_program);
+
+      /* XXX */
+      /*printf ("BEGIN MAPPER\n");
+      pvm_print_program (stdout, mapper_program);
+      printf ("END MAPPER\n"); */
+
+      /* Complete the mapper closure with the current environment,
+         call it to obtain the mapped array itself, and install it in
+         the array as its mapper.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* CLS ARR */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETM);                /* ARR */
+
+      /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
     }
 }
@@ -1367,7 +1420,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  if (PKL_GEN_PAYLOAD->in_map)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
@@ -1388,7 +1441,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  if (PKL_GEN_PAYLOAD->in_map)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* XXX: Generate code like in the case below for in_struct_decl.
          The code should expect the offset in the stack, followed by
