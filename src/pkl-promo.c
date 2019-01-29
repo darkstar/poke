@@ -805,6 +805,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* The base type of an offset in a map should be promoted to uint<64>.
+   This is expected by the code generator.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
+{
+  pkl_ast_node map = PKL_PASS_NODE;
+  pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
+
+  pkl_ast_node to_magnitude_type;
+  int restart;
+
+  to_magnitude_type = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                  64, 0);
+  PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (map_offset);
+
+  if (!promote_offset (PKL_PASS_AST,
+                       to_magnitude_type, PKL_AST_OFFSET_UNIT (map_offset), 
+                       &PKL_AST_MAP_OFFSET (map),
+                       &restart))
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (map_offset),
+               "couldn't promote offset of map #%" PRIu64,
+               PKL_AST_UID (map));
+      PKL_PASS_ERROR;
+    }
+
+  PKL_PASS_RESTART = restart;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
@@ -826,6 +856,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_ps_op_add_sub_mod),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_ps_op_mul),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
+   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_promo_ps_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_ps_array_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),

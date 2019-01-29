@@ -1170,7 +1170,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              SAVER %idx
              SAVER %nelem
 
-                                      ; OFF (must be offset<uint<64>,1>)          
+                                      ; OFF (must be offset<uint<64>,*>)          
              ; Initialize registers.
              OGETM		      ; OFF OMAG
              SWAP                     ; OMAG OFF
