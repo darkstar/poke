@@ -14,3 +14,6 @@
 
 /* { dg-command { print [0,1,2,.[1]=666] } } */
 /* { dg-output "\n\\\[0,666,2\\\]" } */
+
+/* { dg-command { print [[1]][0] } } */
+/* { dg-output "\n\\\[1\\\]" } */
