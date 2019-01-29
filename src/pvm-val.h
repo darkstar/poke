@@ -185,6 +185,16 @@ void pvm_print_string (FILE *out, pvm_val string);
    OFFSET is the offset in the current IO space where the array is
    mapped.  If the array is not mapped then this is PVM_NULL.
 
+   MAPPER is a closure that gets an offset as an argument and, when
+   executed, maps an array from IO.  This field is PVM_NULL if the
+   array is not mapped.
+
+   WRITER is a closure that gets an offset and an array of this type
+   as arguments and, when executed, writes the array contents to IO.
+   This writer can raise PVM_E_CONSTRAINT if some constraint is
+   violated during the write.  This field is PVM_NULL if the array is
+   not mapped.
+
    TYPE is the type of the array.  This includes the type of the
    elements of the array.
 
@@ -195,6 +205,8 @@ void pvm_print_string (FILE *out, pvm_val string);
 
 #define PVM_VAL_ARR(V) (PVM_VAL_BOX_ARR (PVM_VAL_BOX ((V))))
 #define PVM_VAL_ARR_OFFSET(V) (PVM_VAL_ARR(V)->offset)
+#define PVM_VAL_ARR_MAPPER(V) (PVM_VAL_ARR(V)->mapper)
+#define PVM_VAL_ARR_WRITER(V) (PVM_VAL_ARR(V)->writer)
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_ARRAYOF(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_NELEM(V) (PVM_VAL_ARR(V)->nelem)
@@ -203,6 +215,8 @@ void pvm_print_string (FILE *out, pvm_val string);
 struct pvm_array
 {
   pvm_val offset;
+  pvm_val mapper;
+  pvm_val writer;
   pvm_val type;
   pvm_val nelem;
   struct pvm_array_elem *elems;
@@ -222,6 +236,7 @@ typedef struct pvm_array *pvm_array;
 
 #define PVM_VAL_ARR_ELEM_OFFSET(V,I) (PVM_VAL_ARR_ELEM((V),(I)).offset)
 #define PVM_VAL_ARR_ELEM_VALUE(V,I) (PVM_VAL_ARR_ELEM((V),(I)).value)
+
 
 struct pvm_array_elem
 {

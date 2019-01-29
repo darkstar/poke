@@ -90,6 +90,8 @@ pvm_make_array (pvm_val nelem, pvm_val type)
   size_t i;
 
   arr->offset = PVM_NULL;
+  arr->mapper = PVM_NULL;
+  arr->writer = PVM_NULL;
   arr->nelem = nelem;
   arr->type = type;
   arr->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
