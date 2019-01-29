@@ -1023,6 +1023,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+  /* XXX SAVE REGS */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+  /* XXX RESTORE REGS */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
@@ -1068,6 +1073,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+  /* XXX SAVE REGS */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+  /* XXX RESTORE REGS */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
 }
 PKL_PHASE_END_HANDLER

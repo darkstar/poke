@@ -217,13 +217,12 @@ late-header-c
                                                                              \
        /* Save the current environment and use the callee's environment. */     \
        JITTER_PUSH_RETURNSTACK ((jitter_uint) (uintptr_t) jitter_state_runtime.env); \
-       jitter_state_runtime.env = PVM_VAL_CLS_ENV (closure);                 \
+       jitter_state_runtime.env = PVM_VAL_CLS_ENV ((CLS));                   \
                                                                              \
        /* Branch-and-link to the native code, whose first instruction will */ \
        /*  be a prolog. */                                                   \
-       JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT (closure));           \
+       JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT ((CLS)));           \
     } while (0)
-
   end
 end
 
@@ -1522,27 +1521,14 @@ instruction aref () # ( ARR ULONG -- ARR ULONG VAL )
   code
     pvm_val array = JITTER_UNDER_TOP_STACK ();
     pvm_val index = JITTER_TOP_STACK ();
-    pvm_val val;
-    pvm_val mapper;
 
     if (PVM_VAL_ULONG (index) < 0
         || (PVM_VAL_ULONG (index) >=
             PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (array))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    mapper = pvm_val_mapper (array);
-    if (mapper != PVM_NULL /* XXX && !pvm_val_up_to_date (array) */)
-      {
-         /* Call the array's mapper function.
-
-            XXX: catch constraint exception, abort the aref and
-            re-raise it.  */
-      }
-    else
-      val = PVM_VAL_ARR_ELEM_VALUE (array,
-                                    PVM_VAL_ULONG (index));
-
-    JITTER_PUSH_STACK (val);
+    JITTER_PUSH_STACK (PVM_VAL_ARR_ELEM_VALUE (array,
+                                               PVM_VAL_ULONG (index)));
   end
 end
 
@@ -1738,6 +1724,27 @@ end
 #
 #
 # The following instructions operate on the global IO space.
+
+# remap
+#
+# If the value at the TOS is mapped, and (if cached) outdated
+# then re-map it.
+# Otherwise, this is a NOP.
+
+instruction remap () # ( VAL -- VAL )
+  caller
+  code
+    pvm_val val = JITTER_TOP_STACK ();
+    pvm_val mapper = pvm_val_mapper (val);
+
+    if (mapper != PVM_NULL /* XXX && !pvm_val_up_to_date (array) */)
+      {
+         JITTER_DROP_STACK ();
+         JITTER_PUSH_STACK (PVM_VAL_MAPPED_OFFSET (val));
+         PVM_CALL (mapper);
+     }
+  end
+end
 
 # peeki NENC,ENDIAN,BITS
 # ( OFF -- INT )

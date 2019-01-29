@@ -482,6 +482,11 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
    : PVM_IS_ULONG ((V)) ? PVM_VAL_ULONG ((V))    \
    : 0)
 
+#define PVM_VAL_MAPPED_OFFSET(V)                        \
+  (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_OFFSET ((V))          \
+   : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_OFFSET ((V))        \
+   : PVM_NULL)
+
 /* Return an offset with the size of VAL.  */
 pvm_val pvm_sizeof (pvm_val val);
 
