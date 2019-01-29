@@ -27,7 +27,7 @@ end
 
 ## Register classes.
 
-register-class r 3
+register-class r 4
   code
     pvm_val
   end
@@ -1571,7 +1571,7 @@ instruction ogetm () # ( OFF -- OFF (INT|LONG|UINT|ULONG) )
   end
 end
 
-instruction ogetu () # ( OFF -- OFF UINT )
+instruction ogetu () # ( OFF -- OFF ULONG )
   code
     JITTER_PUSH_STACK (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()));
   end

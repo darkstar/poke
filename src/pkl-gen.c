@@ -554,6 +554,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   /* Save the used registers before calling the function.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
 }
 PKL_PHASE_END_HANDLER
 
@@ -572,6 +574,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
 
   /* Restore the used registers after calling the function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 }
@@ -1150,25 +1154,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
              XXX: rewrite to use ADDO.
 
-             ; Three scratch registers are used in this code:
+             ; Four scratch registers are used in this code:
              ;
-             ;   %off is %r0 and contains the offset of the
+             ;   %aoff is %r0 and contains the offset of the
+             ;   array.
+             ;   %off is %r1 and contains the offset of the
              ;   array element being processed, relative to the start
              ;   of the array, in bits.
-             ;   %idx is %r1 and contains the index of the
+             ;   %idx is %r2 and contains the index of the
              ;   array element being processed.
-             ;   %nelem is %r2 and holds the total number of
+             ;   %nelem is %r3 and holds the total number of
              ;   elements contained in the array.
+             SAVER %aoff
              SAVER %off
              SAVER %idx
              SAVER %nelem
 
                                       ; OFF (must be offset<uint<64>,1>)          
              ; Initialize registers.
+             OGETM		      ; OFF OMAG
+             SWAP                     ; OMAG OFF
+             OGETU                    ; OMAG OFF OUNIT
+             ROT                      ; OFF OUNIT OMAG
+             MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
+             NIP2                     ; OFF (OUNIT*OMAG)
+             POPR %aoff               ; OFF
              PUSH 0UL                 ; OFF 0UL
              POPR %off                ; OFF
-             PUSH 0UL
-             POPR %idx
+             PUSH 0UL                 ; OFF 0UL
+             POPR %idx                ; OFF
              SUBPASS array_type_nelem ; OFF NELEM
              POPR %nelem              ; OFF ATYPE
              SUBPASS array_type       ; OFF ATYPE
@@ -1182,8 +1196,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
                                       ; OFF ATYPE
 
              ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-             PUSHR %off               ; ... EOMAG
-             PUSH 1UL                 ; ... EOMAG EOUNIT
+             PUSHR %aoff              ; ... AOFFMAG
+             PUSHR %off               ; ... AOFFMAG EOMAG
+             ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
+             NIP2                     ; ... (AOFFMAG+EOMAG)
+             PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
              MKO                      ; ... EOFF
              DUP                      ; ... EOFF EOFF
              SUBPASS array_type       ; ... EOFF EVAL
@@ -1219,16 +1236,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
              RESTORER %nelem
              RESTORER %idx
-             RESTORER %off  */
+             RESTORER %off
+             RESTORER %aoff  */
 
-          int offreg = 0;
-          int idxreg = 1;
-          int nelemreg = 2;
+          int aoffreg = 0;
+          int offreg = 1;
+          int idxreg = 2;
+          int nelemreg = 3;
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
 
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, aoffreg);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
 
@@ -1251,7 +1278,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           }
           pkl_asm_loop (PKL_GEN_ASM);
           {
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, aoffreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
@@ -1281,7 +1311,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);
-          
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
