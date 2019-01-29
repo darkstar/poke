@@ -673,8 +673,8 @@ pvm_print_val (FILE *out, pvm_val val, int base)
 
           if (elem_offset != PVM_NULL)
             {
-              fprintf (out, "@");
-              pvm_print_val (out, elem_offset, base);
+              fprintf (out, " @ ");
+              pvm_print_val (out, elem_offset, 10);
             }
         }
       fprintf (out, "]");

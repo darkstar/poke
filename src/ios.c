@@ -228,8 +228,6 @@ ios_read_int (ios io, ios_off offset, int flags,
               int64_t *value)
 {
   /* XXX: writeme  */
-  printf ("IOS: bits = %d offset = %lu\n", bits, offset);
-
   if (offset % 8 == 0)
     {
       if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)

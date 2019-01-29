@@ -958,7 +958,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
     {
       int mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
       int mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
-      
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP); /* Dup the offset.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
                     mapper_back, mapper_over);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
@@ -970,6 +971,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
       PKL_GEN_PAYLOAD->in_map = 0;
     }
 
+  /* Stack: OFF VAL */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
@@ -1164,25 +1168,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              SAVER %nelem
 
                                       ; OFF (must be offset<uint<64>,1>)          
+             DUP                      ; OFF OFF
              ; Initialize registers.
-             PUSH 0UL                 ; OFF 0UL
-             POPR %off                ; OFF
+             PUSH 0UL                 ; OFF OFF 0UL
+             POPR %off                ; OFF OFF
              PUSH 0UL
              POPR %idx
-             SUBPASS array_type_nelem ; OFF NELEM
-             SUBPASS array_type       ; OFF NELEM ATYPE
-             SWAP                     ; OFF ATYPE NELEM
-             POPR %nelem              ; OFF ATYPE
+             SUBPASS array_type_nelem ; OFF OFF NELEM
+             POPR %nelem              ; OFF OFF ATYPE
+             SUBPASS array_type       ; OFF OFF ATYPE
 
            .while
-             PUSHR %nelemd            ; OFF ATYPE NELEM
-             PUSHR %idx               ; OFF ATYPE NELEM I
-             EQLU                     ; OFF ATYPE NELEM I (NELEM==I)
-             NOT                      ; OFF ATYPE NELEM I (NELEM==I) !(NELEM==I)
-             NIP2                     ; OFF ATYPE NELEM !(NELEM==I)
-             NIP                      ; OFF ATYPE !(NELEM==I)
+             PUSHR %idx               ; OFF OFF ATYPE I
+             PUSHR %nelemd            ; OFF OFF ATYPE I NELEM
+             LTLU                     ; OFF OFF ATYPE NELEM I (NELEM<I)
+             NIP2                     ; OFF OFF ATYPE (NELEM<I)
            .loop
-                                      ; OFF ATYPE
+                                      ; OFF OFF ATYPE
 
              ; Mount the Ith element triplet: [EOFF EIDX EVAL]
              PUSHR %off               ; ... EOMAG
@@ -1196,9 +1198,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              ROT                      ; ... EVAL ESIZ EOFF
              OGETM                    ; ... EVAL ESIZ EOFF EOMAG
              ROT                      ; ... EVAL EOFF EOMAG ESIZ
-             ADDLU                    ; ... EVAL EOFF EOMAG ESIZ (EOMAG+ESIZ)
-             POPR %off                ; ... EVAL EOFF EOMAG ESIZ
-             DROP                     ; ... EVAL EOFF EOMAG
+             OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
+             ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+             ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
+             POPR %off                ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+             DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
+             DROP                     ; ... EVAL EOFF ESIZ
              DROP                     ; ... EVAL EOFF
              PUSHR %idx               ; ... EVAL EOFF EIDX
              ROT                      ; ... EOFF EIDX EVAL
@@ -1212,9 +1217,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              POPR %idx               ; ... EOFF EIDX EVAL
            .endloop                                     
                                   
-             PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
-             DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
-             MKMA                    ; ARRAY
+             PUSHR %nelem            ; OFF OFF ATYPE [EOFF EIDX EVAL]... NELEM
+             DUP                     ; OFF OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
+             MKMA                    ; OFF ARRAY
 
              RESTORER %nelem
              RESTORER %idx
@@ -1223,6 +1228,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           int offreg = 0;
           int idxreg = 1;
           int nelemreg = 2;
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
           
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
@@ -1237,20 +1244,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
           PKL_GEN_PAYLOAD->in_map = 0;
           PKL_PASS_SUBPASS (array_type_nelem);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
           PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
           PKL_GEN_PAYLOAD->in_map = 1;
 
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
-
           pkl_asm_while (PKL_GEN_ASM);
           {
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_EQLU);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NOT);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
           }
           pkl_asm_loop (PKL_GEN_ASM);
           {
@@ -1263,8 +1266,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
