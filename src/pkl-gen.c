@@ -1406,6 +1406,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
+
+      /* XXX do the same with the writer.  */
     }
 }
 PKL_PHASE_END_HANDLER
