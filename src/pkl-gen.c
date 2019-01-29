@@ -1256,7 +1256,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
-
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
@@ -1313,6 +1312,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
+  if (PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* XXX: drop the number
+                                                  of elements, as it
+                                                  isn't used at the
+                                                  PVM level.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
 }
 PKL_PHASE_END_HANDLER

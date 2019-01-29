@@ -497,6 +497,28 @@ instruction print () # ( STR -- )
   end
 end
 
+instruction strace () # ( -- )
+  code
+     pvm_val tmp[1024];
+     int i = 0, j;
+
+     while (JITTER_HEIGHT_STACK () !=
+            jitter_original_state->pvm_state_backing.canary)
+        {
+          assert (i < 1024);
+
+          pvm_print_val (stdout, JITTER_TOP_STACK (), 16);
+          fprintf (stdout, "\n");
+          tmp[i++] = JITTER_TOP_STACK ();
+          JITTER_DROP_STACK ();
+        }
+
+     /* Restore the stack.  */
+     for (j = (i - 1); j >= 0; j--)
+        JITTER_PUSH_STACK (tmp[j]);
+  end
+end
+
 
 
 ## Stack manipulation instructions
