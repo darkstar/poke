@@ -1206,6 +1206,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              DUP                      ; ... EOFF EOFF
              SUBPASS array_type       ; ... EOFF EVAL
 
+             ; XXX EOFF = EOFF - %aoff
+
              ; Update the current offset with the size of the value just
              ; peeked.
              SIZ                      ; ... EOFF EVAL ESIZ
