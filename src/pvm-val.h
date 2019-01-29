@@ -494,10 +494,11 @@ pvm_val pvm_sizeof (pvm_val val);
    stored, as an unsigned 64-bits long.  Return 1 otherwise.  */
 pvm_val pvm_elemsof (pvm_val val);
 
-/* Return the mapper function for the given value.  If the value is
-   not mapped, return PVM_NULL.  */
+/* Return the mapper function for the given value, and the writer
+   function.  If the value is not mapped, return PVM_NULL.  */
 
 pvm_val pvm_val_mapper (pvm_val val);
+pvm_val pvm_val_writer (pvm_val val);
 
 /* Print a pvm_val to the given file descriptor.
 

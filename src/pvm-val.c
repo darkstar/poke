@@ -291,6 +291,19 @@ pvm_val_mapper (pvm_val val)
 }
 
 pvm_val
+pvm_val_writer (pvm_val val)
+{
+  if (PVM_IS_ARR (val))
+    return PVM_VAL_ARR_WRITER (val);
+  /* XXX
+  if (PVM_IS_SCT (val))
+    return PVM_VAL_SCT_WRITER (val);
+  */
+
+  return PVM_NULL;
+}
+
+pvm_val
 pvm_sizeof (pvm_val val)
 {
   if (PVM_IS_INT (val))

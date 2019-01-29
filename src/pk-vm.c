@@ -94,6 +94,75 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static int
+pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* disassemble mapper EXP */
+
+  pvm_val exp;
+  pvm_val mapper;
+  pvm_program program;
+
+  assert (argc == 1);
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+
+  program = PK_CMD_ARG_EXP (argv[0]);
+  if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
+    return 0;
+  
+  mapper = pvm_val_mapper (exp);
+  if (mapper == PVM_NULL)
+    {
+      fprintf (stdout, "error: the givan value is not mapped\n");
+      return 0;
+    }
+
+  program = PVM_VAL_CLS_PROGRAM (mapper);
+
+  if (uflags & PK_VM_DIS_F_NAT)
+    pvm_disassemble_program (program, true,
+                             JITTER_OBJDUMP, NULL);
+  else
+    pvm_print_program (stdout, program);
+
+  return 1;
+}
+
+static int
+pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* disassemble writer EXP */
+
+  pvm_val exp;
+  pvm_val writer;
+  pvm_program program;
+
+  assert (argc == 1);
+  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
+
+  program = PK_CMD_ARG_EXP (argv[0]);
+  if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
+    return 0;
+
+  writer = pvm_val_writer (exp);
+  if (writer == PVM_NULL)
+    {
+      fprintf (stdout, "error: the givan value is not mapped\n");
+      return 0;
+    }
+
+  program = PVM_VAL_CLS_PROGRAM (writer);
+  
+  if (uflags & PK_VM_DIS_F_NAT)
+    pvm_disassemble_program (program, true,
+                             JITTER_OBJDUMP, NULL);
+  else
+    pvm_print_program (stdout, program);
+
+  return 1;
+}
+
+
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd vm_disas_exp_cmd =
@@ -108,11 +177,24 @@ struct pk_cmd vm_disas_fun_cmd =
 Flags:\n\
   n (do a native disassemble)"};
 
+struct pk_cmd vm_disas_map_cmd =
+  {"mapper", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas_map,
+   "vm disassemble mapper[/n] EXPRESSION\n\
+Flags:\n\
+  n (do a native disassemble)"};
+
+struct pk_cmd vm_disas_wri_cmd =
+  {"writter", "e", PK_VM_DIS_UFLAGS, 0, NULL, pk_cmd_vm_disas_writ,
+   "vm disassemble writer[/n] EXPRESSION\n\
+Flags:\n\
+  n (do a native disassemble)"};
 
 struct pk_cmd *vm_disas_cmds[] =
   {
    &vm_disas_exp_cmd,
    &vm_disas_fun_cmd,
+   &vm_disas_map_cmd,
+   &vm_disas_wri_cmd,
    &null_cmd
   };
 
