@@ -22,6 +22,7 @@
 #define _(str) dgettext (PACKAGE, str)
 
 #include "ios.h"
+#include "pvm.h"
 #include "poke.h"
 #include "pk-cmd.h"
 
@@ -101,7 +102,7 @@ poke_val (ios_off *address, pvm_val val)
 
       nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
       for (idx = 0; idx < nelem; idx++)
-        poke_val (address, PVM_VAL_ARR_ELEM (val, idx));
+        poke_val (address, PVM_VAL_ARR_ELEM_VALUE (val, idx));
     }
   else if (PVM_IS_SCT (val))
     {

@@ -179,9 +179,22 @@ typedef struct pvm_val_box *pvm_val_box;
 pvm_val pvm_make_string (const char *value);
 void pvm_print_string (FILE *out, pvm_val string);
 
-/* Arrays are also boxed.  */
+/* Arrays values are boxed, and store sequences of homogeneous values
+   called array "elements".  They can be mapped in IO, or unmapped.
+
+   OFFSET is the offset in the current IO space where the array is
+   mapped.  If the array is not mapped then this is PVM_NULL.
+
+   TYPE is the type of the array.  This includes the type of the
+   elements of the array.
+
+   NELEM is the number of elements contained in the array.
+
+   ELEMS is a list of elements.  The order of the elements is
+   relevant.  */
 
 #define PVM_VAL_ARR(V) (PVM_VAL_BOX_ARR (PVM_VAL_BOX ((V))))
+#define PVM_VAL_ARR_OFFSET(V) (PVM_VAL_ARR(V)->offset)
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_ARRAYOF(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_NELEM(V) (PVM_VAL_ARR(V)->nelem)
@@ -189,12 +202,32 @@ void pvm_print_string (FILE *out, pvm_val string);
 
 struct pvm_array
 {
+  pvm_val offset;
   pvm_val type;
   pvm_val nelem;
-  pvm_val *elems;
+  struct pvm_array_elem *elems;
 };
 
 typedef struct pvm_array *pvm_array;
+
+/* Array elements hold the data of the arrays, and/or information on
+   how to obtain these values.
+
+   OFFSET is the offset, relative to the array's offset, where the
+   array element is mapped.  If the array is not mapped then this is
+   PVM_NULL.
+
+   VALUE is the value contained in the element.  If the array is
+   mapped this is the cached value, which is returned by `aref'.  */
+
+#define PVM_VAL_ARR_ELEM_OFFSET(V,I) (PVM_VAL_ARR_ELEM((V),(I)).offset)
+#define PVM_VAL_ARR_ELEM_VALUE(V,I) (PVM_VAL_ARR_ELEM((V),(I)).value)
+
+struct pvm_array_elem
+{
+  pvm_val offset;
+  pvm_val value;
+};
 
 pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 

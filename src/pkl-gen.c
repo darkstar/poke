@@ -1212,6 +1212,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
            .endloop                                     
                                   
              PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+             DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
              MKMA                    ; ARRAY
 
              RESTORER %nelem
@@ -1277,8 +1278,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_endloop (PKL_GEN_ASM);
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
-          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);
-          pkl_asm_note (PKL_GEN_ASM, "mkma");
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);
           
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);

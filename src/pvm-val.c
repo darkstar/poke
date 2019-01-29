@@ -86,15 +86,19 @@ pvm_make_array (pvm_val nelem, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_ARR);
   pvm_array arr = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_array));
-  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem);
+  size_t nbytes = sizeof (struct pvm_array_elem) * PVM_VAL_ULONG (nelem);
   size_t i;
 
+  arr->offset = PVM_NULL;
   arr->nelem = nelem;
   arr->type = type;
   arr->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
 
   for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
-    arr->elems[i] = PVM_NULL;
+    {
+      arr->elems[i].offset = PVM_NULL;
+      arr->elems[i].value = PVM_NULL;
+    }
   
   PVM_VAL_BOX_ARR (box) = arr;
   return PVM_BOX (box);
@@ -302,7 +306,7 @@ pvm_sizeof (pvm_val val)
       size = 0;
       for (i = 0; i < nelem; ++i)
         {
-          pvm_val off = pvm_sizeof (PVM_VAL_ARR_ELEM (val, i));
+          pvm_val off = pvm_sizeof (PVM_VAL_ARR_ELEM_VALUE (val, i));
 
           size += (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (off))
                    * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (off)));
@@ -653,17 +657,33 @@ pvm_print_val (FILE *out, pvm_val val, int base)
   else if (PVM_IS_ARR (val))
     {
       size_t nelem, idx;
+      pvm_val array_offset = PVM_VAL_ARR_OFFSET (val);
       
       nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
 
       fprintf (out, "[");
       for (idx = 0; idx < nelem; idx++)
         {
+          pvm_val elem_offset = PVM_VAL_ARR_ELEM_OFFSET (val, idx);
+          pvm_val elem_value = PVM_VAL_ARR_ELEM_VALUE (val, idx);
+          
           if (idx != 0)
             fprintf (out, ",");
-          pvm_print_val (out, PVM_VAL_ARR_ELEM (val, idx), base);
+          pvm_print_val (out, elem_value, base);
+
+          if (elem_offset != PVM_NULL)
+            {
+              fprintf (out, "@");
+              pvm_print_val (out, elem_offset, base);
+            }
         }
       fprintf (out, "]");
+
+      if (array_offset != PVM_NULL)
+        {
+          fprintf (out, " @ ");
+          pvm_print_val (out, array_offset, base);
+        }      
     }
   else if (PVM_IS_SCT (val))
     {
