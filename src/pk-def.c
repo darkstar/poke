@@ -81,7 +81,7 @@ print_var_decl (pkl_ast_node decl, void *data)
   fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
   fputs ("\t\t", stdout);
   /* XXX: support different bases with a /[xbo] cmd flag.  */
-  pvm_print_val (stdout, val, 10);
+  pvm_print_val (stdout, val, 10, 0);
   fputs ("\t\t", stdout);
 
   /* Print information about the site where the variable was

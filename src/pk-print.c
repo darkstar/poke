@@ -25,10 +25,11 @@
 #include "poke.h"
 #include "pk-cmd.h"
 
-#define PK_PRINT_UFLAGS "xbo"
+#define PK_PRINT_UFLAGS "xbom"
 #define PK_PRINT_F_HEX 0x1
 #define PK_PRINT_F_BIN 0x2
 #define PK_PRINT_F_OCT 0x4
+#define PK_PRINT_F_MAP 0x8
 
 static int
 pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
@@ -39,6 +40,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   pvm_val val;
   int pvm_ret;
   int base;
+  int pflags = 0;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
@@ -62,12 +64,15 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     base = 2;
   else if (uflags & PK_PRINT_F_OCT)
     base = 8;
+
+  if (uflags & PK_PRINT_F_MAP)
+    pflags |= PVM_PRINT_F_MAPS;
   
   pvm_ret = pvm_run (poke_vm, prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 
-  pvm_print_val (stdout, val, base);
+  pvm_print_val (stdout, val, base, pflags);
   printf ("\n");
   return 1;
 
@@ -76,7 +81,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 }
 
 struct pk_cmd print_cmd =
-  {"print[/xob]", "e", PK_PRINT_UFLAGS, 0, NULL, pk_cmd_print,
+  {"print[/xobm]", "e", PK_PRINT_UFLAGS, 0, NULL, pk_cmd_print,
    "print EXP.\n\
 Flags:\n\
   x (print numbers in hexadecimal)\n\

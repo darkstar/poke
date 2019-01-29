@@ -224,7 +224,7 @@ printer-c
     void
     pvm_literal_printer (FILE *out, jitter_uint val)
     {
-      pvm_print_val (out, (pvm_val) val, 10);
+      pvm_print_val (out, (pvm_val) val, 10, 0);
     }
 
     void
@@ -240,7 +240,7 @@ printer-c
       fprintf (out, "%%lo(0x%" JITTER_PRIx") (", lo);
       pvm_print_val (out,
                     ((pvm_val) printer_hi << 32) | lo,
-                    10);
+                    10, 0);
       fputc (')', out);
       printer_hi = 0;
     }
@@ -507,7 +507,7 @@ instruction strace () # ( -- )
         {
           assert (i < 1024);
 
-          pvm_print_val (stdout, JITTER_TOP_STACK (), 16);
+          pvm_print_val (stdout, JITTER_TOP_STACK (), 16, 0);
           fprintf (stdout, "\n");
           tmp[i++] = JITTER_TOP_STACK ();
           JITTER_DROP_STACK ();

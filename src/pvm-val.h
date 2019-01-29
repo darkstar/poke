@@ -474,7 +474,15 @@ pvm_val pvm_sizeof (pvm_val val);
    stored, as an unsigned 64-bits long.  Return 1 otherwise.  */
 pvm_val pvm_elemsof (pvm_val val);
 
-/* Print a pvm_val to the given file descriptor. */
-void pvm_print_val (FILE *out, pvm_val val, int base);
+/* Print a pvm_val to the given file descriptor.
+
+   If PVM_PRINT_F_MAPS is specified in FLAGS, then the attributes of
+   mapped values (notably their offsets) are also printed out.  When
+   PVM_PRINT_F_MAPS is not specified, mapped values are printed
+   exactly the same way than non-mapped values.  */
+
+#define PVM_PRINT_F_MAPS 1
+
+void pvm_print_val (FILE *out, pvm_val val, int base, int flags);
 
 #endif /* !PVM_VAL_H */

@@ -429,7 +429,7 @@ pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
 }
 
 void
-pvm_print_val (FILE *out, pvm_val val, int base)
+pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 {
   const char *long64_fmt, *long_fmt;
   const char *ulong64_fmt, *ulong_fmt; 
@@ -669,20 +669,20 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           
           if (idx != 0)
             fprintf (out, ",");
-          pvm_print_val (out, elem_value, base);
+          pvm_print_val (out, elem_value, base, flags);
 
-          if (elem_offset != PVM_NULL)
+          if (flags & PVM_PRINT_F_MAPS && elem_offset != PVM_NULL)
             {
               fprintf (out, " @ ");
-              pvm_print_val (out, elem_offset, 10);
+              pvm_print_val (out, elem_offset, 10, flags);
             }
         }
       fprintf (out, "]");
 
-      if (array_offset != PVM_NULL)
+      if (flags & PVM_PRINT_F_MAPS && array_offset != PVM_NULL)
         {
           fprintf (out, " @ ");
-          pvm_print_val (out, array_offset, base);
+          pvm_print_val (out, array_offset, base, flags);
         }      
     }
   else if (PVM_IS_SCT (val))
@@ -700,7 +700,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
             fprintf (out, ",");
           if (name != PVM_NULL)
             fprintf (out, ".%s=", PVM_VAL_STR (name));
-          pvm_print_val (out, value, base);
+          pvm_print_val (out, value, base, flags);
         }
       fprintf (out, "}");
     }
@@ -727,12 +727,12 @@ pvm_print_val (FILE *out, pvm_val val, int base)
           fprintf (out, "string");
           break;
         case PVM_TYPE_ARRAY:
-          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base);
+          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base, flags);
           fprintf (out, "[]");
           break;
         case PVM_TYPE_OFFSET:
           fprintf (out, "[");
-          pvm_print_val (out, PVM_VAL_TYP_O_BASE_TYPE (val), base);
+          pvm_print_val (out, PVM_VAL_TYP_O_BASE_TYPE (val), base, flags);
           fputc (' ', out);
           switch (PVM_VAL_ULONG (PVM_VAL_TYP_O_UNIT (val)))
             {
@@ -772,9 +772,9 @@ pvm_print_val (FILE *out, pvm_val val, int base)
             for (i = 0; i < nargs; ++i)
               {
                 pvm_val atype = PVM_VAL_TYP_C_ATYPE (val, i);
-                pvm_print_val (out, atype, base);
+                pvm_print_val (out, atype, base, flags);
               }
-            pvm_print_val (out, PVM_VAL_TYP_C_RETURN_TYPE (val), 10);
+            pvm_print_val (out, PVM_VAL_TYP_C_RETURN_TYPE (val), 10, flags);
             break;
           }
         case PVM_TYPE_STRUCT:
@@ -792,7 +792,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
                 if (i != 0)
                   fprintf (out, " ");
                 
-                pvm_print_val (out, etype, base);
+                pvm_print_val (out, etype, base, flags);
                 if (ename != PVM_NULL)
                   fprintf (out, " %s", PVM_VAL_STR (ename));
                 fprintf (out, ";");
@@ -806,7 +806,7 @@ pvm_print_val (FILE *out, pvm_val val, int base)
     }
   else if (PVM_IS_OFF (val))
     {
-      pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base);
+      pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base, flags);
       fprintf (out, CYAN "#" NOATTR);
       switch (PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)))
         {
