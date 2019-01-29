@@ -1498,10 +1498,12 @@ end
 
 ## Offset instructions.
 
-instruction mko () # ( EXP ULONG -- EXP ULONG OFF )
+instruction mko () # ( EXP ULONG -- OFF )
   code
-   JITTER_PUSH_STACK (pvm_make_offset (JITTER_UNDER_TOP_STACK (),
-                                       JITTER_TOP_STACK ()));
+   pvm_val res = pvm_make_offset (JITTER_UNDER_TOP_STACK (),
+                                  JITTER_TOP_STACK ());
+   JITTER_DROP_STACK ();
+   JITTER_TOP_STACK () = res;
   end
 end
 

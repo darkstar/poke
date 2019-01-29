@@ -772,10 +772,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
 {
   if (PKL_GEN_PAYLOAD->in_map)
-    {
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-    }
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
 }
 PKL_PHASE_END_HANDLER
 
@@ -791,7 +788,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
   pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_asm_insn (pasm, PKL_INSN_MKO);
-  pkl_asm_insn (pasm, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
@@ -898,7 +894,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
       /* And create the new one.  */
       pkl_asm_insn (pasm, PKL_INSN_MKO);
-      pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
       /* Stack: OFFSET */
     }
@@ -1153,13 +1148,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           /* The size of the array is variable.  Peek that many
              elements.
 
-                                      ; OFF
+             XXX: rewrite to use ADDO.
+
+             ; Three scratch registers are used in this code:
+             ;
+             ;   %off is %r0 and contains the offset of the
+             ;   array element being processed, in bits.
+             ;   %idx is %r1 and contains the index of the
+             ;   array element being processed.
+             ;   %nelem is %r2 and holds the total number of
+             ;   elements contained in the array.
              SAVER %off
              SAVER %idx
              SAVER %nelem
-             
+
+                                      ; OFF (must be offset<uint<64>,1>)          
              ; Initialize registers.
-             DUP                      ; OFF OFF
+             OGETM                    ; OFF OMAG
              POPR %off                ; OFF
              PUSH 0UL
              POPR %idx
@@ -1179,16 +1184,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
                                       ; OFF ATYPE
 
              ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-             PUSHR %off               ; ... EOFF
+             PUSHR %off               ; ... EOMAG
+             PUSH 1UL                 ; ... EOMAG EOUNIT
+             MKO                      ; ... EOFF
              SUBPASS array_type       ; ... EOFF EVAL
 
              ; Update the current offset with the size of the value just
              ; peeked.
              SIZ                      ; ... EOFF EVAL ESIZ
              ROT                      ; ... EVAL ESIZ EOFF
-             ADDO                     ; ... EVAL ESIZ EOFF (ESIZ+EOFF)
-             POPR %off                ; ... EVAL ESIZ EOFF
-             NIP                      ; ... EVAL EOFF
+             OGETM                    ; ... EVAL ESIZ EOFF EOMAG
+             ROT                      ; ... EVAL EOFF EOMAG ESIZ
+             ADDLU                    ; ... EVAL EOFF EOMAG ESIZ (EOMAG+ESIZ)
+             POPR %off                ; ... EVAL EOFF EOMAG ESIZ
+             DROP                     ; ... EVAL EOFF EOMAG
+             DROP                     ; ... EVAL EOFF
              PUSHR %idx               ; ... EVAL EOFF EIDX
              ROT                      ; ... EOFF EIDX EVAL
 
@@ -1212,17 +1222,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           int idxreg = 1;
           int nelemreg = 2;
           
-          /* Save used scratch registers.  */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
 
-          /* We will be using %r0 to hold the current offset, %r1 to
-             hold the current index into the array, and %r2 to hold
-             the total number of elements in the array.  Initialize
-             them.  */
-
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
@@ -1249,20 +1253,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_loop (PKL_GEN_ASM);
           {
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
 
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
-            //            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDO,
-            //                          offset_type, offset_type,
-            //                          offset_type);
-            pkl_asm_note (PKL_GEN_ASM, "addo");
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
 
-            /* Increase the index.  */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
@@ -1549,7 +1554,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
         PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
         pkl_asm_call (pasm, "_pkl_gcd");
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
@@ -1593,7 +1597,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
 
         PKL_PASS_SUBPASS (res_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
@@ -1655,7 +1658,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
           
         PKL_PASS_SUBPASS (offset_unit); /* MR UNIT */
         pkl_asm_insn (pasm, PKL_INSN_MKO); /* MR UNIT OFFSET */
-        pkl_asm_insn (pasm, PKL_INSN_NIP2); /* OFFSET */
       }
       break;
     default:
@@ -1754,7 +1756,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
 
         PKL_PASS_SUBPASS (op1_unit);
         pkl_asm_insn (pasm, PKL_INSN_MKO);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
     default:
