@@ -21,6 +21,7 @@
 #include <gettext.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <assert.h>
 #define _(str) gettext (str)
 
@@ -227,6 +228,7 @@ ios_read_int (ios io, ios_off offset, int flags,
               int64_t *value)
 {
   /* XXX: writeme  */
+  printf ("IOS: bits = %d offset = %lu\n", bits, offset);
 
   if (offset % 8 == 0)
     {
@@ -240,7 +242,7 @@ ios_read_int (ios io, ios_off offset, int flags,
           {
             int8_t c;
 
-            c = io->dev_if->getc (io->dev);
+            c = io->dev_if->get_c (io->dev);
             if (c == IOD_EOF)
               return IOS_EIOFF;
             
@@ -251,11 +253,11 @@ ios_read_int (ios io, ios_off offset, int flags,
           {
             int16_t c1, c2;
             
-            c1 = io->dev_if->getc (io->dev);
+            c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
             
-            c2 = io->dev_if->getc (io->dev);
+            c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
 
@@ -270,19 +272,19 @@ ios_read_int (ios io, ios_off offset, int flags,
           {
             int32_t c1, c2, c3, c4;
             
-            c1 = io->dev_if->getc (io->dev);
+            c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
             
-            c2 = io->dev_if->getc (io->dev);
+            c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
             
-            c3 = io->dev_if->getc (io->dev);
+            c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
             
-            c4 = io->dev_if->getc (io->dev);
+            c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
             
@@ -297,35 +299,35 @@ ios_read_int (ios io, ios_off offset, int flags,
           {
             int64_t c1, c2, c3, c4, c5, c6, c7, c8;
             
-            c1 = io->dev_if->getc (io->dev);
+            c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
             
-            c2 = io->dev_if->getc (io->dev);
+            c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
             
-            c3 = io->dev_if->getc (io->dev);
+            c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
             
-            c4 = io->dev_if->getc (io->dev);
+            c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
 
-            c5 = io->dev_if->getc (io->dev);
+            c5 = io->dev_if->get_c (io->dev);
             if (c5 == IOD_EOF)
               return IOS_EIOFF;
 
-            c6 = io->dev_if->getc (io->dev);
+            c6 = io->dev_if->get_c (io->dev);
             if (c6 == IOD_EOF)
               return IOS_EIOFF;
 
-            c7 = io->dev_if->getc (io->dev);
+            c7 = io->dev_if->get_c (io->dev);
             if (c7 == IOD_EOF)
               return IOS_EIOFF;
 
-            c8 = io->dev_if->getc (io->dev);
+            c8 = io->dev_if->get_c (io->dev);
             if (c8 == IOD_EOF)
               return IOS_EIOFF;
             
@@ -363,7 +365,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
           == -1)
         return IOS_EIOFF;
 
-      c = io->dev_if->getc (io->dev);
+      c = io->dev_if->get_c (io->dev);
       if (c == IOD_EOF)
         return IOS_EIOFF;
 
@@ -469,11 +471,11 @@ ios_write_int (ios io, ios_off offset, int flags,
 
       /* Write the resulting byte to the IOD.  */
       
-      if (io->dev_if->putc (io->dev, uvalue >> (64 - n) & 0xff) == IOD_EOF)
+      if (io->dev_if->put_c (io->dev, uvalue >> (64 - n) & 0xff) == IOD_EOF)
         return IOS_EIOFF;
     }
 
-  if (io->dev_if->putc (io->dev, tail) == IOD_EOF)
+  if (io->dev_if->put_c (io->dev, tail) == IOD_EOF)
     return IOS_EIOFF;
 #endif
 
@@ -494,7 +496,7 @@ ios_write_uint (ios io, ios_off offset, int flags,
           == -1)
         return IOS_EIOFF;
 
-      if (io->dev_if->putc (io->dev, (int) value)
+      if (io->dev_if->put_c (io->dev, (int) value)
           == IOD_EOF)
         return IOS_EIOBJ;
     }

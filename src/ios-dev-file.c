@@ -142,6 +142,6 @@ struct ios_dev_if ios_dev_file =
    .close = ios_dev_file_close,
    .tell = ios_dev_file_tell,
    .seek = ios_dev_file_seek,
-   .getc = ios_dev_file_getc,
-   .putc = ios_dev_file_putc,
+   .get_c = ios_dev_file_getc,
+   .put_c = ios_dev_file_putc,
   };

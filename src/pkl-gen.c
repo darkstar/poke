@@ -1153,7 +1153,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              ; Three scratch registers are used in this code:
              ;
              ;   %off is %r0 and contains the offset of the
-             ;   array element being processed, in bits.
+             ;   array element being processed, relative to the start
+             ;   of the array, in bits.
              ;   %idx is %r1 and contains the index of the
              ;   array element being processed.
              ;   %nelem is %r2 and holds the total number of
@@ -1164,7 +1165,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
                                       ; OFF (must be offset<uint<64>,1>)          
              ; Initialize registers.
-             OGETM                    ; OFF OMAG
+             PUSH 0UL                 ; OFF 0UL
              POPR %off                ; OFF
              PUSH 0UL
              POPR %idx
@@ -1227,7 +1228,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
 
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
