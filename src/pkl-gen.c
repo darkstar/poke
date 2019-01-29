@@ -1323,6 +1323,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              elements until EOF(=null).  XXX: or until a constraint
              exception is raised.  */
 
+          assert (0); /* WRITEME */
         }
 
       PKL_PASS_BREAK;
