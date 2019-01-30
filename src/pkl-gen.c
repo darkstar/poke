@@ -792,8 +792,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
 {
   /* XXX: is this break really necessary considering the break in
      pkl_gen_pr_type?  */
-  if (!PKL_GEN_PAYLOAD->in_mapper)
-    PKL_PASS_BREAK;    
+  if (!PKL_GEN_PAYLOAD->in_mapper
+      || !PKL_GEN_PAYLOAD->in_writer)
+    PKL_PASS_BREAK;
+
+  if (PKL_GEN_PAYLOAD->in_writer)
+    {
+      /* Stack: OFF VAL */
+      /* The offset to poke is stored in the TOS.  Push the magnitude
+         and poke it to the IOS.  */
+
+      pkl_ast_node type_offset = PKL_PASS_NODE;
+      pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type_offset);
+         
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM); /* OFF VAL VMAG */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* OFF VMAG */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKED, base_type);
+      PKL_PASS_BREAK;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1174,7 +1190,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   pkl_ast_node integral_type = PKL_PASS_NODE;
 
   if (PKL_GEN_PAYLOAD->in_mapper)
+    /* Stack: OFF */
     pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+  else if (PKL_GEN_PAYLOAD->in_writer)
+    /* Stack: OFF VAL */
+    pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
   else
     {
       pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -1230,6 +1250,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
   assert (!(PKL_GEN_PAYLOAD->in_mapper
             && PKL_GEN_PAYLOAD->in_writer));
+
+  if (PKL_GEN_PAYLOAD->in_writer)
+    {
+      /* Stack: OFF ARR */
+      /* XXX: handle exceptions from the writer.  */
+      //      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AGETW); /* Stack: OFF ARR CLS */
+      //      pkl_astm_insn (PKL_GEN_ASM, PKL_INSN_CALL); /* Stack: _ */
+      // XXX or generate here the writer??
+    }
+  /* XXX if in writer, call the writer function and break the
+     pass.  */
   
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
@@ -1525,7 +1556,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   if (PKL_GEN_PAYLOAD->in_mapper)
+    /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
+  else if (PKL_GEN_PAYLOAD->in_writer)
+    /* Stack: OFF STR */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKES);
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
@@ -1545,6 +1580,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
+  /* XXX if in writer, call the write function and break the pass.  */
+
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* XXX: Generate code like in the case below for in_struct_decl.

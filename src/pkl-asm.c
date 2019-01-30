@@ -299,6 +299,37 @@ pkl_asm_insn_peekd (pkl_asm pasm, pkl_ast_node type)
     assert (0);
 }
 
+/* Macro-instruction: POKED type
+   Stack: OFF VAL -> _
+
+   Generate code for a poke operation to TYPE, which should be an
+   integral type.  */
+
+static void
+pkl_asm_insn_poked (pkl_asm pasm, pkl_ast_node type)
+{
+  int type_code = PKL_AST_TYPE_CODE (type);
+
+  if (type_code == PKL_TYPE_INTEGRAL)
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      static int poked_table[2][2] =
+        {
+         {PKL_INSN_POKEDIU, PKL_INSN_POKEDI},
+         {PKL_INSN_POKEDLU, PKL_INSN_POKEDL}
+        };
+
+      int tl = !!((size - 1) & ~0x1f);
+
+      pkl_asm_insn (pasm, poked_table[tl][sign],
+                    (jitter_uint) size);
+    }
+  else
+    assert (0);
+}
+
 /* Macro-instruction: NEG type
    Stack: VAL -> VAL
 
@@ -846,14 +877,18 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_PEEKD:
+        case PKL_INSN_POKED:
           {
-            pkl_ast_node peek_type;
+            pkl_ast_node integral_type;
 
             va_start (valist, insn);
-            peek_type = va_arg (valist, pkl_ast_node);
+            integral_type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_peekd (pasm, peek_type);
+            if (insn == PKL_INSN_PEEKD)
+              pkl_asm_insn_peekd (pasm, integral_type);
+            else
+              pkl_asm_insn_poked (pasm, integral_type);
             break;
           }
         case PKL_INSN_BZ:

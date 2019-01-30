@@ -405,8 +405,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
         PKL_PASS_CHAIN (PKL_AST_COMP_STMT_STMTS (node));
       break;
     case PKL_AST_ASS_STMT:
-      PKL_PASS (PKL_AST_ASS_STMT_LVALUE (node));
       PKL_PASS (PKL_AST_ASS_STMT_EXP (node));
+      PKL_PASS (PKL_AST_ASS_STMT_LVALUE (node));
       break;
     case PKL_AST_IF_STMT:
       PKL_PASS (PKL_AST_IF_STMT_EXP (node));
