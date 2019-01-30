@@ -364,17 +364,30 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
 
   /* At this point the r-value, generated from executing EXP, is in
-     the stack.  Note that `gen' didn't generate anything for LVALUE,
-     as it is only used as a place-holder for the lexical address of
-     the variable.  */
-
-  assert (PKL_AST_CODE (lvalue) = PKL_AST_VAR);
-  
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
-                PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
-
-  /* XXX: handle assignments to structs and struct fields.  This
-     should use the struct writer functions.  */
+     the stack.  */
+  switch (PKL_AST_CODE (lvalue))
+    {
+    case PKL_AST_VAR:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
+                    PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
+      break;
+    case PKL_AST_ARRAY_REF:
+      /* Stack: ARRAY INDEX VAL */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array
+                                                    value.  */
+      break;
+    case PKL_AST_STRUCT_REF:
+      /* Stack: SCT ID VAL */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SSET);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The struct
+                                                    value.  */
+      break;
+    default:
+      break;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1039,14 +1052,36 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
-  /* XXX: this can be an l-value in an assignment */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-  /* In case the referenced array is not mapped, but the value stored
-     in it is a mapped value, we issue a REMAP.  */
-  /* XXX: this is redundant IO for many (most?) cases.  */
-  /* XXX: handle exceptions from the mapper function.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+    {
+      /* This is a l-value in an assignment.  The array and the index
+         are pushed to the stack for the ass_stmt PS handler.  Nothing
+         else to do here.  */
+     }
+  else
+    {
+      pkl_ast_node array_ref = PKL_PASS_NODE;
+      pkl_ast_node array_ref_type = PKL_AST_TYPE (array_ref);
+      
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+      /* To cover cases where the referenced array is not mapped, but
+         the value stored in it is a mapped value, we issue a
+         REMAP.  */
+      switch (PKL_AST_TYPE_CODE (array_ref_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+          /* XXX: this is redundant IO for many (most?) cases.  */
+          /* XXX: handle exceptions from the mapper function.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+          break;
+        default:
+          break;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1090,14 +1125,36 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
-  /* XXX This can be an l-value in an assignment.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-  /* In case the referenced struct is not mapped, but the value stored
-     in it is a mapped value, we issue a REMAP.  */
-  /* XXX: this is redundant IO for many (most?) cases.  */
-  /* XXX: handle exceptions from the mapper function.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+    {
+      /* This is a -lvalue in an assignment.  The struct and the
+         identifier are pushed to the stack for the ass_stmt PS
+         handler.  Nothing else to do here.  */
+    }
+  else
+    {
+      pkl_ast_node struct_ref = PKL_PASS_NODE;
+      pkl_ast_node struct_ref_type = PKL_AST_TYPE (struct_ref);
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+      /* To cover cases where the referenced struct is not mapped, but
+         the value stored in it is a mapped value, we issue a
+         REMAP.  */
+      switch (PKL_AST_TYPE_CODE (struct_ref_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+          /* XXX: this is redundant IO for many (most?) cases.  */
+          /* XXX: handle exceptions from the mapper function.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+          break;
+        default:
+          break;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1171,6 +1228,9 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
+  assert (!(PKL_GEN_PAYLOAD->in_mapper
+            && PKL_GEN_PAYLOAD->in_writer));
+  
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* Generate code to create a mapped array of the given type.  At
