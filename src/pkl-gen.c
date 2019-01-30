@@ -1041,6 +1041,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+  /* In case the referenced array is not mapped, but the value stored
+     in it is a mapped value, we issue a REMAP.  */
+  /* XXX: this is redundant IO for many (most?) cases.  */
+  /* XXX: handle exceptions from the mapper function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1086,6 +1091,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+  /* In case the referenced struct is not mapped, but the value stored
+     in it is a mapped value, we issue a REMAP.  */
+  /* XXX: this is redundant IO for many (most?) cases.  */
+  /* XXX: handle exceptions from the mapper function.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
 }
 PKL_PHASE_END_HANDLER
 
