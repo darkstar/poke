@@ -326,7 +326,6 @@ PKL_DEF_INSN (PKL_INSN_EXIT, "", "exit")
 PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
 PKL_DEF_INSN (PKL_INSN_NTON, "aa", "nton")
-PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")
 
 PKL_DEF_INSN (PKL_INSN_NEG, "a", "neg")
 PKL_DEF_INSN (PKL_INSN_ADD, "a", "add")
@@ -355,6 +354,11 @@ PKL_DEF_INSN (PKL_INSN_BAND, "a", "band")
 PKL_DEF_INSN (PKL_INSN_BOR, "a", "bor")
 PKL_DEF_INSN (PKL_INSN_BXOR, "a", "bxor")
 PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
+
+/* Offset meta-instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")
+PKL_DEF_INSN (PKL_INSN_ADDO, "a", "addo")
 
 /* Meta-instructions to handle mapped values.  */
 
