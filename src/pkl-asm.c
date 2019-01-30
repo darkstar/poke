@@ -691,10 +691,6 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 static void
 pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
 {
-  /* XXX _pkl_gcd only works with uint<64> integers.  */
-  assert (PKL_AST_TYPE_I_SIZE (base_type) == 64
-          && PKL_AST_TYPE_I_SIGNED (base_type) == 0);
-
   /* XXX simplify by using the returnstack for save area.  */
   
                                          /* OFF1 OFF2 */
