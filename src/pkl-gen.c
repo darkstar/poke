@@ -1255,13 +1255,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
     {
       /* Stack: OFF ARR */
       /* XXX: handle exceptions from the writer.  */
-      //      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AGETW); /* Stack: OFF ARR CLS */
-      //      pkl_astm_insn (PKL_GEN_ASM, PKL_INSN_CALL); /* Stack: _ */
-      // XXX or generate here the writer??
+
+      /* Note that we don't use the offset, because it should be the
+         same than the mapped offset in the array.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The offset. */
+      PKL_PASS_BREAK;
     }
-  /* XXX if in writer, call the writer function and break the
-     pass.  */
-  
+
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* Generate code to create a mapped array of the given type.  At
@@ -1580,8 +1582,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  /* XXX if in writer, call the write function and break the pass.  */
+  if (PKL_GEN_PAYLOAD->in_writer)
+    {
+      /* Stack: OFF SCT */
+      /* XXX: handle exceptions from the writer.  */
 
+      /* Note that we don't use the offset, because it should be the
+         same than the mapped offset in the struct.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The struct.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The offset. */
+      PKL_PASS_BREAK;
+    }
+      
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* XXX: Generate code like in the case below for in_struct_decl.
