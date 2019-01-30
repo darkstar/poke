@@ -209,8 +209,12 @@ late-header-c
   io, offset, 0, bits, endian, nenc, &value
 #define PVM_IOS_ARGS_UINT                                                    \
   io, offset, 0, bits, endian, &value
+#define PVM_IOS_ARGS_WRITE_INT                                               \
+  io, offset, 0, bits, endian, nenc, value
+#define PVM_IOS_ARGS_WRITE_UINT                                              \
+  io, offset, 0, bits, endian, value
 
-/* Peek instructions.
+/* Integral peek instructions.
    ( OFF -- VAL )  */
 #define PVM_PEEK(TYPE,IOTYPE,NENC,ENDIAN,BITS,IOARGS)                        \
   do                                                                         \
@@ -235,6 +239,33 @@ late-header-c
        }                                                                     \
      else                                                                    \
        JITTER_TOP_STACK () = pvm_make_##IOTYPE (value, bits);                \
+   } while (0)
+
+/* Integral poke instructions.
+   ( OFF VAL -- )  */
+#define PVM_POKE(TYPE,IOTYPE,NENC,ENDIAN,BITS,IOARGS)                        \
+  do                                                                         \
+   {                                                                         \
+     __attribute__((unused)) enum ios_nenc nenc = (NENC);                    \
+     enum ios_endian endian = (ENDIAN);                                      \
+     int bits = (BITS);                                                      \
+     IOTYPE##64_t value = PVM_VAL_##TYPE (JITTER_TOP_STACK ());              \
+     ios io;                                                                 \
+     ios_off offset;                                                         \
+                                                                             \
+     JITTER_DROP_STACK ();                                                   \
+     JITTER_DROP_STACK ();                                                   \
+                                                                             \
+     if ((io = ios_cur ()) == NULL)                                          \
+        PVM_RAISE (PVM_E_NO_IOS);                                            \
+                                                                             \
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))\
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()))); \
+                                                                             \
+     if (ios_write_##IOTYPE (IOARGS) != IOS_OK)                              \
+       {                                                                     \
+         /* XXX: raise an IO exception.  */                                  \
+       }                                                                     \
    } while (0)
 
 /* Macro to call to a closure.  This is used in the isntruction CALL,
@@ -1879,6 +1910,86 @@ instruction peekdlu (?n bits_printer) # XXX avoid code duplication with peeklu
   code
     PVM_PEEK (ulong, uint, jitter_state_runtime.nenc, jitter_state_runtime.endian,
               JITTER_ARGN0, PVM_IOS_ARGS_UINT);
+  end
+end
+
+# pokei NENC,ENDIAN,BITS
+# ( OFF INT -- )
+
+instruction pokei (?n nenc_printer,?n endian_printer,?n bits_printer)
+  code
+    PVM_POKE (INT, int, JITTER_ARGN0, JITTER_ARGN1, JITTER_ARGN2,
+              PVM_IOS_ARGS_WRITE_INT);
+  end
+end
+
+# pokeiu ENDIAN,BITS
+# ( OFF UINT -- )
+
+instruction pokeiu (?n endian_printer,?n bits_printer)
+  code
+   PVM_POKE (UINT, uint, 0 /* unused */, JITTER_ARGN0, JITTER_ARGN1,
+             PVM_IOS_ARGS_WRITE_UINT);
+  end
+end
+
+# pokel NENC,ENDIAN,BITS
+# ( OFF LONG -- )
+
+instruction pokel (?n nenc_printer,?n endian_printer,?n bits_printer)
+  code
+    PVM_POKE (LONG, int, JITTER_ARGN0, JITTER_ARGN1, JITTER_ARGN2,
+              PVM_IOS_ARGS_WRITE_INT);
+  end
+end
+
+# pokelu ENDIAN,BITS
+# ( OFF ULONG -- )
+
+instruction pokelu (?n endian_printer,?n bits_printer)
+  code
+   PVM_POKE (ULONG, uint, 0 /* unused */, JITTER_ARGN0, JITTER_ARGN1,
+             PVM_IOS_ARGS_WRITE_UINT);
+  end
+end
+
+# pokedi BITS
+# ( OFF INT -- )
+
+instruction pokedi (?n bits_printer)
+  code
+    PVM_POKE (INT, int, jitter_state_runtime.nenc, jitter_state_runtime.endian,
+              JITTER_ARGN0, PVM_IOS_ARGS_WRITE_INT);
+  end
+end
+
+# pokediu BITS
+# ( OFF UINT -- )
+
+instruction pokediu (?n bits_printer)
+  code
+    PVM_POKE (UINT, uint, jitter_state_runtime.nenc, jitter_state_runtime.endian,
+              JITTER_ARGN0, PVM_IOS_ARGS_WRITE_UINT);
+  end
+end
+
+# pokedl BITS
+# ( OFF LONG -- )
+
+instruction pokedl (?n bits_printer)
+  code
+    PVM_POKE (LONG, int, jitter_state_runtime.nenc, jitter_state_runtime.endian,
+              JITTER_ARGN0, PVM_IOS_ARGS_WRITE_INT);
+  end
+end
+
+# pokedlu BITS
+# ( OFF ULONG -- )
+
+instruction pokedlu (?n bits_printer)
+  code
+    PVM_POKE (ULONG, uint, jitter_state_runtime.nenc, jitter_state_runtime.endian,
+              JITTER_ARGN0, PVM_IOS_ARGS_WRITE_UINT);
   end
 end
 
