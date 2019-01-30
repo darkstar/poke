@@ -503,8 +503,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 {
-  /* Pop the expression from the stack.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POP);
+  /* Drop the expression from the stack.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1492,26 +1492,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       /* Complete the mapper closure with the current environment,
          call it to obtain the mapped array itself, and install it in
          the array as its mapper.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF CLS CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* OFF CLS OFF CLS */
 
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
 
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* CLS ARR */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* OFF CLS ARR */
 
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETM);                /* ARR */
-
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* OFF ARR CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* OFF ARR */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* ARR */
 
       /* Compile a writer function to a closure.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
@@ -1634,7 +1636,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
          install it in the array as its writer.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* ARR CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* ARR CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETW);                /* ARR */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETW);                /* ARR */
 
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;

@@ -230,6 +230,56 @@ pkl_asm_insn_nton  (pkl_asm pasm,
     }
 }
 
+/* Macro-instruction: REMAP type
+   Stack: VAL -> VAL
+
+   Given a mappable PVM value on the TOS, remap it.  */
+
+static void
+pkl_asm_insn_remap (pkl_asm pasm)
+{
+  jitter_label label = jitter_fresh_label (pasm->program);
+
+  /* The re-map should be done only if the value has a mapper.  */
+  pkl_asm_insn (pasm, PKL_INSN_MGETM);      /* VAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_BN, label);  /* VAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* VAL */
+
+  /* XXX do not re-map if the object is up to date (cached
+     value.) */
+  /* XXX rewrite using the return stack for temporaries.  */
+  
+                                       /* VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETO); /* VAL OFF */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETW); /* OFF VAL WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETM); /* OFF WCLS VAL MCSL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS VAL */
+  
+  pkl_asm_insn (pasm, PKL_INSN_MGETO); /* OFF WCLS MCLS VAL OFF */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS OFF VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETM); /* OFF WCLS MCLS OFF VAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF WCLS MCLS VAL MCLS OFF */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS VAL OFF MCLS */
+
+  /* XXX save registers */
+  pkl_asm_insn (pasm, PKL_INSN_CALL);  /* OFF WCLS MCLS VAL NVAL */
+  /* XXX restore registers */
+
+  pkl_asm_insn (pasm, PKL_INSN_NIP);   /* OFF WCLS MCLS NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS NVAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_MSETM); /* OFF WCLS NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF NVAL WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_MSETW); /* OFF NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* NVAL OFF */
+  pkl_asm_insn (pasm, PKL_INSN_MSETO); /* NVAL */
+  
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* VAL NULL */
+  pvm_append_label (pasm->program, label);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* VAL */
+}
+
 /* Macro-instruction: PEEK type, endian, nenc
    Stack: _ -> VAL
 
@@ -966,6 +1016,11 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_ogetmc (pasm, base_type);
             break;
           }
+        case PKL_INSN_REMAP:
+          {
+            pkl_asm_insn_remap (pasm);
+            break;
+          }
         case PKL_INSN_MACRO:
         default:
           assert (0);
@@ -1023,7 +1078,7 @@ pkl_asm_then (pkl_asm pasm)
                 PKL_AST_TYPE (pasm->level->node1),
                 pasm->level->label1);
   /* Pop the expression condition from the stack.  */
-  pkl_asm_insn (pasm, PKL_INSN_POP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
 
 void
@@ -1034,7 +1089,7 @@ pkl_asm_else (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
   /* Pop the expression condition from the stack.  */
-  pkl_asm_insn (pasm, PKL_INSN_POP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
 
 void
@@ -1145,7 +1200,7 @@ pkl_asm_loop (pkl_asm pasm)
 {
   pkl_asm_insn (pasm, PKL_INSN_BZI, pasm->level->label2);
   /* Pop the loop condition from the stack.  */
-  pkl_asm_insn (pasm, PKL_INSN_POP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
 
 void
@@ -1154,7 +1209,7 @@ pkl_asm_endloop (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label1);
   pvm_append_label (pasm->program, pasm->level->label2);
   /* Pop the loop condition from the stack.  */
-  pkl_asm_insn (pasm, PKL_INSN_POP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 
   /* Cleanup and pop the current level.  */
   pkl_asm_poplevel (pasm);
@@ -1245,7 +1300,7 @@ pkl_asm_for_where (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_EQLU);
   pkl_asm_insn (pasm, PKL_INSN_BNZI, pasm->level->label3);
-  pkl_asm_insn (pasm, PKL_INSN_POP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
 
   /* Set the iterator for this iteration.  */
   pkl_asm_insn (pasm, PKL_INSN_ROT);

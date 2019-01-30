@@ -45,7 +45,6 @@
 /* Stack manipulation instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_PUSH, "v", "push")
-PKL_DEF_INSN (PKL_INSN_POP, "", "pop")
 PKL_DEF_INSN (PKL_INSN_PUSHR, "r", "pushr")
 PKL_DEF_INSN (PKL_INSN_POPR, "r", "popr")
 PKL_DEF_INSN (PKL_INSN_DROP, "", "drop")
@@ -213,14 +212,23 @@ PKL_DEF_INSN (PKL_INSN_MKA, "", "mka")
 PKL_DEF_INSN (PKL_INSN_MKMA, "", "mkma")
 PKL_DEF_INSN (PKL_INSN_AREF, "", "aref")
 PKL_DEF_INSN (PKL_INSN_ASET, "", "aset")
-PKL_DEF_INSN (PKL_INSN_ASETM, "", "asetm")
-PKL_DEF_INSN (PKL_INSN_ASETW, "", "asetw")
 
 /* Struct instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKSCT, "", "mksct")
 PKL_DEF_INSN (PKL_INSN_SREF, "", "sref")
 PKL_DEF_INSN (PKL_INSN_SSET, "", "sset")
+
+/* Instructions to handle mapped values.  */
+
+PKL_DEF_INSN (PKL_INSN_MGETO, "", "mgeto")
+PKL_DEF_INSN (PKL_INSN_MSETO, "", "mseto")
+
+PKL_DEF_INSN (PKL_INSN_MGETM, "", "mgetm")
+PKL_DEF_INSN (PKL_INSN_MSETM, "", "msetm")
+  
+PKL_DEF_INSN (PKL_INSN_MGETW, "", "mgetw")
+PKL_DEF_INSN (PKL_INSN_MSETW, "", "msetw")
 
 /* Type related instructions.  */
 
@@ -240,6 +248,8 @@ PKL_DEF_INSN (PKL_INSN_TYPOF, "", "typof")
 
 PKL_DEF_INSN (PKL_INSN_BA, "l", "ba")
 
+PKL_DEF_INSN (PKL_INSN_BN, "l", "bn")
+
 PKL_DEF_INSN (PKL_INSN_BZI, "l", "bzi")
 PKL_DEF_INSN (PKL_INSN_BZIU, "l", "bziu")
 PKL_DEF_INSN (PKL_INSN_BZL, "l", "bzl")
@@ -252,7 +262,6 @@ PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
 
 /* IO instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
 PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
 
 PKL_DEF_INSN (PKL_INSN_PEEKI, "nnn", "peeki")
@@ -348,6 +357,10 @@ PKL_DEF_INSN (PKL_INSN_BAND, "a", "band")
 PKL_DEF_INSN (PKL_INSN_BOR, "a", "bor")
 PKL_DEF_INSN (PKL_INSN_BXOR, "a", "bxor")
 PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
+
+/* Meta-instructions to handle mapped values.  */
+
+PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
 
 /*
 Local variables:

@@ -263,6 +263,8 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 
 #define PVM_VAL_SCT(V) (PVM_VAL_BOX_SCT (PVM_VAL_BOX ((V))))
 #define PVM_VAL_SCT_OFFSET(V) (PVM_VAL_SCT((V))->offset)
+#define PVM_VAL_SCT_MAPPER(V) (PVM_VAL_SCT((V))->mapper)
+#define PVM_VAL_SCT_WRITER(V) (PVM_VAL_SCT((V))->writer)
 #define PVM_VAL_SCT_TYPE(V) (PVM_VAL_SCT((V))->type)
 #define PVM_VAL_SCT_NELEM(V) (PVM_VAL_SCT((V))->nelem)
 #define PVM_VAL_SCT_ELEM(V,I) (PVM_VAL_SCT((V))->elems[(I)])
@@ -270,6 +272,8 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 struct pvm_struct
 {
   pvm_val offset;
+  pvm_val mapper;
+  pvm_val writer;
   pvm_val type;
   pvm_val nelem;
   struct pvm_struct_elem *elems;
@@ -482,10 +486,56 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
    : PVM_IS_ULONG ((V)) ? PVM_VAL_ULONG ((V))    \
    : 0)
 
-#define PVM_VAL_MAPPED_OFFSET(V)                        \
+/* The following macros allow to handle map-able PVM values (such as
+   arrays and structs) polymorphically.  */
+
+#define PVM_VAL_OFFSET(V)                               \
   (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_OFFSET ((V))          \
    : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_OFFSET ((V))        \
    : PVM_NULL)
+
+#define PVM_VAL_SET_OFFSET(V,O)                 \
+  do                                            \
+    {                                           \
+      if (PVM_IS_ARR ((V)))                     \
+        PVM_VAL_ARR_OFFSET ((V)) = (O);         \
+      else if (PVM_IS_SCT ((V)))                \
+        PVM_VAL_SCT_OFFSET ((V)) = (O);         \
+      else                                      \
+        assert (0);                             \
+    } while (0)
+    
+#define PVM_VAL_MAPPER(V)                               \
+  (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_MAPPER ((V))          \
+   : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_MAPPER ((V))        \
+   : PVM_NULL)
+
+#define PVM_VAL_SET_MAPPER(V,O)                 \
+  do                                            \
+    {                                           \
+      if (PVM_IS_ARR ((V)))                     \
+        PVM_VAL_ARR_MAPPER ((V)) = (O);         \
+      else if (PVM_IS_SCT ((V)))                \
+        PVM_VAL_SCT_MAPPER ((V)) = (O);         \
+      else                                      \
+        assert (0);                             \
+    } while (0)
+
+#define PVM_VAL_WRITER(V)                               \
+  (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_WRITER ((V))          \
+   : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_WRITER ((V))        \
+   : PVM_NULL)
+
+#define PVM_VAL_SET_WRITER(V,O)                 \
+  do                                            \
+    {                                           \
+      if (PVM_IS_ARR ((V)))                     \
+        PVM_VAL_ARR_WRITER ((V)) = (O);         \
+      else if (PVM_IS_SCT ((V)))                \
+        PVM_VAL_SCT_WRITER ((V)) = (O);         \
+      else                                      \
+        assert (0);                             \
+    } while (0)
 
 /* Return an offset with the size of VAL.  */
 pvm_val pvm_sizeof (pvm_val val);
