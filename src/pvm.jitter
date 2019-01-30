@@ -1570,11 +1570,10 @@ instruction sctset () # ( SCT VAL STR -- SCT )
   end
 end
 
-instruction sref () # ( SCT STR -- VAL )
+instruction sref () # ( SCT STR -- SCT STR VAL )
   code
-#define F(res, a, b) { res = pvm_ref_struct (a, b); }
-    JITTER_BINARY_STACK (F);  
-#undef F
+    JITTER_PUSH_STACK (pvm_ref_struct (JITTER_UNDER_TOP_STACK (),
+                                       JITTER_TOP_STACK ()));
   end
 end
 
@@ -1743,6 +1742,30 @@ instruction remap () # ( VAL -- VAL )
          JITTER_PUSH_STACK (PVM_VAL_MAPPED_OFFSET (val));
          PVM_CALL (mapper);
      }
+  end
+end
+
+# write
+#
+# If the value at the TOS is mapped, then write it to IO.
+# Otherwise, this is a NOP.
+#
+# Executing this instruction can result in the following exceptions:
+#   PVM_E_IOS_FULL
+#   PVM_E_CONSTRAINT_ERROR
+
+instruction write () # ( VAL -- VAL )
+  caller
+  code
+     pvm_val val = JITTER_TOP_STACK ();
+     pvm_val writer = pvm_val_writer (val);
+
+     if (writer != PVM_NULL)
+     {
+        JITTER_DUP_STACK ();                             /* VAL VAL */
+        JITTER_PUSH_STACK (PVM_VAL_MAPPED_OFFSET (val)); /* VAL VAL OFF */
+        PVM_CALL (writer);
+      }
   end
 end
 

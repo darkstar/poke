@@ -251,6 +251,7 @@ PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
 /* IO instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
+PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
 
 PKL_DEF_INSN (PKL_INSN_PEEKI, "nnn", "peeki")
 PKL_DEF_INSN (PKL_INSN_PEEKIU, "nnn", "peekiu")
