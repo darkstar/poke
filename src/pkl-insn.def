@@ -262,8 +262,6 @@ PKL_DEF_INSN (PKL_INSN_BNZLU, "l", "bnzlu")
 
 /* IO instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
-
 PKL_DEF_INSN (PKL_INSN_PEEKI, "nnn", "peeki")
 PKL_DEF_INSN (PKL_INSN_PEEKIU, "nnn", "peekiu")
 PKL_DEF_INSN (PKL_INSN_PEEKL, "nnn", "peekl")
@@ -361,6 +359,7 @@ PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
 /* Meta-instructions to handle mapped values.  */
 
 PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
+PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
 
 /*
 Local variables:

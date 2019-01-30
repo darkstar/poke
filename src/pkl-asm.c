@@ -230,10 +230,10 @@ pkl_asm_insn_nton  (pkl_asm pasm,
     }
 }
 
-/* Macro-instruction: REMAP type
+/* Macro-instruction: REMAP
    Stack: VAL -> VAL
 
-   Given a mappable PVM value on the TOS, remap it.  */
+   Given a mapeable PVM value on the TOS, remap it.  */
 
 static void
 pkl_asm_insn_remap (pkl_asm pasm)
@@ -279,6 +279,30 @@ pkl_asm_insn_remap (pkl_asm pasm)
   pvm_append_label (pasm->program, label);
   pkl_asm_insn (pasm, PKL_INSN_DROP);       /* VAL */
 }
+
+/* Macro-instruction: WRITE
+   Stack: VAL -> VAL
+
+   Given a mapeable PVM value on the TOS, invoke its writer.  */
+
+static void
+pkl_asm_insn_write (pkl_asm pasm)
+{
+  jitter_label label = jitter_fresh_label (pasm->program);
+
+  /* The write should be done only if the value has a writer.  */
+  pkl_asm_insn (pasm, PKL_INSN_MGETW);       /* VAL WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_BN, label);   /* VAL MCLS */
+
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);        /* MCLS VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETO);       /* MCLS VAL OFF */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);         /* VAL OFF MCLS */
+  /* XXX: exceptions etc. */
+  pkl_asm_insn (pasm, PKL_INSN_CALL);        /* VAL NULL */
+
+  pvm_append_label (pasm->program, label);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);        /* VAL */
+}  
 
 /* Macro-instruction: PEEK type, endian, nenc
    Stack: _ -> VAL
@@ -1017,10 +1041,11 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_REMAP:
-          {
-            pkl_asm_insn_remap (pasm);
-            break;
-          }
+          pkl_asm_insn_remap (pasm);
+          break;
+        case PKL_INSN_WRITE:
+          pkl_asm_insn_write (pasm);
+          break;
         case PKL_INSN_MACRO:
         default:
           assert (0);
