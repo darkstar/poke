@@ -373,9 +373,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
       break;
     case PKL_AST_ARRAY_REF:
       /* Stack: VAL ARRAY INDEX */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT); /* ARRAY INDEX VAL */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET); /* ARRAY */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE); /* ARRAY */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array
                                                     value.  */
       break;
@@ -1567,8 +1567,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              PUSHVAR 0,1              ; OFF ARRAY
              PUSHR %idx               ; OFF ARRAY I
              AREF                     ; OFF ARRAY I VAL
-XXX Addition of offsets... crap.
              NIP2                     ; OFF VAL
+XXX offset here is always the array offset
              SUBPASS array_type
 
              ; Increase the current index and process the next
