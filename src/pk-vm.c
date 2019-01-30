@@ -113,7 +113,7 @@ pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   mapper = pvm_val_mapper (exp);
   if (mapper == PVM_NULL)
     {
-      fprintf (stdout, "error: the givan value is not mapped\n");
+      fprintf (stdout, "error: the given value is not mapped\n");
       return 0;
     }
 
@@ -147,7 +147,7 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   writer = pvm_val_writer (exp);
   if (writer == PVM_NULL)
     {
-      fprintf (stdout, "error: the givan value is not mapped\n");
+      fprintf (stdout, "error: the given value is not mapped\n");
       return 0;
     }
 
