@@ -336,8 +336,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_array_initializer)
 }
 PKL_PHASE_END_HANDLER
 
+/* Make sure that the left-hand of an assignment expression is a
+   variable, an array reference or a struct reference.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node ass_stmt = PKL_PASS_NODE;
+  pkl_ast_node ass_stmt_lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
+
+  switch (PKL_AST_CODE (ass_stmt_lvalue))
+    {
+    case PKL_AST_VAR:
+    case PKL_AST_ARRAY_REF:
+    case PKL_AST_STRUCT_REF:
+      break;
+    default:
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt_lvalue),
+                 "invalid l-value in assignment");
+      payload->errors++;
+      PKL_PASS_ERROR;
+
+      break;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_analf =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_analf_ps_array_initializer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_analf_ps_ass_stmt),
   };

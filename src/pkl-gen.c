@@ -1039,6 +1039,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
 {
+  /* XXX: this can be an l-value in an assignment */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
   /* In case the referenced array is not mapped, but the value stored
@@ -1089,6 +1090,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
+  /* XXX This can be an l-value in an assignment.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
   /* In case the referenced struct is not mapped, but the value stored
