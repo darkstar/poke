@@ -799,16 +799,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
   if (PKL_GEN_PAYLOAD->in_writer)
     {
       /* Stack: OFF VAL */
-      /* The offset to poke is stored in the TOS.  Push the magnitude
-         and poke it to the IOS.  */
-
-      pkl_ast_node type_offset = PKL_PASS_NODE;
-      pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type_offset);
-         
+      /* The offset to poke is stored in the TOS.  Replace the offset
+         at the TOS with the magnitude of the offset and let the
+         BASE_TYPE handler to tackle it.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM); /* OFF VAL VMAG */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* OFF VMAG */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKED, base_type);
-      PKL_PASS_BREAK;
     }
 }
 PKL_PHASE_END_HANDLER
