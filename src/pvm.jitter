@@ -1582,6 +1582,21 @@ instruction aref () # ( ARR ULONG -- ARR ULONG VAL )
   end
 end
 
+instruction arefo () # ( ARR ULONG -- ARR ULONG OFF )
+  code
+    pvm_val array = JITTER_UNDER_TOP_STACK ();
+    pvm_val index = JITTER_TOP_STACK ();
+
+    if (PVM_VAL_ULONG (index) < 0
+        || (PVM_VAL_ULONG (index) >=
+            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (array))))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    JITTER_PUSH_STACK (PVM_VAL_ARR_ELEM_OFFSET (array,
+                                                PVM_VAL_ULONG (index)));
+  end
+end
+
 
 
 ## Struct instructions.

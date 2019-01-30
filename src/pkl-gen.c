@@ -1567,17 +1567,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              PUSHVAR 0,1              ; OFF ARRAY
              PUSHR %idx               ; OFF ARRAY I
              AREF                     ; OFF ARRAY I VAL
-             NIP2                     ; OFF VAL
-XXX offset here is always the array offset
-             SUBPASS array_type
+             NROT                     ; OFF VAL ARRAY I
+             AREFO                    ; OFF VAL ARRAY I EOFF
+             NIP2                     ; OFF VAL EOFF
+             SWAP                     ; OFF EOFF VAL
+             SUBPASS array_type       ; OFF
+             DROP                     ; _
 
              ; Increase the current index and process the next
              ; element.
-             PUSHR %idx              ; ... EIDX
-             PUSH 1UL                ; ... EIDX 1UL
-             ADDLU                   ; ... EDIX 1UL (EIDX+1UL)
-             NIP2                    ; ... (EIDX+1UL)
-             POPR %idx               ; ... _
+             PUSHR %idx              ; EIDX
+             PUSH 1UL                ; EIDX 1UL
+             ADDLU                   ; EDIX 1UL (EIDX+1UL)
+             NIP2                    ; (EIDX+1UL)
+             POPR %idx               ; _
              .endloop 
 
           */
@@ -1606,11 +1609,16 @@ XXX offset here is always the array offset
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREFO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
 
             PKL_GEN_PAYLOAD->in_writer = 1;
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
             PKL_GEN_PAYLOAD->in_writer = 0;
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
 
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
