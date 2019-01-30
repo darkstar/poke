@@ -204,6 +204,39 @@ late-header-c
       JITTER_PUSH_STACK (pvm_make_##RTYPELC ((RTYPEC) val, tsize));          \
     } while (0)
 
+/* Auxiliary macros used in PVM_PEEK and PVM_POKE below.  */
+#define PVM_IOS_ARGS_INT                                                     \
+  io, offset, 0, bits, endian, nenc, &value
+#define PVM_IOS_ARGS_UINT                                                    \
+  io, offset, 0, bits, endian, &value
+
+/* Peek instructions.
+   ( OFF -- VAL )  */
+#define PVM_PEEK(TYPE,IOTYPE,NENC,ENDIAN,BITS,IOARGS)                        \
+  do                                                                         \
+   {                                                                         \
+     __attribute__((unused)) enum ios_nenc nenc = (NENC);                    \
+     enum ios_endian endian = (ENDIAN);                                      \
+     int bits = (BITS);                                                      \
+     IOTYPE##64_t value;                                                     \
+     ios io;                                                                 \
+     ios_off offset;                                                         \
+                                                                             \
+     if ((io = ios_cur ()) == NULL)                                          \
+        PVM_RAISE (PVM_E_NO_IOS);                                            \
+                                                                             \
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))\
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()))); \
+                                                                             \
+     if (ios_read_##IOTYPE (IOARGS) != IOS_OK)                               \
+       {                                                                     \
+         /* XXX: raise an IO exception for a != EOF error.  */               \
+         JITTER_TOP_STACK () = PVM_NULL;                                     \
+       }                                                                     \
+     else                                                                    \
+       JITTER_TOP_STACK () = pvm_make_##IOTYPE (value, bits);                \
+   } while (0)
+
 /* Macro to call to a closure.  This is used in the isntruction CALL,
    and also other instructions required to... call :D The argument
    should be a closure (surprise.)  */
@@ -1774,28 +1807,8 @@ end
 
 instruction peeki (?n nenc_printer,?n endian_printer,?n bits_printer)
   code
-     enum ios_nenc nenc = JITTER_ARGN0;
-     enum ios_endian endian = JITTER_ARGN1;
-     int bits = JITTER_ARGN2;
-     int64_t value;
-     ios io;
-     ios_off offset;
-
-     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (PVM_E_NO_IOS);
-
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
-
-
-     if (ios_read_int (io, offset, 0,
-                       bits, endian, nenc, &value) != IOS_OK)
-       {
-         /* XXX: raise an IO exception for a != EOF error.  */ 
-         JITTER_TOP_STACK () = PVM_NULL;
-       }
-     else
-       JITTER_TOP_STACK () = pvm_make_int (value, bits);
+    PVM_PEEK (int, int, JITTER_ARGN0, JITTER_ARGN1, JITTER_ARGN2,
+              PVM_IOS_ARGS_INT);
   end
 end
 
@@ -1804,27 +1817,8 @@ end
 
 instruction peekiu (?n endian_printer,?n bits_printer)
   code
-     enum ios_endian endian = JITTER_ARGN0;
-     int bits = JITTER_ARGN1;
-     uint64_t value;
-     ios io;
-     ios_off offset;
-
-     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (PVM_E_NO_IOS);
-
-
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
-
-     if (ios_read_uint (io, offset, 0,
-                        bits, endian, &value) != IOS_OK)
-       {
-         /* XXX: raise an IO exception for a != EOF error.  */ 
-         JITTER_TOP_STACK () = PVM_NULL;
-       }
-     else
-       JITTER_TOP_STACK () = pvm_make_uint (value, bits);
+   PVM_PEEK (uint, uint, 0 /* unused */, JITTER_ARGN0, JITTER_ARGN1,
+             PVM_IOS_ARGS_UINT);
   end
 end
 
@@ -1833,27 +1827,8 @@ end
 
 instruction peekl (?n nenc_printer,?n endian_printer,?n bits_printer)
   code
-     enum ios_nenc nenc = JITTER_ARGN0;
-     enum ios_endian endian = JITTER_ARGN1;
-     int bits = JITTER_ARGN2;
-     int64_t value;
-     ios io;
-     ios_off offset;
-
-     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (PVM_E_NO_IOS);
-
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
-
-     if (ios_read_int (io, offset, 0,
-                       bits, endian, nenc, &value) != IOS_OK)
-       {
-         /* XXX: raise an IO exception for a != EOF error.  */
-         JITTER_TOP_STACK () = PVM_NULL;
-       }
-     else
-       JITTER_TOP_STACK () = pvm_make_long (value, bits);
+    PVM_PEEK (long, int, JITTER_ARGN0, JITTER_ARGN1, JITTER_ARGN2,
+              PVM_IOS_ARGS_INT);
   end
 end
 
@@ -1862,26 +1837,8 @@ end
 
 instruction peeklu (?n endian_printer,?n bits_printer)
   code
-     enum ios_endian endian = JITTER_ARGN0;
-     int bits = JITTER_ARGN1;
-     uint64_t value;
-     ios io;
-     ios_off offset;
-
-     if ((io = ios_cur ()) == NULL)
-        PVM_RAISE (PVM_E_NO_IOS);
-
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
-
-     if (ios_read_uint (io, offset, 0,
-                        bits, endian, &value) != IOS_OK)
-       {
-         /* XXX: raise an IO exception for a != EOF error.  */ 
-         JITTER_TOP_STACK () = PVM_NULL;
-       }
-     else
-       JITTER_TOP_STACK () = pvm_make_ulong (value, bits);
+   PVM_PEEK (ulong, uint, 0 /* unused */, JITTER_ARGN0, JITTER_ARGN1,
+             PVM_IOS_ARGS_UINT);
   end
 end
 
