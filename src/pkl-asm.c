@@ -725,12 +725,10 @@ pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
                 base_type);              /* ... OFF1M RESU OFF2 OFF2M */
   pkl_asm_insn (pasm, PKL_INSN_NIP);     /* ... OFF1M RESU OFF2M */
 
-  /* Add the two magnitudes, but make sure to do it in the right
-     order.  */
+  /* Add the two magnitudes.  */
   pkl_asm_insn (pasm, PKL_INSN_ROT);     /* ... RESU OFF2M OFF1M */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* ... RESU OFF1M OFF2M */
   pkl_asm_insn (pasm, PKL_INSN_ADD,
-                base_type);              /* ... RESU OFF1M OFF2M RESM */
+                base_type);              /* ... RESU OFF2M OFF1M RESM */
   pkl_asm_insn (pasm, PKL_INSN_NIP2);    /* ... RESU RESM */
 
   /* Make the result offset.  */
