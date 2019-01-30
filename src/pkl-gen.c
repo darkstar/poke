@@ -265,10 +265,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_var)
 
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
-    /* This is a l-value in an assignment.  Generate nothing, as this
-       node is only used as a recipient for the lexical address of the
-       variable.  */
-    ;
+    {
+      /* This is a l-value in an assignment.  Generate nothing, as
+         this node is only used as a recipient for the lexical address
+         of the variable.  */
+      /* XXX: the call to WRITE will most probably belong here, after
+         the aref or sref or whatever.  */
+    }
   else
     {
       pkl_ast_node var_type = PKL_AST_TYPE (var);
