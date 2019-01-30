@@ -250,6 +250,7 @@ late-header-c
      enum ios_endian endian = (ENDIAN);                                      \
      int bits = (BITS);                                                      \
      IOTYPE##64_t value = PVM_VAL_##TYPE (JITTER_TOP_STACK ());              \
+     pvm_val offset_val = JITTER_UNDER_TOP_STACK ();                         \
      ios io;                                                                 \
      ios_off offset;                                                         \
                                                                              \
@@ -259,8 +260,8 @@ late-header-c
      if ((io = ios_cur ()) == NULL)                                          \
         PVM_RAISE (PVM_E_NO_IOS);                                            \
                                                                              \
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))\
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()))); \
+     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (offset_val))         \
+               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (offset_val)));          \
                                                                              \
      if (ios_write_##IOTYPE (IOARGS) != IOS_OK)                              \
        {                                                                     \

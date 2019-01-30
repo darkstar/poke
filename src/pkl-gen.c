@@ -1259,6 +1259,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The offset. */
+
       PKL_PASS_BREAK;
     }
 
@@ -1522,9 +1523,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
 
-      /* Push a new frame and register the two local variables passed
-         to the function.  From this point on, the passed variables
-         will be referred using their lexical address.
+      /* Push a new frame and register the local variables passed to
+         the function.  From this point on, the passed variables will
+         be referred using their lexical address.
          
          The offset is back=0, over=0.
          The array to write is back=0, over=1.
@@ -1566,6 +1567,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              PUSHVAR 0,1              ; OFF ARRAY
              PUSHR %idx               ; OFF ARRAY I
              AREF                     ; OFF ARRAY I VAL
+XXX Addition of offsets... crap.
              NIP2                     ; OFF VAL
              SUBPASS array_type
 
