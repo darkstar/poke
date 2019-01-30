@@ -271,10 +271,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_var)
     ;
   else
     {
-      /* XXX: handle exceptions from the mapper function.  */
+      pkl_ast_node var_type = PKL_AST_TYPE (var);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
                     PKL_AST_VAR_BACK (var), PKL_AST_VAR_OVER (var));
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+
+      /* If the value holds a value that could be mapped, then use the
+         REMAP instruction.  */
+      if (PKL_AST_TYPE_CODE (var_type) == PKL_TYPE_ARRAY
+          || PKL_AST_TYPE_CODE (var_type) == PKL_TYPE_STRUCT)
+        {
+          /* XXX: handle exceptions from the mapper function.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+        }
     }
 }
 PKL_PHASE_END_HANDLER
