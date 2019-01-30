@@ -372,14 +372,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
                     PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
       break;
     case PKL_AST_ARRAY_REF:
-      /* Stack: ARRAY INDEX VAL */
+      /* Stack: VAL ARRAY INDEX */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array
                                                     value.  */
       break;
     case PKL_AST_STRUCT_REF:
-      /* Stack: SCT ID VAL */
+      /* Stack: VAL SCT ID */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SSET);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The struct
@@ -1184,12 +1186,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node integral_type = PKL_PASS_NODE;
 
-  if (PKL_GEN_PAYLOAD->in_mapper)
-    /* Stack: OFF */
-    pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
-  else if (PKL_GEN_PAYLOAD->in_writer)
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
+  if (PKL_GEN_PAYLOAD->in_writer)
     /* Stack: OFF VAL */
     pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
+
+  else if (PKL_GEN_PAYLOAD->in_mapper)
+    /* Stack: OFF */
+    pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
   else
     {
       pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -1243,6 +1248,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
   if (PKL_GEN_PAYLOAD->in_writer)
     {
       /* Stack: OFF ARR */
@@ -1285,17 +1292,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
              XXX: rewrite to use ADDO.
 
+             XXX: since this is a function body, there is no need to
+                  the SAVER and RESTORER at the beginning and the end.
+
              ; Four scratch registers are used in this code:
              ;
-             ;   %aoff is %r0 and contains the offset of the
-             ;   array.
-             ;   %off is %r1 and contains the offset of the
-             ;   array element being processed, relative to the start
-             ;   of the array, in bits.
-             ;   %idx is %r2 and contains the index of the
-             ;   array element being processed.
-             ;   %nelem is %r3 and holds the total number of
-             ;   elements contained in the array.
+             ; %aoff  is %r0 and contains the offset of the
+             ;        array.
+             ; 
+             ; %off   is %r1 and contains the offset of the
+             ;        array element being processed, relative to
+             ;        the start of the array, in bits.
+             ;
+             ; %idx   is %r2 and contains the index of the
+             ;        array element being processed.
+             ;
+             ; %nelem is %r3 and holds the total number of
+             ;        elements contained in the array.
              SAVER %aoff
              SAVER %off
              SAVER %idx
@@ -1320,7 +1333,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
            .while
              PUSHR %idx               ; OFF ATYPE I
-             PUSHR %nelemd            ; OFF ATYPE I NELEM
+             PUSHR %nelem             ; OFF ATYPE I NELEM
              LTLU                     ; OFF ATYPE NELEM I (NELEM<I)
              NIP2                     ; OFF ATYPE (NELEM<I)
            .loop
@@ -1512,13 +1525,97 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
          will be referred using their lexical address.
          
          The offset is back=0, over=0.
-         The array to write is back=0, over=1.  */
+         The array to write is back=0, over=1.
+
+         XXX should the offset be used?? */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 
-      /* XXX body ... */
-      pkl_asm_note (PKL_GEN_ASM, "XXX array writer body");
+      if (array_type_nelem)
+        {
+          /* The size of the array is variable.  Poke that many
+             elements.  Note that it is important for the elements of
+             the array to be poked in order.
+
+             ; The scratch registers used in this code are:
+             ;
+             ; %idx   is %r0 and contains the index of the array element
+             ;        being processed.
+             ;
+             ; %nelem is %r1 and holds the total number of
+             ;        elements contained in the array.
+
+             PUSH 0UL                 ; 0UL
+             POPR %idx                ; _
+             SUBPASS array_type_nelem ; NELEM
+             POPR %nelem              ; _
+
+             .while
+             PUSHR %idx               ; I
+             PUSHR %nelem             ; I NELEM
+             LTLU                     ; I NELEM (NELEM<I)
+             NIP2                     ; (NELEM<I)
+             .loop
+             ; _
+
+             ; Poke this array element
+             PUSHVAR 0,0              ; OFF
+             PUSHVAR 0,1              ; OFF ARRAY
+             PUSHR %idx               ; OFF ARRAY I
+             AREF                     ; OFF ARRAY I VAL
+             NIP2                     ; OFF VAL
+             SUBPASS array_type
+
+             ; Increase the current index and process the next
+             ; element.
+             PUSHR %idx              ; ... EIDX
+             PUSH 1UL                ; ... EIDX 1UL
+             ADDLU                   ; ... EDIX 1UL (EIDX+1UL)
+             NIP2                    ; ... (EIDX+1UL)
+             POPR %idx               ; ... _
+             .endloop 
+
+          */
+
+          int idxreg = 0;
+          int nelemreg = 1;
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+
+          PKL_GEN_PAYLOAD->in_mapper = 0;
+          PKL_PASS_SUBPASS (array_type_nelem);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
+          PKL_GEN_PAYLOAD->in_mapper = 1;
+
+          pkl_asm_while (PKL_GEN_ASM);
+          {
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+          }
+          pkl_asm_loop (PKL_GEN_ASM);
+          {
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+            PKL_GEN_PAYLOAD->in_writer = 1;
+            PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+            PKL_GEN_PAYLOAD->in_writer = 0;
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+          }
+          pkl_asm_endloop (PKL_GEN_ASM);
+        }
 
       /* Finish the writer function.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
@@ -1578,12 +1675,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
-  if (PKL_GEN_PAYLOAD->in_mapper)
-    /* Stack: OFF */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
-  else if (PKL_GEN_PAYLOAD->in_writer)
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
+
+  if (PKL_GEN_PAYLOAD->in_writer)
     /* Stack: OFF STR */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKES);
+  else if (PKL_GEN_PAYLOAD->in_mapper)
+    /* Stack: OFF */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
@@ -1603,6 +1703,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
                     PKL_AST_TYPE,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
+
   if (PKL_GEN_PAYLOAD->in_writer)
     {
       /* Stack: OFF SCT */
