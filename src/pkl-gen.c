@@ -1243,14 +1243,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 {
-  assert (!(PKL_GEN_PAYLOAD->in_mapper
-            && PKL_GEN_PAYLOAD->in_writer));
-
   if (PKL_GEN_PAYLOAD->in_writer)
     {
       /* Stack: OFF ARR */
       /* XXX: handle exceptions from the writer.  */
-
       /* Note that we don't use the offset, because it should be the
          same than the mapped offset in the array.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
@@ -1261,14 +1257,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
   if (PKL_GEN_PAYLOAD->in_mapper)
     {
-      /* Generate code to create a mapped array of the given type.  At
-         this point the offset to use is in the top of the stack.  */
-
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
-      pvm_program mapper_program;
-      pvm_val mapper_closure;
+      pvm_program mapper_program, writer_program;
+      pvm_val mapper_closure, writer_closure;
 
       /* Compile a mapper function to a closure.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
@@ -1483,11 +1476,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pvm_specialize_program (mapper_program);
       mapper_closure = pvm_make_cls (mapper_program);
 
-      /* XXX */
-      /*printf ("BEGIN MAPPER\n");
-      pvm_print_program (stdout, mapper_program);
-      printf ("END MAPPER\n"); */
-
       /* Complete the mapper closure with the current environment,
          call it to obtain the mapped array itself, and install it in
          the array as its mapper.  */
@@ -1511,10 +1499,48 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETM);                /* ARR */
 
+
+      /* Compile a writer function to a closure.  */
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
+                                     PKL_GEN_PAYLOAD->compiler,
+                                     0 /* prologue */));
+
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+
+      /* Push a new frame and register the two local variables passed
+         to the function.  From this point on, the passed variables
+         will be referred using their lexical address.
+         
+         The offset is back=0, over=0.
+         The array to write is back=0, over=1.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+
+      /* XXX body ... */
+      pkl_asm_note (PKL_GEN_ASM, "XXX array writer body");
+
+      /* Finish the writer function.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+
+      /* All right, the writer function is compiled.  */
+      writer_program = pkl_asm_finish (PKL_GEN_ASM,
+                                       0 /* epilogue */);
+
+      PKL_GEN_POP_ASM;
+      pvm_specialize_program (writer_program);
+      writer_closure = pvm_make_cls (writer_program);
+
+      /* Complete the writer closure with the current environment, and
+         install it in the array as its writer.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* ARR CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* ARR CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASETW);                /* ARR */
+
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
-
-      /* XXX do the same with the writer.  */
     }
 }
 PKL_PHASE_END_HANDLER
