@@ -501,8 +501,6 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
         PVM_VAL_ARR_OFFSET ((V)) = (O);         \
       else if (PVM_IS_SCT ((V)))                \
         PVM_VAL_SCT_OFFSET ((V)) = (O);         \
-      else                                      \
-        assert (0);                             \
     } while (0)
     
 #define PVM_VAL_MAPPER(V)                               \
@@ -517,8 +515,6 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
         PVM_VAL_ARR_MAPPER ((V)) = (O);         \
       else if (PVM_IS_SCT ((V)))                \
         PVM_VAL_SCT_MAPPER ((V)) = (O);         \
-      else                                      \
-        assert (0);                             \
     } while (0)
 
 #define PVM_VAL_WRITER(V)                               \
@@ -533,8 +529,6 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
         PVM_VAL_ARR_WRITER ((V)) = (O);         \
       else if (PVM_IS_SCT ((V)))                \
         PVM_VAL_SCT_WRITER ((V)) = (O);         \
-      else                                      \
-        assert (0);                             \
     } while (0)
 
 /* Return an offset with the size of VAL.  */
