@@ -932,12 +932,7 @@ defset elf_d_tag =
       DT_HIOS = 0x6fff_f000,
       DT_LOPROC = 0x7000_0000,
 
-      /* XXX
-      if (mach == EM_SPARCV9 || mach == EM_SPARC32PLUS)
-        {
-          DT_SPARC_REGISTER = 0x7000_0001,
-        }
-      */
+      DT_SPARC_REGISTER = 0x7000_0001 if mach in [EM_SPARCV9, EM_SPARC32PLUS],
     
       DT_HIPROC = 0x7fff_ffff
     };

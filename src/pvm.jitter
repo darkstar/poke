@@ -1553,17 +1553,19 @@ instruction aset () # ( ARR ULONG VAL -- ARR )
   code
     uint64_t idx;
     pvm_val val;
+    pvm_val arr;
 
     val= JITTER_TOP_STACK ();
     idx = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
     JITTER_DROP_STACK ();
     JITTER_DROP_STACK ();
 
-    if (idx < 0 ||
-        idx >= PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (JITTER_TOP_STACK ())))
+    arr = JITTER_TOP_STACK ();
+
+    if (idx < 0 || idx >= PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (arr)))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    PVM_VAL_ARR_ELEM_VALUE (JITTER_TOP_STACK (), idx) = val;
+    PVM_VAL_ARR_ELEM_VALUE (arr, idx) = val;
   end
 end
 
