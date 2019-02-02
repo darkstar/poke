@@ -508,7 +508,7 @@ instruction popf (?n popf_printer)
 end
 
 # pushvar BACK, OVER
-instruction pushvar (?n, ?n) #  ( -- VAL )
+instruction pushvar (?n 0, ?n 0 1 2 3 4 5) #  ( -- VAL )
   code
     JITTER_PUSH_STACK (pvm_env_lookup (jitter_state_runtime.env,
                                        (int) JITTER_ARGN0,

@@ -1132,6 +1132,8 @@ pkl_ast_make_ass_stmt (pkl_ast ast, pkl_ast_node lvalue,
 
   PKL_AST_ASS_STMT_LVALUE (ass_stmt) = ASTREF (lvalue);
   PKL_AST_ASS_STMT_EXP (ass_stmt) = ASTREF (exp);
+  PKL_AST_ASS_STMT_VALMAPPER_BACK (ass_stmt) = -1;
+  PKL_AST_ASS_STMT_VALMAPPER_OVER (ass_stmt) = -1;
 
   return ass_stmt;
 }

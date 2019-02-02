@@ -1463,3 +1463,15 @@ pkl_asm_call (pkl_asm pasm, const char *funcname)
   pkl_asm_insn (pasm, PKL_INSN_PUSHVAR, back, over);
   pkl_asm_insn (pasm, PKL_INSN_CALL);
 }
+
+jitter_label
+pkl_asm_fresh_label (pkl_asm pasm)
+{
+  return jitter_fresh_label (pasm->program);
+}
+
+void
+pkl_asm_label (pkl_asm pasm, jitter_label label)
+{
+  pvm_append_label (pasm->program, label);
+}

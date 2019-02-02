@@ -1083,10 +1083,18 @@ pkl_ast_node pkl_ast_make_null_stmt (pkl_ast ast);
    language.
 
    LVALUE is the l-value of the assignment.
-   EXP is the r-value of the assignment.  */
+   EXP is the r-value of the assignment.
+
+   If the l-value is of a map-able type, VALMAPPER_BACK and
+   VALMAPPER_OVER constitute the lexical address of a value-mapper
+   function, or -1.  */
 
 #define PKL_AST_ASS_STMT_LVALUE(AST) ((AST)->ass_stmt.lvalue)
 #define PKL_AST_ASS_STMT_EXP(AST) ((AST)->ass_stmt.exp)
+#define PKL_AST_ASS_STMT_VALMAPPER_BACK(AST) ((AST)->ass_stmt.valmapper_back)
+#define PKL_AST_ASS_STMT_VALMAPPER_OVER(AST) ((AST)->ass_stmt.valmapper_over)
+#define PKL_AST_ASS_STMT_VALMAPPER_P(AST)                               \
+  ((AST)->ass_stmt.valmapper_back != -1 && (AST)->ass_stmt.valmapper_over != -1)
 
 struct pkl_ast_ass_stmt
 {
@@ -1094,6 +1102,8 @@ struct pkl_ast_ass_stmt
 
   union pkl_ast_node *lvalue;
   union pkl_ast_node *exp;
+  int valmapper_back;
+  int valmapper_over;
 };
 
 pkl_ast_node pkl_ast_make_ass_stmt (pkl_ast ast,

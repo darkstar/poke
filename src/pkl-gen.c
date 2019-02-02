@@ -362,22 +362,92 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
 {
   pkl_ast_node ass_stmt = PKL_PASS_NODE;
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
+  pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
+
 
   /* At this point the r-value, generated from executing EXP, is in
-     the stack.  */
+     the stack.  If its type can be mapped, then we need to generate
+     code to perform a mapval on that value.
+
+     Mapval code gets three arguments, and generates one value:
+     MAPVAL ( VAL NVAL OFF -- NVAL )
+
+     If the type is a named struct or array, the assignment statement
+     has the lexical address of the corresponding mapval function.
+     Just call it.  */
+  switch (PKL_AST_CODE (lvalue))
+    {
+    case PKL_AST_ARRAY_REF:
+    case PKL_AST_STRUCT_REF:
+      {
+        jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+        
+        /* We need to get the value (array element, or struct element)
+           that will be replaced in the lvalue.  */
+
+                                                      /* EXP LVALUE IDX */
+
+        /* Save EXP in %r0. XXX: use the r-stack instead.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);     /* LVALUE IDX EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);     /* LVALUE IDX EXP EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0); /* LVALUE IDX EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);    /* EXP LVALUE IDX */
+
+        if (PKL_AST_CODE (lvalue) == PKL_AST_ARRAY_REF)
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF); /* EXP LVALUE IDX VAL */
+        else /* PKL_AST_STRUCT_REF */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
+
+        /* If VAL is not mapped, skip the mapval.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETM);     /* EXP LVALUE IDX VAL MCLS */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, label); /* EXP LVALUE IDX VAL MCLS */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);      /* EXP LVALUE IDX VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);     /* EXP LVALUE IDX VAL OFFSET */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);  /* EXP LVALUE IDX VAL OFFSET EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* EXP LVALUE IDX VAL EXP OFFSET */
+
+        if (PKL_AST_ASS_STMT_VALMAPPER_P (ass_stmt))
+          {
+            /* XXX this never happens atm  */
+            int valmapper_back = PKL_AST_ASS_STMT_VALMAPPER_BACK (ass_stmt);
+            int valmapper_over = PKL_AST_ASS_STMT_VALMAPPER_OVER (ass_stmt);
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                          valmapper_back, valmapper_over);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+          }
+        else
+          {
+            PKL_GEN_PAYLOAD->in_valmapper = 1;
+            PKL_PASS_SUBPASS (PKL_AST_TYPE (exp));
+            PKL_GEN_PAYLOAD->in_valmapper = 0;
+          }
+
+                                                          /* EXP LVALUE IDX VAL */
+        pkl_asm_label (PKL_GEN_ASM, label);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);        /* EXP LVALUE IDX VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);        /* EXP LVALUE IDX */
+      }
+      break;
+    default:
+      break;
+    }
+      
+  /* All right, now assign the resulting rvalue to the lvalue.  */
   switch (PKL_AST_CODE (lvalue))
     {
     case PKL_AST_VAR:
+      /* Stack: VAL */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
                     PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
       break;
     case PKL_AST_ARRAY_REF:
       /* Stack: VAL ARRAY INDEX */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT); /* ARRAY INDEX VAL */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET); /* ARRAY */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* ARRAY INDEX VAL */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);  /* ARRAY */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE); /* ARRAY */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array
-                                                    value.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);  /* The array
+                                                     value.  */
       break;
     case PKL_AST_STRUCT_REF:
       /* Stack: VAL SCT ID */
@@ -818,8 +888,23 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
 {
-  if (PKL_GEN_PAYLOAD->in_mapper)
+  pkl_ast_node offset_type = PKL_PASS_NODE;
+
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
+  if (PKL_GEN_PAYLOAD->in_writer)
+    /* Stack: OFF VAL */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKED,
+                  PKL_AST_TYPE_O_BASE_TYPE (offset_type));
+  else if (PKL_GEN_PAYLOAD->in_mapper)
+    /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
+  else if (PKL_GEN_PAYLOAD->in_valmapper)
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1191,10 +1276,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   if (PKL_GEN_PAYLOAD->in_writer)
     /* Stack: OFF VAL */
     pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
-
   else if (PKL_GEN_PAYLOAD->in_mapper)
     /* Stack: OFF */
     pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+  else if (PKL_GEN_PAYLOAD->in_valmapper)
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
+    }
   else
     {
       pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -1262,8 +1352,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
       PKL_PASS_BREAK;
     }
-
-  if (PKL_GEN_PAYLOAD->in_mapper)
+  else if (PKL_GEN_PAYLOAD->in_mapper || PKL_GEN_PAYLOAD->in_valmapper)
     {
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
@@ -1271,27 +1360,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pvm_program mapper_program, writer_program;
       pvm_val mapper_closure, writer_closure;
 
-      /* Compile a mapper function to a closure.  */
+      /* Compile a mapper, or a valmapper, function to a closure.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                      PKL_GEN_PAYLOAD->compiler,
                                      0 /* prologue */));
 
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
 
-      /* Push a new frame and register the passed object as a local
-         variable.  */
+      /* Push a new frame and register formals as local variables.
+      
+         For mappers:
+
+             0,0 -> OFF
+   
+         For valmappers:
+
+             0,0 -> OFF
+             0,1 -> NVAL
+             0,2 -> VAL
+      */
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* OFF */
+      if (PKL_GEN_PAYLOAD->in_valmapper)
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* VAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* NVAL */
+        }
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
                     0, 0); /* XXX: use this variable in the code
                               below, instead of %aoff.  */
 
-      if (array_type_nelem)
+      if (array_type_nelem
+          || PKL_GEN_PAYLOAD->in_valmapper)
         {
           /* The size of the array is variable.  Peek that many
              elements.
-
-             XXX: rewrite to use ADDO.
 
              XXX: since this is a function body, there is no need to
                   the SAVER and RESTORER at the beginning and the end.
@@ -1310,12 +1415,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              ;
              ; %nelem is %r3 and holds the total number of
              ;        elements contained in the array.
-             SAVER %aoff
-             SAVER %off
-             SAVER %idx
-             SAVER %nelem
 
-                                      ; OFF (must be offset<uint<64>,*>)          
+                                      ; OFF (must be offset<uint<64>,*>)
              ; Initialize registers.
              OGETM		      ; OFF OMAG
              SWAP                     ; OMAG OFF
@@ -1328,14 +1429,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              POPR %off                ; OFF
              PUSH 0UL                 ; OFF 0UL
              POPR %idx                ; OFF
-             SUBPASS array_type_nelem ; OFF NELEM
+             #if valmapper
+               PUSHVAR 0,1            ; OFF NVAL
+               SEL                    ; OFF NVAL NELEM
+               NIP                    ; OFF NELEM
+             #else
+               SUBPASS array_type_nelem ; OFF NELEM
+             #endif
              POPR %nelem              ; OFF ATYPE
              SUBPASS array_type       ; OFF ATYPE
 
            .while
              PUSHR %idx               ; OFF ATYPE I
              PUSHR %nelem             ; OFF ATYPE I NELEM
-             LTLU                     ; OFF ATYPE NELEM I (NELEM<I)
+             LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
              NIP2                     ; OFF ATYPE (NELEM<I)
            .loop
                                       ; OFF ATYPE
@@ -1348,7 +1455,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
              MKO                      ; ... EOFF
              DUP                      ; ... EOFF EOFF
-             SUBPASS array_type       ; ... EOFF EVAL
+             #if valmapper
+               PUSHVAR 0,2              ; ... EOFF EOFF VAL
+               SWAP                     ; ... EOFF VAL EOFF
+               PUSHVAR 0,1              ; ... EOFF VAL EOFF NVAL
+               SWAP                     ; ... EOFF VAL NVAL EOFF
+               SUBPASS array_type       ; ... EOFF EVAL
+             #else
+               SUBPASS array_type       ; ... EOFF EVAL
+             #endif
 
              ; XXX EOFF = EOFF - %aoff
 
@@ -1381,11 +1496,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
              MKMA                    ; ARRAY
 
-             RESTORER %nelem
-             RESTORER %idx
-             RESTORER %off
-             RESTORER %aoff  */
+             #if valmapper
+              NIP2                   ; ARRAY
+             #endif
 
+          */
+          
           int aoffreg = 0;
           int offreg = 1;
           int idxreg = 2;
@@ -1405,11 +1521,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
                         pvm_make_ulong (0, 64));
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
 
-          PKL_GEN_PAYLOAD->in_mapper = 0;
-          PKL_PASS_SUBPASS (array_type_nelem);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
-          PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
-          PKL_GEN_PAYLOAD->in_mapper = 1;
+          if (PKL_GEN_PAYLOAD->in_valmapper)
+            {
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+            }
+          else
+            {
+              PKL_GEN_PAYLOAD->in_mapper = 0;
+              PKL_PASS_SUBPASS (array_type_nelem);
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
+              PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+              PKL_GEN_PAYLOAD->in_mapper = 1;
+            }
 
           pkl_asm_while (PKL_GEN_ASM);
           {
@@ -1428,11 +1553,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
 
-
+            
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
+
+            if (PKL_GEN_PAYLOAD->in_valmapper)
+              {
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 2);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+              }
 
             //            pkl_asm_note (PKL_GEN_ASM, "before array_type"); /* XXX */
             PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
@@ -1490,9 +1623,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pvm_specialize_program (mapper_program);
       mapper_closure = pvm_make_cls (mapper_program);
 
-      /* Complete the mapper closure with the current environment,
-         call it to obtain the mapped array itself, and install it in
-         the array as its mapper.  */
+      /* Complete the mapper/valmapper closure with the current
+         environment, call it to obtain the mapped array itsel.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF OFF CLS */
@@ -1511,6 +1643,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 
+      /* Install the mapper into the value.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* OFF ARR CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* OFF ARR */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* ARR OFF */
@@ -1696,6 +1829,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
   else if (PKL_GEN_PAYLOAD->in_mapper)
     /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
+  else if (PKL_GEN_PAYLOAD->in_valmapper)
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);          
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
+    }
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }

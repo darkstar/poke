@@ -186,4 +186,10 @@ void pkl_asm_endtry (pkl_asm pasm);
 
 void pkl_asm_note (pkl_asm pasm, const char *str);
 
+/* Allocate a fresh jitter label and return it.  */
+jitter_label pkl_asm_fresh_label (pkl_asm pasm);
+
+/* Append a label.  */
+void pkl_asm_label (pkl_asm pasm, jitter_label label);
+
 #endif /* PKL_ASM_H */

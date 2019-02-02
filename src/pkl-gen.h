@@ -75,6 +75,7 @@ struct pkl_gen_payload
   int in_struct_decl;
   int in_mapper;
   int in_writer;
+  int in_valmapper;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
