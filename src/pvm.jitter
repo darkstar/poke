@@ -1719,6 +1719,38 @@ instruction msetw () #  ( VAL CLS -- VAL )
   end
 end
 
+# mgetsel
+#
+# Given a value in the TOS, push the number of elements to which a
+# given mapped value is bounded to.  If the value is not mapped, or if
+# it is not bounded by number of elements, push PVM_NULL.
+
+instruction mgetsel () # ( VAL -- VAL ULONG )
+  code
+    JITTER_PUSH_STACK (PVM_VAL_ELEMS_BOUND (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction msetsel () # ( VAL ULONG -- VAL )
+  code
+    PVM_VAL_SET_ELEMS_BOUND (JITTER_UNDER_TOP_STACK (), JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
+  end
+end
+
+instruction mgetsiz () # ( VAL -- VAL OFF )
+  code
+    JITTER_PUSH_STACK (PVM_VAL_SIZE_BOUND (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction msetsiz () # ( VAL OFF -- VAL )
+  code
+    PVM_VAL_SET_SIZE_BOUND (JITTER_UNDER_TOP_STACK (), JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
+  end
+end
+
 
 
 

@@ -185,6 +185,14 @@ void pvm_print_string (FILE *out, pvm_val string);
    OFFSET is the offset in the current IO space where the array is
    mapped.  If the array is not mapped then this is PVM_NULL.
 
+   If the array is mapped, ELEMS_BOUND is an unsigned long containing
+   the number of elements to which the map is bounded.  Similarly,
+   SIZE_BOUND is an offset indicating the size to which the map is
+   bounded.  If the array is not mapped, both ELEMS_BOUND and
+   SIZE_BOUND are PVM_NULL.  Note that these two boundaries are
+   mutually exclusive, i.e. an array mapped value can be bounded by
+   either a given number of elements, or a given size, but not both.
+
    MAPPER is a closure that gets an offset as an argument and, when
    executed, maps an array from IO.  This field is PVM_NULL if the
    array is not mapped.
@@ -205,6 +213,8 @@ void pvm_print_string (FILE *out, pvm_val string);
 
 #define PVM_VAL_ARR(V) (PVM_VAL_BOX_ARR (PVM_VAL_BOX ((V))))
 #define PVM_VAL_ARR_OFFSET(V) (PVM_VAL_ARR(V)->offset)
+#define PVM_VAL_ARR_ELEMS_BOUND(V) (PVM_VAL_ARR(V)->elems_bound)
+#define PVM_VAL_ARR_SIZE_BOUND(V) (PVM_VAL_ARR(V)->size_bound)
 #define PVM_VAL_ARR_MAPPER(V) (PVM_VAL_ARR(V)->mapper)
 #define PVM_VAL_ARR_WRITER(V) (PVM_VAL_ARR(V)->writer)
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
@@ -215,6 +225,8 @@ void pvm_print_string (FILE *out, pvm_val string);
 struct pvm_array
 {
   pvm_val offset;
+  pvm_val elems_bound;
+  pvm_val size_bound;
   pvm_val mapper;
   pvm_val writer;
   pvm_val type;
@@ -508,6 +520,14 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
    : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_MAPPER ((V))        \
    : PVM_NULL)
 
+#define PVM_VAL_ELEMS_BOUND(V)                          \
+  (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_ELEMS_BOUND ((V))     \
+   : PVM_NULL)
+
+#define PVM_VAL_SIZE_BOUND(V)                           \
+  (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_SIZE_BOUND ((V))      \
+   : PVM_NULL)
+
 #define PVM_VAL_SET_MAPPER(V,O)                 \
   do                                            \
     {                                           \
@@ -529,6 +549,20 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
         PVM_VAL_ARR_WRITER ((V)) = (O);         \
       else if (PVM_IS_SCT ((V)))                \
         PVM_VAL_SCT_WRITER ((V)) = (O);         \
+    } while (0)
+
+#define PVM_VAL_SET_ELEMS_BOUND(V,O)            \
+  do                                            \
+    {                                           \
+      if (PVM_IS_ARR ((V)))                     \
+        PVM_VAL_ARR_ELEMS_BOUND ((V)) = (O);    \
+    } while (0)
+
+#define PVM_VAL_SET_SIZE_BOUND(V,O)             \
+  do                                            \
+    {                                           \
+      if (PVM_IS_ARR ((V)))                     \
+        PVM_VAL_ARR_SIZE_BOUND ((V)) = (O);     \
     } while (0)
 
 /* Return an offset with the size of VAL.  */

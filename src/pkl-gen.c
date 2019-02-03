@@ -1324,141 +1324,106 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_function)
 }
 PKL_PHASE_END_HANDLER
 
-/*
- * TYPE_ARRAY
- * | ETYPE
- * | NELEM
- */
+/* The following macro compiles either a "mapper" function or a
+   "valmapper" function for an array type.
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
-{
-  /* Note that the check for in_writer should appear first than the
-     check for in_mapper.  */
-  if (PKL_GEN_PAYLOAD->in_writer)
-    {
-      /* Stack: OFF ARR */
-      /* XXX: handle exceptions from the writer.  */
-      /* Note that we don't use the offset, because it should be the
-         same than the mapped offset in the array.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The offset. */
+   The algorithm implemented for an array whose dimensions are known
+   is:
 
-      PKL_PASS_BREAK;
-    }
-  else if (PKL_GEN_PAYLOAD->in_mapper || PKL_GEN_PAYLOAD->in_valmapper)
-    {
-      pkl_ast_node array_type = PKL_PASS_NODE;
-      pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
+   ; Four scratch registers are used in this code:
+   ;
+   ; %aoff  is %r0 and contains the offset of the
+   ;        array.
+   ;
+   ; %off   is %r1 and contains the offset of the
+   ;        array element being processed, relative to
+   ;        the start of the array, in bits.
+   ;
+   ; %idx   is %r2 and contains the index of the
+   ;        array element being processed.
+   ;
+   ; %nelem is %r3 and holds the total number of
+   ;        elements contained in the array.
 
-      pvm_program mapper_program, writer_program;
-      pvm_val mapper_closure, writer_closure;
+   ; OFF (must be offset<uint<64>,*>)
+   ; Initialize registers.
+   OGETM		          ; OFF OMAG
+   SWAP                     ; OMAG OFF
+   OGETU                    ; OMAG OFF OUNIT
+   ROT                      ; OFF OUNIT OMAG
+   MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
+   NIP2                     ; OFF (OUNIT*OMAG)
+   POPR %aoff               ; OFF
+   PUSH 0UL                 ; OFF 0UL
+   POPR %off                ; OFF
+   PUSH 0UL                 ; OFF 0UL
+   POPR %idx                ; OFF
+   #if use_valmapper_nelem
+     PUSHVAR 0,1            ; OFF NVAL
+     SEL                    ; OFF NVAL NELEM
+     NIP                    ; OFF NELEM
+   #else
+     SUBPASS array_type_nelem ; OFF NELEM
+   #endif
+   POPR %nelem              ; OFF ATYPE
+   SUBPASS array_type       ; OFF ATYPE
 
-      int use_valmapper_nelem = 0;
+   .while
+   PUSHR %idx               ; OFF ATYPE I
+   PUSHR %nelem             ; OFF ATYPE I NELEM
+   LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
+   NIP2                     ; OFF ATYPE (NELEM<I)
+   .loop
+   ; OFF ATYPE
 
-      /* The following macro compiles either a "mapper" function or a
-         "valmapper" function for an array type.
+   ; Mount the Ith element triplet: [EOFF EIDX EVAL]
+   PUSHR %aoff              ; ... AOFFMAG
+   PUSHR %off               ; ... AOFFMAG EOMAG
+   ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
+   NIP2                     ; ... (AOFFMAG+EOMAG)
+   PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
+   MKO                      ; ... EOFF
+   DUP                      ; ... EOFF EOFF
+   #if valmapper
+   PUSHVAR 0,1              ; ... EOFF EOFF NVAL
+   PUSHR %idx               ; ... EOFF EOFF NVAL IDX
+   AREF                     ; ... EOFF EOFF NVAL IDX NELEM
+   NIP2                     ; ... EOFF EOFF NELEM
+   SWAP                     ; ... EOFF NELEM EOFF
+   #endif
+   SUBPASS array_type       ; ... EOFF EVAL
 
-         The algorithm implemented for an array whose dimensions are
-         known is:
+   ; XXX EOFF = EOFF - %aoff
 
-         XXX: since this is a function body, there is no need to
-         the SAVER and RESTORER at the beginning and the end.
+   ; Update the current offset with the size of the value just
+   ; peeked.
+   SIZ                      ; ... EOFF EVAL ESIZ
+   ROT                      ; ... EVAL ESIZ EOFF
+   OGETM                    ; ... EVAL ESIZ EOFF EOMAG
+   ROT                      ; ... EVAL EOFF EOMAG ESIZ
+   OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
+   ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+   ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
+   POPR %off                ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+   DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
+   DROP                     ; ... EVAL EOFF ESIZ
+   DROP                     ; ... EVAL EOFF
+   PUSHR %idx               ; ... EVAL EOFF EIDX
+   ROT                      ; ... EOFF EIDX EVAL
 
-         ; Four scratch registers are used in this code:
-         ;
-         ; %aoff  is %r0 and contains the offset of the
-         ;        array.
-         ;
-         ; %off   is %r1 and contains the offset of the
-         ;        array element being processed, relative to
-         ;        the start of the array, in bits.
-         ;
-         ; %idx   is %r2 and contains the index of the
-         ;        array element being processed.
-         ;
-         ; %nelem is %r3 and holds the total number of
-         ;        elements contained in the array.
+   ; Increase the current index and process the next
+   ; element.
+   PUSHR %idx              ; ... EOFF EIDX EVAL EIDX
+   PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
+   ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
+   NIP2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
+   POPR %idx               ; ... EOFF EIDX EVAL
+   .endloop
 
-                                 ; OFF (must be offset<uint<64>,*>)
-         ; Initialize registers.
-         OGETM		          ; OFF OMAG
-         SWAP                     ; OMAG OFF
-         OGETU                    ; OMAG OFF OUNIT
-         ROT                      ; OFF OUNIT OMAG
-         MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
-         NIP2                     ; OFF (OUNIT*OMAG)
-         POPR %aoff               ; OFF
-         PUSH 0UL                 ; OFF 0UL
-         POPR %off                ; OFF
-         PUSH 0UL                 ; OFF 0UL
-         POPR %idx                ; OFF
-         #if use_valmapper_nelem
-           PUSHVAR 0,1            ; OFF NVAL
-           SEL                    ; OFF NVAL NELEM
-           NIP                    ; OFF NELEM
-         #else
-           SUBPASS array_type_nelem ; OFF NELEM
-         #endif
-         POPR %nelem              ; OFF ATYPE
-         SUBPASS array_type       ; OFF ATYPE
-
-         .while
-         PUSHR %idx               ; OFF ATYPE I
-         PUSHR %nelem             ; OFF ATYPE I NELEM
-         LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
-         NIP2                     ; OFF ATYPE (NELEM<I)
-         .loop
-                                  ; OFF ATYPE
-
-         ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-         PUSHR %aoff              ; ... AOFFMAG
-         PUSHR %off               ; ... AOFFMAG EOMAG
-         ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
-         NIP2                     ; ... (AOFFMAG+EOMAG)
-         PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
-         MKO                      ; ... EOFF
-         DUP                      ; ... EOFF EOFF
-         #if valmapper
-           PUSHVAR 0,1              ; ... EOFF EOFF NVAL
-           PUSHR %idx               ; ... EOFF EOFF NVAL IDX
-           AREF                     ; ... EOFF EOFF NVAL IDX NELEM
-           NIP2                     ; ... EOFF EOFF NELEM
-           SWAP                     ; ... EOFF NELEM EOFF
-         #endif
-           SUBPASS array_type       ; ... EOFF EVAL
-
-         ; XXX EOFF = EOFF - %aoff
-
-         ; Update the current offset with the size of the value just
-         ; peeked.
-         SIZ                      ; ... EOFF EVAL ESIZ
-         ROT                      ; ... EVAL ESIZ EOFF
-         OGETM                    ; ... EVAL ESIZ EOFF EOMAG
-         ROT                      ; ... EVAL EOFF EOMAG ESIZ
-         OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
-         ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
-         ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
-         POPR %off                ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
-         DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
-         DROP                     ; ... EVAL EOFF ESIZ
-         DROP                     ; ... EVAL EOFF
-         PUSHR %idx               ; ... EVAL EOFF EIDX
-         ROT                      ; ... EOFF EIDX EVAL
-
-         ; Increase the current index and process the next
-         ; element.
-         PUSHR %idx              ; ... EOFF EIDX EVAL EIDX
-         PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
-         ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
-         NIP2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
-         POPR %idx               ; ... EOFF EIDX EVAL
-         .endloop
-
-         PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
-         DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
-         MKMA                    ; ARRAY
-      */
+   PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+   DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
+   MKMA                    ; ARRAY
+*/
 
 #define COMPILE_MAPPER_OR_VALMAPPER                                     \
       do                                                                \
@@ -1621,8 +1586,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           mapper_closure = pvm_make_cls (mapper_program);               \
         } while (0)
 
-      /* If needed, compile a valmapper function and complete it using
-         the current environment.  */
+/*
+ * TYPE_ARRAY
+ * | ETYPE
+ * | NELEM
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
+{
+  /* Note that the check for in_writer should appear first than the
+     check for in_mapper.  */
+  if (PKL_GEN_PAYLOAD->in_writer)
+    {
+      /* Stack: OFF ARR */
+      /* XXX: handle exceptions from the writer.  */
+      /* Note that we don't use the offset, because it should be the
+         same than the mapped offset in the array.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The array.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* The offset. */
+
+      PKL_PASS_BREAK;
+    }
+  else if (PKL_GEN_PAYLOAD->in_mapper || PKL_GEN_PAYLOAD->in_valmapper)
+    {
+      pkl_ast_node array_type = PKL_PASS_NODE;
+      pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
+
+      pvm_program mapper_program, writer_program;
+      pvm_val mapper_closure, writer_closure;
+
+      int use_valmapper_nelem = 0;
+
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
           use_valmapper_nelem = 1;
@@ -1644,8 +1639,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
           /* Compile a mapper function and complete it using the
              current environment.  */
+                                                                     /* VAL OFF */
           PKL_GEN_PAYLOAD->in_valmapper = 0;
-          COMPILE_MAPPER_OR_VALMAPPER;                               /* VAL OFF */
+          COMPILE_MAPPER_OR_VALMAPPER;                               
           PKL_GEN_PAYLOAD->in_valmapper = 1;
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL OFF CLS */
@@ -1708,18 +1704,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
            ;
            ; %idx   is %r0 and contains the index of the array element
            ;        being processed.
-           ;
-           ; %nelem is %r1 and holds the total number of
-           ;        elements contained in the array.
            
            PUSH 0UL                 ; 0UL
            POPR %idx                ; _
-           SUBPASS array_type_nelem ; NELEM
-           POPR %nelem              ; _
 
            .while
            PUSHR %idx               ; I
-           PUSHR %nelem             ; I NELEM
+           PUSHVAR 0,1              ; I ARRAY
+           SEL                      ; I ARRAY NELEM
+           NIP                      ; I NELEM
            LTLU                     ; I NELEM (NELEM<I)
            NIP2                     ; (NELEM<I)
            .loop
@@ -1748,20 +1741,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         */
 
         int idxreg = 0;
-        int nelemreg = 1;
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
 
-        PKL_GEN_PAYLOAD->in_mapper = 0;
-        PKL_PASS_SUBPASS (array_type_nelem);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
-        PKL_GEN_PAYLOAD->in_mapper = 1;
-
         pkl_asm_while (PKL_GEN_ASM);
         {
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
         }
