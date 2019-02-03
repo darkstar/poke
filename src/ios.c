@@ -390,7 +390,7 @@ ios_write_int (ios io, ios_off offset, int flags,
                enum ios_nenc nenc,
                int64_t value)
 {
-  printf ("XXX WRITING TO OFFSET %lu\n", offset / 8);
+  printf ("XXX WRITING %lu TO OFFSET %lu\n", value, offset / 8);
 
 #if 0
   char aux;
