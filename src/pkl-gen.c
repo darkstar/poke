@@ -1623,7 +1623,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           use_valmapper_nelem = 1;
 
           /* Compile a valmapper function and complete it using the
-             current environment. */
+             current environment.  This is used when assigning array
+             values to mapped arrays.
+
+             Which kind of mapper to compile depends on the maping
+             attributes installed in the array object: whether the
+             array's map is bounded by number of elements, bounded by
+             size, or not bounded.  This is determined at
+             run-time.  */
                                                                      /* VAL NVAL OFF */
           COMPILE_MAPPER_OR_VALMAPPER;
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);              /* VAL NVAL */
@@ -1655,8 +1662,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       else
         {
           /* Compile a mapper function and complete it using the
-             current environment.  */
-                                                                     /* OFF */
+             current environment.
+
+             Which kind of mapper to compile depens on the NELEM
+             expression in the array's type AST node: bounded by
+             number of elements, bounded by size, or not bounded.
+             This is determined at compile-time.  */
+                                                                               /* OFF */
           COMPILE_MAPPER_OR_VALMAPPER;
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
@@ -1672,7 +1684,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* OFF VAL */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* VAL OFF */
 
-          /* Set the value's offset.  */
+          /* Set the value's offset.
+
+             XXX: and the other mapping attribute: elems_bound and
+             size_bound, as appropriate.  */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* VAL */
         }
 
