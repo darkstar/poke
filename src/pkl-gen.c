@@ -1699,99 +1699,97 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 
-      if (array_type_nelem)
+      {
+        /* The size of the array is variable.  Poke that many
+           elements.  Note that it is important for the elements of
+           the array to be poked in order.
+
+           ; The scratch registers used in this code are:
+           ;
+           ; %idx   is %r0 and contains the index of the array element
+           ;        being processed.
+           ;
+           ; %nelem is %r1 and holds the total number of
+           ;        elements contained in the array.
+           
+           PUSH 0UL                 ; 0UL
+           POPR %idx                ; _
+           SUBPASS array_type_nelem ; NELEM
+           POPR %nelem              ; _
+
+           .while
+           PUSHR %idx               ; I
+           PUSHR %nelem             ; I NELEM
+           LTLU                     ; I NELEM (NELEM<I)
+           NIP2                     ; (NELEM<I)
+           .loop
+                                    ; _
+
+           ; Poke this array element
+           PUSHVAR 0,0              ; OFF
+           PUSHVAR 0,1              ; OFF ARRAY
+           PUSHR %idx               ; OFF ARRAY I
+           AREF                     ; OFF ARRAY I VAL
+           NROT                     ; OFF VAL ARRAY I
+           AREFO                    ; OFF VAL ARRAY I EOFF
+           NIP2                     ; OFF VAL EOFF
+           SWAP                     ; OFF EOFF VAL
+           SUBPASS array_type       ; OFF
+           DROP                     ; _
+
+           ; Increase the current index and process the next
+           ; element.
+           PUSHR %idx              ; EIDX
+           PUSH 1UL                ; EIDX 1UL
+           ADDLU                   ; EDIX 1UL (EIDX+1UL)
+           NIP2                    ; (EIDX+1UL)
+           POPR %idx               ; _
+           .endloop 
+        */
+
+        int idxreg = 0;
+        int nelemreg = 1;
+
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+
+        PKL_GEN_PAYLOAD->in_mapper = 0;
+        PKL_PASS_SUBPASS (array_type_nelem);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
+        PKL_GEN_PAYLOAD->in_mapper = 1;
+
+        pkl_asm_while (PKL_GEN_ASM);
         {
-          /* The size of the array is variable.  Poke that many
-             elements.  Note that it is important for the elements of
-             the array to be poked in order.
-
-             ; The scratch registers used in this code are:
-             ;
-             ; %idx   is %r0 and contains the index of the array element
-             ;        being processed.
-             ;
-             ; %nelem is %r1 and holds the total number of
-             ;        elements contained in the array.
-
-             PUSH 0UL                 ; 0UL
-             POPR %idx                ; _
-             SUBPASS array_type_nelem ; NELEM
-             POPR %nelem              ; _
-
-             .while
-             PUSHR %idx               ; I
-             PUSHR %nelem             ; I NELEM
-             LTLU                     ; I NELEM (NELEM<I)
-             NIP2                     ; (NELEM<I)
-             .loop
-             ; _
-
-             ; Poke this array element
-             PUSHVAR 0,0              ; OFF
-             PUSHVAR 0,1              ; OFF ARRAY
-             PUSHR %idx               ; OFF ARRAY I
-             AREF                     ; OFF ARRAY I VAL
-             NROT                     ; OFF VAL ARRAY I
-             AREFO                    ; OFF VAL ARRAY I EOFF
-             NIP2                     ; OFF VAL EOFF
-             SWAP                     ; OFF EOFF VAL
-             SUBPASS array_type       ; OFF
-             DROP                     ; _
-
-             ; Increase the current index and process the next
-             ; element.
-             PUSHR %idx              ; EIDX
-             PUSH 1UL                ; EIDX 1UL
-             ADDLU                   ; EDIX 1UL (EIDX+1UL)
-             NIP2                    ; (EIDX+1UL)
-             POPR %idx               ; _
-             .endloop 
-
-          */
-
-          int idxreg = 0;
-          int nelemreg = 1;
-
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
-
-          PKL_GEN_PAYLOAD->in_mapper = 0;
-          PKL_PASS_SUBPASS (array_type_nelem);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);
-          PKL_GEN_PAYLOAD->in_mapper = 1;
-
-          pkl_asm_while (PKL_GEN_ASM);
-          {
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-          }
-          pkl_asm_loop (PKL_GEN_ASM);
-          {
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREFO);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
-
-            PKL_GEN_PAYLOAD->in_writer = 1;
-            PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
-            PKL_GEN_PAYLOAD->in_writer = 0;
-
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
-
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
-          }
-          pkl_asm_endloop (PKL_GEN_ASM);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
         }
+        pkl_asm_loop (PKL_GEN_ASM);
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREFO);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+          
+          PKL_GEN_PAYLOAD->in_writer = 1;
+          PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+          PKL_GEN_PAYLOAD->in_writer = 0;
+          
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+          
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);
+        }
+        pkl_asm_endloop (PKL_GEN_ASM);
+      }
 
       /* Finish the writer function.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
