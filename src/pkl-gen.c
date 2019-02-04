@@ -1397,10 +1397,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                  /* VAL CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* VAL */
-
-          /* Set the value's offset.  */
-          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL OFF */
-          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* VAL */
         }
       else
         {
