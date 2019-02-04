@@ -553,33 +553,27 @@ bounds_fail:
 /* PKL_ASM_ARRAY_WRITER
    ( OFFSET VAL -- )
 
-   The following macro compiles a "writer" function for array types.
-   It pokes the elements of the array.
-
-   This macro should only be expanded in the pkl_gen_pr_type_array
-   handler in pkl-gen.c.
+   Assemble a function that pokes a mapped array value to it's mapped
+   offset in the current IOS.
 
    Note that it is important for the elements of the array to be poked
    in order.
 
-   ; The scratch registers used in this code are:
-   ;
-   ; %idx   is %r0 and contains the index of the array element
-   ;        being processed.
-
+   PROLOG
+   
    ; Register arguments in a new environment frame:
-   ;   Offset: 0,1
-   ;   Value: 0,0
+   ;   Offset: 0,0
+   ;   Value: 0,1
    PUSHF
-   REGVAR
-   REGVAR
+   REGVAR (0,0 VALUE)
+   REGVAR (0,1 OFFSET)
            
    PUSH 0UL                 ; 0UL
-   POPR %idx                ; _
+   REGVAR (0,2 IDX)         ; _
 
    .while
-     PUSHR %idx             ; I
-     PUSHVAR 0,0            ; I ARRAY
+     PUSHVAR 0,2 (IDX)      ; I
+     PUSHVAR 0,1            ; I ARRAY
      SEL                    ; I ARRAY NELEM
      NIP                    ; I NELEM
      LTLU                   ; I NELEM (NELEM<I)
@@ -588,9 +582,9 @@ bounds_fail:
                             ; _
 
      ; Poke this array element
-     PUSHVAR 0,1            ; OFF
-     PUSHVAR 0,0            ; OFF ARRAY
-     PUSHR %idx             ; OFF ARRAY I
+     PUSHVAR 0,0 (OFFSET)   ; OFF
+     PUSHVAR 0,1 (VALUE)    ; OFF ARRAY
+     PUSHVAR 0,2 (IDX)      ; OFF ARRAY I
      AREF                   ; OFF ARRAY I VAL
      NROT                   ; OFF VAL ARRAY I
      AREFO                  ; OFF VAL ARRAY I EOFF
@@ -601,11 +595,11 @@ bounds_fail:
 
      ; Increase the current index and process the next
      ; element.
-     PUSHR %idx             ; EIDX
+     PUSHVAR 0,2 (IDX)      ; EIDX
      PUSH 1UL               ; EIDX 1UL
      ADDLU                  ; EDIX 1UL (EIDX+1UL)
      NIP2                   ; (EIDX+1UL)
-     POPR %idx              ; _
+     POPVAR 0,2 (IDX)       ; _
    .endloop 
 
    POPF
@@ -617,9 +611,8 @@ bounds_fail:
   do                                                                   \
     {                                                                  \
       pvm_program writer_program;                                      \
-      int idxreg = 0;                                                  \
                                                                        \
-      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                     \
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                      \
                                      PKL_GEN_PAYLOAD->compiler,         \
                                      0 /* prologue */));                \
                                                                         \
@@ -630,12 +623,12 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);                \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 2);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                      \
@@ -643,28 +636,26 @@ bounds_fail:
       }                                                                 \
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 2);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREFO);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                      \
                                                                         \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
         PKL_GEN_PAYLOAD->in_writer = 1;                                 \
         PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
         PKL_GEN_PAYLOAD->in_writer = 0;                                 \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);              \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
                                                                         \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 2);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 2);              \
       }                                                                 \
       pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
