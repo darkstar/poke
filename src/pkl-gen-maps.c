@@ -44,7 +44,7 @@
    REGVAR  ; Local: Current Offset, 0,2
 
    PUSHVAR 0,0              ; OFF (must be offset<uint<64>,*>)
-   ; Initialize registers.
+   ; Initialize locals.
    OGETM		    ; OFF OMAG
    SWAP                     ; OMAG OFF
    OGETU                    ; OMAG OFF OUNIT
@@ -53,7 +53,7 @@
    NIP2                     ; OFF (OUNIT*OMAG)
    POPVAR 0,1               ; OFF
    PUSH 0UL                 ; OFF 0UL
-   POPR %off                ; OFF
+   POPVAR 0,2               ; OFF
    PUSH 0UL                 ; OFF 0UL
    POPR %idx                ; OFF
    SUBPASS array_type_nelem ; OFF NELEM
@@ -71,7 +71,7 @@
 
    ; Mount the Ith element triplet: [EOFF EIDX EVAL]
    PUSHVAR 0,1              ; ... AOFFMAG
-   PUSHR %off               ; ... AOFFMAG EOMAG
+   PUSHVAR 0,2              ; ... AOFFMAG EOMAG
    ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
    NIP2                     ; ... (AOFFMAG+EOMAG)
    PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
@@ -90,7 +90,7 @@
    OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
    ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
-   POPR %off                ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+   POPVAR 0,2               ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
    DROP                     ; ... EVAL EOFF ESIZ
    DROP                     ; ... EVAL EOFF
@@ -130,11 +130,12 @@
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,                      \
                     0, 0);                                              \
                                                                         \
-      int offreg = 1;                                                   \
       int idxreg = 2;                                                   \
       int nelemreg = 3;                                                 \
                                                                         \
@@ -146,7 +147,7 @@
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 1);                \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);                \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 2);                \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,                         \
                     pvm_make_ulong (0, 64));                            \
@@ -191,23 +192,19 @@
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 2);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                       \
                                                                         \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);                  \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);                  \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);                  \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);                  \
         PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);               \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);               \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);               \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);               \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
@@ -216,7 +213,7 @@
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 2);              \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
