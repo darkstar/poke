@@ -1375,7 +1375,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              size, or not bounded.  This is determined at
              run-time.  */
                                                                      /* VAL NVAL OFF */
-          COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
+          COMPILE_ARRAY_ELEM_BOUND_VALMAPPER (mapper_closure);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);              /* VAL NVAL */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL NVAL OFF */
 
