@@ -26,13 +26,10 @@
 
 /* Array mapper for maps bounded by number of elements.
 
-   ; Four scratch registers are used in this code:
+   ; One scratch register is used in this code:
    ;
    ; %idx   is %r2 and contains the index of the
    ;        array element being processed.
-   ;
-   ; %nelem is %r3 and holds the total number of
-   ;        elements contained in the array.
 
    PROLOG
 
@@ -42,6 +39,8 @@
    REGVAR  ; Local: Array Offset, 0,1
    PUSH null
    REGVAR  ; Local: Current Offset, 0,2
+   PUSH null
+   REGVAR  ; Local: Number of Elements, 0,3
 
    PUSHVAR 0,0              ; OFF (must be offset<uint<64>,*>)
    ; Initialize locals.
@@ -58,12 +57,12 @@
    POPR %idx                ; OFF
    SUBPASS array_type_nelem ; OFF NELEM
 
-   POPR %nelem              ; OFF ATYPE
+   POPVAR 0,3               ; OFF
    SUBPASS array_type       ; OFF ATYPE
 
    .while
    PUSHR %idx               ; OFF ATYPE I
-   PUSHR %nelem             ; OFF ATYPE I NELEM
+   PUSHVAR 0,3              ; OFF ATYPE I NELEM
    LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
    NIP2                     ; OFF ATYPE (NELEM<I)
    .loop
@@ -106,7 +105,7 @@
    POPR %idx               ; ... EOFF EIDX EVAL
    .endloop
 
-   PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+   PUSHVAR 0,3             ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
 
@@ -132,12 +131,13 @@
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,                      \
                     0, 0);                                              \
                                                                         \
       int idxreg = 2;                                                   \
-      int nelemreg = 3;                                                 \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
@@ -168,7 +168,7 @@
           PKL_GEN_PAYLOAD->in_mapper = tmp;                             \
         }                                                               \
                                                                         \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);              \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0,3);                 \
                                                                         \
       {                                                                 \
         int in_mapper = PKL_GEN_PAYLOAD->in_mapper;                     \
@@ -184,7 +184,7 @@
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);           \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0,3);              \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
@@ -228,7 +228,7 @@
       }                                                                 \
       pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);             \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);               \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                        \
                                                                         \
