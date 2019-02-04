@@ -284,7 +284,7 @@ static void
 pkl_asm_insn_write (pkl_asm pasm)
 {
   jitter_label label = jitter_fresh_label (pasm->program);
-
+  
                                                 /* VAL */
   pkl_asm_insn (pasm, PKL_INSN_DUP);            /* VAL VAL */
 

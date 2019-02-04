@@ -358,8 +358,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
- * | LVALUE
  * | EXP
+ * | LVALUE
  * ASS_STMT
  */
 
@@ -402,13 +402,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
 
         /* If VAL is not mapped, skip the mapval.  */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETM);     /* LVALUE IDX VAL MCLS */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, label); /* LVALUE IDX VAL MCLS */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);      /* LVALUE IDX VAL */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);     /* LVALUE IDX VAL OFFSET */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);       /* LVALUE IDX OFFSET */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);  /* LVALUE IDX OFFSET EXP */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* LVALUE IDX EXP OFFSET */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);  /* LVALUE IDX VAL EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* LVALUE IDX EXP VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETM);     /* LVALUE IDX EXP VAL MCLS */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, label); /* LVALUE IDX EXP VAL MCLS */    
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);      /* LVALUE IDX EXP VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);     /* LVALUE IDX EXP VAL OFFSET */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);      /* LVALUE IDX OFFSET EXP VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* LVALUE IDX OFFSET VAL EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);       /* LVALUE IDX VAL EXP OFFSET */
 
         if (PKL_AST_ASS_STMT_VALMAPPER_P (ass_stmt))
           {
@@ -429,9 +431,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
 
                                                              /* LVALUE IDX VAL */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* LVALUE IDX VAL null */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* LVALUE IDX VAL null null */
         pkl_asm_label (PKL_GEN_ASM, label);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);        /* LVALUE IDX VAL */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);        /* VAL LVALUE IDX */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);        /* LVALUE IDX EXP VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);        /* LVALUE IDX EXP */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);        /* EXP LVALUE IDX */
       }
       break;
     default:
@@ -895,8 +899,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
     /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
-    /* Stack: NVAL OFF */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* NVAL */
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* VAL NVAL */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1272,8 +1279,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
     /* Stack: OFF */
     pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
-    /* Stack: NVAL OFF */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* NVAL */
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
+    }
   else
     {
       pkl_asm_insn (pasm, PKL_INSN_PUSH,
@@ -1365,15 +1375,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);    /* VAL NVAL */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);   /* VAL NVAL OFF */
 
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);        /* NVAL OFF VAL */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETSEL);    /* NVAL OFF VAL EBOUND */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);       /* NVAL OFF EBOUND VAL */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETSIZ);    /* NVAL OFF EBOUND VAL SBOUND */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);       /* NVAL OFF EBOUND SBOUND VAL */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);       /* NVAL OFF EBOUND SBOUND */
-          
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);        /* NVAL OFF EBOUND SBOUND CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);        /* VAL NVAL OFF CLS */
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* VAL */
@@ -1509,8 +1512,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
     /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
-    /* Stack: NVAL OFF */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);          
+    {
+      /* Stack: VAL NVAL OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+    }
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYS);
 }
