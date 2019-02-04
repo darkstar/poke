@@ -62,17 +62,12 @@
    ROT                      ; OFF OUNIT OMAG
    MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
    NIP2                     ; OFF (OUNIT*OMAG)
-   REGVAR (0,3 AOFFMAG)     ; OFF
-
-   ; Initialize the current element's offset, in bits, and put
-   ; it in a local.
-   PUSH 0UL                 ; OFF 0UL
-   REGVAR (0,4 EOMAG)       ; OFF
+   REGVAR (0,3 EOMAG)       ; OFF
 
    ; Initialize the element index to 0UL, and put it
    ; in a local.
    PUSH 0UL                 ; OFF 0UL
-   REGVAR (0,5 EIDX)        ; OFF
+   REGVAR (0,4 EIDX)        ; OFF
 
    SUBPASS array_type       ; OFF ATYPE
 
@@ -81,7 +76,7 @@
    ; If there is an NBOUND, check it.
    ; Else, if there is a SBOUND, check it.
    ; Else, iterate (unbounded).
-   PUSHVAR 0,5 (EIDX)       ; OFF ATYPE I
+   PUSHVAR 0,4 (EIDX)       ; OFF ATYPE I
    PUSHVAR 0,1 (EBOUND)     ; OFF ATYPE I NELEM
    LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
    NIP2                     ; OFF ATYPE (NELEM<I)
@@ -89,11 +84,8 @@
                             ; OFF ATYPE
 
    ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-   PUSHVAR 0,3 (AOFFMAG)    ; ... AOFFMAG
-   PUSHVAR 0,4 (EOMAG)      ; ... AOFFMAG EOMAG
-   ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
-   NIP2                     ; ... (AOFFMAG+EOMAG)
-   PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
+   PUSHVAR 0,3 (EOMAG)      ; ... EOMAG
+   PUSH 1UL                 ; ... EOMAG EOUNIT
    MKO                      ; ... EOFF
    DUP                      ; ... EOFF EOFF
    SUBPASS array_type       ; ... EOFF EVAL
@@ -108,19 +100,19 @@
    OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
    ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
-   POPVAR 0,4 (EOMAG)       ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+   POPVAR 0,3 (EOMAG)       ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
    DROP                     ; ... EVAL EOFF ESIZ
    DROP                     ; ... EVAL EOFF
-   PUSHVAR 0,5 (EIDX)       ; ... EVAL EOFF EIDX
+   PUSHVAR 0,4 (EIDX)       ; ... EVAL EOFF EIDX
    ROT                      ; ... EOFF EIDX EVAL
 
    ; Increase the current index and process the next element.
-   PUSHVAR 0,5 (EIDX)      ; ... EOFF EIDX EVAL EIDX
+   PUSHVAR 0,4 (EIDX)      ; ... EOFF EIDX EVAL EIDX
    PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
    ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
    NIP2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
-   POPVAR 0,5 (EIDX)       ; ... EOFF EIDX EVAL
+   POPVAR 0,4 (EIDX)       ; ... EOFF EIDX EVAL
    .endloop
 
    BA mountarray
@@ -130,7 +122,7 @@ eof:
    DROP                    ; ... EOFF
    DROP                    ; ...
 mountarray:
-   PUSHVAR 0,5 (EIDX)      ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+   PUSHVAR 0,4 (EIDX)      ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
 
@@ -228,9 +220,6 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
-                                                                        \
       PKL_GEN_PAYLOAD->in_mapper = 0;                                   \
       PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));             \
       PKL_GEN_PAYLOAD->in_mapper = 1;                                   \
@@ -238,7 +227,7 @@ bounds_fail:
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
         /* XXX */                                                       \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);              \
+       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);              \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);              \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                       \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                       \
@@ -246,9 +235,6 @@ bounds_fail:
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);              \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);              \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                      \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                       \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);                        \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                        \
@@ -262,18 +248,18 @@ bounds_fail:
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                      \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                        \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                      \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 4);               \
+       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 3);               \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                       \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                       \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                       \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);              \
+       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);              \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                        \
                                                                         \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);              \
+       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);              \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                      \
        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                       \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 5);               \
+       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 4);               \
       }                                                                 \
       pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
@@ -284,7 +270,7 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
                                                                         \
       pkl_asm_label (PKL_GEN_ASM, mountarray_label);                    \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);               \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                        \
                                                                         \

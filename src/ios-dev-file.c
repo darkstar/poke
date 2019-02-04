@@ -100,7 +100,7 @@ ios_dev_file_getc (void *iod)
 {
   struct ios_dev_file *fio = iod;
   int ret = fgetc (fio->file);
-  printf ("0x%lu <- %d\n", ftello (fio->file), ret);
+  //  printf ("0x%lu <- %d\n", ftello (fio->file), ret);
   return ret;
 }
 
@@ -109,7 +109,7 @@ ios_dev_file_putc (void *iod, int c)
 {
   struct ios_dev_file *fio = iod;
   int ret = putc (c, fio->file);
-  printf ("%d -> 0x%lu\n", ret, ftello (fio->file));
+  //  printf ("%d -> 0x%lu\n", ret, ftello (fio->file));
   return ret == EOF ? IOD_EOF : ret;
 }
 
