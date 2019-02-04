@@ -28,13 +28,6 @@
 
    ; Four scratch registers are used in this code:
    ;
-   ; %aoff  is %r0 and contains the offset of the
-   ;        array.
-   ;
-   ; %off   is %r1 and contains the offset of the
-   ;        array element being processed, relative to
-   ;        the start of the array, in bits.
-   ;
    ; %idx   is %r2 and contains the index of the
    ;        array element being processed.
    ;
@@ -45,6 +38,10 @@
 
    PUSHF
    REGVAR  ; Argument: Offset, 0,0
+   PUSH null
+   REGVAR  ; Local: Array Offset, 0,1
+   PUSH null
+   REGVAR  ; Local: Current Offset, 0,2
 
    PUSHVAR 0,0              ; OFF (must be offset<uint<64>,*>)
    ; Initialize registers.
@@ -54,7 +51,7 @@
    ROT                      ; OFF OUNIT OMAG
    MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
    NIP2                     ; OFF (OUNIT*OMAG)
-   POPR %aoff               ; OFF
+   POPVAR 0,1               ; OFF
    PUSH 0UL                 ; OFF 0UL
    POPR %off                ; OFF
    PUSH 0UL                 ; OFF 0UL
@@ -73,7 +70,7 @@
    ; OFF ATYPE
 
    ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-   PUSHR %aoff              ; ... AOFFMAG
+   PUSHVAR 0,1              ; ... AOFFMAG
    PUSHR %off               ; ... AOFFMAG EOMAG
    ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
    NIP2                     ; ... (AOFFMAG+EOMAG)
@@ -131,10 +128,12 @@
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+                                                                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,                      \
                     0, 0);                                              \
                                                                         \
-      int aoffreg = 0;                                                  \
       int offreg = 1;                                                   \
       int idxreg = 2;                                                   \
       int nelemreg = 3;                                                 \
@@ -145,7 +144,7 @@
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, aoffreg);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 1);                \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);                \
                                                                         \
@@ -191,7 +190,7 @@
       }                                                                 \
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, aoffreg);            \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
