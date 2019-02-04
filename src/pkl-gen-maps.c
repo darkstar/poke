@@ -301,7 +301,7 @@
 
    ; Register arguments in a new environment frame:
    ;   Offset: 0,0
-   ;   New value: 0,1
+   ;   Value: 0,1
    PUSHF
    REGVAR
    REGVAR
