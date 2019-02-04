@@ -78,7 +78,7 @@
 
    .while
    ; XXX
-   ; If there is a NBOUND, check it.
+   ; If there is an NBOUND, check it.
    ; Else, if there is a SBOUND, check it.
    ; Else, iterate (unbounded).
    PUSHVAR 0,5 (EIDX)       ; OFF ATYPE I
@@ -670,9 +670,11 @@ bounds_fail:
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                      \
                                                                         \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
         PKL_GEN_PAYLOAD->in_writer = 1;                                 \
         PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
         PKL_GEN_PAYLOAD->in_writer = 0;                                 \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);              \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
                                                                         \
