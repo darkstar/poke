@@ -24,7 +24,10 @@
 
 #include <config.h>
 
-/* Array mapper for maps bounded by number of elements.
+/* ARRAY_ELEM_BOUND_MAPPER
+   ( OFF NELEM -- ARR )
+
+   Array mapper for maps bounded by number of elements.
 
    ; One scratch register is used in this code:
    ;
@@ -161,25 +164,15 @@
         }                                                               \
       else                                                              \
         {                                                               \
-          int tmp = PKL_GEN_PAYLOAD->in_mapper;                         \
-                                                                        \
           PKL_GEN_PAYLOAD->in_mapper = 0;                               \
           PKL_PASS_SUBPASS (array_type_nelem);                          \
-          PKL_GEN_PAYLOAD->in_mapper = tmp;                             \
+          PKL_GEN_PAYLOAD->in_mapper = 1;                               \
         }                                                               \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0,3);                 \
-                                                                        \
-      {                                                                 \
-        int in_mapper = PKL_GEN_PAYLOAD->in_mapper;                     \
-        int in_valmapper = PKL_GEN_PAYLOAD->in_valmapper;               \
-                                                                        \
-        PKL_GEN_PAYLOAD->in_mapper = 0;                                 \
-        PKL_GEN_PAYLOAD->in_valmapper = 0;                              \
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
-        PKL_GEN_PAYLOAD->in_valmapper = in_valmapper;                   \
-        PKL_GEN_PAYLOAD->in_mapper = in_mapper;                         \
-      }                                                                 \
+      PKL_GEN_PAYLOAD->in_mapper = 0;                                   \
+      PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));             \
+      PKL_GEN_PAYLOAD->in_mapper = 1;                                   \
                                                                         \
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
