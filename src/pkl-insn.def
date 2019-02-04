@@ -256,6 +256,7 @@ PKL_DEF_INSN (PKL_INSN_TYPOF, "", "typof")
 PKL_DEF_INSN (PKL_INSN_BA, "l", "ba")
 
 PKL_DEF_INSN (PKL_INSN_BN, "l", "bn")
+PKL_DEF_INSN (PKL_INSN_BNN, "l", "bnn")
 
 PKL_DEF_INSN (PKL_INSN_BZI, "l", "bzi")
 PKL_DEF_INSN (PKL_INSN_BZIU, "l", "bziu")

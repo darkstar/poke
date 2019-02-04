@@ -137,10 +137,10 @@ mountarray:
    ; Check that the resulting array satisfies the mapping's
    ; bounds (number of elements and total size.)
    PUSHVAR 0,1 (EBOUND)    ; ARRAY EBOUND
-   BN check_ebound
+   BNN check_ebound
    DROP                    ; ARRAY
    PUSHVAR 0,0 (SBOUND)    ; ARRAY SBOUND
-   BN check_sbound
+   BNN check_sbound
    DROP
    BA bounds_ok
 
@@ -289,10 +289,10 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                        \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);               \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, check_ebound_label);      \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, check_ebound_label);     \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);               \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, check_sbound_label);      \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, check_sbound_label);     \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, bounds_ok_label);         \
                                                                         \

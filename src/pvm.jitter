@@ -1323,6 +1323,13 @@ instruction bn (?f) # Branch if null
   end
 end
 
+instruction bnn (?f) # Branch if not null
+  code
+    pvm_val tmp = JITTER_TOP_STACK ();
+    JITTER_BRANCH_FAST_IF_ZERO (tmp == PVM_NULL, JITTER_ARGF0);
+  end
+end
+
 instruction bzi (?f)
   code
     pvm_val tmp = JITTER_TOP_STACK ();
