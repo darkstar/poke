@@ -27,7 +27,7 @@ end
 
 ## Register classes.
 
-register-class r 4
+register-class r 1
   code
     pvm_val
   end

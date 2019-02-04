@@ -657,11 +657,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
 {
-  /* Save the used registers before calling the function.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);
+  /* Nothing to do here.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -678,12 +674,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
      in the stack.  Just call the bloody function.  */
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
-
-  /* Restore the used registers after calling the function.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1364,29 +1354,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
           /* Compile a valmapper function and complete it using the
              current environment.  This is used when assigning array
-             values to mapped arrays.
-
-             Which kind of mapper to compile depends on the maping
-             attributes installed in the array object: whether the
-             array's map is bounded by number of elements, bounded by
-             size, or not bounded.  This is determined at
-             run-time.  */
+             values to mapped arrays.  */
                                                                      /* VAL NVAL OFF */
-          COMPILE_ARRAY_ELEM_BOUND_VALMAPPER (mapper_closure);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);              /* VAL NVAL */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL NVAL OFF */
+          PKL_ASM_ARRAY_VALMAPPER (mapper_closure);
 
-          /* XXX: at run-time, decide which mapper to call, depending
-           * on the mapping attributes of VAL.  */
+          /* Install the current environment in the valmapper closure,
+             arrange the arguments (including the attributes of VAL's
+             mapping, and call the valmapper to obtain the new
+             value.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);    /* VAL NVAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);   /* VAL NVAL OFF */
 
-          /* XXX: for elem-bound maps, check that the sel of NVAL is
-           * appropriate.  For size-bound maps, check that the siz of
-           * NVAL is appropriate.  Raise a a PVM_E_MAP_BOUNDS
-           * exception if appropriate.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL NVAL OFF CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL NVAL OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);        /* NVAL OFF VAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETSEL);    /* NVAL OFF VAL EBOUND */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);       /* NVAL OFF EBOUND VAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETSIZ);    /* NVAL OFF EBOUND VAL SBOUND */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);       /* NVAL OFF EBOUND SBOUND VAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);       /* NVAL OFF EBOUND SBOUND */
+          
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);        /* NVAL OFF EBOUND SBOUND CLS */
 
-          /* Now, call the valmapper in order to get the new value.  */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* VAL */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
@@ -1408,8 +1396,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* VAL */
 
           /* Set the value's offset.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL OFF */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* VAL */
+          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL OFF */
+          //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* VAL */
         }
       else
         {
@@ -1436,7 +1424,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             {
               PKL_GEN_PAYLOAD->in_mapper = 0;
               PKL_PASS_SUBPASS (array_type_nelem);
-              PKL_GEN_PAYLOAD->in_mapper = 0;
+              PKL_GEN_PAYLOAD->in_mapper = 1;
             }
           else
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
@@ -1449,7 +1437,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             {
               PKL_GEN_PAYLOAD->in_mapper = 0;
               PKL_PASS_SUBPASS (array_type_nelem);
-              PKL_GEN_PAYLOAD->in_mapper = 0;
+              PKL_GEN_PAYLOAD->in_mapper = 1;
             }
           else
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
