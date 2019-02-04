@@ -294,7 +294,8 @@ pkl_asm_insn_write (pkl_asm pasm)
 
   pkl_asm_insn (pasm, PKL_INSN_SWAP);           /* VAL WCLS VAL */
   pkl_asm_insn (pasm, PKL_INSN_MGETO);          /* VAL WCLS VAL OFF */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);            /* VAL VAL OFF WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);           /* VAL WCLS OFF VAL */
+  pkl_asm_insn (pasm, PKL_INSN_ROT);            /* VAL OFF VAL WCLS */
   /* XXX: exceptions etc. */
   pkl_asm_insn (pasm, PKL_INSN_CALL);           /* VAL NULL */
 

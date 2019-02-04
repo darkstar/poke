@@ -1464,7 +1464,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
 
       /* Compile a writer function to a closure.  */
-      COMPILE_ARRAY_WRITER (writer_closure);
+      PKL_ASM_ARRAY_WRITER (writer_closure);
 
       /* Complete the writer closure with the current environment, and
          install it in the array as its writer.  */

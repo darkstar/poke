@@ -550,7 +550,10 @@ bounds_fail:
       (CLOSURE) = pvm_make_cls (mapper_program);                        \
     } while (0)
 
-/* The following macro compiles a "writer" function for array types.
+/* PKL_ASM_ARRAY_WRITER
+   ( OFFSET VAL -- )
+
+   The following macro compiles a "writer" function for array types.
    It pokes the elements of the array.
 
    This macro should only be expanded in the pkl_gen_pr_type_array
@@ -565,8 +568,8 @@ bounds_fail:
    ;        being processed.
 
    ; Register arguments in a new environment frame:
-   ;   Offset: 0,0
-   ;   Value: 0,1
+   ;   Offset: 0,1
+   ;   Value: 0,0
    PUSHF
    REGVAR
    REGVAR
@@ -576,7 +579,7 @@ bounds_fail:
 
    .while
      PUSHR %idx             ; I
-     PUSHVAR 0,1            ; I ARRAY
+     PUSHVAR 0,0            ; I ARRAY
      SEL                    ; I ARRAY NELEM
      NIP                    ; I NELEM
      LTLU                   ; I NELEM (NELEM<I)
@@ -585,8 +588,8 @@ bounds_fail:
                             ; _
 
      ; Poke this array element
-     PUSHVAR 0,0            ; OFF
-     PUSHVAR 0,1            ; OFF ARRAY
+     PUSHVAR 0,1            ; OFF
+     PUSHVAR 0,0            ; OFF ARRAY
      PUSHR %idx             ; OFF ARRAY I
      AREF                   ; OFF ARRAY I VAL
      NROT                   ; OFF VAL ARRAY I
@@ -610,7 +613,7 @@ bounds_fail:
    RETURN
 */
 
-#define COMPILE_ARRAY_WRITER(CLOSURE)                                  \
+#define PKL_ASM_ARRAY_WRITER(CLOSURE)                                  \
   do                                                                   \
     {                                                                  \
       pvm_program writer_program;                                      \
@@ -622,13 +625,6 @@ bounds_fail:
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
                                                                         \
-      /* Push a new frame and register the local variables passed to  */ \
-      /* the function.  From this point on, the passed variables will */ \
-      /* be referred using their lexical address.                     */ \
-      /*                                                              */ \
-      /* The offset is back=0, over=0.                                */ \
-      /* The array to write is back=0, over=1.                        */ \
-                                                                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
@@ -639,7 +635,7 @@ bounds_fail:
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                       \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                      \
@@ -647,8 +643,8 @@ bounds_fail:
       }                                                                 \
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                      \
@@ -672,12 +668,10 @@ bounds_fail:
       }                                                                 \
       pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
-      /* Finish the writer function.  */                                \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);                     \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);                      \
                                                                         \
-      /* All right, the writer function is compiled.  */                \
       writer_program = pkl_asm_finish (PKL_GEN_ASM,                     \
                                        0 /* epilogue */);               \
                                                                         \
