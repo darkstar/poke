@@ -25,10 +25,8 @@
 #include <config.h>
 
 /* The following macro compiles either a "mapper" function or a
-   "valmapper" function for an array type.
-
-   The algorithm implemented for an array whose dimensions are known
-   is:
+   "valmapper" function for arrays whose mapping is bounded to a given
+   number of elements.
 
    ; Four scratch registers are used in this code:
    ;
@@ -137,167 +135,155 @@
    RETURN
 */
 
-#define COMPILE_MAPPER_OR_VALMAPPER(CLOSURE)                            \
-      do                                                                \
+#define COMPILE_ARRAY_ELEM_BOUND_MAPPER(CLOSURE)                        \
+  do                                                                    \
+    {                                                                   \
+      pvm_program mapper_program;                                       \
+                                                                        \
+      /* Compile a mapper, or a valmapper, function to a closure.  */   \
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                      \
+                                     PKL_GEN_PAYLOAD->compiler,         \
+                                     0 /* prologue */));                \
+                                                                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
+                                                                        \
+      /* Push a new frame and register formals as local variables. */   \
+      /*                                                           */   \
+      /* For mappers: 0,0 -> OFF                                   */   \
+      /* For valmappers: 0,0 -> OFF, 0,1 -> NVAL                   */   \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* OFF */            \
+      if (PKL_GEN_PAYLOAD->in_valmapper)                                \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* NVAL */         \
+                                                                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,                      \
+                    0, 0); /* XXX: use this variable in the code */     \
+      /* below, instead of %aoff.  */                                   \
+                                                                        \
+      int aoffreg = 0;                                                  \
+      int offreg = 1;                                                   \
+      int idxreg = 2;                                                   \
+      int nelemreg = 3;                                                 \
+                                                                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, aoffreg);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);                \
+                                                                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,                         \
+                    pvm_make_ulong (0, 64));                            \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);                \
+                                                                        \
+      if (use_valmapper_nelem)                                          \
         {                                                               \
-          pvm_program mapper_program;                                   \
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);           \
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);                     \
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                     \
+        }                                                               \
+      else                                                              \
+        {                                                               \
+          int tmp = PKL_GEN_PAYLOAD->in_mapper;                         \
                                                                         \
-          /* Compile a mapper, or a valmapper, function to a closure.  */ \
-          PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                  \
-                                         PKL_GEN_PAYLOAD->compiler,     \
-                                         0 /* prologue */));            \
+          PKL_GEN_PAYLOAD->in_mapper = 0;                               \
+          PKL_PASS_SUBPASS (array_type_nelem);                          \
+          PKL_GEN_PAYLOAD->in_mapper = tmp;                             \
+        }                                                               \
                                                                         \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                  \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);              \
                                                                         \
-          /* Push a new frame and register formals as local variables. */ \
-          /*                                                           */ \
-          /* For mappers: 0,0 -> OFF                                   */ \
-          /* For valmappers: 0,0 -> OFF, 0,1 -> NVAL                   */ \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                   \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* OFF */        \
-          if (PKL_GEN_PAYLOAD->in_valmapper)                            \
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR); /* NVAL */     \
+      {                                                                 \
+        int in_mapper = PKL_GEN_PAYLOAD->in_mapper;                     \
+        int in_valmapper = PKL_GEN_PAYLOAD->in_valmapper;               \
                                                                         \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,                  \
-                        0, 0); /* XXX: use this variable in the code */ \
-          /* below, instead of %aoff.  */                               \
+        PKL_GEN_PAYLOAD->in_mapper = 0;                                 \
+        PKL_GEN_PAYLOAD->in_valmapper = 0;                              \
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
+        PKL_GEN_PAYLOAD->in_valmapper = in_valmapper;                   \
+        PKL_GEN_PAYLOAD->in_mapper = in_mapper;                         \
+      }                                                                 \
                                                                         \
-          if (array_type_nelem                                          \
-              || use_valmapper_nelem)                                   \
-            {                                                           \
-              int aoffreg = 0;                                          \
-              int offreg = 1;                                           \
-              int idxreg = 2;                                           \
-              int nelemreg = 3;                                         \
+      pkl_asm_while (PKL_GEN_ASM);                                      \
+      {                                                                 \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);           \
                                                                         \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);               \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);               \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                 \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);               \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, aoffreg);       \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);        \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+      }                                                                 \
+      pkl_asm_loop (PKL_GEN_ASM);                                       \
+      {                                                                 \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, aoffreg);            \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);                       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                       \
                                                                         \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,                 \
-                            pvm_make_ulong (0, 64));                    \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);        \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);                  \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);                  \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);                  \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);                  \
                                                                         \
-              if (use_valmapper_nelem)                                  \
-                {                                                       \
-                  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);   \
-                  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);             \
-                  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);             \
-                }                                                       \
-              else                                                      \
-                {                                                       \
-                  int tmp = PKL_GEN_PAYLOAD->in_mapper;                 \
+        if (PKL_GEN_PAYLOAD->in_valmapper)                              \
+          {                                                             \
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);         \
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);         \
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);                  \
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                  \
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                  \
+          }                                                             \
                                                                         \
-                  PKL_GEN_PAYLOAD->in_mapper = 0;                       \
-                  PKL_PASS_SUBPASS (array_type_nelem);                  \
-                  PKL_GEN_PAYLOAD->in_mapper = tmp;                     \
-                }                                                       \
+        PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
                                                                         \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, nelemreg);      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);               \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);               \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);               \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);               \
                                                                         \
-              {                                                         \
-                int in_mapper = PKL_GEN_PAYLOAD->in_mapper;             \
-                int in_valmapper = PKL_GEN_PAYLOAD->in_valmapper;       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);                       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                       \
                                                                         \
-                PKL_GEN_PAYLOAD->in_mapper = 0;                         \
-                PKL_GEN_PAYLOAD->in_valmapper = 0;                      \
-                PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));   \
-                PKL_GEN_PAYLOAD->in_valmapper = in_valmapper;           \
-                PKL_GEN_PAYLOAD->in_mapper = in_mapper;                 \
-              }                                                         \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);              \
+      }                                                                 \
+      pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
-              pkl_asm_while (PKL_GEN_ASM);                              \
-              {                                                         \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);     \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);   \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);             \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                        \
                                                                         \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);              \
-              }                                                         \
-              pkl_asm_loop (PKL_GEN_ASM);                               \
-              {                                                         \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, aoffreg);    \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, offreg);     \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);             \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);               \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);               \
+      /* Finish the mapper function.  */                                \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);                     \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);                      \
                                                                         \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 0);          \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 1);          \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);          \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);          \
+      /* All right, the mapper function is compiled.  */                \
+      mapper_program = pkl_asm_finish (PKL_GEN_ASM,                     \
+                                       0 /* epilogue */);               \
                                                                         \
-                if (PKL_GEN_PAYLOAD->in_valmapper)                      \
-                  {                                                     \
-                    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1); \
-                    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg); \
-                    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);          \
-                    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);          \
-                    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);          \
-                  }                                                     \
-                                                                        \
-                PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));   \
-                                                                        \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);       \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);       \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 1);       \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);       \
-                                                                        \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);               \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);               \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);             \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);               \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);             \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);               \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);             \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, offreg);      \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);     \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);               \
-                                                                        \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, idxreg);     \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (1, 64)); \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);             \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);              \
-                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, idxreg);      \
-              }                                                         \
-              pkl_asm_endloop (PKL_GEN_ASM);                            \
-                                                                        \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, nelemreg);     \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                 \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                \
-            }                                                           \
-          else                                                          \
-            {                                                           \
-              /* The size of the array is unspecified.  Peek array */   \
-              /* elements until EOF(=null).  XXX: or until a constraint */ \
-              /*   exception is raised.  */                             \
-                                                                        \
-              assert (0); /* WRITEME */                                 \
-            }                                                           \
-                                                                        \
-          /* Finish the mapper function.  */                            \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);                 \
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);                  \
-                                                                        \
-          /* All right, the mapper function is compiled.  */            \
-          mapper_program = pkl_asm_finish (PKL_GEN_ASM,                 \
-                                           0 /* epilogue */);           \
-                                                                        \
-          PKL_GEN_POP_ASM;                                              \
-          pvm_specialize_program (mapper_program);                      \
-          (CLOSURE) = pvm_make_cls (mapper_program);                    \
-        } while (0)
+      PKL_GEN_POP_ASM;                                                  \
+      pvm_specialize_program (mapper_program);                          \
+      (CLOSURE) = pvm_make_cls (mapper_program);                        \
+    } while (0)
 
 /* The following macro compiles a "writer" function for array types.
    It pokes the elements of the array.

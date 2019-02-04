@@ -1356,12 +1356,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
-      pvm_val mapper_closure, writer_closure;
-
+      pvm_val writer_closure;
       int use_valmapper_nelem = 0;
 
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
+          pvm_val mapper_closure;
+
           use_valmapper_nelem = 1;
 
           /* Compile a valmapper function and complete it using the
@@ -1374,9 +1375,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              size, or not bounded.  This is determined at
              run-time.  */
                                                                      /* VAL NVAL OFF */
-          COMPILE_MAPPER_OR_VALMAPPER (mapper_closure);
+          COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0);              /* VAL NVAL */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL NVAL OFF */
+
+          /* XXX: at run-time, decide which mapper to call, depending
+           * on the mapping attributes of VAL.  */
+
+          /* XXX: for elem-bound maps, check that the sel of NVAL is
+           * appropriate.  For size-bound maps, check that the siz of
+           * NVAL is appropriate.  Raise a a PVM_E_MAP_BOUNDS
+           * exception if appropriate.  */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL NVAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL NVAL OFF CLS */
 
@@ -1390,7 +1399,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              current environment.  */
                                                                      /* VAL OFF */
           PKL_GEN_PAYLOAD->in_valmapper = 0;
-          COMPILE_MAPPER_OR_VALMAPPER (mapper_closure);
+          COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
           PKL_GEN_PAYLOAD->in_valmapper = 1;
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL OFF CLS */
@@ -1403,6 +1412,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
       else
         {
+          pvm_val mapper_closure;
+
           /* Compile a mapper function and complete it using the
              current environment.
 
@@ -1410,8 +1421,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              expression in the array's type AST node: bounded by
              number of elements, bounded by size, or not bounded.
              This is determined at compile-time.  */
-                                                                               /* OFF */
-          COMPILE_MAPPER_OR_VALMAPPER (mapper_closure);
+                                                                     /* OFF */
+          if (array_type_nelem)
+            COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
+          else
+            /* XXX: handle size bound and unbounded maps.  */
+            assert (0);
+          
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF OFF CLS */
