@@ -1395,12 +1395,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 0);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);             /* VAL OFF */
 
-          /* Compile a mapper function and complete it using the
-             current environment.  */
+          /* Compile a mapper function, complete it using the current
+             environment, and install it as the mapper of the new
+             value.  */
                                                                      /* VAL OFF */
           PKL_GEN_PAYLOAD->in_valmapper = 0;
-          COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
+          PKL_GEN_PAYLOAD->in_mapper = 1;
+          PKL_ASM_ARRAY_MAPPER (mapper_closure);
+          PKL_GEN_PAYLOAD->in_mapper = 0;
           PKL_GEN_PAYLOAD->in_valmapper = 1;
+          
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                  /* VAL CLS */
@@ -1412,54 +1416,54 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
       else
         {
+          pkl_ast_node nelem_type = PKL_AST_TYPE (array_type_nelem);
           pvm_val mapper_closure;
 
           /* Compile a mapper function and complete it using the
-             current environment.
+             current environment.  */
+          PKL_ASM_ARRAY_MAPPER (mapper_closure);
 
-             Which kind of mapper to compile depens on the NELEM
-             expression in the array's type AST node: bounded by
-             number of elements, bounded by size, or not bounded.
-             This is determined at compile-time.  */
+          /* Complete the mapper closure with the current
+             environment.  */
                                                                      /* OFF */
-          if (!array_type_nelem)
-            /* XXX: handle unbounded array maps.  */
-            assert (0);
-          else
-            {
-              switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_nelem)))
-                {
-                case PKL_TYPE_INTEGRAL:
-                  COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
-                  break;
-                case PKL_TYPE_OFFSET:
-                  /* XXX: handle size bounded array maps.  */
-                  assert (0);
-                  break;
-                default:
-                  assert (0);
-                }
-            }
-          
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF OFF CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF CLS CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* OFF CLS OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
 
-          /* Use the mapper to get a new value.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                 /* OFF CLS VAL */
+          /* Build the arguments and call the mapper to get a mapped
+             array value.  Whether the mapping is bounded, and exactly
+             how, is determined from the array type.  */
+          if (array_type_nelem
+              && (PKL_AST_TYPE_CODE (nelem_type) == PKL_TYPE_INTEGRAL))
+            {
+              PKL_GEN_PAYLOAD->in_mapper = 0;
+              PKL_PASS_SUBPASS (array_type_nelem);
+              PKL_GEN_PAYLOAD->in_mapper = 0;
+            }
+          else
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+                                                         /* CLS OFF CLS EBOUND */
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);     /* CLS OFF EBOUND CLS */
+
+          if (array_type_nelem
+              && (PKL_AST_TYPE_CODE (nelem_type) == PKL_TYPE_OFFSET))
+            {
+              PKL_GEN_PAYLOAD->in_mapper = 0;
+              PKL_PASS_SUBPASS (array_type_nelem);
+              PKL_GEN_PAYLOAD->in_mapper = 0;
+            }
+          else
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+                                                         /* CLS OFF EBOUND CLS SBOUND */
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);     /* CLS OFF EBOUND SBOUND CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);     /* CLS VAL */
 
           /* Install the mapper into the value.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* OFF VAL CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);                /* OFF VAL */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                 /* VAL OFF */
-
-          /* Set the value's offset.
-
-             XXX: and the other mapping attribute: elems_bound and
-             size_bound, as appropriate.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETO);                /* VAL */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);  /* VAL CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM); /* VAL */
         }
 
       /* Compile a writer function to a closure.  */

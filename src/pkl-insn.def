@@ -231,6 +231,12 @@ PKL_DEF_INSN (PKL_INSN_MSETM, "", "msetm")
 PKL_DEF_INSN (PKL_INSN_MGETW, "", "mgetw")
 PKL_DEF_INSN (PKL_INSN_MSETW, "", "msetw")
 
+PKL_DEF_INSN (PKL_INSN_MGETSEL, "", "mgetsel")
+PKL_DEF_INSN (PKL_INSN_MSETSEL, "", "msetsel")
+
+PKL_DEF_INSN (PKL_INSN_MGETSIZ, "", "mgetsiz")
+PKL_DEF_INSN (PKL_INSN_MSETSIZ, "", "msetsiz")
+
 /* Type related instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKTYI, "", "mktyi")

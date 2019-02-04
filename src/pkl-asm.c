@@ -249,31 +249,26 @@ pkl_asm_insn_remap (pkl_asm pasm)
      value.) */
   /* XXX rewrite using the return stack for temporaries.  */
   
-                                       /* VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETO); /* VAL OFF */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETW); /* OFF VAL WCLS */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETM); /* OFF WCLS VAL MCSL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS VAL */
+                                         /* VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETW);   /* VAL WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETM);   /* WCLS VAL MCSL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS VAL */
   
-  pkl_asm_insn (pasm, PKL_INSN_MGETO); /* OFF WCLS MCLS VAL OFF */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS OFF VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETM); /* OFF WCLS MCLS OFF VAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF WCLS MCLS VAL MCLS OFF */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS MCLS VAL OFF MCLS */
-
-  /* XXX save registers */
-  pkl_asm_insn (pasm, PKL_INSN_CALL);  /* OFF WCLS MCLS VAL NVAL */
-  /* XXX restore registers */
-
-  pkl_asm_insn (pasm, PKL_INSN_NIP);   /* OFF WCLS MCLS NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF WCLS NVAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_MSETM); /* OFF WCLS NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF NVAL WCLS */
-  pkl_asm_insn (pasm, PKL_INSN_MSETW); /* OFF NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* NVAL OFF */
-  pkl_asm_insn (pasm, PKL_INSN_MSETO); /* NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETO);   /* WCLS MCLS VAL OFF */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETSEL); /* WCLS MCLS OFF VAL EBOUND */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETSIZ); /* WCLS MCLS OFF EBOUND VAL SBOUND */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND SBOUND VAL */
+  pkl_asm_insn (pasm, PKL_INSN_MGETM);   /* WCLS MCLS OFF EBOUND SBOUND VAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND SBOUND MCLS VAL */
+  pkl_asm_insn (pasm, PKL_INSN_DROP);    /* WCLS MCLS OFF EBOUND SBOUND MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_CALL);    /* WCLS MCLS NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS NVAL MCLS */
+  pkl_asm_insn (pasm, PKL_INSN_MSETM);   /* WCLS NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* NVAL WCLS */
+  pkl_asm_insn (pasm, PKL_INSN_MSETW);   /* NVAL */
   
   pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* VAL NULL */
   pvm_append_label (pasm->program, label);

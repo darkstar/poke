@@ -24,62 +24,77 @@
 
 #include <config.h>
 
-/* ARRAY_ELEM_BOUND_MAPPER
-   ( OFF NELEM -- ARR )
+/* PKL_ASM_ARRAY_MAPPER
+  ( OFF EBOUND SBOUND -- ARR )
 
-   Array mapper for maps bounded by number of elements.
+   Assemble a function that maps an array value at the given offset
+   OFF, with mapping attributes EBOUND and SBOUND.
 
-   ; One scratch register is used in this code:
-   ;
-   ; %idx   is %r2 and contains the index of the
-   ;        array element being processed.
+   If both EBOUND and SBOUND are null, then perform an unbounded map,
+   i.e. read array elements from IO until EOF.  XXX: what about empty
+   arrays?
+
+   Otherwise, if EBOUND is not null, then perform a map bounded by the
+   given number of elements.  If EOF is encountered before the given
+   amount of elements are read, then raise PVM_E_MAP_BOUNDS.
+
+   Otherwise, if SBOUND is not null, then perform a map bounded by the
+   given size (an offset), i.e. read array elements from IO until the
+   total size of the array is exactly SBOUND.  If SBOUND is exceeded,
+   then raise PVM_E_MAP_BOUNDS.
+
+   At much only one of EBOUND or SBOUND are supported.
+   Note that OFF should be of type offset<uint<64>,*>.
 
    PROLOG
 
    PUSHF
-   REGVAR  ; Argument: Offset, 0,0
-   PUSH null
-   REGVAR  ; Local: Array Offset, 0,1
-   PUSH null
-   REGVAR  ; Local: Current Offset, 0,2
-   PUSH null
-   REGVAR  ; Local: Number of Elements, 0,3
+   REGVAR  ; Argument: SBOUND, 0,0
+   REGVAR  ; Argument: EBOUND, 0,1
+   REGVAR  ; Argument: OFF,    0,2
 
-   PUSHVAR 0,0              ; OFF (must be offset<uint<64>,*>)
-   ; Initialize locals.
+   ; Determine the offset of the array, in bits, and put it
+   ; in a local.
+   PUSHVAR 0,1              ; OFF
    OGETM		    ; OFF OMAG
    SWAP                     ; OMAG OFF
    OGETU                    ; OMAG OFF OUNIT
    ROT                      ; OFF OUNIT OMAG
    MULLU                    ; OFF OUNIT OMAG (OUNIT*OMAG)
    NIP2                     ; OFF (OUNIT*OMAG)
-   POPVAR 0,1               ; OFF
-   PUSH 0UL                 ; OFF 0UL
-   POPVAR 0,2               ; OFF
-   PUSH 0UL                 ; OFF 0UL
-   POPR %idx                ; OFF
-   SUBPASS array_type_nelem ; OFF NELEM
+   REGVAR (0,3 AOFFMAG)     ; OFF
 
-   POPVAR 0,3               ; OFF
+   ; Initialize the current element's offset, in bits, and put
+   ; it in a local.
+   PUSH 0UL                 ; OFF 0UL
+   REGVAR (0,4 EOMAG)       ; OFF
+
+   ; Initialize the element index to 0UL, and put it
+   ; in a local.
+   PUSH 0UL                 ; OFF 0UL
+   REGVAR (0,5 EIDX)        ; OFF
+
    SUBPASS array_type       ; OFF ATYPE
 
    .while
-   PUSHR %idx               ; OFF ATYPE I
-   PUSHVAR 0,3              ; OFF ATYPE I NELEM
+   PUSHVAR 0,5 (EIDX)       ; OFF ATYPE I
+   PUSHVAR 0,1 (EBOUND)     ; OFF ATYPE I NELEM
    LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
    NIP2                     ; OFF ATYPE (NELEM<I)
    .loop
-   ; OFF ATYPE
+                            ; OFF ATYPE
 
    ; Mount the Ith element triplet: [EOFF EIDX EVAL]
-   PUSHVAR 0,1              ; ... AOFFMAG
-   PUSHVAR 0,2              ; ... AOFFMAG EOMAG
+   PUSHVAR 0,2 (AOFFMAG)    ; ... AOFFMAG
+   PUSHVAR 0,3 (EOMAG)      ; ... AOFFMAG EOMAG
    ADDLU                    ; ... AOFFMAG EOMAG (AOFFMAG+EOMAG)
    NIP2                     ; ... (AOFFMAG+EOMAG)
    PUSH 1UL                 ; ... (AOFFMAG+EOMAG) EOUNIT
    MKO                      ; ... EOFF
    DUP                      ; ... EOFF EOFF
    SUBPASS array_type       ; ... EOFF EVAL
+   ; XXX if the peeked element is null (EOF) then
+   ; exit the loop.
 
    ; XXX EOFF = EOFF - %aoff
 
@@ -92,32 +107,38 @@
    OGETM                    ; ... EVAL EOFF EOMAG ESIZ ESIGMAG
    ROT                      ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    ADDLU                    ; ... EVAL EOFF ESIZ ESIGMAG EOMAG (ESIGMAG+EOMAG)
-   POPVAR 0,2               ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
+   POPVAR 0,3 (EOMAG)       ; ... EVAL EOFF ESIZ ESIGMAG EOMAG
    DROP                     ; ... EVAL EOFF ESIZ ESIGMAG
    DROP                     ; ... EVAL EOFF ESIZ
    DROP                     ; ... EVAL EOFF
-   PUSHR %idx               ; ... EVAL EOFF EIDX
+   PUSHVAR 0,4 (EIDX)       ; ... EVAL EOFF EIDX
    ROT                      ; ... EOFF EIDX EVAL
 
    ; Increase the current index and process the next
    ; element.
-   PUSHR %idx              ; ... EOFF EIDX EVAL EIDX
+   PUSHVAR 0,4 (EIDX)      ; ... EOFF EIDX EVAL EIDX
    PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
    ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
    NIP2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
-   POPR %idx               ; ... EOFF EIDX EVAL
+   POPVAR 0,4 (EIDX)       ; ... EOFF EIDX EVAL
    .endloop
 
-   PUSHVAR 0,3             ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+   PUSHVAR 0,1 (EBOUND)    ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
+
+   ; XXX check that the resulting array satisfies the mapping's
+   ; bounds (number of elements and total size.)
+
+   ; XXX: use MKA and set the mapping attributes to the array: offset,
+   ; ebound and sbound.
 
    POPF 1
    RETURN
 
 */
 
-#define COMPILE_ARRAY_ELEM_BOUND_MAPPER(CLOSURE)                        \
+#define PKL_ASM_ARRAY_MAPPER(CLOSURE)                                   \
   do                                                                    \
     {                                                                   \
       pvm_program mapper_program;                                       \
@@ -193,10 +214,7 @@
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                       \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 2);                  \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SAVER, 3);                  \
         PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));           \
-                                                                        \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 3);               \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RESTORER, 2);               \
                                                                         \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);                       \
