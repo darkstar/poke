@@ -1357,13 +1357,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
       pvm_val writer_closure;
-      int use_valmapper_nelem = 0;
 
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
           pvm_val mapper_closure;
-
-          use_valmapper_nelem = 1;
 
           /* Compile a valmapper function and complete it using the
              current environment.  This is used when assigning array
