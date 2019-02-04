@@ -45,7 +45,16 @@
    ; %nelem is %r3 and holds the total number of
    ;        elements contained in the array.
 
-                            ; OFF (must be offset<uint<64>,*>)
+   ; Register arguments in a new environment frame:
+   ;   For mappers: Offset: 0,0
+   ;   For valmappers: Offset: 0,0 New value: 0,1
+   PUSHF
+   REGVAR
+   #if valmapper
+     REGVAR
+   #endif
+
+   PUSHVAR 0,0              ; OFF (must be offset<uint<64>,*>)
    ; Initialize registers.
    OGETM		    ; OFF OMAG
    SWAP                     ; OMAG OFF
@@ -123,6 +132,9 @@
    PUSHR %nelem            ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
+
+   POPF 1
+   RETURN
 */
 
 #define COMPILE_MAPPER_OR_VALMAPPER(CLOSURE)                            \
@@ -300,6 +312,13 @@
    ;
    ; %idx   is %r0 and contains the index of the array element
    ;        being processed.
+
+   ; Register arguments in a new environment frame:
+   ;   Offset: 0,0
+   ;   New value: 0,1
+   PUSHF
+   REGVAR
+   REGVAR
            
    PUSH 0UL                 ; 0UL
    POPR %idx                ; _
@@ -334,6 +353,10 @@
      NIP2                   ; (EIDX+1UL)
      POPR %idx              ; _
    .endloop 
+
+   POPF
+   PUSH null
+   RETURN
 */
 
 #define COMPILE_ARRAY_WRITER(CLOSURE)                                  \
