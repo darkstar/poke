@@ -1422,11 +1422,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              number of elements, bounded by size, or not bounded.
              This is determined at compile-time.  */
                                                                      /* OFF */
-          if (array_type_nelem)
-            COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
-          else
-            /* XXX: handle size bound and unbounded maps.  */
+          if (!array_type_nelem)
+            /* XXX: handle unbounded array maps.  */
             assert (0);
+          else
+            {
+              switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_nelem)))
+                {
+                case PKL_TYPE_INTEGRAL:
+                  COMPILE_ARRAY_ELEM_BOUND_MAPPER (mapper_closure);
+                  break;
+                case PKL_TYPE_OFFSET:
+                  /* XXX: handle size bounded array maps.  */
+                  assert (0);
+                  break;
+                default:
+                  assert (0);
+                }
+            }
           
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF OFF */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF OFF CLS */
