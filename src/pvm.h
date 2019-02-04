@@ -48,6 +48,7 @@ enum pvm_exit_code
 #define PVM_E_NO_IOS      2
 #define PVM_E_NO_RETURN   3
 #define PVM_E_OUT_OF_BOUNDS 4
+#define PVM_E_MAP_BOUNDS 5
 
 
 /* Note that the jitter-generated header should be included this late
