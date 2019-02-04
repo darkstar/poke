@@ -191,17 +191,24 @@ bounds_fail:
     {                                                                   \
       pvm_program mapper_program;                                       \
                                                                         \
-      jitter_label eof_label = pkl_asm_fresh_label (PKL_GEN_ASM);       \
-      jitter_label mountarray_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
-      jitter_label check_ebound_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
-      jitter_label check_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
-      jitter_label bounds_ok_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
-      jitter_label bounds_fail_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
+      jitter_label eof_label;                                           \
+      jitter_label mountarray_label;                                    \
+      jitter_label check_ebound_label;                                  \
+      jitter_label check_sbound_label;                                  \
+      jitter_label bounds_ok_label;                                     \
+      jitter_label bounds_fail_label;                                   \
                                                                         \
       /* Compile a mapper, or a valmapper, function to a closure.  */   \
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                      \
                                      PKL_GEN_PAYLOAD->compiler,         \
                                      0 /* prologue */));                \
+                                                                        \
+      eof_label = pkl_asm_fresh_label (PKL_GEN_ASM);                    \
+      mountarray_label = pkl_asm_fresh_label (PKL_GEN_ASM);             \
+      check_ebound_label = pkl_asm_fresh_label (PKL_GEN_ASM);           \
+      check_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM);           \
+      bounds_ok_label = pkl_asm_fresh_label (PKL_GEN_ASM);              \
+      bounds_fail_label = pkl_asm_fresh_label (PKL_GEN_ASM);            \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
