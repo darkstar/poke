@@ -81,10 +81,19 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
           if (0 <= c)
             {
               uint64_t value;
+              int ret;
 
-              if (ios_read_uint (ios_cur (), (address + i) * 8, 0, 8,
-                                 IOS_ENDIAN_MSB /* irrelevant */,
-                                 &value) != IOS_OK)
+              ret = ios_read_uint (ios_cur (), (address + i) * 8, 0, 8,
+                                   IOS_ENDIAN_MSB /* irrelevant */,
+                                   &value);
+              if (ret == IOS_OK)
+                ;
+              else if (ret == IOS_EIOFF || ret == IOS_EIOBJ)
+                {
+                  fputc ('\n', stdout);
+                  goto done;
+                }
+              else
                 {
                   printf ("error reading from IO\n");
                   return 0;
@@ -120,7 +129,8 @@ pk_cmd_dump (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       if (i)
         printf ("%s%s%s\n", KYEL, string, KNONE);
     }
-
+ done:
+  
   return 1;
 }
 
