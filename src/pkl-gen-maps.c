@@ -125,9 +125,10 @@
    MKMA                    ; ARRAY
 */
 
-#define COMPILE_MAPPER_OR_VALMAPPER                                     \
+#define COMPILE_MAPPER_OR_VALMAPPER(CLOSURE)                            \
       do                                                                \
         {                                                               \
+          pvm_program mapper_program;                                   \
                                                                         \
           /* Compile a mapper, or a valmapper, function to a closure.  */ \
           PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                  \
@@ -283,7 +284,7 @@
                                                                         \
           PKL_GEN_POP_ASM;                                              \
           pvm_specialize_program (mapper_program);                      \
-          mapper_closure = pvm_make_cls (mapper_program);               \
+          (CLOSURE) = pvm_make_cls (mapper_program);                    \
         } while (0)
 
 /* The following macro compiles a "writer" function for array types.
@@ -335,15 +336,16 @@
    .endloop 
 */
 
-#define COMPILE_ARRAY_WRITER(CLOSURE)                           \
-  do                                                            \
-    {                                                           \
-      int idxreg = 0;                                           \
-                                                                \
-      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                     \
-                                     PKL_GEN_PAYLOAD->compiler,        \
-                                     0 /* prologue */));               \
+#define COMPILE_ARRAY_WRITER(CLOSURE)                                  \
+  do                                                                   \
+    {                                                                  \
+      pvm_program writer_program;                                      \
+      int idxreg = 0;                                                  \
                                                                        \
+      PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                     \
+                                     PKL_GEN_PAYLOAD->compiler,         \
+                                     0 /* prologue */));                \
+                                                                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
                                                                         \
       /* Push a new frame and register the local variables passed to  */ \
