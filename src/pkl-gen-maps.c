@@ -77,6 +77,10 @@
    SUBPASS array_type       ; OFF ATYPE
 
    .while
+   ; XXX
+   ; If there is a NBOUND, check it.
+   ; Else, if there is a SBOUND, check it.
+   ; Else, iterate (unbounded).
    PUSHVAR 0,5 (EIDX)       ; OFF ATYPE I
    PUSHVAR 0,1 (EBOUND)     ; OFF ATYPE I NELEM
    LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
@@ -93,10 +97,7 @@
    MKO                      ; ... EOFF
    DUP                      ; ... EOFF EOFF
    SUBPASS array_type       ; ... EOFF EVAL
-   ; XXX if the peeked element is null (EOF) then
-   ; exit the loop.
-
-   ; XXX EOFF = EOFF - %aoff
+   BN eof
 
    ; Update the current offset with the size of the value just
    ; peeked.
@@ -114,8 +115,7 @@
    PUSHVAR 0,4 (EIDX)       ; ... EVAL EOFF EIDX
    ROT                      ; ... EOFF EIDX EVAL
 
-   ; Increase the current index and process the next
-   ; element.
+   ; Increase the current index and process the next element.
    PUSHVAR 0,4 (EIDX)      ; ... EOFF EIDX EVAL EIDX
    PUSH 1UL                ; ... EOFF EIDX EVAL EIDX 1UL
    ADDLU                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
@@ -123,19 +123,63 @@
    POPVAR 0,4 (EIDX)       ; ... EOFF EIDX EVAL
    .endloop
 
-   PUSHVAR 0,1 (EBOUND)    ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
+   BA mountarray
+eof:
+   ; Remove the partial EOFF null element from the stack.
+                           ; ... EOFF null
+   DROP                    ; ... EOFF
+   DROP                    ; ...
+mountarray:
+   PUSHVAR 0,4 (EIDX)      ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
 
    ; XXX check that the resulting array satisfies the mapping's
    ; bounds (number of elements and total size.)
+   PUSHVAR 0,1 (EBOUND)    ; ARRAY EBOUND
+   BN check_ebound
+   DROP                    ; ARRAY
+   PUSHVAR 0,0             ; ARRAY SBOUND
+   BN check_sbound
+   DROP
+   BA bounds_ok
 
-   ; XXX: use MKA and set the mapping attributes to the array: offset,
-   ; ebound and sbound.
+check_ebound:
+   SWAP                    ; EBOUND ARRAY
+   SEL                     ; EBOUND ARRAY NELEM
+   ROT                     ; ARRAY NELEM EBOUND
+   BNELU bounds_fail
+   DROP                    ; ARRAY NELEM
+   DROP                    ; ARRAY
+   BA bounds_ok
+
+check_sbound:
+   SWAP                    ; SBOUND ARRAY
+   SIZ                     ; SBOUND ARRAY OFF
+   OGETM                   ; SBOUND ARRAY OFFM
+   SWAP                    ; SBOUND OFFM ARRAY
+   OGETU                   ; SBOUND OFFM ARRAY OFFU
+   ROT                     ; SBOUND ARRAY OFFU OFFM
+   MULLU                   ; SBOUND ARRAY OFFU OFFM (OFFU*OFFM)
+   NIP2                    ; SBOUND ARRAY (OFFU*OFFM)
+   ROT                     ; ARRAY (OFFU*OFFM) SBOUND
+   BNELU bounds_fail
+   DROP                    ; ARRAY (OFFU*OFFM)
+   DROP                    ; ARRAY
+
+bounds_ok:
+
+   ; Set the map bound attributes in the new object.
+   PUSHVAR 0,0 (SBOUND)    ; ARRAY SBOUND
+   MSETSIZ                 ; ARRAY
+   PUSHVAR 0,1 (EBOUND)    ; ARRAY EBOUND
+   MSETSEL                 ; ARRAY
 
    POPF 1
    RETURN
 
+bounds_fail:
+   RAISE E_MAP_BOUNDS
 */
 
 #define PKL_ASM_ARRAY_MAPPER(CLOSURE)                                   \

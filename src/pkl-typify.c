@@ -966,7 +966,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
 PKL_PHASE_END_HANDLER
 
 /* The array sizes in array type literals, if present, should be
-   integer expressions.  */
+   integer expressions, or offsets.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
 {
@@ -981,10 +981,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
     PKL_PASS_DONE;
 
   nelem_type = PKL_AST_TYPE (nelem);
-  if (PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_INTEGRAL)
+  if (PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_OFFSET)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (nelem),
-                 "an array type size should be an integral value");
+                 "expected integral or offset value");
       payload->errors++;
       PKL_PASS_ERROR;
     }

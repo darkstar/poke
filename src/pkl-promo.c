@@ -568,23 +568,48 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_array_ref)
 PKL_PHASE_END_HANDLER
 
 /* Handler for promoting the array size in array type literals to 64
-   unsigned bit values.  */
+   unsigned bit values, or to offset<uint<64>,*> if they are
+   offsets.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
 {
   int restart;
-  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node array_type = PKL_PASS_NODE;
+  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
-  if (PKL_AST_TYPE_A_NELEM (node) == NULL)
+  if (nelem == NULL)
     /* This array type hasn't a number of elements.  Be done.  */
     PKL_PASS_DONE;
 
-  if (!promote_integral (PKL_PASS_AST, 64, 0,
-                         &PKL_AST_TYPE_A_NELEM (node), &restart))
+  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (nelem)))
     {
-      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
-               "couldn't promote array type size expression");
-      PKL_PASS_ERROR;
+    case PKL_TYPE_INTEGRAL:
+      if (!promote_integral (PKL_PASS_AST, 64, 0,
+                             &PKL_AST_TYPE_A_NELEM (array_type), &restart))
+        {
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (nelem),
+                   "couldn't promote array type size expression");
+          PKL_PASS_ERROR;
+        }
+      break;
+    case PKL_TYPE_OFFSET:
+      {
+        pkl_ast_node to_magnitude_type
+          = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (nelem);
+        
+        if (!promote_offset (PKL_PASS_AST,
+                             to_magnitude_type, PKL_AST_OFFSET_UNIT (nelem),
+                             &PKL_AST_TYPE_A_NELEM (array_type), &restart))
+          {
+            pkl_ice (PKL_PASS_AST, PKL_AST_LOC (nelem),
+                     "couldn't promote array type size expression");
+            PKL_PASS_ERROR;
+          }
+        break;
+      }
+    default:
+      assert (0); /* This can't happen.  */
     }
 
   PKL_PASS_RESTART = restart;
