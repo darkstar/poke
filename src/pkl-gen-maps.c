@@ -73,6 +73,22 @@
    PUSHVAR 0,3 (EOMAG)      ; OFF EOMAG
    REGVAR (0,5 AOMAG)       ; OFF
 
+   ; If it is not null, transform the SBOUND from an offset to
+   ; a magnitude in bits.
+   PUSHVAR 0,0 (SBOUND)     ; OFF SBOUND
+   BN after_sbound_conv
+   OGETM                    ; OFF SBOUND SBOUNDM
+   SWAP                     ; OFF SBOUNDM SBOUND
+   OGETU                    ; OFF SBOUNDM SBOUND SBOUNDU
+   SWAP                     ; OFF SBOUNDM SBOUNDU SBOUND
+   DROP                     ; OFF SOBUNDM SBOUNDU
+   MULLU                    ; OFF SBOUNDM SBOUNDU (SBOUNDM*SBOUNDU)
+   NIP2                     ; OFF (SBOUNDM*SBOUNDU)
+   POPVAR 0,0 (SBOUND)      ; OFF
+   PUSH null                ; OFF null
+after_sbound_conv:
+   DROP                     ; OFF
+
    SUBPASS array_type       ; OFF ATYPE
 
    .while
@@ -89,12 +105,12 @@ loop_on_sbound:
    DROP                     ; OFF ATYPE
    PUSHVAR 0,0 (SBOUND)     ; OFF ATYPE SBOUND
    BN loop_unbounded
-   PUSHVAR 0,3 (EOMAG)      ; OFF ATYPE SBOUND EOMAG
-   PUSHVAR 0,5 (AOMAG)      ; OFF ATYPE SBOUND EOMAG AOMAG
-   SUBLU                    ; OFF ATYPE SBOUND EOMAG AOMAG (EOMAG-AOMAG)
-   NIP2                     ; OFF ATYPE SBOUND (EOMAG-AOMAG)
-   EQLU                     ; OFF ATYPE SBOUND (EOMAG-AOMAG) (SBOUND=(EOMAG-AOMAG))
-   NIP2                     ; OFF ATYPE (SBOUND=(EOMAG-AOMAG))
+   PUSHVAR 0,5 (AOMAG)      ; OFF ATYPE SBOUND AOMAG
+   ADDLU                    ; OFF ATYPE SBOUND AOMAG (SBOUND+AOMAG)
+   NIP2                     ; OFF ATYPE (SBOUND+AOMAG)
+   PUSHVAR 0,3 (EOMAG)      ; OFF ATYPE (SBOUND+AOMAG) EOMAG
+   GTLU                     ; OFF ATYPE (SBOUND+AOMAG) EOMAG ((SBOUND+AOMAG)>EOMAG)
+   NIP2                     ; OFF ATYPE ((SBOUND+AOMAG)>EOMAG)  
    BA end_loop_on
 loop_unbounded:
    DROP                     ; OFF ATYPE
@@ -170,14 +186,14 @@ check_ebound:
 check_sbound:
    SWAP                    ; SBOUND ARRAY
    SIZ                     ; SBOUND ARRAY OFF
-   OGETM                   ; SBOUND ARRAY OFFM
-   SWAP                    ; SBOUND OFFM ARRAY
-   OGETU                   ; SBOUND OFFM ARRAY OFFU
-   ROT                     ; SBOUND ARRAY OFFU OFFM
-   MULLU                   ; SBOUND ARRAY OFFU OFFM (OFFU*OFFM)
-   NIP2                    ; SBOUND ARRAY (OFFU*OFFM)
-   ROT                     ; ARRAY (OFFU*OFFM) SBOUND
-   SUBLU                   ; ARRAY (OFFU*OFFM) SBOUND ((OFFU*OFFM)-SBOUND)
+   OGETM                   ; SBOUND ARRAY OFF OFFM
+   SWAP                    ; SBOUND ARRAY OFFM OFF
+   OGETU                   ; SBOUND ARRAY OFFM OFF OFFU
+   NIP                     ; SBOUND ARRAY OFFM OFFU
+   MULLU                   ; SBOUND ARRAY OFFM OFFU (OFFM*OFFU)
+   NIP2                    ; SBOUND ARRAY (OFFM*OFFU)
+   ROT                     ; ARRAY (OFFM*OFFU) SBOUND
+   SUBLU                   ; ARRAY (OFFM*OFFU) SBOUND ((OFFM*OFFU)-SBOUND)
    BNZLU bounds_fail
    DROP                    ; ARRAY (OFFU*OFFM) SBOUND
    DROP                    ; ARRAY (OFFU*OFFM)
@@ -209,6 +225,7 @@ bounds_fail:
       jitter_label check_sbound_label;                                  \
       jitter_label bounds_ok_label;                                     \
       jitter_label bounds_fail_label;                                   \
+      jitter_label after_sbound_conv_label;                             \
                                                                         \
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                      \
                                      PKL_GEN_PAYLOAD->compiler,         \
@@ -220,6 +237,7 @@ bounds_fail:
       check_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM);           \
       bounds_ok_label = pkl_asm_fresh_label (PKL_GEN_ASM);              \
       bounds_fail_label = pkl_asm_fresh_label (PKL_GEN_ASM);            \
+      after_sbound_conv_label = pkl_asm_fresh_label (PKL_GEN_ASM);      \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
@@ -242,13 +260,27 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);               \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, after_sbound_conv_label); \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 0);                \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
+      pkl_asm_label (PKL_GEN_ASM, after_sbound_conv_label);             \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
+                                                                        \
       PKL_GEN_PAYLOAD->in_mapper = 0;                                   \
       PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));             \
       PKL_GEN_PAYLOAD->in_mapper = 1;                                   \
                                                                         \
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
-        jitter_label loop_on_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
+ jitter_label loop_on_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
         jitter_label end_loop_on_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
         jitter_label loop_unbounded_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
                                                                         \
@@ -263,11 +295,11 @@ bounds_fail:
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, loop_unbounded_label);  \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);             \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);             \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SUBLU);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU);                     \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_EQLU);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_GTLU);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, end_loop_on_label);     \
                                                                         \
@@ -344,7 +376,7 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);                       \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
@@ -423,6 +455,22 @@ bounds_fail:
    SEL                      ; OFF NVAL NELEM
    NIP                      ; OFF NELEM
    REGVAR (0,7 NELEM)       ; OFF
+
+   ; If it is not null, transform the SBOUND from an offset to
+   ; a magnitude in bits.
+   PUSHVAR 0,4 (SBOUND)     ; OFF SBOUND
+   BN after_sbound_conv
+   OGETM                    ; OFF SBOUND SBOUNDM
+   SWAP                     ; OFF SBOUNDM SBOUND
+   OGETU                    ; OFF SBOUNDM SBOUND SBOUNDU
+   SWAP                     ; OFF SBOUNDM SBOUNDU SBOUND
+   DROP                     ; OFF SOBUNDM SBOUNDU
+   MULLU                    ; OFF SBOUNDM SBOUNDU (SBOUNDM*SBOUNDU)
+   NIP2                     ; OFF (SBOUNDM*SBOUNDU)
+   POPVAR 0,4 (SBOUND)      ; OFF
+   PUSH null                ; OFF null
+after_sbound_conv:
+   DROP                     ; OFF
 
    ; Check that NVAL satisfies EBOUND if this bound is specified
    ; i.e. the number of elements stored in the array matches the
@@ -507,14 +555,14 @@ ebound_ok:
 check_sbound:
    SWAP                    ; SBOUND ARRAY
    SIZ                     ; SBOUND ARRAY OFF
-   OGETM                   ; SBOUND ARRAY OFFM
-   SWAP                    ; SBOUND OFFM ARRAY
-   OGETU                   ; SBOUND OFFM ARRAY OFFU
-   ROT                     ; SBOUND ARRAY OFFU OFFM
-   MULLU                   ; SBOUND ARRAY OFFU OFFM (OFFU*OFFM)
-   NIP2                    ; SBOUND ARRAY (OFFU*OFFM)
-   ROT                     ; ARRAY (OFFU*OFFM) SBOUND
-   SUBLU                   ; ARRAY (OFFU*OFFM) SBOUND ((OFFU*OFFM)-SBOUND)
+   OGETM                   ; SBOUND ARRAY OFF OFFM
+   SWAP                    ; SBOUND ARRAY OFFM OFF
+   OGETU                   ; SBOUND ARRAY OFFM OFF OFFU
+   NIP                     ; SBOUND ARRAY OFFM OFFU
+   MULLU                   ; SBOUND ARRAY OFFM OFFU (OFFM*OFFU)
+   NIP2                    ; SBOUND ARRAY (OFFM*OFFU)
+   ROT                     ; ARRAY (OFFM*OFFU) SBOUND
+   SUBLU                   ; ARRAY (OFFM*OFFU) SBOUND ((OFFM*OFFU)-SBOUND)
    BNZLU bounds_fail
    DROP                    ; ARRAY (OFFU*OFFM) SBOUND
    DROP                    ; ARRAY (OFFU*OFFM)
@@ -545,6 +593,7 @@ bounds_fail:
       jitter_label ebound_ok_label;                                     \
       jitter_label sbound_ok_label;                                     \
       jitter_label bounds_fail_label;                                   \
+      jitter_label after_sbound_conv_label;                             \
                                                                         \
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,                      \
                                      PKL_GEN_PAYLOAD->compiler,         \
@@ -555,6 +604,7 @@ bounds_fail:
       ebound_ok_label = pkl_asm_fresh_label (PKL_GEN_ASM);              \
       sbound_ok_label = pkl_asm_fresh_label (PKL_GEN_ASM);              \
       bounds_fail_label = pkl_asm_fresh_label (PKL_GEN_ASM);            \
+      after_sbound_conv_label = pkl_asm_fresh_label (PKL_GEN_ASM);      \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);                      \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);                       \
@@ -585,6 +635,20 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SEL);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+                                                                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, after_sbound_conv_label); \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR, 0, 4);                \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
+      pkl_asm_label (PKL_GEN_ASM, after_sbound_conv_label);             \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
                                                                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);               \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, check_ebound_label);     \
@@ -667,7 +731,7 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETU);                       \
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MULLU);                       \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);                         \
