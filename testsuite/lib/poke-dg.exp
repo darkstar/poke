@@ -24,6 +24,7 @@ load_lib dg.exp
 # where the dg-* element appears in the source file.
 
 set poke_commands {}
+set poke_data_file {}
 
 proc dg-command { args } {
     global poke_commands
@@ -43,9 +44,11 @@ proc dg-command { args } {
 # argument, with a random name.  The incoming data is encoded in
 # a Tcl list, like in:
 #
-# dg-data {0x00 0x01 0x02 0x03 0x0a 0xf3 0xb5}
+# dg-data {c*} {0x00 0x01 0x02 0x03 0x0a 0xf3 0xb5}
 #
-# where list element denotes a byte.
+# The first argument to dg-data is the format argument expected by the
+# binary(3tcl) Tcl command.  This should be flexible enough for most
+# purposes.
 #
 # Note that it is possible for a single test to specify several
 # dg-data.  Commands acting on IOS will opeate on the most recent
@@ -53,17 +56,28 @@ proc dg-command { args } {
 
 proc dg-data { args } {
     global poke_commands
+    global poke_data_file
+    global objdir
 
-    if { [llength $args] > 2 } {
-        error "[linex $args 0]: too many arguments"
+    if { [llength $args] != 3 } {
+        error "[linex $args 0]: invalid arguments"
     }
-    set bytes [lindex $args 1]
+    set format [lindex $args 1]
+    set bytes [lindex $args 2]
 
-    # Substitute RR by two random nibbles.
-    # XXX
+     # Write the data to a temporary file.
+    set output_file ${objdir}/[pid].data
+    set fd [open $output_file w]
+    fconfigure $fd -translation binary
+    puts -nonewline $fd [binary format $format $bytes]
+    close $fd
 
     # Append commands to open the file in poke and make it the current
     # IOS.
+    set poke_commands \
+        "$poke_commands -c [exec printf %q "file $output_file"]"
+
+    set poke_data_file $output_file
 }
 
 # We set LC_ALL and LANG to C so that we get the same error messages
@@ -111,4 +125,15 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
     set poke_commands {}
 
     return [list $comp_output $output_file]
+}
+
+# Cleanup.
+#
+# This function is invoked by dg-finish.
+proc poke_finish {} {
+    global poke_data_file
+
+    if {!($poke_data_file eq {})} {
+        file delete $poke_data_file
+    }
 }
