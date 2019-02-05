@@ -39,6 +39,25 @@ proc dg-command { args } {
         "$poke_commands -c [exec printf %q [lindex $args 1]]"
 }
 
+proc dg-data { args } {
+    global poke_commands
+
+    if { [llength $args] > 2 } {
+        error "[linex $args 0]: too many arguments"
+    }
+
+    # Create a temporary data file containing the data specified as an
+    # argument.  The incoming data is encoded in bytes, like this:
+    #
+    # dg-data 00 01 02 03 0a f3 b5
+    #
+    # XXX: support XY{N} -> XY XY XY
+    # XXX: support RR -> Random bytes.
+
+    # Append commands to open the file in poke and make it the current
+    # IOS.
+}
+
 # We set LC_ALL and LANG to C so that we get the same error messages
 # as expected.
 setenv LC_ALL C
