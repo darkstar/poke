@@ -2145,7 +2145,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
     case PKL_AST_ATTR_ALIGNMENT:
       /* XXX writeme */
     case PKL_AST_ATTR_OFFSET:
-      /* XXX writeme */
+      switch (PKL_AST_TYPE_CODE (operand_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+          break;
+        default:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+          break;
+        }
+      break;
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
                "unhandled attribute expression code #%d in code generator",
