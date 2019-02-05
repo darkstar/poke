@@ -69,17 +69,36 @@
    PUSH 0UL                 ; OFF 0UL
    REGVAR (0,4 EIDX)        ; OFF
 
+   ; Save the offset in bits of the beginning of the array in a local.
+   PUSHVAR 0,3 (EOMAG)      ; OFF EOMAG
+   REGVAR (0,5 AOMAG)       ; OFF
+
    SUBPASS array_type       ; OFF ATYPE
 
    .while
-   ; XXX
-   ; If there is an NBOUND, check it.
+   ; If there is an EBOUND, check it.
    ; Else, if there is a SBOUND, check it.
    ; Else, iterate (unbounded).
-   PUSHVAR 0,4 (EIDX)       ; OFF ATYPE I
-   PUSHVAR 0,1 (EBOUND)     ; OFF ATYPE I NELEM
-   LTLU                     ; OFF ATYPE I NELEM (NELEM<I)
-   NIP2                     ; OFF ATYPE (NELEM<I)
+   PUSHVAR 0,1 (EBOUND)     ; OFF ATYPE NELEM
+   BN loop_on_sbound
+   PUSHVAR 0,4 (EIDX)       ; OFF ATYPE NELEM I
+   GTLU                     ; OFF ATYPE NELEM I (NELEM>I)
+   NIP2                     ; OFF ATYPE (NELEM>I)
+   BA end_loop_on
+loop_on_sbound:
+   DROP                     ; OFF ATYPE
+   PUSHVAR 0,0 (SBOUND)     ; OFF ATYPE SBOUND
+   BN loop_unbounded
+   PUSHVAR 0,3 (EOMAG)      ; OFF ATYPE SBOUND EOMAG
+   PUSHVAR 0,5 (AOMAG)      ; OFF ATYPE SBOUND EOMAG AOMAG
+   SUBLU                    ; OFF ATYPE SBOUND EOMAG AOMAG (EOMAG-AOMAG)
+   NIP2                     ; OFF ATYPE SBOUND (EOMAG-AOMAG)
+   EQLU                     ; OFF ATYPE SBOUND (EOMAG-AOMAG) (SBOUND=(EOMAG-AOMAG))
+   NIP2                     ; OFF ATYPE (SBOUND=(EOMAG-AOMAG))
+   BA end_loop_on
+loop_unbounded:
+   PUSH 1                   ; OFF ATYPE 1
+end_loop_on:
    .loop
                             ; OFF ATYPE
 
@@ -219,17 +238,42 @@ bounds_fail:
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64)); \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
                                                                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                      \
+                                                                        \
       PKL_GEN_PAYLOAD->in_mapper = 0;                                   \
       PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));             \
       PKL_GEN_PAYLOAD->in_mapper = 1;                                   \
                                                                         \
       pkl_asm_while (PKL_GEN_ASM);                                      \
       {                                                                 \
-        /* XXX */                                                       \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);              \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);              \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_LTLU);                       \
-       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                       \
+        jitter_label loop_on_sbound_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
+        jitter_label end_loop_on_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
+        jitter_label loop_unbounded_label = pkl_asm_fresh_label (PKL_GEN_ASM); \
+                                                                        \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, loop_on_sbound_label);  \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_GTLU);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, end_loop_on_label);     \
+                                                                        \
+        pkl_asm_label (PKL_GEN_ASM, loop_on_sbound_label);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, loop_unbounded_label);  \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 3);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 5);             \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SUBLU);                     \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_EQLU);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                      \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, end_loop_on_label);     \
+                                                                        \
+        pkl_asm_label (PKL_GEN_ASM, loop_unbounded_label);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (1, 32)); \
+                                                                        \
+        pkl_asm_label (PKL_GEN_ASM, end_loop_on_label);                 \
       }                                                                 \
       pkl_asm_loop (PKL_GEN_ASM);                                       \
       {                                                                 \
