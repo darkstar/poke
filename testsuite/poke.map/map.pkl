@@ -1,4 +1,4 @@
-# pkl.exp - Compiler tests for poke
+# pkl.exp - Mapping tests for poke
 #
 #   Copyright (C) 2019 Jose E. Marchesi
 #
@@ -18,5 +18,5 @@
 
 load_lib ${tool}-dg.exp
 dg-init
-dg-runtest [lsort [glob -nocomplain $srcdir/poke.pkl/*.pk]] {} {}
+dg-runtest [lsort [glob -nocomplain $srcdir/poke.map/*.pk]] {} {}
 dg-finish
