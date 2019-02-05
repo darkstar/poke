@@ -77,7 +77,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       free (filename);
     }
 
-  if (poke_interactive_p)
+  if (poke_interactive_p && !poke_quiet_p)
     printf (_("The current file is now `%s'.\n"),
             ios_handler (ios_cur ()) + strlen ("file://"));
 
@@ -115,8 +115,11 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       if (ios_cur () == NULL)
         puts (_("No more IO spaces."));
       else
-        printf (_("The current file is now `%s'.\n"),
-                ios_handler (ios_cur ()));
+        {
+          if (poke_interactive_p && !poke_quiet_p)
+            printf (_("The current file is now `%s'.\n"),
+                    ios_handler (ios_cur ()));
+        }
     }
   
   return 1;
