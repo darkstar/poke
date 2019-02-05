@@ -97,6 +97,7 @@ loop_on_sbound:
    NIP2                     ; OFF ATYPE (SBOUND=(EOMAG-AOMAG))
    BA end_loop_on
 loop_unbounded:
+   DROP                     ; OFF ATYPE
    PUSH 1                   ; OFF ATYPE 1
 end_loop_on:
    .loop
@@ -271,6 +272,7 @@ bounds_fail:
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, end_loop_on_label);     \
                                                                         \
         pkl_asm_label (PKL_GEN_ASM, loop_unbounded_label);              \
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      \
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (1, 32)); \
                                                                         \
         pkl_asm_label (PKL_GEN_ASM, end_loop_on_label);                 \
