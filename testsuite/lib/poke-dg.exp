@@ -39,20 +39,28 @@ proc dg-command { args } {
         "$poke_commands -c [exec printf %q [lindex $args 1]]"
 }
 
+# Create a temporary data file containing the data specified as an
+# argument, with a random name.  The incoming data is encoded in
+# a Tcl list, like in:
+#
+# dg-data {0x00 0x01 0x02 0x03 0x0a 0xf3 0xb5}
+#
+# where list element denotes a byte.
+#
+# Note that it is possible for a single test to specify several
+# dg-data.  Commands acting on IOS will opeate on the most recent
+# dg-data.
+
 proc dg-data { args } {
     global poke_commands
 
     if { [llength $args] > 2 } {
         error "[linex $args 0]: too many arguments"
     }
+    set bytes [lindex $args 1]
 
-    # Create a temporary data file containing the data specified as an
-    # argument.  The incoming data is encoded in bytes, like this:
-    #
-    # dg-data 00 01 02 03 0a f3 b5
-    #
-    # XXX: support XY{N} -> XY XY XY
-    # XXX: support RR -> Random bytes.
+    # Substitute RR by two random nibbles.
+    # XXX
 
     # Append commands to open the file in poke and make it the current
     # IOS.
