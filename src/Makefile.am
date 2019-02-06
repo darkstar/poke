@@ -44,7 +44,10 @@ poke_SOURCES = poke.c poke.h \
                pvm-env.h pvm-env.c \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
-BUILT_SOURCES = pkl-tab.h pkl-lex.c
+ras-insn.def: pkl-insn.def
+	cpp -D'PKL_DEF_INSN(M,A,N)=M N' -P $< | sed -e 's/"//g' > $@
+
+BUILT_SOURCES = pkl-tab.h pkl-lex.c ras-insn.def
 AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
