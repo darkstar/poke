@@ -28,6 +28,9 @@
 
 /* XXX: every declaration here should be immutable.  */
 
+defvar true = 1;
+defvar false = 0;
+
 /* Compiler built-ins.  */
 
 defun print = (string str) void: __builtin_print__;
