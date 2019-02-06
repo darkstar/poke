@@ -33,7 +33,7 @@
 #define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
-#include "pkl.h" /* For pkl_compile_expression */
+#include "pkl.h" /* For pkl_compile_buffer */
 #include "pkl-parser.h"
 #include "ios.h"
 #include "pk-cmd.h"
@@ -389,14 +389,17 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                       program_string = p;
 
                     if (*a == 'e')
-                      prog = pkl_compile_expression (poke_compiler,
-                                                     program_string, &end);
+                      prog = pkl_compile_buffer (poke_compiler,
+                                                 PKL_WHAT_EXPRESSION,
+                                                 program_string, &end);
                     else if (*a == 'T')
-                      prog = pkl_compile_statement (poke_compiler,
-                                                    program_string, &end);
+                      prog = pkl_compile_buffer (poke_compiler,
+                                                 PKL_WHAT_STATEMENT,
+                                                 program_string, &end);
                     else
-                      prog = pkl_compile_declaration (poke_compiler,
-                                                      program_string, &end);
+                      prog = pkl_compile_buffer (poke_compiler,
+                                                 PKL_WHAT_DECLARATION,
+                                                 program_string, &end);
 
                     if (prog != NULL)
                       {

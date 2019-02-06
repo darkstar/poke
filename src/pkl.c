@@ -209,59 +209,35 @@ rest_of_compilation (pkl_compiler compiler,
 }
 
 pvm_program
-pkl_compile_declaration (pkl_compiler compiler, char *buffer,
-                         char **end)
+pkl_compile_buffer (pkl_compiler compiler, int what,
+                    char *buffer, char **end)
 {
   pkl_ast ast = NULL;
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+  int parse_what;
 
-  compiler->compiling = PKL_COMPILING_PROGRAM;
-
-  env = pkl_env_dup_toplevel (compiler->env);
-  
-  /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&env, &ast,
-                          PKL_PARSE_DECLARATION, buffer, end);
-  if (ret == 1)
-    /* Parse error.  */
-    goto error;
-  else if (ret == 2)
-    /* Memory exhaustion.  */
-    printf (_("out of memory\n"));
-  
-  program = rest_of_compilation (compiler, ast);
-  if (program == NULL)
-    goto error;
-
-  compiler->env = env;
-  pvm_specialize_program (program);
-  /* XXX */
-  /* pvm_print_program (stdout, program); */
-  return program;
-
- error:
-  pkl_env_free (env);
-  return NULL;
-}
-
-pvm_program
-pkl_compile_statement (pkl_compiler compiler, char *buffer,
-                       char **end)
-{
-  pkl_ast ast = NULL;
-  pvm_program program;
-  int ret;
-  pkl_env env = NULL;
-
-  compiler->compiling = PKL_COMPILING_PROGRAM;
+  compiler->compiling
+    = (what == PKL_WHAT_EXPRESSION
+       ? PKL_COMPILING_EXPRESSION
+       : PKL_COMPILING_PROGRAM);
 
   env = pkl_env_dup_toplevel (compiler->env);
   
+  /* Decide the entity to parse.  */
+  switch (what)
+    {
+    case PKL_WHAT_PROGRAM: parse_what = PKL_PARSE_PROGRAM; break;
+    case PKL_WHAT_EXPRESSION: parse_what = PKL_PARSE_EXPRESSION; break;
+    case PKL_WHAT_DECLARATION: parse_what = PKL_PARSE_DECLARATION; break;
+    case PKL_WHAT_STATEMENT: parse_what = PKL_PARSE_STATEMENT; break;
+    default:
+      assert (0);
+    }
+
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&env, &ast,
-                          PKL_PARSE_STATEMENT, buffer, end);
+  ret = pkl_parse_buffer (&env, &ast, parse_what, buffer, end);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -327,39 +303,6 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
  error:
   fclose (fd);
   pkl_env_free (env);
-  return NULL;
-}
-
-pvm_program
-pkl_compile_expression (pkl_compiler compiler,
-                        char *buffer, char **end)
-{
-  pkl_ast ast = NULL;
-  pvm_program program;
-  int ret;
-
-  compiler->compiling = PKL_COMPILING_EXPRESSION;
-  
-  /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&compiler->env,
-                          &ast,
-                          PKL_PARSE_EXPRESSION, buffer, end);
-  if (ret == 1)
-    /* Parse error.  */
-    goto error;
-  else if (ret == 2)
-    /* Memory exhaustion.  */
-    printf (_("out of memory\n"));
-
-  program = rest_of_compilation (compiler, ast);
-  if (program == NULL)
-    goto error;
-  
-  pvm_specialize_program (program);
-  return program;
-
- error:
-  pvm_destroy_program (program);
   return NULL;
 }
 
