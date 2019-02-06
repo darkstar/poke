@@ -2159,11 +2159,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
         {
         case PKL_TYPE_ARRAY:
         case PKL_TYPE_STRUCT:
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
-          break;
+          {
+            jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+            
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, label);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                          pvm_make_int (PVM_E_MAP, 32));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+            pkl_asm_label (PKL_GEN_ASM, label);
+            break;
+          }
         default:
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        pvm_make_int (PVM_E_MAP, 32));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
           break;
         }
       break;

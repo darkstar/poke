@@ -9,7 +9,5 @@
 /* { dg-command {print a'offset + a'size} } */
 /* { dg-output "\n40UL#b" } */
 
-/* The offset of an unmapped object is null.  */
-/* { dg-command {print [1,2,3]'offset} } */
-/* { dg-output "\nnull" } */
-
+/* { dg-command {print a'offset + 1#B} } */
+/* { dg-output "\n32UL#b" } */

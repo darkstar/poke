@@ -1257,6 +1257,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       offset_unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_LOC (offset_unit_type) = PKL_AST_LOC (exp);
       offset_unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+      PKL_AST_LOC (offset_unit) = PKL_AST_LOC (exp);
       PKL_AST_TYPE (offset_unit) = ASTREF (offset_unit_type);
 
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
@@ -1334,6 +1335,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       offset_unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_LOC (offset_unit_type) = PKL_AST_LOC (exp);
       offset_unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+      PKL_AST_LOC (offset_unit) = PKL_AST_LOC (exp);
       PKL_AST_TYPE (offset_unit) = ASTREF (offset_unit_type);
 
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
