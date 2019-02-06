@@ -1232,6 +1232,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
   enum pkl_ast_attr attr = PKL_AST_EXP_ATTR (exp);
 
   pkl_ast_node exp_type;
+  pkl_ast_node offset_unit_type;
+  pkl_ast_node offset_unit;
 
   switch (attr)
     {
@@ -1252,12 +1254,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
         }
 
       /* The type of 'size is offset<uint<64>,1>  */
+      offset_unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_LOC (offset_unit_type) = PKL_AST_LOC (exp);
+      offset_unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+      PKL_AST_TYPE (offset_unit) = ASTREF (offset_unit_type);
+
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
-      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
-                                           exp_type,
-                                           pkl_ast_make_integer (PKL_PASS_AST,
-                                                                 1));
+      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST, exp_type, offset_unit);
+
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
     case PKL_AST_ATTR_SIGNED:
@@ -1326,12 +1331,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
         }
 
       /* The type of 'offset is an offset<uint<64>,1>  */
+      offset_unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      PKL_AST_LOC (offset_unit_type) = PKL_AST_LOC (exp);
+      offset_unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+      PKL_AST_TYPE (offset_unit) = ASTREF (offset_unit_type);
+
       exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
-      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST,
-                                           exp_type,
-                                           pkl_ast_make_integer (PKL_PASS_AST,
-                                                                 1));
+      exp_type = pkl_ast_make_offset_type (PKL_PASS_AST, exp_type, offset_unit);
+
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
     default:
