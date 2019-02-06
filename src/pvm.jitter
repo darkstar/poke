@@ -983,6 +983,13 @@ end
 
 # Comparison instructions.
 
+instruction nn () # ( VAL -- VAL INT )
+  code
+     JITTER_PUSH_STACK (pvm_make_int (JITTER_TOP_STACK () != PVM_NULL,
+                                      32));
+  end
+end
+
 instruction lti () # ( INT INT -- INT INT INT )
   code
      PVM_BOOL_BINOP (INT, <);

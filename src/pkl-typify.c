@@ -1344,6 +1344,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
+    case PKL_AST_ATTR_MAPPED:
+      /* The type of 'mapped is a boolean, int<32>  */
+      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
+      PKL_AST_TYPE (exp) = ASTREF (exp_type);
+      break;
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
                "unhandled attribute expression code #%d in typify1",

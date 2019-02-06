@@ -153,6 +153,8 @@ PKL_DEF_INSN (PKL_INSN_NOT, "", "not")
   
 /* Comparison instructions.  */
 
+PKL_DEF_INSN (PKL_INSN_NN, "", "nn")
+
 PKL_DEF_INSN (PKL_INSN_EQI, "", "eqi")
 PKL_DEF_INSN (PKL_INSN_EQIU, "", "eqiu")
 PKL_DEF_INSN (PKL_INSN_EQL, "", "eql")

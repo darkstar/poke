@@ -2178,6 +2178,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
           break;
         }
       break;
+    case PKL_AST_ATTR_MAPPED:
+      switch (PKL_AST_TYPE_CODE (operand_type))
+        {
+        case PKL_TYPE_ARRAY:
+        case PKL_TYPE_STRUCT:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NN);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+          break;
+        default:
+          /* Other types are never mapped.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        pvm_make_int (0, 32));
+          break;
+        }
+      break;
     default:
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
                "unhandled attribute expression code #%d in code generator",
