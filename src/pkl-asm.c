@@ -270,9 +270,15 @@ pkl_asm_insn_remap (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* NVAL WCLS */
   pkl_asm_insn (pasm, PKL_INSN_MSETW);   /* NVAL */
   
-  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* VAL NULL */
+  /* If the mapped value is null then raise an EOF exception.  */
+  pkl_asm_insn (pasm, PKL_INSN_DUP);        /* NVAL NVAL */
+  pkl_asm_insn (pasm, PKL_INSN_BNN, label);
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_EOF, 32));
+  pkl_asm_insn (pasm, PKL_INSN_RAISE);
+
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* NVAL NULL */  
   pvm_append_label (pasm->program, label);
-  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* VAL */
+  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* NVAL */
 }
 
 /* Macro-instruction: WRITE

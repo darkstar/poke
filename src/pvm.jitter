@@ -127,6 +127,7 @@ late-header-c
        exception handler.  */
 
 #define PVM_RAISE(EXCEPTION)                                           \
+ do {                                                                  \
     while (1)                                                          \
     {                                                                  \
       struct pvm_exception_handler *ehandler                           \
@@ -146,7 +147,8 @@ late-header-c
         JITTER_BRANCH (ehandler->code);                                \
         break;                                                         \
       }                                                                \
-    }
+    }                                                                  \
+  } while (0)
 
     /* Macros to implement different kind of instructions.  These are to
        avoid flagrant code replication below.  */

@@ -30,10 +30,3 @@
 /* { dg-command {print/x int<32> @ 1#B } } */
 /* { dg-output "\n0x50403020" } */
 
-/* Trying to peek beyond the end of the data.  */
-/* { dg-command {print/x byte @ 8#B} } */
-/* { dg-output "\nnull" } */
-
-/* Partial 32-bit integral at the end of the data.  */
-/* { dg-command {print/x int<32> @ 6#B } } */
-/* { dg-output "\nnull" } */

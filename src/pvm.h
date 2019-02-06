@@ -43,12 +43,13 @@ enum pvm_exit_code
 /* Exceptions.  These should be in sync with the exception variables
    declared in pkl-rt.pkl */
 
-#define PVM_E_GENERIC     0
-#define PVM_E_DIV_BY_ZERO 1
-#define PVM_E_NO_IOS      2
-#define PVM_E_NO_RETURN   3
+#define PVM_E_GENERIC       0
+#define PVM_E_DIV_BY_ZERO   1
+#define PVM_E_NO_IOS        2
+#define PVM_E_NO_RETURN     3
 #define PVM_E_OUT_OF_BOUNDS 4
-#define PVM_E_MAP_BOUNDS 5
+#define PVM_E_MAP_BOUNDS    5
+#define PVM_E_EOF           6
 
 /* Note that the jitter-generated header should be included this late
    in the file because it uses some stuff defined above.  */
