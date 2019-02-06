@@ -120,7 +120,8 @@ BEGIN {
 # .c RESTOFLINE
 /\.c.*$/ {
     # XXX: should print the rest of the line
-    out($2 "\\")
+    $0 = gensub (/.*\.c (.*)$/, "\\1", "g", $0)
+    out("\t" $0 " \\")
     next
 }
 
