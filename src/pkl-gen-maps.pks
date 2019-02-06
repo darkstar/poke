@@ -17,6 +17,8 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
+        .function array_mapper
+        
 ;;; RAS_FUNCTION_ARRAY_MAPPER
 ;;; ( OFF EBOUND SBOUND -- ARR )
 ;;; 
@@ -38,8 +40,6 @@
 ;;;
 ;;; Only one of EBOUND or SBOUND simultanously are supported.
 ;;; Note that OFF should be of type offset<uint<64>,*>.
-
-        .function array_mapper
 
         prolog
         pushf
