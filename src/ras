@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/gawk -f
 
 # ras - The Retarded Poke Assembler
 #
@@ -24,6 +24,8 @@
 # Yes, RAS sucks ass, but it does its job... more or less.
 # No, we wont' spend time trying to turn it into a real assembler.
 # Yes, we suck too :P
+#
+# Note that RAS requires GAWK.
 
 ### Documentation
 
@@ -44,6 +46,34 @@
 # XXX support pushf/popf and lexical environment
 # XXX support labels
 # XXX support E_* constants
+# XXX turn .local VAR into regvar $VAR
+
+### Some useful functions, used in the rules below
+
+# Append a line to the assembled output.
+function out(line)
+{
+    output[output_line++] = line
+}
+
+# Initialize the global state to start processing a new function or
+# macro.
+function init_entity()
+{
+    # Reset the output
+    for (lineno in output) delete output[lineno]
+    # Reset the line number of the entity
+    output_line = 1
+    # Reset the labels table
+    for (label in labels) delete labels[label]
+    # Reset the lexical environment state
+    back = 0
+    over = 0
+    for (key in variable_back) delete variable_back[key];
+    for (key in variable_over) delete variable_over[key];
+}
+
+### There we go...
 
 BEGIN {
     objdir = ENVIRON["objdir"]
@@ -68,16 +98,16 @@ BEGIN {
 # Keep blank lines (to improve visibility)
 /^[ \t]*$/ {
     if (current_entity == "")
-        print ""
+        out("")
     else
-        print "\t                                                          \\"
+        out("\t                                                          \\")
     next
 }
 
 # Process lines containing only comments
 /^[ \t]*;.*/ {
     # XXX do not include the leading ; in the comment
-    print "/* " $0 " */"
+    out("/* " $0 " */")
     next
 }
 
@@ -86,57 +116,88 @@ BEGIN {
 # .c RESTOFLINE
 /\.c.*$/ {
     # XXX: should print the rest of the line
-    print $2 "\\"
+    out($2 "\\")
     next
 }
 
 # .macro NAME
 /\.macro/ {
-    print "#define RAS_MACRO_" toupper($2) "(CLOSURE) \\"
-    print "\tdo() {                                                     \\"
+    # Get the macro name, and make sure it looks good.
+    macro_name = $2
+    if (match (macro_name, /^[a-zA-Z][a-zA-Z]*/) == 0)
+    {
+        print ("error:" FNR ": invalid function name")
+        exit (1)
+    }
+
+   init_entity()
+
+    out("#define RAS_MACRO_" toupper($2) "(CLOSURE) \\")
+    out("\tdo() {                                                     \\")
 
     current_entity = "macro"
     next
 }
 
-# .expand NAME
-/\.expand/ {
-    print "\tRAS_MACRO_" toupper($2) ";                                \\"
-    next
-}
-
 # .function NAME
 /\.function/ {
-    print "#define RAS_FUNCTION_" toupper($2) "(CLOSURE)  \\"
-    print "\tdo() {                                                    \\"
-    print "\tpvm_program program;                                      \\"
-    print "\t                                                          \\"
-    print "\tPKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,              \\"
-    print "\t                               PKL_GEN_PAYLOAD->compiler, \\"
-    print "\t                               0 /* prologue */));        \\"
-    print "\t                                                          \\"
 
-    # Initialize the variable back and over
-    back = 0
-    over = 0
-    for (key in variable_back) delete variable_back[key];
-    for (key in variable_over) delete variable_over[key];
+    # Get the function name, and make sure it looks good.
+    function_name = $2
+    if (match (function_name, /^[a-zA-Z][a-zA-Z]*/) == 0)
+    {
+        print ("error:" FNR ": invalid function name")
+        exit (1)
+    }
+
+    init_entity()
+
+    out("#define RAS_FUNCTION_" toupper($2) "(CLOSURE)  \\")
+    out("\tdo() {                                       \\")
+    out("\tpvm_program program;                         \\")
+    out("\t                                             \\")
+    out("\tPKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST, \\")
+    out("\t                               PKL_GEN_PAYLOAD->compiler, \\")
+    out("\t                               0 /* prologue */));        \\")
+    out("\t                                                          \\")
+    out("---LABELDECLS---")
 
     current_entity = "function"
     next
 }
 
-# .endfunction
+# .end
 /\.end/ {
     if (current_entity == "function")
     {
-        print "\tPKL_GEN_POP_ASM;                                      \\"
-        print "\tpvm_specialize_program (program);                     \\"
-        print "\t(CLOSURE) = pvm_make_cls (program);                   \\"
+        out("\tPKL_GEN_POP_ASM;                                      \\")
+        out("\tpvm_specialize_program (program);                     \\")
+        out("\t(CLOSURE) = pvm_make_cls (program);                   \\")
     }
-    print "\t} while (0)"
+    out("\t} while (0)")
 
+    # Output the entity
+    for (lineno = 1; lineno <= output_line; lineno++)
+    {
+        line = output[lineno]
+        if (match (line, "---LABELDECLS---") == 1)
+        {
+            # Emit label declarations
+            for (label in labels)
+                print "\tjitter_label " label "_label = pkl_asm_fresh_label (PKL_GEN_ASM); \\"
+        }
+        else
+            print output[lineno]
+    }
+
+    for (line in output) delete output[line]
     current_entity = ""
+    next
+}
+
+# .expand NAME
+/\.expand/ {
+    out("\tRAS_MACRO_" toupper($2) ";                                \\")
     next
 }
 
@@ -148,7 +209,7 @@ BEGIN {
         exit (1)
     }
 
-    if (match ($2, /^[a-zA-Z][a-zA-Z]/) == 0)
+    if (match ($2, /^[a-zA-Z][a-zA-Z]*/) == 0)
     {
         print ("error:" FNR ": invalid variable name in .local")
         exit (1)
@@ -157,8 +218,16 @@ BEGIN {
     variable_back[$2] = back
     variable_over[$2] = over
     
-    print "\tpkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR, " back "," over "); \\"
+    out("\tpkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR, " back "," over "); \\")
     over++;
+    next
+}
+
+# Process a label
+/^[ \t]*\.[a-zA-Z][a-zA-Z]*:/ {
+    labelname = substr ($1, 2, length($1) - 2)
+    labels[labelname] = labelname
+    out("\tpkl_asm_label (PKL_GEN_ASM," labelname "_label); \\")
     next
 }
 
@@ -169,6 +238,10 @@ BEGIN {
     # Lookup the instruction in the instructions hash.
     insn = $1
     insn_id = insn_table[insn]
+
+    # XXX from the information stored in the instruction tables,
+    # i.e. the number of arguments, and their types, build a regular
+    # expression to match and extract the fields.
 
     if (insn_id == "")
     {
@@ -238,7 +311,7 @@ BEGIN {
         exit (1)
     }
 
-    print $0
+    out($0)
     next
 }
 

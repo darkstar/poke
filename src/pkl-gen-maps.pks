@@ -43,9 +43,9 @@
 
         prolog
         pushf
-        .local sbound           ; Argument: SBOUND
-        .local ebound           ; Argument: EBOUND
-        .local off              ; Argument: OFF
+        regvar $sbound           ; Argument: SBOUND
+        regvar $ebound           ; Argument: EBOUND
+        regvar $off              ; Argument: OFF
 
         ;; Determine the offset of the array, in bits, and put it in a
         ;; local.
@@ -56,17 +56,17 @@
         rot                     ; OFF OUNIT OMAG
         mullu                   ; OFF OUNIT OMAG (OUNIT*OMAG)
         nip2                    ; OFF (OUNIT*OMAG)
-        .local eomag            ; OFF
+        regvar $eomag           ; OFF
 
         ;; Initialize the element index to 0UL, and put it
         ;; in a local.
         push ulong<64>0         ; OFF 0UL
-        .local eidx             ; OFF
+        regvar $eidx            ; OFF
 
         ;; Save the offset in bits of the beginning of the array in a
         ;; local.
         pushvar $eomag          ; OFF EOMAG
-        .local aomag            ; OFF
+        regvar $aomag           ; OFF
 
         ;; If it is not null, transform the SBOUND from an offset to a
         ;; magnitude in bits.
@@ -79,7 +79,7 @@
         drop                    ; OFF SOBUNDM SBOUNDU
         mullu                   ; OFF SBOUNDM SBOUNDU (SBOUNDM*SBOUNDU)
         nip2                    ; OFF (SBOUNDM*SBOUNDU)
-        .local SBOUNDM          ; OFF
+        regvar $sboundm         ; OFF
         push null               ; OFF null
 .after_sbound_conv:
         drop                    ; OFF
