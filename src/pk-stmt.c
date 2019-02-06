@@ -1,4 +1,4 @@
-/* pk-stmt.c - do (execute sentence) command */
+/* pk-stmt.c - : (execute sentence) command */
 
 /* Copyright (C) 2019 Jose E. Marchesi */
 
@@ -53,5 +53,5 @@ pk_cmd_stmt (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 }
 
 struct pk_cmd stmt_cmd =
-  {"do", "T", 0, 0, NULL, pk_cmd_stmt,
-   "do STATEMENT"};
+  {":", "T", 0, 0, NULL, pk_cmd_stmt,
+   ": STATEMENT"};

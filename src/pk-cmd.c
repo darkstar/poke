@@ -226,7 +226,7 @@ pk_trie_get_cmd (struct pk_trie *trie, const char *str)
   for (pc = str; *pc; pc++)
     {
       int n = *pc;
-      
+
       if (trie->children[n] == NULL)
         return NULL;
 
@@ -279,7 +279,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
   /* Get the command name.  */
   i = 0;
-  while (isalnum (*p) || *p == '_')
+  while (isalnum (*p) || *p == '_' || *p == ':')
     cmd_name[i++] = *(p++);
   cmd_name[i] = '\0';
 
