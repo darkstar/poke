@@ -236,11 +236,12 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> comp_stmt stmt_decl_list stmt
 
 /* The following two tokens are used in order to support several start
-   rules: one is for parsing an expression and the other for parsing a
-   full poke programs.  This trick is explained in the Bison Manual in
-   the "Multiple start-symbols" section.  */
+   rules: one is for parsing an expression, declaration or sentence,
+   and the other for parsing a full poke programs.  This trick is
+   explained in the Bison Manual in the "Multiple start-symbols"
+   section.  */
 
-%token START_EXP START_DECL START_PROGRAM;
+%token START_EXP START_DECL START_STMT START_PROGRAM;
 
 %start start
 
@@ -279,7 +280,12 @@ start:
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
-
+        | START_STMT stmt
+                {
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
         | START_PROGRAM program
         	{
                   $$ = pkl_ast_make_program (pkl_parser->ast, $2);

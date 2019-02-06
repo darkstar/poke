@@ -77,11 +77,13 @@ void pkl_free (pkl_compiler compiler);
 
 pvm_program pkl_compile_file (pkl_compiler compiler, const char *fname);
 
-/* Compile a poke program from the given BUFFER.  Return NULL in case
-   of a compilation error.  */
+/* Compile a poke declaration from a NULL-terminated string BUFFER.
+   Return NULL in case of a compilation error.  If not NULL, END is
+   set to the first character in BUFFER that is not part of the
+   declaration.  */
 
-pvm_program pkl_compile_buffer (pkl_compiler compiler,
-                                char *buffer, char **end);
+pvm_program pkl_compile_declaration (pkl_compiler compiler,
+                                     char *buffer, char **end);
 
 /* Compile a poke expression from a NULL-terminated string BUFFER.
    Return NULL in case of a compilation error.  If not NULL, END is
@@ -90,6 +92,14 @@ pvm_program pkl_compile_buffer (pkl_compiler compiler,
 
 pvm_program pkl_compile_expression (pkl_compiler compiler,
                                     char *buffer, char **end);
+
+/* Compile a poke statement from a NULL-terminated string BUFFER.
+   Return NULL in case of a compilation error.  If not NULL, END is
+   set to the first character in BUFFER that is not part of the
+   expression.  */
+
+pvm_program pkl_compile_statement (pkl_compiler compiler,
+                                   char *buffer, char **end);
 
 /* Return the current compile-time environment in COMPILER.  */
 

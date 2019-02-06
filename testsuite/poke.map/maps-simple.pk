@@ -30,6 +30,6 @@
 /* { dg-command {print/x int<32> @ 1#B } } */
 /* { dg-output "\n0x50403020" } */
 
-/* { dg-command {defun catcheof = void: { defvar i = 10; try i = int @ 999#B; catch if E_eof { print ("catched\n"); } } } } */
-/* { dg-command {print catcheof} } */
-/* { dg-output "\ncatched\nnull" } */
+/* { dg-command {defvar i = 10} } */
+/* { dg-command {do try i = int @ 999#B; catch if E_eof { print ("catched\n"); } } } */
+/* { dg-output "\ncatched" } */

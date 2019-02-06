@@ -1,6 +1,6 @@
 /* pk-cmd.c - Poke commands.  */
 
-/* Copyright (C) 2018, 2019 Jose E. Marchesi */
+/* Copyright (C) 2019 Jose E. Marchesi */
 
 /* This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ extern struct pk_cmd deftype_cmd; /* pk-def.c */
 extern struct pk_cmd defvar_cmd; /* pk-def.c */
 extern struct pk_cmd defun_cmd; /* pk-def.c */
 extern struct pk_cmd set_cmd; /* pk-set.c */
+extern struct pk_cmd stmt_cmd; /* pk-stmt.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, NULL, 0, NULL, NULL};
@@ -78,6 +79,7 @@ static struct pk_cmd *cmds[] =
     &defvar_cmd,
     &defun_cmd,
     &set_cmd,
+    &stmt_cmd,
     &null_cmd
   };
 
@@ -356,6 +358,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                 {
                 case 'd':
                 case 'e':
+                case 'T':
                   {
                     /* Compile a poke program.  */
                     pvm_program prog;
@@ -388,9 +391,12 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     if (*a == 'e')
                       prog = pkl_compile_expression (poke_compiler,
                                                      program_string, &end);
+                    else if (*a == 'T')
+                      prog = pkl_compile_statement (poke_compiler,
+                                                    program_string, &end);
                     else
-                      prog = pkl_compile_buffer (poke_compiler,
-                                                 program_string, &end);
+                      prog = pkl_compile_declaration (poke_compiler,
+                                                      program_string, &end);
 
                     if (prog != NULL)
                       {
@@ -405,6 +411,11 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                               p--;
 
                             free (program_string);
+                          }
+                        else if (*a == 'T')
+                          {
+                            argv[argc].type = PK_CMD_ARG_STMT;
+                            p = end;
                           }
                         else
                           {
@@ -593,7 +604,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   for (i = 0; i < argc; ++i)
     {
       if (argv[i].type == PK_CMD_ARG_EXP
-          || argv[i].type == PK_CMD_ARG_DEF)
+          || argv[i].type == PK_CMD_ARG_DEF
+          || argv[i].type == PK_CMD_ARG_STMT)
         pvm_destroy_program (argv[i].val.prog);
     }
   

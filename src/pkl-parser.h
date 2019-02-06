@@ -46,6 +46,7 @@ struct pkl_parser
 #define PKL_PARSE_PROGRAM 0
 #define PKL_PARSE_EXPRESSION 1
 #define PKL_PARSE_DECLARATION 2
+#define PKL_PARSE_STATEMENT 3
 
 int pkl_parse_file (pkl_env *env, pkl_ast *ast, FILE *fd, const char *fname);
 int pkl_parse_buffer (pkl_env *env, pkl_ast *ast, int what, char *buffer, char **end);
