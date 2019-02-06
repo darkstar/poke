@@ -44,10 +44,7 @@ pk_cmd_stmt (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   prog = PK_CMD_ARG_STMT (argv[0]);
   pvm_ret = pvm_run (poke_vm, prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
-    {
-      printf (_("run-time error\n"));
-      return 0;
-    }
+    return 0;
 
   return 1;
 }
