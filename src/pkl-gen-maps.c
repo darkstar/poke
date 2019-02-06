@@ -151,13 +151,27 @@ end_loop_on:
    POPVAR 0,4 (EIDX)       ; ... EOFF EIDX EVAL
    .endloop
 
+   PUSH null
    BA mountarray
 eof:
    ; Remove the partial EOFF null element from the stack.
                            ; ... EOFF null
    DROP                    ; ... EOFF
    DROP                    ; ...
+   ; If the array is bounded, raise E_EOF
+   PUSHVAR 0,1 (EBOUND)    ; ... EBOUND
+   NN                      ; ... EBOUND (EBOUND!=NULL)
+   NIP                     ; ... (EBOUND!=NULL)
+   PUSHVAR 0,0 (SBOUND)    ; ... (EBOUND!=NULL) SBOUND
+   NN                      ; ... (EBOUND!=NULL) SBOUND (SBOUND!=NULL)
+   NIP                     ; ... (EBOUND!=NULL) (SBOUND!=NULL)
+   OR                      ; ... (EBOUND!=NULL) (SBOUND!=NULL) ARRAYBOUNDED
+   NIP2                    ; ... ARRAYBOUNDED
+   BZ mountarray
+   PUSH E_EOF
+   RAISE
 mountarray:
+   DROP                    ; OFF ATYPE [EOFF EIDX EVAL]...
    PUSHVAR 0,4 (EIDX)      ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
    DUP                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
    MKMA                    ; ARRAY
@@ -211,7 +225,8 @@ bounds_ok:
    RETURN
 
 bounds_fail:
-   RAISE E_MAP_BOUNDS
+   PUSH E_MAP_BOUNDS
+   RAISE
 */
 
 #define PKL_ASM_ARRAY_MAPPER(CLOSURE)                                   \
@@ -340,13 +355,26 @@ bounds_fail:
       }                                                                 \
       pkl_asm_endloop (PKL_GEN_ASM);                                    \
                                                                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);              \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, mountarray_label);        \
                                                                         \
       pkl_asm_label (PKL_GEN_ASM, eof_label);                           \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 1);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NN);                          \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);               \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NN);                          \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                         \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);                          \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);                        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BZI, mountarray_label);        \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (PVM_E_EOF, 32));\
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);                       \
                                                                         \
       pkl_asm_label (PKL_GEN_ASM, mountarray_label);                    \
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                        \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 4);               \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                         \
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMA);                        \
@@ -580,7 +608,8 @@ sbound_ok:
    RETURN
 
 bounds_fail:
-   RAISE E_MAP_BOUNDS
+   PUSH E_MAP_BOUNDS
+   RAISE
 */
 
 #define PKL_ASM_ARRAY_VALMAPPER(CLOSURE)                                \
