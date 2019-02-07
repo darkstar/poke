@@ -486,11 +486,11 @@ BEGIN {
 }
 
 # .macro NAME
-/\.macro/ {
+/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*/ {
     # Get the macro name, and make sure it looks good.
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*/) == 0)
-        error("error:" FNR ": invalid function name")
+        fatal("error:" FNR ": invalid function name.  This should NOT happen.")
 
    init_entity()
 
