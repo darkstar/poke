@@ -620,6 +620,13 @@ BEGIN {
 # Process a label
 /^[ \t]*\.[a-zA-Z][a-zA-Z_]*:[ \t]*(;.*)?$/ {
     labelname = substr ($1, 2, length($1) - 2)
+
+    if (labels[labelname] == labelname)
+    {
+        error("error: " FNR ": label already defined in the current entity")
+        next
+    }
+
     labels[labelname] = labelname
     out("\tpkl_asm_label (PKL_GEN_ASM," labelname "_label); \\")
     next
