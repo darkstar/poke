@@ -1,0 +1,9 @@
+Note that this file is not your typical abandoned TODO file that
+nobody reads and nobody updates.  We DO use this file, and these are
+asks that really need to get done.
+
+ras
+
+  - Validate the number of bits in u?int and u?long arguments.
+  - Validate labels in label arguments.
+  - Write error messages to stderr.

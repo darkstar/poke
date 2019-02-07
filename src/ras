@@ -17,11 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is an assembler that can translate Poke Assembly code into C
-# macros.  The resulting C macros are designed to be used in the PKL
-# code generator.  ras may not be the smartest assembler in the class,
-# but we love it very much because it saves us a lot of work.  So
-# please be gentle and don't break it.
+# This assembler translates Poke Assembly code into C macros.  The
+# resulting C macros are designed to be used in the PKL code
+# generator.  See the Documentation section below for more details.
+#
+# ras may not be the smartest assembler in the class, but we love it
+# very much because it saves us a lot of work.  So please be gentle
+# and don't break it.
 #
 # This code is supposed to run well on any POSIX-compatible awk.
 # Please send us a patch if it doesn't!
@@ -205,10 +207,6 @@
 # addresses instead of variable names.  But I strongly recommend using
 # variable names unless you have a _very_ good reason not to... like a
 # gun aiming at your head for example.
-
-# XXX support E_* constants
-# XXX validate the number of bits in u?int and u?long arguments
-# XXX validate labels in label arguments
 
 ### Some useful misc functions, used in the rules below
 
