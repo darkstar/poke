@@ -23,8 +23,8 @@
 # because it saves us a lot of work.  So please be gentle and don't
 # break it.
 #
-# This code is supposed to run on any POSIX-compatible awk.  Please
-# send us a patch if it doesn't!
+# This code is supposed to run well on any POSIX-compatible awk.
+# Please send us a patch if it doesn't!
 
 ### Documentation
 
@@ -99,7 +99,7 @@ BEGIN {
 
 ## Miscellaneous rules
 
-# Keep blank lines (to improve visibility)
+# Keep blank lines (to improve readability)
 /^[ \t]*$/ {
     if (current_entity == "")
         out("")

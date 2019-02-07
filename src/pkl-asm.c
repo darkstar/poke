@@ -28,8 +28,8 @@
 #include "pvm.h"
 #include "ios.h"
 
-/* In order to allow nested multi-function macros, like conditionals
-   and loops, the assembler supports the notion of "nesting levels".
+/* In order to support nested multi-function macros, like conditionals
+   and loops, the assembler implements the notion of "nesting levels".
    For example, consider the following conditional code:
 
       ... top-level ...
