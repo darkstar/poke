@@ -410,3 +410,63 @@
         raise
         .end                    ; array_valmapper
 
+
+        .function array_writer
+
+;;; RAS_FUNCTION_ARRAY_WRITER
+;;; ( OFFSET VAL -- )
+;;;
+;;; Assemble a function that pokes a mapped array value to it's mapped
+;;; offset in the current IOS.
+;;;
+;;; Note that it is important for the elements of the array to be poked
+;;; in order.
+
+        prolog
+        pushf
+        regvar $value           ; Argument
+        regvar $offset          ; Argument
+           
+        push ulong<64>0         ; 0UL
+        regvar $idx             ; _
+
+        .while
+        pushvar $idx            ; I
+        pushvar $value          ; I ARRAY
+        sel                     ; I ARRAY NELEM
+        nip                     ; I NELEM
+        ltlu                    ; I NELEM (NELEM<I)
+        nip2                    ; (NELEM<I)
+        .loop
+                                ; _
+
+        ;; Poke this array element
+        pushvar $offset         ; OFF
+        pushvar $value          ; OFF ARRAY
+        pushvar $idx            ; OFF ARRAY I
+        aref                    ; OFF ARRAY I VAL
+        nrot                    ; OFF VAL ARRAY I
+        arefo                   ; OFF VAL ARRAY I EOFF
+        nip2                    ; OFF VAL EOFF
+        swap                    ; OFF EOFF VAL
+
+        .c PKL_GEN_PAYLOAD->in_writer = 1;
+        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        .c PKL_GEN_PAYLOAD->in_writer = 0;
+                                ; OFF
+        drop                    ; _
+
+        ;; Increase the current index and process the next
+        ;; element.
+        pushvar $idx            ; EIDX
+        push ulong<64>1         ; EIDX 1UL
+        addlu                   ; EDIX 1UL (EIDX+1UL)
+        nip2                    ; (EIDX+1UL)
+        popvar $idx             ; _
+        .endloop 
+
+        popf 1
+        push null
+        return
+        .end                    ; array_writer
+

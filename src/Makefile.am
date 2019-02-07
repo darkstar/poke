@@ -44,7 +44,10 @@ poke_SOURCES = poke.c poke.h \
                pvm-env.h pvm-env.c \
                pvm-vm.h pvm-vm1.c pvm-vm2.c
 
-BUILT_SOURCES = pkl-tab.h pkl-lex.c
+pkl-gen-maps.pkc: pkl-gen-maps.pks
+	srcdir=$(srcdir) $(srcdir)/ras $< > $@
+
+BUILT_SOURCES = pkl-tab.h pkl-lex.c pkl-gen-maps.pkc
 AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 

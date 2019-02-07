@@ -375,11 +375,11 @@ BEGIN {
     var_re="(\\$[a-zA-Z][a-zA-Z_]*)"
     expt_re="(PVM_E_[A-Z_]+)"
 
-    ideffile = srcdir "pkl-insn.def"
+    ideffile = srcdir "/pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
         fatal("fatal: cannot read instruction definition file " ideffile)
     
-    cmd = "cpp -D'PKL_DEF_INSN(M,A,N)=M A N' -P " srcdir "pkl-insn.def"
+    cmd = "cpp -D'PKL_DEF_INSN(M,A,N)=M A N' -P " ideffile
     while ((cmd | getline line) > 0)
     {
         name = gensub (/(.*) (.*) (.*)/, "\\3", "g", line)
