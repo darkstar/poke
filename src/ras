@@ -452,9 +452,9 @@ BEGIN {
 # choke on the catch-all centinel at the end of the file, and that
 # ain't be fun.
 #
-# In what probably is terrible awk style, each rule below will use
-# `next' in order to prevent other rules to match the just processed
-# line.  This keeps things simple.
+# In what probably is terrible awk style, each rule below uses `next'
+# in order to prevent other rules to match the just processed line.
+# This keeps things simple.
 
 ## Miscellaneous rules
 
