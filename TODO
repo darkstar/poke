@@ -2,8 +2,12 @@ Note that this file is not your typical abandoned TODO file that
 nobody reads and nobody updates.  We DO use this file, and these are
 asks that really need to get done.
 
+The tasks below are generally ordered in reverse order of importance,
+i.e. the most important tasks are listed first.
+
 ras
 
   - Validate the number of bits in u?int and u?long arguments.
   - Validate labels in label arguments.
   - Write error messages to stderr.
+  - Pretty print: indentation in .loop/.endloop etc.

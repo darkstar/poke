@@ -562,6 +562,28 @@ BEGIN {
     next
 }
 
+# .while
+/^[ \t]*\.while[ \t]*(;.*)?$/ {
+    out("\tpkl_asm_while (PKL_GEN_ASM);                              \\")
+    out("\t{                                                         \\")
+    next
+}
+
+# .loop
+/^[ \t]*\.loop[ \t]*(;.*)?$/ {
+    out("\t}                                                         \\")
+    out("\tpkl_asm_loop (PKL_GEN_ASM);                               \\")
+    out("\t{                                                         \\")
+    next
+}
+
+# .endloop
+/^[ \t]*\.endloop[ \t]*(;.*)?$/ {
+    out("\t}                                                         \\")
+    out("\tpkl_asm_endloop (PKL_GEN_ASM);                            \\")
+    next
+}
+
 # Process a label
 /^[ \t]*\.[a-zA-Z][a-zA-Z_]*:[ \t]*(;.*)?$/ {
     labelname = substr ($1, 2, length($1) - 2)
