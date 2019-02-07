@@ -47,24 +47,193 @@
 #  .end
 #
 # Translates to RAS_FUNCTION_NAME(CLOSURE)
+#
+# Variables
+# ---------
+#
+# Wherever a lexical address (a pair of BACK, OVER numbers) is
+# expected in a program, ras allows you to specify a variable name
+# instead.  Variable names are identifiers that start with the $
+# character.
+#
+# For example, both forms of pushvar are allowed:
+#
+#   pushvar 0,3
+#   pushvar $foo
+#
+# Using variable names eases writing PVM assembly code a lot, for
+# several reasons.
+#
+# First, the location of a given variable in a given lexical frame
+# depends on how many other variables has been registered before.  For
+# example, consider a function that gets two arguments, and also uses
+# local variables:
+#
+#   .function FOO
+#   prolog
+#   pushf
+#   regvar      ; Argument2, 0,0
+#   regvar      ; Argument1, 0,1
+#   ...
+#   regvar      ; Local1, 0,2
+#   regvar      ; Local2, 0,3
+#   ...
+#   pushvar 0,2 ; Use Local1
+#
+# Now, we want to modify FOO to get an extra argument.  Boom! This
+# changes the lexical addresses of everything, and thus we need to
+# adjust them manually:
+#
+#   .function FOO
+#   prolog
+#   pushf
+#   regvar      ; Argument3, 0,0
+#   regvar      ; Argument2, 0,1
+#   regvar      ; Argument1, 0,2
+#   ...
+#   regvar      ; Local1, 0,3
+#   regvar      ; Local2, 0,4
+#   ...
+#   pushvar 0,3 ; Use Local1
+#
+# This is VERY error prone and mistakes are laborious to debug, not to
+# mention it is a pain in the ass and a waste of time.
+#
+# Fortunately, ras comes to the rescue.  Using variable names instead
+# of lexical addresses, the assembler will do the boring work for you.
+# The original function is:
+#
+#  .function FOO
+#  prolog
+#  pushf
+#  regvar $arg2
+#  regvar $arg1
+#  ...
+#  regvar $local1
+#  regvar $local2
+#
+# And the updated function, with an additional argument:
+#
+#  .function FOO
+#  prolog
+#  pushf
+#  regvar $arg3
+#  regvar $arg2
+#  regvar $arg1
+#  ...
+#  regvar $local1
+#  regvar $local2
+#
+# Much better :P
+#
+# Another difficulty when dealing with lexical addresses is that
+# different addresses are required to refer to the same variable,
+# depending on the context.  For example, consider the following PVM
+# program:
+#
+# pushf
+# regvar        ; A
+# pushvar 0,0   ; A
+# pushf
+# pushvar 1,0   ; Also A!
+# popf 2
+#
+# In this case, it is simple: a quick look at the code is enough to
+# determine the lexical addresses of the desired variable (A) in both
+# program points.  However, in real programs this quickly degenerates
+# and gets really complex.  As before, it is much better to let ras do
+# the tracking job:
+#
+# pushf
+# regvar %A
+# pushvar %A
+# pushf
+# pushvar %A
+# popf 2
+#
+# Summarizing: ultimately it is up to you when to use explicit lexical
+# addresses instead of variable names.  But I strongly recommend using
+# variable names unless you have a _very_ good reason not to... like a
+# gun aiming at your head for example.
 
 # XXX support pushf/popf and lexical environment
 # XXX support E_* constants
 # XXX turn .local VAR into regvar $VAR
+# XXX support pushvar/popvar instructions with explicit lexical addresses
+# XXX replace "fatal" with "error" and accumulate them
 
-### Some useful functions, used in the rules below
+### Some useful misc functions, used in the rules below
 
 # Emit an error message and boil out with an error status.
-function fatal(msg)
+function error(msg)
 {
-    print msg
-    exit (1)
+    num_errors++
+    errors[num_errors] = msg
 }
 
 # Append a line to the assembled output.
 function out(line)
 {
     output[output_line++] = line
+}
+
+### Functions to manage the lexical environment
+
+function init_lexenv()
+{
+    cur_back = -1
+    cur_over = -1
+    for (key in lexenv) delete lexenv[key]
+    for (key in lexenv_nvars) delete lexenv_nvars[key]
+}
+
+function push_frame()
+{
+    print ("PUSHING FRAME")
+    if (cur_back != -1)
+        lexenv_nvars[cur_back] = cur_over
+    cur_back++
+    cur_over = 0
+}
+
+function pop_frame()
+{
+    print ("POPPING FRAME")
+    cur_back--
+    cur_over = lexenv_nvars[cur_back]
+}
+
+function register_var(name)
+{
+    print ("REGISTERING " name)
+    lexenv[cur_back,cur_over] = name
+    cur_over++
+}
+
+# Lookup for a variable in the lexical environment.
+# Set the global `lookup_var_found'.
+function lookup_var(name)
+{
+    if (cur_back < 0 || cur_over < 0)
+        error("error: " FNR ": at least a PUSHF is required to access variables")
+    
+    lookup_var_found[back] = -1
+    lookup_var_found[over] = -1
+    for (bn = cur_back; bn >= 0; bn--)
+    {
+        for (on = 0; on < cur_over; on++)
+            if (lexenv[bn,on] == name)
+            {
+                lookup_var_found["back"] = cur_back - bn
+                lookup_var_found["over"] = cur_over - on - 1
+                break
+            }
+
+        if (lookup_var_found[back] != -1)
+            break;
+    }
+
+    print "LOOKING UP " name " FOUND " lookup_var_found["back"] " " lookup_var_found["over"]
 }
 
 # Initialize the global state to start processing a new function or
@@ -78,16 +247,14 @@ function init_entity()
     # Reset the labels table
     for (label in labels) delete labels[label]
     # Reset the lexical environment state
-    back = 0
-    over = 0
-    for (key in variable_back) delete variable_back[key];
-    for (key in variable_over) delete variable_over[key];
+    init_lexenv()
 }
 
 ### There we go...
 
 BEGIN {
     srcdir = ENVIRON["srcdir"]
+    num_errors=0
     current_entity = ""
 
     # Read the instructions from pkl-insn.def and build the
@@ -103,11 +270,11 @@ BEGIN {
     int_re="(u?int)<([0-9]+)>(-?[0-9]+)"
     long_re="(u?long)<([0-9]+)>(-?[0-9]+)"
     string_re="(\"[^\"]*\")"
-    var_re="(\\$[a-zA-Z][a-zA-Z]+)"
+    var_re="(\\$[a-zA-Z][a-zA-Z]*)"
 
     ideffile = srcdir "pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
-        fatal("error: cannot read instruction definition file " ideffile)
+        error("error: cannot read instruction definition file " ideffile)
     
     cmd = "cpp -D'PKL_DEF_INSN(M,A,N)=M A N' -P " srcdir "pkl-insn.def"
     while ((cmd | getline line) > 0)
@@ -121,11 +288,13 @@ BEGIN {
         name = substr (name, 2, length (name) - 2)
         args = substr (args, 2, length (args) - 2)     
 
-        # Build the instruction's regexp.  There is a couple of
-        # special cases.
+        # Build the instruction's regexp.  There are a few special
+        # cases.
         iregexp = name
 
-        if (id == "PKL_INSN_PUSHVAR" || id == "PKL_INSN_POPVAR")
+        if (id == "PKL_INSN_PUSHVAR" \
+            || id == "PKL_INSN_POPVAR" \
+            || id == "PKL_INSN_REGVAR")
             iregexp = iregexp "[ \t]+\\$([a-z][A-Z]*)"
         else
         {
@@ -156,7 +325,7 @@ BEGIN {
                         re="(---NEVER MATCHING---)"
                         break
                     default:
-                        fatal("error: unknown insn argument type " a)
+                        error("error: unknown insn argument type " a)
                 }
                 iregexp = iregexp re
             }
@@ -204,7 +373,7 @@ BEGIN {
     # Get the macro name, and make sure it looks good.
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][a-zA-Z]*/) == 0)
-        fatal("error:" FNR ": invalid function name")
+        error("error:" FNR ": invalid function name")
 
    init_entity()
 
@@ -221,7 +390,7 @@ BEGIN {
     # Get the function name, and make sure it looks good.
     function_name = $2
     if (match (function_name, /^[a-zA-Z][a-zA-Z]*/) == 0)
-        fatal("error:" FNR ": invalid function name")
+        error("error:" FNR ": invalid function name")
 
     init_entity()
 
@@ -241,6 +410,11 @@ BEGIN {
 
 # .end
 /\.end/ {
+    # Check that the previous entity finished any opened
+    # lexical frame.
+    if (cur_back != -1)
+        error("error: " FNR ": unbalanced PUSHF and POPF in closing entity")
+
     if (current_entity == "function")
     {
         out("\tPKL_GEN_POP_ASM;                                      \\")
@@ -248,6 +422,14 @@ BEGIN {
         out("\t(CLOSURE) = pvm_make_cls (program);                   \\")
     }
     out("\t} while (0)")
+
+    # XXX If there has been errors, print them and exit(1)
+    if (num_errors > 0)
+    {
+        for (nerror = 1; nerror <= num_errors; nerror++)
+            print errors[nerror]
+        exit (1);
+    }
 
     # Output the entity
     for (lineno = 1; lineno <= output_line; lineno++)
@@ -278,10 +460,10 @@ BEGIN {
 # .local VARNAME
 /\.local/ {
     if (current_entity != "function")
-        fatal("error:" FNR ": .local can only be used within functions")
+        error("error:" FNR ": .local can only be used within functions")
 
     if (match ($2, /^[a-zA-Z][a-zA-Z]*/) == 0)
-        fatal("error:" FNR ": invalid variable name in .local")
+        error("error:" FNR ": invalid variable name in .local")
 
     variable_back[$2] = back
     variable_over[$2] = over
@@ -310,11 +492,14 @@ BEGIN {
     i_re = insn_re[insn]
 
     if (i_id == "")
-        fatal("error:" FNR ": unknown instruction `" insn "'")
+    {
+        error("error:" FNR ": unknown instruction `" insn "'")
+        next
+    }
 
     # Check that the instruction is well-formed
-    if (match ($0, "^[ \t]*" i_re "(; .*)?") != 1)
-        fatal("error:" FNR ": malformed instruction " insn)
+    if (match ($0, "^[ \t]*" i_re "[ \t]*(; .*)?$") != 1)
+        error("error:" FNR ": malformed instruction " insn)
 
     # Remove the optional line comment.
     $0 = gensub (/(.*);(.*)$/, "\\1", "g", $0)
@@ -333,53 +518,48 @@ BEGIN {
     # Substitute and check null arguments.
     $0 = gensub (null_re, "PVM_NULL", "g", $0)
 
-    # Substitute variable arguments.
+    # Substitute variable arguments and perform side-effects.
     # This assumes instructions have at most one variable argument.
     if (i_id == "PKL_INSN_REGVAR")
     {
         # Remove the leading $ from the variable name
         varname = substr ($2, 2, length ($2) - 1)
-        variable_back[varname] = back
-        variable_over[varname] = over
-        over++;
+        register_var(varname)
 
         $0 = gensub (var_re, "", "g", $0)
     }
     else
     {
-        varloc = match ($0, /\$[a-zA-Z][a-zA-Z]+/)
+        varloc = match ($0, /\$[a-zA-Z][a-zA-Z]*/)
         if (varloc != 0)
         {
             vname = substr ($0, RSTART + 1, RLENGTH);
-            vback = variable_back[vname]
-            vover = variable_over[vname]
+            lookup_var(vname)
+            vback = lookup_var_found["back"]
+            vover = lookup_var_found["over"]
             
-            if (vback == "" || vover == "")
-                fatal("error:" FNR ": unknown variable $" vname)
+            if (vback == -1 || vover == -1)
+                error("error:" FNR ": unknown variable $" vname)
             
             $0 = gensub ("\\$" vname, vback "," vover, "g", $0);
         }
+    }
+
+    # Some instructions have side-effects in the lexical environment.
+    # Proces them.
+    if (i_id == "PKL_INSN_PUSHF")
+        push_frame()
+    if (i_id == "PKL_INSN_POPF")
+    {
+        popf_frames = $2
+        for (i = 0; i < popf_frames; i++)
+            pop_frame()
     }
 
     # Build the call to pkl_asm_insn.
     $0 = gensub (insn, "pkl_asm_insn (PKL_ASM_GEN, " i_id ",", "g", $0);
     $0 = $0 "); \\"
     $0 = gensub (",[ \t]*\\)", ")", "g", $0);
-
-    # Some instructions have side-effects in the lexical environment.
-    # Proces them.
-    if (i_id == "PKL_INSN_PUSHF")
-    {
-        back++
-        over = 0
-    }
-    if (i_id == "PKL_INSN_POPF")
-    {
-        popf_frames = $2
-        back = back - popf_frames
-        if (back < 0)
-            fatal("error:" FNR ": unbalanced PUSHF and POPF")
-    }
 
     # Ok, emit the line
     out($0)
@@ -390,5 +570,10 @@ BEGIN {
 
 {
     # XXX print to stderr
-    fatal("error:" FNR ": UNKNOWN LINE")
+    error("error:" FNR ": UNKNOWN LINE")
+}
+
+## Final checks
+
+END {
 }
