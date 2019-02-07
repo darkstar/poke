@@ -238,7 +238,6 @@
 ;;; This function can raise PVM_E_MAP_BOUNDS if the characteristics of
 ;;; NVAL violate the bounds of the map.
 ;;; 
-;;; Only one of EBOUND or SBOUND simultanously are supported.
 ;;; Note that OFF should be of type offset<uint<64>,*>.
 
         prolog
