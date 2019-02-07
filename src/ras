@@ -167,6 +167,8 @@
 # gun aiming at your head for example.
 
 # XXX support E_* constants
+# XXX validate the number of bits in u?int and u?long arguments
+# XXX validate labels in label arguments
 
 ### Some useful misc functions, used in the rules below
 
@@ -355,6 +357,17 @@ BEGIN {
           "-- DO NOT EDIT */"
 }
 
+### Line matching rules
+
+# Every line in the assembly program is expected to match one of the
+# rules below.  In case a line isn't recognized by any rule, it will
+# choke on the catch-all centinel at the end of the file, and that
+# ain't be fun.
+#
+# In what probably is terrible awk style, each rule below will use
+# `next' in order to prevent other rules to match the just processed
+# line.  This keeps things simple.
+
 ## Miscellaneous rules
 
 # Keep blank lines (to improve readability)
@@ -368,7 +381,6 @@ BEGIN {
 
 # Process lines containing only comments
 /^[ \t]*;.*/ {
-    # XXX do not include the leading ; in the comment
     out("/* " $0 " */")
     next
 }
@@ -377,7 +389,6 @@ BEGIN {
 
 # .c RESTOFLINE
 /\.c.*$/ {
-    # XXX: should print the rest of the line
     $0 = gensub (/.*\.c (.*)$/, "\\1", "g", $0)
     out("\t" $0 " \\")
     next
@@ -438,7 +449,8 @@ BEGIN {
     }
     out("\t} while (0)")
 
-    # XXX If there has been errors, print them and exit(1)
+    # If there has been errors while processing the entity, print them
+    # and do not continue processing further entities.
     if (num_errors > 0)
     {
         for (nerror = 1; nerror <= num_errors; nerror++)
@@ -472,24 +484,8 @@ BEGIN {
     next
 }
 
-# .local VARNAME
-/\.local/ {
-    if (current_entity != "function")
-        error("error:" FNR ": .local can only be used within functions")
-
-    if (match ($2, /^[a-zA-Z][a-zA-Z]*/) == 0)
-        error("error:" FNR ": invalid variable name in .local")
-
-    variable_back[$2] = back
-    variable_over[$2] = over
-    
-    out("\tpkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR, " back "," over "); \\")
-    over++;
-    next
-}
-
 # Process a label
-/^[ \t]*\.[a-zA-Z][a-zA-Z]*:/ {
+/^[ \t]*\.[a-zA-Z][a-zA-Z]*:[ \t]*(;.*)?$/ {
     labelname = substr ($1, 2, length($1) - 2)
     labels[labelname] = labelname
     out("\tpkl_asm_label (PKL_GEN_ASM," labelname "_label); \\")
@@ -520,11 +516,9 @@ BEGIN {
     $0 = gensub (/(.*);(.*)$/, "\\1", "g", $0)
 
     # Substitute and check integer arguments.
-    # XXX: check bits >= 1 && <= 32
     $0 = gensub (int_re, "pvm_make_\\1 (\\3, \\2)", "g", $0)
 
     # Substitute and check long arguments.
-    # XXX: check bits >= 1 && <= 64
     $0 =gensub (long_re, "pvm_make_\\1 (\\3, \\2)", "g", $0)
 
     # Substitute and check string arguments.
@@ -584,11 +578,5 @@ BEGIN {
 ## Catch-all centinel rule
 
 {
-    # XXX print to stderr
-    error("error:" FNR ": UNKNOWN LINE")
-}
-
-## Final checks
-
-END {
+    error("error:" FNR ": excuse me, what is this crap")
 }
