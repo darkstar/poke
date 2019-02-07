@@ -144,7 +144,7 @@
 #   pushvar 0,3
 #   pushvar $foo
 #
-# Using variable names eases writing PVM assembly code a lot, for
+# Using variable names eases writing PVM assembly code by a lot, for
 # several reasons.
 #
 # First, the location of a given variable in a given lexical frame
@@ -180,11 +180,12 @@
 #   pushvar 0,3 ; Use Local1
 #
 # This is VERY error prone and mistakes are laborious to debug, not to
-# mention it is a pain in the ass and a waste of time.
+# mention it is a pain in the ass and a waste of time.  It also makes
+# it difficult to re-use the same code in different contexts.
 #
-# Fortunately, ras comes to the rescue.  Using variable names instead
-# of lexical addresses, the assembler will do the boring work for you.
-# The original function is:
+# Fortunately, ras comes to the rescue.  If you use variable names
+# instead of lexical addresses, the assembler will do the boring work
+# for you.  The original function is:
 #
 #  .function FOO
 #  prolog
@@ -221,17 +222,17 @@
 # pushvar 1,0   ; Also A!
 # popf 2
 #
-# In this case, it is simple: a quick look at the code is enough to
+# In this case, it is simple: a quick glimpse at the code is enough to
 # determine the lexical addresses of the desired variable (A) in both
 # program points.  However, in real programs this quickly degenerates
-# and gets really complex.  As before, it is much better to let ras do
-# the tracking job:
+# and gets really confusing.  Once again, it is much better to let ras
+# do the tracking job:
 #
 # pushf
-# regvar %A
-# pushvar %A
+# regvar %a
+# pushvar %a
 # pushf
-# pushvar %A
+# pushvar %a
 # popf 2
 #
 # Summarizing: ultimately it is up to you when to use explicit lexical
