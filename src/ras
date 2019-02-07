@@ -156,7 +156,6 @@
 # variable names unless you have a _very_ good reason not to... like a
 # gun aiming at your head for example.
 
-# XXX support pushf/popf and lexical environment
 # XXX support E_* constants
 
 ### Some useful misc functions, used in the rules below
@@ -201,8 +200,6 @@ function pop_frame()
 
 function register_var(name)
 {
-    print ("REGISTERING " name)
-
     # Make sure the variable doesn't exist already, in the current
     # frame.
     for (on = 0; on < frame_nvars[cur_frame]; on++)
@@ -215,8 +212,6 @@ function register_var(name)
     # Add the variable to the current frame
     lexenv[cur_frame,frame_nvars[cur_frame]] = varname
     frame_nvars[cur_frame] = frame_nvars[cur_frame] + 1
-
-    for (key in lexenv) print lexenv[key]
 }
 
 # Lookup for a variable in the lexical environment.
@@ -234,7 +229,7 @@ function lookup_var(name)
         {
             if (lexenv[fn,on] == name)
             {
-                lookup_var_found["back"] = cur_frame - bn
+                lookup_var_found["back"] = cur_frame - fn
                 lookup_var_found["over"] = on
                 break;
             }
