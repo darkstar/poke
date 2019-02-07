@@ -78,12 +78,25 @@
 # by zero or more instruction arguments separated by commas,
 # optionally followed by a comment that spans to the end of the line.
 #
-# Immediate Numbers
-# PVM integers
-# PVM longs
-# PVM strings
-# Exception Arguments
-# Label Arguments
+# ras supports the PVM instructions as they are defined in the
+# pkl-insn.def file.  Arguments of the following types are supported:
+#
+# Immediate numbers are written like C decimal immediates, for example
+# 1, 0, -1.
+#
+# PVM integers are written like int<M>N or uint<M>N, depending whether
+# they are signed or unsigned.  M is the number of bits, and N an
+# immediate number with the value.  M should be in the range 1 <= M <=
+# 32.  N is a C numeric literal, such as 0, -1, or -0x32.
+#
+# Similarly, PVM longs are written like long<M>N or ulong<M>N.  This
+# time, M should be in the range 1 <= M <= 64.
+#
+# PVM strings are written like C strings, i.e. "foo" or "" or
+# "two\nlines".
+#
+# Exception Arguments are written like PVM_E_*.  See the file pvm.h
+# for the set of valid exceptions.
 #
 # Variables
 # ---------
@@ -316,10 +329,11 @@ BEGIN {
     # instruction.
 
     null_re="null"
-    int_re="(u?int)<([0-9]+)>(-?[0-9]+)"
-    long_re="(u?long)<([0-9]+)>(-?[0-9]+)"
+    int_re="(u?int)<([0-9]+)>(-?(0x)?[0-9]+)"
+    long_re="(u?long)<([0-9]+)>(-?(0x)?[0-9]+)"
     string_re="(\"[^\"]*\")"
     var_re="(\\$[a-zA-Z][a-zA-Z]*)"
+    expt_re="PVM_E_[A-Z_]+"
 
     ideffile = srcdir "pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
@@ -361,14 +375,14 @@ BEGIN {
                 switch (a)
                 {
                     case "n":
-                        re="(-?[0-9][0-9]*)"
+                        re="(-?(0x)?[0-9][0-9]*)"
                         break
                     case "l":
                         re="(\\.[a-zA-Z][a-zA-Z]*)"
                         break
                     case "v":
                         re="(" null_re "|" int_re "|" long_re \
-                           "|" string_re "|" var_re ")"
+                           "|" string_re "|" var_re "|" expt_re ")"
                         break
                     case "r":
                         break
