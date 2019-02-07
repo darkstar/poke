@@ -159,9 +159,9 @@
 # several reasons.
 #
 # First, the location of a given variable in a given lexical frame
-# depends on how many other variables has been registered before.  For
-# example, consider a function that gets two arguments, and also uses
-# local variables:
+# depends on how many other variables have been registered before.
+# For example, consider a function that gets two arguments, and also
+# uses local variables:
 #
 #   .function FOO
 #   prolog
