@@ -167,7 +167,7 @@ eof:
    NIP                     ; ... (EBOUND!=NULL) (SBOUND!=NULL)
    OR                      ; ... (EBOUND!=NULL) (SBOUND!=NULL) ARRAYBOUNDED
    NIP2                    ; ... ARRAYBOUNDED
-   BZ mountarray
+   BZI mountarray
    PUSH E_EOF
    RAISE
 mountarray:

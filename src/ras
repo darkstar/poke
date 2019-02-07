@@ -373,7 +373,7 @@ BEGIN {
     long_re="(u?long)<([0-9]+)>(-?(0x)?[0-9]+)"
     string_re="(\"[^\"]*\")"
     var_re="(\\$[a-zA-Z][a-zA-Z_]*)"
-    expt_re="PVM_E_[A-Z_]+"
+    expt_re="(PVM_E_[A-Z_]+)"
 
     ideffile = srcdir "pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
@@ -533,6 +533,8 @@ BEGIN {
 
     if (current_entity == "function")
     {
+        out("\tprogram = pkl_asm_finish (PKL_GEN_ASM,                \\")
+        out("\t                           0 /* epilogue */);         \\")
         out("\tPKL_GEN_POP_ASM;                                      \\")
         out("\tpvm_specialize_program (program);                     \\")
         out("\t(CLOSURE) = pvm_make_cls (program);                   \\")
@@ -641,6 +643,9 @@ BEGIN {
 
     # Substitute and check label arguments.
     $0 = gensub ("\\.([a-zA-Z][a-zA-Z_]*)", "\\1_label", "g", $0);
+
+    # Substitute and check exception arguments.
+    $0 = gensub (expt_re, "pvm_make_int (\\1, 32)", "g", $0);
 
     # Substitute variable arguments and perform side-effects.
     # This assumes instructions have at most one variable argument.
