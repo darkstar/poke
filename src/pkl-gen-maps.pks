@@ -105,7 +105,7 @@
         pushvar $aomag          ; OFF ATYPE SBOUNDM AOMAG
         addlu                   ; OFF ATYPE SBOUNDM AOMAG (SBOUNDM+AOMAG)
         nip2                    ; OFF ATYPE (SBOUNDM+AOMAG)
-        pushvar eomag           ; OFF ATYPE (SBOUNDM+AOMAG) EOMAG
+        pushvar $eomag          ; OFF ATYPE (SBOUNDM+AOMAG) EOMAG
         gtlu                    ; OFF ATYPE (SBOUNDM+AOMAG) EOMAG ((SBOUNDM+AOMAG)>EOMAG)
         nip2                    ; OFF ATYPE ((SBOUNDM+AOMAG)>EOMAG)  
         ba .end_loop_on
@@ -116,7 +116,7 @@
         .loop
                                 ; OFF ATYPE
         ;; Mount the Ith element triplet: [EOFF EIDX EVAL]
-        pushvar eomag    )      ; ... EOMAG
+        pushvar $eomag          ; ... EOMAG
         push ulong<64>1         ; ... EOMAG EOUNIT
         mko                     ; ... EOFF
         dup                     ; ... EOFF EOFF
@@ -125,7 +125,7 @@
         
         ;; Update the current offset with the size of the value just
         ;; peeked.
-        zip                     ; ... EOFF EVAL ESIZ
+        siz                     ; ... EOFF EVAL ESIZ
         rot                     ; ... EVAL ESIZ EOFF
         ogetm                   ; ... EVAL ESIZ EOFF EOMAG
         rot                     ; ... EVAL EOFF EOMAG ESIZ
@@ -140,7 +140,7 @@
         rot                     ; ... EOFF EIDX EVAL
 
         ;; Increase the current index and process the next element.
-        pushvar $eidx    )      ; ... EOFF EIDX EVAL EIDX
+        pushvar $eidx           ; ... EOFF EIDX EVAL EIDX
         push ulong<64>1         ; ... EOFF EIDX EVAL EIDX 1UL
         addlu                   ; ... EOFF EIDX EVAL EDIX 1UL (EIDX+1UL)
         nip2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
@@ -155,7 +155,7 @@
         drop                    ; ... EOFF
         drop                    ; ...
         ;; If the array is bounded, raise E_EOF
-        pushvar $ebound    )    ; ... EBOUND
+        pushvar $ebound         ; ... EBOUND
         nn                      ; ... EBOUND (EBOUND!=NULL)
         nip                     ; ... (EBOUND!=NULL)
         pushvar $sbound         ; ... (EBOUND!=NULL) SBOUND
@@ -163,8 +163,8 @@
         nip                     ; ... (EBOUND!=NULL) (SBOUND!=NULL)
         or                      ; ... (EBOUND!=NULL) (SBOUND!=NULL) ARRAYBOUNDED
         nip2                    ; ... ARRAYBOUNDED
-        bz .mountarray
-        push E_EOF
+        bzi .mountarray
+        push PVM_E_EOF
         raise
 .mountarray:
         drop                   ; OFF ATYPE [EOFF EIDX EVAL]...
@@ -221,6 +221,6 @@
         return
 
 .bounds_fail:
-        push E_MAP_BOUNDS
+        push PVM_E_MAP_BOUNDS
         raise
         .end                    ; array_mapper
