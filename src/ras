@@ -158,8 +158,6 @@
 
 # XXX support pushf/popf and lexical environment
 # XXX support E_* constants
-# XXX turn .local VAR into regvar $VAR
-# XXX replace "fatal" with "error" and accumulate them
 
 ### Some useful misc functions, used in the rules below
 
@@ -180,59 +178,69 @@ function out(line)
 
 function init_lexenv()
 {
-    cur_back = -1
-    cur_over = -1
+    for (key in frame_nvars) delete frame_nvars[key]
     for (key in lexenv) delete lexenv[key]
-    for (key in lexenv_nvars) delete lexenv_nvars[key]
+    cur_frame = -1
 }
 
 function push_frame()
 {
-    print ("PUSHING FRAME")
-    if (cur_back != -1)
-        lexenv_nvars[cur_back] = cur_over
-    cur_back++
-    cur_over = 0
+    cur_frame++
+    frame_nvars[cur_frame] = 0
 }
 
 function pop_frame()
 {
     print ("POPPING FRAME")
-    cur_back--
-    cur_over = lexenv_nvars[cur_back]
+    if (cure_frame == -1)
+    {
+        error("error: " FNR " frame underflow")
+        return
+    }
+    cur_frame--
 }
 
 function register_var(name)
 {
     print ("REGISTERING " name)
-    lexenv[cur_back,cur_over] = name
-    cur_over++
+
+    # Make sure the variable doesn't exist already, in the current
+    # frame.
+    for (on = 0; on < frame_nvars[cur_frame]; on++)
+        if (lexenv[cur_frame,on] == name)
+        {
+            error("error: " FNR " variable `" name "' already defined")
+            return
+        }
+
+    # Add the variable to the current frame
+    lexenv[cur_frame,frame_nvars[cur_frame]] = varname
+    frame_nvars[cur_frame] = frame_nvars[cur_frame] + 1
 }
 
 # Lookup for a variable in the lexical environment.
 # Set the global `lookup_var_found'.
 function lookup_var(name)
 {
-    if (cur_back < 0 || cur_over < 0)
+    if (cur_frame < 0)
         error("error: " FNR ": at least a PUSHF is required to access variables")
-    
-    lookup_var_found[back] = -1
-    lookup_var_found[over] = -1
-    for (bn = cur_back; bn >= 0; bn--)
-    {
-        for (on = 0; on < cur_over; on++)
-            if (lexenv[bn,on] == name)
-            {
-                lookup_var_found["back"] = cur_back - bn
-                lookup_var_found["over"] = cur_over - on - 1
-                break
-            }
 
-        if (lookup_var_found[back] != -1)
+    lookup_var_found["back"] = -1
+    lookup_var_found["over"] = -1
+    for (fn = cur_frame; fn >= 0; fn--)
+    {
+        for (on = 0; on < frame_nvars[fn]; on++)
+        {
+            if (lexenv[fn,on] == name)
+            {
+                lookup_var_found["back"] = cur_frame - bn
+                lookup_var_found["over"] = on
+                break;
+            }
+        }
+        if (lookup_var_found["back"] != -1)
             break;
     }
-
-    print "LOOKING UP " name " FOUND " lookup_var_found["back"] " " lookup_var_found["over"]
 }
 
 # Initialize the global state to start processing a new function or
@@ -413,7 +421,7 @@ BEGIN {
 /\.end/ {
     # Check that the previous entity finished any opened
     # lexical frame.
-    if (cur_back != -1)
+    if (cur_frame != -1)
         error("error: " FNR ": unbalanced PUSHF and POPF in closing entity")
 
     if (current_entity == "function")
