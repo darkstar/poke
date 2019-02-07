@@ -479,7 +479,7 @@ BEGIN {
 ## Rules for assembler directives
 
 # .c RESTOFLINE
-/^[ \t]*\.c.*$/ {
+/^[ \t]*\.c .*$/ {
     $0 = gensub (/.*\.c (.*)$/, "\\1", "g", $0)
     out("\t" $0 " \\")
     next
@@ -503,7 +503,6 @@ BEGIN {
 
 # .function NAME
 /^[ \t]*\.function[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(;.*)?$/ {
-
     # Get the function name
     function_name = $2
     if (match (function_name, /^[a-zA-Z][a-zA-Z_]*/) == 0)
@@ -639,6 +638,9 @@ BEGIN {
 
     # Substitute and check null arguments.
     $0 = gensub (null_re, "PVM_NULL", "g", $0)
+
+    # Substitute and check label arguments.
+    $0 = gensub ("\\.([a-zA-Z][a-zA-Z_]*)", "\\1_label", "g", $0);
 
     # Substitute variable arguments and perform side-effects.
     # This assumes instructions have at most one variable argument.
