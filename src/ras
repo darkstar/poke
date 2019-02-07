@@ -17,11 +17,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is a dumb assembler that can translate Poke Assembly code into
-# C macros.  The resulting C macros are designed to be used in the PKL
-# code generator.  ras is not very smart, but we love it very much
-# because it saves us a lot of work.  So please be gentle and don't
-# break it.
+# This is an assembler that can translate Poke Assembly code into C
+# macros.  The resulting C macros are designed to be used in the PKL
+# code generator.  ras may not be the smartest assembler in the class,
+# but we love it very much because it saves us a lot of work.  So
+# please be gentle and don't break it.
 #
 # This code is supposed to run well on any POSIX-compatible awk.
 # Please send us a patch if it doesn't!
