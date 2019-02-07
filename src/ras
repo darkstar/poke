@@ -31,7 +31,17 @@
 # Invoking RAS
 # ------------
 #
-# XXX srcdir
+# The environment variable `srcdir' should be set before running ras,
+# and it should contain the path of the poke src/ directory.
+#
+# Usage: ras [FILE]
+#
+# Where FILE is a Poke assembly program, which usually use the file
+# extension .pks.  The assembler will write the translated program to
+# the standard output.
+#
+# If FILE is not specified then ras will read the assembly program in
+# the standard input.
 #
 # Macros and Functions
 # --------------------
