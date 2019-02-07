@@ -8,6 +8,6 @@ i.e. the most important tasks are listed first.
 ras
 
   - Validate the number of bits in u?int and u?long arguments.
-  - Validate labels in label arguments.
+  - Make sure that label arguments are defined.
   - Write error messages to stderr.
   - Pretty print: indentation in .loop/.endloop etc.
