@@ -58,6 +58,33 @@
 #
 # Translates to RAS_FUNCTION_NAME(CLOSURE)
 #
+# Assembler Directives
+# --------------------
+#
+# .function
+# .macro
+# .end
+# .expand
+# .c
+#
+# Instructions
+# ------------
+#
+# An instruction line looks like:
+#
+#       MNEMONIC [ARG,...]  [; comment]
+#
+# i.e. zero or more blank characters followed by a mnemonic, followed
+# by zero or more instruction arguments separated by commas,
+# optionally followed by a comment that spans to the end of the line.
+#
+# Immediate Numbers
+# PVM integers
+# PVM longs
+# PVM strings
+# Exception Arguments
+# Label Arguments
+#
 # Variables
 # ---------
 #
@@ -172,11 +199,18 @@
 
 ### Some useful misc functions, used in the rules below
 
-# Emit an error message and boil out with an error status.
+# Emit an error message
 function error(msg)
 {
     num_errors++
     errors[num_errors] = msg
+}
+
+# Emit an error message and terminate immediately
+function fatal(msg)
+{
+    print msg
+    exit (1)
 }
 
 # Append a line to the assembled output.
@@ -289,7 +323,7 @@ BEGIN {
 
     ideffile = srcdir "pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
-        error("error: cannot read instruction definition file " ideffile)
+        fatal("fatal: cannot read instruction definition file " ideffile)
     
     cmd = "cpp -D'PKL_DEF_INSN(M,A,N)=M A N' -P " srcdir "pkl-insn.def"
     while ((cmd | getline line) > 0)
