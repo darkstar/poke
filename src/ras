@@ -479,7 +479,7 @@ BEGIN {
 ## Rules for assembler directives
 
 # .c RESTOFLINE
-/\.c.*$/ {
+/^[ \t]*\.c.*$/ {
     $0 = gensub (/.*\.c (.*)$/, "\\1", "g", $0)
     out("\t" $0 " \\")
     next
