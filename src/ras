@@ -495,7 +495,7 @@ BEGIN {
    init_entity()
 
     out("#define RAS_MACRO_" toupper($2) "(CLOSURE) \\")
-    out("\tdo() {                                                     \\")
+    out("\tdo {                                                     \\")
 
     current_entity = "macro"
     next
@@ -511,7 +511,7 @@ BEGIN {
     init_entity()
 
     out("#define RAS_FUNCTION_" toupper($2) "(CLOSURE)  \\")
-    out("\tdo() {                                       \\")
+    out("\tdo {                                         \\")
     out("\tpvm_program program;                         \\")
     out("\t                                             \\")
     out("\tPKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST, \\")
@@ -686,7 +686,7 @@ BEGIN {
     }
 
     # Build the call to pkl_asm_insn.
-    $0 = gensub (insn, "pkl_asm_insn (PKL_ASM_GEN, " i_id ",", "g", $0);
+    $0 = gensub (insn, "pkl_asm_insn (PKL_GEN_ASM, " i_id ",", "g", $0);
     $0 = $0 "); \\"
     $0 = gensub (",[ \t]*\\)", ")", "g", $0);
 

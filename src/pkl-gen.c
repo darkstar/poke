@@ -31,7 +31,7 @@
 /* Get the mapping programs.  This includes definition of cpp macros,
    to be used in the handlers below.  */
 
-#include "pkl-gen-maps.c"
+#include "pkl-gen-maps.pkc"
 
 /* The following macros are used in the rules below, to reduce
    verbosity.  */
@@ -1376,7 +1376,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
              current environment.  This is used when assigning array
              values to mapped arrays.  */
                                                                      /* VAL NVAL OFF */
-          PKL_ASM_ARRAY_VALMAPPER (mapper_closure);
+          RAS_FUNCTION_ARRAY_VALMAPPER (mapper_closure);
 
           /* Install the current environment in the valmapper closure,
              arrange the arguments (including the attributes of VAL's
@@ -1399,7 +1399,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
                                                                      /* VAL OFF */
           PKL_GEN_PAYLOAD->in_valmapper = 0;
           PKL_GEN_PAYLOAD->in_mapper = 1;
-          PKL_ASM_ARRAY_MAPPER (mapper_closure);
+          RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
           PKL_GEN_PAYLOAD->in_mapper = 0;
           PKL_GEN_PAYLOAD->in_valmapper = 1;
           
@@ -1414,7 +1414,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
           /* Compile a mapper function and complete it using the
              current environment.  */
-          PKL_ASM_ARRAY_MAPPER (mapper_closure);
+          RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
 
           /* Complete the mapper closure with the current
              environment.  */
@@ -1462,7 +1462,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
 
       /* Compile a writer function to a closure.  */
-      PKL_ASM_ARRAY_WRITER (writer_closure);
+      RAS_FUNCTION_ARRAY_WRITER (writer_closure);
 
       /* Complete the writer closure with the current environment, and
          install it in the array as its writer.  */
