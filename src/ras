@@ -142,6 +142,25 @@
 # Exception Arguments are written like PVM_E_*.  See the file pvm.h
 # for the set of valid exceptions.
 #
+# Labels
+# ------
+#
+# Label names start with a dot, like .a_label
+#
+# In PVM instructions getting labels as arguments, just write the name
+# of the label, including the dot.  Example:
+#
+#   ba .do_whatever
+#
+# To define the label, write it in its own line and postfix with a `:'
+# character.  Example:
+#
+# .do_whatever:
+#
+# Labels are local to the current entity, i.e. the macro or function
+# being assembled.  It is an error to define two labels having the
+# same name in the same entity.
+#
 # Variables
 # ---------
 #
