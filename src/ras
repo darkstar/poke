@@ -100,6 +100,17 @@
 # is copied verbatim and ras knows nothing about its contents, so
 # please be careful.
 #
+# Loops
+# -----
+#
+# Loops can be constructed like:
+#
+# .while
+#  ... condition ...
+# .loop
+#  ... body ...
+# .endloop
+# 
 # Instructions
 # ------------
 #
@@ -459,7 +470,10 @@ BEGIN {
 
 # Process lines containing only comments
 /^[ \t]*;.*/ {
-    out("/* " $0 " */")
+    if (current_entity == "")
+        out("/* " $0 " */")
+    else
+        out("/* " $0 " */ \\")
     next
 }
 
