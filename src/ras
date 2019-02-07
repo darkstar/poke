@@ -45,29 +45,60 @@
 # If FILE is not specified then ras will read the assembly program in
 # the standard input.
 #
-# Macros and Functions
-# --------------------
+# Defining Macros and Functions
+# -----------------------------
+#
+# A .pks file defines zero or more entities, which can be _functions_
+# and _macros_.  Macros are defined using .macro/.end pairs of
+# assembler directives, and look like this:
 #
 #  .macro NAME
 #  ...
 #  .end
 #
-# Translates to RAS_MACRO_NAME
+# This translates into a C macro RAS_MACRO_NAME, with no arguments.
+#
+# Likewise, functions can be defined using .function/.end pairs of
+# assembler directives:
 #
 #  .function NAME
 #  ...
 #  .end
 #
-# Translates to RAS_FUNCTION_NAME(CLOSURE)
+# This translates into a C macro RAS_FUNCTION_NAME(CLOSURE), with a
+# single argument which should be an l-value.  The macro will compile
+# the function into a pvm_program, and install it into a PVM closure
+# value that is assigned to CLOSURE.
 #
-# Assembler Directives
-# --------------------
+# IMPORTANT: both macros and functions are designed to be expanded in
+# the GEN pass of the poke compiler (pkl-gen-*.c).  They won't work
+# anywhere else.  See pkl-gen.c for usage examples.
 #
-# .function
-# .macro
-# .end
-# .expand
-# .c
+# Expanding Macros
+# ----------------
+#
+# Once defined, a macro NAME can be expanded using the .expand
+# assembler directive:
+#
+# .expand NAME
+#
+# In the C level, this will expand RAS_MACRO_NAME.
+#
+# Literal C Code
+# --------------
+#
+# Sometimes we need to insert C code at some point of our assembly
+# programs.  This is achieved by using the .c assembler directive.
+#
+# A typical example is to invoke a GEN subpass, like:
+#
+#  .c PKL_GEN_PAYLOAD->in_mapper = 0;
+#  .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+#  .c PKL_GEN_PAYLOAD->in_mapper = 1;
+#
+# The directives above will generate the literal C code.  The C code
+# is copied verbatim and ras knows nothing about its contents, so
+# please be careful.
 #
 # Instructions
 # ------------
