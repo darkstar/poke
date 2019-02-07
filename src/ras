@@ -487,7 +487,7 @@ BEGIN {
 
 # .macro NAME
 /^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*/ {
-    # Get the macro name, and make sure it looks good.
+    # Get the macro name
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*/) == 0)
         fatal("error:" FNR ": invalid function name.  This should NOT happen.")
