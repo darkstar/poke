@@ -387,10 +387,10 @@ BEGIN {
         if (id == "PKL_INSN_PUSHVAR" \
             || id == "PKL_INSN_POPVAR")
             iregexp \
-                = iregexp "[ \t]+((\\$([a-z][A-Z]*))"\
+                = iregexp "[ \t]+((\\$([a-zA-Z][a-zA-Z]*))"\
                           "|((-?[0-9][0-9]*)[ \t]*,[ \t]*(-?[0-9][0-9]*)))"
         else if (id == "PKL_INSN_REGVAR")
-            iregexp = iregexp "[ \t]+\\$([a-z][A-Z]*)"
+            iregexp = iregexp "[ \t]+\\$([a-zA-Z][a-zA-Z]*)"
         else
         {
             for (ia = 1; ia <= length (args); ia++)
