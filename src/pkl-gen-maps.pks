@@ -1,5 +1,5 @@
 ;;; -*- mode: asm -*-
-;;; pkl-gen-maps.pks - Map-related functions and macros
+;;; pkl-gen-maps.pks - Map-related assembly routines for the codegen
 ;;;
 
 ;;; Copyright (C) 2019 Jose E. Marchesi
