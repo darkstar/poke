@@ -366,9 +366,8 @@ BEGIN {
     # insn_id[NAME] contains the PKL_INSN_* identifier for the
     # instructions.
     #
-    # insn_re[NAME] contains a regular expression matching a
+    # insn_re[NAME] contains a regular expression matching an
     # instruction.
-
     null_re="null"
     int_re="(u?int)<([0-9]+)>(-?(0x)?[0-9]+)"
     long_re="(u?long)<([0-9]+)>(-?(0x)?[0-9]+)"
