@@ -159,7 +159,6 @@
 # XXX support pushf/popf and lexical environment
 # XXX support E_* constants
 # XXX turn .local VAR into regvar $VAR
-# XXX support pushvar/popvar instructions with explicit lexical addresses
 # XXX replace "fatal" with "error" and accumulate them
 
 ### Some useful misc functions, used in the rules below
@@ -288,13 +287,15 @@ BEGIN {
         name = substr (name, 2, length (name) - 2)
         args = substr (args, 2, length (args) - 2)     
 
-        # Build the instruction's regexp.  There are a few special
-        # cases.
+        # Build the instruction's regexp.
         iregexp = name
 
         if (id == "PKL_INSN_PUSHVAR" \
-            || id == "PKL_INSN_POPVAR" \
-            || id == "PKL_INSN_REGVAR")
+            || id == "PKL_INSN_POPVAR")
+            iregexp \
+                = iregexp "[ \t]+((\\$([a-z][A-Z]*))"\
+                          "|((-?[0-9][0-9]*)[ \t]*,[ \t]*(-?[0-9][0-9]*)))"
+        else if (id == "PKL_INSN_REGVAR")
             iregexp = iregexp "[ \t]+\\$([a-z][A-Z]*)"
         else
         {
