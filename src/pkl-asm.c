@@ -28,6 +28,10 @@
 #include "pvm.h"
 #include "ios.h"
 
+/* Use the Retarde Poke Assembler.  */
+#define RAS_ASM pasm
+#include "pkl-asm.pkc"
+
 /* In order to support nested multi-function macros, like conditionals
    and loops, the assembler implements the notion of "nesting levels".
    For example, consider the following conditional code:

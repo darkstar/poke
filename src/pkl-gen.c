@@ -28,9 +28,6 @@
 #include "pkl-asm.h"
 #include "pvm.h"
 
-#include "pkl-gen.pkc"
-#include "pkl-gen-maps.pkc"
-
 /* The following macros are used in the rules below, to reduce
    verbosity.  */
 
@@ -63,6 +60,12 @@
 
 #define PKL_GEN_POP_ASM  PKL_GEN_POP_AN_ASM(pasm)
 #define PKL_GEN_POP_ASM2 PKL_GEN_POP_AN_ASM(pasm2)
+
+
+/* Use the Retarded Poke Assembler.  */
+#define RAS_ASM PKL_GEN_ASM
+#include "pkl-gen.pkc"
+#include "pkl-gen-maps.pkc"
 
 /*
  * PROGRAM

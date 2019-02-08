@@ -18,8 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This assembler translates Poke Assembly code into C macros.  The
-# resulting C macros are designed to be used in the PKL code
-# generator.  See the Documentation section below for more details.
+# resulting C macros are designed to be used in the PKL compiler.  See
+# the Documentation section below for more details.
 #
 # ras may not be the smartest assembler in the class, but we love it
 # very much because it saves us a lot of work.  So please be gentle
@@ -44,6 +44,17 @@
 #
 # If FILE is not specified then ras will read the assembly program in
 # the standard input.
+#
+# In the C code, define the assembler to be used by RAS and include
+# the compiled pkc files.  Then use the macros at pleasure.  For
+# example:
+#
+#  #define RAS_ASM PKL_GEN_ASM
+#  #include <pkl-gen.pkc>
+#
+#  ...
+#
+#  RAS_MACRO_OFFSET_CAST;
 #
 # Defining Macros and Functions
 # -----------------------------
@@ -552,7 +563,7 @@ BEGIN {
 
     if (current_entity == "function")
     {
-        out("\tprogram = pkl_asm_finish (PKL_GEN_ASM,                \\")
+        out("\tprogram = pkl_asm_finish (RAS_ASM,                \\")
         out("\t                           0 /* epilogue */);         \\")
         out("\tPKL_GEN_POP_ASM;                                      \\")
         out("\tpvm_specialize_program (program);                     \\")
@@ -578,7 +589,7 @@ BEGIN {
             # Emit label declarations
             for (label in labels)
                 print "\tjitter_label " label \
-                      "_label = pkl_asm_fresh_label (PKL_GEN_ASM); \\"
+                      "_label = pkl_asm_fresh_label (RAS_ASM); \\"
         }
         else
             print output[lineno]
@@ -597,7 +608,7 @@ BEGIN {
 
 # .while
 /^[ \t]*\.while[ \t]*(;.*)?$/ {
-    out("\tpkl_asm_while (PKL_GEN_ASM);                              \\")
+    out("\tpkl_asm_while (RAS_ASM);                              \\")
     out("\t{                                                         \\")
     next
 }
@@ -605,7 +616,7 @@ BEGIN {
 # .loop
 /^[ \t]*\.loop[ \t]*(;.*)?$/ {
     out("\t}                                                         \\")
-    out("\tpkl_asm_loop (PKL_GEN_ASM);                               \\")
+    out("\tpkl_asm_loop (RAS_ASM);                               \\")
     out("\t{                                                         \\")
     next
 }
@@ -613,7 +624,7 @@ BEGIN {
 # .endloop
 /^[ \t]*\.endloop[ \t]*(;.*)?$/ {
     out("\t}                                                         \\")
-    out("\tpkl_asm_endloop (PKL_GEN_ASM);                            \\")
+    out("\tpkl_asm_endloop (RAS_ASM);                            \\")
     next
 }
 
@@ -628,7 +639,7 @@ BEGIN {
     }
 
     labels[labelname] = labelname
-    out("\tpkl_asm_label (PKL_GEN_ASM," labelname "_label); \\")
+    out("\tpkl_asm_label (RAS_ASM," labelname "_label); \\")
     next
 }
 
@@ -712,7 +723,7 @@ BEGIN {
     }
 
     # Build the call to pkl_asm_insn.
-    $0 = gensub (insn, "pkl_asm_insn (PKL_GEN_ASM, " i_id ",", "g", $0);
+    $0 = gensub (insn, "pkl_asm_insn (RAS_ASM, " i_id ",", "g", $0);
     $0 = $0 "); \\"
     $0 = gensub (",[ \t]*\\)", ")", "g", $0);
 
