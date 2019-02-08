@@ -405,9 +405,9 @@ BEGIN {
     int_re="(u?int)<([0-9]+)>(-?(0x)?[0-9]+)"
     long_re="(u?long)<([0-9]+)>(-?(0x)?[0-9]+)"
     string_re="(\"[^\"]*\")"
-    var_re="(\\$[a-zA-Z][a-zA-Z_]*)"
+    var_re="(\\$[a-zA-Z][0-9a-zA-Z_]*)"
     expt_re="(PVM_E_[A-Z_]+)"
-    marg_re="@([a-zA-Z_][a-zA-Z_]*)"
+    marg_re="@([a-zA-Z_][0-9a-zA-Z_]*)"
 
     ideffile = srcdir "/pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
@@ -431,10 +431,10 @@ BEGIN {
         if (id == "PKL_INSN_PUSHVAR" \
             || id == "PKL_INSN_POPVAR")
             iregexp \
-                = iregexp "[ \t]+((\\$([a-zA-Z][a-zA-Z_]*))"\
+                = iregexp "[ \t]+((\\$([a-zA-Z][0-9a-zA-Z_]*))"\
                           "|((-?[0-9][0-9]*)[ \t]*,[ \t]*(-?[0-9][0-9]*)))"
         else if (id == "PKL_INSN_REGVAR")
-            iregexp = iregexp "[ \t]+\\$([a-zA-Z][a-zA-Z_]*)"
+            iregexp = iregexp "[ \t]+\\$([a-zA-Z][0-9a-zA-Z_]*)"
         else
         {
             for (ia = 1; ia <= length (args); ia++)
@@ -452,7 +452,7 @@ BEGIN {
                         re="(-?(0x)?[0-9][0-9]*)"
                         break
                     case "l":
-                        re="(\\.[a-zA-Z][a-zA-Z_]*)"
+                        re="(\\.[a-zA-Z][0-9a-zA-Z_]*)"
                         break
                     case "v":
                         re="(" null_re "|" int_re "|" long_re \
@@ -520,10 +520,10 @@ BEGIN {
 }
 
 # .macro NAME
-/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(@[a-zA-Z_][a-zA-Z_]*[ \t]*)*[ \t]*(;.*)?$/ {
+/^[ \t]*\.macro[ \t]+[a-zA-Z][0-9a-zA-Z_]*[ \t]*(@[a-zA-Z_][0-9a-zA-Z_]*[ \t]*)*[ \t]*(;.*)?$/ {
     # Get the macro name
     macro_name = $2
-    if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*$/) == 0)
+    if (match (macro_name, /^[a-zA-Z][0-9a-zA-Z_]*$/) == 0)
         fatal("error:" FNR ": invalid macro name.  This should NOT happen.")
 
     # Build the list of arguments
@@ -552,10 +552,10 @@ BEGIN {
 }
 
 # .function NAME
-/^[ \t]*\.function[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(;.*)?$/ {
+/^[ \t]*\.function[ \t]+[a-zA-Z][0-9a-zA-Z_]*[ \t]*(;.*)?$/ {
     # Get the function name
     function_name = $2
-    if (match (function_name, /^[a-zA-Z][a-zA-Z_]*$/) == 0)
+    if (match (function_name, /^[a-zA-Z][0-9a-zA-Z_]*$/) == 0)
         fatal("error:" FNR ": invalid function name. This should NOT happen.")
 
     init_entity()
@@ -621,7 +621,7 @@ BEGIN {
 }
 
 # .expand NAME
-/^[ \t]*\.expand[ \t]+[a-zA-Z][a-zA-Z_]*(;.*)?$/ {
+/^[ \t]*\.expand[ \t]+[a-zA-Z][0-9a-zA-Z_]*(;.*)?$/ {
     out("\tRAS_MACRO_" toupper($2) ";                                \\")
     next
 }
@@ -649,7 +649,7 @@ BEGIN {
 }
 
 # Process a label
-/^[ \t]*\.[a-zA-Z][a-zA-Z_]*:[ \t]*(;.*)?$/ {
+/^[ \t]*\.[a-zA-Z][0-9a-zA-Z_]*:[ \t]*(;.*)?$/ {
     labelname = substr ($1, 2, length($1) - 2)
 
     if (labels[labelname] == labelname)
@@ -665,7 +665,7 @@ BEGIN {
 
 ## Rules to process instructions
 
-/^[ \t]*[a-zA-Z][a-zA-Z]+/ {
+/^[ \t]*[a-zA-Z][0-9a-zA-Z]+/ {
 
     # Lookup the instruction in the instructions hash and complain if
     # the instruction is unknown.
@@ -699,7 +699,7 @@ BEGIN {
     $0 = gensub (null_re, "PVM_NULL", "g", $0)
 
     # Substitute and check label arguments.
-    $0 = gensub ("\\.([a-zA-Z][a-zA-Z_]*)", "\\1_label", "g", $0);
+    $0 = gensub ("\\.([a-zA-Z][0-9a-zA-Z_]*)", "\\1_label", "g", $0);
 
     # Substitute and check exception arguments.
     $0 = gensub (expt_re, "pvm_make_int (\\1, 32)", "g", $0);
@@ -719,7 +719,7 @@ BEGIN {
     }
     else
     {
-        varloc = match ($0, /\$[a-zA-Z][a-zA-Z_]*/)
+        varloc = match ($0, /\$[a-zA-Z][0-9a-zA-Z_]*/)
         if (varloc != 0)
         {
             vname = substr ($0, RSTART + 1, RLENGTH - 1);

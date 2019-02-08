@@ -175,3 +175,59 @@
         mko                                     ; OFFC
         popf 1
         .end
+
+;;; ADDO
+;;; ( OFF OFF -- OFF OFF OFF )
+;;;
+;;;  Add the two given offsets in the stack, which must be of the
+;;;  given base type.  The unit of the result is the greatest common
+;;;  divisor of the operands units.  The base type  of the result is the base
+;;;  type of the operands.
+;;;
+;;;  Macro arguments:
+;;;
+;;;  @unit_type
+;;;    a pkl_ast_node with a type uint<64>.
+;;;  @base_type
+;;;    a pkl_ast_node with the base type of the offsets.
+
+        .macro addo @unit_type @base_type
+        pushf
+        regvar $off2
+        regvar $off1
+        ;; Calculate the unit of the result.
+        pushvar $off1           ; OFF1
+        pushvar $off2           ; OFF2
+        ogetu                   ; OFF1 OFF2 OFF2U
+        rot                     ; OFF2 OFF2U OFF1
+        ogetu                   ; OFF2 OFF2U OFF1 OFF1U
+        swap                    ; OFF2 OFF2U OFF1U OFF1
+        nrot                    ; OFF2 OFF1 OFF2U OFF1U
+;        gcd @unit_type          ;OFF2 OFF1 OFF2U OFF1U RESU
+        nip2                    ; OFF2 OFF1 RESU
+        ;; Get the magnitude of the first array, in result's units.
+        dup                     ; OFF2 OFF1 RESU RESU
+        nrot                    ; OFF2 RESU OFF1 RESU
+        ogetmc @base_type       ; OFF2 RESU OFF1 OFF1M
+        nip                     ; OFF2 RESU OFF1M
+        ;; Get the magnitude of the second array, in result's units.
+        swap                    ; OFF2 OFF1M RESU
+        rot                     ; OFF1M RESU OFF2
+        swap                    ; OFF1M OFF2 RESU
+        dup                     ; OFF1M OFF2 RESU RESU
+        nrot                    ; OFF1M RESU OFF2 RESU
+        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
+        nip                     ; OFF1M RESU OFF2M
+        ;; Add the two magnitudes.
+        rot                     ; RESU OFF2M OFF1M
+        add @base_type          ; RESU OFF2M OFF1M RESM
+        nip2                    ; RESU RESM
+        ;; Build the result offset.
+        swap                    ; RESM RESU
+        mko                     ; RESO
+        push $off1              ; RESO OFF1
+        push $off2              ; RESO OFF1 OFF2
+        rot                     ; OFF1 OFF2 RESO
+        popf 1
+        .end
+

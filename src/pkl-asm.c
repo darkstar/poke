@@ -611,17 +611,16 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
     = pkl_ast_make_integral_type (pasm->ast, 64, 0);
 
   RAS_MACRO_OGETMC (unit_type, base_type);
-
-  ASTREF (unit_type);
-  pkl_ast_node_free (unit_type);
+  ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
 /* Macro-instruction: ADDO
-   Stack: OFF OFF -> OFF OFF OFF
+   ( OFF OFF -> OFF OFF OFF )
 
    Add the two given offsets in the stack, which must be of the given
    base type.
 
+   The unit of the result is bits.
    The base type of the result is BASE_TYPE.
 
    The unit of the result is the greatest common divisor of the
@@ -630,52 +629,11 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 static void
 pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
 {
-  /* XXX simplify by using the returnstack for save area.  */
-  
-                                         /* OFF1 OFF2 */
+  pkl_ast_node unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
 
-  pkl_asm_insn (pasm, PKL_INSN_DUP);     /* OFF1 OFF2 OFF2 */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* OFF2 OFF2 OFF1 */
-  pkl_asm_insn (pasm, PKL_INSN_DUP);     /* OFF2 OFF2 OFF1 OFF1 */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* OFF2 OFF1 OFF1 OFF2 */
-  
-  /* First, calculate the unit of the result.  */
-  pkl_asm_insn (pasm, PKL_INSN_OGETU);   /* ... OFF1 OFF2 OFF2U */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* ... OFF2 OFF2U OFF1 */
-  pkl_asm_insn (pasm, PKL_INSN_OGETU);   /* ... OFF2 OFF2U OFF1 OFF1U */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* ... OFF2 OFF2U OFF1U OFF1 */
-  pkl_asm_insn (pasm, PKL_INSN_NROT);    /* ... OFF2 OFF1 OFF2U OFF1U */
-  pkl_asm_call (pasm, "_pkl_gcd");       /* ... OFF2 OFF1 RESU */
-  
-  /* Get the magnitude of the first array, in result's units.  */
-  pkl_asm_insn (pasm, PKL_INSN_DUP);     /* ... OFF2 OFF1 RESU RESU */
-  pkl_asm_insn (pasm, PKL_INSN_NROT);    /* ... OFF2 RESU OFF1 RESU */
-  pkl_asm_insn (pasm, PKL_INSN_OGETMC,
-                base_type);              /* ... OFF2 RESU OFF1 OFF1M */
-  pkl_asm_insn (pasm, PKL_INSN_NIP);     /* ... OFF2 RESU OFF1M */
-
-  /* Get the magnitude of the second array, in result's units.  */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* ... OFF2 OFF1M RESU */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* ... OFF1M RESU OFF2 */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* ... OFF1M OFF2 RESU */
-  pkl_asm_insn (pasm, PKL_INSN_DUP);     /* ... OFF1M OFF2 RESU RESU */
-  pkl_asm_insn (pasm, PKL_INSN_NROT);    /* ... OFF1M RESU OFF2 RESU */
-  pkl_asm_insn (pasm, PKL_INSN_OGETMC,
-                base_type);              /* ... OFF1M RESU OFF2 OFF2M */
-  pkl_asm_insn (pasm, PKL_INSN_NIP);     /* ... OFF1M RESU OFF2M */
-
-  /* Add the two magnitudes.  */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* ... RESU OFF2M OFF1M */
-  pkl_asm_insn (pasm, PKL_INSN_ADD,
-                base_type);              /* ... RESU OFF2M OFF1M RESM */
-  pkl_asm_insn (pasm, PKL_INSN_NIP2);    /* ... RESU RESM */
-
-  /* Make the result offset.  */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* ... RESM RESU */
-  pkl_asm_insn (pasm, PKL_INSN_MKO);     /* OFF2 OFF1 RES */
-  pkl_asm_insn (pasm, PKL_INSN_NROT);    /* RES OFF2 OFF1 */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* RES OFF1 OFF2 */
-  pkl_asm_insn (pasm, PKL_INSN_ROT);     /* OFF1 OFF2 RES */
+  RAS_MACRO_ADDO (unit_type, base_type);
+  ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
 /* Macro-instruction: BZ type, label
