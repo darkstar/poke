@@ -40,7 +40,6 @@
 ;;;    pkl_ast_node reflecting the type of the result offset unit.
 
         .macro offset_cast
-        
         ;; XXX use OGETMC here.
 
         ;; XXX we have to do the arithmetic in base_unit_types, then
@@ -87,8 +86,7 @@
                                 ; (OFFMC*OFFUNC/NUNITC) OFF NUNIT
         nip                     ; (OFFMC*OFFUNC/NUNITC) NUNIT
         mko                     ; OFFC
-        
-        .end                    ; offset_cast
+        .end
         
 ;;; RAS_FUNCTION_ARRAY_MAPPER
 ;;; ( OFF EBOUND SBOUND -- ARR )
@@ -113,7 +111,6 @@
 ;;; Note that OFF should be of type offset<uint<64>,*>.
 
         .function array_mapper
-
         prolog
         pushf
         regvar $sbound           ; Argument
@@ -297,7 +294,7 @@
 .bounds_fail:
         push PVM_E_MAP_BOUNDS
         raise
-        .end                    ; array_mapper
+        .end
 
 ;;; RAS_FUNCTION_ARRAY_VALMAPPER
 ;;; ( VAL NVAL OFF -- ARR )
@@ -311,7 +308,6 @@
 ;;; Note that OFF should be of type offset<uint<64>,*>.
 
         .function array_valmapper
-        
         prolog
         pushf
         regvar $off             ; Argument
@@ -479,7 +475,7 @@
 .bounds_fail:
         push PVM_E_MAP_BOUNDS
         raise
-        .end                    ; array_valmapper
+        .end
 
 
 ;;; RAS_FUNCTION_ARRAY_WRITER
@@ -492,7 +488,6 @@
 ;;; in order.
 
         .function array_writer
-        
         prolog
         pushf
         regvar $value           ; Argument

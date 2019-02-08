@@ -24,7 +24,6 @@
 ;;; implementation of the REMAP macro-instruction.
 
         .macro remap
-
         ;; The re-map should be done only if the value has a mapper.
         mgetm                   ; VAL MCLS
         bn .label               ; VAL MCLS
@@ -74,7 +73,6 @@
 ;;; the implementation of the WRITE macro-instruction.
 
         .macro write
-
         dup                     ; VAL VAL
 
         ;; The write should be done only if the value has a writer.
@@ -92,7 +90,6 @@
 .label:
         drop                    ; VAL (VAL|null)
         drop                    ; VAL
-
         .end
 
 ;;; RAS_MACRO_OGETMC
