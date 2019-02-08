@@ -404,6 +404,7 @@ BEGIN {
     string_re="(\"[^\"]*\")"
     var_re="(\\$[a-zA-Z][a-zA-Z_]*)"
     expt_re="(PVM_E_[A-Z_]+)"
+    marg_re="@([a-zA-Z_][a-zA-Z_]*)"
 
     ideffile = srcdir "/pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
@@ -457,7 +458,7 @@ BEGIN {
                     case "r":
                         break
                     case "a":
-                        re="[a-zA-Z_][a-zA-Z_]*"
+                        re=marg_re
                         break
                     default:
                         error("error: unknown insn argument type " a)
@@ -516,15 +517,30 @@ BEGIN {
 }
 
 # .macro NAME
-/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(;.*)?$/ {
+/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(@[a-zA-Z_][a-zA-Z_]*[ \t]*)*[ \t]*(;.*)?$/ {
     # Get the macro name
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*$/) == 0)
         fatal("error:" FNR ": invalid macro name.  This should NOT happen.")
 
-   init_entity()
+    # Build the list of arguments
+    macro_args=""
+    for (i = 3; i <= NF; i++)
+    {
+        if (i == 3)
+            macro_args = "("
+        if (match ($i, /^;.*$/) == 0)
+        {
+            if (i != 3)
+                macro_args = macro_args ","
+            macro_args = macro_args gensub (marg_re, "\\1_arg", "g", $i);
+        }
+        if (i == NF)
+            macro_args = macro_args ")"
+    }
 
-    out("#define RAS_MACRO_" toupper($2) " \\")
+    init_entity()
+    out("#define RAS_MACRO_" toupper($2) macro_args " \\")
     out("\tdo {                                                     \\")
     out("---LABELDECLS---")
     
@@ -684,6 +700,9 @@ BEGIN {
 
     # Substitute and check exception arguments.
     $0 = gensub (expt_re, "pvm_make_int (\\1, 32)", "g", $0);
+
+    # Substitute and check macro arguments.
+    $0 = gensub (marg_re, "(\\1_arg)", "g", $0);
 
     # Substitute variable arguments and perform side-effects.
     # This assumes instructions have at most one variable argument.

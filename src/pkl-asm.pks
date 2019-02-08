@@ -99,30 +99,28 @@
 ;;; its magnitude converted to the given unit.  This is the implementation
 ;;; of the PKL_INSN_OGETMC macro-instruction.
 ;;;
-;;; The expansion of this macro requires the following C entities
-;;; to be available:
+;;; Macro arguments:
 ;;;
-;;; `unit_type'
+;;; @unit_type
 ;;;    a pkl_ast_node with the type of an offset unit, i.e.
 ;;;    uint<64>.
-;;; 
-;;; `base_type'
+;;; @base_type
 ;;;    a pkl_ast_node with the base type of the offset.
 
-        .macro ogetmc
+        .macro ogetmc @unit_type @base_type
         swap                    ; TOUNIT OFF
         ogetm                   ; TOUNIT OFF MAGNITUDE
         swap                    ; TOUNIT MAGNITUDE OFF
         ogetu                   ; TOUNIT MAGNITUDE OFF UNIT
-        nton unit_type, base_type ; TOUNIT MAGNITUDE OFF UNIT
+        nton @unit_type, @base_type ; TOUNIT MAGNITUDE OFF UNIT
         nip                     ; TOUNIT MAGNITUDE OFF UNIT
         rot                     ; TOUNIT OFF UNIT MAGNITUDE
-        mul base_type           ; TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE)
+        mul @base_type          ; TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE)
         nip2                    
         rot                     ; OFF (UNIT*MAGNITUIDE) TOUNIT
-        nton unit_type, base_type ; OFF (MAGNITUDE*UNIT) TOUNIT
+        nton @unit_type, @base_type ; OFF (MAGNITUDE*UNIT) TOUNIT
         nip                     ; OFF (MAGNITUDE*UNIT) TOUNIT
-        div base_type
+        div @base_type
         nip2                    ; OFF (MAGNITUDE*UNIT/TOUNIT)
         .end
 
@@ -133,20 +131,19 @@
 ;;; into an offset of another given type.  This is the implementation of
 ;;; the PKL_INSN_OTO macro-instruction.
 ;;;
-;;; The following C variables shall be available to the macro
-;;; expansion:
+;;; Macro arguments:
 ;;;
-;;; `from_base_type'
+;;; @from_base_type
 ;;;    pkl_ast_node reflecting the type of the source offset magnitude.
-;;; `from_base_unit_type'
+;;; @from_base_unit_type
 ;;;    pkl_ast_node reflecting the type of the source offset unit.
 ;;; 
-;;; `to_base_type'
+;;; @to_base_type
 ;;;    pkl_ast_node reflecting the type of the result offset magnitude.
-;;; `to_base_unit_type'
+;;; @to_base_unit_type
 ;;;    pkl_ast_node reflecting the type of the result offset unit.
 
-        .macro offset_cast
+        .macro offset_cast @from_base_type @from_base_unit_type @to_base_type @to_base_unit_type
         ;; XXX use OGETMC here.
         ;; XXX can't FROMUNIT be derived from OFF? (ogetu)
         ;; XXX we have to do the arithmetic in base_unit_types, then
@@ -158,19 +155,19 @@
         ;; Get the magnitude of the offset and convert it to the new
         ;; magnitude type.
         ogetm                                   ; OFF OFFM
-        nton from_base_type, to_base_type       ; OFF OFFM OFFMC
+        nton @from_base_type, @to_base_type     ; OFF OFFM OFFMC
         nip                                     ; OFF OFFMC
         ;; Now do the same for the unit.
         pushvar $fromunit                       ; OFF OFFMC OFFU
-        nton from_base_unit_type, to_base_type  ; OFF OFFMC OFFU OFFUC
+        nton @from_base_unit_type, @to_base_type ; OFF OFFMC OFFU OFFUC
         nip                                     ; OFF OFFMC OFFUC
-        mul to_base_type                        ; OFF OFFMC OFFUC (OFFMC*OFFUC)
+        mul @to_base_type                       ; OFF OFFMC OFFUC (OFFMC*OFFUC)
         nip2                                    ; OFF (OFFMC*OFFUC)
         ;; Convert the new unit.
         pushvar $tounit                         ; OFF (OFFMC*OFFUC) TOUNIT
-        nton to_base_unit_type, to_base_type    ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
+        nton @to_base_unit_type, @to_base_type  ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
         nip                                     ; OFF (OFFMC*OFFUNC) TOUNITC
-        div to_base_type
+        div @to_base_type
         nip2                                    ; OFF (OFFMC*OFFUNC/TOUNITC)
         swap                                    ; (OFFMC*OFFUNC/TOUNITC) OFF
         pushvar $tounit                         ; (OFFMC*OFFUNC/TOUNITC) OFF TOUNIT
