@@ -614,8 +614,21 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
   ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
-/* Macro-instruction: ADDO
-   ( OFF OFF -> OFF OFF OFF )
+/* Macro-instruction: GCD type
+   ( VAL -- VAL VAL )
+
+   Calculate the greatest common divisor of the integral value at the
+   TOS, which should be of type TYPE.  */
+
+static void
+pkl_asm_insn_gcd (pkl_asm pasm, pkl_ast_node type)
+{
+  RAS_MACRO_GCD (type);
+}
+   
+
+/* Macro-instruction: ADDO base_type
+   ( OFF OFF -- OFF OFF OFF )
 
    Add the two given offsets in the stack, which must be of the given
    base type.
@@ -991,6 +1004,17 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_cmp (pasm, insn, type);
+            break;
+          }
+        case PKL_INSN_GCD:
+          {
+            pkl_ast_node type;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_gcd (pasm, type);
             break;
           }
         case PKL_INSN_OGETMC:

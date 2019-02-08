@@ -366,6 +366,8 @@ PKL_DEF_INSN (PKL_INSN_BOR, "a", "bor")
 PKL_DEF_INSN (PKL_INSN_BXOR, "a", "bxor")
 PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
 
+PKL_DEF_INSN (PKL_INSN_GCD, "a", "gcd")
+
 /* Offset meta-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")

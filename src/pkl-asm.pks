@@ -176,20 +176,36 @@
         popf 1
         .end
 
-;;; ADDO
+;;; GCD type
+;;; ( VAL -- VAL VAL )
+;;;
+;;; Calculate the greatest common divisor of the integral value
+;;; at the TOS, which should be of type TYPE.
+;;;
+;;; Macro arguments:
+;;;
+;;; @type
+;;;   type of the value at the TOS.  It should be an integral type.
+
+        .macro gcd @type
+        
+
+        .end
+        
+;;; ADDO unit_type base_type
 ;;; ( OFF OFF -- OFF OFF OFF )
 ;;;
-;;;  Add the two given offsets in the stack, which must be of the
-;;;  given base type.  The unit of the result is the greatest common
-;;;  divisor of the operands units.  The base type  of the result is the base
-;;;  type of the operands.
+;;; Add the two given offsets in the stack, which must be of the
+;;; given base type.  The unit of the result is the greatest common
+;;; divisor of the operands units.  The base type  of the result is the base
+;;; type of the operands.
 ;;;
-;;;  Macro arguments:
+;;; Macro arguments:
 ;;;
-;;;  @unit_type
-;;;    a pkl_ast_node with a type uint<64>.
-;;;  @base_type
-;;;    a pkl_ast_node with the base type of the offsets.
+;;; @unit_type
+;;;   a pkl_ast_node with a type uint<64>.
+;;; @base_type
+;;;   a pkl_ast_node with the base type of the offsets.
 
         .macro addo @unit_type @base_type
         pushf
@@ -203,7 +219,7 @@
         ogetu                   ; OFF2 OFF2U OFF1 OFF1U
         swap                    ; OFF2 OFF2U OFF1U OFF1
         nrot                    ; OFF2 OFF1 OFF2U OFF1U
-;        gcd @unit_type          ;OFF2 OFF1 OFF2U OFF1U RESU
+        gcd @unit_type          ; OFF2 OFF1 OFF2U OFF1U RESU
         nip2                    ; OFF2 OFF1 RESU
         ;; Get the magnitude of the first array, in result's units.
         dup                     ; OFF2 OFF1 RESU RESU

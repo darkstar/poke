@@ -680,7 +680,7 @@ BEGIN {
     }
 
     # Check that the instruction is well-formed
-    if (match ($0, "^[ \t]*" i_re "[ \t]*(; .*)?$") != 1)
+    if (match ($0, "^[ \t]*" i_re "[ \t]*(;.*)?$") != 1)
         error("error:" FNR ": malformed instruction " insn)
 
     # Remove the optional line comment.
