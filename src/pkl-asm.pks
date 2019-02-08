@@ -20,7 +20,7 @@
 ;;; RAS_MACRO_REMAP
 ;;; ( VAL -- VAL )
 ;;;
-;;; Given a mapeable PVM value on the TOS, remap it.  This is the
+;;; Given a map-able PVM value on the TOS, remap it.  This is the
 ;;; implementation of the PKL_INSN_REMAP macro-instruction.
 
         .macro remap
@@ -28,17 +28,13 @@
         mgetm                   ; VAL MCLS
         bn .label               ; VAL MCLS
         drop                    ; VAL
-
         ;; XXX do not re-map if the object is up to date (cached
         ;; value.)
-
         ;; XXX rewrite using variables to avoid extra instructions.
-
         mgetw                   ; VAL WCLS
         swap                    ; WCLS VAL
         mgetm                   ; WCLS VAL MCLS
         swap                    ; WCLS MCLS VAL
-
         mgeto                   ; WCLS MCLS VAL OFF
         swap                    ; WCLS MCLS OFF VAL
         mgetsel                 ; WCLS MCLS OFF VAL EBOUND
@@ -53,14 +49,12 @@
         msetm                   ; WCLS NVAL
         swap                    ; NVAL WCLS
         msetw                   ; NVAL
-
         ;; If the mapped value is null then raise an EOF
         ;; exception.
         dup                     ; NVAL NVAL
         bnn .label
         push PVM_E_EOF
         raise
-
         push null               ; NVAL null
 .label:
         drop                    ; NVAL
@@ -69,23 +63,20 @@
 ;;; RAS_MACRO_WRITE
 ;;; ( VAL -- VAL )
 ;;;
-;;; Given a mapeable PVM value on the TOS, invoke its writer.  This is
+;;; Given a map-able PVM value on the TOS, invoke its writer.  This is
 ;;; the implementation of the PKL_INSN_WRITE macro-instruction.
 
         .macro write
         dup                     ; VAL VAL
-
         ;; The write should be done only if the value has a writer.
         mgetw                   ; VAL VAL WCLS
         bn .label
-
         swap                    ; VAL WCLS VAL
         mgeto                   ; VAL WCLS VAL OFF
         swap                    ; VAL WCLS OFF VAL
         rot                     ; VAL OFF VAL WCLS
         ;; XXX exceptions etc.
         call                    ; VAL null
-
         push null               ; VAL null null
 .label:
         drop                    ; VAL (VAL|null)
