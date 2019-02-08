@@ -183,23 +183,12 @@
 ;;; at the TOS, which should be of type TYPE.
 ;;;
 ;;; Macro arguments:
-;;;
+;;; 
 ;;; @type
 ;;;   type of the value at the TOS.  It should be an integral type.
 
         .macro gcd @type
-        ;; Use an iterative version of Euclid's algorithm:
-        ;; gcd (a, b)
-        ;; {
-        ;;    while (b != 0)
-        ;;    {
-        ;;      long r = a % b;
-        ;;      a = b;
-        ;;      b = r;
-        ;;    }
-        ;;    return a;
-        ;; }
-
+        ;; Use an iterative version of Euclid's algorithm.
         over                     ; A B A
         over                     ; A B A B
 .loop:
