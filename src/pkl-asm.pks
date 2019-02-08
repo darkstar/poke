@@ -109,7 +109,6 @@
 ;;;    a pkl_ast_node with the base type of the offset.
 
         .macro ogetmc
-
         swap                    ; TOUNIT OFF
         ogetm                   ; TOUNIT OFF MAGNITUDE
         swap                    ; TOUNIT MAGNITUDE OFF
