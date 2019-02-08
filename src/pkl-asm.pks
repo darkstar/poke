@@ -17,3 +17,31 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
+
+        .macro write
+
+;;; RAS_MACRO_WRITE
+;;; ( VAL -- VAL )
+;;;
+;;; Given a mapeable PVM value on the TOS, invoke its writer.  This is
+;;; used to implement the WRITE macro-instruction.
+
+        dup                     ; VAL VAL
+
+        ;; The write should be done only if the value has a writer.
+        mgetw                   ; VAL VAL WCLS
+        bn .label
+
+        swap                    ; VAL WCLS VAL
+        mgeto                   ; VAL WCLS VAL OFF
+        swap                    ; VAL WCLS OFF VAL
+        rot                     ; VAL OFF VAL WCLS
+        ;; XXX exceptions etc.
+        call                    ; VAL null
+
+        push null               ; VAL null null
+.label:
+        drop                    ; VAL (VAL|null)
+        drop                    ; VAL
+
+        .end

@@ -526,7 +526,8 @@ BEGIN {
 
     out("#define RAS_MACRO_" toupper($2) " \\")
     out("\tdo {                                                     \\")
-
+    out("---LABELDECLS---")
+    
     current_entity = "macro"
     next
 }
