@@ -110,16 +110,13 @@
         ogetm                   ; TOUNIT OFF MAGNITUDE
         swap                    ; TOUNIT MAGNITUDE OFF
         ogetu                   ; TOUNIT MAGNITUDE OFF UNIT
-        ;; XXX we need ras macro arguments for this
-        ;; nton @unit_type, @base_type
-        .c pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
+        nton unit_type, base_type ; TOUNIT MAGNITUDE OFF UNIT
         nip                     ; TOUNIT MAGNITUDE OFF UNIT
         rot                     ; TOUNIT OFF UNIT MAGNITUDE
         mul base_type           ; TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE)
         nip2                    
         rot                     ; OFF (UNIT*MAGNITUIDE) TOUNIT
-        ;; XXX nton @unit_type, @base_type
-        .c pkl_asm_insn (pasm, PKL_INSN_NTON, pasm->unit_type, base_type);
+        nton unit_type, base_type ; OFF (MAGNITUDE*UNIT) TOUNIT
         nip                     ; OFF (MAGNITUDE*UNIT) TOUNIT
         div base_type
         nip2                    ; OFF (MAGNITUDE*UNIT/TOUNIT)

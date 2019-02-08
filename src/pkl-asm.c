@@ -91,7 +91,6 @@ struct pkl_asm_level
    LEVEL is a pointer to the top of a stack of levels.
 
    AST is for creating ast nodes whenever needed.
-   UNIT_TYPE is an AST type for an offset unit.
 
    ERROR_LABEL marks the generic error handler defined in the standard
    prologue.  */
@@ -106,8 +105,6 @@ struct pkl_asm
   struct pkl_asm_level *level;
 
   pkl_ast ast;
-  pkl_ast_node unit_type;
-
   jitter_label error_label;
 };
 
@@ -609,7 +606,13 @@ static void
 pkl_asm_insn_ogetmc (pkl_asm pasm,
                      pkl_ast_node base_type)
 {
+  pkl_ast_node unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+
   RAS_MACRO_OGETMC;
+
+  ASTREF (unit_type);
+  pkl_ast_node_free (unit_type);
 }
 
 /* Macro-instruction: ADDO
@@ -733,9 +736,6 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
 
   pasm->compiler = compiler;
   pasm->ast = ast;
-  pasm->unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-
   program = pvm_make_program ();
   pasm->error_label = jitter_fresh_label (program);
   pasm->program = program;
@@ -808,7 +808,6 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
   
   /* Free the assembler instance and return the assembled program to
      the user.  */
-  ASTREF (pasm->unit_type); pkl_ast_node_free (pasm->unit_type);
   free (pasm);
   return program;
 }
