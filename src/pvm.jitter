@@ -1323,11 +1323,11 @@ end
 
 ## Compare-and-swap instructions.
 
-instruction swapgti () # ( INT INT - INT INT )
+instruction swaplti () # ( INT INT - INT INT )
   code
      pvm_val a = JITTER_UNDER_TOP_STACK ();
      pvm_val b = JITTER_TOP_STACK ();
-     if (PVM_VAL_INT (a) > PVM_VAL_INT (b))
+     if (PVM_VAL_INT (a) < PVM_VAL_INT (b))
      {
        JITTER_UNDER_TOP_STACK () = b;
        JITTER_TOP_STACK () = a;
@@ -1335,34 +1335,22 @@ instruction swapgti () # ( INT INT - INT INT )
   end
 end
 
-instruction swapgtiu () # ( UINT UINT - UINT UINT )
+instruction swapltiu () # ( UINT UINT - UINT UINT )
   code
      pvm_val a = JITTER_UNDER_TOP_STACK ();
      pvm_val b = JITTER_TOP_STACK ();
-     if (PVM_VAL_UINT (a) > PVM_VAL_UINT (b))
+     if (PVM_VAL_UINT (a) < PVM_VAL_UINT (b))
      {
        JITTER_UNDER_TOP_STACK () = b;
        JITTER_TOP_STACK () = a;
      }
   end
 end
-instruction swapgtl () # ( LONG LONG - LONG LONG )
+instruction swapltl () # ( LONG LONG - LONG LONG )
   code
      pvm_val a = JITTER_UNDER_TOP_STACK ();
      pvm_val b = JITTER_TOP_STACK ();
-     if (PVM_VAL_LONG (a) > PVM_VAL_LONG (b))
-     {
-       JITTER_UNDER_TOP_STACK () = b;
-       JITTER_TOP_STACK () = a;
-     }
-  end
-end
-
-instruction swapgtlu () # ( ULONG ULONG - ULONG ULONG )
-  code
-     pvm_val a = JITTER_UNDER_TOP_STACK ();
-     pvm_val b = JITTER_TOP_STACK ();
-     if (PVM_VAL_ULONG (a) > PVM_VAL_ULONG (b))
+     if (PVM_VAL_LONG (a) < PVM_VAL_LONG (b))
      {
        JITTER_UNDER_TOP_STACK () = b;
        JITTER_TOP_STACK () = a;
@@ -1370,6 +1358,17 @@ instruction swapgtlu () # ( ULONG ULONG - ULONG ULONG )
   end
 end
 
+instruction swapltlu () # ( ULONG ULONG - ULONG ULONG )
+  code
+     pvm_val a = JITTER_UNDER_TOP_STACK ();
+     pvm_val b = JITTER_TOP_STACK ();
+     if (PVM_VAL_ULONG (a) < PVM_VAL_ULONG (b))
+     {
+       JITTER_UNDER_TOP_STACK () = b;
+       JITTER_TOP_STACK () = a;
+     }
+  end
+end
 
 
 

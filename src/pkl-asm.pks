@@ -191,8 +191,7 @@
         ;; Use an iterative version of Euclid's algorithm.
         over                     ; A B A
         over                     ; A B A B
-        swapgt @type             ; Make sure A > B
-        swap
+        swaplt @type             ; Make sure A > B
 .loop:
         bnz @type, .endloop     ; ... A B
         mod @type               ; ... A B A%B
@@ -226,21 +225,34 @@
         pushvar $off1           ; OFF1
         pushvar $off2           ; OFF2
         ogetu                   ; OFF1 OFF2 OFF2U
-        rot                     ; OFF2 OFF2U OFF1
-        ogetu                   ; OFF2 OFF2U OFF1 OFF1U
-        swap                    ; OFF2 OFF2U OFF1U OFF1
-        nrot                    ; OFF2 OFF1 OFF2U OFF1U
+        swap                    ; OFF1 OFF2U OFF2
+        ogetm                   ; OFF1 OFF2U OFF2 OFF2M
+        nton @base_type, @unit_type
+        nip                     ; OFF1 OFF2U OFF2 OFF2M
+        nip                     ; OFF1 OFF2U OFF2M
+        mul @unit_type
+        nip2                    ; OFF1 (OFF2U*OFF2M)
+        swap                    ; (OFF2U*OFF2M) OFF1
+        ogetu                   ; (OFF2U*OFF2M) OFF1 OFF1U
+        swap                    ; (OFF2U*OFF2M) OFF1U OFF1
+        ogetm                   ; (OFF2U*OFF2M) OFF1U OFF1 OFF1M
+        nton @base_type, @unit_type
+        nip                     ; (OFF2U*OFF2M) OFF1U OFF1 OFF1M
+        nip                     ; (OFF2U*OFF2M) OFF1U OFF1M
+        mul @unit_type
+        nip2                    ; (OFF2U*OFF2M) (OFF1U*OFF1M)
         gcd @unit_type          ; OFF2 OFF1 OFF2U OFF1U RESU
-        nip2                    ; OFF2 OFF1 RESU
+        nip2                    ; RESU
         ;; Get the magnitude of the first array, in result's units.
-        dup                     ; OFF2 OFF1 RESU RESU
-        nrot                    ; OFF2 RESU OFF1 RESU
-        ogetmc @base_type       ; OFF2 RESU OFF1 OFF1M
-        nip                     ; OFF2 RESU OFF1M
+        pushvar $off1           ; RESU OFF1
+        swap                    ; OFF1 RESU
+        dup                     ; OFF1 RESU RESU
+        nrot                    ; RESU OFF1 RESU
+        ogetmc @base_type       ; RESU OFF1 OFF1M
+        nip                     ; RESU OFF1M
         ;; Get the magnitude of the second array, in result's units.
-        swap                    ; OFF2 OFF1M RESU
-        rot                     ; OFF1M RESU OFF2
-        swap                    ; OFF1M OFF2 RESU
+        pushvar $off2           ; RESU OFF1M OFF2
+        rot                     ; OFF1M OFF2 RESU
         dup                     ; OFF1M OFF2 RESU RESU
         nrot                    ; OFF1M RESU OFF2 RESU
         ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M

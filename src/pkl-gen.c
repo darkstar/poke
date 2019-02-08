@@ -1664,14 +1664,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
       break;
     case PKL_TYPE_OFFSET:
       {
-        /* Calculate the magnitude of the new offset, which is the
-           addition of both magnitudes.  The unit used for the result
-           is the greatest common divisor of the operand's units.
-
-           Note that since addition is commutative we can process OFF2
-           first and save a swap.  */
-
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+
         pkl_asm_insn (pasm, PKL_INSN_ADDO, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }

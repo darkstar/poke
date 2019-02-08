@@ -649,7 +649,7 @@ pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
   ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
-/* Macro-instruction: SWAPGT type
+/* Macro-instruction: SWAPLT type
    ( VAL VAL -- VAL VAL )
 
    Swap the integral values at the top of the stack, of type TYPE, if
@@ -657,16 +657,16 @@ pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
    top.  */
 
 static void
-pkl_asm_insn_swapgt (pkl_asm pasm, pkl_ast_node type)
+pkl_asm_insn_swaplt (pkl_asm pasm, pkl_ast_node type)
 {
-  static int swapgt_table[2][2] = {{PKL_INSN_SWAPGTIU, PKL_INSN_SWAPGTI},
-                                   {PKL_INSN_SWAPGTLU, PKL_INSN_SWAPGTL}};
+  static int swaplt_table[2][2] = {{PKL_INSN_SWAPLTIU, PKL_INSN_SWAPLTI},
+                                   {PKL_INSN_SWAPLTLU, PKL_INSN_SWAPLTL}};
 
   size_t size = PKL_AST_TYPE_I_SIZE (type);
   int sign = PKL_AST_TYPE_I_SIGNED (type);
 
   int tl = !!((size - 1) & ~0x1f);
-  pkl_asm_insn (pasm, swapgt_table[tl][sign]);
+  pkl_asm_insn (pasm, swaplt_table[tl][sign]);
 }
 
 /* Macro-instruction: BZ type, label
@@ -988,7 +988,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             pkl_asm_insn_bnz (pasm, type, label);
             break;
           }
-        case PKL_INSN_SWAPGT:
+        case PKL_INSN_SWAPLT:
           {
             pkl_ast_node type;
 
@@ -996,7 +996,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_swapgt (pasm, type);
+            pkl_asm_insn_swaplt (pasm, type);
             break;
           }
         case PKL_INSN_NEG:
