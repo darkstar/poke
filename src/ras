@@ -208,8 +208,8 @@
 #   pushvar 0,2 ; Use Local1
 #
 # Now, we want to modify FOO to get an extra argument.  Boom! This
-# changes the lexical addresses of everything, and thus we need to
-# adjust them manually:
+# changes the lexical addresses of literally everything, and thus we
+# need to adjust them manually:
 #
 #   .function FOO
 #   prolog
