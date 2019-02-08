@@ -179,14 +179,14 @@ pkl_asm_insn_oto (pkl_asm pasm,
 {
   pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
   pkl_ast_node from_base_unit = PKL_AST_TYPE_O_UNIT (from_type);
-  pkl_ast_node from_base_unit_type = PKL_AST_TYPE (from_base_unit);
+  pkl_ast_node from_unit_type = PKL_AST_TYPE (from_base_unit);
   
   pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
   pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
-  pkl_ast_node to_base_unit_type = PKL_AST_TYPE (to_base_unit);
+  pkl_ast_node to_unit_type = PKL_AST_TYPE (to_base_unit);
 
-  RAS_MACRO_OFFSET_CAST (from_base_type, from_base_unit_type, \
-                         to_base_type, to_base_unit_type);
+  RAS_MACRO_OFFSET_CAST (from_base_type, from_unit_type, \
+                         to_base_type, to_unit_type);
 }
 
 /* Macro-instruction: NTON from_type, to_type
