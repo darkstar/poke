@@ -213,7 +213,6 @@
         drop                   ; ARRAY
 
 .bounds_ok:
-
         ;; Set the map bound attributes in the new object.
         pushvar $sbound       ; ARRAY SBOUND
         msetsiz               ; ARRAY
@@ -394,7 +393,6 @@
         drop                    ; ARRAY
 
 .sbound_ok:
-
         ;; Set the map bound attributes in the new object.
         pushvar $sbound         ; ARRAY SBOUND
         msetsiz                 ; ARRAY
