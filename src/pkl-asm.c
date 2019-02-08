@@ -626,16 +626,13 @@ pkl_asm_insn_gcd (pkl_asm pasm, pkl_ast_node type)
   RAS_MACRO_GCD (type);
 }
    
-
 /* Macro-instruction: ADDO base_type
    ( OFF OFF -- OFF OFF OFF )
 
    Add the two given offsets in the stack, which must be of the given
    base type.
 
-   The unit of the result is bits.
    The base type of the result is BASE_TYPE.
-
    The unit of the result is the greatest common divisor of the
    operand's units.  */
 
@@ -646,6 +643,26 @@ pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
     = pkl_ast_make_integral_type (pasm->ast, 64, 0);
 
   RAS_MACRO_ADDO (unit_type, base_type);
+  ASTREF (unit_type); pkl_ast_node_free (unit_type);
+}
+
+/* Macro-instruction: SUBO base_type
+   ( OFF OFF -- OFF OFF OFF )
+
+   Subtract the two given offsets in the stack, which must be of the given
+   base type.
+
+   The base type of the result is BASE_TYPE.
+   The unit of the result is the greatest common divisor of the
+   operand's units.  */
+
+static void
+pkl_asm_insn_subo (pkl_asm pasm, pkl_ast_node base_type)
+{
+  pkl_ast_node unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+
+  RAS_MACRO_SUBO (unit_type, base_type);
   ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
@@ -1060,6 +1077,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_ADDO:
+        case PKL_INSN_SUBO:
           {
             pkl_ast_node base_type;
 
@@ -1067,7 +1085,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             base_type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_addo (pasm, base_type);
+            if (insn == PKL_INSN_ADDO)
+              pkl_asm_insn_addo (pasm, base_type);
+            else
+              pkl_asm_insn_subo (pasm, base_type);
             break;
           }
         case PKL_INSN_REMAP:

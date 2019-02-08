@@ -269,3 +269,74 @@
         popf 1
         .end
 
+
+;;; SUBO unit_type base_type
+;;; ( OFF OFF -- OFF OFF OFF )
+;;;
+;;; Add the two given offsets in the stack, which must be of the
+;;; given base type.  The unit of the result is the greatest common
+;;; divisor of the operands units.  The base type  of the result is the base
+;;; type of the operands.
+;;;
+;;; Macro arguments:
+;;;
+;;; @unit_type
+;;;   a pkl_ast_node with a type uint<64>.
+;;; @base_type
+;;;   a pkl_ast_node with the base type of the offsets.
+
+;;; XXX share code with ADDO
+
+        .macro subo @unit_type @base_type
+        pushf
+        regvar $off2
+        regvar $off1
+        ;; Calculate the unit of the result.
+        pushvar $off1           ; OFF1
+        pushvar $off2           ; OFF2
+        ogetu                   ; OFF1 OFF2 OFF2U
+        swap                    ; OFF1 OFF2U OFF2
+        ogetm                   ; OFF1 OFF2U OFF2 OFF2M
+        nton @base_type, @unit_type
+        nip                     ; OFF1 OFF2U OFF2 OFF2M
+        nip                     ; OFF1 OFF2U OFF2M
+        mul @unit_type
+        nip2                    ; OFF1 (OFF2U*OFF2M)
+        swap                    ; (OFF2U*OFF2M) OFF1
+        ogetu                   ; (OFF2U*OFF2M) OFF1 OFF1U
+        swap                    ; (OFF2U*OFF2M) OFF1U OFF1
+        ogetm                   ; (OFF2U*OFF2M) OFF1U OFF1 OFF1M
+        nton @base_type, @unit_type
+        nip                     ; (OFF2U*OFF2M) OFF1U OFF1 OFF1M
+        nip                     ; (OFF2U*OFF2M) OFF1U OFF1M
+        mul @unit_type
+        nip2                    ; (OFF2U*OFF2M) (OFF1U*OFF1M)
+        gcd @unit_type          ; OFF2 OFF1 OFF2U OFF1U RESU
+        nip2                    ; RESU
+        ;; Get the magnitude of the first array, in result's units.
+        pushvar $off1           ; RESU OFF1
+        swap                    ; OFF1 RESU
+        dup                     ; OFF1 RESU RESU
+        nrot                    ; RESU OFF1 RESU
+        ogetmc @base_type       ; RESU OFF1 OFF1M
+        nip                     ; RESU OFF1M
+        ;; Get the magnitude of the second array, in result's units.
+        pushvar $off2           ; RESU OFF1M OFF2
+        rot                     ; OFF1M OFF2 RESU
+        dup                     ; OFF1M OFF2 RESU RESU
+        nrot                    ; OFF1M RESU OFF2 RESU
+        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
+        nip                     ; OFF1M RESU OFF2M
+        ;; Subtrace the two magnitudes.
+        rot                     ; RESU OFF2M OFF1M
+        swap                    ; RESU OFF1M OFF2M
+        sub @base_type
+        nip2                    ; RESU RESM
+        ;; Build the result offset.
+        swap                    ; RESM RESU
+        mko                     ; RESO
+        push $off1              ; RESO OFF1
+        push $off2              ; RESO OFF1 OFF2
+        rot                     ; OFF1 OFF2 RESO
+        popf 1
+        .end
