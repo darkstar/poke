@@ -338,3 +338,33 @@
         rot                     ; OFF1 OFF2 RESO
         popf 1
         .end
+
+;;; MULO base_type
+;;; ( OFF VAL -- OFF VAL OFF )
+;;;
+;;; Multiply an offset with a magnitude.  The types of both the offset
+;;; base type and the magnitude type is BASE_TYPE.
+;;;
+;;; Macro arguments:
+;;;
+;;; @base_type
+;;;   a pkl_ast_node with the base type of the offset.
+
+        .macro mulo @base_type
+        dup                     ; OFF VAL VAL
+        rot                     ; VAL VAL OFF
+        dup                     ; VAL VAL OFF OFF
+        rot                     ; VAL OFF OFF VAL
+        swap                    ; VAL OFF VAL OFF
+        ogetm                   ; VAL OFF VAL OFF OFFM
+        rot                     ; VAL OFF OFF OFFM VAL
+        mul @base_type
+        nip2                    ; VAL OFF OFF (VAL*OFFM)
+        swap                    ; VAL OFF (VAL*OFFM) OFF
+        ogetu
+        nip                     ; VAL OFF (VAL*OFFM) OFFU
+        mko                     ; VAL OFF OFFR
+        nrot                    ; OFFR VAL OFF
+        swap                    ; OFFR OFF VAL
+        rot                     ; OFF VAL OFFR
+        .end

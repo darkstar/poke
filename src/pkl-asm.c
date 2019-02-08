@@ -666,6 +666,18 @@ pkl_asm_insn_subo (pkl_asm pasm, pkl_ast_node base_type)
   ASTREF (unit_type); pkl_ast_node_free (unit_type);
 }
 
+/* Macro-instruction: MULO base_type
+   ( OFF VAL -- OFF VAL OFF )
+
+   Multiply an offset with a magnitude.  The types of both the offset
+   base type and the magnitude type is BASE_TYPE.  */
+
+static void
+pkl_asm_insn_mulo (pkl_asm pasm, pkl_ast_node base_type)
+{
+  RAS_MACRO_MULO (base_type);
+}
+
 /* Macro-instruction: SWAPGT type
    ( VAL VAL -- VAL VAL )
 
@@ -1078,6 +1090,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           }
         case PKL_INSN_ADDO:
         case PKL_INSN_SUBO:
+        case PKL_INSN_MULO:
           {
             pkl_ast_node base_type;
 
@@ -1087,8 +1100,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
             if (insn == PKL_INSN_ADDO)
               pkl_asm_insn_addo (pasm, base_type);
-            else
+            else if (insn == PKL_INSN_SUBO)
               pkl_asm_insn_subo (pasm, base_type);
+            else
+              pkl_asm_insn_mulo (pasm, base_type);
             break;
           }
         case PKL_INSN_REMAP:

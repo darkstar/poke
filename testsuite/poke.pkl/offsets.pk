@@ -147,3 +147,17 @@
 /* { dg-command { print 8#b + 4#B } } */
 /* { dg-output "\n5#B" } */
 
+/* { dg-command { print 2#B * 3 } } */
+/* { dg-output "\n6#B" } */
+
+/* { dg-command { print 2#B * 0 } } */
+/* { dg-output "\n0#B" } */
+
+/* { dg-command { print 0#b * 2 } } */
+/* { dg-output "\n0#b" } */
+
+/* { dg-command { print 2#B * 3L } } */
+/* { dg-output "\n6L#B" } */
+
+
+

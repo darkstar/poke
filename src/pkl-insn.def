@@ -383,6 +383,7 @@ PKL_DEF_INSN (PKL_INSN_GCD, "a", "gcd")
 PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")
 PKL_DEF_INSN (PKL_INSN_ADDO, "a", "addo")
 PKL_DEF_INSN (PKL_INSN_SUBO, "a", "subo")
+PKL_DEF_INSN (PKL_INSN_MULO, "a", "mulo")
 
 /* Meta-instructions to handle mapped values.  */
 
