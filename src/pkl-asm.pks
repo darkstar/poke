@@ -202,10 +202,23 @@
         ;; }
 
         pushf
+        mod @type               ; A B A%B
+        regvar $r
         regvar $b
-        regvar $a
-        push "XXX completeme"
-        print
+        regvar $a               ; _
+.loop:
+        pushvar $b              ; B
+        bnz @type, .endloop     ; B (B==0)
+        drop                    ; B
+        pushvar $a              ; B A
+        swap                    ; A B
+        mod @type               ; A B A%B
+        popvar $b               ; A B
+        popvar $a               ; A
+        drop                    ; _
+        push null               ; null
+.endloop:
+        drop                    ; B
         popf 1
         .end
         
