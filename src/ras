@@ -153,8 +153,8 @@
 # Exception Arguments are written like PVM_E_*.  See the file pvm.h
 # for the set of valid exceptions.
 #
-# AST Arguments are macro arguments, and are written like @this.  The
-# argument should have been declared as such in the .macro directive.
+# AST node arguments and are written like @this.  They are usually
+# (always?) passed to the current entity as an argument.
 #
 # Labels
 # ------
