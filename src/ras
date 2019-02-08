@@ -63,7 +63,7 @@
 # and _macros_.  Macros are defined using .macro/.end pairs of
 # assembler directives, and look like this:
 #
-#  .macro NAME
+#  .macro NAME [@ARG]...
 #  ...
 #  .end
 #
@@ -152,6 +152,9 @@
 #
 # Exception Arguments are written like PVM_E_*.  See the file pvm.h
 # for the set of valid exceptions.
+#
+# AST Arguments are macro arguments, and are written like @this.  The
+# argument should have been declared as such in the .macro directive.
 #
 # Labels
 # ------

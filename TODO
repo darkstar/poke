@@ -9,5 +9,6 @@ ras
 
   - Validate the number of bits in u?int and u?long arguments.
   - Make sure that label arguments are defined.
+  - Make sure that macro arguments are defined when used.
   - Write error messages to stderr.
   - Pretty print: indentation in .loop/.endloop etc.
