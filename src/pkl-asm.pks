@@ -135,18 +135,18 @@
 ;;;
 ;;; @from_base_type
 ;;;    pkl_ast_node reflecting the type of the source offset magnitude.
-;;; @from_base_unit_type
+;;; @from_unit_type
 ;;;    pkl_ast_node reflecting the type of the source offset unit.
 ;;; 
 ;;; @to_base_type
 ;;;    pkl_ast_node reflecting the type of the result offset magnitude.
-;;; @to_base_unit_type
+;;; @to_unit_type
 ;;;    pkl_ast_node reflecting the type of the result offset unit.
 
-        .macro offset_cast @from_base_type @from_base_unit_type @to_base_type @to_base_unit_type
+        .macro offset_cast @from_base_type @from_unit_type @to_base_type @to_unit_type
         ;; XXX use OGETMC here.
         ;; XXX can't FROMUNIT be derived from OFF? (ogetu)
-        ;; XXX we have to do the arithmetic in base_unit_types, then
+        ;; XXX we have to do the arithmetic in unit_types, then
         ;; convert to to_base_type, to assure that to_base_type can hold
         ;; the to_base_unit.  Otherwise weird division by zero occurs.
         pushf
@@ -159,13 +159,13 @@
         nip                                     ; OFF OFFMC
         ;; Now do the same for the unit.
         pushvar $fromunit                       ; OFF OFFMC OFFU
-        nton @from_base_unit_type, @to_base_type ; OFF OFFMC OFFU OFFUC
+        nton @from_unit_type, @to_base_type     ; OFF OFFMC OFFU OFFUC
         nip                                     ; OFF OFFMC OFFUC
         mul @to_base_type                       ; OFF OFFMC OFFUC (OFFMC*OFFUC)
         nip2                                    ; OFF (OFFMC*OFFUC)
         ;; Convert the new unit.
         pushvar $tounit                         ; OFF (OFFMC*OFFUC) TOUNIT
-        nton @to_base_unit_type, @to_base_type  ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
+        nton @to_unit_type, @to_base_type       ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
         nip                                     ; OFF (OFFMC*OFFUNC) TOUNITC
         div @to_base_type
         nip2                                    ; OFF (OFFMC*OFFUNC/TOUNITC)
