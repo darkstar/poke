@@ -516,11 +516,11 @@ BEGIN {
 }
 
 # .macro NAME
-/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*/ {
+/^[ \t]*\.macro[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(;.*)?$/ {
     # Get the macro name
     macro_name = $2
-    if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*/) == 0)
-        fatal("error:" FNR ": invalid function name.  This should NOT happen.")
+    if (match (macro_name, /^[a-zA-Z][a-zA-Z_]*$/) == 0)
+        fatal("error:" FNR ": invalid macro name.  This should NOT happen.")
 
    init_entity()
 
@@ -536,7 +536,7 @@ BEGIN {
 /^[ \t]*\.function[ \t]+[a-zA-Z][a-zA-Z_]*[ \t]*(;.*)?$/ {
     # Get the function name
     function_name = $2
-    if (match (function_name, /^[a-zA-Z][a-zA-Z_]*/) == 0)
+    if (match (function_name, /^[a-zA-Z][a-zA-Z_]*$/) == 0)
         fatal("error:" FNR ": invalid function name. This should NOT happen.")
 
     init_entity()
