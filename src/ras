@@ -240,7 +240,7 @@
 #  regvar $local1
 #  regvar $local2
 #
-# And the updated function, with an additional argument:
+# And the updated function getting an extra argument:
 #
 #  .function FOO
 #  prolog
@@ -252,7 +252,7 @@
 #  regvar $local1
 #  regvar $local2
 #
-# Much better :P
+# Sanity, hell yeah.
 #
 # Another difficulty when dealing with lexical addresses is that
 # different addresses are required to refer to the same variable,
