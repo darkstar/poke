@@ -111,6 +111,13 @@ PKL_DEF_INSN (PKL_INSN_MODI, "", "modi")
 PKL_DEF_INSN (PKL_INSN_MODIU, "", "modiu")
 PKL_DEF_INSN (PKL_INSN_MODL, "", "modl")
 PKL_DEF_INSN (PKL_INSN_MODLU, "", "modlu")
+
+/* Compare-and-swap instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_SWAPGTI, "", "swapgti")
+PKL_DEF_INSN (PKL_INSN_SWAPGTIU, "", "swapgtiu")
+PKL_DEF_INSN (PKL_INSN_SWAPGTL, "", "swapgtl")
+PKL_DEF_INSN (PKL_INSN_SWAPGTLU, "", "swapgtlu")
   
 /* Shift instructions.  */
 
@@ -360,6 +367,8 @@ PKL_DEF_INSN (PKL_INSN_LE, "a", "le")
 
 PKL_DEF_INSN (PKL_INSN_SL, "a", "sl")
 PKL_DEF_INSN (PKL_INSN_SR, "a", "sr")
+
+PKL_DEF_INSN (PKL_INSN_SWAPGT, "a", "swapgt")
 
 PKL_DEF_INSN (PKL_INSN_BNOT, "a", "bnot")
 PKL_DEF_INSN (PKL_INSN_BAND, "a", "band")

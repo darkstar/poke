@@ -191,6 +191,8 @@
         ;; Use an iterative version of Euclid's algorithm.
         over                     ; A B A
         over                     ; A B A B
+        swapgt @type             ; Make sure A > B
+        swap
 .loop:
         bnz @type, .endloop     ; ... A B
         mod @type               ; ... A B A%B
