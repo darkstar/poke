@@ -675,6 +675,12 @@ instruction dup () # ( A -- A A )
   end
 end
 
+instruction over () # ( A B -- A B A )
+  code
+    JITTER_PUSH_STACK (JITTER_UNDER_TOP_STACK ());
+  end
+end
+
 instruction rot () # ( A B C -- B C A )
   code
    pvm_val a, b, c;

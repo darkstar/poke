@@ -177,7 +177,7 @@
         .end
 
 ;;; GCD type
-;;; ( VAL -- VAL VAL )
+;;; ( VAL VAL -- VAL VAL VAL )
 ;;;
 ;;; Calculate the greatest common divisor of the integral value
 ;;; at the TOS, which should be of type TYPE.
@@ -191,35 +191,25 @@
         ;; Use an iterative version of Euclid's algorithm:
         ;; gcd (a, b)
         ;; {
-        ;;    long r;
         ;;    while (b != 0)
         ;;    {
-        ;;      r = a % b;
+        ;;      long r = a % b;
         ;;      a = b;
         ;;      b = r;
         ;;    }
         ;;    return a;
         ;; }
 
-        pushf
-        mod @type               ; A B A%B
-        regvar $r
-        regvar $b
-        regvar $a               ; _
+        over                     ; A B A
+        over                     ; A B A B
 .loop:
-        pushvar $b              ; B
-        bnz @type, .endloop     ; B (B==0)
-        drop                    ; B
-        pushvar $a              ; B A
-        swap                    ; A B
-        mod @type               ; A B A%B
-        popvar $b               ; A B
-        popvar $a               ; A
-        drop                    ; _
-        push null               ; null
+        bnz @type, .endloop     ; ... A B
+        mod @type               ; ... A B A%B
+        rot                     ; ... B A%B A
+        drop                    ; ... B A%B
+        ba .loop
 .endloop:
-        drop                    ; B
-        popf 1
+        drop                    ; A B GCD
         .end
         
 ;;; ADDO unit_type base_type

@@ -615,9 +615,9 @@ pkl_asm_insn_ogetmc (pkl_asm pasm,
 }
 
 /* Macro-instruction: GCD type
-   ( VAL -- VAL VAL )
+   ( VAL VAL -- VAL VAL )
 
-   Calculate the greatest common divisor of the integral value at the
+   Calculate the greatest common divisor of the integral values at the
    TOS, which should be of type TYPE.  */
 
 static void
