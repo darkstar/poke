@@ -252,7 +252,7 @@
 #  regvar $local1
 #  regvar $local2
 #
-# Sanity, hell yeah.
+# Hell yeah, finally some sanity.
 #
 # Another difficulty when dealing with lexical addresses is that
 # different addresses are required to refer to the same variable,
