@@ -678,6 +678,23 @@ pkl_asm_insn_mulo (pkl_asm pasm, pkl_ast_node base_type)
   RAS_MACRO_MULO (base_type);
 }
 
+/* Macro-instruction: DIVO base_type
+   ( OFF OFF -- OFF OFF VAL )
+
+   Divide an offset by another offset.  The result of the operation is
+   a magnitude.  The types of both the offsets base type and the
+   magnitude type is BASE_TYPE.  */
+
+static void
+pkl_asm_insn_divo (pkl_asm pasm, pkl_ast_node base_type)
+{
+  pkl_ast_node unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+  
+  RAS_MACRO_DIVO (unit_type, base_type);
+  ASTREF (unit_type); pkl_ast_node_free (unit_type);  
+}
+
 /* Macro-instruction: SWAPGT type
    ( VAL VAL -- VAL VAL )
 
@@ -1091,6 +1108,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_ADDO:
         case PKL_INSN_SUBO:
         case PKL_INSN_MULO:
+        case PKL_INSN_DIVO:
           {
             pkl_ast_node base_type;
 
@@ -1102,8 +1120,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
               pkl_asm_insn_addo (pasm, base_type);
             else if (insn == PKL_INSN_SUBO)
               pkl_asm_insn_subo (pasm, base_type);
-            else
+            else if (insn == PKL_INSN_MULO)
               pkl_asm_insn_mulo (pasm, base_type);
+            else
+              pkl_asm_insn_divo (pasm, base_type);
             break;
           }
         case PKL_INSN_REMAP:
