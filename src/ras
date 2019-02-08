@@ -279,10 +279,10 @@
 # pushvar %a
 # popf 2
 #
-# Summarizing: ultimately it is up to you when to use explicit lexical
-# addresses instead of variable names.  But I strongly recommend using
-# variable names unless you have a _very_ good reason not to... like a
-# gun aiming at your head for example.
+# Summarizing: ultimately it is up to you to decide when to use
+# explicit lexical addresses instead of variable names.  But I
+# strongly recommend using variable names unless you have a _very_
+# good reason not to... like a gun aiming at your head for example.
 
 ### Some useful misc functions, used in the rules below
 
