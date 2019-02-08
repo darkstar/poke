@@ -229,7 +229,7 @@
 #
 # Fortunately, ras comes to the rescue.  If you use variable names
 # instead of lexical addresses, the assembler will do the boring work
-# for you.  The original function is:
+# for you.  The original function would now read like:
 #
 #  .function FOO
 #  prolog
