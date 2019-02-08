@@ -169,6 +169,28 @@ pkl_asm_push_val (pvm_program program, pvm_val val)
 #endif
 }
 
+/* Macro-instruction: OTO from_type, to_type
+   ( OFF(from_type) FROMUNIT TOUNIT -- OFF(from_type) OFF(to_type) )
+
+   Generate code to convert an offset value from FROM_TYPE to
+   TO_TYPE.  */
+
+static void
+pkl_asm_insn_oto (pkl_asm pasm,
+                  pkl_ast_node from_type,
+                  pkl_ast_node to_type)
+{
+  pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
+  pkl_ast_node from_base_unit = PKL_AST_TYPE_O_UNIT (from_type);
+  pkl_ast_node from_base_unit_type = PKL_AST_TYPE (from_base_unit);
+  
+  pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
+  pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
+  pkl_ast_node to_base_unit_type = PKL_AST_TYPE (to_base_unit);
+
+  RAS_MACRO_OFFSET_CAST;
+}
+
 /* Macro-instruction: NTON from_type, to_type
    Stack: VAL(from_type) -> VAL(from_type) VAL(to_type)
 
@@ -904,6 +926,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       switch (insn)
         {
         case PKL_INSN_NTON:
+        case PKL_INSN_OTO:
           {
             pkl_ast_node from_type;
             pkl_ast_node to_type;
@@ -913,7 +936,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             to_type = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
-            pkl_asm_insn_nton (pasm, from_type, to_type);
+            if (insn == PKL_INSN_NTON)
+              pkl_asm_insn_nton (pasm, from_type, to_type);
+            else
+              pkl_asm_insn_oto (pasm, from_type, to_type);
             break;
           }
         case PKL_INSN_PEEK:

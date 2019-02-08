@@ -21,7 +21,7 @@
 ;;; ( VAL -- VAL )
 ;;;
 ;;; Given a mapeable PVM value on the TOS, remap it.  This is the
-;;; implementation of the REMAP macro-instruction.
+;;; implementation of the PKL_INSN_REMAP macro-instruction.
 
         .macro remap
         ;; The re-map should be done only if the value has a mapper.
@@ -70,7 +70,7 @@
 ;;; ( VAL -- VAL )
 ;;;
 ;;; Given a mapeable PVM value on the TOS, invoke its writer.  This is
-;;; the implementation of the WRITE macro-instruction.
+;;; the implementation of the PKL_INSN_WRITE macro-instruction.
 
         .macro write
         dup                     ; VAL VAL
@@ -97,7 +97,7 @@
 ;;;
 ;;; Given an offset and an unit in the stack, generate code to push
 ;;; its magnitude converted to the given unit.  This is the implementation
-;;; of the OGETMC macro-instruction.
+;;; of the PKL_INSN_OGETMC macro-instruction.
 ;;;
 ;;; The expansion of this macro requires the following C entities
 ;;; to be available:
@@ -123,4 +123,57 @@
         nip                     ; OFF (MAGNITUDE*UNIT) TOUNIT
         div base_type
         nip2                    ; OFF (MAGNITUDE*UNIT/TOUNIT)
+        .end
+
+;;; RAS_MACRO_OFFSET_CAST
+;;; ( OFF FROMUNIT TOUNIT -- OFF )
+;;;
+;;; This macro generates code that converts an offset of a given type
+;;; into an offset of another given type.  This is the implementation of
+;;; the PKL_INSN_OTO macro-instruction.
+;;;
+;;; The following C variables shall be available to the macro
+;;; expansion:
+;;;
+;;; `from_base_type'
+;;;    pkl_ast_node reflecting the type of the source offset magnitude.
+;;; `from_base_unit_type'
+;;;    pkl_ast_node reflecting the type of the source offset unit.
+;;; 
+;;; `to_base_type'
+;;;    pkl_ast_node reflecting the type of the result offset magnitude.
+;;; `to_base_unit_type'
+;;;    pkl_ast_node reflecting the type of the result offset unit.
+
+        .macro offset_cast
+        ;; XXX use OGETMC here.
+        ;; XXX can't FROMUNIT be derived from OFF? (ogetu)
+        ;; XXX we have to do the arithmetic in base_unit_types, then
+        ;; convert to to_base_type, to assure that to_base_type can hold
+        ;; the to_base_unit.  Otherwise weird division by zero occurs.
+        pushf
+        regvar $tounit                          ; OFF FROMUNIT
+        regvar $fromunit                        ; OFF
+        ;; Get the magnitude of the offset and convert it to the new
+        ;; magnitude type.
+        ogetm                                   ; OFF OFFM
+        nton from_base_type, to_base_type       ; OFF OFFM OFFMC
+        nip                                     ; OFF OFFMC
+        ;; Now do the same for the unit.
+        pushvar $fromunit                       ; OFF OFFMC OFFU
+        nton from_base_unit_type, to_base_type  ; OFF OFFMC OFFU OFFUC
+        nip                                     ; OFF OFFMC OFFUC
+        mul to_base_type                        ; OFF OFFMC OFFUC (OFFMC*OFFUC)
+        nip2                                    ; OFF (OFFMC*OFFUC)
+        ;; Convert the new unit.
+        pushvar $tounit                         ; OFF (OFFMC*OFFUC) TOUNIT
+        nton to_base_unit_type, to_base_type    ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
+        nip                                     ; OFF (OFFMC*OFFUNC) TOUNITC
+        div to_base_type
+        nip2                                    ; OFF (OFFMC*OFFUNC/TOUNITC)
+        swap                                    ; (OFFMC*OFFUNC/TOUNITC) OFF
+        pushvar $tounit                         ; (OFFMC*OFFUNC/TOUNITC) OFF TOUNIT
+        nip                                     ; (OFFMC*OFFUNC/TOUNITC) TOUNIT
+        mko                                     ; OFFC
+        popf 1
         .end

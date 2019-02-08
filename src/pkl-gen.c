@@ -953,15 +953,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
   else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
     {
-      pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
-      pkl_ast_node from_base_unit = PKL_AST_TYPE_O_UNIT (from_type);
-      pkl_ast_node from_base_unit_type = PKL_AST_TYPE (from_base_unit);
-
-      pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
-      pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
-      pkl_ast_node to_base_unit_type = PKL_AST_TYPE (to_base_unit);
-
-      RAS_MACRO_OFFSET_CAST;
+      pkl_ast_node from_unit = PKL_AST_TYPE_O_UNIT (from_type);
+      pkl_ast_node to_unit = PKL_AST_TYPE_O_UNIT (to_type);
+      
+      PKL_PASS_SUBPASS (from_unit);
+      PKL_PASS_SUBPASS (to_unit);
+      pkl_asm_insn (pasm, PKL_INSN_OTO, from_type, to_type);
     }
   else
     /* XXX: handle casts to structs and arrays.  For structs,
