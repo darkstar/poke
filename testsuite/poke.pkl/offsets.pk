@@ -140,3 +140,10 @@
 
 /* { dg-command { print 9#b <= 1#B } } */
 /* { dg-output "\n0" } */
+
+/* { dg-command { print 4#B + 8#b } } */
+/* { dg-output "\n5#B" } */
+
+/* { dg-command { print 8#b + 4#B } } */
+/* { dg-output "\n5#B" } */
+

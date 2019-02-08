@@ -10,4 +10,4 @@
 /* { dg-output "\n40UL#b" } */
 
 /* { dg-command {print a'offset + 1#B} } */
-/* { dg-output "\n32UL#b" } */
+/* { dg-output "\n4UL#B" } */

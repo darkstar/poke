@@ -1671,34 +1671,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
            Note that since addition is commutative we can process OFF2
            first and save a swap.  */
 
-        pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
-        pkl_ast_node op1_type = PKL_AST_TYPE (op1);
-        
-        pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
-        pkl_ast_node op2_type = PKL_AST_TYPE (op2);
-        
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
-        pkl_asm_call (pasm, "_pkl_gcd");
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
-        pkl_asm_call (pasm, "_pkl_gcd");
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_ADD, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_ADDO, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-        /* PKL_PASS_SUBPASS (res_unit); */
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op1_type));
-        PKL_PASS_SUBPASS (PKL_AST_TYPE_O_UNIT (op2_type));
-        pkl_asm_call (pasm, "_pkl_gcd");
-        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:
