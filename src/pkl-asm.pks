@@ -17,6 +17,55 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
+;;; RAS_MACRO_REMAP
+;;; ( VAL -- VAL )
+;;;
+;;; Given a mapeable PVM value on the TOS, remap it.  This is used to
+;;; implement the REMAP macro-instruction.
+
+        .macro remap
+
+        ;; The re-map should be done only if the value has a mapper.
+        mgetm                   ; VAL MCLS
+        bn .label               ; VAL MCLS
+        drop                    ; VAL
+
+        ;; XXX do not re-map if the object is up to date (cached
+        ;; value.)
+
+        ;; XXX rewrite using the return stack for temporaries.
+
+        mgetw                   ; VAL WCLS
+        swap                    ; WCLS VAL
+        mgetm                   ; WCLS VAL MCLS
+        swap                    ; WCLS MCLS VAL
+
+        mgeto                   ; WCLS MCLS VAL OFF
+        swap                    ; WCLS MCLS OFF VAL
+        mgetsel                 ; WCLS MCLS OFF VAL EBOUND
+        swap                    ; WCLS MCLS OFF EBOUND VAL
+        mgetsiz                 ; WCLS MCLS OFF EBOUND VAL SBOUND
+        swap                    ; WCLS MCLS OFF EBOUND SBOUND VAL
+        mgetm                   ; WCLS MCLS OFF EBOUND SBOUND VAL MCLS
+        swap                    ; WCLS MCLS OFF EBOUND SBOUND MCLS VAL
+        drop                    ; WCLS MCLS OFF EBOUND SBOUND MCLS
+        call                    ; WCLS MCLS NVAL
+        swap                    ; WCLS NVAL MCLS
+        msetm                   ; WCLS NVAL
+        swap                    ; NVAL WCLS
+        msetw                   ; NVAL
+
+        ;; If the mapped value is null then raise an EOF
+        ;; exception.
+        dup                     ; NVAL NVAL
+        bnn .label
+        push PVM_E_EOF
+        raise
+
+        push null               ; NVAL null
+.label:
+        drop                    ; NVAL
+        .end
 
 ;;; RAS_MACRO_WRITE
 ;;; ( VAL -- VAL )

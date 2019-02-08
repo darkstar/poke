@@ -244,47 +244,7 @@ pkl_asm_insn_nton  (pkl_asm pasm,
 static void
 pkl_asm_insn_remap (pkl_asm pasm)
 {
-  jitter_label label = jitter_fresh_label (pasm->program);
-
-  /* The re-map should be done only if the value has a mapper.  */
-  pkl_asm_insn (pasm, PKL_INSN_MGETM);      /* VAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_BN, label);  /* VAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* VAL */
-
-  /* XXX do not re-map if the object is up to date (cached
-     value.) */
-  /* XXX rewrite using the return stack for temporaries.  */
-  
-                                         /* VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETW);   /* VAL WCLS */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETM);   /* WCLS VAL MCSL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS VAL */
-  
-  pkl_asm_insn (pasm, PKL_INSN_MGETO);   /* WCLS MCLS VAL OFF */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETSEL); /* WCLS MCLS OFF VAL EBOUND */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETSIZ); /* WCLS MCLS OFF EBOUND VAL SBOUND */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND SBOUND VAL */
-  pkl_asm_insn (pasm, PKL_INSN_MGETM);   /* WCLS MCLS OFF EBOUND SBOUND VAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS MCLS OFF EBOUND SBOUND MCLS VAL */
-  pkl_asm_insn (pasm, PKL_INSN_DROP);    /* WCLS MCLS OFF EBOUND SBOUND MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_CALL);    /* WCLS MCLS NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* WCLS NVAL MCLS */
-  pkl_asm_insn (pasm, PKL_INSN_MSETM);   /* WCLS NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);    /* NVAL WCLS */
-  pkl_asm_insn (pasm, PKL_INSN_MSETW);   /* NVAL */
-  
-  /* If the mapped value is null then raise an EOF exception.  */
-  pkl_asm_insn (pasm, PKL_INSN_DUP);        /* NVAL NVAL */
-  pkl_asm_insn (pasm, PKL_INSN_BNN, label);
-  pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_EOF, 32));
-  pkl_asm_insn (pasm, PKL_INSN_RAISE);
-
-  pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* NVAL NULL */  
-  pvm_append_label (pasm->program, label);
-  pkl_asm_insn (pasm, PKL_INSN_DROP);       /* NVAL */
+  RAS_MACRO_REMAP;
 }
 
 /* Macro-instruction: WRITE
