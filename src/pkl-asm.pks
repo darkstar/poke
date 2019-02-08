@@ -18,13 +18,13 @@
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
 
-        .macro write
-
 ;;; RAS_MACRO_WRITE
 ;;; ( VAL -- VAL )
 ;;;
 ;;; Given a mapeable PVM value on the TOS, invoke its writer.  This is
 ;;; used to implement the WRITE macro-instruction.
+
+        .macro write
 
         dup                     ; VAL VAL
 

@@ -67,7 +67,6 @@
    assembled macros.  */
 #define RAS_ASM PKL_GEN_ASM
 #include "pkl-gen.pkc"
-#include "pkl-gen-maps.pkc"
 
 /*
  * PROGRAM
