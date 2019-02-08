@@ -688,11 +688,7 @@ pkl_asm_insn_mulo (pkl_asm pasm, pkl_ast_node base_type)
 static void
 pkl_asm_insn_divo (pkl_asm pasm, pkl_ast_node base_type)
 {
-  pkl_ast_node unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-  
-  RAS_MACRO_DIVO (unit_type, base_type);
-  ASTREF (unit_type); pkl_ast_node_free (unit_type);  
+  RAS_MACRO_DIVO (base_type);
 }
 
 /* Macro-instruction: SWAPGT type

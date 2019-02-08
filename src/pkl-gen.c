@@ -1754,28 +1754,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_div)
       {
         if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
           {
-            /* Calculate the resulting integral value, which is the
-               division of both magnitudes, once normalized to
-               bits. */
-
-            pkl_ast_node unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
-            pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
-            PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
-
-            pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
-            PKL_PASS_SUBPASS (unit_bits);
-            pkl_asm_insn (pasm, PKL_INSN_OGETMC, type);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
-            pkl_asm_insn (pasm, PKL_INSN_SWAP);
-            PKL_PASS_SUBPASS (unit_bits);
-            pkl_asm_insn (pasm, PKL_INSN_OGETMC, type);
-            pkl_asm_insn (pasm, PKL_INSN_NIP);
-
-            pkl_asm_insn (pasm, PKL_INSN_DIV, type);
+            pkl_asm_insn (pasm, PKL_INSN_DIVO,
+                          PKL_AST_TYPE_O_BASE_TYPE (op2_type));
             pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-            ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
           }
         else
           {
