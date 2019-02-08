@@ -102,6 +102,10 @@
 ;;; The expansion of this macro requires the following C entities
 ;;; to be available:
 ;;;
+;;; `unit_type'
+;;;    a pkl_ast_node with the type of an offset unit, i.e.
+;;;    uint<64>.
+;;; 
 ;;; `base_type'
 ;;;    a pkl_ast_node with the base type of the offset.
 
