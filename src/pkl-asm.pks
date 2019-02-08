@@ -204,7 +204,8 @@
         pushf
         regvar $b
         regvar $a
-        ;; XXX completeme
+        push "XXX completeme"
+        print
         popf 1
         .end
         
