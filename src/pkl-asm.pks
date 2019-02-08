@@ -188,12 +188,11 @@
 ;;;   type of the value at the TOS.  It should be an integral type.
 
         .macro gcd @type
-        ;; Use an iterative version of Euclid's algorithm.
+        ;; Iterative Euclid's Algorithm.
         over                     ; A B A
         over                     ; A B A B
-        swaplt @type             ; Make sure A > B
 .loop:
-        bnz @type, .endloop     ; ... A B
+        bz @type, .endloop      ; ... A B
         mod @type               ; ... A B A%B
         rot                     ; ... B A%B A
         drop                    ; ... B A%B

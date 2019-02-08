@@ -7,7 +7,7 @@
 /* { dg-command {print (byte[2] @ 0#B)'offset } } */
 /* { dg-output "\n0UL#B" } */
 /* { dg-command {print a'offset + a'size} } */
-/* { dg-output "\n5#B" } */
+/* { dg-output "\n5UL#B" } */
 
 /* { dg-command {print a'offset + 1#B} } */
 /* { dg-output "\n4UL#B" } */
