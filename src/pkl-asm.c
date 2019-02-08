@@ -578,7 +578,7 @@ pkl_asm_insn_cmp (pkl_asm pasm,
 }
 
 /* Macro-instruction: OGETMC base_type
-   Stack: OFFSET UNIT -> OFFSET CONVERTED_MAGNITUDE
+   ( OFFSET UNIT -- OFFSET CONVERTED_MAGNITUDE )
 
    Given an offset and an unit in the stack, generate code to push its
    magnitude converted to the given unit.  */

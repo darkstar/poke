@@ -20,8 +20,8 @@
 ;;; RAS_MACRO_REMAP
 ;;; ( VAL -- VAL )
 ;;;
-;;; Given a mapeable PVM value on the TOS, remap it.  This is used to
-;;; implement the REMAP macro-instruction.
+;;; Given a mapeable PVM value on the TOS, remap it.  This is the
+;;; implementation of the REMAP macro-instruction.
 
         .macro remap
 
@@ -71,7 +71,7 @@
 ;;; ( VAL -- VAL )
 ;;;
 ;;; Given a mapeable PVM value on the TOS, invoke its writer.  This is
-;;; used to implement the WRITE macro-instruction.
+;;; the implementation of the WRITE macro-instruction.
 
         .macro write
 
