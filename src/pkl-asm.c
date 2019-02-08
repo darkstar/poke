@@ -691,6 +691,20 @@ pkl_asm_insn_divo (pkl_asm pasm, pkl_ast_node base_type)
   RAS_MACRO_DIVO (base_type);
 }
 
+/* Macro-instruction: MODO base_type
+   ( OFF OFF UNIT -- OFF OFF VAL )
+
+   Calculate the modulus of two offsets.  The result of the operation
+   is a magnitude.  The types of both the offsets base type and the
+   magnitude type is BASE_TYPE.  */
+
+static void
+pkl_asm_insn_modo (pkl_asm pasm, pkl_ast_node base_type)
+{
+  RAS_MACRO_MODO (base_type);
+}
+
+
 /* Macro-instruction: SWAPGT type
    ( VAL VAL -- VAL VAL )
 
@@ -1105,6 +1119,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_SUBO:
         case PKL_INSN_MULO:
         case PKL_INSN_DIVO:
+        case PKL_INSN_MODO:
           {
             pkl_ast_node base_type;
 
@@ -1118,8 +1133,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
               pkl_asm_insn_subo (pasm, base_type);
             else if (insn == PKL_INSN_MULO)
               pkl_asm_insn_mulo (pasm, base_type);
-            else
+            else if (insn == PKL_INSN_DIVO)
               pkl_asm_insn_divo (pasm, base_type);
+            else
+              pkl_asm_insn_modo (pasm, base_type);
             break;
           }
         case PKL_INSN_REMAP:

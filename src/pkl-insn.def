@@ -385,6 +385,7 @@ PKL_DEF_INSN (PKL_INSN_ADDO, "a", "addo")
 PKL_DEF_INSN (PKL_INSN_SUBO, "a", "subo")
 PKL_DEF_INSN (PKL_INSN_MULO, "a", "mulo")
 PKL_DEF_INSN (PKL_INSN_DIVO, "a", "divo")
+PKL_DEF_INSN (PKL_INSN_MODO, "aa", "modo")
 
 /* Meta-instructions to handle mapped values.  */
 

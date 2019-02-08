@@ -1778,8 +1778,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
 
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node type = PKL_AST_TYPE (node);
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
-  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
 
   switch (PKL_AST_TYPE_CODE (type))
     {
@@ -1789,29 +1787,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
       break;
     case PKL_TYPE_OFFSET:
       {
-        /* Calculate the magnitude of the new offset, which is the
-           modulus of both magnitudes, the second argument converted
-           to first's units.  */
-
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+        pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+        pkl_ast_node op1_type = PKL_AST_TYPE (op1);
         pkl_ast_node op1_unit = PKL_AST_TYPE_O_UNIT (op1_type);
-
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
-        pkl_asm_insn (pasm, PKL_INSN_OGETM);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
+        
         PKL_PASS_SUBPASS (op1_unit);
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-
-        pkl_asm_insn (pasm, PKL_INSN_MOD, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-        PKL_PASS_SUBPASS (op1_unit);
-        pkl_asm_insn (pasm, PKL_INSN_MKO);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MODO, base_type);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+        break;
       }
-      break;
     default:
       assert (0);
       break;

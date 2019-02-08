@@ -1,3 +1,5 @@
+-*- mode: org -*-
+
 Note that this file is not your typical abandoned TODO file that
 nobody reads and nobody updates.  We _do_ use this file, and these are
 tasks that really need to get done.
@@ -5,10 +7,16 @@ tasks that really need to get done.
 The tasks below are generally ordered in reverse order of importance,
 i.e. the most important tasks are listed first.
 
+asm, gen
+
+- The assembly code snippets in both the code generator and the macro
+  assembler make an excessive use of `regvar'.  It would be more
+  efficient to use the return stack to store temporaries (tor/fromr).
+  
 ras
 
-  - Validate the number of bits in u?int and u?long arguments.
-  - Make sure that label arguments are defined.
-  - Make sure that macro arguments are defined when used.
-  - Write error messages to stderr.
-  - Pretty print: indentation in .loop/.endloop etc.
+- Validate the number of bits in u?int and u?long arguments.
+- Make sure that label arguments are defined.
+- Make sure that macro arguments are defined when used.
+- Write error messages to stderr.
+- Pretty print: indentation in .loop/.endloop etc.

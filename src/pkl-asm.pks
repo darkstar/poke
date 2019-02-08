@@ -396,3 +396,40 @@
         div @base_type
         nip2                    ; OFF1 OFF2 (OFF1M/OFF2M)
         .end
+
+;;; MODO unit_type base_type
+;;; ( OFF OFF UNIT -- OFF OFF UNIT OFF )
+;;;
+;;; Calculate the modulus of two given offsets. The result of the
+;;; operation is an offset having unit UNIT.  The types of both the
+;;; offsets type and the magnitude type is BASE_TYPE.
+;;;
+;;; Macro arguments:
+;;;
+;;; @base_type
+;;;   a pkl_ast_node with the base type of the offsets.
+
+        .macro modo @base_type
+        ;; Calculate the magnitude fo the new offset, which is
+        ;; the modulus of both magnitudes, the second argument
+        ;; converted to first's units.
+        ;; XXX use the return stack for temporaries, rather than
+        ;; variables.
+        pushf
+        regvar $unit            ; OFF1 OFF2
+        pushvar $unit           ; OFF1 OFF2 UNIT
+        ogetmc @base_type       ; OFF1 OFF2 OFF2M
+        rot                     ; OFF2 OFF2U OFF1
+        ogetm                   ; OFF2 OFF2U OFF1 OFF1M
+        rot                     ; OFF2 OFF1 OFF1M OFF2M
+        mod @base_type
+        nip2                    ; OFF2 OFF1 (OFF1M%OFF2M)
+        nrot                    ; (OFF1M%OFF2M) OFF2 OFF1
+        swap                    ; (OFF1M%OFF2M) OFF1 OFF2
+        rot                     ; OFF1 OFF2 (OFF1M%OFF2M)
+        pushvar $unit           ; OFF1 OFF2 (OFF1M%OFF2M) UNIT
+        mko                     ; OFF1 OFF2 OFFRES
+        push $unit              ; OFF1 OFF2 OFFRES UNIT
+        swap                    ; OFF1 OFF2 UNIT OFFRES
+        popf 1
+        .end
