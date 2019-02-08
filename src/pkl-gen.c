@@ -1691,26 +1691,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
       break;
     case PKL_TYPE_OFFSET:
       {
-        /* Calculate the magnitude of the new offset, which is the
-           subtraction of both magnitudes, once normalized to bits. */
-
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-        pkl_ast_node res_unit = PKL_AST_TYPE_O_UNIT (type);
-
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
-        PKL_PASS_SUBPASS (res_unit);
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-        PKL_PASS_SUBPASS (res_unit);
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_SUB, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_SUBO, base_type);
         pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-        PKL_PASS_SUBPASS (res_unit);
-        pkl_asm_insn (pasm, PKL_INSN_MKO);
       }
       break;
     default:

@@ -64,7 +64,7 @@
 /* { dg-output "\n-1L#b" } */
 
 /* { dg-command { print 10UL#b - 2UL#b } } */
-/* { dg-output "\n8UL#b" } */
+/* { dg-output "\n4UL#2" } */
 
 /* { dg-command { print 2 as int<7> #B - 1 as int<2> #b } } */
 /* { dg-output "\n\\(int<7>\\) 15#b" } */
