@@ -285,8 +285,6 @@
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
-;;; XXX share code with ADDO
-
         .macro subo @unit_type @base_type
         pushf
         regvar $off2
