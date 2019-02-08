@@ -188,8 +188,24 @@
 ;;;   type of the value at the TOS.  It should be an integral type.
 
         .macro gcd @type
-        
+        ;; Use an iterative version of Euclid's algorithm:
+        ;; gcd (a, b)
+        ;; {
+        ;;    long r;
+        ;;    while (b != 0)
+        ;;    {
+        ;;      r = a % b;
+        ;;      a = b;
+        ;;      b = r;
+        ;;    }
+        ;;    return a;
+        ;; }
 
+        pushf
+        regvar $b
+        regvar $a
+        ;; XXX completeme
+        popf 1
         .end
         
 ;;; ADDO unit_type base_type
