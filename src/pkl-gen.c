@@ -1685,14 +1685,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
     case PKL_TYPE_OFFSET:
       {       
         pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
+        pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
         pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+        pkl_ast_node op2_type = PKL_AST_TYPE (op2);
         pkl_ast_node base_type;
 
         if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET)
           base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
         else
           {
-            base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
+            base_type = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
             pkl_asm_insn (pasm, PKL_INSN_SWAP);
           }
 
