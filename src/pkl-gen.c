@@ -833,7 +833,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
         {
         case PKL_AST_ARRAY:
-        case PKL_AST_OFFSET:
         case PKL_AST_TYPE:
         case PKL_AST_STRUCT_ELEM_TYPE:
           /* Process these.  */
@@ -854,12 +853,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_offset)
 {
-  /* XXX: is this break really necessary considering the break in
-     pkl_gen_pr_type?  */
-  if (!PKL_GEN_PAYLOAD->in_mapper
-      || !PKL_GEN_PAYLOAD->in_writer)
-    PKL_PASS_BREAK;
-
   if (PKL_GEN_PAYLOAD->in_writer)
     {
       /* Stack: OFF VAL */
