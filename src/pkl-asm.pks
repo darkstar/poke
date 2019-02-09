@@ -333,11 +333,10 @@
 ;;; MULO base_type
 ;;; ( OFF VAL -- OFF VAL OFF )
 ;;;
-;;; Multiply an offset with a magnitude.  The types of both the offset
-;;; base type and the magnitude type is BASE_TYPE.
-;;;
+;;; Multiply an offset with a magnitude.  The result of the operation
+;;; is an offset with base type BASE_TYPE.
+;;; 
 ;;; Macro arguments:
-;;;
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offset.
 
@@ -368,7 +367,6 @@
 ;;; magnitude type is BASE_TYPE.
 ;;;
 ;;; Macro arguments:
-;;;
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
@@ -396,7 +394,6 @@
 ;;; offsets type and the magnitude type is BASE_TYPE.
 ;;;
 ;;; Macro arguments:
-;;;
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
