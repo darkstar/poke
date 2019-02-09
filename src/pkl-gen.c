@@ -888,6 +888,11 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
+  PKL_PHASE_PARENT (4,
+                    PKL_AST_ARRAY,
+                    PKL_AST_OFFSET,
+                    PKL_AST_TYPE,
+                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_ast_node offset_type = PKL_PASS_NODE;
 
@@ -906,6 +911,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* VAL NVAL */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* NVAL */
     }
+  else
+    /* Just build an offset type.  */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYO);
+
 }
 PKL_PHASE_END_HANDLER
 
@@ -925,6 +934,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | TYPE
  * | EXP
  * CAST
  */
@@ -1202,11 +1212,10 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
-  PKL_PHASE_PARENT (5,
+  PKL_PHASE_PARENT (4,
                     PKL_AST_ARRAY,
                     PKL_AST_OFFSET,
                     PKL_AST_TYPE,
-                    PKL_AST_MAP,
                     PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_asm pasm = PKL_GEN_ASM;

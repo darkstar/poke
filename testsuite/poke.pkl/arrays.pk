@@ -17,3 +17,7 @@
 
 /* { dg-command { print [[1]][0] } } */
 /* { dg-output "\n\\\[1\\\]" } */
+
+/* { dg-command { print [2#B, 3#b] } } */
+/* { dg-output "\n\\\[2#B,3#b\\\]" } */
+
