@@ -150,6 +150,9 @@
 /* { dg-command { print 2#B * 3 } } */
 /* { dg-output "\n6#B" } */
 
+/* { dg-command { print 3 * 2#B } } */
+/* { dg-output "\n6#B" } */
+
 /* { dg-command { print 2#B * 0 } } */
 /* { dg-output "\n0#B" } */
 
