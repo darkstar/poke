@@ -190,7 +190,7 @@ pkl_asm_insn_oto (pkl_asm pasm,
 }
 
 /* Macro-instruction: NTON from_type, to_type
-   Stack: VAL(from_type) -> VAL(from_type) VAL(to_type)
+   ( VAL(from_type) -- VAL(from_type) VAL(to_type) )
 
    Generate code to convert an integer value from FROM_TYPE to
    TO_TYPE.  Both types should be integral types.  */

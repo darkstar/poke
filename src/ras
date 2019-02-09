@@ -88,12 +88,12 @@
 # Expanding Macros
 # ----------------
 #
-# Once defined, a macro NAME can be expanded using the .expand
+# Once defined, a macro NAME can be expanded using the .e
 # assembler directive:
 #
-# .expand NAME
+# .e NAME [@ARG, ...]
 #
-# In the C level, this will expand RAS_MACRO_NAME.
+# In the C level, this will expand RAS_MACRO_NAME (ARG, ...)
 #
 # Literal C Code
 # --------------
@@ -620,9 +620,33 @@ BEGIN {
     next
 }
 
-# .expand NAME
-/^[ \t]*\.expand[ \t]+[a-zA-Z][0-9a-zA-Z_]*(;.*)?$/ {
-    out("\tRAS_MACRO_" toupper($2) ";                                \\")
+# .e NAME
+/^[ \t]*\.e / {
+    # Validate the entry
+    if (match ($0, "^[ \t]*.e[ \t]+"        \
+               "[a-zA-Z_][0-9a-zA-Z_]*" \
+               "([ \t]+" marg_re "([ \n\t]*,[ \n\t]*" marg_re ")*)?" \
+               "([ \t]*;.*)?" \
+               "$") != 1)
+        error("error:" FNR ": malformed .e")
+
+    # Remove the optional line comment.
+    $0 = gensub (/(.*);(.*)$/, "\\1", "g", $0)
+
+    # Process the macro name
+    $0 = gensub (/^[ \t]*.e[ \t]+([a-zA-Z][0-9a-zA-Z_]*)/, "\t\\1", 1, $0)
+    $1 = "\tRAS_MACRO_" toupper($1)
+
+    # Process the macro arguments, if there is at least one
+    if (match ($0, marg_re) != 0)
+    {
+        # Add parenthesis
+        $0 = gensub (marg_re, "(@\\1", 1, $0)
+        $0 = $0 ");"
+        # Process the macro arguments
+        $0 = gensub (marg_re, "(\\1_arg)", "g", $0)
+    }
+    out($0 "  \\")
     next
 }
 
