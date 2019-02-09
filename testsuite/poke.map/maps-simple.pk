@@ -7,6 +7,9 @@
 /* { dg-command {print/x byte @ 1#B} } */
 /* { dg-output "\n0x20UB" } */
 
+/* { dg-command {print/x byte @ (7#b + 1#b) } } */
+/* { dg-output "\n0x20UB" } */
+
 /* { dg-command {set endian big} } */
 /* { dg-command {print/x int @ 0#B} } */
 /* { dg-output "\n0x10203040" } */
@@ -33,3 +36,4 @@
 /* { dg-command {defvar i = 10} } */
 /* { dg-command {: try i = int @ 999#B; catch if E_eof { print ("catched\n"); } } } */
 /* { dg-output "\ncatched" } */
+

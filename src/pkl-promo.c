@@ -837,6 +837,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
 {
   pkl_ast_node map = PKL_PASS_NODE;
   pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
+  pkl_ast_node map_offset_type = PKL_AST_TYPE (map_offset);
 
   pkl_ast_node to_magnitude_type;
   int restart;
@@ -846,7 +847,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
   PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (map_offset);
 
   if (!promote_offset (PKL_PASS_AST,
-                       to_magnitude_type, PKL_AST_OFFSET_UNIT (map_offset), 
+                       to_magnitude_type,
+                       PKL_AST_TYPE_O_UNIT (map_offset_type),
                        &PKL_AST_MAP_OFFSET (map),
                        &restart))
     {
