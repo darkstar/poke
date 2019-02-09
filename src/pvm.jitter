@@ -1841,7 +1841,7 @@ end
 
 # String types
 
-instruction mktys () # ( _ -- TYP )
+instruction mktys () # ( -- TYP )
   code
     JITTER_PUSH_STACK (pvm_make_string_type ());
   end
@@ -2164,7 +2164,7 @@ end
 
 # pope
 #
-# ( EXCEPTION_HANDLER -- _ )
+# ( EXCEPTION_HANDLER -- )
 
 instruction pope ()
   code

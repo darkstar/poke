@@ -317,7 +317,7 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type,
 }
 
 /* Macro-instruction: PEEKD type
-   ( _ -> VAL )
+   (  -- VAL )
 
    Generate code for a peek operation to TYPE, which should be an
    integral type.  */
