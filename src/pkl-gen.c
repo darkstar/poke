@@ -832,23 +832,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
     {
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
         {
-        case PKL_AST_DECL:
-          /* Declared struct type nodes should be processed in order to
-             generate the code for mapper and construction functions.  */
-          if (PKL_AST_TYPE_CODE (PKL_PASS_NODE) == PKL_TYPE_STRUCT)
-            break;
-        case PKL_AST_STRUCT:
-        case PKL_AST_INTEGER:
-        case PKL_AST_STRING:
+        case PKL_AST_ARRAY:
         case PKL_AST_OFFSET:
-        case PKL_AST_FUNC:
-        case PKL_AST_FUNC_ARG:
-        case PKL_AST_VAR:
-        case PKL_AST_ARRAY_REF:
-        case PKL_AST_SCONS:
-          PKL_PASS_BREAK;
+        case PKL_AST_TYPE:
+        case PKL_AST_STRUCT_ELEM_TYPE:
+          /* Process these.  */
           break;
         default:
+          PKL_PASS_BREAK;
           break;
         }
     }
@@ -1212,11 +1203,6 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node integral_type = PKL_PASS_NODE;
@@ -1424,11 +1410,6 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   if (PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* XXX: drop the number
@@ -1444,11 +1425,6 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
-  PKL_PHASE_PARENT (4,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   /* Note that the check for in_writer should appear first than the
      check for in_mapper.  */
@@ -1477,12 +1453,6 @@ PKL_PHASE_END_HANDLER
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
-  PKL_PHASE_PARENT (5,
-                    PKL_AST_DECL,
-                    PKL_AST_ARRAY,
-                    PKL_AST_OFFSET,
-                    PKL_AST_TYPE,
-                    PKL_AST_STRUCT_ELEM_TYPE)
 {
   /* Note that the check for in_writer should appear first than the
      check for in_mapper.  */
