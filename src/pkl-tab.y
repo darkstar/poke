@@ -127,8 +127,9 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
           assert (0);
           break;
         case PKL_AST_TYPE:
-          if (PKL_AST_TYPE_CODE ($$) == PKL_TYPE_STRUCT)
-            pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+            /* XXX finish this */
+            /*         if (PKL_AST_TYPE_CODE ($$) == PKL_TYPE_STRUCT)
+                       pkl_parser->env = pkl_env_pop_frame (pkl_parser->env); */
           break;
         case PKL_AST_FUNC:
           pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
