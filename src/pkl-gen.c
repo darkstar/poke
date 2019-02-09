@@ -568,14 +568,15 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
 {
   /* Return from the function: pop N frames and generate a return
-     instruction.  Note the popf below includes the function
-     argument's frame, if any.  */
+     instruction.  */
 
   pkl_ast_node return_stmt = PKL_PASS_NODE;
   pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
                 PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE));
+
+  /* Pop the function argument's frame.  */
   if (PKL_AST_FUNC_ARGS (function))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
     
