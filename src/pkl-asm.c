@@ -257,7 +257,7 @@ pkl_asm_insn_nton  (pkl_asm pasm,
 }
 
 /* Macro-instruction: REMAP
-   Stack: VAL -> VAL
+   ( VAL -- VAL )
 
    Given a mapeable PVM value on the TOS, remap it.  */
 
@@ -279,7 +279,7 @@ pkl_asm_insn_write (pkl_asm pasm)
 }  
 
 /* Macro-instruction: PEEK type, endian, nenc
-   Stack: _ -> VAL
+   ( -- VAL )
 
    Generate code for a peek operation to TYPE, which should be an
    integral type.  */
@@ -317,7 +317,7 @@ pkl_asm_insn_peek (pkl_asm pasm, pkl_ast_node type,
 }
 
 /* Macro-instruction: PEEKD type
-   Stack: _ -> VAL
+   ( _ -> VAL )
 
    Generate code for a peek operation to TYPE, which should be an
    integral type.  */
@@ -348,7 +348,7 @@ pkl_asm_insn_peekd (pkl_asm pasm, pkl_ast_node type)
 }
 
 /* Macro-instruction: POKED type
-   Stack: OFF VAL -> _
+   ( OFF VAL -- )
 
    Generate code for a poke operation to TYPE, which should be an
    integral type.  */
@@ -379,40 +379,40 @@ pkl_asm_insn_poked (pkl_asm pasm, pkl_ast_node type)
 }
 
 /* Macro-instruction: NEG type
-   Stack: VAL -> VAL
+   ( VAL -- VAL )
 
    Macro-instruction: ADD type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
    
    Macro-instruction: SUB type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: MUL type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: DIV type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: MOD type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
    
    Macro-instruction: BNOT type
-   Stack: VAL -> VAL VAL VAL
+   ( VAL -- VAL VAL VAL )
 
    Macro-instruction: BAND type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: BOR type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: BXOR type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: SL type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Macro-instruction: SR type
-   Stack: VAL VAL -> VAL VAL VAL
+   ( VAL VAL -- VAL VAL VAL )
 
    Generate code for performing negation, addition, subtraction,
    multiplication, division, remainder and bit shift to integral
@@ -511,22 +511,22 @@ pkl_asm_insn_intop (pkl_asm pasm,
 }
 
 /* Macro-instruction: EQ type
-   Stack: VAL VAL -> INT
+   ( VAL VAL -- INT )
 
    Macro-instruction: NE type
-   Stack: VAL VAL -> INT
+   ( VAL VAL -- INT )
  
    Macro-instruction: LT type
-   Stack VAL VAL -> INT
+   ( VAL VAL -- INT )
  
    Macro-instruction: GT type
-   Stack VAL VAL -> INT
+   ( VAL VAL -- INT )
 
    Macro-instruction: GE type
-   Stack VAL VAL -> INT
+   ( VAL VAL -- INT )
 
    Macro-instruction: LE type
-   Stack VAL VAL -> INT
+   ( VAL VAL -- INT )
 
    Generate code for perfoming a comparison operation, to either
    integral or string operands.  INSN identifies the operation to
@@ -726,7 +726,7 @@ pkl_asm_insn_swapgt (pkl_asm pasm, pkl_ast_node type)
 }
 
 /* Macro-instruction: BZ type, label
-   Stack: _ -> _
+   ( -- )
 
    Branch to LABEL if the integer value of type TYPE at the top of the
    stack is zero.  */
@@ -748,7 +748,7 @@ pkl_asm_insn_bz (pkl_asm pasm,
 }
 
 /* Macro-instruction: BNZ type, label
-   Stack: _ -> _
+   ( -- )
 
    Branch to LABEL if the integer value of type TYPE at the top of the
    stack is not zero.  */
