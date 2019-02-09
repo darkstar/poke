@@ -568,11 +568,17 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
 {
   /* Return from the function: pop N frames and generate a return
-     instruction.  Note the popf below includes the function's
-     frame.  */
+     instruction.  Note the popf below includes the function
+     argument's frame, if any.  */
+
+  pkl_ast_node return_stmt = PKL_PASS_NODE;
+  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
-                PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE) + 1);
+                PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE));
+  if (PKL_AST_FUNC_ARGS (function))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+    
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
@@ -698,10 +704,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
                 PKL_AST_FUNC_NAME (PKL_PASS_NODE));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
 
-  /* Push the function environment, for the arguments.  The
-     compound-statement that is the body for the function will create
-     it's own frame.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+  /* Push the function environment, for the arguments, if there are
+     any.  The compound-statement that is the body for the function
+     will create it's own frame.  */
+  if (PKL_AST_FUNC_ARGS (PKL_PASS_NODE))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
 }
 PKL_PHASE_END_HANDLER
 
@@ -746,8 +753,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
     }
      
-  /* Pop the function's environment and return.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
+  /* Pop the function's argument environment, if any, and return.  */
+  if (PKL_AST_FUNC_ARGS (function))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
