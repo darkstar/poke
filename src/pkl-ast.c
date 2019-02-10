@@ -539,18 +539,13 @@ pkl_ast_dup_type (pkl_ast_node type)
 int
 pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 {
-  if (PKL_AST_TYPE_CODE (a) == PKL_TYPE_ANY
-      || PKL_AST_TYPE_CODE (b) == PKL_TYPE_ANY)
-    return 1;
-
   if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b))
     return 0;
 
   switch (PKL_AST_TYPE_CODE (a))
     {
     case PKL_TYPE_ANY:
-      /* Should not happen.  */
-      assert (0);
+      return 1;
       break;
     case PKL_TYPE_INTEGRAL:
       return (PKL_AST_TYPE_I_SIZE (a) == PKL_AST_TYPE_I_SIZE (b)

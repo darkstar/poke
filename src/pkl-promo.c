@@ -728,6 +728,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
           
           switch (PKL_AST_TYPE_CODE (fa_type))
             {
+            case PKL_TYPE_ANY:
+              /* Do nothing.  Promoting to ANY doesn't require
+                 altering the AST in any way.  */
+              break;
             case PKL_TYPE_INTEGRAL:
               if (!promote_integral (PKL_PASS_AST,
                                      PKL_AST_TYPE_I_SIZE (fa_type),
@@ -794,6 +798,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
       
       switch (PKL_AST_TYPE_CODE (expected_type))
         {
+        case PKL_TYPE_ANY:
+          /* Nothing to do.  */
+          break;
         case PKL_TYPE_INTEGRAL:
           if (!promote_integral (PKL_PASS_AST,
                                  PKL_AST_TYPE_I_SIZE (expected_type),

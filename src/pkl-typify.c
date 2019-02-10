@@ -846,11 +846,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               char *passed_type = pkl_type_str (aa_type, 1);
               char *expected_type = pkl_type_str (fa_type, 1);
 
-              if ((PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
-                   && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+              if (PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_ANY
+                  || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
+                      && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
                   || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
                       && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
-                /* Integers and offsets can be promoted.  */
+                /* Integers and offsets can be promoted, and anything
+                   can be promoted to ANY.  */
                 ;
               else
                 {
@@ -1621,11 +1623,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_return_stmt)
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
 
-      if ((PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
-           && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
+      if (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_ANY
+          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
+              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
           || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_OFFSET
               && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_OFFSET))
-        /* Integers and offsets can be promoted.  */
+        /* Integers and offsets can be promoted, and anything can be
+           promoted to ANY.  */
         ;
       else
       {
