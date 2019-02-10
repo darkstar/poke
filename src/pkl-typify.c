@@ -974,7 +974,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
   pkl_ast_node lvalue_type = PKL_AST_TYPE (lvalue);
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
 
-  if (!pkl_ast_type_equal (lvalue_type, exp_type))
+  if (PKL_AST_TYPE_CODE (lvalue_type) != PKL_TYPE_ANY
+      && !pkl_ast_type_equal (lvalue_type, exp_type))
     {
       char *expected_type = pkl_type_str (lvalue_type, 1);
       char *found_type = pkl_type_str (exp_type, 1);
