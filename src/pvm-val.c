@@ -905,7 +905,7 @@ pvm_typeof (pvm_val val)
     type = pvm_make_offset_type (PVM_VAL_OFF_BASE_TYPE (val),
                                  PVM_VAL_OFF_UNIT (val));
   else if (PVM_IS_ARR (val))
-    type = pvm_make_array_type (PVM_VAL_ARR_TYPE (val));
+    type = PVM_VAL_ARR_TYPE (val);
   else if (PVM_IS_SCT (val))
     {
       size_t i;
