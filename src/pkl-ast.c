@@ -425,6 +425,14 @@ pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
 }
 
 pkl_ast_node
+pkl_ast_make_any_type (pkl_ast ast)
+{
+  pkl_ast_node type = pkl_ast_make_type (ast);
+  PKL_AST_TYPE_CODE (type) = PKL_TYPE_ANY;
+  return type;
+}
+
+pkl_ast_node
 pkl_ast_make_func_type_arg (pkl_ast ast, pkl_ast_node type,
                             pkl_ast_node name)
 {
@@ -454,6 +462,8 @@ pkl_ast_dup_type (pkl_ast_node type)
   
   switch (PKL_AST_TYPE_CODE (type))
     {
+    case PKL_TYPE_ANY:
+      break;
     case PKL_TYPE_INTEGRAL:
       PKL_AST_TYPE_I_SIZE (new) = PKL_AST_TYPE_I_SIZE (type);
       PKL_AST_TYPE_I_SIGNED (new) = PKL_AST_TYPE_I_SIGNED (type);
@@ -534,6 +544,9 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 
   switch (PKL_AST_TYPE_CODE (a))
     {
+    case PKL_TYPE_ANY:
+      return 1;
+      break;
     case PKL_TYPE_INTEGRAL:
       return (PKL_AST_TYPE_I_SIZE (a) == PKL_AST_TYPE_I_SIZE (b)
               && PKL_AST_TYPE_I_SIGNED (a) == PKL_AST_TYPE_I_SIGNED (b));
@@ -1944,6 +1957,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
           IPRINTF ("code:\n");
           switch (PKL_AST_TYPE_CODE (ast))
             {
+            case PKL_TYPE_ANY: IPRINTF ("  any\n"); break;
             case PKL_TYPE_INTEGRAL: IPRINTF ("  integral\n"); break;
             case PKL_TYPE_STRING: IPRINTF ("  string\n"); break;
             case PKL_TYPE_ARRAY: IPRINTF ("  array\n"); break;
@@ -1980,6 +1994,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
               PRINT_AST_SUBAST (unit, TYPE_O_UNIT);
               break;
             case PKL_TYPE_STRING:
+            case PKL_TYPE_ANY:
             default:
               break;
             }
