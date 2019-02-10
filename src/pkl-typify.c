@@ -163,6 +163,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
   pkl_ast_node cast = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
   
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+                 "cast a value to `any' is not allowed");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_FUNCTION)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),

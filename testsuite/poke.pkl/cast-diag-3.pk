@@ -1,0 +1,6 @@
+/* { dg-do compile } */
+
+defun foo = void:
+  {
+   defvar v = 10 as any; /* { dg-error "" } */
+  }

@@ -360,6 +360,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
           case PKL_TYPE_INTEGRAL:
           case PKL_TYPE_STRING:
           case PKL_TYPE_VOID:
+          case PKL_TYPE_ANY:
           case PKL_TYPE_NOTYPE:
             break;
           default:
