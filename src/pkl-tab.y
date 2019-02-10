@@ -174,6 +174,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token TRY CATCH RAISE
 %token VOID
 %token ANY
+%token ISA
 %token PRINT
 
 /* ATTRIBUTE operator.  */
@@ -220,7 +221,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %left BCONC
 %right '@'
 %nonassoc UNIT
-%right UNARY INC DEC AS
+%right UNARY INC DEC AS ISA
 %left HYPERUNARY
 %left '.'
 %left ATTR
@@ -469,6 +470,11 @@ expression:
 	| expression AS simple_type_specifier
         	{
                   $$ = pkl_ast_make_cast (pkl_parser->ast, $3, $1);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| expression ISA simple_type_specifier
+        	{
+                  $$ = pkl_ast_make_isa (pkl_parser->ast, $3, $1);
                   PKL_AST_LOC ($$) = @$;
                 }
         | simple_type_specifier '@' expression

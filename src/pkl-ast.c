@@ -1027,6 +1027,22 @@ pkl_ast_make_cast (pkl_ast ast,
   return cast;
 }
 
+/* Build and return an AST node for an `isa' operation.  */
+
+pkl_ast_node
+pkl_ast_make_isa (pkl_ast ast,
+                  pkl_ast_node type, pkl_ast_node exp)
+{
+  pkl_ast_node isa = pkl_ast_make_node (ast, PKL_AST_ISA);
+
+  assert (type && exp);
+
+  PKL_AST_ISA_TYPE (isa) = ASTREF (type);
+  PKL_AST_ISA_EXP (isa) = ASTREF (exp);
+
+  return isa;
+}
+
 /* Build and return an AST node for a map.  */
 
 pkl_ast_node
@@ -1512,6 +1528,12 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_CAST_EXP (ast));
       break;
 
+    case PKL_AST_ISA:
+
+      pkl_ast_node_free (PKL_AST_ISA_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_ISA_EXP (ast));
+      break;
+      
     case PKL_AST_MAP:
 
       pkl_ast_node_free (PKL_AST_MAP_TYPE (ast));
@@ -2082,6 +2104,15 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (cast_type, CAST_TYPE);
       PRINT_AST_SUBAST (exp, CAST_EXP);
+      break;
+
+    case PKL_AST_ISA:
+      IPRINTF ("ISA::\n");
+
+      PRINT_COMMON_FIELDS;
+      PRINT_AST_SUBAST (type, TYPE);
+      PRINT_AST_SUBAST (isa_type, ISA_TYPE);
+      PRINT_AST_SUBAST (exp, ISA_EXP);
       break;
 
     case PKL_AST_MAP:

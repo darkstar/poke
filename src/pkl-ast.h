@@ -48,6 +48,7 @@ enum pkl_ast_code
   PKL_AST_STRUCT_REF,
   PKL_AST_OFFSET,
   PKL_AST_CAST,
+  PKL_AST_ISA,
   PKL_AST_MAP,
   PKL_AST_SCONS,
   PKL_AST_FUNCALL,
@@ -901,6 +902,26 @@ pkl_ast_node pkl_ast_make_cast (pkl_ast ast,
                                 pkl_ast_node type,
                                 pkl_ast_node exp);
 
+/* PKL_AST_ISA nodes represent an application of the ISA operator.
+
+   EXP is the expression whose's type is checked.
+   TYPE is the type to check for.  */
+
+#define PKL_AST_ISA_TYPE(AST) ((AST)->isa.type)
+#define PKL_AST_ISA_EXP(AST) ((AST)->isa.exp)
+
+struct pkl_ast_isa
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *type;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_isa (pkl_ast ast,
+                               pkl_ast_node type,
+                               pkl_ast_node exp);
+
 /* PKL_AST_MAP nodes represent maps, i.e. the mapping of some type at
    some offset in IO space.
 
@@ -1320,6 +1341,7 @@ union pkl_ast_node
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_offset offset;
   struct pkl_ast_cast cast;
+  struct pkl_ast_isa isa;
   struct pkl_ast_map map;
   struct pkl_ast_scons scons;
   struct pkl_ast_funcall funcall;

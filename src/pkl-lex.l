@@ -137,7 +137,8 @@ D [0-9]
 "raise"		{ return RAISE; }
 "void"		{ return VOID; }
 "any"		{ return ANY; }
-"sprint"		{ return PRINT; }
+"sprint"	{ return PRINT; }
+"isa"		{ return ISA; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }
