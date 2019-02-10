@@ -1,0 +1,14 @@
+/* { dg-do run } */
+
+defun foo = (any a) int: { return a as int + 1; }
+
+/* { dg-command { .print foo (10) } } */
+/* { dg-output "11" } */
+
+/* { dg-command { try foo ("foo"); catch if E_conv { sprint "cached\n"; } } } */
+/* { dg-output "\ncached" } */
+  
+defun bar = (any a) int: { return (a as int[])[1] + 1; }
+
+/* { dg-command { .print foo ([2,4,6]) }  } */
+/* { dg-output "\n5" } */

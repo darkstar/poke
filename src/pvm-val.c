@@ -935,8 +935,67 @@ pvm_typeof (pvm_val val)
 int
 pvm_type_equal (pvm_val type1, pvm_val type2)
 {
-  /* XXX writeme */
-  return 0;
+  enum pvm_type_code type_code_1 = PVM_VAL_TYP_CODE (type1);
+  enum pvm_type_code type_code_2 = PVM_VAL_TYP_CODE (type2);
+
+  if (type_code_1 != type_code_2)
+    return 0;
+  
+  switch (type_code_1)
+    {
+    case PVM_TYPE_INTEGRAL:
+      {
+        size_t t1_size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (type1));
+        size_t t2_size = PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (type2));
+        uint32_t t1_signed = PVM_VAL_UINT (PVM_VAL_TYP_I_SIGNED (type1));
+        uint32_t t2_signed = PVM_VAL_UINT (PVM_VAL_TYP_I_SIGNED (type2));
+
+        return (t1_size == t2_size && t1_signed == t2_signed);
+        break;
+      }
+    case PVM_TYPE_STRING:
+      return 1;
+      break;
+    case PVM_TYPE_ARRAY:
+      return pvm_type_equal (PVM_VAL_TYP_A_ETYPE (type1),
+                             PVM_VAL_TYP_A_ETYPE (type2));
+      break;
+    case PVM_TYPE_STRUCT:
+      return (strcmp (PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type1)),
+                      PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type2))) == 0);
+      break;
+    case PVM_TYPE_OFFSET:
+      return (pvm_type_equal (PVM_VAL_TYP_O_BASE_TYPE (type1),
+                              PVM_VAL_TYP_O_BASE_TYPE (type2))
+              && (PVM_VAL_ULONG (PVM_VAL_TYP_O_UNIT (type1))
+                  == PVM_VAL_ULONG (PVM_VAL_TYP_O_UNIT (type2))));
+      break;
+    case PVM_TYPE_CLOSURE:
+      {
+        size_t i, nargs;
+
+        if (PVM_VAL_ULONG (PVM_VAL_TYP_C_NARGS (type1))
+            != PVM_VAL_ULONG (PVM_VAL_TYP_C_NARGS (type2)))
+          return 0;
+
+        if (!pvm_type_equal (PVM_VAL_TYP_C_RETURN_TYPE (type1),
+                             PVM_VAL_TYP_C_RETURN_TYPE (type2)))
+          return 0;
+
+        nargs = PVM_VAL_ULONG (PVM_VAL_TYP_C_NARGS (type1));
+        for (i = 0; i < nargs; i++)
+          {
+            if (!pvm_type_equal (PVM_VAL_TYP_C_ATYPE (type1, i),
+                                 PVM_VAL_TYP_C_ATYPE (type2, i)))
+              return 0;
+          }
+
+        return 1;
+      }
+      break;
+    default:
+      assert (0);
+    }
 }
 
 void
