@@ -1310,11 +1310,11 @@ stmt:
                                               $1);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | PRINT expression ';'
+/*        | PRINT expression ';'
         	{
-                  /* XXX WRITEME */
+                  / * XXX WRITEME * /
                   $$ = NULL;
-                }
+                  }*/
 	|
           primary NARG expression ';'
                 {
