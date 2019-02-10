@@ -56,7 +56,6 @@ extern struct pk_cmd deftype_cmd; /* pk-def.c */
 extern struct pk_cmd defvar_cmd; /* pk-def.c */
 extern struct pk_cmd defun_cmd; /* pk-def.c */
 extern struct pk_cmd set_cmd; /* pk-set.c */
-extern struct pk_cmd stmt_cmd; /* pk-stmt.c */
 
 struct pk_cmd null_cmd =
   {NULL, NULL, NULL, 0, NULL, NULL};
@@ -79,7 +78,6 @@ static struct pk_cmd *cmds[] =
     &defvar_cmd,
     &defun_cmd,
     &set_cmd,
-    &stmt_cmd,
     &null_cmd
   };
 
