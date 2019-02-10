@@ -160,6 +160,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_isa)
   pkl_ast_node isa = PKL_PASS_NODE;
   //  pkl_ast_node isa_exp = PKL_AST_ISA_EXP (isa);
   pkl_ast_node isa_type = PKL_AST_ISA_TYPE (isa);
+  pkl_ast_node isa_exp = PKL_AST_ISA_EXP (isa);
+  pkl_ast_node isa_exp_type = PKL_AST_TYPE (isa_exp);
+
+    
   if (PKL_AST_TYPE_CODE (isa_type) == PKL_TYPE_ANY)
     {
       /* EXP isa any is always true.  Replace the subtree with a
@@ -175,6 +179,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_isa)
 
       pkl_ast_node_free (PKL_PASS_NODE);
       PKL_PASS_NODE = true_node;
+      PKL_PASS_RESTART = 1;
+    }
+  else if (PKL_AST_TYPE_CODE (isa_exp_type) != PKL_TYPE_ANY)
+    {
+      pkl_ast_node bool_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
+      pkl_ast_node bool_node
+        = pkl_ast_make_integer (PKL_PASS_AST,
+                                pkl_ast_type_equal (isa_type, isa_exp_type));
+
+      PKL_AST_LOC (bool_type) = PKL_AST_LOC (isa);
+      PKL_AST_TYPE (bool_node) = ASTREF (bool_type);
+      PKL_AST_LOC (bool_node) = PKL_AST_LOC (isa);
+
+      pkl_ast_node_free (PKL_PASS_NODE);
+      PKL_PASS_NODE = bool_node;
       PKL_PASS_RESTART = 1;
     }
   else
