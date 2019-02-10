@@ -957,9 +957,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
   to_type = PKL_AST_CAST_TYPE (node);
   from_type = PKL_AST_TYPE (exp);
-  
-  if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
-      && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
+
+  if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_ANY)
+    {
+      /* Check at run-time that the type of the value is `to_type'.
+         Raise a E_conv if it isn't.  */
+      /* XXX change this? */
+    }
+  else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
+           && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
     {
       pkl_asm_insn (pasm, PKL_INSN_NTON,
                     from_type, to_type);

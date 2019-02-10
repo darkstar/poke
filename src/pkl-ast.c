@@ -539,13 +539,18 @@ pkl_ast_dup_type (pkl_ast_node type)
 int
 pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
 {
+  if (PKL_AST_TYPE_CODE (a) == PKL_TYPE_ANY
+      || PKL_AST_TYPE_CODE (b) == PKL_TYPE_ANY)
+    return 1;
+
   if (PKL_AST_TYPE_CODE (a) != PKL_AST_TYPE_CODE (b))
     return 0;
 
   switch (PKL_AST_TYPE_CODE (a))
     {
     case PKL_TYPE_ANY:
-      return 1;
+      /* Should not happen.  */
+      assert (0);
       break;
     case PKL_TYPE_INTEGRAL:
       return (PKL_AST_TYPE_I_SIZE (a) == PKL_AST_TYPE_I_SIZE (b)
@@ -740,6 +745,9 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
      and the PVM.  */
   switch (PKL_AST_TYPE_CODE (type))
     {
+    case PKL_TYPE_ANY:
+      fprintf (out, "any");
+      break;
     case PKL_TYPE_INTEGRAL:
       if (!PKL_AST_TYPE_I_SIGNED (type))
         fputc ('u', out);
