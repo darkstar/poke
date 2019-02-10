@@ -136,6 +136,7 @@ D [0-9]
 "catch"		{ return CATCH; }
 "raise"		{ return RAISE; }
 "void"		{ return VOID; }
+"print"		{ return PRINT; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }
@@ -207,6 +208,10 @@ D [0-9]
       yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
 
    return UNIT;
+}
+
+:{L}({L}|{D})* {
+  return NARG;
 }
 
 {L}({L}|{D})* {

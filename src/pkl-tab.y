@@ -173,6 +173,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token STRING
 %token TRY CATCH RAISE
 %token VOID
+%token PRINT
 
 /* ATTRIBUTE operator.  */
 
@@ -203,6 +204,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 /* Operator tokens and their precedences, in ascending order.  */
 
+%left NARG
 %right '?' ':'
 %left OR
 %left AND
@@ -1307,6 +1309,17 @@ stmt:
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,
                                               $1);
                   PKL_AST_LOC ($$) = @$;
+                }
+        | PRINT expression ';'
+        	{
+                  /* XXX WRITEME */
+                  $$ = NULL;
+                }
+	|
+          primary NARG expression ';'
+                {
+                  /* YESSSSS!!! NO conflicts! :D */
+                  $$ = NULL;
                 }
         ;
 
