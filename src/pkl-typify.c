@@ -152,6 +152,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_first_operand)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of an ISA operation is a boolean.  Also, many ISA can be
+   determined at compile-time.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_isa)
+{
+  pkl_ast_node isa = PKL_PASS_NODE;
+  //  pkl_ast_node isa_exp = PKL_AST_ISA_EXP (isa);
+  pkl_ast_node isa_type = PKL_AST_ISA_TYPE (isa);
+  if (PKL_AST_TYPE_CODE (isa_type) == PKL_TYPE_ANY)
+    {
+      /* EXP isa any is always true.  Replace the subtree with a
+         `true' value.  */
+
+      pkl_ast_node bool_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
+      pkl_ast_node true_node = pkl_ast_make_integer (PKL_PASS_AST, 1);
+
+      PKL_AST_LOC (bool_type) = PKL_AST_LOC (isa);
+      PKL_AST_TYPE (true_node) = ASTREF (bool_type);
+      PKL_AST_LOC (true_node) = PKL_AST_LOC (isa);
+
+      pkl_ast_node_free (PKL_PASS_NODE);
+      PKL_PASS_NODE = true_node;
+      PKL_PASS_RESTART = 1;
+    }
+  else
+    {
+      assert (0);
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of a CAST is the type of its target type.  However, not
    all types are allowed in casts.  */
 
@@ -1508,6 +1540,7 @@ struct pkl_phase pkl_phase_typify1 =
 
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_typify1_ps_var),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_typify1_ps_cast),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ISA, pkl_typify1_ps_isa),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_typify1_ps_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_typify1_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_typify1_ps_offset),
