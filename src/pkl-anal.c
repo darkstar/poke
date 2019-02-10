@@ -166,11 +166,45 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_ps_default)
 }
 PKL_PHASE_END_HANDLER
 
+/* The arguments to a funcall should be either all named, or none
+   named.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node funcall_arg;
+  int some_named = 0;
+  int some_unnamed = 0;
+
+  for (funcall_arg = PKL_AST_FUNCALL_ARGS (funcall);
+       funcall_arg;
+       funcall_arg = PKL_AST_CHAIN (funcall_arg))
+    {
+      if (PKL_AST_FUNCALL_ARG_NAME (funcall_arg))
+        some_named = 1;
+      else
+        some_unnamed = 1;
+    }
+
+  if (some_named && some_unnamed)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
+                 "mixed named and not-named arguments not allowed in funcall");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_anal1_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_COMP_STMT, pkl_anal1_ps_comp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal1_ps_funcall),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_ps_type_struct),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };

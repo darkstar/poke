@@ -34,3 +34,9 @@ defun quux = (offset<uint,B> o) offset<long,b>: { return o; }
 /* Coercion of offset return value.  */
 /* { dg-command { print quux ((2 as uint<3>)#B) } } */
 /* { dg-output "\n16L#b" } */
+
+defun myprint = (string str) void: { print (str); }
+
+/* { dg-command { : myprint :str "foo\n"; } } */
+/* { dg-output "\nfoo" } */
+

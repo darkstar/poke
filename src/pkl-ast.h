@@ -997,18 +997,24 @@ pkl_ast_node pkl_ast_make_funcall (pkl_ast ast,
 /* PKL_AST_FUNCALL_ARG nodes represent actual arguments in function
    calls.
 
-   EXP is the value passed for the argument.  */
+   EXP is the value passed for the argument.
+
+   NAME, if not NULL, is an IDENTIFIER node with the name of the
+   argument.  */
 
 #define PKL_AST_FUNCALL_ARG_EXP(AST) ((AST)->funcall_arg.exp)
+#define PKL_AST_FUNCALL_ARG_NAME(AST) ((AST)->funcall_arg.name)
 
 struct pkl_ast_funcall_arg
 {
   struct pkl_ast_common common;
 
   union pkl_ast_node *exp;
+  union pkl_ast_node *name;
 };
 
-pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,
+                                       pkl_ast_node name);
 
 /* PKL_AST_VAR nodes represent variable references.
 

@@ -211,6 +211,7 @@ D [0-9]
 }
 
 :{L}({L}|{D})* {
+  yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
   return NARG;
 }
 

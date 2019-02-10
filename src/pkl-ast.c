@@ -1064,7 +1064,8 @@ pkl_ast_make_funcall (pkl_ast ast,
    call.  */
 
 pkl_ast_node
-pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp)
+pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,
+                          pkl_ast_node name)
 {
   pkl_ast_node funcall_arg = pkl_ast_make_node (ast,
                                                 PKL_AST_FUNCALL_ARG);
@@ -1072,6 +1073,8 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp)
   assert (exp);
 
   PKL_AST_FUNCALL_ARG_EXP (funcall_arg) = ASTREF (exp);
+  if (name)
+    PKL_AST_FUNCALL_ARG_NAME (funcall_arg) = ASTREF (name);
   return funcall_arg;
 }
 
@@ -1485,6 +1488,7 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_FUNCALL_ARG:
 
       pkl_ast_node_free (PKL_AST_FUNCALL_ARG_EXP (ast));
+      pkl_ast_node_free (PKL_AST_FUNCALL_ARG_NAME (ast));
       break;
 
     case PKL_AST_VAR:
@@ -2059,6 +2063,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("FUNCALL_ARG::\n");
 
       PRINT_AST_SUBAST (exp, FUNCALL_ARG_EXP);
+      PRINT_AST_SUBAST (name, FUNCALL_ARG_NAME);
       break;
 
     case PKL_AST_VAR:

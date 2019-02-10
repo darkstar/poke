@@ -204,7 +204,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 /* Operator tokens and their precedences, in ascending order.  */
 
-%left NARG
+%left <ast> NARG
 %right '?' ':'
 %left OR
 %left AND
@@ -236,7 +236,8 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
-%type <ast> comp_stmt stmt_decl_list stmt funcall_stmt funcall_stmt_arg
+%type <ast> comp_stmt stmt_decl_list stmt
+%type <ast> funcall_stmt funcall_stmt_arg_list funcall_stmt_arg
 
 /* The following two tokens are used in order to support several start
    rules: one is for parsing an expression, declaration or sentence,
@@ -663,7 +664,7 @@ funcall_arg:
 	   expression
           	{
                   $$ = pkl_ast_make_funcall_arg (pkl_parser->ast,
-                                                 $1);
+                                                 $1, NULL /* name */);
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
@@ -1317,27 +1318,38 @@ stmt:
                   }*/
 	| funcall_stmt ';'
         	{
-                  $$ = $1;
+                  $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,
+                                              $1);
+                  PKL_AST_LOC ($$) = @$;
                 }
         ;
 
 funcall_stmt:
-	  primary funcall_stmt_arg
-          	{
-                  $$ = NULL;
+	primary funcall_stmt_arg_list
+        	{
+                  $$ = pkl_ast_make_funcall (pkl_parser->ast,
+                                             $1, $2);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	;
+
+funcall_stmt_arg_list:
+	  funcall_stmt_arg
+        | funcall_stmt_arg funcall_stmt_arg
+        	{
+                  $$ = pkl_ast_chainon ($1, $2);
                 }
         ;
 
 funcall_stmt_arg:
 	  NARG expression
           	{
-                  $$ = NULL;
+                  $$ = pkl_ast_make_funcall_arg (pkl_parser->ast,
+                                                 $2, $1);
+                  PKL_AST_LOC ($1) = @1;
+                  PKL_AST_LOC ($$) = @$;
                 }
-        | funcall_stmt_arg NARG expression
-        	{
-                  $$ = NULL;
-                }
-        ;
+	;
 
 /*
  * Enumerations.
