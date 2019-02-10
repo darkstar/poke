@@ -860,7 +860,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
         {
         case PKL_AST_ARRAY:
         case PKL_AST_TYPE:
-        case PKL_AST_ISA:
         case PKL_AST_STRUCT_ELEM_TYPE:
           /* Process these.  */
           break;
@@ -940,20 +939,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
 PKL_PHASE_END_HANDLER
 
 /*
- * | BOOLEAN_TYPE (shit)
- * | TYPE
  * | EXP
  * ISA
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_isa)
 {
-  /* NOTE!!! This is ultra piggy.  We have to get rid of the
-     PKL_AST_TYPE of the ISA ast node itself...  shame on me.  We
-     should figure a way to NOT do this.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
-
+  PKL_PASS_SUBPASS (PKL_AST_ISA_TYPE (PKL_PASS_NODE));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ISA);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
