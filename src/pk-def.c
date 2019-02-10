@@ -28,32 +28,6 @@
 #include "poke.h"
 #include "pk-cmd.h"
 
-static int
-pk_cmd_def (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
-{
-  int pvm_ret;
-  pvm_program prog;
-  pvm_val val;
-  
-  assert (argc == 1);
-  assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_DEF);
-
-  /* Execute the program with the definition in the pvm and check for
-     execution errors, but ignore the returned value.  */
-  
-  prog = PK_CMD_ARG_DEF (argv[0]);
-  /* XXX */
-  /* pvm_print_program (stdout, prog);*/
-  pvm_ret = pvm_run (poke_vm, prog, &val);
-  if (pvm_ret != PVM_EXIT_OK)
-    {
-      printf (_("run-time error\n"));
-      return 0;
-    }
-
-  return 1;
-}
-
 static void
 print_var_decl (pkl_ast_node decl, void *data)
 {
@@ -144,18 +118,6 @@ pk_cmd_info_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   return 1;
 }
-
-struct pk_cmd deftype_cmd =
-  {"deftype", "d", 0, 0, NULL, pk_cmd_def,
-   "deftype NAME = TYPE"};
-
-struct pk_cmd defvar_cmd =
-  {"defvar", "d", 0, 0, NULL, pk_cmd_def,
-   "defvar NAME = EXP"};
-
-struct pk_cmd defun_cmd =
-  {"defun", "d", 0, 0, NULL, pk_cmd_def,
-   "defun NAME = (ARGS) [: TYPE] { BODY }"};
 
 struct pk_cmd info_var_cmd =
   {"variable", "", "", 0, NULL, pk_cmd_info_var,

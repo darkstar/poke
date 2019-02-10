@@ -52,9 +52,6 @@ extern struct pk_cmd version_cmd; /* pk-misc.c */
 extern struct pk_cmd help_cmd; /* pk-help.c */
 extern struct pk_cmd vm_cmd; /* pk-vm.c  */
 extern struct pk_cmd print_cmd; /* pk-print.c */
-extern struct pk_cmd deftype_cmd; /* pk-def.c */
-extern struct pk_cmd defvar_cmd; /* pk-def.c */
-extern struct pk_cmd defun_cmd; /* pk-def.c */
 extern struct pk_cmd set_cmd; /* pk-set.c */
 
 struct pk_cmd null_cmd =
@@ -74,9 +71,6 @@ static struct pk_cmd *cmds[] =
     &help_cmd,
     &vm_cmd,
     &print_cmd,
-    &deftype_cmd,
-    &defvar_cmd,
-    &defun_cmd,
     &set_cmd,
     &null_cmd
   };
