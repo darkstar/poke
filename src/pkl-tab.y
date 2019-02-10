@@ -236,7 +236,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg
-%type <ast> comp_stmt stmt_decl_list stmt
+%type <ast> comp_stmt stmt_decl_list stmt funcall_stmt funcall_stmt_arg
 
 /* The following two tokens are used in order to support several start
    rules: one is for parsing an expression, declaration or sentence,
@@ -1315,10 +1315,26 @@ stmt:
                   / * XXX WRITEME * /
                   $$ = NULL;
                   }*/
-	|
-          primary NARG expression ';'
-                {
-                  /* YESSSSS!!! NO conflicts! :D */
+	| funcall_stmt ';'
+        	{
+                  $$ = $1;
+                }
+        ;
+
+funcall_stmt:
+	  primary funcall_stmt_arg
+          	{
+                  $$ = NULL;
+                }
+        ;
+
+funcall_stmt_arg:
+	  NARG expression
+          	{
+                  $$ = NULL;
+                }
+        | funcall_stmt_arg NARG expression
+        	{
                   $$ = NULL;
                 }
         ;
