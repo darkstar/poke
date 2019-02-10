@@ -167,7 +167,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_ps_default)
 PKL_PHASE_END_HANDLER
 
 /* The arguments to a funcall should be either all named, or none
-   named.  */
+   named.  Also, it is not allowed to specify the same argument
+   twice.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
 {
@@ -179,6 +180,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
   int some_named = 0;
   int some_unnamed = 0;
 
+  /* Check that all arguments are either named or unnamed.  */
   for (funcall_arg = PKL_AST_FUNCALL_ARGS (funcall);
        funcall_arg;
        funcall_arg = PKL_AST_CHAIN (funcall_arg))
@@ -195,6 +197,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
                  "mixed named and not-named arguments not allowed in funcall");
       payload->errors++;
       PKL_PASS_ERROR;
+    }
+
+  /* If arguments are named, check that there are not arguments named
+     twice.  */
+  if (some_named)
+    { 
+      for (funcall_arg = PKL_AST_FUNCALL_ARGS (funcall);
+           funcall_arg;
+           funcall_arg = PKL_AST_CHAIN (funcall_arg))
+        {
+          pkl_ast_node aa;
+          for (aa = PKL_AST_CHAIN (funcall_arg); aa; aa = PKL_AST_CHAIN (aa))
+            {
+              pkl_ast_node identifier1 = PKL_AST_FUNCALL_ARG_NAME (funcall_arg);
+              pkl_ast_node identifier2 = PKL_AST_FUNCALL_ARG_NAME (aa);
+
+              if (strcmp (PKL_AST_IDENTIFIER_POINTER (identifier1),
+                          PKL_AST_IDENTIFIER_POINTER (identifier2)) == 0)
+                {
+                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                             "duplicated argument in funcall");
+                  payload->errors++;
+                  PKL_PASS_ERROR;
+                }
+            }
+        }
     }
 }
 PKL_PHASE_END_HANDLER

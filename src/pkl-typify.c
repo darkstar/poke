@@ -797,14 +797,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
                   break;
               }
 
-            if (!aa)
-              {
-                /* XXX improve location of error */
-                pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
-                          "invalid argument name in funcall");
-                payload->errors++;
-                PKL_PASS_ERROR;
-              }
+            /* As per the checks in pkl_anal1_ps_funcall, at this
+               point it is guaranteed that every named formal argument
+               is mentioned, and only once.  */
+            assert (aa);
 
             new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
                                                PKL_AST_FUNCALL_ARG_EXP (aa),
