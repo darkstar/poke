@@ -25,3 +25,31 @@ defun foo = int<3>: { return 2; }
 
 /* { dg-command { .print foo isa int<3> } } */
 /* { dg-output "\n1" } */
+
+defun foo2 = (any a) void:
+  {
+   if (a isa int<32>)
+     sprint "an int32";
+   else if (a isa uint<7>)
+     sprint "an uint7";
+   else if (a isa uint<64>[])
+     sprint "an uint64 array";
+   else
+     sprint "unknown";
+   sprint;
+  }
+
+/* { dg-command { foo2 (10) } } */
+/* { dg-output "\nan int32" } */
+
+/* { dg-command { foo2 (666) } } */
+/* { dg-output "\nan int32" } */
+
+/* { dg-command { foo2 (10 as uint<7>) } } */
+/* { dg-output "\nan uint7" } */
+
+/* { dg-command { foo2 ([1UL, 2UL]) } } */
+/* { dg-output "\nan uint64 array" } */
+
+/* { dg-command { foo2 ({.i=10,.j="foo"}) } } */
+/* { dg-output "\nunknown" } */
