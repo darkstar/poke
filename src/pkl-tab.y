@@ -1311,12 +1311,18 @@ stmt:
                                               $1);
                   PKL_AST_LOC ($$) = @$;
                 }
+	| PRINT ';'
+                {
+                  $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
+                                                NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | PRINT expression ';'
         	{
-                    $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
-                                                  $2);
-                    PKL_AST_LOC ($$) = @$;
-                  }
+                  $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
+                                                $2);
+                  PKL_AST_LOC ($$) = @$;
+                }
 	| funcall_stmt ';'
         	{
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,

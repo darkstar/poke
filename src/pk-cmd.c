@@ -640,7 +640,61 @@ static struct pk_trie *cmds_trie;
 int
 pk_cmd_exec (char *str)
 {
-  return pk_cmd_exec_1 (str, cmds_trie, NULL);
+  /* If the first non-blank character in STR is a dot ('.'), then this
+     is a poke command.  Dispatch it with pk_cmd_exec_1.  Otherwise,
+     compile a Poke declaration or a statement and execute it.  */
+  
+  char *cmd = skip_blanks (str);
+
+  if (*cmd == '.')
+    return pk_cmd_exec_1 (cmd + 1, cmds_trie, NULL);
+  else
+    {
+      char *ecmd, *end;
+      pvm_program prog;
+      pvm_val val;
+      int what;
+      int pvm_ret;
+
+      ecmd = xmalloc (strlen (cmd) + 2);
+      strcpy (ecmd, cmd);
+
+      if (strncmp (ecmd, "defun", 5) == 0)
+        what = PKL_WHAT_DECLARATION;
+      else
+        {
+          if (strncmp (ecmd, "defvar", 5) == 0
+              || strncmp (ecmd, "deftype", 7) == 0)
+            what = PKL_WHAT_DECLARATION;
+          else
+            what = PKL_WHAT_STATEMENT;
+
+          /* Add a trailing `;' if the user didn't specify one.  */
+          {
+            char *last_non_blank = ecmd + strlen (ecmd) - 1;
+            while ((*last_non_blank == ' '
+                    || *last_non_blank == '\t')
+                   && last_non_blank != ecmd)
+              last_non_blank--;
+          
+            if (*last_non_blank != ';')
+              strcat (ecmd, ";");
+          }
+        }
+      
+      prog  = pkl_compile_buffer (poke_compiler, what, ecmd, &end);
+      if (prog == NULL)
+        goto error;
+
+      pvm_ret = pvm_run (poke_vm, prog, &val);
+      if (pvm_ret != PVM_EXIT_OK)
+        goto error;
+      
+      return 1;
+
+    error:
+      return 0;
+    }
 }
 
 int
