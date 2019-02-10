@@ -1274,6 +1274,19 @@ pkl_ast_make_program (pkl_ast ast, pkl_ast_node elems)
   return program;
 }
 
+/* Free the AST nodes linked by PKL_AST_CHAIN.  */
+void
+pkl_ast_node_free_chain (pkl_ast_node ast)
+{
+  pkl_ast_node n, next;
+
+  for (n = ast; n; n = next)
+    {
+      next = PKL_AST_CHAIN (n);
+      pkl_ast_node_free (n);
+    }
+}
+
 /* Free all allocated resources used by AST.  Note that nodes marked
    as "registered", as well as their children, are not disposed.  */
 

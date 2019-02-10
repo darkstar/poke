@@ -1361,6 +1361,7 @@ struct pkl_ast
 pkl_ast pkl_ast_init (void);
 void pkl_ast_free (pkl_ast ast);
 void pkl_ast_node_free (pkl_ast_node ast);
+void pkl_ast_node_free_chain (pkl_ast_node ast);
 
 #ifdef PKL_DEBUG
 

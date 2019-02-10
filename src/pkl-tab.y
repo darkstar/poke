@@ -204,7 +204,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 /* Operator tokens and their precedences, in ascending order.  */
 
-%left <ast> NARG
+%right <ast> NARG
 %right '?' ':'
 %left OR
 %left AND
@@ -1335,7 +1335,7 @@ funcall_stmt:
 
 funcall_stmt_arg_list:
 	  funcall_stmt_arg
-        | funcall_stmt_arg funcall_stmt_arg
+        | funcall_stmt_arg_list funcall_stmt_arg
         	{
                   $$ = pkl_ast_chainon ($1, $2);
                 }
