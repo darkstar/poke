@@ -1552,6 +1552,57 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
 }
 PKL_PHASE_END_HANDLER
 
+/* Check that the type of the expression in a `return' statement
+   matches the return type of it's containing function.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node return_stmt = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
+  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
+
+  pkl_ast_node returned_type;
+  pkl_ast_node expected_type;
+
+  if (exp == NULL)
+    PKL_PASS_DONE;
+
+  returned_type = PKL_AST_TYPE (exp);
+  expected_type = PKL_AST_FUNC_RET_TYPE (function);
+
+  if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
+      && !pkl_ast_type_equal (returned_type, expected_type))
+    {
+      char *returned_type_str = pkl_type_str (returned_type, 1);
+      char *expected_type_str = pkl_type_str (expected_type, 1);
+
+      if (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_ANY
+          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
+              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
+          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_OFFSET
+              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_OFFSET))
+        /* Integers and offsets can be promoted, and anything can be
+           promoted to ANY.  */
+        ;
+      else
+      {
+        pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                   "returning an expression of the wrong type\n\
+expected %s, got %s",
+                   expected_type_str, returned_type_str);
+        free (expected_type_str);
+        free (returned_type_str);
+        
+        payload->errors++;
+        PKL_PASS_ERROR;
+      }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1575,6 +1626,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_typify1_ps_struct_elem_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_typify1_ps_return_stmt),
 
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NOT, pkl_typify1_ps_op_not),
@@ -1647,61 +1699,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
-/* Check that the type of the expression in a `return' statement
-   matches the return type of it's containing function.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_return_stmt)
-{
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
-  pkl_ast_node return_stmt = PKL_PASS_NODE;
-  pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
-  pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
-
-  pkl_ast_node returned_type;
-  pkl_ast_node expected_type;
-
-  if (exp == NULL)
-    PKL_PASS_DONE;
-
-  returned_type = PKL_AST_TYPE (exp);
-  expected_type = PKL_AST_FUNC_RET_TYPE (function);
-
-  if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
-      && !pkl_ast_type_equal (returned_type, expected_type))
-    {
-      char *returned_type_str = pkl_type_str (returned_type, 1);
-      char *expected_type_str = pkl_type_str (expected_type, 1);
-
-      if (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_ANY
-          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
-              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
-          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_OFFSET
-              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_OFFSET))
-        /* Integers and offsets can be promoted, and anything can be
-           promoted to ANY.  */
-        ;
-      else
-      {
-        pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
-                   "returning an expression of the wrong type\n\
-expected %s, got %s",
-                   expected_type_str, returned_type_str);
-        free (expected_type_str);
-        free (returned_type_str);
-        
-        payload->errors++;
-        PKL_PASS_ERROR;
-      }
-    }
-}
-PKL_PHASE_END_HANDLER
-
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
-   PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_typify2_ps_return_stmt),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_ps_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_ps_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_ps_op_sizeof),
