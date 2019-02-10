@@ -1827,6 +1827,17 @@ end
 
 ## Type related instructions.
 
+instruction isa () # ( TYPE VAL -- TYPE VAL BOOL )
+  code
+    pvm_val type = JITTER_UNDER_TOP_STACK ();
+    pvm_val val = JITTER_TOP_STACK ();
+    pvm_val val_type = pvm_typeof (val);
+
+    JITTER_PUSH_STACK (pvm_make_int (pvm_type_equal (type, val_type),
+                                     32));
+  end
+end
+
 # Integral types
 
 instruction mktyi () # ( ULONG UINT -- TYP )

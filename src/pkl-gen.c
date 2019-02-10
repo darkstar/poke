@@ -860,6 +860,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
         {
         case PKL_AST_ARRAY:
         case PKL_AST_TYPE:
+        case PKL_AST_ISA:
         case PKL_AST_STRUCT_ELEM_TYPE:
           /* Process these.  */
           break;
@@ -935,6 +936,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
   pkl_asm pasm = PKL_GEN_ASM;
 
   pkl_asm_insn (pasm, PKL_INSN_MKO);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | TYPE
+ * | EXP
+ * ISA
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_isa)
+{
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ISA);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
@@ -2116,6 +2130,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_gen_ps_type_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_gen_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_gen_ps_cast),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ISA, pkl_gen_ps_isa),
    PKL_PHASE_PR_HANDLER (PKL_AST_MAP, pkl_gen_pr_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),

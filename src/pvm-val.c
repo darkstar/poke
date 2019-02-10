@@ -932,6 +932,13 @@ pvm_typeof (pvm_val val)
   return type;
 }
 
+int
+pvm_type_equal (pvm_val type1, pvm_val type2)
+{
+  /* XXX writeme */
+  return 0;
+}
+
 void
 pvm_print_string (FILE *out, pvm_val string)
 {

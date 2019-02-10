@@ -407,6 +407,7 @@ void pvm_allocate_closure_attrs (pvm_val nargs, pvm_val **atypes);
 
 pvm_val pvm_dup_type (pvm_val type);
 pvm_val pvm_typeof (pvm_val val);
+int pvm_type_equal (pvm_val type1, pvm_val type2);
 
 /* Closures are also boxed.  */
 
