@@ -173,6 +173,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token STRING
 %token TRY CATCH RAISE
 %token VOID
+%token ANY
 %token PRINT
 
 /* ATTRIBUTE operator.  */
@@ -815,6 +816,11 @@ simple_type_specifier:
                   assert (decl != NULL
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | ANY
+        	{
+                  $$ = pkl_ast_make_any_type (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
 	| VOID
