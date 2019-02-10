@@ -661,18 +661,23 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
    function type.
 
    TYPE is a PKL_AST_TYPE node describing the type of the
-   argument.  */
+   argument.
+
+   NAME, if not NULL, is an IDENTIFIER node describing the name
+   of the argument.  */
 
 #define PKL_AST_FUNC_TYPE_ARG_TYPE(AST) ((AST)->fun_type_arg.type)
+#define PKL_AST_FUNC_TYPE_ARG_NAME(AST) ((AST)->fun_type_arg.name)
 
 struct pkl_ast_func_type_arg
 {
   struct pkl_ast_common common;
   union pkl_ast_node *type;
+  union pkl_ast_node *name;
 };
 
 pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
-                                         pkl_ast_node type);
+                                         pkl_ast_node type, pkl_ast_node name);
 
 /* PKL_AST_TYPE nodes represent types.
    
