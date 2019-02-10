@@ -940,6 +940,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_offset)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | BOOLEAN_TYPE (shit)
  * | TYPE
  * | EXP
  * ISA
@@ -947,6 +948,12 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_isa)
 {
+  /* NOTE!!! This is ultra piggy.  We have to get rid of the
+     PKL_AST_TYPE of the ISA ast node itself...  shame on me.  We
+     should figure a way to NOT do this.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ISA);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
