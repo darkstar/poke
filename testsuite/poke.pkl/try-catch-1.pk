@@ -15,6 +15,6 @@ defun baz = (int n) int:
  return a;
 }
 
-/* { dg-command { print baz (2) } } */
-/* { dg-command { print baz (0) } } */
+/* { dg-command { .print baz (2) } } */
+/* { dg-command { .print baz (0) } } */
 /* { dg-output "50\ndivision by zero" } */

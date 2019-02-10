@@ -1,16 +1,16 @@
 /* { dg-do run } */
 
-/* { dg-command { print "foo" + "bar" } } */
+/* { dg-command { .print "foo" + "bar" } } */
 /* { dg-output "\"foobar\"" } */
 
-/* { dg-command { print "foo" == "foo" } } */
+/* { dg-command { .print "foo" == "foo" } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { print "foo" == "fooo" } } */
+/* { dg-command { .print "foo" == "fooo" } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { print "foo" != "foo" } } */
+/* { dg-command { .print "foo" != "foo" } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { print "foo" != "fooo" } } */
+/* { dg-command { .print "foo" != "fooo" } } */
 /* { dg-output "\n1" } */

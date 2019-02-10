@@ -650,7 +650,7 @@ pk_cmd_exec (char *str)
     return pk_cmd_exec_1 (cmd + 1, cmds_trie, NULL);
   else
     {
-      char *ecmd, *end;
+      char *ecmd, *end, *last_non_blank;
       pvm_program prog;
       pvm_val val;
       int what;
@@ -659,6 +659,16 @@ pk_cmd_exec (char *str)
       ecmd = xmalloc (strlen (cmd) + 2);
       strcpy (ecmd, cmd);
 
+      /* XXX: remove comments, since they can confuse the code
+         below.  */
+
+      /* Add a trailing `;' if the user didn't specify one.  */
+      last_non_blank = ecmd + strlen (ecmd) - 1;
+      while ((*last_non_blank == ' '
+              || *last_non_blank == '\t')
+             && last_non_blank != ecmd)
+        last_non_blank--;
+      
       if (strncmp (ecmd, "defun", 5) == 0)
         what = PKL_WHAT_DECLARATION;
       else
@@ -668,20 +678,16 @@ pk_cmd_exec (char *str)
             what = PKL_WHAT_DECLARATION;
           else
             what = PKL_WHAT_STATEMENT;
-
-          /* Add a trailing `;' if the user didn't specify one.  */
-          {
-            char *last_non_blank = ecmd + strlen (ecmd) - 1;
-            while ((*last_non_blank == ' '
-                    || *last_non_blank == '\t')
-                   && last_non_blank != ecmd)
-              last_non_blank--;
-          
-            if (*last_non_blank != ';')
-              strcat (ecmd, ";");
-          }
         }
-      
+
+      if (strncmp (ecmd, "defun", 5) != 0)
+        {
+          if (*last_non_blank != ';'
+              && (what != PKL_WHAT_STATEMENT
+                  || *last_non_blank != '}'))
+            strcat (ecmd, ";");
+        }
+
       prog  = pkl_compile_buffer (poke_compiler, what, ecmd, &end);
       if (prog == NULL)
         goto error;

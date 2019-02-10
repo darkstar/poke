@@ -32,6 +32,6 @@ defun quux = (int n) int:
    return 666;
   }
 
-/* { dg-command { print quux (2) } } */
-/* { dg-command { print quux (0) } } */
+/* { dg-command { .print quux (2) } } */
+/* { dg-command { .print quux (0) } } */
 /* { dg-output "re-raising\ngot exception\n666" } */

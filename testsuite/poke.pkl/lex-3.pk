@@ -13,10 +13,10 @@ defun indirect = (int n) int:
    return increase (n);
   }
 
-/* { dg-command { print increase (1) } } */
-/* { dg-command { print increase (2) } } */
-/* { dg-command { print global } } */
-/* { dg-command { print indirect (3) } } */
-/* { dg-command { print global } } */
+/* { dg-command { .print increase (1) } } */
+/* { dg-command { .print increase (2) } } */
+/* { dg-command { .print global } } */
+/* { dg-command { .print indirect (3) } } */
+/* { dg-command { .print global } } */
 /* { dg-output "0\n0\n3\n0\n6" } */
 

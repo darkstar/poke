@@ -24,6 +24,6 @@ defun bar = (Exception e) int:
    return 0;
   }
 
-/* { dg-command "print bar (E_no_ios)" } */
-/* { dg-command "print bar (E_div_by_zero)" } */
+/* { dg-command { .print bar (E_no_ios) } } */
+/* { dg-command { .print bar (E_div_by_zero) } } */
 /* { dg-output "uncatched\n0\ncatched\n0" } */

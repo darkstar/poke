@@ -1,26 +1,26 @@
 /* { dg-do run } */
 
-/* { dg-command { print/x 1 <<. 2 } } */
+/* { dg-command { .print/x 1 <<. 2 } } */
 /* { dg-output 0x4 } */
 
-/* { dg-command { print/x 1 <<. 3 } } */
+/* { dg-command { .print/x 1 <<. 3 } } */
 /* { dg-output "\n0x8" } */
 
-/* { dg-command { print/x 1 <<. 31 } } */
+/* { dg-command { .print/x 1 <<. 31 } } */
 /* { dg-output "\n0x80000000" } */
 
-/* { dg-command { print 1 <<. 32 } } */
+/* { dg-command { .print 1 <<. 32 } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { print 1 <<. 33 } } */
+/* { dg-command { .print 1 <<. 33 } } */
 /* { dg-output "\n2" } */
 
-/* { dg-command { print 1 as uint<4> <<. 1 } } */
+/* { dg-command { .print 1 as uint<4> <<. 1 } } */
 /* { dg-output "\n2UN" } */
 
-/* { dg-command { print 1 as uint<4> <<. 2 } } */
+/* { dg-command { .print 1 as uint<4> <<. 2 } } */
 /* { dg-output "\n4UN" } */
 
-/* { dg-command { print 1 as uint<4> <<. 3 } } */
+/* { dg-command { .print 1 as uint<4> <<. 3 } } */
 /* { dg-output "\n8UN" } */
 

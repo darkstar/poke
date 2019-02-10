@@ -15,5 +15,5 @@ defun apply = (Callback[] callbacks, int data) int:
    return sum;
   }
 
-/* { dg-command { print apply ([identity, double, half], 10) } } */
+/* { dg-command { .print apply ([identity, double, half], 10) } } */
 /* { dg-output "35" } */

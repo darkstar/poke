@@ -19,7 +19,7 @@ defun loop_3 = (int i) int:
      }
   }
 
-/* { dg-command { print loop_3 (0) } } */
-/* { dg-command { print loop_3 (1) } } */
-/* { dg-command { print loop_3 (2) } } */
+/* { dg-command { .print loop_3 (0) } } */
+/* { dg-command { .print loop_3 (1) } } */
+/* { dg-command { .print loop_3 (2) } } */
 /* { dg-output "666\n2\n4" } */

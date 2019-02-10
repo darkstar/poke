@@ -5,8 +5,8 @@ defun hello = string:
     return "hello";
   }
 
-/* { dg-command { print hello () } } */
+/* { dg-command { .print hello () } } */
 /* { dg-output {"hello"} } */
 
-/* { dg-command { print hello () + " world" } } */
+/* { dg-command { .print hello () + " world" } } */
 /* { dg-output "\n\"hello world\"" } */

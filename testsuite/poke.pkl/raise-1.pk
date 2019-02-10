@@ -11,5 +11,5 @@ defun foo = int:
    return 666;
   }
 
-/* { dg-command {print foo} } */
+/* { dg-command { .print foo } } */
 /* { dg-output "got an exception\n" } */

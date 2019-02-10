@@ -13,5 +13,5 @@ defun call_cb = (int[] a, Callback cb) int:
 
 defun double = (int n) int: { return n * 2; }
 
-/* { dg-command { print call_cb ([1,2,3], double) } } */
+/* { dg-command { .print call_cb ([1,2,3], double) } } */
 /* { dg-output "12" } */

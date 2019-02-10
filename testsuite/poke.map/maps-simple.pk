@@ -1,39 +1,39 @@
 /* { dg-do run } */
 /* { dg-data {c*} {0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80} } */
 
-/* { dg-command {print/x byte @ 0#B} } */
+/* { dg-command {.print/x byte @ 0#B} } */
 /* { dg-output "0x10UB" } */
 
-/* { dg-command {print/x byte @ 1#B} } */
+/* { dg-command {.print/x byte @ 1#B} } */
 /* { dg-output "\n0x20UB" } */
 
-/* { dg-command {print/x byte @ (7#b + 1#b) } } */
+/* { dg-command {.print/x byte @ (7#b + 1#b) } } */
 /* { dg-output "\n0x20UB" } */
 
-/* { dg-command {set endian big} } */
-/* { dg-command {print/x int @ 0#B} } */
+/* { dg-command {.set endian big} } */
+/* { dg-command {.print/x int @ 0#B} } */
 /* { dg-output "\n0x10203040" } */
-/* { dg-command {set endian little} } */
-/* { dg-command {print/x int @ 0#B} } */
+/* { dg-command {.set endian little} } */
+/* { dg-command {.print/x int @ 0#B} } */
 /* { dg-output "\n0x40302010" } */
 
-/* { dg-command {set endian big} } */
-/* { dg-command {print/x int<16> @ 6#B } } */
+/* { dg-command {.set endian big} } */
+/* { dg-command {.print/x int<16> @ 6#B } } */
 /* { dg-output "\n0x7080H" } */
 
-/* { dg-command {set endian little} } */
-/* { dg-command {print/x int<16> @ 6#B } } */
+/* { dg-command {.set endian little} } */
+/* { dg-command {.print/x int<16> @ 6#B } } */
 /* { dg-output "\n0x8070H" } */
 
-/* { dg-command {set endian big} } */
-/* { dg-command {print/x int<32> @ 1#B } } */
+/* { dg-command {.set endian big} } */
+/* { dg-command {.print/x int<32> @ 1#B } } */
 /* { dg-output "\n0x20304050" } */
 
-/* { dg-command {set endian little} } */
-/* { dg-command {print/x int<32> @ 1#B } } */
+/* { dg-command {.set endian little} } */
+/* { dg-command {.print/x int<32> @ 1#B } } */
 /* { dg-output "\n0x50403020" } */
 
 /* { dg-command {defvar i = 10} } */
-/* { dg-command {: try i = int @ 999#B; catch if E_eof { print ("catched\n"); } } } */
+/* { dg-command {try i = int @ 999#B; catch if E_eof { print ("catched\n"); } } } */
 /* { dg-output "\ncatched" } */
 

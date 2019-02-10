@@ -5,5 +5,5 @@ defun defun_4 = (int i) int:
    return i + 1;
   }
 
-/* { dg-command { print defun_4 (10) } } */
+/* { dg-command { .print defun_4 (10) } } */
 /* { dg-output 11 } */

@@ -19,5 +19,5 @@ defun loop_4 = int:
    return res;
   }
 
-/* { dg-command { print loop_4 } } */
+/* { dg-command { .print loop_4 } } */
 /* { dg-output 9 } */

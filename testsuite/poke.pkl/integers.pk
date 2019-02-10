@@ -1,46 +1,46 @@
 /* { dg-do run } */
 
-/* { dg-command { print 6n } } */
+/* { dg-command { .print 6n } } */
 /* { dg-output 6N } */
 
-/* { dg-command { print 10LU } } */
+/* { dg-command { .print 10LU } } */
 /* { dg-output "\n10UL" } */
 
-/* { dg-command { print 10UL } } */
+/* { dg-command { .print 10UL } } */
 /* { dg-output "\n10UL" } */
 
-/* { dg-command { print 6h } } */
+/* { dg-command { .print 6h } } */
 /* { dg-output "\n6H" } */
 
-/* { dg-command { print 6 as int<16> } } */
+/* { dg-command { .print 6 as int<16> } } */
 /* { dg-output "\n6H" } */
 
-/* { dg-command { print 6hu } } */
+/* { dg-command { .print 6hu } } */
 /* { dg-output "\n6UH" } */
 
-/* { dg-command { print 6 as uint<16> } } */
+/* { dg-command { .print 6 as uint<16> } } */
 /* { dg-output "\n6UH" } */
 
-/* { dg-command { print/x -1 as uint<4> } } */
+/* { dg-command { .print/x -1 as uint<4> } } */
 /* { dg-output "\n0xfUN" } */
 
-/* { dg-command { print/x -1 as int<4> } } */
+/* { dg-command { .print/x -1 as int<4> } } */
 /* { dg-output "\n0xfN" } */
 
-/* { dg-command { print/o -1 as uint<3> } } */
+/* { dg-command { .print/o -1 as uint<3> } } */
 /* { dg-output "\n\\(uint<3>\\) 0o7" } */
 
-/* { dg-command { print/o -1 as int<3> } } */
+/* { dg-command { .print/o -1 as int<3> } } */
 /* { dg-output "\n\\(int<3>\\) 0o7" } */
 
-/* { dg-command { print/b -1 as uint<4> } } */
+/* { dg-command { .print/b -1 as uint<4> } } */
 /* { dg-output "\n0b1111UN" } */
 
-/* { dg-command { print/b -1 as int<4> } } */
+/* { dg-command { .print/b -1 as int<4> } } */
 /* { dg-output "\n0b1111N" } */
 
-/* { dg-command { print/b -1 as int<3> } } */
+/* { dg-command { .print/b -1 as int<3> } } */
 /* { dg-output "\n\\(int<3>\\) 0b111" } */
 
-/* { dg-command { print/b -1 as uint<3> } } */
+/* { dg-command { .print/b -1 as uint<3> } } */
 /* { dg-output "\n\\(uint<3>\\) 0b111" } */

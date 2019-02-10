@@ -10,6 +10,6 @@ defun if_1 = (int i) int:
  return res;
 }
 
-/* { dg-command { print if_1 (10) } } */
-/* { dg-command { print if_1 (20) } } */
+/* { dg-command { .print if_1 (10) } } */
+/* { dg-command { .print if_1 (20) } } */
 /* { dg-output "0\n666" } */

@@ -1,23 +1,23 @@
 /* { dg-do run } */
 
-/* { dg-command { print [0,1,2] } } */
+/* { dg-command { .print [0,1,2] } } */
 /* { dg-output "\\\[0,1,2\\\]" } */
 
-/* { dg-command { print [0,1,2][1] } } */
+/* { dg-command { .print [0,1,2][1] } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { print [{.foo=10}] } } */
+/* { dg-command { .print [{.foo=10}] } } */
 /* { dg-output "\n\\\[\\{.foo=10\\}\\\]" } */
 
-/* { dg-command { print [.[2]=10] } } */
+/* { dg-command { .print [.[2]=10] } } */
 /* { dg-output "\n\\\[null,null,10\\\]" } */
 
-/* { dg-command { print [0,1,2,.[1]=666] } } */
+/* { dg-command { .print [0,1,2,.[1]=666] } } */
 /* { dg-output "\n\\\[0,666,2\\\]" } */
 
-/* { dg-command { print [[1]][0] } } */
+/* { dg-command { .print [[1]][0] } } */
 /* { dg-output "\n\\\[1\\\]" } */
 
-/* { dg-command { print [2#B, 3#b] } } */
+/* { dg-command { .print [2#B, 3#b] } } */
 /* { dg-output "\n\\\[2#B,3#b\\\]" } */
 

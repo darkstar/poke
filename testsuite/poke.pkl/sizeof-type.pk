@@ -1,21 +1,21 @@
 /* { dg-do run } */
 
-/* { dg-command { print sizeof (int) } } */
+/* { dg-command { .print sizeof (int) } } */
 /* { dg-output 32UL#b } */
 
-/* { dg-command { print sizeof (long) } } */
+/* { dg-command { .print sizeof (long) } } */
 /* { dg-output "\n64UL#b" } */
 
 deftype array_of_struct = struct {int; int;};
 
 deftype struct_empty = struct {};
 
-/* { dg-command { print sizeof (struct_empty) } } */
+/* { dg-command { .print sizeof (struct_empty) } } */
 /* { dg-output "\n0UL#b" } */
 
 deftype struct_for_sizeof = struct { int; long; };
 
-/* { dg-command { print sizeof (struct_for_sizeof) } } */
+/* { dg-command { .print sizeof (struct_for_sizeof) } } */
 /* { dg-output "\n96UL#b" } */
 
 deftype struct_with_struct =
@@ -30,7 +30,7 @@ deftype struct_with_struct =
     };
   };
 
-/* { dg-command { print sizeof (struct_with_struct) } } */
+/* { dg-command { .print sizeof (struct_with_struct) } } */
 /* { dg-output "\n96UL#b" } */
 
 deftype struct_with_struct_2 =
@@ -46,7 +46,7 @@ deftype struct_with_struct_2 =
     };
   };
 
-/* { dg-command { print sizeof (struct_with_struct_2) } } */
+/* { dg-command { .print sizeof (struct_with_struct_2) } } */
 /* { dg-output "\n160UL#b" } */
 
 deftype struct_with_array =
@@ -57,7 +57,7 @@ deftype struct_with_array =
     int[3];
   };
 
-/* { dg-command { print sizeof (struct_with_array) } } */
+/* { dg-command { .print sizeof (struct_with_array) } } */
 /* { dg-output "\n288UL#b" } */
 
 deftype struct_with_intconstr =
@@ -68,11 +68,11 @@ deftype struct_with_intconstr =
     int<7> baz;
   };
 
-/* { dg-command { print sizeof (struct_with_intconstr) } } */
+/* { dg-command { .print sizeof (struct_with_intconstr) } } */
 /* { dg-output "\n18UL#b" } */
 
-/* { dg-command { print sizeof (offset<int,B>) } } */
+/* { dg-command { .print sizeof (offset<int,B>) } } */
 /* { dg-output "\n32UL#b" } */
 
-/* { dg-command { print sizeof (offset<int<5>,B>) } } */
+/* { dg-command { .print sizeof (offset<int<5>,B>) } } */
 /* { dg-output "\n5UL#b" } */

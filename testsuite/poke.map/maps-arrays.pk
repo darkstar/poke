@@ -1,36 +1,36 @@
 /* { dg-do run } */
 /* { dg-data {c*} {0x10 0x20 0x30 0x40  0x50 0x60 0x70 0x80   0x90 0xa0 0xb0 0xc0} } */
 
-/* { dg-command {print/x byte[4] @ 0#B} } */
+/* { dg-command {.print/x byte[4] @ 0#B} } */
 /* { dg-output "\\\[0x10UB,0x20UB,0x30UB,0x40UB\\\]" } */
 
-/* { dg-command {set endian big} } */
-/* { dg-command {print/x int<32>[2] @ 0#B} } */
+/* { dg-command {.set endian big} } */
+/* { dg-command {.print/x int<32>[2] @ 0#B} } */
 /* { dg-output "\n\\\[0x10203040,0x50607080\\\]" } */
 
-/* { dg-command {print/x byte[2][2] @ 4#B} } */
+/* { dg-command {.print/x byte[2][2] @ 4#B} } */
 /* { dg-output "\n\\\[\\\[0x50UB,0x60UB\\\],\\\[0x70UB,0x80UB\\\]\\\]" } */
 
-/* { dg-command {print/x byte[16#b][2] @ 4#B} } */
+/* { dg-command {.print/x byte[16#b][2] @ 4#B} } */
 /* { dg-output "\n\\\[\\\[0x50UB,0x60UB\\\],\\\[0x70UB,0x80UB\\\]\\\]" } */
 
-/* { dg-command {print/x byte[2][16#b] @ 4#B} } */
+/* { dg-command {.print/x byte[2][16#b] @ 4#B} } */
 /* { dg-output "\n\\\[\\\[0x50UB,0x60UB\\\]\\\]" } */
 
-/* { dg-command {print/x byte[] @ 0#B} } */
+/* { dg-command {.print/x byte[] @ 0#B} } */
 /* { dg-output "\n\\\[0x10UB,0x20UB,0x30UB,0x40UB,0x50UB,0x60UB,0x70UB,0x80UB,0x90UB,0xa0UB,0xb0UB,0xc0UB\\\]" } */
 
 /* { dg-command {defvar a = byte[2][2] @ 4#B } } */
-/* { dg-command {: a[0] = [0xaaUB, 0xbbUB]; } } */
-/* { dg-command { print/x a } } */
+/* { dg-command {a[0] = [0xaaUB, 0xbbUB]; } } */
+/* { dg-command { .print/x a } } */
 /* { dg-output "\n\\\[\\\[0xaaUB,0xbbUB\\\],\\\[0x70UB,0x80UB\\\]\\\]" } */
 
 /* { dg-command {defvar b = byte[16#b][4#B] @ 4#B } } */
-/* { dg-command {: b[1] = [0x11UB, 0x22UB]; } } */
-/* { dg-command { print/x b } } */
+/* { dg-command {b[1] = [0x11UB, 0x22UB]; } } */
+/* { dg-command { .print/x b } } */
 /* { dg-output "\n\\\[\\\[0xaaUB,0xbbUB\\\],\\\[0x11UB,0x22UB\\\]\\\]" } */
 
 /* { dg-command {defvar c = [1,2,3]} } */
-/* { dg-command {: try c = int[3] @ 4#B; catch if E_eof { print ("catched\n"); } } } */
+/* { dg-command {try c = int[3] @ 4#B; catch if E_eof { print ("catched\n"); } } } */
 /* { dg-output "\ncatched" }  */
 

@@ -75,7 +75,7 @@ proc dg-data { args } {
     # Append commands to open the file in poke and make it the current
     # IOS.
     set poke_commands \
-        "$poke_commands -c [exec printf %q "file $output_file"]"
+        "$poke_commands -c [exec printf %q ".file $output_file"]"
 
     set poke_data_file $output_file
 }
@@ -96,7 +96,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
 
     switch $do_what {
         "compile" {
-            catch "exec $POKE --quiet -l $prog -c exit $extra_tool_flags" comp_output
+            catch "exec $POKE --quiet -l $prog -c .exit $extra_tool_flags" comp_output
             set output_file ""
         }
         "run" {

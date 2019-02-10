@@ -5,7 +5,7 @@ deftype Function = (int)int;
 defun double = (int a) int: { return a * 2; }
 defun foo = Function: { return double; }
 
-/* {dg-command { print foo()(10) } } */
+/* {dg-command { .print foo()(10) } } */
 /* {dg-output "20"} */
 
 

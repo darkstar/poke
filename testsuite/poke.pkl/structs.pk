@@ -1,15 +1,15 @@
 /* { dg-do run } */
 
-/* { dg-command { print {} } } */
+/* { dg-command { .print {} } } */
 /* { dg-output "\\{\\}" } */
 
-/* { dg-command { print {1,2} } } */
+/* { dg-command { .print {1,2} } } */
 /* { dg-output "\n\\{1,2\\}" } */
 
-/* { dg-command { print ({.fo=10}).fo } } */
+/* { dg-command { .print ({.fo=10}).fo } } */
 /* { dg-output "\n10" } */
 
 defvar struct_ref_2 = {.fo = 10#Kb};
   
-/* { dg-command { print struct_ref_2.fo/2#Kb } } */
+/* { dg-command { .print struct_ref_2.fo/2#Kb } } */
 /* { dg-output "\n5" } */

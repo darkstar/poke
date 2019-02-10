@@ -7,5 +7,5 @@ defun foo = int:
    return global;
   }
 
-/* { dg-command { print foo () } } */
+/* { dg-command { .print foo () } } */
 /* { dg-output 10 } */
