@@ -1249,6 +1249,19 @@ pkl_ast_make_try_catch_stmt (pkl_ast ast, pkl_ast_node code,
   return try_catch_stmt;
 }
 
+/* Build and return an AST node for a `print' statement.  */
+
+pkl_ast_node
+pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp)
+{
+  pkl_ast_node print_stmt = pkl_ast_make_node (ast,
+                                               PKL_AST_PRINT_STMT);
+
+  if (exp)
+    PKL_AST_PRINT_STMT_EXP (print_stmt) = ASTREF (exp);
+  return print_stmt;
+}
+
 /* Build and return an AST node for a `raise' statement.  */
 
 pkl_ast_node
@@ -1568,6 +1581,10 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_EXP (ast));
       break;
 
+    case PKL_AST_PRINT_STMT:
+      pkl_ast_node_free (PKL_AST_PRINT_STMT_EXP (ast));
+      break;
+
     case PKL_AST_RAISE_STMT:
 
       pkl_ast_node_free (PKL_AST_RAISE_STMT_EXP (ast));
@@ -1690,6 +1707,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
     case PKL_AST_DECL:
     case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
+    case PKL_AST_PRINT_STMT:
     case PKL_AST_RAISE_STMT:
     case PKL_AST_NULL_STMT:
       break;
@@ -2155,6 +2173,11 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (try_catch_stmt_handler, TRY_CATCH_STMT_HANDLER);
       PRINT_AST_SUBAST (try_catch_stmt_arg, TRY_CATCH_STMT_ARG);
       PRINT_AST_SUBAST (try_catch_stmt_exp, TRY_CATCH_STMT_EXP);
+      break;
+
+    case PKL_AST_PRINT_STMT:
+      IPRINTF ("PRINT_STMT::\n");
+      PRINT_AST_SUBAST (print_stmt_exp, PRINT_STMT_EXP);
       break;
 
     case PKL_AST_RAISE_STMT:

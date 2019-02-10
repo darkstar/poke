@@ -1211,6 +1211,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of the expression in a `print' statement should be a
+   string.  XXX: do promo instead of this, with casts to string.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node print_stmt = PKL_PASS_NODE;
+  pkl_ast_node print_stmt_exp = PKL_AST_PRINT_STMT_EXP (print_stmt);
+
+  if (print_stmt_exp)
+    {
+      pkl_ast_node exp_type = PKL_AST_TYPE (print_stmt_exp);
+
+      if (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_STRING)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp_type),
+                     "expected a string");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of a `raise' exception number, if specified, should be
    integral.  */
 
@@ -1484,6 +1510,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_pr_loop_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_typify1_ps_print_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_typify1_ps_struct_elem_type),

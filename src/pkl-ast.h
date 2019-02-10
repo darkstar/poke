@@ -74,6 +74,7 @@ enum pkl_ast_code
   PKL_AST_RETURN_STMT,
   PKL_AST_EXP_STMT,
   PKL_AST_TRY_CATCH_STMT,
+  PKL_AST_PRINT_STMT,
   PKL_AST_RAISE_STMT,
   PKL_AST_LAST_STMT = PKL_AST_RAISE_STMT,
   PKL_AST_LAST
@@ -1266,8 +1267,22 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
                                           pkl_ast_node code, pkl_ast_node handler,
                                           pkl_ast_node arg, pkl_ast_node exp);
 
-/* PKL_AST_RAISE_STMT nodes represent raise statements, which are used
-   in order to raise exceptions at the program level.
+/* PKL_AST_PRINT_STMT nodes represent `print' statements.
+
+   EXP is an expression.  */
+
+#define PKL_AST_PRINT_STMT_EXP(AST) ((AST)->print_stmt.exp)
+
+struct pkl_ast_print_stmt
+{
+  struct pkl_ast_common common;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp);
+
+/* PKL_AST_RAISE_STMT nodes represent `raise' statements, which are
+   used in order to raise exceptions at the program level.
 
    EXP is an expression that should evaluate to an exception object.
    At the present time, this is simply a 32-bit integer.  */
@@ -1328,6 +1343,7 @@ union pkl_ast_node
   struct pkl_ast_exp_stmt exp_stmt;
   struct pkl_ast_try_catch_stmt try_catch_stmt;
   struct pkl_ast_raise_stmt raise_stmt;
+  struct pkl_ast_print_stmt print_stmt;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

@@ -598,6 +598,23 @@ PKL_PHASE_END_HANDLER
 
 /*
  * | [EXP]
+ * PRINT_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_print_stmt)
+{
+  pkl_ast_node print_stmt = PKL_PASS_NODE;
+  pkl_ast_node print_stmt_exp = PKL_AST_PRINT_STMT_EXP (print_stmt);
+
+  /* Print a newline if there is no expression.  */
+  if (!print_stmt_exp)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string ("\n"));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT);
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | [EXP]
  * RAISE_STMT
  */
 
@@ -2073,6 +2090,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_gen_ps_print_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_gen_ps_raise_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL, pkl_gen_pr_funcall),
