@@ -20,11 +20,9 @@
 #include "pk-cmd.h"
 
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
-extern struct pk_cmd help_peek_cmd; /* pk-peek.c */
 
 struct pk_cmd *help_cmds[] =
   {
-    &help_peek_cmd,
     &null_cmd
   };
 
