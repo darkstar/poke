@@ -973,9 +973,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
 
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_ANY)
     {
-      /* Check at run-time that the type of the value is `to_type'.
-         Raise a E_conv if it isn't.  */
-      /* XXX change this? */
+      jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+      PKL_PASS_SUBPASS (to_type);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ISA);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNZI, label);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+      pkl_asm_label (PKL_GEN_ASM, label);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
     }
   else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
