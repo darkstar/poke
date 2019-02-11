@@ -131,7 +131,8 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
                       pkl_parser->env = pkl_env_pop_frame (pkl_parser->env); */
           break;
         case PKL_AST_FUNC:
-          /*          pkl_parser->env = pkl_env_pop_frame (pkl_parser->env); */
+          if (PKL_AST_FUNC_ARGS ($$))
+            pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
           break;
         default:
           break;
