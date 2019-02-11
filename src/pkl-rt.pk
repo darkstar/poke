@@ -61,29 +61,29 @@ defvar E_conv          = 8;
 
 defun _pkl_exception_handler = (Exception exception) void:
   {
-   print ("unhandled ");
+   sprint "unhandled ";
 
    /* XXX: use a multiple conditional statement here.  */
    if (exception == E_out_of_bounds)
-     print ("out of bounds");
+     sprint "out of bounds";
    else if (exception == E_eof)
-     print ("EOF");
+     sprint "EOF";
    else if (exception == E_conv)
-     print ("conversion error");
+     sprint "conversion error";
    else if (exception == E_map_bounds)
-     print ("out of map bounds");
+     sprint "out of map bounds";
    else if (exception == E_map)
-     print ("no map");
+     sprint "no map";
    else if (exception == E_div_by_zero)
-     print ("division by zero");
+     sprint "division by zero";
    else if (exception == E_no_ios)
-     print ("no IOS");
+     sprint "no IOS";
    else if (exception == E_no_return)
-     print ("no return");
+     sprint "no return";
    else
-     print ("generic");
+     sprint "generic";
 
-   print (" exception\n");
+   sprint " exception\n";
   }
 
 /* Find the greatest common divisor of two unsigned 64-bit integrals A
