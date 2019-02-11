@@ -48,7 +48,7 @@ pvm_env
 pvm_env_new ()
 {
   int i;
-  pvm_env env = GC_MALLOC (sizeof (struct pvm_env));
+  pvm_env env = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_env));
 
   memset (env, 0, sizeof (struct pvm_env));
 
