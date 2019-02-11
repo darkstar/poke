@@ -37,10 +37,10 @@ defun quux = (offset<uint,B> o) offset<long,b>: { return o; }
 
 defun myprint = (string str1, string str2) void: { print (str1); print (str2); }
 
-/* { dg-command { myprint :str1 "foo" :str2 "bar\n"; } } */
+/* { dg-command { myprint :str1 "foo" :str2 "bar\n" } } */
 /* { dg-output "\nfoobar" } */
 
-/* { dg-command { myprint :str2 "bar\n" :str1 "foo"; } } */
+/* { dg-command { myprint :str2 "bar\n" :str1 "foo" } } */
 /* { dg-output "\nfoobar" } */
 
 

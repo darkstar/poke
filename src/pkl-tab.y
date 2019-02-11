@@ -286,8 +286,18 @@ start:
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
                 }
-        | START_STMT stmt
+	| START_STMT stmt
                 {
+                  $$ = pkl_ast_make_program (pkl_parser->ast, $2);
+                  PKL_AST_LOC ($$) = @$;
+                  pkl_parser->ast->ast = ASTREF ($$);
+                }
+	| START_STMT stmt ';'
+                {
+                  /* This rule is to allow the presence of an extra
+                     ';' after the sentence.  This to allow the poke
+                     command manager to ease the handlign of
+                     semicolons in the command line.  */
                   $$ = pkl_ast_make_program (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
                   pkl_parser->ast->ast = ASTREF ($$);
