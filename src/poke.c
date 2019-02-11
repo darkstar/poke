@@ -301,10 +301,22 @@ initialize ()
   /* Initialize the poke incremental compiler and load the standard
      library.  */
   poke_compiler = pkl_new ();
-  if (!pkl_compile_file (poke_compiler,
-                         /* XXX: use POKEDIR  */
-                         "/home/jemarch/gnu/hacks/poke/pickles/std.pk"))
-    exit (1);
+  {
+    pvm_program program;
+    int pvm_ret;
+    pvm_val val;
+
+    program = pkl_compile_file (poke_compiler,
+                                /* XXX: use POKEDIR  */
+                                "/home/jemarch/gnu/hacks/poke/pickles/std.pk");
+    if (program == NULL)
+      /* XXX explanatory error message.  */
+      exit (1);
+
+    pvm_ret = pvm_run (poke_vm, program, &val);
+    if (pvm_ret != PVM_EXIT_OK)
+      exit (1);
+  }
 
   /* Initialize the command subsystem.  This should be done even if
      called non-interactively.  */

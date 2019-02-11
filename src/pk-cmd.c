@@ -773,14 +773,27 @@ pk_cmd_init (void)
   vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
   set_trie = pk_trie_from_cmds (set_cmds);
 
-#if 0
   /* Compile commands written in Poke.  */
-  if (!pkl_compile_file (poke_compiler,
-                         /* XXX: use POKEDIR  */
-                         "/home/jemarch/gnu/hacks/poke/src/pk-dump.pk"))
-    /* XXX explanatory error message.  */
-    exit (1);
-#endif
+  {
+    pvm_program program;
+    int pvm_ret;
+    pvm_val val;
+
+    /* XXX for loop loading all the pk-*.pk */
+    program = pkl_compile_file (poke_compiler,
+                                /* XXX: use POKEDIR  */
+                                "/home/jemarch/gnu/hacks/poke/src/pk-dump.pk");
+    if (program == NULL)
+      /* XXX explanatory error message.  */
+      exit (1);
+
+    pvm_ret = pvm_run (poke_vm, program, &val);
+    if (pvm_ret != PVM_EXIT_OK)
+    {
+      printf (_("run-time error\n"));
+      exit (1);
+    }
+  }
 }
 
 void
