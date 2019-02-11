@@ -1833,9 +1833,6 @@ instruction isa () # ( VAL TYPE -- TYPE VAL BOOL )
     pvm_val val = JITTER_UNDER_TOP_STACK ();
     pvm_val val_type = pvm_typeof (val);
 
-//    pvm_print_val (stdout, type, 10, 0);     printf ("\n");
-//    pvm_print_val (stdout, val_type, 10, 0); printf ("\n");
-
     JITTER_PUSH_STACK (pvm_make_int (pvm_type_equal (type, val_type),
                                      32));
   end
