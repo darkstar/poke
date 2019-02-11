@@ -27,6 +27,8 @@ defun dump = (offset<uint64,b> from,
    defvar top = from + size;
    defvar offset = from;
 
+   /* XX Check for an IOS.  */
+
    print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
    while (offset < top)
      {
