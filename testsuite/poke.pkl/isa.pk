@@ -29,14 +29,14 @@ defun foo = int<3>: { return 2; }
 defun foo2 = (any a) void:
   {
    if (a isa int<32>)
-     sprint "an int32";
+     print "an int32";
    else if (a isa uint<7>)
-     sprint "an uint7";
+     print "an uint7";
    else if (a isa uint<64>[])
-     sprint "an uint64 array";
+     print "an uint64 array";
    else
-     sprint "unknown";
-   sprint;
+     print "unknown";
+   print;
   }
 
 /* { dg-command { foo2 (10) } } */

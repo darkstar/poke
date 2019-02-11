@@ -137,14 +137,12 @@ D [0-9]
 "raise"		{ return RAISE; }
 "void"		{ return VOID; }
 "any"		{ return ANY; }
-"sprint"	{ return PRINT; }
+"print"		{ return PRINT; }
 "isa"		{ return ISA; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }
 "offset<"       { return OFFSETCONSTR; }
-
-"__builtin_print__"	{ return BUILTIN_PRINT; }
 
 "*="		{ return MULA; }
 "/="		{ return DIVA; }

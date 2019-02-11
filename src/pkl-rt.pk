@@ -31,10 +31,6 @@
 defvar true = 1;
 defvar false = 0;
 
-/* Compiler built-ins.  */
-
-defun print = (string str) void: __builtin_print__;
-
 /* Exceptions.
 
    XXX: use an enumeration?
@@ -61,29 +57,29 @@ defvar E_conv          = 8;
 
 defun _pkl_exception_handler = (Exception exception) void:
   {
-   sprint "unhandled ";
+   print "unhandled ";
 
    /* XXX: use a multiple conditional statement here.  */
    if (exception == E_out_of_bounds)
-     sprint "out of bounds";
+     print "out of bounds";
    else if (exception == E_eof)
-     sprint "EOF";
+     print "EOF";
    else if (exception == E_conv)
-     sprint "conversion error";
+     print "conversion error";
    else if (exception == E_map_bounds)
-     sprint "out of map bounds";
+     print "out of map bounds";
    else if (exception == E_map)
-     sprint "no map";
+     print "no map";
    else if (exception == E_div_by_zero)
-     sprint "division by zero";
+     print "division by zero";
    else if (exception == E_no_ios)
-     sprint "no IOS";
+     print "no IOS";
    else if (exception == E_no_return)
-     sprint "no return";
+     print "no return";
    else
-     sprint "generic";
+     print "generic";
 
-   sprint " exception\n";
+   print " exception\n";
   }
 
 /* Find the greatest common divisor of two unsigned 64-bit integrals A

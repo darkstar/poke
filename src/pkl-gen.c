@@ -345,13 +345,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
     {
       switch (comp_stmt_builtin)
         {
-        case PKL_AST_BUILTIN_PRINT:
-          {
-            /* defun print = (string s) __builtin_print __ */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT);
-            break;
-          }
         default:
             assert (0);
         }
