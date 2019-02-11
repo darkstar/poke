@@ -1,13 +1,13 @@
 /* { dg-do run } */
 
-/* { dg-command { .print !0 } } */
+/* { dg-command {  !0 } } */
 /* { dg-output 1 } */
 
-/* { dg-command { .print !1 } } */
+/* { dg-command {  !1 } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print !24 } } */
+/* { dg-command {  !24 } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print !0L } } */
+/* { dg-command {  !0L } } */
 /* { dg-output "\n1" } */

@@ -2,5 +2,5 @@
 
 defvar foo = 10;
 
-/* { dg-command { .print foo } } */
+/* { dg-command {  foo } } */
 /* { dg-output 10 } */

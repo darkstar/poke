@@ -2,5 +2,5 @@
 
 defvar offset = 12#B;
 
-/* { dg-command { .print offset + #b } } */
+/* { dg-command {  offset + #b } } */
 /* { dg-output 97#b } */

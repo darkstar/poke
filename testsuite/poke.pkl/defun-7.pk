@@ -10,6 +10,6 @@ defun foo = (int n) int:
    return bar (n);
   }
 
-/* { dg-command { .print foo (10) } } */
+/* { dg-command {  foo (10) } } */
 /* { dg-output 10 } */
 

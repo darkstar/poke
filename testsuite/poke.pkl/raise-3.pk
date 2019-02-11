@@ -23,5 +23,5 @@ defun bar = int:
    return 0;
   }
 
-/* { dg-command { .print bar } } */
+/* { dg-command {  bar } } */
 /* { dg-output "caught exception\n0" } */

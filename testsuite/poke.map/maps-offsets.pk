@@ -2,12 +2,12 @@
 /* { dg-data {c*} {0x10 0x20 0x30 0x40 0x50 0x60 0x70 0x80} } */
 
 /* { dg-command {defvar a = byte[2] @ 3#B} } */
-/* { dg-command {.print a'offset} } */
+/* { dg-command { a'offset} } */
 /* { dg-output "3UL#B" } */
-/* { dg-command {.print (byte[2] @ 0#B)'offset } } */
+/* { dg-command { (byte[2] @ 0#B)'offset } } */
 /* { dg-output "\n0UL#B" } */
-/* { dg-command {.print a'offset + a'size} } */
+/* { dg-command { a'offset + a'size} } */
 /* { dg-output "\n5UL#B" } */
 
-/* { dg-command {.print a'offset + 1#B} } */
+/* { dg-command { a'offset + 1#B} } */
 /* { dg-output "\n4UL#B" } */

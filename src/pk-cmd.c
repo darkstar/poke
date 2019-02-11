@@ -647,18 +647,22 @@ pk_cmd_exec (char *str)
       ecmd = xmalloc (strlen (cmd) + 2);
       strcpy (ecmd, cmd);
 
-      if (strncmp (ecmd, "defun", 5) == 0)
+      if (strncmp (ecmd, "defun ", 6) == 0
+          || strncmp (ecmd, "defun\t", 6) == 0)
         what = PKL_WHAT_DECLARATION;
       else
         {
-          if (strncmp (ecmd, "defvar", 5) == 0
-              || strncmp (ecmd, "deftype", 7) == 0)
+          if (strncmp (ecmd, "defvar ", 6) == 0
+              || strncmp (ecmd, "defvar\t", 6) == 0
+              || strncmp (ecmd, "deftype ", 8) == 0
+              || strncmp (ecmd, "deftype\t", 8) == 0)
             what = PKL_WHAT_DECLARATION;
           else
             what = PKL_WHAT_STATEMENT;
         }
 
-      if (strncmp (ecmd, "defun", 5) != 0)
+      if (strncmp (ecmd, "defun ", 6) != 0
+          && strncmp (ecmd, "defun\t", 6) != 0)
         strcat (ecmd, ";");
 
       prog  = pkl_compile_buffer (poke_compiler, what, ecmd, &end);

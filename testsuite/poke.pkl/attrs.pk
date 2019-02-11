@@ -1,62 +1,62 @@
 /* { dg-do run } */
 
-/* { dg-command { .print 1'size } } */
+/* { dg-command {  1'size } } */
 /* { dg-output 32UL#b } */
 
-/* { dg-command { .print 1U'size } } */
+/* { dg-command {  1U'size } } */
 /* { dg-output "\n32UL#b" } */
 
-/* { dg-command { .print 1L'size } } */
+/* { dg-command {  1L'size } } */
 /* { dg-output "\n64UL#b" } */
 
-/* { dg-command { .print 1LU'size } } */
+/* { dg-command {  1LU'size } } */
 /* { dg-output "\n64UL#b" } */
 
-/* { dg-command { .print (1 as int<3>)'size } } */
+/* { dg-command {  (1 as int<3>)'size } } */
 /* { dg-output "\n3UL#b" } */
 
-/* { dg-command { .print (1 as uint<33>)'size } } */
+/* { dg-command {  (1 as uint<33>)'size } } */
 /* { dg-output "\n33UL#b" } */
 
-/* { dg-command { .print [1]'size } } */
+/* { dg-command {  [1]'size } } */
 /* { dg-output "\n32UL#b" } */
 
-/* { dg-command { .print [1,2,3]'size } } */
+/* { dg-command {  [1,2,3]'size } } */
 /* { dg-output "\n96UL#b" } */
 
-/* { dg-command { .print [1UL]'size } } */
+/* { dg-command {  [1UL]'size } } */
 /* { dg-output "\n64UL#b" } */
 
-/* { dg-command { .print struct {}'size } } */
+/* { dg-command {  struct {}'size } } */
 /* { dg-output "\n0UL#b" } */
 
-/* { dg-command { .print struct {1, 2UL, "foo"}'size } } */
+/* { dg-command {  struct {1, 2UL, "foo"}'size } } */
 /* { dg-output "\n128UL#b" } */
 
-/* { dg-command { .print 10'size'unit } } */
+/* { dg-command {  10'size'unit } } */
 /* { dg-output "\n1UL" } */
 
-/* { dg-command { .print 10'size'magnitude } } */
+/* { dg-command {  10'size'magnitude } } */
 /* { dg-output "\n32UL" } */
 
-/* { dg-command { .print 10'signed } } */
+/* { dg-command {  10'signed } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 10LU'signed } } */
+/* { dg-command {  10LU'signed } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print struct {}'length } } */
+/* { dg-command {  struct {}'length } } */
 /* { dg-output "\n0UL" } */
 
-/* { dg-command { .print struct {1, .bar="foo"}'length } } */
+/* { dg-command {  struct {1, .bar="foo"}'length } } */
 /* { dg-output "\n2UL" } */
 
-/* { dg-command { .print ""'length } } */
+/* { dg-command {  ""'length } } */
 /* { dg-output "\n1UL" } */
 
-/* { dg-command { .print "foo"'length } } */
+/* { dg-command {  "foo"'length } } */
 /* { dg-output "\n4UL" } */
 
-/* { dg-command { .print [1,2,3]'length } } */
+/* { dg-command {  [1,2,3]'length } } */
 /* { dg-output "\n3UL" } */
 

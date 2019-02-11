@@ -1,165 +1,165 @@
 /* { dg-do run } */
 
-/* { dg-command { .print #bit } } */
+/* { dg-command {  #bit } } */
 /* { dg-output 1#b } */
 
-/* { dg-command { .print #int } } */
+/* { dg-command {  #int } } */
 /* { dg-output "\n1#32" } */
 
-/* { dg-command { .print 12#B } } */
+/* { dg-command {  12#B } } */
 /* { dg-output "\n12#B" } */
 
-/* { dg-command { .print 12#b } } */
+/* { dg-command {  12#b } } */
 /* { dg-output "\n12#b" } */
 
-/* { dg-command { .print (1 + 3)#B } } */
+/* { dg-command {  (1 + 3)#B } } */
 /* { dg-output "\n4#B" } */
 
-/* { dg-command { .print 12#Kb } } */
+/* { dg-command {  12#Kb } } */
 /* { dg-output "\n12#Kb" } */
 
-/* { dg-command { .print 12#KB } } */
+/* { dg-command {  12#KB } } */
 /* { dg-output "\n12#KB" } */
 
-/* { dg-command { .print 12#Mb } } */
+/* { dg-command {  12#Mb } } */
 /* { dg-output "\n12#Mb" } */
 
-/* { dg-command { .print 12#MB } } */
+/* { dg-command {  12#MB } } */
 /* { dg-output "\n12#MB" } */
 
-/* { dg-command { .print 20#long/#int } } */
+/* { dg-command {  20#long/#int } } */
 /* { dg-output "\n40" } */
 
-/* { dg-command { .print 1024UL#b/1UB#byte } } */
+/* { dg-command {  1024UL#b/1UB#byte } } */
 /* { dg-output "\n128UL" } */
 
-/* { dg-command { .print 10#bit%#byte/#bit } } */
+/* { dg-command {  10#bit%#byte/#bit } } */
 /* { dg-output "\n2" } */
 
-/* { dg-command { .print 3#nibble%#byte } } */
+/* { dg-command {  3#nibble%#byte } } */
 /* { dg-output "\n1#N" } */
 
-/* { dg-command { .print 1#b + 2#b } } */
+/* { dg-command {  1#b + 2#b } } */
 /* { dg-output "\n3#b" } */
 
-/* { dg-command { .print 1U#b + 2U#b } } */
+/* { dg-command {  1U#b + 2U#b } } */
 /* { dg-output "\n3U#b" } */
 
-/* { dg-command { .print 1L#b + 2L#b } } */
+/* { dg-command {  1L#b + 2L#b } } */
 /* { dg-output "\n3L#b" } */
 
-/* { dg-command { .print 1UL#b + 2UL#b } } */
+/* { dg-command {  1UL#b + 2UL#b } } */
 /* { dg-output "\n3UL#b" } */
 
-/* { dg-command { .print 2 as int<7> #B + 1 as int<2> #b } } */
+/* { dg-command {  2 as int<7> #B + 1 as int<2> #b } } */
 /* { dg-output "\n\\(int<7>\\) 17#b" } */
 
-/* { dg-command { .print 1#b - 2#b } } */
+/* { dg-command {  1#b - 2#b } } */
 /* { dg-output "\n-1#b" } */
 
-/* { dg-command { .print 2U#b - 1U#b } } */
+/* { dg-command {  2U#b - 1U#b } } */
 /* { dg-output "\n1U#b" } */
 
-/* { dg-command { .print 1L#b - 2L#b } } */
+/* { dg-command {  1L#b - 2L#b } } */
 /* { dg-output "\n-1L#b" } */
 
-/* { dg-command { .print 10UL#b - 2UL#b } } */
+/* { dg-command {  10UL#b - 2UL#b } } */
 /* { dg-output "\n4UL#2" } */
 
-/* { dg-command { .print 2 as int<7> #B - 1 as int<2> #b } } */
+/* { dg-command {  2 as int<7> #B - 1 as int<2> #b } } */
 /* { dg-output "\n\\(int<7>\\) 15#b" } */
 
-/* { dg-command { .print 12#b == (11 + 1)#b } } */
+/* { dg-command {  12#b == (11 + 1)#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 2L#byte == 16UH#bit } } */
+/* { dg-command {  2L#byte == 16UH#bit } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 12#b == (11 + 2)#b } } */
+/* { dg-command {  12#b == (11 + 2)#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 3#byte == 16#b } } */
+/* { dg-command {  3#byte == 16#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 12#b != (11 + 2)#b } } */
+/* { dg-command {  12#b != (11 + 2)#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 3L#byte != 16U#b } } */
+/* { dg-command {  3L#byte != 16U#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 12#b != (11 + 1)#b } } */
+/* { dg-command {  12#b != (11 + 1)#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 2#byte != 16#bit } } */
+/* { dg-command {  2#byte != 16#bit } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 12#b > 11#b } } */
+/* { dg-command {  12#b > 11#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 1L#B > -7H#b } } */
+/* { dg-command {  1L#B > -7H#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 11#b > 20#b } } */
+/* { dg-command {  11#b > 20#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 1#B > 9#b } } */
+/* { dg-command {  1#B > 9#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 12#b >= 12#b } } */
+/* { dg-command {  12#b >= 12#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 1L#B >= 7UB#b } } */
+/* { dg-command {  1L#B >= 7UB#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 11#b >= 20#b } } */
+/* { dg-command {  11#b >= 20#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 1#B >= 9#b } } */
+/* { dg-command {  1#B >= 9#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 11#b < 12#b } } */
+/* { dg-command {  11#b < 12#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 7LU#b < 1UH#B } } */
+/* { dg-command {  7LU#b < 1UH#B } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 20#b < 11#b } } */
+/* { dg-command {  20#b < 11#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 9#b < 1#B } } */
+/* { dg-command {  9#b < 1#B } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 12#b <= 12#b } } */
+/* { dg-command {  12#b <= 12#b } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print -7H#b <= 1L#B } } */
+/* { dg-command {  -7H#b <= 1L#B } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 20#b <= 11#b } } */
+/* { dg-command {  20#b <= 11#b } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 9#b <= 1#B } } */
+/* { dg-command {  9#b <= 1#B } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print 4#B + 8#b } } */
+/* { dg-command {  4#B + 8#b } } */
 /* { dg-output "\n5#B" } */
 
-/* { dg-command { .print 8#b + 4#B } } */
+/* { dg-command {  8#b + 4#B } } */
 /* { dg-output "\n5#B" } */
 
-/* { dg-command { .print 2#B * 3 } } */
+/* { dg-command {  2#B * 3 } } */
 /* { dg-output "\n6#B" } */
 
-/* { dg-command { .print 3 * 2#B } } */
+/* { dg-command {  3 * 2#B } } */
 /* { dg-output "\n6#B" } */
 
-/* { dg-command { .print 2#B * 0 } } */
+/* { dg-command {  2#B * 0 } } */
 /* { dg-output "\n0#B" } */
 
-/* { dg-command { .print 0#b * 2 } } */
+/* { dg-command {  0#b * 2 } } */
 /* { dg-output "\n0#b" } */
 
-/* { dg-command { .print 2#B * 3L } } */
+/* { dg-command {  2#B * 3L } } */
 /* { dg-output "\n6L#B" } */
 
 

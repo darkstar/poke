@@ -7,5 +7,5 @@ defun get_message = string:
    return defun_2_message;
   }
 
-/* { dg-command { .print get_message () } } */
+/* { dg-command {  get_message () } } */
 /* { dg-output {"hello world"} } */

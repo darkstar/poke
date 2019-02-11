@@ -16,6 +16,6 @@ defun loop_2 = (int i) int:
    return res;
    }
 
-/* { dg-command { .print loop_2 (0) } } */
-/* { dg-command { .print loop_2 (10) } } */
+/* { dg-command {  loop_2 (0) } } */
+/* { dg-command {  loop_2 (10) } } */
 /* { dg-output "0\n5" } */

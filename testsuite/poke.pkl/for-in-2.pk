@@ -10,6 +10,6 @@ defun foo = (int[] array) int:
    return sum;
   }
 
-/* { dg-command { .print foo ([1,2,3,4]) } } */
+/* { dg-command {  foo ([1,2,3,4]) } } */
 /* { dg-output "6" } */
 

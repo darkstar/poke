@@ -1,29 +1,29 @@
 /* { dg-do run } */
 
-/* { dg-command { .print 10 isa any } } */
+/* { dg-command {  10 isa any } } */
 /* { dg-output "1" } */
 
-/* { dg-command { .print "foo" isa any } } */
+/* { dg-command {  "foo" isa any } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print struct {1,"foo"} isa any } } */
+/* { dg-command {  struct {1,"foo"} isa any } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 10 isa int } } */
+/* { dg-command {  10 isa int } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 10 isa int<32> } } */
+/* { dg-command {  10 isa int<32> } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print 10 isa uint<32> } } */
+/* { dg-command {  10 isa uint<32> } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print "foo" isa string } } */
+/* { dg-command {  "foo" isa string } } */
 /* { dg-output "\n1" } */
 
 defun foo = int<3>: { return 2; }
 
-/* { dg-command { .print foo isa int<3> } } */
+/* { dg-command {  foo isa int<3> } } */
 /* { dg-output "\n1" } */
 
 defun foo2 = (any a) void:
