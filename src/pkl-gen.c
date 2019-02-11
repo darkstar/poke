@@ -95,9 +95,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
 {
   /* Make sure there is always some value returned in the stack, since
      that is expected in the PVM.  */
-  if (!pkl_compiling_expression_p (PKL_GEN_PAYLOAD->compiler))
-    /*      && PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)
-            && PKL_AST_CODE (PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)) != PKL_AST_EXP_STMT)*/
+  if (!pkl_compiling_expression_p (PKL_GEN_PAYLOAD->compiler)
+      && !(pkl_compiling_statement_p (PKL_GEN_PAYLOAD->compiler)
+           && PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)
+           && PKL_AST_CODE (PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)) == PKL_AST_EXP_STMT))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
@@ -593,9 +594,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 {
-  /*  XXX if (!PKL_PASS_PARENT
-      || PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)*/
-    /* Drop the expression from the stack.  */
+  /* Drop the expression from the stack, but not if we are compiling a
+     single statement.  */
+  if (!PKL_PASS_PARENT
+      || PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
 }
 PKL_PHASE_END_HANDLER

@@ -100,10 +100,11 @@ pkl_env pkl_get_env (pkl_compiler compiler);
 
 int pkl_bootstrapped_p (pkl_compiler compiler);
 
-/* Returns a boolean telling whether the compiler is compiling an
-   expression.  */
+/* Returns a boolean telling whether the compiler is compiling a
+   single xexpression or a statement, respectively.  */
 
 int pkl_compiling_expression_p (pkl_compiler compiler);
+int pkl_compiling_statement_p (pkl_compiler compiler);
 
 /* Diagnostic routines.  */
 

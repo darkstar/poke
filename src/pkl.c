@@ -47,6 +47,7 @@
 
 #define PKL_COMPILING_EXPRESSION 0
 #define PKL_COMPILING_PROGRAM    1
+#define PKL_COMPILING_STATEMENT  2
 
 struct pkl_compiler
 {
@@ -221,6 +222,8 @@ pkl_compile_buffer (pkl_compiler compiler, int what,
   compiler->compiling
     = (what == PKL_WHAT_EXPRESSION
        ? PKL_COMPILING_EXPRESSION
+       : what == PKL_WHAT_STATEMENT
+       ? PKL_COMPILING_STATEMENT
        : PKL_COMPILING_PROGRAM);
 
   env = pkl_env_dup_toplevel (compiler->env);
@@ -505,4 +508,10 @@ int
 pkl_compiling_expression_p (pkl_compiler compiler)
 {
   return compiler->compiling == PKL_COMPILING_EXPRESSION;
+}
+
+int
+pkl_compiling_statement_p (pkl_compiler compiler)
+{
+  return compiler->compiling == PKL_COMPILING_STATEMENT;
 }
