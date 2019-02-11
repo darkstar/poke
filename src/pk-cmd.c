@@ -772,6 +772,15 @@ pk_cmd_init (void)
   vm_trie = pk_trie_from_cmds (vm_cmds);
   vm_disas_trie = pk_trie_from_cmds (vm_disas_cmds);
   set_trie = pk_trie_from_cmds (set_cmds);
+
+#if 0
+  /* Compile commands written in Poke.  */
+  if (!pkl_compile_file (poke_compiler,
+                         /* XXX: use POKEDIR  */
+                         "/home/jemarch/gnu/hacks/poke/src/pk-dump.pk"))
+    /* XXX explanatory error message.  */
+    exit (1);
+#endif
 }
 
 void
