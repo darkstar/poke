@@ -310,7 +310,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
 
   /* Please keep this code in sync with the string printer in
      pvm-val.c:pvm_print_val.  */
-  
+
   /* First pass: calculate the size of the resulting string after
      \-expansion, and report errors in the contents of the string.  */
   for (p = string_pointer, string_length = 0; *p != '\0'; ++p)
@@ -337,7 +337,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
     }
 
   /* Second pass: compose the new string.  */
-  new_string_pointer = xmalloc (string_length);
+  new_string_pointer = xmalloc (string_length + 1);
 
   for (p = string_pointer, i = 0; *p != '\0'; ++p, ++i)
     {

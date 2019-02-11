@@ -830,7 +830,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
             size_t naa;
 
             for (naa = 0, aa = PKL_AST_FUNCALL_ARGS (funcall);
-                 aa; naa++, aa = PKL_AST_CHAIN (aa))
+                 aa;
+                 naa++, aa = PKL_AST_CHAIN (aa))
               {
                 aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
                 fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
