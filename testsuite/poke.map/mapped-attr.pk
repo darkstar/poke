@@ -7,7 +7,7 @@
 /* { dg-command {.print [1,2]'mapped} } */
 /* { dg-output "\n0" } */
 
-/* { dg-command {.print {1,"foo"}'mapped} } */
+/* { dg-command {.print struct {1,"foo"}'mapped} } */
 /* { dg-output "\n0" } */
 
 /* { dg-command {.print (byte[2] @ 2#B)'mapped} } */

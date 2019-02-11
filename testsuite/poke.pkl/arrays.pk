@@ -6,7 +6,7 @@
 /* { dg-command { .print [0,1,2][1] } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print [{.foo=10}] } } */
+/* { dg-command { .print [struct {.foo=10}] } } */
 /* { dg-output "\n\\\[\\{.foo=10\\}\\\]" } */
 
 /* { dg-command { .print [.[2]=10] } } */

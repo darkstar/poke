@@ -677,10 +677,10 @@ funcall_arg:
         ;
 
 struct:
-	  '{' struct_elem_list '}'
+	  STRUCT '{' struct_elem_list '}'
 		{
                     $$ = pkl_ast_make_struct (pkl_parser->ast,
-                                              0 /* nelem */, $2);
+                                              0 /* nelem */, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
 	;
@@ -1317,7 +1317,7 @@ stmt:
                                                 $2);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | funcall ';'
+        | expression ';'
         	{
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,
                                               $1);

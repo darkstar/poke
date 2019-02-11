@@ -27,10 +27,10 @@
 /* { dg-command { .print [1UL]'size } } */
 /* { dg-output "\n64UL#b" } */
 
-/* { dg-command { .print {}'size } } */
+/* { dg-command { .print struct {}'size } } */
 /* { dg-output "\n0UL#b" } */
 
-/* { dg-command { .print {1, 2UL, "foo"}'size } } */
+/* { dg-command { .print struct {1, 2UL, "foo"}'size } } */
 /* { dg-output "\n128UL#b" } */
 
 /* { dg-command { .print 10'size'unit } } */
@@ -45,10 +45,10 @@
 /* { dg-command { .print 10LU'signed } } */
 /* { dg-output "\n0" } */
 
-/* { dg-command { .print {}'length } } */
+/* { dg-command { .print struct {}'length } } */
 /* { dg-output "\n0UL" } */
 
-/* { dg-command { .print {1, .bar="foo"}'length } } */
+/* { dg-command { .print struct {1, .bar="foo"}'length } } */
 /* { dg-output "\n2UL" } */
 
 /* { dg-command { .print ""'length } } */

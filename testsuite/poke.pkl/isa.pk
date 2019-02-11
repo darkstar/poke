@@ -6,7 +6,7 @@
 /* { dg-command { .print "foo" isa any } } */
 /* { dg-output "\n1" } */
 
-/* { dg-command { .print {1,"foo"} isa any } } */
+/* { dg-command { .print struct {1,"foo"} isa any } } */
 /* { dg-output "\n1" } */
 
 /* { dg-command { .print 10 isa int } } */
@@ -51,5 +51,5 @@ defun foo2 = (any a) void:
 /* { dg-command { foo2 ([1UL, 2UL]) } } */
 /* { dg-output "\nan uint64 array" } */
 
-/* { dg-command { foo2 ({.i=10,.j="foo"}) } } */
+/* { dg-command { foo2 (struct {.i=10,.j="foo"}) } } */
 /* { dg-output "\nunknown" } */

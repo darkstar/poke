@@ -683,6 +683,12 @@ pk_cmd_exec (char *str)
       pvm_ret = pvm_run (poke_vm, prog, &val);
       if (pvm_ret != PVM_EXIT_OK)
         goto error;
+
+      if (val != PVM_NULL)
+        {
+          pvm_print_val (stdout, val, 10, 0);
+          fputc ('\n', stdout);
+        }
       
       return 1;
 
