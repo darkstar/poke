@@ -242,7 +242,8 @@ pkl_ast_make_func (pkl_ast ast, pkl_ast_node ret_type,
 
 pkl_ast_node
 pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
-                       pkl_ast_node identifier)
+                       pkl_ast_node identifier,
+                       pkl_ast_node initial)
 {
   pkl_ast_node func_arg = pkl_ast_make_node (ast, PKL_AST_FUNC_ARG);
 
@@ -250,6 +251,8 @@ pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
 
   PKL_AST_FUNC_ARG_TYPE (func_arg) = ASTREF (type);
   PKL_AST_FUNC_ARG_IDENTIFIER (func_arg) = ASTREF (identifier);
+  if (initial)
+    PKL_AST_FUNC_ARG_INITIAL (func_arg) = ASTREF (initial);
 
   return func_arg;
 }

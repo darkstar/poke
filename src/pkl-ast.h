@@ -581,10 +581,15 @@ pkl_ast_node pkl_ast_make_func (pkl_ast ast,
    TYPE is the type of the argument.
 
    IDENTIFIER is the name of the argument.  It is a PKL_AST_IDENTIFIER
-   node.  */
+   node.
+
+   INITIAL, if not NULL, is an expression providing the default value
+   for the function argument.  This expression can refer to previous
+   arguments.  */
 
 #define PKL_AST_FUNC_ARG_TYPE(AST) ((AST)->func_arg.type)
 #define PKL_AST_FUNC_ARG_IDENTIFIER(AST) ((AST)->func_arg.identifier)
+#define PKL_AST_FUNC_ARG_INITIAL(AST) ((AST)->func_arg.initial)
 
 struct pkl_ast_func_arg
 {
@@ -592,11 +597,13 @@ struct pkl_ast_func_arg
 
   union pkl_ast_node *type;
   union pkl_ast_node *identifier;
+  union pkl_ast_node *initial;
 };
 
 pkl_ast_node pkl_ast_make_func_arg (pkl_ast ast,
                                     pkl_ast_node type,
-                                    pkl_ast_node identifier);
+                                    pkl_ast_node identifier,
+                                    pkl_ast_node init);
 
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 

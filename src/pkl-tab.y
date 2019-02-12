@@ -801,7 +801,18 @@ function_arg:
 	  simple_type_specifier identifier
           	{
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
-                                              $1, $2);
+                                              $1, $2, NULL /* init */);
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_LOC ($$) = @$;
+
+                  /* Note the arguments are registered in the lexical
+                     environment in a mid-term action in the
+                     `function_specifier' rule, not here.  */
+                }
+	| simple_type_specifier identifier '=' expression
+          	{
+                  $$ = pkl_ast_make_func_arg (pkl_parser->ast,
+                                              $1, $2, $4);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 

@@ -874,15 +874,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
           }
 
-        /* Dispose the old list of actual argument nodes.  */
+        /* Dispose the old list of actual argument nodes.
+           XXX move this logic to a function in pkl-ast.c  */
         {
           pkl_ast_node ta;
           for (aa = PKL_AST_FUNCALL_ARGS (funcall);
                aa;
                aa = ta)
             {
+              if (PKL_AST_REFCOUNT (aa) > 1)
+                PKL_AST_REFCOUNT (aa) -= 1;
+              else
+                free (aa);
               ta = PKL_AST_CHAIN (aa);
-              free (aa);
             }
         }
 
