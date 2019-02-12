@@ -235,7 +235,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
-%type <ast> function_specifier function_arg_list function_arg
+%type <ast> function_specifier function_arg_list function_arg function_arg_initial
 %type <ast> comp_stmt stmt_decl_list stmt
 %type <ast> funcall_stmt funcall_stmt_arg_list funcall_stmt_arg
 
@@ -798,21 +798,10 @@ function_arg_list:
         ;
 
 function_arg:
-	  simple_type_specifier identifier
+	  simple_type_specifier identifier function_arg_initial
           	{
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
-                                              $1, $2, NULL /* init */);
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_LOC ($$) = @$;
-
-                  /* Note the arguments are registered in the lexical
-                     environment in a mid-term action in the
-                     `function_specifier' rule, not here.  */
-                }
-	| simple_type_specifier identifier '=' expression
-          	{
-                  $$ = pkl_ast_make_func_arg (pkl_parser->ast,
-                                              $1, $2, $4);
+                                              $1, $2, $3);
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
@@ -821,6 +810,11 @@ function_arg:
                      `function_specifier' rule, not here.  */
                 }
         ;
+
+function_arg_initial:
+	%empty			{ $$ = NULL; }
+	| '=' expression	{ $$ = $2; }
+      ;
 
 /*
  * Types.
