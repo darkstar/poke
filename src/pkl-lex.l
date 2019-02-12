@@ -176,6 +176,8 @@ D [0-9]
 "int<"          { return INTCONSTR; }
 "offset<"       { return OFFSETCONSTR; }
 
+"..."		{ return THREEDOTS; }
+
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
 "%="		{ return MODA; }

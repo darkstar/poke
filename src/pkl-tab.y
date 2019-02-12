@@ -220,6 +220,8 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 /* Compiler builtins.  */
 
+/* Opcodes.  */
+
 %token <opcode> MULA
 %token <opcode> DIVA
 %token <opcode> MODA
@@ -233,6 +235,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 %token MSB LSB
 %token SIGNED UNSIGNED
+%token THREEDOTS
 
 /* This is for the dangling ELSE.  */
 
