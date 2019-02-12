@@ -967,7 +967,7 @@ function_type_arg:
                                                    $1, NULL /* name */);
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_FUNC_TYPE_ARG_OPTIONAL ($$) = 1;
-                  }
+                }
 	;
 
 struct_type_specifier:
