@@ -43,5 +43,8 @@ defun myprint = (string str1, string str2) void: { print (str1); print (str2); }
 /* { dg-command { myprint :str2 "bar\n" :str1 "foo" } } */
 /* { dg-output "\nfoobar" } */
 
+defun def1 = (int a, int b, int c = 0) int: { return a + b + c; }
 
+/* { dg-command { def1 (10, 20, 30) } } */
+/* { dg-output "\n60" } */
 
