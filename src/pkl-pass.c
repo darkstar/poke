@@ -403,6 +403,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_FUNC_ARG:
       PKL_PASS (PKL_AST_FUNC_ARG_TYPE (node));
+      if (PKL_AST_FUNC_ARG_INITIAL (node))
+        PKL_PASS (PKL_AST_FUNC_ARG_INITIAL (node));
       break;
     case PKL_AST_FUNC_TYPE_ARG:
       PKL_PASS (PKL_AST_FUNC_TYPE_ARG_TYPE (node));

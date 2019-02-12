@@ -67,6 +67,43 @@ pkl_tab_error (YYLTYPE *llocp,
     pkl_error (pkl_parser->ast, *llocp, "%s", err);
 }
 
+/* Register an argument in the compile-time environment.  This is used
+   by function specifiers and try-catch statements.
+
+   Return 0 if there was an error registering, 1 otherwise.  */
+
+int
+pkl_register_arg (struct pkl_parser *parser, pkl_ast_node arg)
+{
+  pkl_ast_node arg_decl;
+  pkl_ast_node arg_identifier = PKL_AST_FUNC_ARG_IDENTIFIER (arg);
+
+  pkl_ast_node dummy
+    = pkl_ast_make_integer (parser->ast, 0);
+  PKL_AST_TYPE (dummy) = ASTREF (PKL_AST_FUNC_ARG_TYPE (arg));
+  
+  arg_decl = pkl_ast_make_decl (parser->ast,
+                                PKL_AST_DECL_KIND_VAR,
+                                arg_identifier,
+                                dummy,
+                                NULL /* source */);
+  PKL_AST_LOC (arg_decl) = PKL_AST_LOC (arg);
+  
+  if (!pkl_env_register (parser->env,
+                         PKL_AST_IDENTIFIER_POINTER (arg_identifier),
+                         arg_decl))
+    {
+      pkl_error (parser->ast, PKL_AST_LOC (arg_identifier),
+                 "duplicated argument name `%s' in function declaration",
+                 PKL_AST_IDENTIFIER_POINTER (arg_identifier));
+      /* Make sure to pop the function frame.  */
+      parser->env = pkl_env_pop_frame (parser->env);
+      return 0;
+    }
+
+  return 1;
+}
+
 /* Register a list of arguments in the compile-time environment.  This
    is used by function specifiers and try-catch statements.
 
@@ -789,7 +826,7 @@ function_specifier:
         ;
 
 function_arg_list:
-	  function_arg
+          function_arg
         | function_arg ',' function_arg_list
           	{
                   /* Note this is in reverse order.  */
