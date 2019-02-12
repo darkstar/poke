@@ -834,6 +834,58 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     pkl_ast_node ordered_arg_list = NULL;
     size_t nfa;
     
+    /* Make sure that the function type gets named arguments, and that
+       every named actual argument corresponds to a formal
+       argument.  */
+    for (aa = PKL_AST_FUNCALL_ARGS (funcall);
+         aa;
+         aa = PKL_AST_CHAIN (aa))
+      {
+        pkl_ast_node aa_name
+          = PKL_AST_FUNCALL_ARG_NAME (aa);
+        int found_arg = 0;
+      
+        if (!aa_name)
+          /* The funcall doesn't use named arguments; bail
+             out.  Note this will always happen while
+             processing the first actual argument, as per a
+             check in anal1.  */
+          goto after_named;       
+
+        for (fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
+             fa;
+             fa = PKL_AST_CHAIN (fa))
+          {
+            pkl_ast_node fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
+
+            if (!fa_name)
+              {
+                pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
+                           "function doesn't take named arguments");
+                payload->errors++;
+                PKL_PASS_ERROR;
+              }
+
+            if (strcmp (PKL_AST_IDENTIFIER_POINTER (aa_name),
+                        PKL_AST_IDENTIFIER_POINTER (fa_name)) == 0)
+              {
+                found_arg = 1;
+                break;
+              }
+          }
+
+        if (!found_arg)
+          {
+            pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                       "function doesn't take a `%s' argument",
+                       PKL_AST_IDENTIFIER_POINTER (aa_name));
+            payload->errors++;
+            PKL_PASS_ERROR;
+          }
+      }
+      
+    /* Reorder the actual arguments to match the arguments specified
+       in the function type.  */
     for (narg = 0, nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
          fa;
          nfa++, fa = PKL_AST_CHAIN (fa))
@@ -848,14 +900,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
              naa++, aa = PKL_AST_CHAIN (aa))
           {
             aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
-            
-            if (!aa_name)
-              /* The funcall doesn't use named arguments; bail
-                 out.  Note this will always happen while
-                 processing the first actual argument, as per a
-                 check in anal1.  */
-              goto after_named;       
-
             if (!fa_name)
               {
                 pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),

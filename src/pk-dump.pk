@@ -21,16 +21,17 @@
 defvar pk_dump_usage =
   "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
 
-defun dump = (Offset64 from, Offset64 size) void:
+defun dump = (Offset64 from,
+              Offset64 size,
+              int header = 1) void:
   {
    defvar top = from + size;
    defvar offset = from;
 
-   /* optional :header 1 */
-   
    /* XX Check for an IOS.  */
 
-   print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
+   if (header)
+     print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
    while (offset < top)
      {
        defvar i = 0;
