@@ -869,6 +869,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               break;
           }
 
+        if (!aa && PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa))
+          continue;
+
         if (!aa)
           {
             pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),

@@ -710,7 +710,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
       = PKL_AST_TYPE_F_NARG (function_type) - PKL_AST_FUNCALL_NARG (funcall);
 
     for (i = 0; i < non_specified; ++i)
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+      {
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP); /* XXX this sucks,
+                                                      use a preorder
+                                                      handler instead
+                                                      to generate the
+                                                      nulls before the
+                                                      closure.  */
+      }
   }
 
   /* At this point the closure for FUNCTION and the actuals are pushed
