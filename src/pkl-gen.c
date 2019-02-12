@@ -568,6 +568,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
 
   pkl_ast_node return_stmt = PKL_PASS_NODE;
   pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
+  pkl_ast_node function_type = PKL_AST_TYPE (function);
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
                 PKL_AST_RETURN_STMT_NFRAMES (PKL_PASS_NODE));
@@ -575,7 +576,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
   /* Pop the function argument's frame.  */
   if (PKL_AST_FUNC_ARGS (function))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
-    
+
+  /* In a void function, return PVM_NULL in the stack.  */
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE_F_RTYPE (function_type))
+      == PKL_TYPE_VOID)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+  
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER

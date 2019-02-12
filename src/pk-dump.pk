@@ -28,7 +28,14 @@ defun dump = (Offset64 from,
    defvar top = from + size;
    defvar offset = from;
 
-   /* XX Check for an IOS.  */
+   /* Check for an available IOS.  */
+   try
+     byte @ from;
+   catch if E_no_ios
+   {
+     print "error: `dump' requires an open IO space\n";
+     return;
+   }
 
    if (header)
      print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
