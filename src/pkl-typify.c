@@ -829,12 +829,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
             pkl_ast_node new_aa;
             size_t naa;
 
+            fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
             for (naa = 0, aa = PKL_AST_FUNCALL_ARGS (funcall);
                  aa;
                  naa++, aa = PKL_AST_CHAIN (aa))
               {
                 aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
-                fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
 
                 if (!aa_name)
                   /* The funcall doesn't use named arguments; bail
@@ -856,10 +856,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
                   break;
               }
 
-            /* As per the checks in pkl_anal1_ps_funcall, at this
-               point it is guaranteed that every named formal argument
-               is mentioned, and only once.  */
-            assert (aa);
+            if (!aa)
+              {
+                pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
+                           "required argument `%s' not specified in funcall",
+                           PKL_AST_IDENTIFIER_POINTER (fa_name));
+                payload->errors++;
+                PKL_PASS_ERROR;
+              }
 
             new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
                                                PKL_AST_FUNCALL_ARG_EXP (aa),
