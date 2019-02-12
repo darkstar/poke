@@ -22,3 +22,6 @@ defun def4 = (int a, int b, int c = 1, int d = 2) int: { return a + b + c + d; }
 
 /* { dg-command { def4 :a 10 :b 20 :d 30 } } */
 /* { dg-output "\n62" } */
+
+/* { dg-command { def4 :b 20 :a 10 } } */
+/* { dg-output "\n33" } */
