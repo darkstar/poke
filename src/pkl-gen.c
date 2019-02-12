@@ -674,31 +674,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_try_catch_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
- * FUNCALL_ARG
- * | EXP
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall_arg)
-{
-  /* If this actual starts the vararg, push the type of the vararg
-     array.  */
-  if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (PKL_PASS_NODE))
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
-}
-PKL_PHASE_END_HANDLER
-
-/*
  * | EXP
  * FUNCALL_ARG
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall_arg)
 {
-  /* If this is the last actual, and the function has a vararg, make
-     the vararg array.  */
-  /* XXX push array size and array initializers.  */
+  /* No extra action is required here.  */
 }
 PKL_PHASE_END_HANDLER
+
 
 /* FUNCALL
  * | [ARG]
@@ -708,23 +693,41 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
 {
-  /* Nothing to do here.  */
-}
-PKL_PHASE_END_HANDLER
-
-/*
- * | [ARG]
- * | ...
- * | FUNCTION
- * FUNCALL
- */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
-{
   pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node aa;
 
-  /* If the last formal is a vararg.  */
+  //  int vararg = 0;
+  //  int aindex = 0;
+ 
+  /* Push the actuals to the stack. */
+  for (aa = PKL_AST_FUNCALL_ARGS (funcall); aa; aa = PKL_AST_CHAIN (aa))
+    {
+       /* If this actual starts the vararg, push the type of the vararg
+         array.  */
+      //  if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (PKL_PASS_NODE))
+      //       {
+      //  vararg = 1;
+      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+      //        }
 
+      //      if (vararg)
+      //        {
+      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
+      //          aindex++;
+      //        }
+
+      PKL_PASS_SUBPASS (aa);
+
+      /* If this is the last actual, and the function has a vararg,
+         make the vararg array.  */
+      //      if ((vararg) && PKL_AST_CHAIN (aa) == NULL)
+      //        {
+      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex + 1, 64));
+      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
+      //        }
+    }
+     
   /* Complete non-specified actuals for formals having default values.
      For these, we should push nulls.  */
   {
@@ -734,20 +737,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
       = PKL_AST_TYPE_F_NARG (function_type) - PKL_AST_FUNCALL_NARG (funcall);
 
     for (i = 0; i < non_specified; ++i)
-      {
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP); /* XXX this sucks,
-                                                      use a preorder
-                                                      handler instead
-                                                      to generate the
-                                                      nulls before the
-                                                      closure.  */
-      }
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   }
 
-  /* At this point the closure for FUNCTION and the actuals are pushed
-     in the stack.  Just call the bloody function.  */
+  /* Push the closure for FUNCTION and call the bloody function.  */
+  PKL_PASS_SUBPASS (PKL_AST_FUNCALL_FUNCTION (funcall));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -2181,10 +2178,8 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_gen_ps_print_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_gen_ps_raise_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
-   PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL, pkl_gen_pr_funcall),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
-   PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_pr_funcall_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL, pkl_gen_pr_funcall),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_pr_func_arg),
