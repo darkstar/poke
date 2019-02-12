@@ -237,8 +237,8 @@ D [0-9]
   pkl_ast_node type
      = pkl_ast_make_integral_type (yyextra->ast, 64, 0);
 
-  base = pkl_lex_get_base (yytext, &offset);
-  value = strtoll (yytext + offset, &end, base);
+  base = pkl_lex_get_base (yytext + 1, &offset);
+  value = strtoll (yytext + 1 + offset, &end, base);
   yylval->ast = pkl_ast_make_integer (yyextra->ast, value);
   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
 

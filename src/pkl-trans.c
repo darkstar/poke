@@ -165,9 +165,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* At this point offsets can have either an identifier or a type
-   expressing its unit.  This handler takes care of the first case,
-   replacing the identifier with a suitable unit factor.  If the
+/* At this point offsets can have either an identifier, an integer or
+   a type expressing its unit.  This handler takes care of the first
+   case, replacing the identifier with a suitable unit factor.  If the
    identifier is invalid, then an error is raised.
    
    Also, if the magnitude of the offset wasn't specified then it

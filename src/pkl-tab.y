@@ -608,13 +608,17 @@ expression:
 		{
                     $$ = pkl_ast_make_offset (pkl_parser->ast, NULL, $1);
                     PKL_AST_LOC ($1) = @1;
+                    if (PKL_AST_TYPE ($1))
+                        PKL_AST_LOC (PKL_AST_TYPE ($1)) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
         | expression UNIT
         	{
-                  $$ = pkl_ast_make_offset (pkl_parser->ast, $1, $2);
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_LOC ($$) = @$;
+                    $$ = pkl_ast_make_offset (pkl_parser->ast, $1, $2);
+                    PKL_AST_LOC ($2) = @2;
+                    if (PKL_AST_TYPE ($2))
+                        PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                    PKL_AST_LOC ($$) = @$;
                 }
    	| struct
         ;

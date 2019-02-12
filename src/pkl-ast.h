@@ -872,8 +872,7 @@ pkl_ast_node pkl_ast_make_decl (pkl_ast ast, int kind,
 /* PKL_AST_OFFSET nodes represent poke object constructions.
 
    MAGNITUDE is an integer expression.
-   UNIT is either PKL_AST_OFFSET_UNIT_BITS or
-   PKL_AST_AST_OFFSET_UNITS_BYTES.  */
+   UNIT can be an IDENTFIFIER, an INTEGER or a TYPE.  */
 
 #define PKL_AST_OFFSET_MAGNITUDE(AST) ((AST)->offset.magnitude)
 #define PKL_AST_OFFSET_UNIT(AST) ((AST)->offset.unit)

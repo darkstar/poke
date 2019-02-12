@@ -162,5 +162,13 @@
 /* { dg-command {  2#B * 3L } } */
 /* { dg-output "\n6L#B" } */
 
+/* { dg-command { 12#0x8 } } */
+/* { dg-output "\n12#B" } */
+
+/* { dg-command { 12#0x9 } } */
+/* { dg-output "\n12#9" } */
+
+/* { dg-command { 0UL#1024 } }*/
+/* { dg-output "\n0UL#Kb" } */
 
 
