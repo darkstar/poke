@@ -781,6 +781,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     = PKL_AST_FUNCALL_FUNCTION (funcall);
   pkl_ast_node funcall_function_type
     = PKL_AST_TYPE (funcall_function);
+  pkl_ast_node fa, aa;
+
+  int narg;
 
   if (PKL_AST_TYPE_CODE (funcall_function_type)
       != PKL_TYPE_FUNCTION)
@@ -790,6 +793,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+
+  /* Calculate the number of formal arguments that are not optional,
+     and determine whether we have the right number of actual
+     arguments.  Emit an error otherwise.  */
 
   /* Check the types of the function and the funcall.  */
   if (PKL_AST_FUNCALL_NARG (funcall) <
@@ -808,135 +815,130 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       payload->errors++;
       PKL_PASS_ERROR;
     }
-  else
-    {
-      pkl_ast_node fa, aa;
-      int narg = 0;
 
-      /* If the funcall uses named arguments, reorder them to match
-         the arguments specified in the function type.  If a funcall
-         using named arguments is found but the function type doesn't
-         include argument names, then an error is reported.  */
+  /* If the funcall uses named arguments, reorder them to match the
+     arguments specified in the function type.  If a funcall using
+     named arguments is found but the function type doesn't include
+     argument names, then an error is reported.  */
+  {
+    pkl_ast_node ordered_arg_list = NULL;
+    size_t nfa;
+    
+    for (narg = 0, nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
+         fa;
+         nfa++, fa = PKL_AST_CHAIN (fa))
       {
-        pkl_ast_node ordered_arg_list = NULL;
-        size_t nfa;
-
-        for (nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
-             fa;
-             nfa++, fa = PKL_AST_CHAIN (fa))
+        pkl_ast_node aa_name, fa_name;
+        pkl_ast_node new_aa;
+        size_t naa;
+        
+        fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
+        for (naa = 0, aa = PKL_AST_FUNCALL_ARGS (funcall);
+             aa;
+             naa++, aa = PKL_AST_CHAIN (aa))
           {
-            pkl_ast_node aa_name, fa_name;
-            pkl_ast_node new_aa;
-            size_t naa;
+            aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
+            
+            if (!aa_name)
+              /* The funcall doesn't use named arguments; bail
+                 out.  Note this will always happen while
+                 processing the first actual argument, as per a
+                 check in anal1.  */
+              goto after_named;       
 
-            fa_name = PKL_AST_FUNC_TYPE_ARG_NAME (fa);
-            for (naa = 0, aa = PKL_AST_FUNCALL_ARGS (funcall);
-                 aa;
-                 naa++, aa = PKL_AST_CHAIN (aa))
+            if (!fa_name)
               {
-                aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
-
-                if (!aa_name)
-                  /* The funcall doesn't use named arguments; bail
-                     out.  Note this will always happen while
-                     processing the first actual argument, as per a
-                     check in anal1.  */
-                  goto after_named;       
-
-                if (!fa_name)
-                  {
-                    pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
-                               "function doesn't take named arguments");
-                    payload->errors++;
-                    PKL_PASS_ERROR;
-                  }
-
-                if (strcmp (PKL_AST_IDENTIFIER_POINTER (aa_name),
-                            PKL_AST_IDENTIFIER_POINTER (fa_name)) == 0)
-                  break;
-              }
-
-            if (!aa)
-              {
-                pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
-                           "required argument `%s' not specified in funcall",
-                           PKL_AST_IDENTIFIER_POINTER (fa_name));
+                pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
+                           "function doesn't take named arguments");
                 payload->errors++;
                 PKL_PASS_ERROR;
               }
 
-            new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
-                                               PKL_AST_FUNCALL_ARG_EXP (aa),
-                                               PKL_AST_FUNCALL_ARG_NAME (aa));
-            PKL_AST_LOC (new_aa) = PKL_AST_LOC (aa);
-
-            ordered_arg_list
-              = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
+            if (strcmp (PKL_AST_IDENTIFIER_POINTER (aa_name),
+                        PKL_AST_IDENTIFIER_POINTER (fa_name)) == 0)
+              break;
           }
 
-        /* Dispose the old list of actual argument nodes.
-           XXX move this logic to a function in pkl-ast.c  */
-        {
-          pkl_ast_node ta;
-          for (aa = PKL_AST_FUNCALL_ARGS (funcall);
-               aa;
-               aa = ta)
-            {
-              if (PKL_AST_REFCOUNT (aa) > 1)
-                PKL_AST_REFCOUNT (aa) -= 1;
-              else
-                free (aa);
-              ta = PKL_AST_CHAIN (aa);
-            }
-        }
+        if (!aa)
+          {
+            pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
+                       "required argument `%s' not specified in funcall",
+                       PKL_AST_IDENTIFIER_POINTER (fa_name));
+            payload->errors++;
+            PKL_PASS_ERROR;
+          }
 
-        /* Install the new ordered list in the funcall.  */
-        PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (ordered_arg_list);
+        new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
+                                           PKL_AST_FUNCALL_ARG_EXP (aa),
+                                           PKL_AST_FUNCALL_ARG_NAME (aa));
+        PKL_AST_LOC (new_aa) = PKL_AST_LOC (aa);
+
+        ordered_arg_list
+          = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
       }
-    after_named:
 
-      /* Ok, check that the types of the actual arguments match the
-         types of the corresponding formal arguments.  */
-      for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
-           aa = PKL_AST_FUNCALL_ARGS (funcall);
-           fa && aa;
-           fa = PKL_AST_CHAIN (fa), aa = PKL_AST_CHAIN (aa))
+    /* Dispose the old list of actual argument nodes.
+       XXX move this logic to a function in pkl-ast.c  */
+    {
+      pkl_ast_node ta;
+      for (aa = PKL_AST_FUNCALL_ARGS (funcall);
+           aa;
+           aa = ta)
         {
-          pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
-          pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
-          pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
-
-          assert (aa_type);
-
-          if (!pkl_ast_type_equal (fa_type, aa_type))
-            {
-              char *passed_type = pkl_type_str (aa_type, 1);
-              char *expected_type = pkl_type_str (fa_type, 1);
-
-              if (PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_ANY
-                  || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
-                      && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
-                  || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
-                      && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
-                /* Integers and offsets can be promoted, and anything
-                   can be promoted to ANY.  */
-                ;
-              else
-                {
-                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                             "function argument %d has the wrong type\n\
-expected %s, got %s",
-                             narg + 1, expected_type, passed_type);
-                  free (expected_type);
-                  free (passed_type);
-                  
-                  payload->errors++;
-                  PKL_PASS_ERROR;
-                }
-            }
-
-          narg++;
+          if (PKL_AST_REFCOUNT (aa) > 1)
+            PKL_AST_REFCOUNT (aa) -= 1;
+          else
+            free (aa);
+          ta = PKL_AST_CHAIN (aa);
         }
+    }
+
+    /* Install the new ordered list in the funcall.  */
+    PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (ordered_arg_list);
+  }
+ after_named:
+
+  /* Ok, check that the types of the actual arguments match the
+     types of the corresponding formal arguments.  */
+  for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
+         aa = PKL_AST_FUNCALL_ARGS (funcall);
+       fa && aa;
+       fa = PKL_AST_CHAIN (fa), aa = PKL_AST_CHAIN (aa))
+    {
+      pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
+      pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
+      pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
+
+      assert (aa_type);
+
+      if (!pkl_ast_type_equal (fa_type, aa_type))
+        {
+          char *passed_type = pkl_type_str (aa_type, 1);
+          char *expected_type = pkl_type_str (fa_type, 1);
+
+          if (PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_ANY
+              || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
+                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
+              || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
+                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
+            /* Integers and offsets can be promoted, and anything
+               can be promoted to ANY.  */
+            ;
+          else
+            {
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                         "function argument %d has the wrong type\n\
+expected %s, got %s",
+                         narg + 1, expected_type, passed_type);
+              free (expected_type);
+              free (passed_type);
+                  
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+        }
+
+      narg++;
     }
 
   /* Set the type of the funcall itself.  */
