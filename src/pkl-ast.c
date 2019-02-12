@@ -255,6 +255,7 @@ pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
   PKL_AST_FUNC_ARG_IDENTIFIER (func_arg) = ASTREF (identifier);
   if (initial)
     PKL_AST_FUNC_ARG_INITIAL (func_arg) = ASTREF (initial);
+  PKL_AST_FUNC_ARG_VARARG (func_arg) = 0;
 
   return func_arg;
 }
@@ -2085,6 +2086,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, FUNC_ARG_TYPE);
       PRINT_AST_SUBAST (identifier, FUNC_ARG_IDENTIFIER);
+      PRINT_AST_IMM (vararg, FUNC_ARG_VARARG, "%d");
       break;
       
     case PKL_AST_STRUCT_REF:

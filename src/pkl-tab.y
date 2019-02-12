@@ -859,6 +859,7 @@ function_arg:
                                               NULL /* type */,
                                               $1,
                                               NULL /* initial */);
+                  PKL_AST_FUNC_ARG_VARARG ($$) = 1;
                   PKL_AST_LOC ($1) = @1;
                   PKL_AST_LOC ($$) = @$;
                 }
