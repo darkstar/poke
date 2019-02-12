@@ -853,6 +853,15 @@ function_arg:
                      environment in a mid-term action in the
                      `function_specifier' rule, not here.  */
                 }
+	| identifier THREEDOTS
+        	{
+                  $$ = pkl_ast_make_func_arg (pkl_parser->ast,
+                                              NULL /* type */,
+                                              $1,
+                                              NULL /* initial */);
+                  PKL_AST_LOC ($1) = @1;
+                  PKL_AST_LOC ($$) = @$;
+                }
         ;
 
 function_arg_initial:
