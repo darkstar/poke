@@ -1031,17 +1031,21 @@ pkl_ast_node pkl_ast_make_scons (pkl_ast ast,
    FUNCTION is a variable with the function being invoked.
    ARGS is a chain of PKL_AST_FUNCALL_ARG nodes.
 
-   NARG is the number of arguments in the funcall.  */
+   NARG is the number of arguments in the funcall.
+
+   NVARARG is the number of elements in the vararg in this call.  */
 
 #define PKL_AST_FUNCALL_ARGS(AST) ((AST)->funcall.args)
 #define PKL_AST_FUNCALL_FUNCTION(AST) ((AST)->funcall.function)
 #define PKL_AST_FUNCALL_NARG(AST) ((AST)->funcall.narg)
+#define PKL_AST_FUNCALL_NVARARG(AST) ((AST)->funcall.nvararg)
 
 struct pkl_ast_funcall
 {
   struct pkl_ast_common common;
 
   int narg;
+  int nvararg;
   union pkl_ast_node *function;
   union pkl_ast_node *args;
 };
@@ -1056,10 +1060,14 @@ pkl_ast_node pkl_ast_make_funcall (pkl_ast ast,
    EXP is the value passed for the argument.
 
    NAME, if not NULL, is an IDENTIFIER node with the name of the
-   argument.  */
+   argument.
+
+   FIRST_VARARG is 1 if this actual corresponds to the first
+   vararg.  0 otherwise.  */
 
 #define PKL_AST_FUNCALL_ARG_EXP(AST) ((AST)->funcall_arg.exp)
 #define PKL_AST_FUNCALL_ARG_NAME(AST) ((AST)->funcall_arg.name)
+#define PKL_AST_FUNCALL_ARG_FIRST_VARARG(AST) ((AST)->funcall_arg.first_vararg)
 
 struct pkl_ast_funcall_arg
 {
@@ -1067,6 +1075,7 @@ struct pkl_ast_funcall_arg
 
   union pkl_ast_node *exp;
   union pkl_ast_node *name;
+  int first_vararg;
 };
 
 pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,

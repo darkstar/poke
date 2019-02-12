@@ -800,15 +800,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       PKL_PASS_ERROR;
     }
 
-  /* Determine whether the function type gets a vararg.  */
-  for (fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
-       fa;
-       fa = PKL_AST_CHAIN (fa))
-    {
-      if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
-        vararg = 1;
-    }
-
   /* Calculate the number of formal arguments that are not optional,
      and determine whether we have the right number of actual
      arguments.  Emit an error otherwise.  */
@@ -816,7 +807,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
        fa;
        fa = PKL_AST_CHAIN (fa))
     {
-      if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa))
+      if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa)
+          || PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
         break;
       mandatory_args += 1;
     }
@@ -828,11 +820,33 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+
+  /* Determine whether the function type gets a vararg, and annotate
+     the first vararg in the funcall.  */
+  for (narg = 0,
+       aa = PKL_AST_FUNCALL_ARGS (funcall),
+       fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
+       fa;
+       narg++,
+       aa = PKL_AST_CHAIN (aa),
+       fa = PKL_AST_CHAIN (fa))
+    {
+      if (!aa)
+        break;
+      
+      if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
+        {
+          PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa) = 1;
+          PKL_AST_FUNCALL_NVARARG (funcall) =
+            PKL_AST_FUNCALL_NARG (funcall) - narg;
+        }
+    }
+
   /* XXX if named arguments are used, the vararg cannot be specified,
      so it will always be empty and this warning applies.  */
-  else if (!vararg
-           && (PKL_AST_FUNCALL_NARG (funcall) >
-               PKL_AST_TYPE_F_NARG (funcall_function_type)))
+  if (!vararg
+      && (PKL_AST_FUNCALL_NARG (funcall) >
+          PKL_AST_TYPE_F_NARG (funcall_function_type)))
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "too many arguments passed to function");

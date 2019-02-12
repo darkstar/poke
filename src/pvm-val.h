@@ -350,7 +350,8 @@ enum pvm_type_code
   PVM_TYPE_ARRAY,
   PVM_TYPE_STRUCT,
   PVM_TYPE_OFFSET,
-  PVM_TYPE_CLOSURE
+  PVM_TYPE_CLOSURE,
+  PVM_TYPE_ANY
 };
 
 struct pvm_type
@@ -397,6 +398,7 @@ typedef struct pvm_type *pvm_type;
 
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
+pvm_val pvm_make_any_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);

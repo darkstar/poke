@@ -249,7 +249,7 @@ pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
 {
   pkl_ast_node func_arg = pkl_ast_make_node (ast, PKL_AST_FUNC_ARG);
 
-  assert (type && identifier);
+  assert (identifier);
 
   PKL_AST_FUNC_ARG_TYPE (func_arg) = ASTREF (type);
   PKL_AST_FUNC_ARG_IDENTIFIER (func_arg) = ASTREF (identifier);
@@ -445,8 +445,6 @@ pkl_ast_make_func_type_arg (pkl_ast ast, pkl_ast_node type,
 {
   pkl_ast_node function_type_arg
     = pkl_ast_make_node (ast, PKL_AST_FUNC_TYPE_ARG);
-
-  assert (type);
 
   PKL_AST_FUNC_TYPE_ARG_TYPE (function_type_arg)
     = ASTREF (type);
@@ -1138,6 +1136,7 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,
   PKL_AST_FUNCALL_ARG_EXP (funcall_arg) = ASTREF (exp);
   if (name)
     PKL_AST_FUNCALL_ARG_NAME (funcall_arg) = ASTREF (name);
+  PKL_AST_FUNCALL_ARG_FIRST_VARARG (funcall_arg) = 0;
   return funcall_arg;
 }
 
@@ -2181,6 +2180,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
       PRINT_AST_SUBAST (exp, FUNCALL_ARG_EXP);
       PRINT_AST_SUBAST (name, FUNCALL_ARG_NAME);
+      PRINT_AST_IMM (first_vararg, FUNCALL_ARG_FIRST_VARARG, "%d");
       break;
 
     case PKL_AST_VAR:

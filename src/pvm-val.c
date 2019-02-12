@@ -179,6 +179,12 @@ pvm_make_string_type (void)
 }
 
 pvm_val
+pvm_make_any_type (void)
+{
+  return pvm_make_type (PVM_TYPE_ANY);
+}
+
+pvm_val
 pvm_make_offset_type (pvm_val base_type, pvm_val unit)
 {
   pvm_val otype = pvm_make_type (PVM_TYPE_OFFSET);
@@ -758,6 +764,9 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
         case PVM_TYPE_STRING:
           fprintf (out, "string");
           break;
+        case PVM_TYPE_ANY:
+          fprintf (out, "any");
+          break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base, flags);
           fprintf (out, "[]");
@@ -954,6 +963,7 @@ pvm_type_equal (pvm_val type1, pvm_val type2)
         break;
       }
     case PVM_TYPE_STRING:
+    case PVM_TYPE_ANY:
       return 1;
       break;
     case PVM_TYPE_ARRAY:

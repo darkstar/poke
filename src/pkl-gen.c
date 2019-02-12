@@ -674,13 +674,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_try_catch_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * FUNCALL_ARG
+ * | EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall_arg)
+{
+  /* If this actual starts the vararg, push the type of the vararg
+     array.  */
+  if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (PKL_PASS_NODE))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | EXP
  * FUNCALL_ARG
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall_arg)
 {
-  /* Do nothing, the argument is already pushed in the stack.  */
+  /* If this is the last actual, and the function has a vararg, make
+     the vararg array.  */
+  /* XXX push array size and array initializers.  */
 }
 PKL_PHASE_END_HANDLER
 
@@ -706,6 +722,8 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
 {
   pkl_ast_node funcall = PKL_PASS_NODE;
+
+  /* If the last formal is a vararg.  */
 
   /* Complete non-specified actuals for formals having default values.
      For these, we should push nulls.  */
@@ -2165,6 +2183,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL, pkl_gen_pr_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_gen_ps_funcall),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_pr_funcall_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
