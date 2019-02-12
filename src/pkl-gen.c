@@ -695,37 +695,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
 {
   pkl_ast_node funcall = PKL_PASS_NODE;
   pkl_ast_node aa;
-
-  //  int vararg = 0;
-  //  int aindex = 0;
+  int vararg = 0;
+  int aindex = 0;
  
   /* Push the actuals to the stack. */
   for (aa = PKL_AST_FUNCALL_ARGS (funcall); aa; aa = PKL_AST_CHAIN (aa))
     {
        /* If this actual starts the vararg, push the type of the vararg
          array.  */
-      //  if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (PKL_PASS_NODE))
-      //       {
-      //  vararg = 1;
-      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
-      //        }
+      if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa))
+        {
+          vararg = 1;
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+        }
 
-      //      if (vararg)
-      //        {
-      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
-      //          aindex++;
-      //        }
+      if (vararg)
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
+          aindex++;
+        }
 
       PKL_PASS_SUBPASS (aa);
 
       /* If this is the last actual, and the function has a vararg,
          make the vararg array.  */
-      //      if ((vararg) && PKL_AST_CHAIN (aa) == NULL)
-      //        {
-      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex + 1, 64));
-      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
-      //          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
-      //        }
+      if ((vararg) && PKL_AST_CHAIN (aa) == NULL)
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex + 1, 64));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
+        }
     }
      
   /* Complete non-specified actuals for formals having default values.

@@ -1031,21 +1031,17 @@ pkl_ast_node pkl_ast_make_scons (pkl_ast ast,
    FUNCTION is a variable with the function being invoked.
    ARGS is a chain of PKL_AST_FUNCALL_ARG nodes.
 
-   NARG is the number of arguments in the funcall.
-
-   NVARARG is the number of elements in the vararg in this call.  */
+   NARG is the number of arguments in the funcall.  */
 
 #define PKL_AST_FUNCALL_ARGS(AST) ((AST)->funcall.args)
 #define PKL_AST_FUNCALL_FUNCTION(AST) ((AST)->funcall.function)
 #define PKL_AST_FUNCALL_NARG(AST) ((AST)->funcall.narg)
-#define PKL_AST_FUNCALL_NVARARG(AST) ((AST)->funcall.nvararg)
 
 struct pkl_ast_funcall
 {
   struct pkl_ast_common common;
 
   int narg;
-  int nvararg;
   union pkl_ast_node *function;
   union pkl_ast_node *args;
 };

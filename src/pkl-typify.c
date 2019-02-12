@@ -835,11 +835,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
         break;
       
       if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
-        {
-          PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa) = 1;
-          PKL_AST_FUNCALL_NVARARG (funcall) =
-            PKL_AST_FUNCALL_NARG (funcall) - narg;
-        }
+        PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa) = 1;
     }
 
   /* XXX if named arguments are used, the vararg cannot be specified,
