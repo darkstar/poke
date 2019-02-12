@@ -786,7 +786,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     = PKL_AST_TYPE (funcall_function);
   pkl_ast_node fa, aa;
 
-  int narg;
+  int mandatory_args, narg;
 
   if (PKL_AST_TYPE_CODE (funcall_function_type)
       != PKL_TYPE_FUNCTION)
@@ -800,8 +800,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
   /* Calculate the number of formal arguments that are not optional,
      and determine whether we have the right number of actual
      arguments.  Emit an error otherwise.  */
-  if (PKL_AST_FUNCALL_NARG (funcall) <
-      PKL_AST_TYPE_F_NARG (funcall_function_type))
+
+  for (mandatory_args = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
+       fa;
+       fa = PKL_AST_CHAIN (fa))
+    {
+      if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa))
+        break;
+      mandatory_args += 1;
+    }
+  
+  if (PKL_AST_FUNCALL_NARG (funcall) < mandatory_args)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "too few arguments passed to function");

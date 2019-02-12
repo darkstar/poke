@@ -444,7 +444,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
     nargs++;
   PKL_AST_TYPE_F_NARG (function_type) = nargs;
 
-  /* Find the first optional formal arugment, if any, and set
+  /* Find the first optional formal argument, if any, and set
      first_op_arg accordingly.  */
   for (arg = function_type_args; arg; arg = PKL_AST_CHAIN (arg))
     {
