@@ -400,15 +400,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 PKL_PHASE_END_HANDLER
 
 /* The parser emits the formal arguments of functions in
-   reverse-order.  Reverse them again here.  */
+   reverse-order.  Reverse them again here.
+
+   Also, set the function's first optional argument.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_func)
 {
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
+  pkl_ast_node fa;
 
+  /* Reverse the formal arguments.  */
   func_args = pkl_ast_reverse (func_args);
   PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
+
+  /* Find the first optional formal argument, if any, and set
+     first_opt_arg accordingly.  */
+  for (fa = func_args; fa; fa = PKL_AST_CHAIN (fa))
+    {
+      if (PKL_AST_FUNC_ARG_INITIAL (fa))
+        PKL_AST_FUNC_FIRST_OPT_ARG (func) = ASTREF (fa);
+    }
 }
 PKL_PHASE_END_HANDLER
 
