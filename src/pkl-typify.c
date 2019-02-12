@@ -797,8 +797,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
   /* Calculate the number of formal arguments that are not optional,
      and determine whether we have the right number of actual
      arguments.  Emit an error otherwise.  */
-
-  /* Check the types of the function and the funcall.  */
   if (PKL_AST_FUNCALL_NARG (funcall) <
       PKL_AST_TYPE_F_NARG (funcall_function_type))
     {

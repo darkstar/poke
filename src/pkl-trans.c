@@ -433,16 +433,28 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
 {
   pkl_ast_node function_type = PKL_PASS_NODE;
+  pkl_ast_node function_type_args = PKL_AST_TYPE_F_ARGS (function_type);
 
   pkl_ast_node arg;
   size_t nargs = 0;
 
-  for (arg = PKL_AST_TYPE_F_ARGS (function_type);
-       arg;
-       arg = PKL_AST_CHAIN (arg))
+  /* Count the number of formal arguments taken by functions of this
+     type.  */
+  for (arg = function_type_args;  arg; arg = PKL_AST_CHAIN (arg))
     nargs++;
-
   PKL_AST_TYPE_F_NARG (function_type) = nargs;
+
+  /* Find the first optional formal arugment, if any, and set
+     first_op_arg accordingly.  */
+  for (arg = function_type_args; arg; arg = PKL_AST_CHAIN (arg))
+    {
+      if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (arg))
+        {
+          PKL_AST_TYPE_F_FIRST_OPT_ARG (function_type)
+            = ASTREF (arg);
+          break;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 

@@ -680,16 +680,20 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
    argument.
 
    NAME, if not NULL, is an IDENTIFIER node describing the name
-   of the argument.  */
+   of the argument.
+
+   OPTIONAL is 1 if the argument is optional.  0 otherwise.  */
 
 #define PKL_AST_FUNC_TYPE_ARG_TYPE(AST) ((AST)->fun_type_arg.type)
 #define PKL_AST_FUNC_TYPE_ARG_NAME(AST) ((AST)->fun_type_arg.name)
+#define PKL_AST_FUNC_TYPE_ARG_OPTIONAL(AST) ((AST)->fun_type_arg.optional)
 
 struct pkl_ast_func_type_arg
 {
   struct pkl_ast_common common;
   union pkl_ast_node *type;
   union pkl_ast_node *name;
+  int optional;
 };
 
 pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
@@ -722,7 +726,9 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    In function types, NARG is the number of formal arguments in the
    function type.  ARGS is a chain of PKL_AST_FUNC_TYPE_ARG nodes.
    RTYPE is the type of the returned value, or NULL if the function
-   type denotes a void function.
+   type denotes a void function.  FIRST_OPT_ARG is the first argument
+   (in ARGS) that has an associated initial.  If no argument in ARGS
+   has an associated initial, this is NULL.
 
    When the size of a value of a given type can be determined at
    compile time, we say that such type is "complete".  Otherwise, we
@@ -743,6 +749,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_F_RTYPE(AST) ((AST)->type.val.fun.rtype)
 #define PKL_AST_TYPE_F_NARG(AST) ((AST)->type.val.fun.narg)
 #define PKL_AST_TYPE_F_ARGS(AST) ((AST)->type.val.fun.args)
+#define PKL_AST_TYPE_F_FIRST_OPT_ARG(AST) ((AST)->type.val.fun.first_opt_arg)
 
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
 #define PKL_AST_TYPE_COMPLETE_YES 1
@@ -787,6 +794,7 @@ struct pkl_ast_type
       union pkl_ast_node *rtype;
       int narg;
       union pkl_ast_node *args;
+      union pkl_ast_node *first_opt_arg;
     } fun;
     
   } val;
