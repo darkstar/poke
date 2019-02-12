@@ -41,3 +41,4 @@ deftype short = int16;
 deftype ulong = uint64;
 deftype long = int64;
 
+deftype offset = offset<uint64,b>;
