@@ -699,8 +699,19 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_funcall)
 {
-  /* XXX: Complete non-specified actuals for formals having default
-     values.  For these, we should push nulls.  */
+  pkl_ast_node funcall = PKL_PASS_NODE;
+
+  /* Complete non-specified actuals for formals having default values.
+     For these, we should push nulls.  */
+  {
+    pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
+    pkl_ast_node function_type = PKL_AST_TYPE (function);
+    int i, non_specified
+      = PKL_AST_TYPE_F_NARG (function_type) - PKL_AST_FUNCALL_NARG (funcall);
+
+    for (i = 0; i < non_specified; ++i)
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+  }
 
   /* At this point the closure for FUNCTION and the actuals are pushed
      in the stack.  Just call the bloody function.  */

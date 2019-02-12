@@ -785,7 +785,7 @@ struct pkl_ast_type
     struct
     {
       union pkl_ast_node *rtype;
-      size_t narg;
+      int narg;
       union pkl_ast_node *args;
     } fun;
     

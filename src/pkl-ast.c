@@ -233,6 +233,7 @@ pkl_ast_make_func (pkl_ast ast, pkl_ast_node ret_type,
   if (args)
     PKL_AST_FUNC_ARGS (func) = ASTREF (args);
   PKL_AST_FUNC_BODY (func) = ASTREF (body);
+
   PKL_AST_FUNC_FIRST_OPT_ARG (func) = NULL;
 
   return func;
@@ -2015,7 +2016,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
               PRINT_AST_SUBAST_CHAIN (TYPE_S_ELEMS);
               break;
             case PKL_TYPE_FUNCTION:
-              PRINT_AST_IMM (narg, TYPE_F_NARG, "%zu");
+              PRINT_AST_IMM (narg, TYPE_F_NARG, "%d");
               IPRINTF ("args:\n");
               PRINT_AST_SUBAST_CHAIN (TYPE_F_ARGS);
               break;
