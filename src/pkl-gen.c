@@ -731,14 +731,31 @@ PKL_PHASE_END_HANDLER
 
 /*
  * FUNC_ARG
+ * | INITIAL
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func_arg)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_arg)
 {
-  /* Pop an actual argument from the stack and put it in the current
-     environment.  */
+  pkl_ast_node func_arg = PKL_PASS_NODE;
+  pkl_ast_node func_arg_initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
 
+  if (func_arg_initial)
+    {
+      jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+      /* If the value on the stack is `null', that means we need to
+         use the default value for the argument.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, label);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* Drop the null */
+      PKL_PASS_SUBPASS (func_arg_initial);
+      pkl_asm_label (PKL_GEN_ASM, label);
+    }
+
+  /* Pop the actual argument from the stack and put it in the current
+     environment.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -2124,7 +2141,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_gen_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_gen_ps_func),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_ps_func_arg),
+   PKL_PHASE_PR_HANDLER (PKL_AST_FUNC_ARG, pkl_gen_pr_func_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC_TYPE_ARG, pkl_gen_pr_func_type_arg),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_gen_pr_type),
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_gen_pr_program),
