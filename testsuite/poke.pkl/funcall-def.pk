@@ -17,3 +17,8 @@ defun def3 = (int a, int b, int c = 1) int: { return a + b + c; }
 
 /* { dg-command { def3 :a 10 :b 20 } } */
 /* { dg-output "\n31" } */
+
+defun def4 = (int a, int b, int c = 1, int d = 2) int: { return a + b + c + d; }
+
+/* { dg-command { def4 :a 10 :b 20 :d 30 } } */
+/* { dg-output "\n62" } */
