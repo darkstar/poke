@@ -76,6 +76,38 @@
      yyextra->nchars += yyleng;                         \
     } while (0);
 
+/* Note that the following function assumes that STR is a pointer of a
+   string that satisfies the regexp
+   ({HEXCST}|{BINCST}|{OCTCST}|{DECCST}) */
+
+int
+pkl_lex_get_base  (const char *str, int *offset)
+{
+ int base = 10;
+ *offset = 0;
+
+ if (str[0] == '0')
+  {
+    if (str[1] == 'x' || str[1] == 'X')
+    {
+      base = 16;
+      *offset = 2;
+    }
+    else if (str[1] == 'b' || str[1] == 'B')
+    {
+      base = 2;
+      *offset = 2;
+    }
+    else if (str[1] == 'o' || str[1] == 'O')
+    {
+      base = 8;
+      *offset = 2;
+    }
+  }
+
+ return base;
+}
+
 %}
 
 NEWLINE            \n
@@ -198,6 +230,21 @@ D [0-9]
   return ATTR;
 }
 
+#({HEXCST}|{BINCST}|{OCTCST}|{DECCST}) {
+  char *end;
+  int base, offset;
+  uint64_t value;
+  pkl_ast_node type
+     = pkl_ast_make_integral_type (yyextra->ast, 64, 0);
+
+  base = pkl_lex_get_base (yytext, &offset);
+  value = strtoll (yytext + offset, &end, base);
+  yylval->ast = pkl_ast_make_integer (yyextra->ast, value);
+  PKL_AST_TYPE (yylval->ast) = ASTREF (type);
+
+  return UNIT;
+}
+
 #{L}({L}|{D})* {
    pkl_ast_node decl
        = pkl_env_lookup (yyextra->env, yytext + 1, NULL, NULL);
@@ -243,31 +290,8 @@ D [0-9]
        *tmp = *(tmp + 1);
   }
 
-  /* We support hexadecimal, octal, decimal and binary integer
-     constants.  Set the base of the match and skip prefixes.  */
-
-  base = 10;
-  offset = 0;
-
-  if (yytext[0] == '0')
-  {
-    if (yytext[1] == 'x' || yytext[1] == 'X')
-    {
-      base = 16;
-      offset = 2;
-    }
-    else if (yytext[1] == 'b' || yytext[1] == 'B')
-    {
-      base = 2;
-      offset = 2;
-    }
-    else if (yytext[1] == 'o' || yytext[1] == 'O')
-    {
-      base = 8;
-      offset = 2;
-    }
-  }
-
+  base = pkl_lex_get_base (yytext, &offset);
+  
   /* Note that strtol can't fail in this context.  */
   value = strtoll (yytext + offset, &end, base);
 
