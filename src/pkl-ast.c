@@ -454,6 +454,7 @@ pkl_ast_make_func_type_arg (pkl_ast ast, pkl_ast_node type,
     PKL_AST_FUNC_TYPE_ARG_NAME (function_type_arg)
       = ASTREF (name);
   PKL_AST_FUNC_TYPE_ARG_OPTIONAL (function_type_arg) = 0;
+  PKL_AST_FUNC_TYPE_ARG_VARARG (function_type_arg) = 0;
 
   return function_type_arg;
 }
@@ -525,6 +526,8 @@ pkl_ast_dup_type (pkl_ast_node type)
                                           fun_type_arg_name);
           PKL_AST_FUNC_TYPE_ARG_OPTIONAL (function_type_arg)
             = PKL_AST_FUNC_TYPE_ARG_OPTIONAL (t);
+          PKL_AST_FUNC_TYPE_ARG_VARARG (function_type_arg)
+            = PKL_AST_FUNC_TYPE_ARG_VARARG (t);
           PKL_AST_TYPE_F_ARGS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_F_ARGS (new),
                                function_type_arg);
@@ -591,6 +594,10 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
           {
             if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa)
                 != PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fb))
+              return 0;
+
+            if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
+                != PKL_AST_FUNC_TYPE_ARG_VARARG (fb))
               return 0;
             
             if (!pkl_ast_type_equal (PKL_AST_FUNC_TYPE_ARG_TYPE (fa),

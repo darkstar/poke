@@ -228,7 +228,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
 PKL_PHASE_END_HANDLER
 
 /* Check that all optional formal arguments in a function specifier
-   are at the end of the arguments list.  */
+   are at the end of the arguments list, and other checks.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
 {
@@ -238,6 +238,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node fa;
 
+  /* All optional formal arguments in a function specifier should be
+     at the end of the arguments list.  */
   for (fa = PKL_AST_FUNC_FIRST_OPT_ARG (func);
        fa;
        fa = PKL_AST_CHAIN (fa))
@@ -250,6 +252,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
           PKL_PASS_ERROR;
         }
     }
+
+  /* If there is a vararg argument, it should be at the end of the
+     list of arguments.  Also, it should be unique.  The parser makes
+     sure both restrictions are respected.  */
 }
 PKL_PHASE_END_HANDLER
 

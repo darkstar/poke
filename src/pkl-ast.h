@@ -686,11 +686,13 @@ pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
    NAME, if not NULL, is an IDENTIFIER node describing the name
    of the argument.
 
-   OPTIONAL is 1 if the argument is optional.  0 otherwise.  */
+   OPTIONAL is 1 if the argument is optional.  0 otherwise.
+   VARARG is 1 if the argument is a vararg.  0 otherwise.  */
 
 #define PKL_AST_FUNC_TYPE_ARG_TYPE(AST) ((AST)->fun_type_arg.type)
 #define PKL_AST_FUNC_TYPE_ARG_NAME(AST) ((AST)->fun_type_arg.name)
 #define PKL_AST_FUNC_TYPE_ARG_OPTIONAL(AST) ((AST)->fun_type_arg.optional)
+#define PKL_AST_FUNC_TYPE_ARG_VARARG(AST) ((AST)->fun_type_arg.vararg)
 
 struct pkl_ast_func_type_arg
 {
@@ -698,6 +700,7 @@ struct pkl_ast_func_type_arg
   union pkl_ast_node *type;
   union pkl_ast_node *name;
   int optional;
+  int vararg;
 };
 
 pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
