@@ -874,9 +874,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
           }
 
-        /* Dispose the old list of actual arguments.  */
-        // XXX deep free is invalid here.  We need shallow.
-        // pkl_ast_node_free_chain (PKL_AST_FUNCALL_ARGS (funcall));
+        /* Dispose the old list of actual argument nodes.  */
+        {
+          pkl_ast_node ta;
+          for (aa = PKL_AST_FUNCALL_ARGS (funcall);
+               aa;
+               aa = ta)
+            {
+              ta = PKL_AST_CHAIN (aa);
+              free (aa);
+            }
+        }
 
         /* Install the new ordered list in the funcall.  */
         PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (ordered_arg_list);
