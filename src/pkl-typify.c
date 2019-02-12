@@ -750,6 +750,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
 
       func_type_args = pkl_ast_chainon (func_type_args,
                                         ASTREF (func_type_arg));
+      PKL_AST_FUNC_TYPE_ARG_OPTIONAL (func_type_arg)
+        = PKL_AST_FUNC_ARG_INITIAL (t) != NULL;
+
       nargs++;
     }
 
