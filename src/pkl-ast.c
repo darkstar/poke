@@ -233,6 +233,7 @@ pkl_ast_make_func (pkl_ast ast, pkl_ast_node ret_type,
   if (args)
     PKL_AST_FUNC_ARGS (func) = ASTREF (args);
   PKL_AST_FUNC_BODY (func) = ASTREF (body);
+  PKL_AST_FUNC_FIRST_OPT_ARG (func) = NULL;
 
   return func;
 }
@@ -1457,6 +1458,7 @@ pkl_ast_node_free (pkl_ast_node ast)
               n = PKL_AST_CHAIN (t);
               pkl_ast_node_free (t);
             }
+      pkl_ast_node_free (PKL_AST_FUNC_FIRST_OPT_ARG (ast));
       break;
 
     case PKL_AST_FUNC_ARG:
@@ -2060,6 +2062,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (ret_type, FUNC_RET_TYPE);
       PRINT_AST_SUBAST_CHAIN (FUNC_ARGS);
+      PRINT_AST_SUBAST (first_opt_arg, FUNC_FIRST_OPT_ARG);
       PRINT_AST_SUBAST (body, FUNC_BODY);
       break;
 

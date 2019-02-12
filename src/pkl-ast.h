@@ -540,6 +540,10 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
    arguments to the function.  It can be NULL if the function takes no
    arguments.
 
+   FIRST_OPT_ARG is the first argument (in ARGS) that has an
+   associated initial.  If no argument in ARGS has an associated
+   initial, this is NULL.
+
    BODY is a PKL_AST_COMP_STMT node containing the statements that
    conform the function body.
 
@@ -554,6 +558,7 @@ pkl_ast_node pkl_ast_make_enum (pkl_ast ast,
 
 #define PKL_AST_FUNC_RET_TYPE(AST) ((AST)->func.ret_type)
 #define PKL_AST_FUNC_ARGS(AST) ((AST)->func.args)
+#define PKL_AST_FUNC_FIRST_OPT_ARG(AST) ((AST)->func.first_opt_arg)
 #define PKL_AST_FUNC_BODY(AST) ((AST)->func.body)
 #define PKL_AST_FUNC_NFRAMES(AST) ((AST)->func.nframes)
 #define PKL_AST_FUNC_NAME(AST) ((AST)->func.name)
@@ -564,6 +569,7 @@ struct pkl_ast_func
 
   union pkl_ast_node *ret_type;
   union pkl_ast_node *args;
+  union pkl_ast_node *first_opt_arg;
   union pkl_ast_node *body;
 
   int nframes;
