@@ -39,6 +39,7 @@ defun dump = (Offset64 from,
 
    if (header)
      print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
+
    while (offset < top)
      {
        defvar i = 0;

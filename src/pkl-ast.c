@@ -812,11 +812,9 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
                 
                 if (t != PKL_AST_TYPE_F_ARGS (type))
                   fputc (',', out);
-                if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (t))
-                  fputc ('[', out);
                 pkl_print_type (out, atype, use_given_name);
                 if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (t))
-                  fputc (']', out);
+                  fputc ('?', out);
               }
             
             fputc (')', out);
