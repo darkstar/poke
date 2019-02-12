@@ -227,12 +227,39 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+/* Check that all optional formal arguments in a function specifier
+   are at the end of the arguments list.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
+{
+  pkl_anal_payload payload
+    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node func = PKL_PASS_NODE;
+  pkl_ast_node fa;
+
+  for (fa = PKL_AST_FUNC_FIRST_OPT_ARG (func);
+       fa;
+       fa = PKL_AST_CHAIN (fa))
+    {
+      if (!PKL_AST_FUNC_ARG_INITIAL (fa))
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
+                     "non-optional argument after optional arguments");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_anal1_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_COMP_STMT, pkl_anal1_ps_comp_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal1_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_anal1_ps_func),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_ps_type_struct),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };

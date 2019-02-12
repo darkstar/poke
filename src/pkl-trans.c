@@ -419,7 +419,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_func)
   for (fa = func_args; fa; fa = PKL_AST_CHAIN (fa))
     {
       if (PKL_AST_FUNC_ARG_INITIAL (fa))
-        PKL_AST_FUNC_FIRST_OPT_ARG (func) = ASTREF (fa);
+        {
+          PKL_AST_FUNC_FIRST_OPT_ARG (func) = ASTREF (fa);
+          break;
+        }
     }
 }
 PKL_PHASE_END_HANDLER

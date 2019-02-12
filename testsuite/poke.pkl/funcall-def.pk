@@ -4,3 +4,8 @@ defun def1 = (int a, int b, int c = 0) int: { return a + b + c; }
 
 /* { dg-command { def1 (10, 20, 30) } } */
 /* { dg-output "60" } */
+
+defun def2 = (int a, int b = 1, int c = 0) int: { return a + b + c; }
+
+/* { dg-command { def2 (10, 20, 30) } } */
+/* { dg-output "\n60" } */
