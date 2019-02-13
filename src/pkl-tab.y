@@ -213,6 +213,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token ANY
 %token ISA
 %token PRINT
+%token PRINTF
 
 /* ATTRIBUTE operator.  */
 
@@ -267,7 +268,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression primary identifier
+%type <ast> expression comma_expression_list primary identifier
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
@@ -625,6 +626,13 @@ expression:
                 }
    	| struct
         ;
+
+comma_expression_list:
+	expression
+        | comma_expression_list ',' expression
+        {
+          $$ = pkl_ast_chainon ($1, $3);
+        }
 
 unary_operator:
 	  '-'		{ $$ = PKL_AST_OP_NEG; }
@@ -1423,6 +1431,12 @@ stmt:
                   PKL_AST_LOC ($$) = @$;
                 }
         | PRINT expression ';'
+        	{
+                  $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
+                                                $2);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| PRINTF comma_expression_list ';'
         	{
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
                                                 $2);

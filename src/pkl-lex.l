@@ -170,6 +170,7 @@ D [0-9]
 "void"		{ return VOID; }
 "any"		{ return ANY; }
 "print"		{ return PRINT; }
+"printf"	{ return PRINTF; }
 "isa"		{ return ISA; }
 
 "uint<"         { return UINTCONSTR; }
