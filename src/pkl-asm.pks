@@ -403,9 +403,8 @@
         ;; converted to first's units.
         ;; XXX use the return stack for temporaries, rather than
         ;; variables.
-        pushf
-        regvar $unit            ; OFF1 OFF2
-        pushvar $unit           ; OFF1 OFF2 UNIT
+        tor			; OFF1 OFF2
+        atr                     ; OFF1 OFF2 UNIT
         ogetmc @base_type       ; OFF1 OFF2 OFF2M
         rot                     ; OFF2 OFF2U OFF1
         ogetm                   ; OFF2 OFF2U OFF1 OFF1M
@@ -415,9 +414,8 @@
         nrot                    ; (OFF1M%OFF2M) OFF2 OFF1
         swap                    ; (OFF1M%OFF2M) OFF1 OFF2
         rot                     ; OFF1 OFF2 (OFF1M%OFF2M)
-        pushvar $unit           ; OFF1 OFF2 (OFF1M%OFF2M) UNIT
+        atr                     ; OFF1 OFF2 (OFF1M%OFF2M) UNIT
         mko                     ; OFF1 OFF2 OFFRES
-        push $unit              ; OFF1 OFF2 OFFRES UNIT
+        fromr                   ; OFF1 OFF2 OFFRES UNIT
         swap                    ; OFF1 OFF2 UNIT OFFRES
-        popf 1
         .end
