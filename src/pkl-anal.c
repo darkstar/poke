@@ -254,8 +254,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
     }
 
   /* If there is a vararg argument, it should be at the end of the
-     list of arguments.  Also, it should be unique.  The parser makes
-     sure both restrictions are respected.  */
+     list of arguments.  Also, it should be unique.  */
+  for (fa = PKL_AST_FUNC_ARGS (func);
+       fa;
+       fa = PKL_AST_CHAIN (fa))
+    {
+      if (PKL_AST_FUNC_ARG_VARARG (fa) == 1
+          && PKL_AST_CHAIN (fa) != NULL)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
+                     "vararg argument should be the last argument of the function");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 

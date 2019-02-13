@@ -17,7 +17,4 @@ defun bar = (int a, int b, args ...) int: { return a + b + (args[0] as int); }
 /* { dg-command { try bar (1,2,"foo",3); catch if E_conv { print "cached\n"; } } } */
 /* { dg-output "\ncached" } */
 
-defun aa = (args...) int: { return args[0] as int; }
 
-/* { dg-command { aa (10) } } */
-/* { dg-output "\n10" } */
