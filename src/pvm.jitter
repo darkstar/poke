@@ -19,7 +19,7 @@
 vm
   set prefix "pvm"
   tos-stack "pvm_val" "stack"
-  ntos-stack "jitter_uint" "returnstack"
+  ntos-stack "pvm_val" "returnstack"
   ntos-stack "struct pvm_exception_handler *" "exceptionstack"
 end
 
@@ -763,6 +763,20 @@ end
 instruction sel () # ( VAL -- VAL ULONG )
   code
     JITTER_PUSH_STACK (pvm_elemsof (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction tor () # ( VAL -- )
+  code
+    JITTER_PUSH_RETURNSTACK (JITTER_TOP_STACK ());
+    JITTER_DROP_STACK ();
+  end
+end
+
+instruction fromr () # ( -- VAL )
+  code
+    JITTER_PUSH_STACK (JITTER_TOP_RETURNSTACK ());
+    JITTER_DROP_RETURNSTACK ();
   end
 end
 
