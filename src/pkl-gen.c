@@ -367,7 +367,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
   pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
 
-
   /* At this point the r-value, generated from executing EXP, is in
      the stack.  If its type can be mapped, then we need to generate
      code to perform a mapval on that value.
@@ -381,6 +380,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
   switch (PKL_AST_CODE (lvalue))
     {
     case PKL_AST_ARRAY_REF:
+      /* Note that analf guarantees that the container of this aref is
+         an array, not a string.  */
     case PKL_AST_STRUCT_REF:
       {
         jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
@@ -1196,7 +1197,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
     {
       /* This is a l-value in an assignment.  The array and the index
          are pushed to the stack for the ass_stmt PS handler.  Nothing
-         else to do here.  Note that typify guarantees that the
+         else to do here.  Note that analf guarantees that the
          container of this aref is an array, not a string.  */
      }
   else
