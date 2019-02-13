@@ -294,8 +294,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
       break;
     case PKL_AST_TRIMMER:
       PKL_PASS (PKL_AST_TRIMMER_CONTAINER (node));
-      PKL_PASS (PKL_AST_TRIMMER_FROM (node));
-      PKL_PASS (PKL_AST_TRIMMER_TO (node));
+      if (PKL_AST_TRIMMER_FROM (node))
+        PKL_PASS (PKL_AST_TRIMMER_FROM (node));
+      if (PKL_AST_TRIMMER_TO (node))
+        PKL_PASS (PKL_AST_TRIMMER_TO (node));
       
       break;
     case PKL_AST_ARRAY_REF:
