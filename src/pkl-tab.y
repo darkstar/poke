@@ -994,6 +994,22 @@ function_type_arg:
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_FUNC_TYPE_ARG_OPTIONAL ($$) = 1;
                 }
+        | THREEDOTS
+        	{
+                  pkl_ast_node type
+                    = pkl_ast_make_any_type (pkl_parser->ast);
+                  pkl_ast_node array_type
+                    = pkl_ast_make_array_type (pkl_parser->ast,
+                                               type);
+
+                  PKL_AST_LOC (type) = @1;
+                  PKL_AST_LOC (array_type) = @1;
+                  
+                  $$ = pkl_ast_make_func_type_arg (pkl_parser->ast,
+                                                   array_type, NULL /* name */);
+                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_FUNC_TYPE_ARG_VARARG ($$) = 1;
+                }
 	;
 
 struct_type_specifier:
