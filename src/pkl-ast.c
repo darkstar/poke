@@ -260,6 +260,23 @@ pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
   return func_arg;
 }
 
+/* Build and return an AST node for a trimmer.  */
+
+pkl_ast_node
+pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node container,
+                      pkl_ast_node from, pkl_ast_node to)
+{
+  pkl_ast_node trimmer = pkl_ast_make_node (ast, PKL_AST_TRIMMER);
+
+  PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (container);
+  if (from)
+    PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (from);
+  if (to)
+    PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (to);
+
+  return trimmer;
+}
+
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
@@ -1476,6 +1493,13 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_ARRAY_REF_INDEX (ast));
       break;
 
+    case PKL_AST_TRIMMER:
+
+      pkl_ast_node_free (PKL_AST_TRIMMER_CONTAINER (ast));
+      pkl_ast_node_free (PKL_AST_TRIMMER_FROM (ast));
+      pkl_ast_node_free (PKL_AST_TRIMMER_TO (ast));
+      break;
+
     case PKL_AST_FUNC:
 
       pkl_ast_node_free (PKL_AST_FUNC_RET_TYPE (ast));
@@ -2075,6 +2099,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_IMM (optional, FUNC_TYPE_ARG_OPTIONAL, "%d");
       break;
       
+    case PKL_AST_TRIMMER:
+      IPRINTF ("TRIMMER::\n");
+      PRINT_AST_SUBAST (from, TRIMMER_FROM);
+      PRINT_AST_SUBAST (to, TRIMMER_TO);
+      PRINT_AST_SUBAST (container, TRIMMER_CONTAINER);
+      break;
+
     case PKL_AST_ARRAY_REF:
       IPRINTF ("ARRAY_REF::\n");
 

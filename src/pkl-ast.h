@@ -43,6 +43,7 @@ enum pkl_ast_code
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_INITIALIZER,
   PKL_AST_ARRAY_REF,
+  PKL_AST_TRIMMER,
   PKL_AST_STRUCT,
   PKL_AST_STRUCT_ELEM,
   PKL_AST_STRUCT_REF,
@@ -614,6 +615,35 @@ pkl_ast_node pkl_ast_make_func_arg (pkl_ast ast,
                                     pkl_ast_node type,
                                     pkl_ast_node identifier,
                                     pkl_ast_node init);
+
+/* PKL_AST_TRIMMER nodes represent a trim of an array, or a string.
+   
+   CONTAINER is either an array or a string, which is the subject of
+   the trim.
+
+   FROM is an expression that should evaluate to an uint<64>, which is
+   the index of the first element of the trim.
+
+   TO is an expression that should evaluate to an uint<64>, which is
+   the index of the last element of the trim.  */
+
+#define PKL_AST_TRIMMER_CONTAINER(AST) ((AST)->trimmer.container)
+#define PKL_AST_TRIMMER_FROM(AST) ((AST)->trimmer.from)
+#define PKL_AST_TRIMMER_TO(AST) ((AST)->trimmer.to)
+
+struct pkl_ast_trimmer
+{
+  struct pkl_ast_common common;
+
+  union pkl_ast_node *container;
+  union pkl_ast_node *from;
+  union pkl_ast_node *to;
+};
+
+pkl_ast_node pkl_ast_make_trimmer (pkl_ast ast,
+                                   pkl_ast_node container,
+                                   pkl_ast_node from,
+                                   pkl_ast_node to);
 
 /* PKL_AST_ARRAY_REF nodes represent references to an array element.
 
@@ -1371,6 +1401,7 @@ union pkl_ast_node
   struct pkl_ast_array array;
   struct pkl_ast_array_initializer array_initializer;
   struct pkl_ast_array_ref aref;
+  struct pkl_ast_trimmer trimmer;
   struct pkl_ast_struct sct;
   struct pkl_ast_struct_elem sct_elem;
   struct pkl_ast_struct_ref sref;
