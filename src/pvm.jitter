@@ -780,6 +780,12 @@ instruction fromr () # ( -- VAL )
   end
 end
 
+instruction atr () # ( -- VAL )
+  code
+    JITTER_PUSH_STACK (JITTER_TOP_RETURNSTACK ());
+  end
+end
+
 
 
 ## Operators instructions.
