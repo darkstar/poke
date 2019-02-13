@@ -495,13 +495,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_trimmer)
      one.  */
   if (!to)
     {
+      pkl_ast_node idx_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
       pkl_ast_node length_op = pkl_ast_make_unary_exp (PKL_PASS_AST,
                                                        PKL_AST_OP_ATTR,
                                                        entity);
-      PKL_AST_EXP_ATTR (length_op) = PKL_AST_ATTR_LENGTH;
-      PKL_AST_LOC (length_op) = PKL_AST_LOC (trimmer);
+      pkl_ast_node one = pkl_ast_make_integer (PKL_PASS_AST, 1);
+      pkl_ast_node sub_op = pkl_ast_make_binary_exp (PKL_PASS_AST,
+                                                     PKL_AST_OP_SUB,
+                                                     length_op, one);
 
-      PKL_AST_TRIMMER_TO (trimmer) = ASTREF (length_op);
+      PKL_AST_EXP_ATTR (length_op) = PKL_AST_ATTR_LENGTH;
+      PKL_AST_TYPE (one) = ASTREF (idx_type);
+
+      PKL_AST_LOC (length_op) = PKL_AST_LOC (trimmer);
+      PKL_AST_LOC (idx_type) = PKL_AST_LOC (trimmer);
+      PKL_AST_LOC (one) = PKL_AST_LOC (trimmer);
+      PKL_AST_LOC (sub_op) = PKL_AST_LOC (trimmer);
+
+      PKL_AST_TRIMMER_TO (trimmer) = ASTREF (sub_op);
       PKL_PASS_RESTART = 1;
     }
 }
