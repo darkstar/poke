@@ -1,8 +1,6 @@
 /* { dg-do compile } */
 
-/* XXX The wrong diagnostic is emitted here.  */
-
-defun foo = (args..., int a) int:
+defun foo = (args..., int a) int: /* { dg-error "" } */
   {
-   return args[0];   /* { dg-error ".*\n.*" } */
+   return args[0];
   }
