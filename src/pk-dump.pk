@@ -21,8 +21,7 @@
 defvar pk_dump_usage =
   "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
 
-defun dump = (off64 from,
-              off64 size,
+defun dump = (off64 from, off64 size,
               off64 step = 16#B,
               int rule = 0,
               int ascii = 0) void:
