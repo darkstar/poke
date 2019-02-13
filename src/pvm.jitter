@@ -1454,6 +1454,17 @@ end
 
 ## Conversion instructions.
 
+instruction ctos () # ( UINT8 - UINT8 STR )
+  code
+    uint8_t c = PVM_VAL_UINT (JITTER_TOP_STACK ());
+    char *str = xmalloc (2); /* XXX GC */
+    str[0] = c;
+    str[1] = '\0';
+
+    JITTER_PUSH_STACK (pvm_make_string (str));
+  end
+end
+
 instruction itoi (?n pvm_literal_printer_cast) # ( INT -- INT INT )
   code
     PVM_CONVOP (INT, int32_t, int, int32_t);

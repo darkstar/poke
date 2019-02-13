@@ -1061,6 +1061,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       PKL_PASS_SUBPASS (to_unit);
       pkl_asm_insn (pasm, PKL_INSN_OTO, from_type, to_type);
     }
+  else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_STRING)
+    {
+      pkl_asm_insn (pasm, PKL_INSN_CTOS);
+      pkl_asm_insn (pasm, PKL_INSN_NIP);
+    }
   else
     /* XXX: handle casts to structs and arrays.  For structs,
        reorder fields.  */

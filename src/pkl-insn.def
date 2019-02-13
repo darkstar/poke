@@ -60,6 +60,8 @@ PKL_DEF_INSN (PKL_INSN_RESTORER, "r", "restorer")
 
 /* Conversion instructions.  */
 
+PKL_DEF_INSN (PKL_INSN_CTOS, "", "ctos")
+
 PKL_DEF_INSN (PKL_INSN_ITOI, "n", "itoi")
 PKL_DEF_INSN (PKL_INSN_ITOIU, "n", "itoiu")
 PKL_DEF_INSN (PKL_INSN_ITOL, "n", "itol")
