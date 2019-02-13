@@ -45,6 +45,8 @@ deftype long = int64;
 
 deftype off64 = offset<int64,b>;
 
+/* String manipulation routines.  */
+
 defun substr = (string s, int f, int t = -1) string:
   {
    defvar res = "";
