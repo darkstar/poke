@@ -399,20 +399,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 }
 PKL_PHASE_END_HANDLER
 
-/* The parser emits the formal arguments of functions in
-   reverse-order.  Reverse them again here.
-
-   Also, set the function's first optional argument.  */
+/* Set the function's first optional argument.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_func)
 {
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
   pkl_ast_node fa;
-
-  /* Reverse the formal arguments.  */
-  func_args = pkl_ast_reverse (func_args);
-  PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
 
   /* Find the first optional formal argument, if any, and set
      first_opt_arg accordingly.  */
@@ -749,19 +742,6 @@ struct pkl_phase pkl_phase_trans3 =
 
 
 
-/* Reverse the order of the function arguments, as the callee access
-   them in LIFO order.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_func)
-{
-  pkl_ast_node func = PKL_PASS_NODE;
-  pkl_ast_node func_args = PKL_AST_FUNC_ARGS (func);
-
-  func_args = pkl_ast_reverse (func_args);
-  PKL_AST_FUNC_ARGS (func) = ASTREF (func_args);
-}
-PKL_PHASE_END_HANDLER
-
 /* Reverse the list of initializers in array literals.
 
    This is needed because at code generation time, the mka instruction
@@ -782,6 +762,5 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
-   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans4_ps_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans4_ps_array),
   };

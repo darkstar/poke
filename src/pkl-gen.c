@@ -698,7 +698,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
   pkl_ast_node function_type = PKL_AST_TYPE (function);
   int vararg = PKL_AST_TYPE_F_VARARG (function_type);
-  int aindex = 0, vararg_actual = 0;
+  int i, aindex = 0, vararg_actual = 0;
   pkl_ast_node aa;
  
   /* Push the actuals to the stack. */
@@ -732,7 +732,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   /* Complete non-specified actuals for formals having default values.
      For these, we should push nulls.  But beware the vararg!  */
   {
-    int i, non_specified
+    int non_specified
       = (PKL_AST_TYPE_F_NARG (function_type)
          - PKL_AST_FUNCALL_NARG (funcall)
          - PKL_AST_TYPE_F_VARARG (function_type));
@@ -759,10 +759,22 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
 {
+  pkl_ast_node fa;
+
   /* This is a function prologue.  */
   pkl_asm_note (PKL_GEN_ASM,
                 PKL_AST_FUNC_NAME (PKL_PASS_NODE));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PROLOG);
+
+  /* Reverse the arguments.
+     XXX: compute the number of formals in transf.
+     XXX: use pick and roll when available.  */
+  {
+    int narg = 0;
+    for (fa = PKL_AST_FUNC_ARGS (PKL_PASS_NODE); fa; fa = PKL_AST_CHAIN (fa))
+      narg++;
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REVN, narg);
+  }
 
   /* Push the function environment, for the arguments, if there are
      any.  The compound-statement that is the body for the function

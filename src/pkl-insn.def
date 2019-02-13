@@ -60,6 +60,8 @@ PKL_DEF_INSN (PKL_INSN_RESTORER, "r", "restorer")
 PKL_DEF_INSN (PKL_INSN_TOR, "", "tor")
 PKL_DEF_INSN (PKL_INSN_FROMR, "", "fromr")
 PKL_DEF_INSN (PKL_INSN_ATR, "", "atr")
+
+PKL_DEF_INSN (PKL_INSN_REVN, "n", "revn")
   
 /* Conversion instructions.  */
 

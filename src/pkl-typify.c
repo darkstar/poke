@@ -781,9 +781,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
       nargs++;
     }
 
-  /* Reverse.  */
-  func_type_args = pkl_ast_reverse (func_type_args);
-  
   /* Make the type of the function.  */
   type = pkl_ast_make_function_type (PKL_PASS_AST,
                                      PKL_AST_FUNC_RET_TYPE (node),

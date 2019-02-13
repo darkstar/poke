@@ -811,21 +811,10 @@ array_initializer:
  */
 
 function_specifier:
-	  '(' pushlevel function_arg_list ')'
-                {
-                    /* Register the function arguments in the
-                       compile-time environment.  This is done here
-                       and not in the function_arg rule because it
-                       should be done in reverse-order, because the
-                       callee gets the arguments in a LIFO order.  */
-
-                  if (!pkl_register_args (pkl_parser, $3))
-                    YYERROR;
-                }
-          simple_type_specifier ':' comp_stmt
+	  '(' pushlevel function_arg_list ')' simple_type_specifier ':' comp_stmt
         	{
                   $$ = pkl_ast_make_func (pkl_parser->ast,
-                                          $6, $3, $8);
+                                          $5, $3, $7);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
@@ -844,8 +833,7 @@ function_arg_list:
           function_arg
         | function_arg ',' function_arg_list
           	{
-                  /* Note this is in reverse order.  */
-                  $$ = pkl_ast_chainon ($3, $1);
+                  $$ = pkl_ast_chainon ($1, $3);
                 }
         ;
 
@@ -857,9 +845,8 @@ function_arg:
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
 
-                  /* Note the arguments are registered in the lexical
-                     environment in a mid-term action in the
-                     `function_specifier' rule, not here.  */
+                  if (!pkl_register_arg (pkl_parser, $$))
+                      YYERROR;
                 }
 	| identifier THREEDOTS
         	{
@@ -879,6 +866,9 @@ function_arg:
                   PKL_AST_FUNC_ARG_VARARG ($$) = 1;
                   PKL_AST_LOC ($1) = @1;
                   PKL_AST_LOC ($$) = @$;
+
+                  if (!pkl_register_arg (pkl_parser, $$))
+                      YYERROR;
                 }
         ;
 
@@ -1390,16 +1380,10 @@ stmt:
                                                     $2, $6, NULL, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| TRY stmt CATCH  '(' pushlevel function_arg
-        	{
-                  /* Register the argument in the lexical environment.  */
-                  if (!pkl_register_args (pkl_parser, $6))
-                    YYERROR;
-                }
-	  ')' comp_stmt
+	| TRY stmt CATCH  '(' pushlevel function_arg ')' comp_stmt
 		{
                   $$ = pkl_ast_make_try_catch_stmt (pkl_parser->ast,
-                                                    $2, $9, $6, NULL);
+                                                    $2, $8, $6, NULL);
                   PKL_AST_LOC ($$) = @$;
 
                   /* Pop the frame introduced by `pushlevel'
