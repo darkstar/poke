@@ -42,3 +42,21 @@ deftype ulong = uint64;
 deftype long = int64;
 
 deftype off64 = offset<int64,b>;
+
+defun substr = (string s, int f, int t = -1) string:
+  {
+   defvar res = "";
+   defvar i = f;
+
+   /* XXX: substitute by s'length in the initializer.  */
+   if (t == -1)
+     t = s'length as int;
+
+   while (i < t)
+     {
+       res = res + s[i] as string;
+       i = i + 1;
+     }
+
+   return res;
+  }

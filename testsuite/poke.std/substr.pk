@@ -1,0 +1,13 @@
+/* { dg-do run } */
+
+/* { dg-command { substr ("foobar", 0, "foobar"'length) } } */
+/* { dg-output "\"foobar\"" } */
+
+/* { dg-command { substr ("foobar", 0) } } */
+/* { dg-output "\n\"foobar\"" } */
+
+/* { dg-command { substr ("@foobar", 1) } } */
+/* { dg-output "\n\"foobar\"" } */
+
+/* { dg-command { try substr ("foobar", -1, 20); catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
