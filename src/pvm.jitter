@@ -1552,6 +1552,45 @@ end
 
 
 
+## String instructions
+
+instruction strref () # ( STR ULONG -- STR ULONG VAL )
+  code
+     pvm_val string = JITTER_UNDER_TOP_STACK ();
+     pvm_val index = JITTER_TOP_STACK ();
+
+    if (PVM_VAL_ULONG (index) < 0
+        || (PVM_VAL_ULONG (index) >
+            strlen (PVM_VAL_STR (string))))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    JITTER_PUSH_STACK (pvm_make_uint (PVM_VAL_STR (string)[PVM_VAL_ULONG (index)],
+                                      8));
+  end
+end
+
+instruction strset () # ( STR ULONG VAL -- STR )
+  code
+     uint64_t idx;
+     pvm_val val;
+     pvm_val string;
+
+     val = JITTER_TOP_STACK ();
+     idx = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
+     JITTER_DROP_STACK ();
+     JITTER_DROP_STACK ();
+
+     string = JITTER_TOP_STACK ();
+
+     if (idx < 0 || idx > strlen (PVM_VAL_STR (string)))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    PVM_VAL_STR (string)[idx] = PVM_VAL_UINT (val);
+  end
+end
+
+
+
 ## Array instructions.
 
 # ( TYP [IDX VAL]... ULONG(nelem) ULONG(ninitializer) -- ARR )

@@ -1202,23 +1202,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
     {
       pkl_ast_node array_ref = PKL_PASS_NODE;
       pkl_ast_node array_ref_type = PKL_AST_TYPE (array_ref);
-      
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+      pkl_ast_node container = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+      pkl_ast_node container_type = PKL_AST_TYPE (container);
 
-      /* To cover cases where the referenced array is not mapped, but
-         the value stored in it is a mapped value, we issue a
-         REMAP.  */
-      switch (PKL_AST_TYPE_CODE (array_ref_type))
+      switch (PKL_AST_TYPE_CODE (container_type))
         {
         case PKL_TYPE_ARRAY:
-        case PKL_TYPE_STRUCT:
-          /* XXX: this is redundant IO for many (most?) cases.  */
-          /* XXX: handle exceptions from the mapper function.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+          /* To cover cases where the referenced array is not mapped, but
+             the value stored in it is a mapped value, we issue a
+             REMAP.  */
+          switch (PKL_AST_TYPE_CODE (array_ref_type))
+            {
+            case PKL_TYPE_ARRAY:
+            case PKL_TYPE_STRUCT:
+              /* XXX: this is redundant IO for many (most?) cases.  */
+              /* XXX: handle exceptions from the mapper function.  */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
+              break;
+            default:
+              break;
+            }
+          break;
+        case PKL_TYPE_STRING:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_STRREF);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
           break;
         default:
-          break;
+          assert (0);
         }
     }
 }

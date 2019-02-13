@@ -651,7 +651,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 PKL_PHASE_END_HANDLER
 
 /* The type of an ARRAY_REF is the type of the elements of the array
-   it references.  */
+   it references.  If the referenced container is a string, the type
+   of the ARRAY_REF is uint<8>.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 {
@@ -666,8 +667,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 
   pkl_ast_node type;
 
-  if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY)
+  switch (PKL_AST_TYPE_CODE (container_type))
     {
+    case PKL_TYPE_ARRAY:
+      /* The type of the aref is the type of the elements of the
+         array.  */
+      type
+        = PKL_AST_TYPE_A_ETYPE (container_type);
+      break;
+    case PKL_TYPE_STRING:
+      {
+        /* The type of the aref is a `char', i.e. a uint<8>.  */
+        type = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
+        PKL_AST_LOC (type) = PKL_AST_LOC (array_ref);
+        break;
+      }
+    default:
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
                  "operator to [] must be an arry or a string");
       payload->errors++;
@@ -681,8 +696,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
       PKL_PASS_ERROR;
     }
 
-  type
-    = PKL_AST_TYPE_A_ETYPE (container_type);
   PKL_AST_TYPE (array_ref) = ASTREF (type);
   PKL_PASS_RESTART = 1;
 }
