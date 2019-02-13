@@ -56,6 +56,9 @@ defun substr = (string s, int f, int t = -1) string:
    if (t == -1)
      t = s'length as int;
 
+   if (t < f)
+     raise;
+
    /* XXX: use for (i in 0 to t)  */
    while (i < t)
      {

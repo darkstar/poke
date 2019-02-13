@@ -14,3 +14,6 @@
 
 /* { dg-command { try substr ("foobar", 1, 100); catch if E_out_of_bounds { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
+
+/* { dg-command { try substr ("foobar", 2, 1); catch { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
