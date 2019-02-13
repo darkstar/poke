@@ -48,3 +48,13 @@ defun def1 = (int a, int b, int c = 0) int: { return a + b + c; }
 /* { dg-command { def1 (10, 20, 30) } } */
 /* { dg-output "\n60" } */
 
+
+defun xxx = int: { print "foo\n"; return 10; }
+defun yyy = int: { print "bar\n"; return 20; }
+defun zzz = (int a, int b) int: { return a + b; }
+
+/* { dg-command { zzz (xxx, yyy) } } */
+/* { dg-output "\nfoo\nbar\n30" } */
+
+/* { dg-command { zzz (yyy, xxx) } } */
+/* { dg-output "\nbar\nfoo\n30" } */
