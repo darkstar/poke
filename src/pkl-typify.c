@@ -651,7 +651,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 PKL_PHASE_END_HANDLER
 
 /* The type of an ARRAY_REF is the type of the elements of the array
-   it references.  */
+   it references.  If the referenced container is a string, the type
+   of the ARRAY_REF is uint<8>.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 {
@@ -659,34 +660,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
   pkl_ast_node array_ref = PKL_PASS_NODE;
-  pkl_ast_node array_ref_index
-    = PKL_AST_ARRAY_REF_INDEX (array_ref);
-  pkl_ast_node array_ref_array
-    = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+  pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (array_ref);
+  pkl_ast_node container = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+  pkl_ast_node index_type = PKL_AST_TYPE (index);
+  pkl_ast_node container_type = PKL_AST_TYPE (container);
 
   pkl_ast_node type;
 
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_array))
-      != PKL_TYPE_ARRAY)
+  switch (PKL_AST_TYPE_CODE (container_type))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (array_ref_array),
-                 "operator to [] must be an array");
+    case PKL_TYPE_ARRAY:
+    case PKL_TYPE_STRING:
+      break;
+    default:
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
+                 "operator to [] must be an arry or a string");
       payload->errors++;
-      PKL_PASS_ERROR;
+      PKL_PASS_ERROR;      
     }
 
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_ref_index))
-      != PKL_TYPE_INTEGRAL)
+  if (PKL_AST_TYPE_CODE (index_type) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (array_ref_index),
-                 "array index should be an integer");
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (index),
+                 "index should be an integer");
       PKL_PASS_ERROR;
     }
 
   type
-    = PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (array_ref_array));
+    = PKL_AST_TYPE_A_ETYPE (container_type);
   PKL_AST_TYPE (array_ref) = ASTREF (type);
-
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
