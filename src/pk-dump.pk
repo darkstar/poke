@@ -23,7 +23,8 @@ defvar pk_dump_usage =
 
 defun dump = (Offset64 from,
               Offset64 size,
-              int header = 1) void:
+              int rule = 0,
+              int ascii = 0) void:
   {
    defvar top = from + size;
    defvar offset = from;
@@ -37,8 +38,13 @@ defun dump = (Offset64 from,
      return;
    }
 
-   if (header)
-     print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF\n";
+   if (rule)
+     {
+       print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
+       if (ascii)
+         print "  0123456789ABCDEF";
+       print "\n";
+     }
 
    while (offset < top)
      {
