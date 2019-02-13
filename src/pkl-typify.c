@@ -677,34 +677,26 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
   pkl_ast_node to_idx = PKL_AST_TRIMMER_TO (trimmer);
   pkl_ast_node entity = PKL_AST_TRIMMER_ENTITY (trimmer);
   pkl_ast_node entity_type = PKL_AST_TYPE (entity);
+  pkl_ast_node to_idx_type = PKL_AST_TYPE (to_idx);
+  pkl_ast_node from_idx_type = PKL_AST_TYPE (from_idx);
+
+  if (PKL_AST_TYPE_CODE (from_idx_type) != PKL_TYPE_INTEGRAL)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (from_idx),
+                 "index in trimmer should be an integer");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  if (PKL_AST_TYPE_CODE (to_idx_type) != PKL_TYPE_INTEGRAL)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (to_idx),
+                 "index in trimmer should be an integer");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
 
   PKL_AST_TYPE (trimmer) = ASTREF (entity_type);
-
-  if (from_idx)
-    {
-      pkl_ast_node from_idx_type = PKL_AST_TYPE (from_idx);
-
-      if (PKL_AST_TYPE_CODE (from_idx_type) != PKL_TYPE_INTEGRAL)
-        {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (from_idx),
-                     "index in trimmer should be an integer");
-          payload->errors++;
-          PKL_PASS_ERROR;
-        }
-    }
-
-  if (to_idx)
-    {
-      pkl_ast_node to_idx_type = PKL_AST_TYPE (to_idx);
-
-      if (PKL_AST_TYPE_CODE (to_idx_type) != PKL_TYPE_INTEGRAL)
-        {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (to_idx),
-                     "index in trimmer should be an integer");
-          payload->errors++;
-          PKL_PASS_ERROR;
-        }
-    }
 }
 PKL_PHASE_END_HANDLER
 

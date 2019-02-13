@@ -377,6 +377,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
   const char *identifier_name = PKL_AST_IDENTIFIER_POINTER (identifier);
   enum pkl_ast_attr attr = PKL_AST_ATTR_NONE;
 
+  if (PKL_AST_EXP_ATTR (exp) != PKL_AST_ATTR_NONE)
+    PKL_PASS_DONE;
+
   for (attr = 0; pkl_attr_name (attr); ++attr)
     {
       if (strcmp (pkl_attr_name (attr), identifier_name) == 0)
@@ -463,6 +466,47 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
 }
 PKL_PHASE_END_HANDLER
 
+/* Complete trimmers lacking some of its indexes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_trimmer)
+{
+  pkl_ast_node trimmer = PKL_PASS_NODE;
+  pkl_ast_node entity = PKL_AST_TRIMMER_ENTITY (trimmer);
+  pkl_ast_node from = PKL_AST_TRIMMER_FROM (trimmer);
+  pkl_ast_node to = PKL_AST_TRIMMER_TO (trimmer);
+
+  /* If the FROM index of a trimmer isn't specified, it defaults to
+     0UL.  */
+  if (!from)
+    {
+      pkl_ast_node idx_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+
+      from = pkl_ast_make_integer (PKL_PASS_AST, 0);
+      PKL_AST_TYPE (from) = ASTREF (idx_type);
+      PKL_AST_LOC (idx_type) = PKL_AST_LOC (trimmer);
+      PKL_AST_LOC (from) = PKL_AST_LOC (trimmer);
+
+      PKL_AST_TRIMMER_FROM (trimmer) = ASTREF (from);
+    }
+
+  /* If the TO index of a trimmer isn't specified, it defaults to an
+     expression that evaluates to the size of the container, minus
+     one.  */
+  if (!to)
+    {
+      pkl_ast_node length_op = pkl_ast_make_unary_exp (PKL_PASS_AST,
+                                                       PKL_AST_OP_ATTR,
+                                                       entity);
+      PKL_AST_EXP_ATTR (length_op) = PKL_AST_ATTR_LENGTH;
+      PKL_AST_LOC (length_op) = PKL_AST_LOC (trimmer);
+
+      PKL_AST_TRIMMER_TO (trimmer) = ASTREF (length_op);
+      PKL_PASS_RESTART = 1;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
@@ -473,6 +517,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_STRING, pkl_trans1_ps_string),
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_trans1_ps_var),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans1_ps_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_trans1_ps_trimmer),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
