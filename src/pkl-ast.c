@@ -270,9 +270,9 @@ pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node entity,
 
   PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (entity);
   if (from)
-    PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (from);
+    PKL_AST_TRIMMER_FROM (trimmer) = ASTREF (from);
   if (to)
-    PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (to);
+    PKL_AST_TRIMMER_TO (trimmer) = ASTREF (to);
 
   return trimmer;
 }

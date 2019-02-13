@@ -663,6 +663,51 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 }
 PKL_PHASE_END_HANDLER
 
+/* The type of a trim is the type of the trimmed entity.  The trimmer
+   indexes should be unsigned 64-bit integrals, but this phase lets
+   any integral pass to promo.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node trimmer = PKL_PASS_NODE;
+  pkl_ast_node from_idx = PKL_AST_TRIMMER_FROM (trimmer);
+  pkl_ast_node to_idx = PKL_AST_TRIMMER_TO (trimmer);
+  pkl_ast_node entity = PKL_AST_TRIMMER_ENTITY (trimmer);
+  pkl_ast_node entity_type = PKL_AST_TYPE (entity);
+
+  PKL_AST_TYPE (trimmer) = ASTREF (entity_type);
+
+  if (from_idx)
+    {
+      pkl_ast_node from_idx_type = PKL_AST_TYPE (from_idx);
+
+      if (PKL_AST_TYPE_CODE (from_idx_type) != PKL_TYPE_INTEGRAL)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (from_idx),
+                     "index in trimmer should be an integer");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+
+  if (to_idx)
+    {
+      pkl_ast_node to_idx_type = PKL_AST_TYPE (to_idx);
+
+      if (PKL_AST_TYPE_CODE (to_idx_type) != PKL_TYPE_INTEGRAL)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (to_idx),
+                     "index in trimmer should be an integer");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* The type of an ARRAY_REF is the type of the elements of the array
    it references.  If the referenced container is a string, the type
    of the ARRAY_REF is uint<8>.  */
@@ -706,6 +751,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (index),
                  "index should be an integer");
+      payload->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1750,6 +1796,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_typify1_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_typify1_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_typify1_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_typify1_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_ps_array_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_typify1_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_typify1_ps_ass_stmt),
