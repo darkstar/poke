@@ -1343,17 +1343,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
     assert (container_type != NULL);
 
     /* The type of the container should be a container type.  */
-    if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY)
+    if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY
+        && PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_STRING)
       {
         pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
-                   "expected array");
+                   "expected array or string");
         payload->errors++;
         PKL_PASS_ERROR;
       }
 
     /* The type of the iterator is the type of the elements contained
        in the container.  */
-    container_elem_type = PKL_AST_TYPE_A_ETYPE (container_type);
+    if (PKL_AST_TYPE_CODE (container_type) == PKL_TYPE_ARRAY)
+        container_elem_type = PKL_AST_TYPE_A_ETYPE (container_type);
+    else
+      {
+        /* Container is a string.  */
+        container_elem_type
+          = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
+        PKL_AST_LOC (container_elem_type) = PKL_AST_LOC (container_type);
+      }
+
     PKL_AST_TYPE (PKL_AST_DECL_INITIAL (iterator))
       = ASTREF (container_elem_type);
   }

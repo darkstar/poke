@@ -81,6 +81,7 @@ struct pkl_asm_level
   jitter_label label2;
   jitter_label label3;
   pkl_ast_node node1;
+  pkl_ast_node node2;
 };
 
 /* An assembler instance.
@@ -1363,7 +1364,7 @@ pkl_asm_endloop (pkl_asm pasm)
    ; Set the iterator for this iteration.
    ROT        ; I NELEMS CONTAINER
    ROT        ; NELEMS CONTAINER I
-   AREF       ; NELEMS CONTAINER I IVAL
+   AREF|STRREF ; NELEMS CONTAINER I IVAL
    POPVAR 0,0 ; NELEMS CONTAINER I
    ROT        ; CONTAINER I NELEMS
    ; Increase the iterator counter
@@ -1394,7 +1395,8 @@ pkl_asm_endloop (pkl_asm pasm)
 */
 
 void
-pkl_asm_for (pkl_asm pasm, pkl_ast_node selector)
+pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
+             pkl_ast_node selector)
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_FOR_LOOP);
 
@@ -1404,6 +1406,8 @@ pkl_asm_for (pkl_asm pasm, pkl_ast_node selector)
 
   if (selector)
     pasm->level->node1 = ASTREF (selector);
+  assert (container);
+  pasm->level->node2 = ASTREF (container);
 }
 
 void
@@ -1429,7 +1433,11 @@ pkl_asm_for_where (pkl_asm pasm)
   /* Set the iterator for this iteration.  */
   pkl_asm_insn (pasm, PKL_INSN_ROT);
   pkl_asm_insn (pasm, PKL_INSN_ROT);
-  pkl_asm_insn (pasm, PKL_INSN_AREF);
+  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (pasm->level->node2))
+      == PKL_TYPE_ARRAY)
+    pkl_asm_insn (pasm, PKL_INSN_AREF);
+  else
+    pkl_asm_insn (pasm, PKL_INSN_STRREF);
   pkl_asm_insn (pasm, PKL_INSN_POPVAR, 0, 0);
   pkl_asm_insn (pasm, PKL_INSN_ROT);
 
@@ -1470,6 +1478,11 @@ pkl_asm_for_endloop (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
+
+  /* Cleanup and pop the current level.  */
+  pkl_ast_node_free (pasm->level->node1);
+  pkl_ast_node_free (pasm->level->node2);
+  pkl_asm_poplevel (pasm);
 }
 
 void

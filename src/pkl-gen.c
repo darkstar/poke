@@ -534,7 +534,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
   else if (iterator && container)
     {
       /* This is a FOR-IN[-WHERE] loop.  */
-      pkl_asm_for (PKL_GEN_ASM, condition);
+      pkl_asm_for (PKL_GEN_ASM, container, condition);
       {
         PKL_PASS_SUBPASS (container);
       }
