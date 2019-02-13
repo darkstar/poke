@@ -705,6 +705,24 @@ primary:
                   $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
+        | primary '[' expression ':' expression ']' %prec '.'
+        	{
+                  $$ = pkl_ast_make_trimmer (pkl_parser->ast,
+                                             $1, $3, $5);
+                  PKL_AST_LOC ($$) = @$;
+                }
+        | primary '[' ':' expression ']' %prec '.'
+        	{
+                  $$ = pkl_ast_make_trimmer (pkl_parser->ast,
+                                             $1, NULL, $4);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| primary '[' expression ':' ']' %prec '.'
+        	{
+                  $$ = pkl_ast_make_trimmer (pkl_parser->ast,
+                                             $1, $3, NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
 	| funcall
 	;
 
