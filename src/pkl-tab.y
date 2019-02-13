@@ -855,8 +855,17 @@ function_arg:
                 }
 	| identifier THREEDOTS
         	{
+                  pkl_ast_node type
+                    = pkl_ast_make_any_type (pkl_parser->ast);
+                  pkl_ast_node array_type
+                    = pkl_ast_make_array_type (pkl_parser->ast,
+                                               type);
+
+                  PKL_AST_LOC (type) = @1;
+                  PKL_AST_LOC (array_type) = @1;
+                  
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
-                                              NULL /* type */,
+                                              array_type,
                                               $1,
                                               NULL /* initial */);
                   PKL_AST_FUNC_ARG_VARARG ($$) = 1;

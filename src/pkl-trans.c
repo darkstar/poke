@@ -455,6 +455,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
           break;
         }
     }
+
+  /* Determine whether the function type gets a vararg.  */
+  for (arg = PKL_AST_TYPE_F_ARGS (function_type);
+       arg;
+       arg = PKL_AST_CHAIN (arg))
+    {
+      if (PKL_AST_FUNC_TYPE_ARG_VARARG (arg))
+        {
+          PKL_AST_TYPE_F_VARARG (function_type) = 1;
+          break;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 

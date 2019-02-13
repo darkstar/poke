@@ -821,8 +821,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       PKL_PASS_ERROR;
     }
 
-  /* Determine whether the function type gets a vararg, and annotate
-     the first vararg in the funcall.  */
+  /* Annotate the first vararg in the funcall.  */
   for (narg = 0,
        aa = PKL_AST_FUNCALL_ARGS (funcall),
        fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
@@ -835,9 +834,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
         break;
       
       if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
-        PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa) = 1;
+        {
+          vararg = 1;
+          PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa) = 1;
+        }
     }
-
+  
   /* XXX if named arguments are used, the vararg cannot be specified,
      so it will always be empty and this warning applies.  */
   if (!vararg
@@ -937,7 +939,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               break;
           }
 
-        if (!aa && PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa))
+        if (!aa &&
+            (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa)
+             || PKL_AST_FUNC_TYPE_ARG_VARARG (fa)))
           continue;
 
         if (!aa)
@@ -992,7 +996,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
 
       assert (aa_type);
 
-      if (!pkl_ast_type_equal (fa_type, aa_type))
+      if (!PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
+          && !pkl_ast_type_equal (fa_type, aa_type))
         {
           char *passed_type = pkl_type_str (aa_type, 1);
           char *expected_type = pkl_type_str (fa_type, 1);

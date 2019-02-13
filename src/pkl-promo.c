@@ -718,6 +718,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
       pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
       pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
 
+      /* Do not promote varargs.  */
+      if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
+        continue;
+
       /* At this point it is assured that the types of the actual
          argument and the formal argument are promoteable, or typify
          wouldn't have allowed it to pass.  If both types are equal,

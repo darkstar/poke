@@ -735,7 +735,8 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    RTYPE is the type of the returned value, or NULL if the function
    type denotes a void function.  FIRST_OPT_ARG is the first argument
    (in ARGS) that has an associated initial.  If no argument in ARGS
-   has an associated initial, this is NULL.
+   has an associated initial, this is NULL.  VARARG is 1 if the
+   function takes a variable number of arguments.  0 otherwise.
 
    When the size of a value of a given type can be determined at
    compile time, we say that such type is "complete".  Otherwise, we
@@ -756,6 +757,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_F_RTYPE(AST) ((AST)->type.val.fun.rtype)
 #define PKL_AST_TYPE_F_NARG(AST) ((AST)->type.val.fun.narg)
 #define PKL_AST_TYPE_F_ARGS(AST) ((AST)->type.val.fun.args)
+#define PKL_AST_TYPE_F_VARARG(AST) ((AST)->type.val.fun.vararg)
 #define PKL_AST_TYPE_F_FIRST_OPT_ARG(AST) ((AST)->type.val.fun.first_opt_arg)
 
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
@@ -800,6 +802,7 @@ struct pkl_ast_type
     {
       union pkl_ast_node *rtype;
       int narg;
+      int vararg;
       union pkl_ast_node *args;
       union pkl_ast_node *first_opt_arg;
     } fun;

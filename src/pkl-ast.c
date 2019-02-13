@@ -426,6 +426,7 @@ pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
   PKL_AST_TYPE_F_RTYPE (type) = ASTREF (rtype);
   PKL_AST_TYPE_F_NARG (type) = narg;
   PKL_AST_TYPE_F_ARGS (type) = ASTREF (args);
+  PKL_AST_TYPE_F_VARARG (type) = 0;
   PKL_AST_TYPE_F_FIRST_OPT_ARG (type) = NULL;
 
   return type;
@@ -533,6 +534,8 @@ pkl_ast_dup_type (pkl_ast_node type)
         }
       PKL_AST_TYPE_F_FIRST_OPT_ARG (new)
         = ASTREF (PKL_AST_TYPE_F_FIRST_OPT_ARG (type));
+      PKL_AST_TYPE_F_VARARG (new)
+        = PKL_AST_TYPE_F_VARARG (type);
       break;
     case PKL_TYPE_OFFSET:
       /* Fallthrough.  */

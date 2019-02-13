@@ -694,46 +694,47 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
 {
   pkl_ast_node funcall = PKL_PASS_NODE;
+  pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
+  pkl_ast_node function_type = PKL_AST_TYPE (function);
+  int vararg = PKL_AST_TYPE_F_VARARG (function_type);
+  int aindex = 0, vararg_actual = 0;
   pkl_ast_node aa;
-  int vararg = 0;
-  int aindex = 0;
  
   /* Push the actuals to the stack. */
   for (aa = PKL_AST_FUNCALL_ARGS (funcall); aa; aa = PKL_AST_CHAIN (aa))
     {
-       /* If this actual starts the vararg, push the type of the vararg
-         array.  */
       if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa))
         {
-          vararg = 1;
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+          vararg_actual = 1;
         }
 
-      if (vararg)
+      if (vararg_actual)
         {
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
           aindex++;
         }
 
       PKL_PASS_SUBPASS (aa);
-
-      /* If this is the last actual, and the function has a vararg,
-         make the vararg array.  */
-      if ((vararg) && PKL_AST_CHAIN (aa) == NULL)
-        {
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex + 1, 64));
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
-        }
+    }
+  
+  if (vararg)
+    {
+      if (aindex == 0)
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+      
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
     }
      
   /* Complete non-specified actuals for formals having default values.
-     For these, we should push nulls.  */
+     For these, we should push nulls.  But beware the vararg!  */
   {
-    pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
-    pkl_ast_node function_type = PKL_AST_TYPE (function);
     int i, non_specified
-      = PKL_AST_TYPE_F_NARG (function_type) - PKL_AST_FUNCALL_NARG (funcall);
+      = (PKL_AST_TYPE_F_NARG (function_type)
+         - PKL_AST_FUNCALL_NARG (funcall)
+         - PKL_AST_TYPE_F_VARARG (function_type));
 
     for (i = 0; i < non_specified; ++i)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
