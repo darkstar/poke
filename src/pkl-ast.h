@@ -618,16 +618,19 @@ pkl_ast_node pkl_ast_make_func_arg (pkl_ast ast,
 
 /* PKL_AST_TRIMMER nodes represent a trim of an array, or a string.
    
-   CONTAINER is either an array or a string, which is the subject of
+   ENTITY is either an array or a string, which is the subject of
    the trim.
 
    FROM is an expression that should evaluate to an uint<64>, which is
-   the index of the first element of the trim.
+   the index of the first element of the trim.  If FROM is NULL, then
+   the index of the first element of the trim is 0.
 
    TO is an expression that should evaluate to an uint<64>, which is
-   the index of the last element of the trim.  */
+   the index of the last element of the trim.  If TO is NULL, then the
+   indes of the last element of the trim is L-1, where L is the length
+   of ENTITY.  */
 
-#define PKL_AST_TRIMMER_CONTAINER(AST) ((AST)->trimmer.container)
+#define PKL_AST_TRIMMER_ENTITY(AST) ((AST)->trimmer.entity)
 #define PKL_AST_TRIMMER_FROM(AST) ((AST)->trimmer.from)
 #define PKL_AST_TRIMMER_TO(AST) ((AST)->trimmer.to)
 
@@ -635,13 +638,13 @@ struct pkl_ast_trimmer
 {
   struct pkl_ast_common common;
 
-  union pkl_ast_node *container;
+  union pkl_ast_node *entity;
   union pkl_ast_node *from;
   union pkl_ast_node *to;
 };
 
 pkl_ast_node pkl_ast_make_trimmer (pkl_ast ast,
-                                   pkl_ast_node container,
+                                   pkl_ast_node entity,
                                    pkl_ast_node from,
                                    pkl_ast_node to);
 

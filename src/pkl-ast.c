@@ -263,16 +263,16 @@ pkl_ast_make_func_arg (pkl_ast ast, pkl_ast_node type,
 /* Build and return an AST node for a trimmer.  */
 
 pkl_ast_node
-pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node container,
+pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node entity,
                       pkl_ast_node from, pkl_ast_node to)
 {
   pkl_ast_node trimmer = pkl_ast_make_node (ast, PKL_AST_TRIMMER);
 
-  PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (container);
+  PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (entity);
   if (from)
-    PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (from);
+    PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (from);
   if (to)
-    PKL_AST_TRIMMER_CONTAINER (trimmer) = ASTREF (to);
+    PKL_AST_TRIMMER_ENTITY (trimmer) = ASTREF (to);
 
   return trimmer;
 }
@@ -1495,7 +1495,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_TRIMMER:
 
-      pkl_ast_node_free (PKL_AST_TRIMMER_CONTAINER (ast));
+      pkl_ast_node_free (PKL_AST_TRIMMER_ENTITY (ast));
       pkl_ast_node_free (PKL_AST_TRIMMER_FROM (ast));
       pkl_ast_node_free (PKL_AST_TRIMMER_TO (ast));
       break;
@@ -2103,7 +2103,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("TRIMMER::\n");
       PRINT_AST_SUBAST (from, TRIMMER_FROM);
       PRINT_AST_SUBAST (to, TRIMMER_TO);
-      PRINT_AST_SUBAST (container, TRIMMER_CONTAINER);
+      PRINT_AST_SUBAST (entity, TRIMMER_ENTITY);
       break;
 
     case PKL_AST_ARRAY_REF:
