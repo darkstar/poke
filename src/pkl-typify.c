@@ -651,8 +651,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 PKL_PHASE_END_HANDLER
 
 /* The type of an ARRAY_REF is the type of the elements of the array
-   it references.  If the referenced container is a string, the type
-   of the ARRAY_REF is uint<8>.  */
+   it references.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 {
@@ -667,12 +666,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
 
   pkl_ast_node type;
 
-  switch (PKL_AST_TYPE_CODE (container_type))
+  if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY)
     {
-    case PKL_TYPE_ARRAY:
-    case PKL_TYPE_STRING:
-      break;
-    default:
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
                  "operator to [] must be an arry or a string");
       payload->errors++;
