@@ -27,11 +27,11 @@
 /* { dg-command { ("foo" + "bar")[3] } } */
 /* { dg-output "\n98UB" } */
 
-/* { dg-command { ("foo" + "bar")[6] } } */
-/* { dg-output "\n0UB" } */
+/* { dg-command { try ("foo" + "bar")[6]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
 
-/* { dg-command { try "foo"[-1]; catch if E_out_of_bounds { print "cached\n"; } } } */
-/* { dg-output "\ncached" } */
+/* { dg-command { try "foo"[-1]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
 
-/* { dg-command { try "foo"[4]; catch if E_out_of_bounds { print "cached\n"; } } } */
-/* { dg-output "\ncached" } */
+/* { dg-command { try "foo"[4]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */

@@ -1608,7 +1608,7 @@ instruction strref () # ( STR ULONG -- STR ULONG VAL )
      pvm_val index = JITTER_TOP_STACK ();
 
     if (PVM_VAL_ULONG (index) < 0
-        || (PVM_VAL_ULONG (index) >
+        || (PVM_VAL_ULONG (index) >=
             strlen (PVM_VAL_STR (string))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
