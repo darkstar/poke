@@ -773,7 +773,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
     int narg = 0;
     for (fa = PKL_AST_FUNC_ARGS (PKL_PASS_NODE); fa; fa = PKL_AST_CHAIN (fa))
       narg++;
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REVN, narg);
+    if (narg > 1)
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REVN, narg);
   }
 
   /* Push the function environment, for the arguments, if there are
@@ -1326,6 +1327,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
           break;
         }
     }
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * TYPE_ANY
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_any)
+{
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYANY);
 }
 PKL_PHASE_END_HANDLER
 
@@ -2259,6 +2270,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_gen_ps_op_bconc),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ANY, pkl_gen_ps_type_any),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_gen_ps_type_function),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_pr_type_array),

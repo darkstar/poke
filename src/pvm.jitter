@@ -1905,6 +1905,14 @@ instruction isa () # ( VAL TYPE -- TYPE VAL BOOL )
   end
 end
 
+# `Any' type.
+
+instruction mktyany () # ( -- TYP )
+  code
+    JITTER_PUSH_STACK (pvm_make_any_type ());
+  end
+end
+
 # Integral types
 
 instruction mktyi () # ( ULONG UINT -- TYP )
