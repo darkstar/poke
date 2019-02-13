@@ -52,10 +52,10 @@
 /* { dg-output "\n2UL" } */
 
 /* { dg-command {  ""'length } } */
-/* { dg-output "\n1UL" } */
+/* { dg-output "\n0UL" } */
 
 /* { dg-command {  "foo"'length } } */
-/* { dg-output "\n4UL" } */
+/* { dg-output "\n3UL" } */
 
 /* { dg-command {  [1,2,3]'length } } */
 /* { dg-output "\n3UL" } */
