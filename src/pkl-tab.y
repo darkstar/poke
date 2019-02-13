@@ -711,6 +711,12 @@ primary:
                                              $1, $3, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
+        | primary '[' ':' ']' %prec '.'
+        	{
+                  $$ = pkl_ast_make_trimmer (pkl_parser->ast,
+                                             $1, NULL, NULL);
+                  PKL_AST_LOC ($$) = @$;
+                }
         | primary '[' ':' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,

@@ -567,6 +567,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_array_ref)
 }
 PKL_PHASE_END_HANDLER
 
+/* Handler for promoting indexes in trimmers to unsigned 64 bit
+   values.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_trimmer)
+{
+  int restart;
+  pkl_ast_node trimmer = PKL_PASS_NODE;
+  pkl_ast_node from = PKL_AST_TRIMMER_FROM (trimmer);
+  pkl_ast_node to = PKL_AST_TRIMMER_TO (trimmer);
+
+  if (!promote_integral (PKL_PASS_AST, 64, 0,
+                         &PKL_AST_TRIMMER_FROM (trimmer), &restart))
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (from),
+               "couldn't promote trimmer index");
+      PKL_PASS_ERROR;
+    }
+
+  if (!promote_integral (PKL_PASS_AST, 64, 0,
+                         &PKL_AST_TRIMMER_TO (trimmer), &restart))
+    {
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (to),
+               "couldn't promote trimmer index");
+      PKL_PASS_ERROR;
+    }
+
+  PKL_PASS_RESTART = restart;
+}
+PKL_PHASE_END_HANDLER
+
 /* Handler for promoting the array size in array type literals to 64
    unsigned bit values, or to offset<uint<64>,*> if they are
    offsets.  */
@@ -896,6 +926,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_promo_ps_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_promo_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_promo_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_promo_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_promo_ps_try_catch_stmt),
