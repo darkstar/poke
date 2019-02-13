@@ -219,7 +219,6 @@ PKL_DEF_INSN (PKL_INSN_SEL, "", "sel")
 /* String instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_STRREF, "", "strref")
-PKL_DEF_INSN (PKL_INSN_STRSET, "", "strset")
 
 /* Array instructions.  */
 
