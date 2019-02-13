@@ -1196,7 +1196,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
     {
       /* This is a l-value in an assignment.  The array and the index
          are pushed to the stack for the ass_stmt PS handler.  Nothing
-         else to do here.  */
+         else to do here.  Note that typify guarantees that the
+         container of this aref is an array, not a string.  */
      }
   else
     {
