@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* XXX: use the std:: namespace for all the definitions in this file.  */
+
 /* Standard integral types.  */
 /* XXX: these types should be immutable.  */
 
