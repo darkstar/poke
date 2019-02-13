@@ -47,14 +47,10 @@ deftype off64 = offset<int64,b>;
 
 /* String manipulation routines.  */
 
-defun substr = (string s, int f, int t = -1) string:
+defun substr = (string s, int f, int t = s'length as int) string:
   {
    defvar res = "";
    defvar i = f;
-
-   /* XXX: substitute by s'length in the initializer.  */
-   if (t == -1)
-     t = s'length as int;
 
    if (t < f)
      raise;
