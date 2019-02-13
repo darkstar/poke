@@ -212,6 +212,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 
   pkl_ast_node cast = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
+  pkl_ast_node exp = PKL_AST_CAST_EXP (cast);
+  pkl_ast_node exp_type = PKL_AST_TYPE (exp);
   
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
     {
@@ -229,11 +231,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
       PKL_PASS_ERROR;
     }
 
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (PKL_AST_CAST_EXP (cast)))
-      == PKL_TYPE_FUNCTION)
+  if (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_FUNCTION)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "casting a function to any other type is not allowed");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* Only characters (uint<8>) can be casted to string.  */
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING
+      && (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_INTEGRAL
+          || PKL_AST_TYPE_I_SIGNED (exp_type) != 0
+          || PKL_AST_TYPE_I_SIZE (exp_type) != 8))
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+                 "invalid cast to string.  Expected a uint<8>.");
       payload->errors++;
       PKL_PASS_ERROR;
     }
