@@ -642,11 +642,11 @@ BEGIN {
     {
         # Add parenthesis
         $0 = gensub (marg_re, "(@\\1", 1, $0)
-        $0 = $0 ");"
+        $0 = $0 ")"
         # Process the macro arguments
         $0 = gensub (marg_re, "(\\1_arg)", "g", $0)
     }
-    out($0 "  \\")
+    out($0 ";  \\")
     next
 }
 

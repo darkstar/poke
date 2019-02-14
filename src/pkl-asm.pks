@@ -17,6 +17,17 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
+        ;; ( OFF -- OFF NORMALIZED_MAGNITUDE )
+        ;;  OFF should be offset<uint<64>,*>
+        .macro ogetmn
+        ogetm                   ; OFF OGETM
+        swap                    ; OGETM OFF
+        ogetu                   ; OGETM OFF OGETU
+        rot                     ; OFF OGETU OGETM
+        mullu
+        nip2                    ; OFF (OGETU*OGETM
+        .end
+        
 ;;; RAS_MACRO_REMAP
 ;;; ( VAL -- VAL )
 ;;;
@@ -482,11 +493,12 @@
         pushvar $idx            ; ... ARR IDX
         aref                    ; ... ARR IDX ELEM
         nip2                    ; ... ELEM
-        siz
-        nip                     ; ... ESIZE
-        pushvar $asize          ; ... ESIZE ASIZE
+        siz                     ; ... ELEM ESIZEO
+        .e ogetmn               ; ... ELEM ESIZEO ESIZEM
+        nip2                    ; ... ESIZEM
+        pushvar $asize          ; ... ESIZEM ASIZE
         addlu
-        nip2                    ; ... (ESIZE+ASIZE)
+        nip2                    ; ... (ESIZEM+ASIZE)
         popvar $asize           ; ...
         ba .continue
 .addelem:
@@ -529,23 +541,37 @@
         rot                     ; ARR OFFSET TARR
         regvar $tarr
         pushvar $asize          ; ARR OFFSET ASIZE
+        swap                    ; ARR ASIZE OFFSET
+        .e ogetmn               ; ARR ASIZE OFFSET OFFSETM
+        rot                     ; ARR OFFSET OFFSETM ASIZE
         addlu
-        nip2    		; ARR OFFSET
+        nip2                    ; ARR OFFSET (OFFSETM+ASIZE)
+        push ulong<64>1
+        mko                     ; ARR OFFSET NOFFSET
+        nip                     ; ARR OFFSET
         swap                    ; OFFSET ARR
         mgetm                   ; OFFSET ARR MAPPER
         swap                    ; OFFSET MAPPER ARR
         mgetw                   ; OFFSET MAPPER ARR WRITER
         swap                    ; OFFSET MAPPER WRITER ARR
         mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
+        bn .noebound
         pushvar $from           ; OFFSET MAPPER WRITER ARR EBOUND FROM
         sublu
         nip2        		; OFFSET MAPPER WRITER ARR EBOUND
+.noebound:
         swap                    ; OFFSET MAPPER WRITER EBOUND ARR
         mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
         nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
+        bn .nosbound
+        .e ogetmn               ; OFFSET MAPPER WRITER EBOUND SBOUND SBOUNDM
+        nip                     ; OFFSET MAPPER WRITER EBOUND SBOUNDM
         pushvar $asize          ; OFFSET MAPPER WRITER EBOUND SBOUND ASIZE
         sublu
-        nip2          		; OFFSET MAPPER WRITER EBOUND SBOUND
+        nip2          		; OFFSET MAPPER WRITER EBOUND (SBOUND-ASIZE)
+        push ulong<64>1
+        mko                     ; OFFSET MAPPER WRITER EBOUND SBOUND
+.nosbound:
         pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
         swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
         msetsiz                 ; OFFSET MAPPER WRITER EBOUND TARR
