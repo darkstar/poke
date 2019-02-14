@@ -521,43 +521,48 @@
         nip2                    ; ... (TO-FROM+1)
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
-;;         ;; Set mapping attributes of the new array.
-;;         ;; XXX: move this to a macro-instruction: mcattrs
-;;         regvar $tarr
-;;         pushvar $array          ; ARR
-;;         mgeto                   ; ARR OFFSET
-;; ;        bn .noremap
-;;         ;; XXX OFFSET + sizes
-;;         swap                    ; OFFSET ARR
-;;         mgetm                   ; OFFSET ARR MAPPER
-;;         swap                    ; OFFSET MAPPER ARR
-;;         mgetw                   ; OFFSET MAPPER ARR WRITER
-;;         swap                    ; OFFSET MAPPER WRITER ARR
-;;         mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
-;;         ;; XXX EBOUND - accumulated elements :D
-;; ;        pushvar $from
-;; ;        sublu
-;; ;        nip2
-;;         swap                    ; OFFSET MAPPER WRITER EBOUND ARR
-;;         mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
-;;         ;; XXX shit, how to know the new size-bound???
-;;         ;; SBOUND - accumulated size :D
-;;         nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
-;;         pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
-;;         swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
-;;         msetsiz                 ; OFFSET MAPPER WRITER EBOUND TARR
-;;         swap                    ; OFFSET MAPPER WRITER TARR EBOUND
-;;         msetsel                 ; OFFSET MAPPER WRITER TARR
-;;         swap                    ; OFFSET MAPPER TARR WRITER
-;;         msetw                   ; OFFSET MAPPER TARR
-;;         swap                    ; OFFSET TARR MAPPER
-;;         msetm                   ; OFFSET TARR
-;;         swap                    ; TARR OFFSET
-;;         mseto                   ; TARR
-;;         ;; Remap.
-;;         remap
-;; ;        push null
-;; ;.noremap:
-;; ;        drop
+        ;; Set mapping attributes of the new array.
+        ;; XXX: move this to a macro-instruction: mcattrs
+        pushvar $array          ; TARR ARR
+        mgeto                   ; TARR ARR OFFSET
+        bn .noremap
+        rot                     ; ARR OFFSET TARR
+        regvar $tarr
+        pushvar $asize          ; ARR OFFSET ASIZE
+        addlu
+        nip2    		; ARR OFFSET
+        swap                    ; OFFSET ARR
+        mgetm                   ; OFFSET ARR MAPPER
+        swap                    ; OFFSET MAPPER ARR
+        mgetw                   ; OFFSET MAPPER ARR WRITER
+        swap                    ; OFFSET MAPPER WRITER ARR
+        mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
+        pushvar $from           ; OFFSET MAPPER WRITER ARR EBOUND FROM
+        sublu
+        nip2        		; OFFSET MAPPER WRITER ARR EBOUND
+        swap                    ; OFFSET MAPPER WRITER EBOUND ARR
+        mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
+        nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
+        pushvar $asize          ; OFFSET MAPPER WRITER EBOUND SBOUND ASIZE
+        sublu
+        nip2          		; OFFSET MAPPER WRITER EBOUND SBOUND
+        pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
+        swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
+        msetsiz                 ; OFFSET MAPPER WRITER EBOUND TARR
+        swap                    ; OFFSET MAPPER WRITER TARR EBOUND
+        msetsel                 ; OFFSET MAPPER WRITER TARR
+        swap                    ; OFFSET MAPPER TARR WRITER
+        msetw                   ; OFFSET MAPPER TARR
+        swap                    ; OFFSET TARR MAPPER
+        msetm                   ; OFFSET TARR
+        swap                    ; TARR OFFSET
+        mseto                   ; TARR
+        ;; Remap.
+        remap
+        push null
+        push null
+.noremap:
+        drop
+        drop
         popf 1
         .end
