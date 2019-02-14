@@ -1,0 +1,43 @@
+/* { dg-do run } */
+
+/* { dg-command { "foo"[..] } } */
+/* { dg-output "\"foo\"" } */
+
+/* { dg-command { "foo"[0..] } } */
+/* { dg-output "\n\"foo\"" } */
+
+/* { dg-command { "foo"[1..] } } */
+/* { dg-output "\n\"oo\"" } */
+
+/* { dg-command { "foo"[2..] } } */
+/* { dg-output "\n\"o\"" } */
+
+/* { dg-command { "foo"[2..2] } } */
+/* { dg-output "\n\"o\"" } */
+
+/* { dg-command { "foo"[..2] } } */
+/* { dg-output "\n\"foo\"" } */
+
+/* { dg-command { "foo"[..1] } } */
+/* { dg-output "\n\"fo\"" } */
+
+/* { dg-command { "foo"[..0] } } */
+/* { dg-output "\n\"f\"" } */
+
+/* { dg-command { "foo"[1..2] } } */
+/* { dg-output "\n\"oo\"" } */
+
+/* { dg-command { "foo"[1..1] } } */
+/* { dg-output "\n\"o\"" } */
+
+/* { dg-command { try "foo"[..3]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
+
+/* { dg-command { try "foo"[-1..]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
+
+/* { dg-command { try [1,2,3][..3]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
+
+/* { dg-command { try [1,2,3][-1..]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
