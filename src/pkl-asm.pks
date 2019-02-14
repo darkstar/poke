@@ -521,8 +521,8 @@
         nip2                    ; ... (TO-FROM+1)
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
-        ;; Set mapping attributes of the new array.
-        ;; XXX: move this to a macro-instruction: mcattrs
+        ;; Calculate the mapping attributes of the new array,
+        ;; and install them in the value.
         pushvar $array          ; TARR ARR
         mgeto                   ; TARR ARR OFFSET
         bn .noremap
