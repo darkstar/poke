@@ -538,16 +538,18 @@
         nip2                    ; ... (TO-FROM+1)
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
-        ;; Calculate the mapping attributes of the new array,
-        ;; if the trimmer array is mapped, and install them.
+        ;; If the trimmed array is mapped, the resulting array
+        ;; is mapped as well, with the following attributes:
         ;;
-        ;;   new OFFSET = OFFSET + ASIZE
-        ;;   new EBOUND = EBOUND - FROM
-        ;;   new SBOUND = SBOUND - ASIZE
-        ;; 
+        ;;   OFFSET = original OFFSET + ASIZE
+        ;;   EBOUND = TO - FROM + 1
+        ;;
+        ;; i.e., the mapping of the resulting array is always
+        ;; bounded by number of elements, regardless of the
+        ;; characteristics of the mapping of the trimmed array.
         pushvar $array          ; TARR ARR
         mgeto                   ; TARR ARR OFFSET
-        bn .noremap
+        bn .notmapped
         rot                     ; ARR OFFSET TARR
         regvar $tarr
         pushvar $asize          ; ARR OFFSET ASIZE
@@ -563,29 +565,16 @@
         mgetm                   ; OFFSET ARR MAPPER
         swap                    ; OFFSET MAPPER ARR
         mgetw                   ; OFFSET MAPPER ARR WRITER
-        swap                    ; OFFSET MAPPER WRITER ARR
-        mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
-        bn .noebound
-        pushvar $from           ; OFFSET MAPPER WRITER ARR EBOUND FROM
+        nip                     ; OFFSET MAPPER WRITER
+        pushvar $to
+        pushvar $from           ; OFFSET MAPPER WRITER TO FROM
         sublu
-        nip2        		; OFFSET MAPPER WRITER ARR EBOUND
-.noebound:
-        swap                    ; OFFSET MAPPER WRITER EBOUND ARR
-        mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
-        nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
-        bn .nosbound
-        .e ogetmn               ; OFFSET MAPPER WRITER EBOUND SBOUND SBOUNDM
-        nip                     ; OFFSET MAPPER WRITER EBOUND SBOUNDM
-        pushvar $asize          ; OFFSET MAPPER WRITER EBOUND SBOUND ASIZE
-        sublu
-        nip2          		; OFFSET MAPPER WRITER EBOUND (SBOUND-ASIZE)
+        nip2                    ; OFFSET MAPPER WRITER (TO-FROM)
         push ulong<64>1
-        mko                     ; OFFSET MAPPER WRITER EBOUND SBOUND
-.nosbound:
-        pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
-        swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
-        msetsiz                 ; OFFSET MAPPER WRITER EBOUND TARR
-        swap                    ; OFFSET MAPPER WRITER TARR EBOUND
+        addlu
+        nip2                    ; OFFSET MAPPER WRITER (TO-FROM+1UL)
+        pushvar $tarr           ; OFFSET MAPPER WRITER (TO-FROM+!UL) TARR
+        swap                    ; OFFSET MAPPER WRITER TARR (TO-FROM+!UL)
         msetsel                 ; OFFSET MAPPER WRITER TARR
         swap                    ; OFFSET MAPPER TARR WRITER
         msetw                   ; OFFSET MAPPER TARR
@@ -597,7 +586,7 @@
         remap
         push null
         push null
-.noremap:
+.notmapped:
         drop
         drop
         popf 1
