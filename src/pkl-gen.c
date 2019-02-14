@@ -1235,8 +1235,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_trimmer)
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ATRIM,
                       PKL_AST_TYPE (array));
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
         break;
       }
     default:

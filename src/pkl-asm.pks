@@ -421,7 +421,7 @@
         .end
 
 ;;; ATRIM array_type
-;;; ( ARR ULONG ULONG -- ARR ULONG ULONG ARR )
+;;; ( ARR ULONG ULONG -- ARR )
 ;;;
 ;;; Push a new array resulting from the trimming of ARR to indexes
 ;;; [ULONG,ULONG].
@@ -432,6 +432,31 @@
 
         .macro atrim @array_type
         ;; XXX writeme
-        rot
-        dup
+        pushf
+        regvar $to
+        regvar $from
+        regvar $array
+        ;; Check boundaries
+        pushvar $array          ; ARR
+        sel                     ; ARR NELEM
+        pushvar $to             ; ARR NELEM TO
+        lelu                    ; ARR NELEM TO (NELEM<=TO)
+        bnzi .ebounds
+        drop                    ; ARR NELEM TO
+        drop                    ; ARR NELEM
+        pushvar $from           ; ARR NELEM FROM
+        lelu                    ; ARR NELEM FROM (NELEM<=FROM)
+        bnzi .ebounds
+        drop                    ; ARR NELEM FROM
+        drop                    ; ARR NELEM
+        drop                    ; ARR
+        ba .bounds_ok
+.ebounds:
+        push PVM_E_OUT_OF_BOUNDS
+        raise
+.bounds_ok:
+        ;; Boundaries are ok.  Build the trimmed array with a
+        ;; subset of the elements of the array.
+        ;; XXX writeme
+        popf 1
         .end
