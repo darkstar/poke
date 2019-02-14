@@ -419,3 +419,18 @@
         fromr                   ; OFF1 OFF2 OFFRES UNIT
         swap                    ; OFF1 OFF2 UNIT OFFRES
         .end
+
+;;; ATRIM array_type
+;;; ( ARR ULONG ULONG -- ARR ULONG ULONG ARR )
+;;;
+;;; Push a new array resulting from the trimming of ARR to indexes
+;;; [ULONG,ULONG].
+;;;
+;;; Macro arguments:
+;;; @array_type
+;;;    a pkl_ast_node with the type of ARR.
+
+        .macro atrim @array_type
+        rot
+        dup
+        .end

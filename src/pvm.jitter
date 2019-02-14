@@ -2319,6 +2319,12 @@ into
   nip2
 end
 
+rule nip2-nip-to-nip3 rewrite
+  nip2; nip
+into
+  nip3
+end
+
 rule drop-drop-to-drop2 rewrite
   drop; drop
 into

@@ -390,6 +390,10 @@ PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
 
 PKL_DEF_INSN (PKL_INSN_GCD, "a", "gcd")
 
+/* Array meta-instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_ATRIM, "a", "atrim")
+
 /* Offset meta-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_OGETMC, "a", "ogetmc")

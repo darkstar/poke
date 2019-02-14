@@ -1230,8 +1230,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_trimmer)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
       break;
     case PKL_TYPE_ARRAY:
-      /* XXX handle arrays trims here  */
-      break;
+      {
+        pkl_ast_node array = PKL_AST_TRIMMER_ENTITY (trimmer);
+
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ATRIM,
+                      PKL_AST_TYPE (array));
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+        break;
+      }
     default:
       assert (0);
     }

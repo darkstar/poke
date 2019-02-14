@@ -598,6 +598,18 @@ pkl_asm_insn_cmp (pkl_asm pasm,
   pkl_asm_insn (pasm, oinsn);
 }
 
+/* Macro-instruction: ATRIM array_type
+   ( ARR ULONG ULONG -- ARR ULONG ULONG ARR )
+
+   Given an array and two indexes, generate code to push the trim
+   of the array.  */
+
+static void
+pkl_asm_insn_atrim (pkl_asm pasm, pkl_ast_node array_type)
+{
+  RAS_MACRO_ATRIM (array_type);
+}
+
 /* Macro-instruction: OGETMC base_type
    ( OFFSET UNIT -- OFFSET CONVERTED_MAGNITUDE )
 
@@ -1114,6 +1126,17 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_ogetmc (pasm, base_type);
+            break;
+          }
+        case PKL_INSN_ATRIM:
+          {
+            pkl_ast_node array_type;
+
+            va_start (valist, insn);
+            array_type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_atrim (pasm, array_type);
             break;
           }
         case PKL_INSN_ADDO:
