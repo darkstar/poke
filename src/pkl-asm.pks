@@ -498,7 +498,23 @@
         nip2                    ; ... (TO-FROM+1)
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
-        ;; Set mapping attributes, and remap.
+        ;; Set mapping attributes of the new array.
+        regvar $tarr
+        pushvar $array          ; ARR
+        mgeto                   ; ARR OFFSET
+        swap                    ; OFFSET ARR
+        mgetm                   ; OFFSET ARR MAPPER
+        swap                    ; OFFSET MAPPER ARR
+        mgetw                   ; OFFSET MAPPER ARR WRITER
+        nip                     ; OFFSET MAPPER WRITER
+        pushvar $tarr           ; OFFSET MAPPER WRITER TARR
+        swap                    ; OFFSET MAPPER TARR WRITER
+        msetw                   ; OFFSET MAPPER TARR
+        swap                    ; OFFSET TARR MAPPER
+        msetm                   ; OFFSET TARR
+        swap                    ; TARR OFFSET
+        mseto                   ; TARR
         ;; Now remap.
+        remap
         popf 1
         .end
