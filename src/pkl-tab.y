@@ -237,6 +237,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token MSB LSB
 %token SIGNED UNSIGNED
 %token THREEDOTS
+%token TRIMOP
 
 /* This is for the dangling ELSE.  */
 
@@ -705,25 +706,25 @@ primary:
                   $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' expression ':' expression ']' %prec '.'
+        | primary '[' expression TRIMOP expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, $3, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' ':' ']' %prec '.'
+        | primary '[' TRIMOP ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, NULL, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' ':' expression ']' %prec '.'
+        | primary '[' TRIMOP expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, NULL, $4);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| primary '[' expression ':' ']' %prec '.'
+	| primary '[' expression TRIMOP ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, $3, NULL);

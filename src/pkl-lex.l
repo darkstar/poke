@@ -178,6 +178,7 @@ D [0-9]
 "offset<"       { return OFFSETCONSTR; }
 
 "..."		{ return THREEDOTS; }
+".."		{ return TRIMOP; }
 
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
