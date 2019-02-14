@@ -17,8 +17,12 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
-        ;; ( OFF -- OFF NORMALIZED_MAGNITUDE )
-        ;;  OFF should be offset<uint<64>,*>
+;;; RAS_MACRO_OGETMN
+;;; ( OFF -- OFF ULONG )
+;;;
+;;; Auxiliary macro to get the normalized magnitude (i.e. in bits) of a
+;;; given offset<uint<64>,*>.
+
         .macro ogetmn
         ogetm                   ; OFF OGETM
         swap                    ; OGETM OFF
