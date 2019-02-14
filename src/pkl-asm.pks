@@ -458,5 +458,11 @@
         ;; Boundaries are ok.  Build the trimmed array with a
         ;; subset of the elements of the array.
         ;; XXX writeme
+        typof                   ; ARR ATYP
+        tyagett                 ; ARR ATYP ETYP
+        nip2                    ; ETYP
+        push ulong<64>0
+        push ulong<64>0
+        mka
         popf 1
         .end

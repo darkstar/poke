@@ -1932,6 +1932,12 @@ instruction isa () # ( VAL TYPE -- TYPE VAL BOOL )
   end
 end
 
+instruction typof () # ( VAL -- VAL TYP )
+  code
+    JITTER_PUSH_STACK (pvm_typeof (JITTER_TOP_STACK ()));
+  end
+end
+
 # `Any' type.
 
 instruction mktyany () # ( -- TYP )
@@ -2036,12 +2042,6 @@ instruction mktysct () # ( [STRING TYP]... NLONG -- TYP )
 
     JITTER_PUSH_STACK (pvm_make_struct_type (nelem,
                                              enames, etypes));
-  end
-end
-
-instruction typof () # ( VAL -- TYP )
-  code
-    JITTER_TOP_STACK () = pvm_typeof (JITTER_TOP_STACK ());
   end
 end
 
