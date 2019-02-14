@@ -446,7 +446,6 @@
 ;;;    a pkl_ast_node with the type of ARR.
 
         .macro atrim @array_type
-        ;; XXX writeme
         pushf
         regvar $to
         regvar $from
@@ -472,7 +471,6 @@
 .bounds_ok:
         ;; Boundaries are ok.  Build the trimmed array with a
         ;; subset of the elements of the array.
-        ;; XXX writeme
         typof                   ; ARR ATYP
         tyagett                 ; ARR ATYP ETYP
         nip2                    ; ETYP
@@ -528,6 +526,9 @@
         nip2                    ; (IDX+1UL)
         popvar $idx
       .endloop
+        ;; Ok, the elements are in the stack.  Calculate the
+        ;; number of initializers and elements and make the
+        ;; new array.
         pushvar $to             ; ... TO
         pushvar $from           ; ... TO FROM
         sublu
@@ -538,7 +539,12 @@
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
         ;; Calculate the mapping attributes of the new array,
-        ;; and install them in the value.
+        ;; if the trimmer array is mapped, and install them.
+        ;;
+        ;;   new OFFSET = OFFSET + ASIZE
+        ;;   new EBOUND = EBOUND - FROM
+        ;;   new SBOUND = SBOUND - ASIZE
+        ;; 
         pushvar $array          ; TARR ARR
         mgeto                   ; TARR ARR OFFSET
         bn .noremap
