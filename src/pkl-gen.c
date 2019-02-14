@@ -773,8 +773,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
     int narg = 0;
     for (fa = PKL_AST_FUNC_ARGS (PKL_PASS_NODE); fa; fa = PKL_AST_CHAIN (fa))
       narg++;
+
     if (narg == 2)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+    else if (narg == 3)
+      {
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
+      }
     else if (narg > 1)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REVN, narg);
   }
