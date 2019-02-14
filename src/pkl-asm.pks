@@ -499,6 +499,7 @@
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
         ;; Set mapping attributes of the new array.
+        ;; XXX: move this to a macro-instruction: mcattrs
         regvar $tarr
         pushvar $array          ; ARR
         mgeto                   ; ARR OFFSET
@@ -506,8 +507,16 @@
         mgetm                   ; OFFSET ARR MAPPER
         swap                    ; OFFSET MAPPER ARR
         mgetw                   ; OFFSET MAPPER ARR WRITER
-        nip                     ; OFFSET MAPPER WRITER
-        pushvar $tarr           ; OFFSET MAPPER WRITER TARR
+        swap                    ; OFFSET MAPPER WRITER ARR
+        mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
+        swap                    ; OFFSET MAPPER WRITER EBOUND ARR
+        mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
+        nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
+        pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
+        swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
+        msetsiz                 ; OFFSET MAPPER WRITER EBOUND TARR
+        swap                    ; OFFSET MAPPER WRITER TARR EBOUND
+        msetsel                 ; OFFSET MAPPER WRITER TARR
         swap                    ; OFFSET MAPPER TARR WRITER
         msetw                   ; OFFSET MAPPER TARR
         swap                    ; OFFSET TARR MAPPER
