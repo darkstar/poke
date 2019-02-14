@@ -514,7 +514,7 @@
         msetm                   ; OFFSET TARR
         swap                    ; TARR OFFSET
         mseto                   ; TARR
-        ;; Now remap.
+        ;; Remap.
         remap
         popf 1
         .end
