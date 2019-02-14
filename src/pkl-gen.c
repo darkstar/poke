@@ -1233,7 +1233,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_trimmer)
       {
         pkl_ast_node array = PKL_AST_TRIMMER_ENTITY (trimmer);
 
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REMAP);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ATRIM,
                       PKL_AST_TYPE (array));
         break;
