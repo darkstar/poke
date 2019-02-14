@@ -511,13 +511,14 @@
 ;;         mgetw                   ; OFFSET MAPPER ARR WRITER
 ;;         swap                    ; OFFSET MAPPER WRITER ARR
 ;;         mgetsel                 ; OFFSET MAPPER WRITER ARR EBOUND
-;;         ;; XXX EBOUND - FROM
+;;         ;; XXX EBOUND - accumulated elements :D
 ;; ;        pushvar $from
 ;; ;        sublu
 ;; ;        nip2
 ;;         swap                    ; OFFSET MAPPER WRITER EBOUND ARR
 ;;         mgetsiz                 ; OFFSET MAPPER WRITER EBOUND ARR SBOUND
 ;;         ;; XXX shit, how to know the new size-bound???
+;;         ;; SBOUND - accumulated size :D
 ;;         nip                     ; OFFSET MAPPER WRITER EBOUND SBOUND
 ;;         pushvar $tarr           ; OFFSET MAPPER WRITER EBOUND SBOUND TARR
 ;;         swap                    ; OFFSET MAPPER WRITER EBOUND TARR SBOUND
