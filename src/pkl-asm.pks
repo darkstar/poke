@@ -461,14 +461,36 @@
         typof                   ; ARR ATYP
         tyagett                 ; ARR ATYP ETYP
         nip2                    ; ETYP
-        pushvar $from
+        push ulong<64>0
+        dup
         regvar $idx
+        regvar $asize
       .while
         pushvar $idx            ; ... IDX
         pushvar $to             ; ... IDX TO
         lelu                    ; ... IDX TO (IDX<=TO)
         nip2                    ; ... (IDX<=TO)
       .loop
+        ;; If IDX < FROM, just update ASIZE
+        pushvar $idx            ; ... IDX
+        pushvar $from           ; ... IDX FROM
+        ltlu                    ; ... IDX FROM (IDX<FROM)
+        nip2                    ; ... (IDX<FROM)
+        bzi .addelem
+        drop                    ; ...
+        pushvar $array          ; ... ARR
+        pushvar $idx            ; ... ARR IDX
+        aref                    ; ... ARR IDX ELEM
+        nip2                    ; ... ELEM
+        siz
+        nip                     ; ... ESIZE
+        pushvar $asize          ; ... ESIZE ASIZE
+        addlu
+        nip2                    ; ... (ESIZE+ASIZE)
+        popvar $asize           ; ...
+        ba .continue
+.addelem:
+        drop
         ;; Mount the IDX-FROMth element of the new array.
         pushvar $idx            ; ... IDX
         pushvar $array          ; ... IDX ARR
@@ -482,6 +504,7 @@
         sublu
         nip2                    ; ... EVAL (IDX-FROM)
         swap                    ; ... (IDX-FROM) EVAL
+.continue:
         ;; Increase index and loop.
         pushvar $idx            ; ... IDX
         push ulong<64>1         ; ... IDX 1UL
