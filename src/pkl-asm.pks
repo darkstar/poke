@@ -345,14 +345,14 @@
         rot                     ; VAL VAL OFF
         dup                     ; VAL VAL OFF OFF
         rot                     ; VAL OFF OFF VAL
-        swap                    ; VAL OFF VAL OFF
-        ogetm                   ; VAL OFF VAL OFF OFFM
-        rot                     ; VAL OFF OFF OFFM VAL
+        swap                    ;   ...   VAL OFF
+        ogetm                   ;   ...   VAL OFF OFFM
+        rot                     ;   ...   OFF OFFM VAL
         mul @base_type
-        nip2                    ; VAL OFF OFF (VAL*OFFM)
-        swap                    ; VAL OFF (VAL*OFFM) OFF
+        nip2                    ;   ...   OFF (VAL*OFFM)
+        swap                    ;   ...   (VAL*OFFM) OFF
         ogetu
-        nip                     ; VAL OFF (VAL*OFFM) OFFU
+        nip                     ;   ...   (VAL*OFFM) OFFU
         mko                     ; VAL OFF OFFR
         nrot                    ; OFFR VAL OFF
         swap                    ; OFFR OFF VAL
