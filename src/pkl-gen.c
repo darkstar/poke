@@ -1211,6 +1211,34 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array)
 PKL_PHASE_END_HANDLER
 
 /*
+ * | ENTITY
+ * | FROM
+ * | TO
+ * TRIMMER
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_trimmer)
+{
+  pkl_ast_node trimmer = PKL_PASS_NODE;
+  pkl_ast_node trimmer_type = PKL_AST_TYPE (trimmer);
+
+  switch (PKL_AST_TYPE_CODE (trimmer_type))
+    {
+    case PKL_TYPE_STRING:
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SUBSTR);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+      break;
+    case PKL_TYPE_ARRAY:
+      /* XXX handle arrays trims here  */
+      break;
+    default:
+      assert (0);
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | ARRAY_REF_ARRAY
  * | ARRAY_REF_INDEX
  * ARRAY_REF
@@ -2249,6 +2277,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_MAP, pkl_gen_pr_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_gen_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_ps_array_ref),
    PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),

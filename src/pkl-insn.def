@@ -211,7 +211,9 @@ PKL_DEF_INSN (PKL_INSN_LES, "", "les")
 /* String instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SCONC, "", "sconc")
-
+PKL_DEF_INSN (PKL_INSN_STRREF, "", "strref")
+PKL_DEF_INSN (PKL_INSN_SUBSTR, "", "substr")
+  
 /* Offset instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKO, "", "mko")
@@ -222,10 +224,6 @@ PKL_DEF_INSN (PKL_INSN_OGETBT, "", "ogetbt")
 /* Containers instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SEL, "", "sel")
-
-/* String instructions.  */
-
-PKL_DEF_INSN (PKL_INSN_STRREF, "", "strref")
 
 /* Array instructions.  */
 

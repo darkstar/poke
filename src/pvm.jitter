@@ -1168,7 +1168,7 @@ instruction sconc () # ( STR STR -- STR STR STR )
      pvm_val res;
      char *sa = PVM_VAL_STR (JITTER_UNDER_TOP_STACK ());
      char *sb = PVM_VAL_STR (JITTER_TOP_STACK ());
-     char *s = xmalloc (strlen (sa) + strlen (sb) + 1);
+     char *s = xmalloc (strlen (sa) + strlen (sb) + 1); /* XXX GC */
      strcpy (s, sa);
      strcat (s, sb);
      res = pvm_make_string (s);
@@ -1614,6 +1614,33 @@ instruction strref () # ( STR ULONG -- STR ULONG VAL )
 
     JITTER_PUSH_STACK (pvm_make_uint (PVM_VAL_STR (string)[PVM_VAL_ULONG (index)],
                                       8));
+  end
+end
+
+instruction substr () # ( STR ULONG ULONG -- STR ULONG ULONG STR )
+  code
+    pvm_val str;
+    char *s;
+    pvm_val to = JITTER_TOP_STACK ();
+    pvm_val from = JITTER_UNDER_TOP_STACK ();
+    size_t slen = PVM_VAL_ULONG (to) - PVM_VAL_ULONG (from) + 1;
+
+    JITTER_DROP_STACK ();
+    str = JITTER_UNDER_TOP_STACK ();
+    JITTER_PUSH_STACK (to);
+
+    if (PVM_VAL_ULONG (from) >= strlen (PVM_VAL_STR (str))
+        || PVM_VAL_ULONG (to) >= strlen (PVM_VAL_STR (str))
+        || PVM_VAL_ULONG (from) > PVM_VAL_ULONG (to))
+        PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    s = xmalloc (slen); /* XX XGC */
+    strncpy (s,
+             PVM_VAL_STR (str) + PVM_VAL_ULONG (from),
+             PVM_VAL_ULONG (to) - PVM_VAL_ULONG (from) + 1);
+    s[slen] = '\0';
+
+    JITTER_PUSH_STACK (pvm_make_string (s));
   end
 end
 
