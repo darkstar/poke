@@ -461,8 +461,44 @@
         typof                   ; ARR ATYP
         tyagett                 ; ARR ATYP ETYP
         nip2                    ; ETYP
-        push ulong<64>0
-        push ulong<64>0
+        pushvar $from
+        regvar $idx
+      .while
+        pushvar $idx            ; ... IDX
+        pushvar $to             ; ... IDX TO
+        lelu                    ; ... IDX TO (IDX<=TO)
+        nip2                    ; ... (IDX<=TO)
+      .loop
+        ;; Mount the IDX-FROMth element of the new array.
+        pushvar $idx            ; ... IDX
+        pushvar $array          ; ... IDX ARR
+        swap                    ; ... ARR IDX
+        aref                    ; ... ARR IDX EVAL
+        rot                     ; ... IDX EVAL ARR
+        drop                    ; ... IDX EVAL
+        pushvar $from           ; ... IDX EVAL FROM
+        rot                     ; ... EVAL FROM IDX
+        swap                    ; ... EVAL IDX FROM
+        sublu
+        nip2                    ; ... EVAL (IDX-FROM)
+        swap                    ; ... (IDX-FROM) EVAL
+        ;; Increase index and loop.
+        pushvar $idx            ; ... IDX
+        push ulong<64>1         ; ... IDX 1UL
+        addlu
+        nip2                    ; (IDX+1UL)
+        popvar $idx
+      .endloop
+        pushvar $to             ; ... TO
+        pushvar $from           ; ... TO FROM
+        sublu
+        nip2                    ; ... (TO-FROM)
+        push ulong<64>1         ; ... (TO-FROM) 1
+        addlu
+        nip2                    ; ... (TO-FROM+1)
+        dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
+        ;; Set mapping attributes, and remap.
+        ;; Now remap.
         popf 1
         .end

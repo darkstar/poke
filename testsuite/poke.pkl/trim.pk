@@ -41,3 +41,30 @@
 
 /* { dg-command { try [1,2,3][-1..]; catch if E_out_of_bounds { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
+
+/* { dg-command { [1,2,3][..] } } */
+/* { dg-output "\n\\\[1,2,3\\\]" } */
+
+/* { dg-command { [1,2,3][1..] } } */
+/* { dg-output "\n\\\[2,3\\\]" } */
+
+/* { dg-command { [1,2,3][2..] } } */
+/* { dg-output "\n\\\[3\\\]" } */
+
+/* { dg-command { [1,2,3][2..2] } } */
+/* { dg-output "\n\\\[3\\\]" } */
+
+/* { dg-command { [1,2,3][..2] } } */
+/* { dg-output "\n\\\[1,2,3\\\]" } */
+
+/* { dg-command { [1,2,3][..1] } } */
+/* { dg-output "\n\\\[1,2\\\]" } */
+
+/* { dg-command { [1,2,3][..0] } } */
+/* { dg-output "\n\\\[1\\\]" } */
+
+/* { dg-command { [1,2,3][0..0] } } */
+/* { dg-output "\n\\\[1\\\]" } */
+
+/* { dg-command { [[1,2,3],[3,4]][1..] } } */
+/* { dg-output "\n\\\[\\\[3,4\\\]\\\]" } */
