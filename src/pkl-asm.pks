@@ -431,6 +431,7 @@
 ;;;    a pkl_ast_node with the type of ARR.
 
         .macro atrim @array_type
+        ;; XXX writeme
         rot
         dup
         .end
