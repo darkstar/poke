@@ -1028,6 +1028,7 @@ pkl_ast_id_to_offset_unit (pkl_ast ast, pkl_ast_node id)
   size_t factor = 0;
   const char *id_pointer = PKL_AST_IDENTIFIER_POINTER (id);
 
+  /* XXX: replace this with a pkl-units.def file.  */
   if (strcmp (id_pointer, "b") == 0)
     factor = PKL_AST_OFFSET_UNIT_BITS;
   else if (strcmp (id_pointer, "N") == 0)

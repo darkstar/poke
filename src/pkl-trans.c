@@ -466,7 +466,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_function)
 }
 PKL_PHASE_END_HANDLER
 
-/* Complete trimmers lacking some of its indexes.  */
+/* Complete trimmers lacking some of their indexes.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_trimmer)
 {
