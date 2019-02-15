@@ -11,3 +11,14 @@
 
 /* { dg-command { a'offset + 1#B} } */
 /* { dg-output "\n4UL#B" } */
+
+/* { dg-command { .set obase 16 } } */
+
+/* { dg-command { defvar b = int[2*4UL#B] @ 0#B } } */
+/* { dg-command { b } } */
+/* { dg-output "\n\\\[0x10203040,0x50607080\\\]" } */
+
+/* { dg-command { defvar c = int[2*4#B] @ 0#B } } */
+/* { dg-command { c } } */
+/* { dg-output "\n\\\[0x10203040,0x50607080\\\]" } */
+

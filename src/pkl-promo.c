@@ -606,12 +606,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
   int restart;
   pkl_ast_node array_type = PKL_PASS_NODE;
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (array_type);
-
+  pkl_ast_node nelem_type;
+  
   if (nelem == NULL)
     /* This array type hasn't a number of elements.  Be done.  */
     PKL_PASS_DONE;
 
-  switch (PKL_AST_TYPE_CODE (PKL_AST_TYPE (nelem)))
+  nelem_type = PKL_AST_TYPE (nelem);
+
+  switch (PKL_AST_TYPE_CODE (nelem_type))
     {
     case PKL_TYPE_INTEGRAL:
       if (!promote_integral (PKL_PASS_AST, 64, 0,
@@ -629,7 +632,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
         PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (nelem);
         
         if (!promote_offset (PKL_PASS_AST,
-                             to_magnitude_type, PKL_AST_OFFSET_UNIT (nelem),
+                             to_magnitude_type, PKL_AST_TYPE_O_UNIT (nelem_type),
                              &PKL_AST_TYPE_A_NELEM (array_type), &restart))
           {
             pkl_ice (PKL_PASS_AST, PKL_AST_LOC (nelem),
