@@ -439,7 +439,7 @@
 ;;; ( ARR ULONG ULONG -- ARR )
 ;;;
 ;;; Push a new array resulting from the trimming of ARR to indexes
-;;; [ULONG,ULONG].
+;;; [ULONG..ULONG].
 ;;;
 ;;; Macro arguments:
 ;;; @array_type
