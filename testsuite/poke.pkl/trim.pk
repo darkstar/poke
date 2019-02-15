@@ -42,6 +42,9 @@
 /* { dg-command { try [1,2,3][-1..]; catch if E_out_of_bounds { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
 
+/* { dg-command { try [1,2,3][2..1]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
+
 /* { dg-command { [1,2,3][..] } } */
 /* { dg-output "\n\\\[1,2,3\\\]" } */
 

@@ -8,14 +8,14 @@ defun bar = (int a, int b, args ...) int: { return a + b + (args[0] as int); }
 /* { dg-command { bar (1,2,3,4) } } */
 /* { dg-output "\n6" } */
 
-/* { dg-command { try bar :b 2 :a 1; catch if E_out_of_bounds { print "cached\n";  } } } */
-/* { dg-output "\ncached" } */
+/* { dg-command { try bar :b 2 :a 1; catch if E_out_of_bounds { print "catched\n";  } } } */
+/* { dg-output "\ncatched" } */
 
-/* { dg-command { try bar (1,2); catch if E_out_of_bounds { print "cached\n"; } } } */
-/* { dg-output "\ncached" } */
+/* { dg-command { try bar (1,2); catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
 
-/* { dg-command { try bar (1,2,"foo",3); catch if E_conv { print "cached\n"; } } } */
-/* { dg-output "\ncached" } */
+/* { dg-command { try bar (1,2,"foo",3); catch if E_conv { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
 
 defun aa = (args...) int: { return args[0] as int; }
 

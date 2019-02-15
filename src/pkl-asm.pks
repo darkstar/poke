@@ -464,6 +464,12 @@
         drop                    ; ARR NELEM FROM
         drop                    ; ARR NELEM
         drop                    ; ARR
+        pushvar $from           ; ARR FROM
+        pushvar $to             ; ARR TO
+        gtlu
+        nip2                    ; ARR (FROM>TO)
+        bnzi .ebounds
+        drop                    ; ARR
         ba .bounds_ok
 .ebounds:
         push PVM_E_OUT_OF_BOUNDS
