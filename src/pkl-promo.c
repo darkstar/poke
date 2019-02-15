@@ -925,7 +925,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
           break;
         }
 
-      PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
+      PKL_PASS_RESTART = restart;
     }
 }
 PKL_PHASE_END_HANDLER
