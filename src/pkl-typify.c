@@ -1760,9 +1760,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
   if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
       && !pkl_ast_type_equal (returned_type, expected_type))
     {
-      char *returned_type_str = pkl_type_str (returned_type, 1);
-      char *expected_type_str = pkl_type_str (expected_type, 1);
-
       if (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_ANY
           || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
               && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
@@ -1773,6 +1770,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
         ;
       else
       {
+        char *returned_type_str = pkl_type_str (returned_type, 1);
+        char *expected_type_str = pkl_type_str (expected_type, 1);
+
         pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                    "returning an expression of the wrong type\n\
 expected %s, got %s",
@@ -1783,6 +1783,54 @@ expected %s, got %s",
         payload->errors++;
         PKL_PASS_ERROR;
       }
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* Function argument initializers should be of the same type (or
+   promoteable to) the type of the function argument.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
+{
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node func_arg = PKL_PASS_NODE;
+  pkl_ast_node initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
+
+
+
+  if (initial)
+    {
+      pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
+      pkl_ast_node initial_type = PKL_AST_TYPE (initial);
+
+      if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_ANY
+          && !pkl_ast_type_equal (arg_type, initial_type))
+        {
+          if (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_ANY
+              || (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL
+                  && PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_INTEGRAL)
+              || (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_OFFSET
+                  && PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_OFFSET))
+            /* Integers and offsets can be promoted.  */
+            ;
+          else
+            {
+              char *arg_type_str = pkl_type_str (arg_type, 1);
+              char *initial_type_str = pkl_type_str (initial_type, 1);
+
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (initial),
+                         "argument initializer is of the wrong type\n\
+expected %s, got %s",
+                         arg_type_str, initial_type_str);
+              free (arg_type_str);
+              free (initial_type_str);
+        
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+        }
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1804,6 +1852,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_typify1_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_ps_struct_elem),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_typify1_pr_func),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_typify1_ps_func_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_typify1_ps_struct_ref),
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_typify1_pr_loop_stmt),

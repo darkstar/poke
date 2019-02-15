@@ -1,0 +1,4 @@
+/* { dg-do compile } */
+
+defun foo = (string a, int b = a) void: {} /* { dg-error ".*\n.*" } */
+  

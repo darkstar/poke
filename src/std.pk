@@ -47,37 +47,23 @@ deftype off64 = offset<int64,b>;
 
 /* String manipulation routines.  */
 
-defun substr = (string s, int f, int t = s'length as int) string:
+defun substr = (string s, int f, int t = s'length - 1) string:
   {
-   defvar res = "";
-   defvar i = f;
-
-   if (t < f)
-     raise;
-
-   /* XXX: use for (i in 0 to t)  */
-   while (i < t)
-     {
-       res = res + s[i] as string;
-       i = i + 1;
-     }
-
-   return res;
+   return s[f..t];
   }
 
 defun strstr = (string s1, string s2) long:
   {
-   defvar found = 0;
    defvar i = 0UL;
    
-   while (!found && i < s2'length - s1'length)
+   while (i < s2'length - s1'length)
      {
-       found = s2[i..i + s1'length - 1] == s1;
+       print "comparing " + s1 + " and " + s2[i..i+s1'length-1] + "\n";
+       if (s2[i..i + s1'length - 1] == s1)
+         return i;
+
        i = i + 1;
      }
 
-   if (found)
-     return i - 1;
-   else
-     return -1;
+   return -1;
   }
