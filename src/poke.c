@@ -266,6 +266,8 @@ repl ()
     {
       pk_print_version ();
       puts ("");
+      puts (_("For help, type \".help\"."));
+      puts (_("Type \".exit\" to leave the program."));
     }
 
   while (!poke_exit_p)
