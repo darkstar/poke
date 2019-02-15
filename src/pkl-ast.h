@@ -42,7 +42,7 @@ enum pkl_ast_code
   PKL_AST_IDENTIFIER,
   PKL_AST_ARRAY,
   PKL_AST_ARRAY_INITIALIZER,
-  PKL_AST_ARRAY_REF,
+  PKL_AST_INDEXER,
   PKL_AST_TRIMMER,
   PKL_AST_STRUCT,
   PKL_AST_STRUCT_ELEM,
@@ -648,24 +648,24 @@ pkl_ast_node pkl_ast_make_trimmer (pkl_ast ast,
                                    pkl_ast_node from,
                                    pkl_ast_node to);
 
-/* PKL_AST_ARRAY_REF nodes represent references to an array element.
+/* PKL_AST_INDEXER nodes represent references to an array element.
 
    BASE must point to a PKL_AST_ARRAY node.
 
    INDEX must point to an expression whose evaluation is the offset of
    the element into the field, in units of the field's SIZE.  */
 
-#define PKL_AST_ARRAY_REF_ARRAY(AST) ((AST)->aref.array)
-#define PKL_AST_ARRAY_REF_INDEX(AST) ((AST)->aref.index)
+#define PKL_AST_INDEXER_ENTITY(AST) ((AST)->indexer.entity)
+#define PKL_AST_INDEXER_INDEX(AST) ((AST)->indexer.index)
 
-struct pkl_ast_array_ref
+struct pkl_ast_indexer
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *array;
+  union pkl_ast_node *entity;
   union pkl_ast_node *index;
 };
 
-pkl_ast_node pkl_ast_make_array_ref (pkl_ast ast,
+pkl_ast_node pkl_ast_make_indexer (pkl_ast ast,
                                      pkl_ast_node array,
                                      pkl_ast_node index);
 
@@ -1403,7 +1403,7 @@ union pkl_ast_node
   struct pkl_ast_identifier identifier;
   struct pkl_ast_array array;
   struct pkl_ast_array_initializer array_initializer;
-  struct pkl_ast_array_ref aref;
+  struct pkl_ast_indexer indexer;
   struct pkl_ast_trimmer trimmer;
   struct pkl_ast_struct sct;
   struct pkl_ast_struct_elem sct_elem;

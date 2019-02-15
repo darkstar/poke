@@ -379,7 +379,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
      Just call it.  */
   switch (PKL_AST_CODE (lvalue))
     {
-    case PKL_AST_ARRAY_REF:
+    case PKL_AST_INDEXER:
       /* Note that analf guarantees that the container of this aref is
          an array, not a string.  */
     case PKL_AST_STRUCT_REF:
@@ -395,7 +395,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);     /* LVALUE IDX EXP */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPR, 0); /* LVALUE IDX */
 
-        if (PKL_AST_CODE (lvalue) == PKL_AST_ARRAY_REF)
+        if (PKL_AST_CODE (lvalue) == PKL_AST_INDEXER)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AREF); /* LVALUE IDX VAL */
         else /* PKL_AST_STRUCT_REF */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SREF);
@@ -449,7 +449,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPVAR,
                     PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
       break;
-    case PKL_AST_ARRAY_REF:
+    case PKL_AST_INDEXER:
       /* Stack: VAL ARRAY INDEX */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* ARRAY INDEX VAL */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);  /* ARRAY */
@@ -1244,12 +1244,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_trimmer)
 PKL_PHASE_END_HANDLER
 
 /*
- * | ARRAY_REF_ARRAY
- * | ARRAY_REF_INDEX
- * ARRAY_REF
+ * | INDEXER_ENTITY
+ * | INDEXER_INDEX
+ * INDEXER
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_indexer)
 {
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
@@ -1261,9 +1261,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
      }
   else
     {
-      pkl_ast_node array_ref = PKL_PASS_NODE;
-      pkl_ast_node array_ref_type = PKL_AST_TYPE (array_ref);
-      pkl_ast_node container = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+      pkl_ast_node indexer = PKL_PASS_NODE;
+      pkl_ast_node indexer_type = PKL_AST_TYPE (indexer);
+      pkl_ast_node container = PKL_AST_INDEXER_ENTITY (indexer);
       pkl_ast_node container_type = PKL_AST_TYPE (container);
 
       switch (PKL_AST_TYPE_CODE (container_type))
@@ -1275,7 +1275,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_ref)
           /* To cover cases where the referenced array is not mapped, but
              the value stored in it is a mapped value, we issue a
              REMAP.  */
-          switch (PKL_AST_TYPE_CODE (array_ref_type))
+          switch (PKL_AST_TYPE_CODE (indexer_type))
             {
             case PKL_TYPE_ARRAY:
             case PKL_TYPE_STRUCT:
@@ -2283,7 +2283,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_gen_ps_trimmer),
-   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_gen_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_gen_ps_indexer),
    PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_pr_struct_elem),

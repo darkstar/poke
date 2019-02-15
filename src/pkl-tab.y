@@ -703,7 +703,7 @@ primary:
                 }
         | primary '[' expression ']' %prec '.'
                 {
-                  $$ = pkl_ast_make_array_ref (pkl_parser->ast, $1, $3);
+                  $$ = pkl_ast_make_indexer (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
         | primary '[' expression TRIMOP expression ']' %prec '.'

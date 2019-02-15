@@ -700,18 +700,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of an ARRAY_REF is the type of the elements of the array
+/* The type of an INDEXER is the type of the elements of the array
    it references.  If the referenced container is a string, the type
-   of the ARRAY_REF is uint<8>.  */
+   of the INDEXER is uint<8>.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
 {
   pkl_typify_payload payload
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
-  pkl_ast_node array_ref = PKL_PASS_NODE;
-  pkl_ast_node index = PKL_AST_ARRAY_REF_INDEX (array_ref);
-  pkl_ast_node container = PKL_AST_ARRAY_REF_ARRAY (array_ref);
+  pkl_ast_node indexer = PKL_PASS_NODE;
+  pkl_ast_node index = PKL_AST_INDEXER_INDEX (indexer);
+  pkl_ast_node container = PKL_AST_INDEXER_ENTITY (indexer);
   pkl_ast_node index_type = PKL_AST_TYPE (index);
   pkl_ast_node container_type = PKL_AST_TYPE (container);
 
@@ -729,7 +729,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
       {
         /* The type of the aref is a `char', i.e. a uint<8>.  */
         type = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
-        PKL_AST_LOC (type) = PKL_AST_LOC (array_ref);
+        PKL_AST_LOC (type) = PKL_AST_LOC (indexer);
         break;
       }
     default:
@@ -747,7 +747,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array_ref)
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_TYPE (array_ref) = ASTREF (type);
+  PKL_AST_TYPE (indexer) = ASTREF (type);
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
@@ -1098,7 +1098,7 @@ expected %s, got %s",
         && (parent_code == PKL_AST_EXP
             || parent_code == PKL_AST_COND_EXP
             || parent_code == PKL_AST_ARRAY_INITIALIZER
-            || parent_code == PKL_AST_ARRAY_REF
+            || parent_code == PKL_AST_INDEXER
             || parent_code == PKL_AST_STRUCT_ELEM
             || parent_code == PKL_AST_OFFSET
             || parent_code == PKL_AST_CAST
@@ -1799,7 +1799,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_typify1_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_typify1_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_typify1_ps_trimmer),
-   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_typify1_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_typify1_ps_indexer),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_typify1_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_typify1_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_ps_struct_elem),

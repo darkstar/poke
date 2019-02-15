@@ -598,9 +598,9 @@ PKL_PHASE_END_HANDLER
 /* An array ref is a literal if the referred array element is also a
    literal.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_array_ref)
+PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_indexer)
 {
-  pkl_ast_node array = PKL_AST_ARRAY_REF_ARRAY (PKL_PASS_NODE);
+  pkl_ast_node array = PKL_AST_INDEXER_ENTITY (PKL_PASS_NODE);
   PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (array);
 }
 PKL_PHASE_END_HANDLER
@@ -661,7 +661,7 @@ struct pkl_phase pkl_phase_trans2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP, pkl_trans2_ps_exp),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans2_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans2_ps_array),
-   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_REF, pkl_trans2_ps_array_ref),
+   PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_trans2_ps_indexer),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_trans2_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_trans2_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_trans2_ps_struct_ref),

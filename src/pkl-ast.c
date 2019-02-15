@@ -280,15 +280,15 @@ pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node entity,
 /* Build and return an AST node for an array reference.  */
 
 pkl_ast_node
-pkl_ast_make_array_ref (pkl_ast ast,
+pkl_ast_make_indexer (pkl_ast ast,
                         pkl_ast_node array, pkl_ast_node index)
 {
-  pkl_ast_node aref = pkl_ast_make_node (ast, PKL_AST_ARRAY_REF);
+  pkl_ast_node aref = pkl_ast_make_node (ast, PKL_AST_INDEXER);
 
   assert (array && index);
 
-  PKL_AST_ARRAY_REF_ARRAY (aref) = ASTREF (array);
-  PKL_AST_ARRAY_REF_INDEX (aref) = ASTREF (index);
+  PKL_AST_INDEXER_ENTITY (aref) = ASTREF (array);
+  PKL_AST_INDEXER_INDEX (aref) = ASTREF (index);
   PKL_AST_LITERAL_P (aref) = 0;
 
   return aref;
@@ -1488,10 +1488,10 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_FUNC_TYPE_ARG_NAME (ast));
       break;
       
-    case PKL_AST_ARRAY_REF:
+    case PKL_AST_INDEXER:
 
-      pkl_ast_node_free (PKL_AST_ARRAY_REF_ARRAY (ast));
-      pkl_ast_node_free (PKL_AST_ARRAY_REF_INDEX (ast));
+      pkl_ast_node_free (PKL_AST_INDEXER_ENTITY (ast));
+      pkl_ast_node_free (PKL_AST_INDEXER_INDEX (ast));
       break;
 
     case PKL_AST_TRIMMER:
@@ -2107,13 +2107,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (entity, TRIMMER_ENTITY);
       break;
 
-    case PKL_AST_ARRAY_REF:
-      IPRINTF ("ARRAY_REF::\n");
+    case PKL_AST_INDEXER:
+      IPRINTF ("INDEXER::\n");
 
       PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (type, TYPE);
-      PRINT_AST_SUBAST (array, ARRAY_REF_ARRAY);
-      PRINT_AST_SUBAST (index, ARRAY_REF_INDEX);
+      PRINT_AST_SUBAST (entity, INDEXER_ENTITY);
+      PRINT_AST_SUBAST (index, INDEXER_INDEX);
       break;
 
     case PKL_AST_FUNC:

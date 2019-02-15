@@ -482,10 +482,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
     case PKL_AST_VAR:
     case PKL_AST_STRUCT_REF:
       break;
-    case PKL_AST_ARRAY_REF:
+    case PKL_AST_INDEXER:
       {
         pkl_ast_node container
-          = PKL_AST_ARRAY_REF_ARRAY (ass_stmt_lvalue);
+          = PKL_AST_INDEXER_ENTITY (ass_stmt_lvalue);
         pkl_ast_node container_type = PKL_AST_TYPE (container);
 
         if (PKL_AST_TYPE_CODE (container_type) == PKL_TYPE_ARRAY)
