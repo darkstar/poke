@@ -1342,7 +1342,7 @@ pkl_asm_while (pkl_asm pasm)
 
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
-  pasm->level->break_label = pasm->level->label2;
+  pasm->level->break_label = jitter_fresh_label (pasm->program);
 
   pvm_append_label (pasm->program, pasm->level->label1);
 }
@@ -1363,6 +1363,8 @@ pkl_asm_endloop (pkl_asm pasm)
   /* Pop the loop condition from the stack.  */
   pkl_asm_insn (pasm, PKL_INSN_DROP);
 
+  pvm_append_label (pasm->program, pasm->level->break_label);
+  
   /* Cleanup and pop the current level.  */
   pkl_asm_poplevel (pasm);
 }
@@ -1419,6 +1421,7 @@ pkl_asm_endloop (pkl_asm pasm)
    DROP       ; CONTAINER
    DROP       ; _
    POPF 1
+ break_label:
 */
 
 void
@@ -1430,7 +1433,8 @@ pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
   pasm->level->label3 = jitter_fresh_label (pasm->program);
-  pasm->level->break_label = pasm->level->label3;
+  pasm->level->break_label = jitter_fresh_label (pasm->program);
+ 
 
   if (selector)
     pasm->level->node1 = ASTREF (selector);
@@ -1506,6 +1510,8 @@ pkl_asm_for_endloop (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
+
+  pvm_append_label (pasm->program, pasm->level->break_label);
 
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
