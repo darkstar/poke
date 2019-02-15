@@ -288,8 +288,8 @@
         ;; Build the result offset.
         swap                    ; RESM RESU
         mko                     ; RESO
-        push $off1              ; RESO OFF1
-        push $off2              ; RESO OFF1 OFF2
+        pushvar $off1           ; RESO OFF1
+        pushvar $off2           ; RESO OFF1 OFF2
         rot                     ; OFF1 OFF2 RESO
         popf 1
         .end
@@ -339,8 +339,8 @@
         ;; Build the result offset.
         swap                    ; RESM RESU
         mko                     ; RESO
-        push $off1              ; RESO OFF1
-        push $off2              ; RESO OFF1 OFF2
+        pushvar $off1           ; RESO OFF1
+        pushvar $off2           ; RESO OFF1 OFF2
         rot                     ; OFF1 OFF2 RESO
         popf 1
         .end

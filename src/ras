@@ -456,7 +456,7 @@ BEGIN {
                         break
                     case "v":
                         re="(" null_re "|" int_re "|" long_re \
-                           "|" string_re "|" var_re "|" expt_re ")"
+                           "|" string_re "|" expt_re ")"
                         break
                     case "r":
                         break
@@ -596,7 +596,7 @@ BEGIN {
     if (num_errors > 0)
     {
         for (nerror = 1; nerror <= num_errors; nerror++)
-            print errors[nerror]
+            print "ras: " errors[nerror] | "cat 1>&2"
         exit (1);
     }
 
