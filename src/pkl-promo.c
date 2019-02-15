@@ -890,7 +890,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
   if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
       && !pkl_ast_type_equal (returned_type, expected_type))
     {
-      int restart;
+      int restart = 0;
       
       switch (PKL_AST_TYPE_CODE (expected_type))
         {
@@ -929,6 +929,63 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
         }
 
       PKL_PASS_RESTART = restart;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+/* Promote function argument initializers, if needed.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
+{
+  pkl_ast_node func_arg = PKL_PASS_NODE;
+  pkl_ast_node initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
+
+  if (initial)
+    {
+      pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
+      pkl_ast_node initial_type = PKL_AST_TYPE (initial);
+
+      if (!pkl_ast_type_equal (arg_type, initial_type))
+        {
+          int restart = 0;
+
+          switch (PKL_AST_TYPE_CODE (arg_type))
+            {
+            case PKL_TYPE_ANY:
+              /* Nothing to do.  */
+              break;
+            case PKL_TYPE_INTEGRAL:
+              if (!promote_integral (PKL_PASS_AST,
+                                     PKL_AST_TYPE_I_SIZE (arg_type),
+                                     PKL_AST_TYPE_I_SIGNED (arg_type),
+                                     &PKL_AST_FUNC_ARG_INITIAL (func_arg),
+                                     &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
+                           "couldn't promote argument initializer");
+                  PKL_PASS_ERROR;
+                }
+              break;
+            case PKL_TYPE_OFFSET:
+              if (!promote_offset (PKL_PASS_AST,
+                                   PKL_AST_TYPE_O_BASE_TYPE (arg_type),
+                                   PKL_AST_TYPE_O_UNIT (arg_type),
+                                   &PKL_AST_FUNC_ARG_INITIAL (func_arg),
+                                   &restart))
+                {
+                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
+                           "couldn't promote argument initializer");
+                  PKL_PASS_ERROR;
+                }
+              break;
+            default:
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
+                       "non-promoteable function argument initializer at promo time");
+              PKL_PASS_ERROR;
+            }
+
+          PKL_PASS_RESTART = restart;
+        }
     }
 }
 PKL_PHASE_END_HANDLER
@@ -986,6 +1043,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_promo_ps_op_add_sub_mod),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_ps_op_mul),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
+   PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_promo_ps_func_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_promo_ps_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_promo_ps_indexer),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_promo_ps_trimmer),
