@@ -484,6 +484,13 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     str = xmalloc (size);
                     strncpy (str, p, size);
 
+                    /* Trim trailing space.  */
+                    end = str + strlen (str) - 1;
+                    while (end > str && isspace ((unsigned char) *end))
+                      end--;
+                    end++;
+                    *end = '\0';
+
                     argv[argc].type = PK_CMD_ARG_STR;
                     argv[argc].val.str = str;
                     p = end;

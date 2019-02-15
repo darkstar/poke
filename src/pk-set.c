@@ -29,6 +29,22 @@
 #include "pvm.h"
 
 static int
+pk_cmd_set_obase (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* set obase {2,8,10,16} */
+  int base = PK_CMD_ARG_INT (argv[0]);
+
+  if (base != 10 && base != 16 && base != 2 && base != 8)
+    {
+      fputs ("error: obase should be one of 2, 8, 10 or 16.\n", stdout);
+      return 0;
+    }
+  
+  poke_obase = base;
+  return 1;
+}
+
+static int
 pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* set endian {little,big,host,network}  */
@@ -159,6 +175,9 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
+struct pk_cmd set_obase_cmd =
+  {"obase", "i", "", 0, NULL, pk_cmd_set_obase, "set obase (2|8|10|16)"};
+
 struct pk_cmd set_endian_cmd =
   {"endian", "s?", "", 0, NULL, pk_cmd_set_endian, "set endian (little|big|host)"};
 
@@ -167,6 +186,7 @@ struct pk_cmd set_nenc_cmd =
 
 struct pk_cmd *set_cmds[] =
   {
+   &set_obase_cmd,
    &set_endian_cmd,
    &set_nenc_cmd,
    &null_cmd
