@@ -1417,11 +1417,11 @@ pkl_asm_endloop (pkl_asm pasm)
    BA label2
  label3:
    DROP       ; CONTAINER I NELEMS
+ break_label:
    DROP       ; CONTAINER I
    DROP       ; CONTAINER
    DROP       ; _
    POPF 1
- break_label:
 */
 
 void
@@ -1506,12 +1506,11 @@ pkl_asm_for_endloop (pkl_asm pasm)
   /* Cleanup the stack, and pop the current frame from the
      environment.  */
   pkl_asm_insn (pasm, PKL_INSN_DROP);
+  pvm_append_label (pasm->program, pasm->level->break_label);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
-
-  pvm_append_label (pasm->program, pasm->level->break_label);
 
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
@@ -1538,6 +1537,7 @@ pkl_asm_break_label_1 (struct pkl_asm_level *level)
   switch (level->current_env)
     {
     case PKL_ASM_ENV_LOOP:
+    case PKL_ASM_ENV_FOR_LOOP:
       return level->break_label;
       break;
     default:
