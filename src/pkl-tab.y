@@ -563,10 +563,10 @@ expression:
                         free (mapper_name);
                       }
                 }
-	| TYPENAME struct
+            | TYPENAME '{' struct_elem_list '}'
           	{
                   pkl_ast_node type;
-                  pkl_ast_node constructor_decl;
+                  pkl_ast_node constructor_decl, astruct;
                   const char *type_name;
                   char *constructor_name;
                   int constructor_back, constructor_over;
@@ -599,9 +599,13 @@ expression:
                                                      &constructor_back, &constructor_over);
                   assert (constructor_decl);
 
+                  astruct = pkl_ast_make_struct (pkl_parser->ast,
+                                                 0 /* nelem */, $3);
+                  PKL_AST_LOC (astruct) = @$;
+
                   $$ = pkl_ast_make_scons (pkl_parser->ast,
                                            type,
-                                           $2,
+                                           astruct,
                                            constructor_back,
                                            constructor_over);
                   PKL_AST_LOC ($$) = @$;
