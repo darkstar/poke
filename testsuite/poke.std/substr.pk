@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-/* { dg-command { substr ("foobar", 0, "foobar"'length) } } */
+/* { dg-command { substr ("foobar", 0, "foobar"'length - 1) } } */
 /* { dg-output "\"foobar\"" } */
 
 /* { dg-command { substr ("foobar", 0) } } */
