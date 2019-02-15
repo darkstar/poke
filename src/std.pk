@@ -71,3 +71,86 @@ defun strstr = (string s1, string s2) long:
 
    return -1;
   }
+
+defun format = (string fmt, args...) string:
+  {
+   defvar fi = 0;
+   defvar res = "";
+   defvar narg = 0;
+   
+   defun tohex = (uint<64> n) string:
+   {
+    defvar hex = "";
+
+    while (n != 0)
+      {
+        defvar remainder = (n % 16) as char;
+
+        if (remainder < 10)
+          hex = (remainder + '0') as string + hex;
+        else
+          hex = (remainder + '7') as string + hex;
+
+        n = n / 16;
+      }
+
+    return hex;
+   }
+
+   defun tooct = (uint<64> n) string:
+   {
+    return "012";
+   }
+
+   defun tobin = (uint<64> n) string:
+   {
+    return "100";
+   }
+
+   defun todec = (int<64> n) string:
+   {
+    return "10";
+   }
+
+   defun toudec = (uint<64> n) string:
+   {
+    return "-10";
+   }
+
+   while (fi < fmt'length)
+     {
+       if (fmt[fi] == '%'
+           && fi < fmt'length - 1)
+         {
+           /* Process %-sequence:
+              
+              %{i,u}BITS{x,o,b,d,u}  */
+
+           if (fmt[fi + 1] == 'x')
+             res = res + tohex (args[narg] as uint<64>);
+           else if (fmt[fi + 1] == 'o')
+             res = res + tooct (args[narg] as uint<64>);
+           else if (fmt[fi + 1] == 'b')
+             res = res + tobin (args[narg] as uint<64>);
+           else if (fmt[fi + 1] == 'd')
+             res = res + todec (args[narg] as int<64>);
+           else if (fmt[fi + 1] == 'u')
+             res = res + toudec (args[narg] as uint<64>);
+           else
+             {
+               print "format: unrecognized %" + fmt[fi + 1] as string + "\n";
+               raise E_generic; /* XXX use E_inval ? */
+             }
+
+           narg = narg + 1;
+           fi = fi + 2;
+         }
+       else
+         {
+          res = res + fmt[fi] as string;
+          fi = fi + 1;
+         }
+     }
+
+   return res;
+  }

@@ -245,8 +245,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
           || PKL_AST_TYPE_I_SIGNED (exp_type) != 0
           || PKL_AST_TYPE_I_SIZE (exp_type) != 8))
     {
+      char *found_type = pkl_type_str (exp_type, 1);
+
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
-                 "invalid cast to string.  Expected a uint<8>.");
+                 "invalid cast to string\n\
+expected uint<8>, got %s.",
+                 found_type);
+      free (found_type);
       payload->errors++;
       PKL_PASS_ERROR;
     }
