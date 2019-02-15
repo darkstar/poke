@@ -28,6 +28,7 @@ extern int poke_exit_code;
 extern pkl_compiler poke_compiler;
 extern pvm poke_vm;
 extern char *poke_datadir;
+extern int poke_obase;
 
 void pk_print_version ();
 

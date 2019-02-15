@@ -675,7 +675,7 @@ pk_cmd_exec (char *str)
 
       if (val != PVM_NULL)
         {
-          pvm_print_val (stdout, val, 10, 0);
+          pvm_print_val (stdout, val, poke_obase, 0);
           fputc ('\n', stdout);
         }
       
