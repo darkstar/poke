@@ -289,15 +289,8 @@
 # Emit an error message
 function error(msg)
 {
-    errors[++num_errors] = msg
+    errors[++num_errors] = FILENAME ":" msg
     errors[++num_errors] = $0
-}
-
-# Emit an error message and terminate immediately
-function fatal(msg)
-{
-    print msg
-    exit (1)
 }
 
 # Append a line to the assembled output.
@@ -325,7 +318,7 @@ function pop_frame()
 {
     if (cure_frame == -1)
     {
-        error("error: " FNR " frame underflow")
+        error(FNR " frame underflow")
         return
     }
     cur_frame--
@@ -338,7 +331,7 @@ function register_var(name)
     for (on = 0; on < frame_nvars[cur_frame]; on++)
         if (lexenv[cur_frame,on] == name)
         {
-            error("error: " FNR " variable `" name "' already defined")
+            error(FNR " variable `" name "' already defined")
             return
         }
 
@@ -352,7 +345,7 @@ function register_var(name)
 function lookup_var(name)
 {
     if (cur_frame < 0)
-        error("error: " FNR ": at least a PUSHF is required to access variables")
+        error(FNR ": at least a PUSHF is required to access variables")
 
     lookup_var_found["back"] = -1
     lookup_var_found["over"] = -1
@@ -464,7 +457,7 @@ BEGIN {
                         re=marg_re
                         break
                     default:
-                        error("error: unknown insn argument type " a)
+                        error(" unknown insn argument type " a)
                 }
                 iregexp = iregexp re
             }
@@ -524,7 +517,7 @@ BEGIN {
     # Get the macro name
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][0-9a-zA-Z_]*$/) == 0)
-        fatal("error:" FNR ": invalid macro name.  This should NOT happen.")
+        fatal(FNR ": invalid macro name.  This should NOT happen.")
 
     # Build the list of arguments
     macro_args=""
@@ -556,7 +549,7 @@ BEGIN {
     # Get the function name
     function_name = $2
     if (match (function_name, /^[a-zA-Z][0-9a-zA-Z_]*$/) == 0)
-        fatal("error:" FNR ": invalid function name. This should NOT happen.")
+        fatal(FNR ": invalid function name. This should NOT happen.")
 
     init_entity()
 
@@ -579,7 +572,7 @@ BEGIN {
     # Check that the previous entity finished any opened
     # lexical frame.
     if (cur_frame != -1)
-        error("error: " FNR ": unbalanced PUSHF and POPF in closing entity")
+        error(FNR ": unbalanced PUSHF and POPF in closing entity")
 
     if (current_entity == "function")
     {
@@ -596,7 +589,7 @@ BEGIN {
     if (num_errors > 0)
     {
         for (nerror = 1; nerror <= num_errors; nerror++)
-            print "ras: " errors[nerror] | "cat 1>&2"
+            print errors[nerror] | "cat 1>&2"
         exit (1);
     }
 
@@ -628,7 +621,7 @@ BEGIN {
                "([ \t]+" marg_re "([ \n\t]*,[ \n\t]*" marg_re ")*)?" \
                "([ \t]*;.*)?" \
                "$") != 1)
-        error("error:" FNR ": malformed .e")
+        error(FNR ": malformed .e")
 
     # Remove the optional line comment.
     $0 = gensub (/(.*);(.*)$/, "\\1", "g", $0)
@@ -678,7 +671,7 @@ BEGIN {
 
     if (labels[labelname] == labelname)
     {
-        error("error: " FNR ": label already defined in the current entity")
+        error(FNR ": label already defined in the current entity")
         next
     }
 
@@ -699,13 +692,13 @@ BEGIN {
 
     if (i_id == "")
     {
-        error("error:" FNR ": unknown instruction")
+        error(FNR ": unknown instruction")
         next
     }
 
     # Check that the instruction is well-formed
     if (match ($0, "^[ \t]*" i_re "[ \t]*(;.*)?$") != 1)
-        error("error:" FNR ": malformed instruction " insn)
+        error(FNR ": malformed instruction " insn)
 
     # Remove the optional line comment.
     $0 = gensub (/(.*);(.*)$/, "\\1", "g", $0)
@@ -752,7 +745,7 @@ BEGIN {
             vover = lookup_var_found["over"]
             
             if (vback == -1 || vover == -1)
-                error("error:" FNR ": unknown variable $" vname)
+                error(FNR ": unknown variable $" vname)
             
             $0 = gensub ("\\$" vname, vback "," vover, "g", $0);
         }
@@ -782,5 +775,5 @@ BEGIN {
 ## Catch-all centinel rule
 
 {
-    error("error:" FNR ": excuse me, what is this crap")
+    error(FNR ": excuse me, what is this crap")
 }
