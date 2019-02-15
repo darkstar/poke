@@ -238,12 +238,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node fa;
 
-  /* All optional formal arguments in a function specifier should be
-     at the end of the arguments list.  */
   for (fa = PKL_AST_FUNC_FIRST_OPT_ARG (func);
        fa;
        fa = PKL_AST_CHAIN (fa))
     {
+      /* All optional formal arguments in a function specifier should
+         be at the end of the arguments list.  */
       if (!PKL_AST_FUNC_ARG_INITIAL (fa))
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
@@ -251,14 +251,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
           payload->errors++;
           PKL_PASS_ERROR;
         }
-    }
 
-  /* If there is a vararg argument, it should be at the end of the
-     list of arguments.  Also, it should be unique.  */
-  for (fa = PKL_AST_FUNC_ARGS (func);
-       fa;
-       fa = PKL_AST_CHAIN (fa))
-    {
+      /* If there is a vararg argument, it should be at the end of the
+         list of arguments.  Also, it should be unique.  */
       if (PKL_AST_FUNC_ARG_VARARG (fa) == 1
           && PKL_AST_CHAIN (fa) != NULL)
         {
