@@ -505,6 +505,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_if_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * BREAK_STMT
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_break_stmt)
+{
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF,
+                PKL_AST_BREAK_STMT_NFRAMES (PKL_PASS_NODE));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA,
+                pkl_asm_break_label (PKL_GEN_ASM));
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * LOOP_STMT
  * | CONDITION
  * | BODY
@@ -2256,6 +2269,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_NULL_STMT, pkl_gen_ps_null_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_gen_ps_ass_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_IF_STMT, pkl_gen_pr_if_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_BREAK_STMT, pkl_gen_ps_break_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),

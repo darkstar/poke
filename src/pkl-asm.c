@@ -82,6 +82,8 @@ struct pkl_asm_level
   jitter_label label3;
   pkl_ast_node node1;
   pkl_ast_node node2;
+
+  jitter_label break_label;
 };
 
 /* An assembler instance.
@@ -1329,6 +1331,7 @@ pkl_asm_endtry (pkl_asm pasm)
    BA label1;
    label2:
    POP the condition expression
+   break_label:
   
    Thus, loops use two labels.  */
 
@@ -1339,6 +1342,7 @@ pkl_asm_while (pkl_asm pasm)
 
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
+  pasm->level->break_label = pasm->level->label2;
 
   pvm_append_label (pasm->program, pasm->level->label1);
 }
@@ -1426,6 +1430,7 @@ pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
   pasm->level->label1 = jitter_fresh_label (pasm->program);
   pasm->level->label2 = jitter_fresh_label (pasm->program);
   pasm->level->label3 = jitter_fresh_label (pasm->program);
+  pasm->level->break_label = pasm->level->label3;
 
   if (selector)
     pasm->level->node1 = ASTREF (selector);
@@ -1519,6 +1524,29 @@ pkl_asm_call (pkl_asm pasm, const char *funcname)
 
   pkl_asm_insn (pasm, PKL_INSN_PUSHVAR, back, over);
   pkl_asm_insn (pasm, PKL_INSN_CALL);
+}
+
+static jitter_label
+pkl_asm_break_label_1 (struct pkl_asm_level *level)
+{
+  switch (level->current_env)
+    {
+    case PKL_ASM_ENV_LOOP:
+      return level->break_label;
+      break;
+    default:
+      return pkl_asm_break_label_1 (level->parent);
+      break;
+    }
+
+  /* The compiler must guarantee this does NOT happen.  */
+  assert (0);
+}
+
+jitter_label
+pkl_asm_break_label (pkl_asm pasm)
+{
+  return pkl_asm_break_label_1 (pasm->level);
 }
 
 jitter_label
