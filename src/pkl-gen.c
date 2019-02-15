@@ -280,7 +280,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_var)
          this node is only used as a recipient for the lexical address
          of the variable.  */
       /* XXX: the call to WRITE will most probably belong here, after
-         the aref or sref or whatever.  */
+         the indexer or sref or whatever.  */
     }
   else
     {
@@ -380,7 +380,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
   switch (PKL_AST_CODE (lvalue))
     {
     case PKL_AST_INDEXER:
-      /* Note that analf guarantees that the container of this aref is
+      /* Note that analf guarantees that the entity in this indexer is
          an array, not a string.  */
     case PKL_AST_STRUCT_REF:
       {
@@ -1257,7 +1257,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_indexer)
       /* This is a l-value in an assignment.  The array and the index
          are pushed to the stack for the ass_stmt PS handler.  Nothing
          else to do here.  Note that analf guarantees that the
-         container of this aref is an array, not a string.  */
+         entity in this indexer is an array, not a string.  */
      }
   else
     {

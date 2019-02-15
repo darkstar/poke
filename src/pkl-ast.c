@@ -277,21 +277,21 @@ pkl_ast_make_trimmer (pkl_ast ast, pkl_ast_node entity,
   return trimmer;
 }
 
-/* Build and return an AST node for an array reference.  */
+/* Build and return an AST node for an indexer.  */
 
 pkl_ast_node
 pkl_ast_make_indexer (pkl_ast ast,
-                        pkl_ast_node array, pkl_ast_node index)
+                        pkl_ast_node entity, pkl_ast_node index)
 {
-  pkl_ast_node aref = pkl_ast_make_node (ast, PKL_AST_INDEXER);
+  pkl_ast_node indexer = pkl_ast_make_node (ast, PKL_AST_INDEXER);
 
-  assert (array && index);
+  assert (entity && index);
 
-  PKL_AST_INDEXER_ENTITY (aref) = ASTREF (array);
-  PKL_AST_INDEXER_INDEX (aref) = ASTREF (index);
-  PKL_AST_LITERAL_P (aref) = 0;
+  PKL_AST_INDEXER_ENTITY (indexer) = ASTREF (entity);
+  PKL_AST_INDEXER_INDEX (indexer) = ASTREF (index);
+  PKL_AST_LITERAL_P (indexer) = 0;
 
-  return aref;
+  return indexer;
 }
 
 /* Build and return an AST node for a struct reference.  */

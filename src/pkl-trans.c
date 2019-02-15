@@ -595,13 +595,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* An array ref is a literal if the referred array element is also a
+/* An indexer is a literal if the referred entity element is also a
    literal.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_indexer)
 {
-  pkl_ast_node array = PKL_AST_INDEXER_ENTITY (PKL_PASS_NODE);
-  PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (array);
+  pkl_ast_node entity = PKL_AST_INDEXER_ENTITY (PKL_PASS_NODE);
+  PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (entity);
 }
 PKL_PHASE_END_HANDLER
 

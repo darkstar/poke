@@ -720,14 +720,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
   switch (PKL_AST_TYPE_CODE (container_type))
     {
     case PKL_TYPE_ARRAY:
-      /* The type of the aref is the type of the elements of the
+      /* The type of the indexer is the type of the elements of the
          array.  */
       type
         = PKL_AST_TYPE_A_ETYPE (container_type);
       break;
     case PKL_TYPE_STRING:
       {
-        /* The type of the aref is a `char', i.e. a uint<8>.  */
+        /* The type of the indexer is a `char', i.e. a uint<8>.  */
         type = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
         PKL_AST_LOC (type) = PKL_AST_LOC (indexer);
         break;

@@ -547,8 +547,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_unary)
 }
 PKL_PHASE_END_HANDLER
 
-/* Handler for promoting indexes in array references to unsigned 64
-   bit values.  */
+/* Handler for promoting indexes in indexers to unsigned 64 bit
+   values.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_indexer)
 {
@@ -559,7 +559,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_indexer)
                          &PKL_AST_INDEXER_INDEX (node), &restart))
     {
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
-               "couldn't promote array subscript");
+               "couldn't promote indexer subscript");
       PKL_PASS_ERROR;
     }
 

@@ -467,7 +467,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_array_initializer)
 PKL_PHASE_END_HANDLER
 
 /* Make sure that the left-hand of an assignment expression is a
-   variable, an array reference or a struct reference.  */
+   variable, an indexer or a struct reference.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
 {
@@ -484,11 +484,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
       break;
     case PKL_AST_INDEXER:
       {
-        pkl_ast_node container
+        pkl_ast_node entity
           = PKL_AST_INDEXER_ENTITY (ass_stmt_lvalue);
-        pkl_ast_node container_type = PKL_AST_TYPE (container);
+        pkl_ast_node entity_type = PKL_AST_TYPE (entity);
 
-        if (PKL_AST_TYPE_CODE (container_type) == PKL_TYPE_ARRAY)
+        if (PKL_AST_TYPE_CODE (entity_type) == PKL_TYPE_ARRAY)
           break;
       }
     default:
