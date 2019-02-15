@@ -65,7 +65,7 @@ defun substr = (string s, int f, int t = s'length as int) string:
    return res;
   }
 
-defun strstr = (string s1, string s2) int:
+defun strstr = (string s1, string s2) long:
   {
    defvar found = 0;
    defvar i = 0UL;
