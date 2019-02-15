@@ -1117,8 +1117,7 @@ expected %s, got %s",
 PKL_PHASE_END_HANDLER
 
 /* The type of the r-value in an assignment statement should match the
-   type of the l-value.  XXX: but what about promotions in integers
-   and other transformations.
+   type of the l-value.
 
 #if 0
    Also, the type of the l-value cannot be a function: function
@@ -1140,19 +1139,30 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
   if (PKL_AST_TYPE_CODE (lvalue_type) != PKL_TYPE_ANY
       && !pkl_ast_type_equal (lvalue_type, exp_type))
     {
-      char *expected_type = pkl_type_str (lvalue_type, 1);
-      char *found_type = pkl_type_str (exp_type, 1);
-      
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
-                 "r-value in assignment has the wrong type\n\
-expected %s got %s",
-                 expected_type, found_type);
+      if (PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_ANY
+          || (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_INTEGRAL
+              && PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_INTEGRAL)
+          || (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_OFFSET
+              && PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_OFFSET))
+        /* Integers and offsets can be promoted, and anything can be
+           promoted to ANY.  */
+        ;
+      else
+        {
+          char *expected_type = pkl_type_str (lvalue_type, 1);
+          char *found_type = pkl_type_str (exp_type, 1);
 
-      free (found_type);
-      free (expected_type);
-      
-      payload->errors++;
-      PKL_PASS_ERROR;
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+                     "r-value in assignment has the wrong type\n\
+expected %s got %s",
+                     expected_type, found_type);
+          
+          free (found_type);
+          free (expected_type);
+          
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
     }
 
 #if 0

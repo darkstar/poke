@@ -728,6 +728,65 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_try_catch_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* In assignments, the r-value should be promoted to the type of the
+   l-value, if that is suitable.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
+{
+  pkl_ast_node ass_stmt = PKL_PASS_NODE;
+  pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
+  pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
+  pkl_ast_node lvalue_type = PKL_AST_TYPE (lvalue);
+  pkl_ast_node exp_type = PKL_AST_TYPE (exp);
+  int restart = 0;
+
+  /* At this point it is assured that exp_type is promoteable to
+     lvalue_type, or typify1 wouldn't have allowed this node to
+     pass.  */
+
+  if (!pkl_ast_type_equal (lvalue_type, exp_type))
+    {
+      switch (PKL_AST_TYPE_CODE (lvalue_type))
+        {
+        case PKL_TYPE_ANY:
+          /* Nothing to do.  */
+          break;
+        case PKL_TYPE_INTEGRAL:
+          if (!promote_integral (PKL_PASS_AST,
+                                 PKL_AST_TYPE_I_SIZE (lvalue_type),
+                                 PKL_AST_TYPE_I_SIGNED (lvalue_type),
+                                 &PKL_AST_ASS_STMT_EXP (ass_stmt),
+                                 &restart))
+            {
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                       "couldn't promote r-value in assignment");
+              PKL_PASS_ERROR;
+            }
+          break;
+        case PKL_TYPE_OFFSET:
+          if (!promote_offset (PKL_PASS_AST,
+                               PKL_AST_TYPE_O_BASE_TYPE (lvalue_type),
+                               PKL_AST_TYPE_O_UNIT (lvalue_type),
+                               &PKL_AST_ASS_STMT_EXP (ass_stmt),
+                               &restart))
+            {
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+                       "couldn't promote r-value in assignment");
+              PKL_PASS_ERROR;
+            }
+          break;
+        default:
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+                   "non-promoteable r-value in assignment statement at promo time");
+          PKL_PASS_ERROR;
+          break;
+        }
+
+      PKL_PASS_RESTART = restart;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* In function calls, the actual arguments should be promoted to the
    type of the formal arguments, if that is suitable.  */
 
@@ -931,6 +990,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_promo_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_promo_ps_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_promo_ps_funcall),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_promo_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_promo_ps_return_stmt),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };

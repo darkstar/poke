@@ -1,0 +1,8 @@
+/* { dg-do compile } */
+
+defun foo = void:
+  {
+   defvar i = 10;
+   i = "foo";  /* { dg-error ".*\n.*" } */
+  }
+  

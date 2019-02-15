@@ -1,0 +1,23 @@
+/* { dg-do run } */
+
+/* { dg-command { defvar i = 10 as int<9> } } */
+
+/* { dg-command { i = 20 as int<9> } } */
+/* { dg-command { i } } */
+/* { dg-output "\\\(int<9>\\\) 20" }*/
+
+/* { dg-command { i = 30UL } } */
+/* { dg-command { i } } */
+/* { dg-output "\n\\\(int<9>\\\) 30" }*/
+
+/* { dg-command { defvar o = 2#B } } */
+
+/* { dg-command { o = 10#B } } */
+/* { dg-command { o } } */
+/* { dg-output "\n10#B" } */
+
+/* { dg-command { o = 20UL#b } } */
+/* { dg-command { o } } */
+/* { dg-output "\n2#B" } */
+
+
