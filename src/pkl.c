@@ -333,23 +333,39 @@ pkl_error (pkl_ast ast,
 {
   va_list valist;
   size_t i;
+  char *errmsg, *p;
 
-  if (ast->filename)
-    fprintf (stderr, "%s:", ast->filename);
-  
-  if (PKL_AST_LOC_VALID (loc))
-    {
-      if (poke_quiet_p)
-        fprintf (stderr, "%d: ", loc.first_line);
-      else
-        fprintf (stderr, "%d:%d: ",
-                 loc.first_line, loc.first_column);
-    }
-  fputs (RED REVERSE "error: " NOATTR, stderr);
+  /* Write out the error message, line by line.  */
   va_start (valist, fmt);
-  vfprintf (stderr, fmt, valist);
+  vasprintf (&errmsg, fmt, valist);
   va_end (valist);
-  fputc ('\n', stderr);
+
+  p = errmsg;
+  while (*p != '\0')
+    {
+      if (ast->filename)
+        fprintf (stderr, "%s:", ast->filename);
+  
+      if (PKL_AST_LOC_VALID (loc))
+        {
+          if (poke_quiet_p)
+            fprintf (stderr, "%d: ", loc.first_line);
+          else
+            fprintf (stderr, "%d:%d: ",
+                     loc.first_line, loc.first_column);
+        }
+      fputs (RED REVERSE "error: " NOATTR, stderr);
+
+      while (*p != '\n' && *p != '\0')
+        {
+          fputc (*p, stderr);
+          p++;
+        }
+      if (*p == '\n')
+        p++;
+      fputc ('\n', stderr);
+    }
+  free (errmsg);
 
   if (poke_quiet_p)
     return;
