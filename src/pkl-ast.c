@@ -1809,7 +1809,8 @@ pkl_ast_finish_breaks_1 (pkl_ast_node entity, pkl_ast_node stmt,
                                nframes);
       break;
     case PKL_AST_DECL:
-      case PKL_AST_LOOP_STMT:
+    case PKL_AST_RETURN_STMT:
+    case PKL_AST_LOOP_STMT:
     case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
     case PKL_AST_PRINT_STMT:
@@ -1818,6 +1819,7 @@ pkl_ast_finish_breaks_1 (pkl_ast_node entity, pkl_ast_node stmt,
     case PKL_AST_NULL_STMT:
       break;
     default:
+      printf ("XXX %d\n", PKL_AST_CODE (stmt));
       assert (0);
       break;
     }
@@ -1827,7 +1829,7 @@ void
 pkl_ast_finish_breaks (pkl_ast_node entity, pkl_ast_node stmt)
 {
   int nframes = 0;
-  pkl_ast_finish_breaks_1 (entity, entity, &nframes);
+  pkl_ast_finish_breaks_1 (entity, stmt, &nframes);
 }
 
 /* Annotate FUNCTIONs return statements with the function and their

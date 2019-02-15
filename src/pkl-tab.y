@@ -1343,7 +1343,7 @@ stmt:
 
                   /* Annotate the contained BREAK statements with
                      their lexical level within this loop.  */
-                  pkl_ast_finish_breaks ($$, $5);
+                  pkl_ast_finish_breaks ($$, $9);
 
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
