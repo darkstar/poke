@@ -77,6 +77,7 @@ enum pkl_ast_code
   PKL_AST_EXP_STMT,
   PKL_AST_TRY_CATCH_STMT,
   PKL_AST_PRINT_STMT,
+  PKL_AST_BREAK_STMT,
   PKL_AST_RAISE_STMT,
   PKL_AST_LAST_STMT = PKL_AST_RAISE_STMT,
   PKL_AST_LAST
@@ -1372,6 +1373,23 @@ struct pkl_ast_print_stmt
 
 pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp);
 
+/* PKL_AST_BREAK_STMT nodes represent `break' statements.  Each break
+   statement is associated to a loop or switch node.
+
+   ENTITY is the loop or switch node associated with this break
+   statement.  */
+
+#define PKL_AST_BREAK_STMT_ENTITY(AST) ((AST)->break_stmt.entity)
+
+struct pkl_ast_break_stmt
+{
+  struct pkl_ast_common common;
+  union pkl_ast_node *entity;
+};
+
+pkl_ast_node pkl_ast_make_break_stmt (pkl_ast ast,
+                                      pkl_ast_node entity);
+
 /* PKL_AST_RAISE_STMT nodes represent `raise' statements, which are
    used in order to raise exceptions at the program level.
 
@@ -1435,6 +1453,7 @@ union pkl_ast_node
   struct pkl_ast_return_stmt return_stmt;
   struct pkl_ast_exp_stmt exp_stmt;
   struct pkl_ast_try_catch_stmt try_catch_stmt;
+  struct pkl_ast_break_stmt break_stmt;
   struct pkl_ast_raise_stmt raise_stmt;
   struct pkl_ast_print_stmt print_stmt;
 };

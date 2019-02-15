@@ -1343,6 +1343,19 @@ pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp)
   return print_stmt;
 }
 
+/* Build and return an AST node for a `break' statement.  */
+
+pkl_ast_node
+pkl_ast_make_break_stmt (pkl_ast ast, pkl_ast_node entity)
+{
+  pkl_ast_node break_stmt = pkl_ast_make_node (ast,
+                                               PKL_AST_BREAK_STMT);
+
+  if (entity)
+    PKL_AST_BREAK_STMT_ENTITY (break_stmt) = ASTREF (entity);
+  return break_stmt;
+}
+
 /* Build and return an AST node for a `raise' statement.  */
 
 pkl_ast_node
@@ -1680,6 +1693,9 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_PRINT_STMT_EXP (ast));
       break;
 
+    case PKL_AST_BREAK_STMT:
+      break;
+      
     case PKL_AST_RAISE_STMT:
 
       pkl_ast_node_free (PKL_AST_RAISE_STMT_EXP (ast));
@@ -1803,6 +1819,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
     case PKL_AST_EXP_STMT:
     case PKL_AST_ASS_STMT:
     case PKL_AST_PRINT_STMT:
+    case PKL_AST_BREAK_STMT:
     case PKL_AST_RAISE_STMT:
     case PKL_AST_NULL_STMT:
       break;
@@ -2294,7 +2311,13 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
     case PKL_AST_PRINT_STMT:
       IPRINTF ("PRINT_STMT::\n");
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (print_stmt_exp, PRINT_STMT_EXP);
+      break;
+
+    case PKL_AST_BREAK_STMT:
+      IPRINTF ("BREAK_STMT::\n");
+      PRINT_COMMON_FIELDS;
       break;
 
     case PKL_AST_RAISE_STMT:
