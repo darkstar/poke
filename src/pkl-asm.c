@@ -1318,6 +1318,9 @@ pkl_asm_endtry (pkl_asm pasm)
     pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
 
   pvm_append_label (pasm->program, pasm->level->label2);
+
+  /* Cleanup and pop the current level.  */
+  pkl_asm_poplevel (pasm);
 }
 
 /* The following functions implement while loops.  The code generated
