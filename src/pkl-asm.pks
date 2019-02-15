@@ -474,39 +474,14 @@
         typof                   ; ARR ATYP
         tyagett                 ; ARR ATYP ETYP
         nip2                    ; ETYP
-        push ulong<64>0
-        dup
+        pushvar $from
         regvar $idx
-        regvar $asize
       .while
         pushvar $idx            ; ... IDX
         pushvar $to             ; ... IDX TO
         lelu                    ; ... IDX TO (IDX<=TO)
         nip2                    ; ... (IDX<=TO)
       .loop
-        ;; If IDX < FROM, just update ASIZE
-        ;; XXX simplify this by using an instruction that gets
-        ;; the offset of an array's element.
-        pushvar $idx            ; ... IDX
-        pushvar $from           ; ... IDX FROM
-        ltlu                    ; ... IDX FROM (IDX<FROM)
-        nip2                    ; ... (IDX<FROM)
-        bzi .addelem
-        drop                    ; ...
-        pushvar $array          ; ... ARR
-        pushvar $idx            ; ... ARR IDX
-        aref                    ; ... ARR IDX ELEM
-        nip2                    ; ... ELEM
-        siz                     ; ... ELEM ESIZEO
-        .e ogetmn               ; ... ELEM ESIZEO ESIZEM
-        nip2                    ; ... ESIZEM
-        pushvar $asize          ; ... ESIZEM ASIZE
-        addlu
-        nip2                    ; ... (ESIZEM+ASIZE)
-        popvar $asize           ; ...
-        ba .continue
-.addelem:
-        drop
         ;; Mount the IDX-FROMth element of the new array.
         pushvar $idx            ; ... IDX
         pushvar $array          ; ... IDX ARR
@@ -520,7 +495,6 @@
         sublu
         nip2                    ; ... EVAL (IDX-FROM)
         swap                    ; ... (IDX-FROM) EVAL
-.continue:
         ;; Increase index and loop.
         pushvar $idx            ; ... IDX
         push ulong<64>1         ; ... IDX 1UL
@@ -540,29 +514,36 @@
         nip2                    ; ... (TO-FROM+1)
         dup                     ; ETYP [IDX VAL...] NELEM NINIT
         mka
-        ;; If the trimmed array is mapped, the resulting array
+        ;; If the trimmed array is mapped then the resulting array
         ;; is mapped as well, with the following attributes:
         ;;
-        ;;   OFFSET = original OFFSET + ASIZE
+        ;;   OFFSET = original OFFSET + OFF(FROM)
         ;;   EBOUND = TO - FROM + 1
         ;;
-        ;; i.e., the mapping of the resulting array is always
+        ;; The mapping of the resulting array is always
         ;; bounded by number of elements, regardless of the
         ;; characteristics of the mapping of the trimmed array.
         pushvar $array          ; TARR ARR
         mgeto                   ; TARR ARR OFFSET
         bn .notmapped
+        ;; Calculate the new offset.
+        swap                    ; TARR OFFSET ARR
+        pushvar $from           ; TARR OFFSET ARR FROM
+        arefo                   ; TARR OFFSET ARR FROM OFF(FROM)
+        nip                     ; TARR OFFSET ARR OFF(FROM)
+        rot                     ; TARR ARR OFF(FROM) OFFSET
+        .e ogetmn               ; TARR ARR OFF(FROM) OFFSET OFFSETM
+        nip
+        swap                    ; TARR ARR OFFSETM OFF(FROM)
+        .e ogetmn
+        nip                     ; TARR ARR OFFSETM OFFM(FROM)
+        addlu
+        nip2                    ; TARR ARR NOFFSETM
+        push ulong<64>1
+        mko                     ; TARR ARR OFFSET
         rot                     ; ARR OFFSET TARR
         regvar $tarr
-        pushvar $asize          ; ARR OFFSET ASIZE
-        swap                    ; ARR ASIZE OFFSET
-        .e ogetmn               ; ARR ASIZE OFFSET OFFSETM
-        rot                     ; ARR OFFSET OFFSETM ASIZE
-        addlu
-        nip2                    ; ARR OFFSET (OFFSETM+ASIZE)
-        push ulong<64>1
-        mko                     ; ARR OFFSET NOFFSET
-        nip                     ; ARR OFFSET
+        ;; Calculate the new EBOUND.
         swap                    ; OFFSET ARR
         mgetm                   ; OFFSET ARR MAPPER
         swap                    ; OFFSET MAPPER ARR
@@ -575,6 +556,7 @@
         push ulong<64>1
         addlu
         nip2                    ; OFFSET MAPPER WRITER (TO-FROM+1UL)
+        ;; Install mapper, writer, offset and ebound.
         pushvar $tarr           ; OFFSET MAPPER WRITER (TO-FROM+!UL) TARR
         swap                    ; OFFSET MAPPER WRITER TARR (TO-FROM+!UL)
         msetsel                 ; OFFSET MAPPER WRITER TARR
@@ -584,7 +566,7 @@
         msetm                   ; OFFSET TARR
         swap                    ; TARR OFFSET
         mseto                   ; TARR
-        ;; Remap.
+        ;; Remap!!
         remap
         push null
         push null
