@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-dist_pkgdata_DATA = pkl-rt.pk
+dist_pkgdata_DATA = pkl-rt.pk std.pk pk-dump.pk
 
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
@@ -56,7 +56,7 @@ AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG \
-                -DPKGDATADIR=$(pkgdatadir)
+                -DPKGDATADIR=\"$(pkgdatadir)\"
 poke_CFLAGS = -Wall -Werror $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE) $(BDW_GC_LIBS)

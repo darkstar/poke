@@ -73,10 +73,14 @@ pkl_new ()
      error and should be reported as such.  */
   {
     pvm_val val;
-    pvm_program pkl_prog
-      = pkl_compile_file (compiler,
-                          /* XXX: use datadir/bleh */
-                          "/home/jemarch/gnu/hacks/poke/src/pkl-rt.pk");
+    pvm_program pkl_prog;
+    char *poke_rt_pk;
+
+    poke_rt_pk = xmalloc (strlen (poke_datadir) + strlen ("/pkl-rt.pk") + 1);
+    strcpy (poke_rt_pk, poke_datadir);
+    strcat (poke_rt_pk, "/pkl-rt.pk");
+    pkl_prog = pkl_compile_file (compiler, poke_rt_pk);
+    free (poke_rt_pk);
 
     if (pkl_prog == NULL
         || (pvm_run (poke_vm, pkl_prog, &val) != PVM_EXIT_OK))

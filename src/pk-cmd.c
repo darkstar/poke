@@ -778,13 +778,14 @@ pk_cmd_init (void)
     pvm_program program;
     int pvm_ret;
     pvm_val val;
+    char *poke_cmdfile;
 
-    /* XXX for loop loading all the pk-*.pk */
-    program = pkl_compile_file (poke_compiler,
-                                /* XXX: use POKEDIR  */
-                                "/home/jemarch/gnu/hacks/poke/src/pk-dump.pk");
+    poke_cmdfile = xmalloc (strlen (poke_datadir) + strlen ("/pk-dump.pk") + 1);
+    strcpy (poke_cmdfile, poke_datadir);
+    strcat (poke_cmdfile, "/pk-dump.pk");
+    program = pkl_compile_file (poke_compiler, poke_cmdfile);
+    free (poke_cmdfile);
     if (program == NULL)
-      /* XXX explanatory error message.  */
       exit (1);
 
     pvm_ret = pvm_run (poke_vm, program, &val);

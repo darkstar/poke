@@ -1,5 +1,4 @@
-dist_pkgdata_DATA = std.pk \
-                    bmp.pk \
+dist_pkgdata_DATA = bmp.pk \
                     bson.pk \
                     deflate.pk \
                     dwarf.pk \

@@ -48,6 +48,11 @@ int poke_interactive_p;
 
 int poke_quiet_p;
 
+/* The following global contains the directory holding the program's
+   architecture independent files, such as scripts.  */
+
+char *poke_datadir;
+
 /* This is used by commands to indicate the repl that it must
    exit.  */
 
@@ -293,6 +298,12 @@ initialize ()
   /* Determine whether the tool has been invoked interactively.  */
   poke_interactive_p = isatty (fileno (stdin));
   
+  /* Determine the directory containing poke's scripts and other
+     architecture-independent data.  */
+  poke_datadir = getenv ("POKEDATADIR");
+  if (poke_datadir == NULL)
+    poke_datadir = PKGDATADIR;
+
   /* Initialize the Poke Virtual Machine.  Note this should be done
      before initializing the compiler, since the later constructs and
      runs pvm programs internally.  */
@@ -305,10 +316,14 @@ initialize ()
     pvm_program program;
     int pvm_ret;
     pvm_val val;
+    char *poke_std_pk;
 
-    program = pkl_compile_file (poke_compiler,
-                                /* XXX: use POKEDIR  */
-                                "/home/jemarch/gnu/hacks/poke/pickles/std.pk");
+    poke_std_pk = xmalloc (strlen (poke_datadir) + strlen ("/std.pk") + 1);
+    strcpy (poke_std_pk, poke_datadir);
+    strcat (poke_std_pk, "/std.pk");
+    program = pkl_compile_file (poke_compiler, poke_std_pk);
+    free (poke_std_pk);
+
     if (program == NULL)
       /* XXX explanatory error message.  */
       exit (1);
