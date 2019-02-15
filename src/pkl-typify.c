@@ -1798,8 +1798,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
   pkl_ast_node func_arg = PKL_PASS_NODE;
   pkl_ast_node initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
 
-
-
   if (initial)
     {
       pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
