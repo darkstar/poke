@@ -192,7 +192,6 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 %token ENUM
 %token STRUCT
-%token BREAK
 %token CONST
 %token CONTINUE
 %token ELSE
@@ -206,7 +205,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %token ERR
 %token INTCONSTR UINTCONSTR OFFSETCONSTR
 %token DEFUN DEFSET DEFTYPE DEFVAR
-%token RETURN
+%token RETURN BREAK
 %token STRING
 %token TRY CATCH RAISE
 %token VOID
@@ -1380,6 +1379,12 @@ stmt:
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                }
+        | BREAK ';'
+		{
+                  $$ = pkl_ast_make_break_stmt (pkl_parser->ast,
+                                                NULL /* entity */);
+                  PKL_AST_LOC ($$) = @$;
                 }
         | RETURN ';'
         	{

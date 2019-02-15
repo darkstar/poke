@@ -161,6 +161,7 @@ D [0-9]
 "defun"		{ return DEFUN; }
 "deftype"	{ return DEFTYPE; }
 "defvar"	{ return DEFVAR; }
+"break"		{ return BREAK; }
 "return"        { return RETURN; }
 "string"	{ return STRING; }
 "as"		{ return AS; }
