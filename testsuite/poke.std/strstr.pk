@@ -1,0 +1,23 @@
+/* { dg-do run } */
+
+/* { dg-command { strstr ("xxxxxxxx", "fooo") } } */
+/* { dg-output "-1L" } */
+
+/* { dg-command { strstr ("", "fooo") } } */
+/* { dg-output "\n0L" } */
+
+/* { dg-command { strstr ("fo", "fooo") } } */
+/* { dg-output "\n0L" } */
+
+/* { dg-command { strstr ("ooo", "fooo") } } */
+/* { dg-output "\n1L" } */
+
+/* { dg-command { strstr ("x", "fooox") } } */
+/* { dg-output "\n4L" } */
+
+/* { dg-command { strstr ("xxxxx", "") } } */
+/* { dg-output "\n-1L" } */
+
+
+
+
