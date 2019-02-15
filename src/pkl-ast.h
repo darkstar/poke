@@ -1377,18 +1377,23 @@ pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp);
    statement is associated to a loop or switch node.
 
    ENTITY is the loop or switch node associated with this break
-   statement.  */
+   statement.
+
+   NFRAMES is the lexical depth of the break statement, relative to
+   the enclosing entity.  */
 
 #define PKL_AST_BREAK_STMT_ENTITY(AST) ((AST)->break_stmt.entity)
+#define PKL_AST_BREAK_STMT_NFRAMES(AST) ((AST)->break_stmt.nframes)
 
 struct pkl_ast_break_stmt
 {
   struct pkl_ast_common common;
   union pkl_ast_node *entity;
+  int nframes;
 };
 
-pkl_ast_node pkl_ast_make_break_stmt (pkl_ast ast,
-                                      pkl_ast_node entity);
+pkl_ast_node pkl_ast_make_break_stmt (pkl_ast ast);
+void pkl_ast_finish_breaks (pkl_ast_node entity);
 
 /* PKL_AST_RAISE_STMT nodes represent `raise' statements, which are
    used in order to raise exceptions at the program level.

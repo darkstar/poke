@@ -1346,13 +1346,10 @@ pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp)
 /* Build and return an AST node for a `break' statement.  */
 
 pkl_ast_node
-pkl_ast_make_break_stmt (pkl_ast ast, pkl_ast_node entity)
+pkl_ast_make_break_stmt (pkl_ast ast)
 {
   pkl_ast_node break_stmt = pkl_ast_make_node (ast,
                                                PKL_AST_BREAK_STMT);
-
-  if (entity)
-    PKL_AST_BREAK_STMT_ENTITY (break_stmt) = ASTREF (entity);
   return break_stmt;
 }
 
@@ -1765,6 +1762,74 @@ pkl_ast_reverse (pkl_ast_node ast)
   return prev;
 }
 
+/* Annotate the break statements within a given entity (loop or switch
+   or...) with a pointer to the entity and their lexical nest level
+   within the entity.  */
+
+static void
+pkl_ast_finish_breaks_1 (pkl_ast_node entity, pkl_ast_node stmt,
+                         int *nframes)
+{
+  /* STMT can be a statement or a declaration.  */
+
+  switch (PKL_AST_CODE (stmt))
+    {
+    case PKL_AST_BREAK_STMT:
+      PKL_AST_BREAK_STMT_ENTITY (stmt) = entity; /* Note no ASTREF */
+      PKL_AST_BREAK_STMT_NFRAMES (stmt) = *nframes;
+      break;
+    case PKL_AST_COMP_STMT:
+      {
+        pkl_ast_node t;
+
+        *nframes += 1;
+        for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
+             t = PKL_AST_CHAIN (t))
+          pkl_ast_finish_breaks_1 (entity, t, nframes);
+
+        /* Pop the frame of the compound itself.  */
+        *nframes -= 1;
+        break;
+      }
+    case PKL_AST_IF_STMT:
+      pkl_ast_finish_breaks_1 (entity,
+                               PKL_AST_IF_STMT_THEN_STMT (stmt),
+                               nframes);
+      if (PKL_AST_IF_STMT_ELSE_STMT (stmt))
+        pkl_ast_finish_breaks_1 (entity,
+                                 PKL_AST_IF_STMT_ELSE_STMT (stmt),
+                                 nframes);
+      break;
+    case PKL_AST_TRY_CATCH_STMT:
+      pkl_ast_finish_breaks_1 (entity,
+                               PKL_AST_TRY_CATCH_STMT_CODE (stmt),
+                               nframes);
+      pkl_ast_finish_breaks_1 (entity,
+                               PKL_AST_TRY_CATCH_STMT_HANDLER (stmt),
+                               nframes);
+      break;
+    case PKL_AST_DECL:
+      case PKL_AST_LOOP_STMT:
+    case PKL_AST_EXP_STMT:
+    case PKL_AST_ASS_STMT:
+    case PKL_AST_PRINT_STMT:
+    case PKL_AST_RAISE_STMT:
+    /* XXX: Add switch statements here.  */
+    case PKL_AST_NULL_STMT:
+      break;
+    default:
+      assert (0);
+      break;
+    }
+}
+
+void
+pkl_ast_finish_breaks (pkl_ast_node entity)
+{
+  int nframes = 0;
+  pkl_ast_finish_breaks_1 (entity, entity, &nframes);
+}
+
 /* Annotate FUNCTIONs return statements with the function and their
    nest level within the function.  */
 
@@ -1789,7 +1854,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
              t = PKL_AST_CHAIN (t))
           pkl_ast_finish_returns_1 (function, t, nframes);
 
-        /* Pop the frame of the compount itself.  */
+        /* Pop the frame of the compound itself.  */
         *nframes -= 1;
         break;
       }

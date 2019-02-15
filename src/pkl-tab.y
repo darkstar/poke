@@ -1382,8 +1382,7 @@ stmt:
                 }
         | BREAK ';'
 		{
-                  $$ = pkl_ast_make_break_stmt (pkl_parser->ast,
-                                                NULL /* entity */);
+                  $$ = pkl_ast_make_break_stmt (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
         | RETURN ';'
