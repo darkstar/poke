@@ -1393,7 +1393,7 @@ struct pkl_ast_break_stmt
 };
 
 pkl_ast_node pkl_ast_make_break_stmt (pkl_ast ast);
-void pkl_ast_finish_breaks (pkl_ast_node entity);
+void pkl_ast_finish_breaks (pkl_ast_node entity, pkl_ast_node stmt);
 
 /* PKL_AST_RAISE_STMT nodes represent `raise' statements, which are
    used in order to raise exceptions at the program level.

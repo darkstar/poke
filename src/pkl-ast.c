@@ -1824,7 +1824,7 @@ pkl_ast_finish_breaks_1 (pkl_ast_node entity, pkl_ast_node stmt,
 }
 
 void
-pkl_ast_finish_breaks (pkl_ast_node entity)
+pkl_ast_finish_breaks (pkl_ast_node entity, pkl_ast_node stmt)
 {
   int nframes = 0;
   pkl_ast_finish_breaks_1 (entity, entity, &nframes);

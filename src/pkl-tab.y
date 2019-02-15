@@ -1301,6 +1301,10 @@ stmt:
                                                NULL, /* container */
                                                $5);  /* body */
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Annotate the contained BREAK statements with
+                     their lexical level within this loop.  */
+                  pkl_ast_finish_breaks ($$, $5);
                 }
 	| FOR '(' IDENTIFIER IN expression pushlevel
         	{
@@ -1336,6 +1340,10 @@ stmt:
 
                   /* Free the identifier.  */
                   ASTREF ($3); pkl_ast_node_free ($3);
+
+                  /* Annotate the contained BREAK statements with
+                     their lexical level within this loop.  */
+                  pkl_ast_finish_breaks ($$, $5);
 
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
@@ -1375,6 +1383,10 @@ stmt:
                                                $11); /* body */
                   PKL_AST_LOC ($3) = @3;
                   PKL_AST_LOC ($$) = @$;
+
+                  /* Annotate the contained BREAK statements with
+                     their lexical level within this loop.  */
+                  pkl_ast_finish_breaks ($$, $11);
 
                   /* Pop the frame introduced by `pushlevel'
                      above.  */
