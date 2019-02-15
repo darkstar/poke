@@ -67,13 +67,17 @@ defun substr = (string s, int f, int t = s'length as int) string:
 
 defun strstr = (string s1, string s2) int:
   {
-   defvar i = 0;
-
-   while (i < s2'length
-          && s2[i..i+s1'length] == s1)
+   defvar found = 0;
+   defvar i = 0UL;
+   
+   while (!found && i < s2'length - s1'length)
      {
-       i = i + s1'length as int; 
+       found = s2[i..i + s1'length - 1] == s1;
+       i = i + 1;
      }
 
-   return i;
+   if (found)
+     return i - 1;
+   else
+     return -1;
   }
