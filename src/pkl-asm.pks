@@ -485,6 +485,8 @@
         nip2                    ; ... (IDX<=TO)
       .loop
         ;; If IDX < FROM, just update ASIZE
+        ;; XXX simplify this by using an instruction that gets
+        ;; the offset of an array's element.
         pushvar $idx            ; ... IDX
         pushvar $from           ; ... IDX FROM
         ltlu                    ; ... IDX FROM (IDX<FROM)
