@@ -502,12 +502,20 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     /* Parse a filename, doing tilde expansion.  */
                     size_t i;
                     wordexp_t exp_result;
+                    char *end;
 
                     p = skip_blanks (p);
                     i = 0;
-                    while (!isblank (*p) && *p != '\0' && *p != ',')
+                    while (*p != '\0' && *p != ',')
                       filename[i++] = *(p++);
                     filename[i] = '\0';
+
+                    /* Trim trailing space.  */
+                    end = filename + strlen (filename) - 1;
+                    while (end > filename && isspace ((unsigned char) *end))
+                      end--;
+                    end++;
+                    *end = '\0';
 
                     if (filename[0] == '\0')
                       goto usage;
@@ -537,7 +545,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         argv[argc].val.str = filename;
                         match = 1;
                       }
-                    
+
                     break;
                   }
                 default:
