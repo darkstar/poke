@@ -1710,7 +1710,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 
         /* Put the arguments in the current environment:
          
-           OFFSET: offset of the struct to map.  */
+           OFFSET: offset of the struct to map.
+           EBOUND: always null
+           SBOUND: always null  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 
         /* Push the offset to the stack.  */
