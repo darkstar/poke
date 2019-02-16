@@ -102,8 +102,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
         "run" {
             # This requires at least one command
             if {$poke_commands eq {}} {
-                perror "$do_what: at least one dg-command is required"
-                return ""
+                set poke_commands {-c ""}
             }
             
             # Create a script in `output_file'.  DG will run it after

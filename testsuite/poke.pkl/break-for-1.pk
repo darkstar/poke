@@ -1,15 +1,11 @@
 /* { dg-do run } */
 
-defun foo = void:
+for (i in [1,2,3,4])
   {
-   for (i in [1,2,3,4])
-     {
-      if (i > 2)
-        break;
-      print "foo\n";
-     }
+    if (i > 2)
+      break;
+    print "foo\n";
   }
 
-/* { dg-command { foo } } */
 /* { dg-output "foo\nfoo" } */
   

@@ -1,18 +1,14 @@
 /* { dg-do run } */
 
-defun foo = void:
-  {
-   defvar i = 0;
+defvar i = 0;
 
-   while (i < 10)
-     {
-       if (i == 2)
-         break;
-       print "foo\n";
-       i = i + 1;
-     }
+while (i < 10)
+  {
+    if (i == 2)
+      break;
+    print "foo\n";
+    i = i + 1;
   }
 
-/* { dg-command { foo } } */
 /* { dg-output "foo\nfoo" } */
   
