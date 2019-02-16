@@ -268,7 +268,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression comma_expression_list primary identifier bconc
+%type <ast> expression comma_expression_list primary identifier bconc map
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
@@ -433,7 +433,6 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| bconc
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_SL,
@@ -522,44 +521,7 @@ expression:
                   $$ = pkl_ast_make_isa (pkl_parser->ast, $3, $1);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | simple_type_specifier '@' expression
-                {
-                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
-                    PKL_AST_LOC ($$) = @$;
-
-                    /* If the type specifier is of a struct, then look
-                       for the lexical address of its mapper function
-                       in the compilation environment and set it in
-                       the map AST node.  */
-
-                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
-                      {
-                        int mapper_back;
-                        int mapper_over;
-                        
-                        const char *type_name
-                          = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
-                          
-                        char *mapper_name = xmalloc (strlen (type_name) +
-                                                     strlen ("_pkl_mapper_") + 1);
-                        
-                        pkl_ast_node mapper_decl;
-
-                        strcpy (mapper_name, "_pkl_mapper_");
-                        strcat (mapper_name, type_name);
-                        
-                        mapper_decl = pkl_env_lookup (pkl_parser->env,
-                                                      mapper_name,
-                                                      &mapper_back, &mapper_over);
-                        assert (mapper_decl);
-
-                        PKL_AST_MAP_MAPPER_BACK($$) = mapper_back;
-                        PKL_AST_MAP_MAPPER_OVER($$) = mapper_over;
-
-                        free (mapper_name);
-                      }
-                }
-            | TYPENAME '{' struct_elem_list '}'
+        | TYPENAME '{' struct_elem_list '}'
           	{
                   pkl_ast_node type;
                   pkl_ast_node constructor_decl, astruct;
@@ -625,6 +587,8 @@ expression:
                     PKL_AST_LOC ($$) = @$;
                 }
    	| struct
+	| bconc
+        | map
         ;
 
 comma_expression_list:
@@ -641,6 +605,47 @@ bconc:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
+;
+
+map:
+          simple_type_specifier '@' expression
+                {
+                    $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($$) = @$;
+
+                    /* If the type specifier is of a struct, then look
+                       for the lexical address of its mapper function
+                       in the compilation environment and set it in
+                       the map AST node.  */
+
+                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
+                      {
+                        int mapper_back;
+                        int mapper_over;
+                        
+                        const char *type_name
+                          = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
+                          
+                        char *mapper_name = xmalloc (strlen (type_name) +
+                                                     strlen ("_pkl_mapper_") + 1);
+                        
+                        pkl_ast_node mapper_decl;
+
+                        strcpy (mapper_name, "_pkl_mapper_");
+                        strcat (mapper_name, type_name);
+                        
+                        mapper_decl = pkl_env_lookup (pkl_parser->env,
+                                                      mapper_name,
+                                                      &mapper_back, &mapper_over);
+                        assert (mapper_decl);
+
+                        PKL_AST_MAP_MAPPER_BACK($$) = mapper_back;
+                        PKL_AST_MAP_MAPPER_OVER($$) = mapper_over;
+
+                        free (mapper_name);
+                      }
+                }
+
 ;
 
 unary_operator:
@@ -1295,6 +1300,11 @@ stmt:
                   $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
                                               $1, $3);
                   PKL_AST_LOC ($$) = @$;
+                }
+	| map '=' expression ';'
+        	{
+                  $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
+                                              $1, $3);
                 }
         | IF '(' expression ')' stmt %prec THEN
                 {
