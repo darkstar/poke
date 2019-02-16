@@ -818,23 +818,6 @@ pk_cmd_init (void)
     LOAD_PK_FILE ("pk-cmd.pk");
     LOAD_PK_FILE ("pk-dump.pk");
 
-#if 0
-    poke_cmdfile = xmalloc (strlen (poke_datadir) + strlen ("/pk-dump.pk") + 1);
-    strcpy (poke_cmdfile, poke_datadir);
-    strcat (poke_cmdfile, "/pk-dump.pk");
-    program = pkl_compile_file (poke_compiler, poke_cmdfile);
-    free (poke_cmdfile);
-    if (program == NULL)
-      exit (1);
-
-    pvm_ret = pvm_run (poke_vm, program, &val);
-    if (pvm_ret != PVM_EXIT_OK)
-    {
-      printf (_("run-time error\n"));
-      exit (1);
-    }
-#endif
-
 #undef LOAD_PK_FILE
   }
 }

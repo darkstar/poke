@@ -18,8 +18,8 @@
 
 /* XXX Register the help text of this command.  */
 
-//pk_help_str = pk_help_str
-//  + "\ndump\t\tDisplay the contents of an IO range."
+pk_help_str = pk_help_str
+  + "\ndump\t\tDisplay the contents of an IO range.";
 
 defvar pk_cmd_dump_usage = "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
 

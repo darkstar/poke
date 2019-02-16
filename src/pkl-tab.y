@@ -367,6 +367,7 @@ program_elem_list:
 
 program_elem:
 	  declaration
+        | stmt
         ;
 
 /*
