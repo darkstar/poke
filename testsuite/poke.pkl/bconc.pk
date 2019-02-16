@@ -14,3 +14,11 @@
 /* { dg-command { 0xcdUH::0xab } } */
 /* { dg-output "\n\\(uint<48>\\) cd000000ab" } */
 
+/* { dg-command { 1::2 } } */
+/* { dg-output "\n0x100000002L" } */
+
+/* { dg-command { 2::1 } } */
+/* { dg-output "\n0x200000001L" } */
+
+/* { dg-command { 1H::2B } } */
+/* { dg-output "\n\\(int<24>\\) 0x102" } */

@@ -158,7 +158,6 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_isa)
 {
   pkl_ast_node isa = PKL_PASS_NODE;
-  //  pkl_ast_node isa_exp = PKL_AST_ISA_EXP (isa);
   pkl_ast_node isa_type = PKL_AST_ISA_TYPE (isa);
   pkl_ast_node isa_exp = PKL_AST_ISA_EXP (isa);
   pkl_ast_node isa_exp_type = PKL_AST_TYPE (isa_exp);
@@ -572,14 +571,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
       > 64)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
-                 "the sum of the width o the operators should not exceed 64-bit");
+                 "the sum of the width of the operators should not exceed 64-bit");
       payload->errors++;
       PKL_PASS_ERROR;
     }
 
   /* Allright, make the new type.  */
-  //  printf ("XXX new size: %lu\n",  PKL_AST_TYPE_I_SIZE (t1)
-  //          + PKL_AST_TYPE_I_SIZE (t2));
   exp_type = pkl_ast_make_integral_type (PKL_PASS_AST,
                                          PKL_AST_TYPE_I_SIZE (t1)
                                          + PKL_AST_TYPE_I_SIZE (t2),
