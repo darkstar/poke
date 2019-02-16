@@ -1,6 +1,3 @@
 /* { dg-do compile } */
 
-defun foo = void:
-  {
-   raise "foo"; /* { dg-error "" } */
-  }
+raise "foo"; /* { dg-error "" } */

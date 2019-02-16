@@ -610,7 +610,8 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 {
   /* Drop the expression from the stack, but not if we are compiling a
-     single statement.  */
+     single statement.  XXX this check fails now that we are admitting
+     statements in programs... */
   if (!PKL_PASS_PARENT
       || PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_PROGRAM)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
