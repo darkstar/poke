@@ -4,6 +4,7 @@
 
 defun nothing = void: {{{}}}
 
-/* { dg-command {  nothing } } */
+nothing;
+
 /* { dg-output "" } */
 
