@@ -18,8 +18,10 @@
 
 /* XXX Register the help text of this command.  */
 
-defvar pk_dump_usage =
-  "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
+//pk_help_str = pk_help_str
+//  + "\ndump\t\tDisplay the contents of an IO range."
+
+defvar pk_cmd_dump_usage = "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
 
 defun dump = (off64 from, off64 size,
               off64 step = 16#B,

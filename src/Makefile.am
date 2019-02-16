@@ -16,7 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-dist_pkgdata_DATA = pkl-rt.pk std.pk pk-dump.pk
+dist_pkgdata_DATA = pkl-rt.pk std.pk \
+                    pk-cmd.pk pk-dump.pk
 
 bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
