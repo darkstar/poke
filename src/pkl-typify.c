@@ -578,6 +578,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
     }
 
   /* Allright, make the new type.  */
+  //  printf ("XXX new size: %lu\n",  PKL_AST_TYPE_I_SIZE (t1)
+  //          + PKL_AST_TYPE_I_SIZE (t2));
   exp_type = pkl_ast_make_integral_type (PKL_PASS_AST,
                                          PKL_AST_TYPE_I_SIZE (t1)
                                          + PKL_AST_TYPE_I_SIZE (t2),

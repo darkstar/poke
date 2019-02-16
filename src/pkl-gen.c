@@ -2227,9 +2227,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_bconc)
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
 
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BCONC,
-                op1_type, op2_type, exp_type);
+  /* Convert the second operand to the result type.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NTON, op2_type, exp_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+
+  /* Convert the first operand to the result type and shift left.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NTON, op1_type, exp_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                pvm_make_uint (PKL_AST_TYPE_I_SIZE (op2_type), 32));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SL, exp_type);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+  /* Stack: op2c op1c  */
+
+  /* Ok, or the magnitudes to get the result.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BOR, exp_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+  //  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BCONC,
+  //                op1_type, op2_type, exp_type);
+  //  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
 }
 PKL_PHASE_END_HANDLER
 
