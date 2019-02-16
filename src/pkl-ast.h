@@ -1213,6 +1213,8 @@ struct pkl_ast_ass_stmt
 pkl_ast_node pkl_ast_make_ass_stmt (pkl_ast ast,
                                     pkl_ast_node lvalue, pkl_ast_node exp);
 
+int pkl_ast_lvalue_p (pkl_ast_node node);
+
 /* PKL_AST_IF_STMT nodes represent conditional statements, with an
    optional `else' part.
 

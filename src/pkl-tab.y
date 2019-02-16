@@ -268,7 +268,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression comma_expression_list primary identifier
+%type <ast> expression comma_expression_list primary identifier bconc
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
@@ -432,12 +432,7 @@ expression:
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| expression BCONC expression
-        	{
-                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_BCONC,
-                                                $1, $3);
-                  PKL_AST_LOC ($$) = @$;
-                }
+	| bconc
         | expression SL expression
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_SL,
@@ -637,6 +632,15 @@ comma_expression_list:
         {
           $$ = pkl_ast_chainon ($1, $3);
         }
+
+bconc:
+	  expression BCONC expression
+        	{
+                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_BCONC,
+                                                $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+;
 
 unary_operator:
 	  '-'		{ $$ = PKL_AST_OP_NEG; }
@@ -1281,6 +1285,12 @@ stmt:
                 }
         | primary '=' expression ';'
           	{
+                  $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
+                                              $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| bconc '=' expression ';'
+        	{
                   $$ = pkl_ast_make_ass_stmt (pkl_parser->ast,
                                               $1, $3);
                   PKL_AST_LOC ($$) = @$;

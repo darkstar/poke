@@ -1904,6 +1904,35 @@ pkl_ast_finish_returns (pkl_ast_node function)
                             &nframes);
 }
 
+int
+pkl_ast_lvalue_p (pkl_ast_node node)
+{
+  switch (PKL_AST_CODE (node))
+    {
+    case PKL_AST_VAR:
+    case PKL_AST_STRUCT_REF:
+      break;
+    case PKL_AST_INDEXER:
+      {
+        pkl_ast_node entity = PKL_AST_INDEXER_ENTITY (node);
+        pkl_ast_node entity_type = PKL_AST_TYPE (entity);
+
+        if (PKL_AST_TYPE_CODE (entity_type) == PKL_TYPE_ARRAY)
+          break;
+      }
+    case PKL_AST_EXP:
+      if (PKL_AST_EXP_CODE (node) == PKL_AST_OP_BCONC
+          && pkl_ast_lvalue_p (PKL_AST_EXP_OPERAND (node, 0))
+          && pkl_ast_lvalue_p (PKL_AST_EXP_OPERAND (node, 1)))
+        break;
+    default:
+      return 0;
+      break;
+    }
+
+  return 1;
+}
+
 #ifdef PKL_DEBUG
 
 /* The following macros are commodities to be used to keep the
