@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* GZIP format spec: http://www.gzip.org/zlib/rfc-gzip.html  */
+/* GZIP format spec: http://www.zlib.org/rfc-gzip.html  */
 
 load deflate;
 
