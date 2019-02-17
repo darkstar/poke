@@ -1333,13 +1333,16 @@ pkl_ast_make_try_catch_stmt (pkl_ast ast, pkl_ast_node code,
 /* Build and return an AST node for a `print' statement.  */
 
 pkl_ast_node
-pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp)
+pkl_ast_make_print_stmt (pkl_ast ast, char *fmt, pkl_ast_node args)
 {
   pkl_ast_node print_stmt = pkl_ast_make_node (ast,
                                                PKL_AST_PRINT_STMT);
 
-  if (exp)
-    PKL_AST_PRINT_STMT_EXP (print_stmt) = ASTREF (exp);
+  if (fmt)
+    PKL_AST_PRINT_STMT_FMT (print_stmt) = xstrdup (fmt);
+  if (args)
+    PKL_AST_PRINT_STMT_ARGS (print_stmt) = ASTREF (args);
+
   return print_stmt;
 }
 
@@ -1687,7 +1690,17 @@ pkl_ast_node_free (pkl_ast_node ast)
       break;
 
     case PKL_AST_PRINT_STMT:
-      pkl_ast_node_free (PKL_AST_PRINT_STMT_EXP (ast));
+      free (PKL_AST_PRINT_STMT_FMT (ast));
+      for (t = PKL_AST_PRINT_STMT_ARGS (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
+      for (t = PKL_AST_PRINT_STMT_TYPES (ast); t; t = n)
+        {
+          n = PKL_AST_CHAIN (t);
+          pkl_ast_node_free (t);
+        }
       break;
 
     case PKL_AST_BREAK_STMT:
@@ -2411,7 +2424,9 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_PRINT_STMT:
       IPRINTF ("PRINT_STMT::\n");
       PRINT_COMMON_FIELDS;
-      PRINT_AST_SUBAST (print_stmt_exp, PRINT_STMT_EXP);
+      PRINT_AST_IMM (fmt, PRINT_STMT_FMT, "%s");
+      PRINT_AST_SUBAST_CHAIN (PRINT_STMT_TYPES);
+      PRINT_AST_SUBAST_CHAIN (PRINT_STMT_ARGS);
       break;
 
     case PKL_AST_BREAK_STMT:

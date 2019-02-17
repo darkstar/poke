@@ -1363,17 +1363,31 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
 
 /* PKL_AST_PRINT_STMT nodes represent `print' statements.
 
-   EXP is an expression.  */
+   ARGS is a chained list of expressions.  In `print' statements, this
+   only contains one expression, which should be of type string.  In
+   `printf' statements, this may contain zero or more expressions, of
+   the types expressed in FMT.
 
-#define PKL_AST_PRINT_STMT_EXP(AST) ((AST)->print_stmt.exp)
+   FMT, if not NULL, is a format string.
+
+   TYPES is a linked list of type nodes, corresponding to the %-
+   directives in FMT.  */
+
+#define PKL_AST_PRINT_STMT_FMT(AST) ((AST)->print_stmt.fmt)
+#define PKL_AST_PRINT_STMT_TYPES(AST) ((AST)->print_stmt.types)
+#define PKL_AST_PRINT_STMT_ARGS(AST) ((AST)->print_stmt.args)
 
 struct pkl_ast_print_stmt
 {
   struct pkl_ast_common common;
-  union pkl_ast_node *exp;
+
+  char *fmt;
+  union pkl_ast_node *types;
+  union pkl_ast_node *args;
 };
 
-pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast, pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast,
+                                      char *fmt, pkl_ast_node args);
 
 /* PKL_AST_BREAK_STMT nodes represent `break' statements.  Each break
    statement is associated to a loop or switch node.

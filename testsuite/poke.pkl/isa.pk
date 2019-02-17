@@ -36,7 +36,7 @@ defun foo2 = (any a) void:
      print "an uint64 array";
    else
      print "unknown";
-   print;
+   print "\n";
   }
 
 /* { dg-command { foo2 (10) } } */

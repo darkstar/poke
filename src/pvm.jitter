@@ -564,7 +564,7 @@ instruction siz () # ( VAL -- VAL OFF )
   end
 end
 
-instruction print () # ( STR -- )
+instruction prints () # ( STR -- )
   code
     pvm_print_string (stdout, JITTER_TOP_STACK ());
     JITTER_DROP_STACK ();

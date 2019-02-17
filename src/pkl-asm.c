@@ -888,7 +888,7 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
           pkl_asm_insn (pasm, PKL_INSN_DROP); /* Discard exception number.  */
           pkl_asm_insn (pasm, PKL_INSN_PUSH,
                         pvm_make_string ("unhandled exception while bootstrapping\n"));
-          pkl_asm_insn (pasm, PKL_INSN_PRINT);
+          pkl_asm_insn (pasm, PKL_INSN_PRINTS);
 
         }
 

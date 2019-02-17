@@ -1459,8 +1459,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of the expression in a `print' statement should be a
-   string.  XXX: do promo instead of this, with casts to string.  */
+/* Type-check `print' and `printf' statements.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
 {
@@ -1468,15 +1467,52 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
     = (pkl_typify_payload) PKL_PASS_PAYLOAD;
 
   pkl_ast_node print_stmt = PKL_PASS_NODE;
-  pkl_ast_node print_stmt_exp = PKL_AST_PRINT_STMT_EXP (print_stmt);
+  pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  pkl_ast_node print_stmt_types = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  char *print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
 
-  if (print_stmt_exp)
+  if (print_stmt_fmt)
     {
-      pkl_ast_node exp_type = PKL_AST_TYPE (print_stmt_exp);
+      /* This is a printf.  Make sure the type of the ARGS match the
+         types in TYPES.  */
 
-      if (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_STRING)
+      pkl_ast_node type;
+      pkl_ast_node arg;
+
+      for (arg = print_stmt_args, type = print_stmt_types;
+           arg && type;
+           arg = PKL_AST_CHAIN (arg),
+           type = PKL_AST_CHAIN (type))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp_type),
+          pkl_ast_node arg_type = PKL_AST_TYPE (arg);
+
+          if (!pkl_ast_type_equal (arg_type, type))
+            {
+              /* XXX Do promo.  */
+              char *found_type = pkl_type_str (arg_type, 1);
+              char *expected_type = pkl_type_str (type, 1);
+
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
+                         "printf argument is of an invalid type\n\
+expected %s, got %s",
+                         expected_type, found_type);
+              free (found_type);
+              free (expected_type);
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+        }
+    }
+  else
+    {
+      /* This is a print.  The type of the single element in ARGS
+         should be a string.  */
+
+      pkl_ast_node arg_type = PKL_AST_TYPE (print_stmt_args);
+
+      if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_STRING)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
                      "expected a string");
           payload->errors++;
           PKL_PASS_ERROR;
