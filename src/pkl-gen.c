@@ -626,10 +626,10 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_print_stmt)
 {
   pkl_ast_node print_stmt = PKL_PASS_NODE;
-  pkl_ast_node print_stmt_exp = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
 
   /* Print a newline if there is no expression.  */
-  if (!print_stmt_exp)
+  if (!print_stmt_args)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string ("\n"));
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
 }
