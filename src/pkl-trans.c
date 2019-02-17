@@ -546,10 +546,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   bases = xmalloc (sizeof (int) * nargs);
   PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
 
-
-  ntag = 0;
+  /* Process the format string.  */
   fmt = PKL_AST_STRING_POINTER (print_fmt);
-  for (p = fmt; *p != '\0'; p++)
+  for (types = NULL, ntag = 0, p = fmt; *p != '\0'; p++)
     {
       if (*p == '%')
         {
