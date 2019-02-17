@@ -331,12 +331,20 @@ PKL_DEF_INSN (PKL_INSN_CALL, "", "call")
 PKL_DEF_INSN (PKL_INSN_PROLOG, "", "prolog")
 PKL_DEF_INSN (PKL_INSN_RETURN, "", "return")
 
+/* Printing instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_PRINTI, "nn", "printi")
+PKL_DEF_INSN (PKL_INSN_PRINTIU, "nn", "printiu")
+PKL_DEF_INSN (PKL_INSN_PRINTL, "nn", "printl")
+PKL_DEF_INSN (PKL_INSN_PRINTLU, "nn", "printlu")
+
+PKL_DEF_INSN (PKL_INSN_PRINTS, "", "prints")
+
 /* Miscellaneous instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
-PKL_DEF_INSN (PKL_INSN_PRINTS, "", "prints")
 PKL_DEF_INSN (PKL_INSN_STRACE, "", "strace")
 
 /* Exceptions handling instructions.  */
@@ -407,6 +415,10 @@ PKL_DEF_INSN (PKL_INSN_MODO, "aa", "modo")
 
 PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
 PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
+
+/* Printing meta-instructions.  */
+
+PKL_DEF_INSN (PKL_INSN_PRINT, "a", "print")
 
 /*
 Local variables:
