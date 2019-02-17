@@ -371,7 +371,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
      the stack.  If its type can be mapped, then we need to generate
      code to perform a mapval on that value.
 
-     Mapval code gets three arguments, and generates one value:
+     Mapval code gets two arguments, and generates one value:
      MAPVAL ( NVAL OFF -- NVAL )
 
      If the type is a named struct or array, the assignment statement
