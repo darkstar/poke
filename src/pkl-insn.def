@@ -418,7 +418,7 @@ PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
 
 /* Printing meta-instructions.  */
 
-PKL_DEF_INSN (PKL_INSN_PRINT, "a", "print")
+PKL_DEF_INSN (PKL_INSN_PRINT, "an", "print")
 
 /*
 Local variables:

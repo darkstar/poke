@@ -380,6 +380,38 @@ pkl_asm_insn_peekd (pkl_asm pasm, pkl_ast_node type)
     assert (0);
 }
 
+/* Macro-instruction: PRINT type
+   ( VAL -- )
+*/
+
+static void
+pkl_asm_insn_print (pkl_asm pasm, pkl_ast_node type, int base)
+{
+  int type_code = PKL_AST_TYPE_CODE (type);
+
+  if (type_code == PKL_TYPE_STRING)
+    pkl_asm_insn (pasm, PKL_INSN_PRINTS);
+  else if (type_code == PKL_TYPE_INTEGRAL)
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      static int print_table[2][2] =
+        {
+         {PKL_INSN_PRINTIU, PKL_INSN_PRINTI},
+         {PKL_INSN_PRINTLU, PKL_INSN_PRINTL}
+        };
+
+      int tl = !!((size - 1) & ~0x1f);
+
+      pkl_asm_insn (pasm, print_table[tl][sign],
+                    (jitter_uint) size, (jitter_uint) base);
+
+    }
+  else
+    assert (0);
+}
+
 /* Macro-instruction: POKED type
    ( OFF VAL -- )
 
@@ -1060,6 +1092,19 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_peek (pasm, peek_type, nenc, endian);
+            break;
+          }
+        case PKL_INSN_PRINT:
+          {
+            pkl_ast_node type;
+            int base;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            base = va_arg (valist, int);
+            va_end (valist);
+
+            pkl_asm_insn_print (pasm, type, base);
             break;
           }
         case PKL_INSN_PEEKD:
