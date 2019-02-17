@@ -1368,26 +1368,35 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
    `printf' statements, this may contain zero or more expressions, of
    the types expressed in FMT.
 
-   FMT, if not NULL, is a format string.
+   FMT, if not NULL, is a format string node.
 
    TYPES is a linked list of type nodes, corresponding to the %-
-   directives in FMT.  */
+   directives in FMT.
+
+   NARGS is the number of arguments in ARGS.
+
+   BASES is an array of integers, with the numeration base to use for
+   each argument in ARGS.  */
 
 #define PKL_AST_PRINT_STMT_FMT(AST) ((AST)->print_stmt.fmt)
 #define PKL_AST_PRINT_STMT_TYPES(AST) ((AST)->print_stmt.types)
+#define PKL_AST_PRINT_STMT_BASES(AST) ((AST)->print_stmt.bases)
 #define PKL_AST_PRINT_STMT_ARGS(AST) ((AST)->print_stmt.args)
+#define PKL_AST_PRINT_STMT_NARGS(AST) ((AST)->print_stmt.nargs)
 
 struct pkl_ast_print_stmt
 {
   struct pkl_ast_common common;
 
-  char *fmt;
+  int *bases;
+  int nargs;
+  union pkl_ast_node *fmt;
   union pkl_ast_node *types;
   union pkl_ast_node *args;
 };
 
 pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast,
-                                      char *fmt, pkl_ast_node args);
+                                      pkl_ast_node fmt, pkl_ast_node args);
 
 /* PKL_AST_BREAK_STMT nodes represent `break' statements.  Each break
    statement is associated to a loop or switch node.

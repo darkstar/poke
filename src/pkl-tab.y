@@ -1482,21 +1482,17 @@ stmt:
                 }
         | PRINTF STR ';'
         	{
-                  char *fmt = PKL_AST_STRING_POINTER ($2);
-
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
-                                                fmt, NULL /* args */);
+                                                $2, NULL /* args */);
+                  PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-                  ASTREF ($2); pkl_ast_node_free ($2);
                 }
         | PRINTF STR ',' comma_expression_list ';'
         	{
-                  char *fmt = PKL_AST_STRING_POINTER ($2);
-
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
-                                                fmt, $4);
+                                                $2, $4);
+                  PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
-                  ASTREF ($2); pkl_ast_node_free ($2);
                 }
 	| funcall_stmt ';'
         	{

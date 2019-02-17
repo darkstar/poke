@@ -519,6 +519,79 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_trimmer)
 }
 PKL_PHASE_END_HANDLER
 
+/* Decode format strings in `printf' instructions.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
+{
+  pkl_trans_payload payload __attribute((unused))
+    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
+
+  pkl_ast_node print_stmt = PKL_PASS_NODE;
+  pkl_ast_node args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  pkl_ast_node print_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
+  char *fmt, *p;
+  pkl_ast_node t;
+  int ntag, nargs = 0;
+  int *bases;
+  pkl_ast_node types = NULL;
+
+  /* Calculate the number of arguments.  */
+  for (t = args; t; t = PKL_AST_CHAIN (t))
+    nargs++;
+  PKL_AST_PRINT_STMT_NARGS (print_stmt) = nargs;
+
+  if (!print_fmt)
+    PKL_PASS_DONE;
+
+  bases = xmalloc (sizeof (int) * nargs);
+  PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
+
+
+  ntag = 0;
+  fmt = PKL_AST_STRING_POINTER (print_fmt);
+  for (p = fmt; *p != '\0'; p++)
+    {
+      if (*p == '%')
+        {
+          if (ntag >= nargs)
+            {
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+                         "not enough arguments in printf");
+              payload->errors++;
+              PKL_PASS_ERROR;
+            }
+
+          switch (p[1])
+            {
+            case 's':
+              p += 2;
+              bases[ntag] = 10; /* Arbitrary */
+              types = pkl_ast_chainon (types,
+                                       pkl_ast_make_string_type (PKL_PASS_AST));
+              break;
+            case 'i':
+              break;
+            case 'u':
+              break;
+            default:
+              goto invalid_tag;
+            }
+
+          ntag++;
+        }
+    }
+
+  PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
+  PKL_PASS_DONE;
+
+ invalid_tag:
+  pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_fmt),
+             "invalid %%- tag in format string");
+  payload->errors++;
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_trans1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
@@ -530,6 +603,7 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_trans1_ps_var),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans1_ps_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_trans1_ps_trimmer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_trans1_ps_print_stmt),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
