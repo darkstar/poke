@@ -768,18 +768,7 @@ end
 
 instruction revn (?n popf_printer) # ( VAL{N} -- VAL{N} )
   code
-    size_t i, n = JITTER_ARGN0;
-    pvm_val *reversed = xmalloc (sizeof (pvm_val) * n); /* XXX alloca */
-
-    for (i = 0; i < n; ++i)
-    {
-       reversed[i] = JITTER_TOP_STACK ();
-       JITTER_DROP_STACK ();
-    }
-    for (i = 0; i < n; ++i)
-       JITTER_PUSH_STACK (reversed[i]);
-
-    free (reversed);
+    JITTER_REVERSE_STACK (JITTER_ARGN0);
   end
 end
 
