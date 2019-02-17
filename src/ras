@@ -81,10 +81,6 @@
 # the function into a pvm_program, and install it into a PVM closure
 # value that is assigned to CLOSURE.
 #
-# IMPORTANT: both macros and functions are designed to be expanded in
-# the GEN pass of the poke compiler (pkl-gen-*.c).  They won't work
-# anywhere else.  See pkl-gen.c for usage examples.
-#
 # Expanding Macros
 # ----------------
 #
