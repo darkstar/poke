@@ -49,10 +49,6 @@
 #define YYDEBUG 1
 #include <pkl-tab.h>
 #include "pk-cmd.h"
-#include "readline.h"
-#if defined HAVE_READLINE_HISTORY_H
-# include <readline/history.h>
-#endif
 
 #define YY_USER_ACTION                                  \
   do                                                    \
