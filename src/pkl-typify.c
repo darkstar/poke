@@ -1468,7 +1468,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
 
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
-  pkl_ast_node print_stmt_types = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  pkl_ast_node print_stmt_types = PKL_AST_PRINT_STMT_TYPES (print_stmt);
   pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
 
   if (print_stmt_fmt)

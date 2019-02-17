@@ -544,13 +544,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
     PKL_PASS_DONE;
 
   bases = xmalloc (sizeof (int) * nargs);
-  PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
 
   /* Process the format string.  */
   fmt = PKL_AST_STRING_POINTER (print_fmt);
   for (types = NULL, ntag = 0, p = fmt; *p != '\0'; p++)
     {
-      if (*p == '%')
+      if (*p != '%')
+        {
+          /* Build a piece.  */
+        }
+      else
         {
           if (ntag >= nargs)
             {
@@ -569,9 +572,53 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                                        pkl_ast_make_string_type (PKL_PASS_AST));
               break;
             case 'i':
-              break;
             case 'u':
-              break;
+              {
+                unsigned int bits;
+
+                if (p[2] >= '0' && p[2] <= '9')
+                  {
+                    int base_idx;
+                    
+                    if (p[3] >= '0' && p[3] <= '9')
+                      {
+                        bits = (p[2] - '0') * 10 + (p[3] - '0');
+                        base_idx = 4;
+                      }
+                    else
+                      {
+                        bits = p[2] - '0';
+                        base_idx = 3;
+                      }
+
+                    if (bits > 64)
+                      goto invalid_tag;
+
+                    switch (p[base_idx])
+                      {
+                      case 'b': bases[ntag] = 2; break;
+                      case 'o': bases[ntag] = 8; break;
+                      case 'd': bases[ntag] = 10; break;
+                      case 'x': bases[ntag] = 16; break;
+                      default:
+                        goto invalid_tag;
+                      }
+
+                    types
+                      = pkl_ast_chainon (types,
+                                         pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                                     bits,
+                                                                     p[1] == 'i'));
+
+                    if (base_idx == 4)
+                      p += 5;
+                    else
+                      p += 4;
+                  }
+                else
+                  goto invalid_tag;
+                break;
+              }
             default:
               goto invalid_tag;
             }
@@ -580,6 +627,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         }
     }
 
+  PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
   PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
   PKL_PASS_DONE;
 

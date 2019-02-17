@@ -628,11 +628,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_print_stmt)
 {
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+  pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
+  int *print_stmt_bases = PKL_AST_PRINT_STMT_BASES (print_stmt);
   pkl_ast_node t;
-  int base = 10; /* XXX */
+  size_t i;
 
-  for (t = print_stmt_args; t; t = PKL_AST_CHAIN (t))
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (t), base);
+  if (print_stmt_fmt)
+    {
+      for (i = 0, t = print_stmt_args; t; t = PKL_AST_CHAIN (t), i++)
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (t),
+                      print_stmt_bases[i]);
+    }
+  else
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
 }
 PKL_PHASE_END_HANDLER
 

@@ -1383,6 +1383,7 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
 #define PKL_AST_PRINT_STMT_BASES(AST) ((AST)->print_stmt.bases)
 #define PKL_AST_PRINT_STMT_ARGS(AST) ((AST)->print_stmt.args)
 #define PKL_AST_PRINT_STMT_NARGS(AST) ((AST)->print_stmt.nargs)
+#define PKL_AST_PRINT_STMT_PIECES(AST) ((AST)->print_stmt.pieces)
 
 struct pkl_ast_print_stmt
 {
@@ -1390,6 +1391,7 @@ struct pkl_ast_print_stmt
 
   int *bases;
   int nargs;
+  char **pieces;
   union pkl_ast_node *fmt;
   union pkl_ast_node *types;
   union pkl_ast_node *args;

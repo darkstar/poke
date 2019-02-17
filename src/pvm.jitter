@@ -550,28 +550,41 @@ end
 
 instruction printi (?n popf_printer, ?n popf_printer) # ( INT -- )
   code
-    pvm_print_val (stdout, PVM_VAL_INT (JITTER_TOP_STACK ()), JITTER_ARGN1, 0);
+    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
+    const char *fmt;
+
+    switch (JITTER_ARGN1)
+    {
+     case 10: fmt = "%d"; break;
+     case 16: fmt = "%04x"; break; /* XXX field width depends on JITTER_ARGN1  */
+     case 8:  fmt = "%0o"; break;
+     case 2:  /* XXX */
+     default:
+       assert (0);
+    }
+
+    printf (fmt, val);
     JITTER_DROP_STACK ();
   end
 end
 
 instruction printiu (?n popf_printer, ?n popf_printer) # ( UINT -- )
   code
-    pvm_print_val (stdout, PVM_VAL_UINT (JITTER_TOP_STACK ()), JITTER_ARGN1, 0);
+    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
     JITTER_DROP_STACK ();
   end
 end
 
 instruction printl (?n popf_printer, ?n popf_printer) # ( LONG -- )
   code
-    pvm_print_val (stdout, PVM_VAL_LONG (JITTER_TOP_STACK ()), JITTER_ARGN1, 0);
+    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
     JITTER_DROP_STACK ();
   end
 end
 
 instruction printlu (?n popf_printer, ?n popf_printer) # ( ULONG -- )
   code
-    pvm_print_val (stdout, PVM_VAL_ULONG (JITTER_TOP_STACK ()), JITTER_ARGN1, 0);
+    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
     JITTER_DROP_STACK ();
   end
 end
