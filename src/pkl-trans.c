@@ -546,7 +546,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   fmt = PKL_AST_STRING_POINTER (print_fmt);
   bases = xmalloc (sizeof (int) * nargs);
   pieces = xmalloc (strlen (fmt) * sizeof (char*));
-  memset (pieces, 0, strlen (fmt) * sizeof (char*));
+  if (pieces)
+    memset (pieces, 0, strlen (fmt) * sizeof (char*));
   if (fmt[0] == '%')
     npiece++;
 

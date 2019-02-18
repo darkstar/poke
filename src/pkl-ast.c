@@ -1692,17 +1692,15 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_PRINT_STMT:
       {
-        // XXX
-        //        pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (ast);
+        pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (ast);
 
         free (PKL_AST_PRINT_STMT_BASES (ast));
-        // XXX        if (print_stmt_fmt)
-        //          {
-        //            size_t s = (strlen (PKL_AST_STRING_POINTER (print_stmt_fmt))
-        //                        * sizeof (char *));
-        //            for (i = 0; i < s; ++i)
-        //              free (PKL_AST_PRINT_STMT_PIECE (ast, i));
-        //          }
+        if (print_stmt_fmt)
+          {
+            size_t s = strlen (PKL_AST_STRING_POINTER (print_stmt_fmt));
+            for (i = 0; i < s; ++i)
+              free (PKL_AST_PRINT_STMT_PIECE (ast, i));
+          }
         for (t = PKL_AST_PRINT_STMT_ARGS (ast); t; t = n)
           {
             n = PKL_AST_CHAIN (t);
