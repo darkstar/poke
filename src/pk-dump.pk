@@ -29,34 +29,17 @@ defun dump = (off64 from = pk_dump_offset,
               int rule = 0,
               int ascii = 0) void:
   {
-   defun print_rule = void:
-   {
-    print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
-    if (ascii)
-      print "  0123456789ABCDEF";
-    print "\n";
-   }
-
-   /* Check for an available IOS.  */
-   try
-     byte @ from;
-   catch if E_no_ios
-   {
-     print "error: `dump' requires an open IO space\n";
-     return;
-   }
-
-   /* Update the global with the last used offset.  */
-   pk_dump_offset = from;
-
-   /* The initial offset is the base of the byte containing
-      `from'.  */
    defvar offset = (from / #B) #B;
    defvar top = ((from + size) / #B) #B;
    defvar step = 16#B;
 
    if (rule)
-     print_rule;
+     {
+       print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
+       if (ascii)
+         print "  0123456789ABCDEF";
+       print "\n";
+     }
 
    try
      while (offset < top)
@@ -77,7 +60,8 @@ defun dump = (off64 from = pk_dump_offset,
        }
    catch if E_eof
    {
-     print "\n";
+       print "\n";
    }
-   /* XXX writeme */
+
+   pk_dump_offset = from;
   }
