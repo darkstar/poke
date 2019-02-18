@@ -423,8 +423,6 @@
         ;; Calculate the magnitude fo the new offset, which is
         ;; the modulus of both magnitudes, the second argument
         ;; converted to first's units.
-        ;; XXX use the return stack for temporaries, rather than
-        ;; variables.
         tor			; OFF1 OFF2
         atr                     ; OFF1 OFF2 UNIT
         ogetmc @base_type       ; OFF1 OFF2 OFF2M
