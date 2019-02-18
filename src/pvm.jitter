@@ -290,6 +290,48 @@ late-header-c
        /*  be a prolog. */                                                   \
        JITTER_BRANCH_AND_LINK (PVM_VAL_CLS_ENTRY_POINT ((CLS)));           \
     } while (0)
+
+/* Macros to implement printi* and printl* instructions.  */
+
+#define PVM_PRINTI(TYPE,TYPEC,IFORMAT)                                      \
+  do                                                                        \
+  {                                                                         \
+    TYPEC val = PVM_VAL_##TYPE (JITTER_TOP_STACK ());                       \
+    char fmt[6];  /* %0NNd */                                               \
+                                                                            \
+    fmt[0] = '%';                                                           \
+    fmt[1] = '0';                                                           \
+    if (JITTER_ARGN1 == 10)                                                 \
+    {                                                                       \
+      fmt[2] = IFORMAT;                                                     \
+      fmt[3] = '\0';                                                        \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+      if (JITTER_ARGN1 == 16)                                               \
+      {                                                                     \
+        fmt[4] = 'x';                                                       \
+        JITTER_ARGN0 /= 4;                                                  \
+      }                                                                     \
+      else if (JITTER_ARGN1 == 8)                                           \
+      {                                                                     \
+        fmt[4] = 'o';                                                       \
+        JITTER_ARGN0 /= 3;                                                  \
+      }                                                                     \
+      else if (JITTER_ARGN1 == 2)                                           \
+      {                                                                     \
+        assert (0); /* XXX */                                               \
+      }                                                                     \
+                                                                            \
+      fmt[2] = '0' + (JITTER_ARGN0 / 10);                                   \
+      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);               \
+      fmt[5] = '\0';                                                        \
+    }                                                                       \
+                                                                            \
+    printf (fmt, val);                                                      \
+    JITTER_DROP_STACK ();                                                   \
+  } while (0)
+
   end
 end
 
@@ -550,47 +592,13 @@ end
 
 instruction printi (?n popf_printer, ?n popf_printer) # ( INT -- )
   code
-    int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
-    char fmt[6];  /* %0NNd */
-
-    fmt[0] = '%';
-    fmt[1] = '0';
-    if (JITTER_ARGN1 == 10)
-    {
-      fmt[2] = 'd';
-      fmt[3] = '\0';
-    }
-    else
-    {
-      if (JITTER_ARGN1 == 16)
-      {
-        fmt[4] = 'x';
-        JITTER_ARGN0 /= 4;
-      }
-      else if (JITTER_ARGN1 == 8)
-      {
-        fmt[4] = 'o';
-        JITTER_ARGN0 /= 3;
-      }
-      else if (JITTER_ARGN1 == 2)
-      {
-        assert (0); /* XXX */
-      }
-
-      fmt[2] = '0' + (JITTER_ARGN0 / 10);
-      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);
-      fmt[5] = '\0';
-    }
-
-    printf (fmt, val);
-    JITTER_DROP_STACK ();
+    PVM_PRINTI (INT, int32_t, 'd');
   end
 end
 
 instruction printiu (?n popf_printer, ?n popf_printer) # ( UINT -- )
   code
-    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
-    JITTER_DROP_STACK ();
+    PVM_PRINTI (UINT, uint32_t, 'u');
   end
 end
 

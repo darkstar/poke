@@ -9,5 +9,11 @@ printf "foo%i32dbar", 10;     /* { dg-output "foo10bar" } */
 printf "%i32d %i32d", 10, 20; /* { dg-output "10 20" } */
 printf "%i32d %i32d", 20, 10; /* { dg-output "20 10" } */
 
-printf "%i32x", 10;           /* { dg-output "0000000a" } */
-printf "%i64x", 10;           /* { dg-output "000000000000000a" } */
+printf "%i32d", -10;          /* { dg-output "-10" } */
+printf "%i32x", -10;          /* { dg-output "fffffff6" } */
+printf "%u32x", 10U;          /* { dg-output "0000000a" } */
+printf "%i64x", 10 as int<64>; /* { dg-output "000000000000000a" } */
+printf "%i12x", 1 as int<12>; /* { dg-output "001" } */
+printf "%i4x", 1 as int<4>;   /* { dg-output "1" } */
+printf "%i7x", 1 as int<7>;   /* { dg-output "01" } */
+printf "%i9x", 1 as int<9>;   /* { dg-output "001" } */
