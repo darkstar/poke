@@ -311,12 +311,12 @@ late-header-c
       if (JITTER_ARGN1 == 16)                                               \
       {                                                                     \
         fmt[4] = 'x';                                                       \
-        JITTER_ARGN0 /= 4;                                                  \
+        JITTER_ARGN0 = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);      \
       }                                                                     \
       else if (JITTER_ARGN1 == 8)                                           \
       {                                                                     \
         fmt[4] = 'o';                                                       \
-        JITTER_ARGN0 /= 3;                                                  \
+        JITTER_ARGN0 = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);      \
       }                                                                     \
       else if (JITTER_ARGN1 == 2)                                           \
       {                                                                     \
@@ -351,12 +351,12 @@ late-header-c
       if (JITTER_ARGN1 == 16)                                               \
       {                                                                     \
         fmt[5] = 'x';                                                       \
-        JITTER_ARGN0 /= 4;                                                  \
+        JITTER_ARGN0 = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);      \
       }                                                                     \
       else if (JITTER_ARGN1 == 8)                                           \
       {                                                                     \
         fmt[5] = 'o';                                                       \
-        JITTER_ARGN0 /= 3;                                                  \
+        JITTER_ARGN0 = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);      \
       }                                                                     \
       else if (JITTER_ARGN1 == 2)                                           \
       {                                                                     \
