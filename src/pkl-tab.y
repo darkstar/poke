@@ -1482,6 +1482,15 @@ stmt:
                     PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
+        | PRINTF '(' STR print_stmt_arg_list ')' ';'
+        	{
+                  $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
+                                                $3, $4);
+                  PKL_AST_LOC ($3) = @3;
+                  if (PKL_AST_TYPE ($3))
+                    PKL_AST_LOC (PKL_AST_TYPE ($3)) = @3;
+                  PKL_AST_LOC ($$) = @$;
+                }
 	| funcall_stmt ';'
         	{
                   $$ = pkl_ast_make_exp_stmt (pkl_parser->ast,

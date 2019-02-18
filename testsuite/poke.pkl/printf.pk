@@ -3,6 +3,7 @@
 printf "";                    /* { dg-output "" } */
 printf "foo";                 /* { dg-output "foo" } */
 printf "%s", "bar";           /* { dg-output "bar" } */
+printf ("%s", "bar");         /* { dg-output "bar" } */
 printf "x%sy", "bar";         /* { dg-output "xbary" } */
 printf "%i32d", 10;           /* { dg-output "10" } */
 printf "foo%i32dbar", 10;     /* { dg-output "foo10bar" } */
