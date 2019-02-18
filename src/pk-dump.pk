@@ -27,7 +27,7 @@ defvar pk_dump_group_by = 2#B;
 defvar pk_dump_rule = 0;
 defvar pk_dump_ascii = 0;
 
-/* `pk_dump_offset' keeps the last :from offset used by `dump'.  It is
+/* `pk_dump_offset' keeps the last base offset used by `dump'.  It is
    the offset to be used in case the command is invoked with no :from
    argument.  */
 
@@ -41,9 +41,13 @@ defun dump = (off64 from = pk_dump_offset,
               int rule = pk_dump_rule,
               int ascii = pk_dump_ascii) void:
   {
+   defvar step = 16#B;
+
+   /* The `dump' command is byte-oriented.  If the base offset
+      provided is not aligned to 8 bits, it is truncated.  Likewise
+      for the provided size.  The casts below make sure of that.  */
    defvar offset = from as offset<uint<64>,B>;
    defvar top = (from + size) as offset<uint<64>,B>;
-   defvar step = 16#B;
 
    if (rule)
      {
