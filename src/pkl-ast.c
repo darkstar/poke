@@ -1692,6 +1692,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_PRINT_STMT:
       {
+        // XXX
         //        pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (ast);
 
         free (PKL_AST_PRINT_STMT_BASES (ast));
