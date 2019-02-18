@@ -20,7 +20,7 @@ pk_help_str = pk_help_str
   + "\ndump\t\tDisplay the contents of an IO range.";
 
 defvar pk_dump_offset = 0#B; /* This gets updated by `dump'.  */
-defvar pk_dump_size = 16#B;
+defvar pk_dump_size = 128#B;
 defvar pk_dump_group_by = 2#B;
 defvar pk_dump_rule = 0;
 defvar pk_dump_ascii = 0;
