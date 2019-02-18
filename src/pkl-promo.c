@@ -933,6 +933,60 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
 }
 PKL_PHASE_END_HANDLER
 
+/* Promote arguments to printf.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_print_stmt)
+{
+#if 0
+  pkl_ast_node print_stmt = PKL_PASS_NODE;
+  pkl_ast_node print_stmt_types = PKL_AST_PRINT_STMT_TYPES (print_stmt);
+  pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
+
+  pkl_ast_node type, arg, prev_arg;
+
+  for (arg = print_stmt_args, type = print_stmt_types, prev_arg = NULL;
+       arg && type;
+       arg = PKL_AST_CHAIN (arg), type = PKL_AST_CHAIN (type), prev_arg = tmp)
+    {
+      pkl_ast_node arg_type = PKL_AST_TYPE (arg);
+      pkl_ast_node tmp = arg;
+
+      if (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL)
+        {
+          int restart = 0;
+          pkl_ast_node replaced;
+
+          if (!promote_integral (PKL_PASS_AST,
+                                 PKL_AST_TYPE_I_SIZE (type),
+                                 PKL_AST_TYPE_I_SIGNED (type),
+                                 &replaced,
+                                 &restart))
+            {
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (arg),
+                       "couldn't promote printf argument initializer");
+                  PKL_PASS_ERROR;
+            }
+
+          /* Link the replaced node in the list.  */
+          if (replaced)
+            {
+              PKL_AST_CHAIN (prev_arg) = ASTREF (replaced);
+              PKL_AST_CHAIN (replaced) = ASTREF (PKL_AST_CHAIN (arg));
+            }
+
+          PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
+        }
+      else
+        {
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+                   "non-promoteable argument in printf");
+          PKL_PASS_ERROR;
+        }
+    }
+#endif
+}
+PKL_PHASE_END_HANDLER
+
 /* Promote function argument initializers, if needed.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
@@ -1053,5 +1107,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_promo_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_promo_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_promo_ps_return_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_promo_ps_print_stmt),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };
