@@ -16,5 +16,5 @@ printf "%i64x", 10;           /* { dg-output "000000000000000a" } */
 printf "%i12x", 1;            /* { dg-output "001" } */
 printf "%i4x", 1;             /* { dg-output "1" } */
 printf "%i7x", 1;             /* { dg-output "01" } */
-printf "%i9x", 1;   /* { dg-output "001" } */
+printf "%i9x", 1;             /* { dg-output "001" } */
 printf "%u64x", 0xdeadbeef;   /* { dg-output "00000000deadbeef" } */
