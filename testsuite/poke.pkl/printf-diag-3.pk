@@ -1,0 +1,4 @@
+/* { dg-do compile} */
+
+printf "foo", 12, 32; /* { dg-error "" } */
+
