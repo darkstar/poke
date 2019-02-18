@@ -308,23 +308,26 @@ late-header-c
     }                                                                       \
     else                                                                    \
     {                                                                       \
+      int prec = 0;                                                         \
+                                                                            \
       if (JITTER_ARGN1 == 16)                                               \
       {                                                                     \
         fmt[4] = 'x';                                                       \
-        JITTER_ARGN0 = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);      \
+        prec = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);              \
       }                                                                     \
       else if (JITTER_ARGN1 == 8)                                           \
       {                                                                     \
         fmt[4] = 'o';                                                       \
-        JITTER_ARGN0 = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);      \
+        prec = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);              \
       }                                                                     \
       else if (JITTER_ARGN1 == 2)                                           \
       {                                                                     \
         assert (0); /* XXX */                                               \
       }                                                                     \
                                                                             \
-      fmt[2] = '0' + (JITTER_ARGN0 / 10);                                   \
-      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);               \
+      assert (prec != 0);                                                   \
+      fmt[2] = '0' + (prec / 10);                                           \
+      fmt[3] = '0' + prec - (prec / 10 * 10);                               \
       fmt[5] = '\0';                                                        \
     }                                                                       \
                                                                             \
@@ -348,23 +351,25 @@ late-header-c
     }                                                                       \
     else                                                                    \
     {                                                                       \
+      int prec = 0;                                                         \
+                                                                            \
       if (JITTER_ARGN1 == 16)                                               \
       {                                                                     \
         fmt[5] = 'x';                                                       \
-        JITTER_ARGN0 = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);      \
+        prec = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);              \
       }                                                                     \
       else if (JITTER_ARGN1 == 8)                                           \
       {                                                                     \
         fmt[5] = 'o';                                                       \
-        JITTER_ARGN0 = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);      \
+        prec = (JITTER_ARGN0 / 3) + ((JITTER_ARGN0 % 3) != 0);              \
       }                                                                     \
       else if (JITTER_ARGN1 == 2)                                           \
       {                                                                     \
         assert (0); /* XXX */                                               \
       }                                                                     \
                                                                             \
-      fmt[2] = '0' + (JITTER_ARGN0 / 10);                                   \
-      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);               \
+      fmt[2] = '0' + (prec / 10);                                           \
+      fmt[3] = '0' + prec - (prec / 10 * 10);                               \
       fmt[6] = '\0';                                                        \
     }                                                                       \
                                                                             \

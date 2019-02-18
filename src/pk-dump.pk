@@ -24,13 +24,18 @@ pk_help_str = pk_help_str
 defvar pk_cmd_dump_usage = "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]";
 defvar pk_dump_offset = 0#B;
 
-defun dump = (off64 from, off64 size,
-              off64 step = 16#B,
+defun dump = (off64 from = pk_dump_offset,
+              off64 size = 16#B,
               int rule = 0,
               int ascii = 0) void:
   {
-   defvar top = from + size;
-   defvar offset = from;
+   defun print_rule = void:
+   {
+    print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
+    if (ascii)
+      print "  0123456789ABCDEF";
+    print "\n";
+   }
 
    /* Check for an available IOS.  */
    try
@@ -41,26 +46,34 @@ defun dump = (off64 from, off64 size,
      return;
    }
 
-   if (rule)
-     {
-       print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
-       if (ascii)
-         print "  0123456789ABCDEF";
-       print "\n";
-     }
+   /* Update the global with the last used offset.  */
+   pk_dump_offset = from;
 
+   /* The initial offset is the base of the byte containing
+      `from'.  */
+   defvar offset = (from / #B) #B;
+   defvar top = ((from + size) / #B) #B;
+   defvar step = 16#B;
+
+   if (rule)
+     print_rule;
    while (offset < top)
      {
+       defvar row = int<8>[step] @ offset;
        defvar i = 0;
-       print "AAAAAAAA  ";
-       while (i < 8)
+
+       printf "%u32x: ", offset / #B;
+       for (b in row)
          {
-           print "XXXX ";
+           printf "%u8x", b;
+           if (i % 2)
+             print " ";
            i = i + 1;
          }
-
-       offset = offset + 1#B;
+           
        print "\n";
+
+       offset = offset + step;
      }
    /* XXX writeme */
   }
