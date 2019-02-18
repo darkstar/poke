@@ -332,6 +332,46 @@ late-header-c
     JITTER_DROP_STACK ();                                                   \
   } while (0)
 
+#define PVM_PRINTL(TYPE,TYPEC,IFORMAT)                                      \
+  do                                                                        \
+  {                                                                         \
+    TYPEC val = PVM_VAL_##TYPE (JITTER_TOP_STACK ());                       \
+    char fmt[7];  /* %0NNff */                                              \
+                                                                            \
+    fmt[0] = '%';                                                           \
+    fmt[1] = '0';                                                           \
+    fmt[4] = 'l';                                                           \
+    if (JITTER_ARGN1 == 10)                                                 \
+    {                                                                       \
+      fmt[5] = IFORMAT;                                                     \
+      fmt[6] = '\0';                                                        \
+    }                                                                       \
+    else                                                                    \
+    {                                                                       \
+      if (JITTER_ARGN1 == 16)                                               \
+      {                                                                     \
+        fmt[5] = 'x';                                                       \
+        JITTER_ARGN0 /= 4;                                                  \
+      }                                                                     \
+      else if (JITTER_ARGN1 == 8)                                           \
+      {                                                                     \
+        fmt[5] = 'o';                                                       \
+        JITTER_ARGN0 /= 3;                                                  \
+      }                                                                     \
+      else if (JITTER_ARGN1 == 2)                                           \
+      {                                                                     \
+        assert (0); /* XXX */                                               \
+      }                                                                     \
+                                                                            \
+      fmt[2] = '0' + (JITTER_ARGN0 / 10);                                   \
+      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);               \
+      fmt[6] = '\0';                                                        \
+    }                                                                       \
+                                                                            \
+    printf (fmt, val);                                                      \
+    JITTER_DROP_STACK ();                                                   \
+  } while (0)
+
   end
 end
 
@@ -604,15 +644,13 @@ end
 
 instruction printl (?n popf_printer, ?n popf_printer) # ( LONG -- )
   code
-    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
-    JITTER_DROP_STACK ();
+    PVM_PRINTL (LONG, int64_t, 'd');
   end
 end
 
 instruction printlu (?n popf_printer, ?n popf_printer) # ( ULONG -- )
   code
-    pvm_print_val (stdout, JITTER_TOP_STACK (), JITTER_ARGN1, 0);
-    JITTER_DROP_STACK ();
+   PVM_PRINTL (ULONG, uint64_t, 'u');
   end
 end
 

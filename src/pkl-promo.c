@@ -967,12 +967,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_print_stmt)
 
           PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
         }
-      else
-        {
-          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
-                   "non-promoteable argument in printf");
-          PKL_PASS_ERROR;
-        }
     }
 }
 PKL_PHASE_END_HANDLER
