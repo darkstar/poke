@@ -26,6 +26,7 @@ defvar pk_dump_offset = 0#B;
 
 defun dump = (off64 from = pk_dump_offset,
               off64 size = 16#B,
+              off64 group_by = 2#B,
               int rule = 0,
               int ascii = 0) void:
   {
@@ -35,6 +36,7 @@ defun dump = (off64 from = pk_dump_offset,
 
    if (rule)
      {
+       /* XXX honour use group_by  */
        print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
        if (ascii)
          print "  0123456789ABCDEF";
@@ -44,14 +46,14 @@ defun dump = (off64 from = pk_dump_offset,
    try
      while (offset < top)
        {
-         printf "%u32x: ", offset / #B;
+         printf "%u32x:", offset / #B;
 
          defvar o = offset;
          while (o < offset + step)
            {
-             printf "%u8x", int<8> @ o;
-             if ((o'magnitude - offset'magnitude) % 2)
+             if ((o - offset) % group_by == 0#B)
                print " ";
+             printf "%u8x", int<8> @ o;
              o = o + 1#B;
            }
          print "\n";
