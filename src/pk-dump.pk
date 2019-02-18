@@ -26,12 +26,14 @@ defvar pk_cmd_dump_usage = "Usage: dump :from OFFSET [:size OFFSET] [:to OFFSET]
 defvar pk_dump_offset = 0#B; /* This gets updated by `dump'.  */
 defvar pk_dump_size = 16#B;
 defvar pk_dump_group_by = 2#B;
+defvar pk_dump_rule = 0;
+defvar pk_dump_ascii = 0;
 
 defun dump = (off64 from = pk_dump_offset,
               off64 size = pk_dump_size,
               off64 group_by = pk_dump_group_by,
-              int rule = 0,
-              int ascii = 0) void:
+              int rule = pk_dump_rule,
+              int ascii = pk_dump_ascii) void:
   {
    defvar offset = from as offset<uint<64>,B>;
    defvar top = (from + size) as offset<uint<64>,B>;
