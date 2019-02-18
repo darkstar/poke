@@ -58,6 +58,9 @@ defun dump = (off64 from = pk_dump_offset,
        print "\n";
      }
 
+   /* Iterate and print lines with the bytes of each step, grouping
+      them as indicated by group_by.  The output can be truncated in
+      case an EOF occurs.  */
    try
      while (offset < top)
        {
