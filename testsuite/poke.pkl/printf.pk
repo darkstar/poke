@@ -1,6 +1,10 @@
 /* { dg-do run } */
 
-printf "%i32d", 10;  /* { dg-output "10" } */
-printf "foo%i32dbar", 10; /* { dg-output "foo10bar" } */
+printf "";                    /* { dg-output "" } */
+printf "foo";                 /* { dg-output "foo" } */
+printf "%s", "bar";           /* { dg-output "bar" } */
+printf "x%sy", "bar";         /* { dg-output "xbary" } */
+printf "%i32d", 10;           /* { dg-output "10" } */
+printf "foo%i32dbar", 10;     /* { dg-output "foo10bar" } */
 printf "%i32d %i32d", 10, 20; /* { dg-output "10 20" } */
 printf "%i32d %i32d", 20, 10; /* { dg-output "20 10" } */
