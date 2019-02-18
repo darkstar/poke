@@ -900,6 +900,27 @@ pkl_type_str (pkl_ast_node type, int use_given_name)
   return str;
 }
 
+/* Return a boolean telling whether the given type function only have
+   optional arguments, i.e. all arguments have an initializer.  */
+
+int
+pkl_ast_func_all_optargs (pkl_ast_node type)
+{
+  pkl_ast_node arg;
+  int all_optargs = 1;
+
+  for (arg = PKL_AST_TYPE_F_ARGS (type); arg; arg = PKL_AST_CHAIN (arg))
+    {
+      if (!PKL_AST_FUNC_TYPE_ARG_OPTIONAL (arg))
+        {
+          all_optargs = 0;
+          break;
+        }
+    }
+
+  return all_optargs;
+}
+
 /* Build and return an AST node for an enum.  */
 
 pkl_ast_node

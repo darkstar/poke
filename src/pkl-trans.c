@@ -267,10 +267,7 @@ PKL_PHASE_END_HANDLER
 
 /* Variables that refer to parameterless functions are transformed
    into funcalls to these functions, but only if the variables are not
-   part of funcall themselves! :)
-
-   XXX: the same applies to functions having optional parameters
-   only.  */
+   part of funcall themselves! :)  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
 {
@@ -283,7 +280,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
       pkl_ast_node initial_type = PKL_AST_TYPE (initial);
 
       if (PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_FUNCTION
-          && (PKL_AST_TYPE_F_NARG (initial_type) == 0))
+          && (PKL_AST_TYPE_F_NARG (initial_type) == 0
+              || pkl_ast_func_all_optargs (initial_type)))
         {
           pkl_ast_node funcall = pkl_ast_make_funcall (PKL_PASS_AST,
                                                        var,
