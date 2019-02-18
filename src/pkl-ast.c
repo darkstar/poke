@@ -1347,6 +1347,19 @@ pkl_ast_make_print_stmt (pkl_ast ast,
   return print_stmt;
 }
 
+/* Build and return an AST node for a `printf' argument.  */
+
+pkl_ast_node
+pkl_ast_make_print_stmt_arg (pkl_ast ast, pkl_ast_node exp)
+{
+  pkl_ast_node print_stmt_arg = pkl_ast_make_node (ast,
+                                                   PKL_AST_PRINT_STMT_ARG);
+
+  if (exp)
+    PKL_AST_PRINT_STMT_ARG_EXP (print_stmt_arg) = ASTREF (exp);
+  return print_stmt_arg;
+}
+
 /* Build and return an AST node for a `break' statement.  */
 
 pkl_ast_node
@@ -1690,18 +1703,14 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_TRY_CATCH_STMT_EXP (ast));
       break;
 
+    case PKL_AST_PRINT_STMT_ARG:
+      free (PKL_AST_PRINT_STMT_ARG_SUFFIX (ast));
+      pkl_ast_node_free (PKL_AST_PRINT_STMT_ARG_EXP (ast));
+      break;
+
     case PKL_AST_PRINT_STMT:
       {
-        // XXX
-        //        pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (ast);
-
-        free (PKL_AST_PRINT_STMT_BASES (ast));
-        //        if (print_stmt_fmt)
-        //          {
-        //            size_t s = strlen (PKL_AST_STRING_POINTER (print_stmt_fmt));
-        //            for (i = 0; i < s; ++i)
-        //              free (PKL_AST_PRINT_STMT_PIECE (ast, i));
-        //          }
+        free (PKL_AST_PRINT_STMT_PREFIX (ast));
         for (t = PKL_AST_PRINT_STMT_ARGS (ast); t; t = n)
           {
             n = PKL_AST_CHAIN (t);
@@ -2434,9 +2443,19 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (try_catch_stmt_exp, TRY_CATCH_STMT_EXP);
       break;
 
+    case PKL_AST_PRINT_STMT_ARG:
+      IPRINTF ("PRINT_STMT_ARG::\n");
+      PRINT_COMMON_FIELDS;
+      if (PKL_AST_PRINT_STMT_ARG_SUFFIX (ast))
+        PRINT_AST_IMM (suffix, PRINT_STMT_ARG_SUFFIX, "'%s'");
+      PRINT_AST_SUBAST (exp, PRINT_STMT_ARG_EXP);
+      break;
+
     case PKL_AST_PRINT_STMT:
       IPRINTF ("PRINT_STMT::\n");
       PRINT_COMMON_FIELDS;
+      if (PKL_AST_PRINT_STMT_PREFIX (ast))
+        PRINT_AST_IMM (prefix, PRINT_STMT_PREFIX, "'%s'");
       PRINT_AST_SUBAST (fmt, PRINT_STMT_FMT);
       PRINT_AST_SUBAST_CHAIN (PRINT_STMT_TYPES);
       PRINT_AST_SUBAST_CHAIN (PRINT_STMT_ARGS);

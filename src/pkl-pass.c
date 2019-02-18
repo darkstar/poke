@@ -463,6 +463,10 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_RAISE_STMT_EXP (node))
         PKL_PASS (PKL_AST_RAISE_STMT_EXP (node));
       break;
+    case PKL_AST_PRINT_STMT_ARG:
+      if (PKL_AST_PRINT_STMT_ARG_EXP (node))
+        PKL_PASS (PKL_AST_PRINT_STMT_ARG_EXP (node));
+      break;
     case PKL_AST_PRINT_STMT:
       if (PKL_AST_PRINT_STMT_FMT (node))
         PKL_PASS (PKL_AST_PRINT_STMT_FMT (node));

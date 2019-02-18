@@ -629,40 +629,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
-  int *print_stmt_bases = PKL_AST_PRINT_STMT_BASES (print_stmt);
-  char **print_stmt_pieces = PKL_AST_PRINT_STMT_PIECES (print_stmt);
 
   if (print_stmt_fmt)
     {
-      size_t npiece, i;
       pkl_ast_node arg;
+      char *prefix = PKL_AST_PRINT_STMT_PREFIX (print_stmt);
 
-#define EMIT_PIECE                                              \
-      do                                                        \
-        {                                                       \
-          char *piece = print_stmt_pieces[npiece++];            \
-          if (piece)                                            \
-            {                                                   \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,         \
-                            pvm_make_string (piece));           \
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);      \
-            }                                                   \
-        } while (0)
-      
-      npiece = 0;
-      if (PKL_AST_STRING_POINTER (print_stmt_fmt)[0] != '\0')
-        EMIT_PIECE;
-
-      for (arg = print_stmt_args, i = 0;
-           arg;
-           arg = PKL_AST_CHAIN (arg), i++)
+      /* Emit the optional prefix.  */
+      if (prefix)
         {
-          /* Emit value and print instruction.  */
-          PKL_PASS_SUBPASS (arg);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (arg),
-                        print_stmt_bases[i]);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (prefix));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
+        }
+      
+      for (arg = print_stmt_args; arg; arg = PKL_AST_CHAIN (arg))
+        {
+          /* Print the argument, and the optional suffix.  */
 
-          EMIT_PIECE;
+          pkl_ast_node exp = PKL_AST_PRINT_STMT_ARG_EXP (arg);
+          char *suffix = PKL_AST_PRINT_STMT_ARG_SUFFIX (arg);
+          int base = PKL_AST_PRINT_STMT_ARG_BASE (arg);
+
+          PKL_PASS_SUBPASS (exp);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
+                        base);
+
+          if (suffix)
+            {
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (suffix));
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
+            }
         }
     }
   else

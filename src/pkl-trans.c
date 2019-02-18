@@ -529,10 +529,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
-  char *fmt, *p, **pieces = NULL;
-  pkl_ast_node t;
-  int ntag, nargs = 0, npiece = 0;
-  int *bases;
+  char *fmt, *p;
+  pkl_ast_node t, arg;
+  int ntag, nargs = 0;
   pkl_ast_node types = NULL;
 
   /* Calculate the number of arguments.  */
@@ -540,111 +539,121 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
     nargs++;
   PKL_AST_PRINT_STMT_NARGS (print_stmt) = nargs;
 
+  /* If this is a `print', then we are done.  */
   if (!print_fmt)
     PKL_PASS_DONE;
 
   fmt = PKL_AST_STRING_POINTER (print_fmt);
-  bases = xmalloc (sizeof (int) * nargs);
-  pieces = xmalloc (strlen (fmt) * sizeof (char*));
-  if (pieces)
-    memset (pieces, 0, strlen (fmt) * sizeof (char*));
-  if (fmt[0] == '%')
-    npiece++;
+  p = fmt;
+
+  /* Process the prefix string, if any.  */
+  if (*p != '%')
+    {
+      char *prefix = xmalloc (strlen (fmt + 1));
+      size_t j = 0;
+
+      while (*p != '%' && *p != '\0')
+            {
+              prefix[j] = *p;
+              p++;
+              j++;
+            }
+      prefix[j] = '\0';
+      PKL_AST_PRINT_STMT_PREFIX (print_stmt) = prefix;
+    }
 
   /* Process the format string.  */
-  for (types = NULL, ntag = 0, p = fmt; *p != '\0';)
+  for (types = NULL, ntag = 0, arg = args;
+       *p != '\0' && args;
+       ntag++, arg = PKL_AST_CHAIN (arg))
     {
+      pkl_ast_node atype;
+
+      assert (*p == '%');
+      if (ntag >= nargs)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+                     "not enough arguments in printf");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+
+      switch (p[1])
+        {
+        case 's':
+          p += 2;
+          PKL_AST_PRINT_STMT_ARG_BASE (arg) = 10; /* Arbitrary.  */
+          atype = pkl_ast_make_string_type (PKL_PASS_AST);
+          PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+          types = pkl_ast_chainon (types, atype);
+          break;
+        case 'i':
+        case 'u':
+          {
+            unsigned int bits;
+            
+            if (p[2] >= '0' && p[2] <= '9')
+              {
+                int base_idx;
+                
+                if (p[3] >= '0' && p[3] <= '9')
+                  {
+                    bits = (p[2] - '0') * 10 + (p[3] - '0');
+                    base_idx = 4;
+                  }
+                else
+                  {
+                    bits = p[2] - '0';
+                    base_idx = 3;
+                  }
+                
+                if (bits > 64)
+                  goto invalid_tag;
+                
+                switch (p[base_idx])
+                  {
+                  case 'b': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 2; break;
+                  case 'o': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 8; break;
+                  case 'd': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 10; break;
+                  case 'x': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 16; break;
+                  default:
+                    goto invalid_tag;
+                  }
+                
+                atype = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                    bits, p[1] == 'i');
+                PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+                types = pkl_ast_chainon (types, atype);
+                
+                if (base_idx == 4)
+                  p += 5;
+                else
+                  p += 4;
+              }
+            else
+              goto invalid_tag;
+            break;
+          }
+        default:
+          goto invalid_tag;
+        }        
+
+      /* Add the optional suffix to the argument.  */
       if (*p != '%')
         {
-          /* Build a piece.  */
+          /* This argument has a prefix.  */
           size_t j;
-          char *piece = xmalloc (strlen (fmt + 1));
+          char *suffix = xmalloc (strlen (fmt + 1));
 
           j = 0;
           while (*p != '%' && *p != '\0')
             {
-              piece[j] = *p;
+              suffix[j] = *p;
               p++;
               j++;
             }
-          piece[j] = '\0';
-          pieces[npiece++] = piece;
-        }
-      else
-        {
-          pkl_ast_node atype;
-
-          if (ntag >= nargs)
-            {
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
-                         "not enough arguments in printf");
-              payload->errors++;
-              PKL_PASS_ERROR;
-            }
-
-          switch (p[1])
-            {
-            case 's':
-              p += 2;
-              bases[ntag] = 10; /* Arbitrary */
-              atype = pkl_ast_make_string_type (PKL_PASS_AST);
-              PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
-              types = pkl_ast_chainon (types, atype);
-              break;
-            case 'i':
-            case 'u':
-              {
-                unsigned int bits;
-
-                if (p[2] >= '0' && p[2] <= '9')
-                  {
-                    int base_idx;
-                    
-                    if (p[3] >= '0' && p[3] <= '9')
-                      {
-                        bits = (p[2] - '0') * 10 + (p[3] - '0');
-                        base_idx = 4;
-                      }
-                    else
-                      {
-                        bits = p[2] - '0';
-                        base_idx = 3;
-                      }
-
-                    if (bits > 64)
-                      goto invalid_tag;
-
-                    switch (p[base_idx])
-                      {
-                      case 'b': bases[ntag] = 2; break;
-                      case 'o': bases[ntag] = 8; break;
-                      case 'd': bases[ntag] = 10; break;
-                      case 'x': bases[ntag] = 16; break;
-                      default:
-                        goto invalid_tag;
-                      }
-
-                    atype = pkl_ast_make_integral_type (PKL_PASS_AST,
-                                                        bits, p[1] == 'i');
-                    PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
-                    types = pkl_ast_chainon (types, atype);
-
-                    if (base_idx == 4)
-                      p += 5;
-                    else
-                      p += 4;
-                  }
-                else
-                  goto invalid_tag;
-                break;
-              }
-            default:
-              goto invalid_tag;
-            }
-
-          if (*p == '%')
-            npiece++;
-          ntag++;
+          suffix[j] = '\0';
+          PKL_AST_PRINT_STMT_ARG_SUFFIX (arg) = suffix;
         }
     }
 
@@ -656,8 +665,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
       PKL_PASS_ERROR;
     }
 
-  PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
-  PKL_AST_PRINT_STMT_PIECES (print_stmt) = pieces;
   PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
 
   PKL_PASS_RESTART=1;

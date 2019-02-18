@@ -80,6 +80,7 @@ enum pkl_ast_code
   PKL_AST_BREAK_STMT,
   PKL_AST_RAISE_STMT,
   PKL_AST_LAST_STMT = PKL_AST_RAISE_STMT,
+  PKL_AST_PRINT_STMT_ARG,
   PKL_AST_LAST
 };
 
@@ -1363,10 +1364,11 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
 
 /* PKL_AST_PRINT_STMT nodes represent `print' statements.
 
-   ARGS is a chained list of expressions.  In `print' statements, this
-   only contains one expression, which should be of type string.  In
-   `printf' statements, this may contain zero or more expressions, of
-   the types expressed in FMT.
+   ARGS is a chained list of PKL_AST_PRINT_STMT_ARG nodes.  In `print'
+   statements, this only contains one argument, whose expression
+   should be of type string.  In `printf' statements, this may contain
+   zero or more nodes, and the types of their expressions should match
+   teh format expressed in FMT.
 
    FMT, if not NULL, is a format string node.
 
@@ -1375,24 +1377,21 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
 
    NARGS is the number of arguments in ARGS.
 
-   BASES is an array of integers, with the numeration base to use for
-   each argument in ARGS.  */
+   PREFIX, if not NULL, is a C string that should be printed before
+   the arguments.  */
 
 #define PKL_AST_PRINT_STMT_FMT(AST) ((AST)->print_stmt.fmt)
 #define PKL_AST_PRINT_STMT_TYPES(AST) ((AST)->print_stmt.types)
-#define PKL_AST_PRINT_STMT_BASES(AST) ((AST)->print_stmt.bases)
 #define PKL_AST_PRINT_STMT_ARGS(AST) ((AST)->print_stmt.args)
 #define PKL_AST_PRINT_STMT_NARGS(AST) ((AST)->print_stmt.nargs)
-#define PKL_AST_PRINT_STMT_PIECES(AST) ((AST)->print_stmt.pieces)
-#define PKL_AST_PRINT_STMT_PIECE(AST,N) ((AST)->print_stmt.pieces[(N)])
+#define PKL_AST_PRINT_STMT_PREFIX(AST) ((AST)->print_stmt.prefix)
 
 struct pkl_ast_print_stmt
 {
   struct pkl_ast_common common;
 
-  int *bases;
   int nargs;
-  char **pieces;
+  char *prefix;
   union pkl_ast_node *fmt;
   union pkl_ast_node *types;
   union pkl_ast_node *args;
@@ -1400,6 +1399,31 @@ struct pkl_ast_print_stmt
 
 pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast,
                                       pkl_ast_node fmt, pkl_ast_node args);
+
+/* PKL_AST_PRINT_STMT_ARG nodes represent expression arguments to
+   `printf' statements.
+
+   EXP is an expression node evaluating to the value to print.
+
+   BASE is the numeration base to use when printing this argument.
+
+   SUFFIX, if not NULL, is a C string that should be printed after the
+   value of EXP, respectively.  */
+
+#define PKL_AST_PRINT_STMT_ARG_EXP(AST) ((AST)->print_stmt_arg.exp)
+#define PKL_AST_PRINT_STMT_ARG_BASE(AST) ((AST)->print_stmt_arg.base)
+#define PKL_AST_PRINT_STMT_ARG_SUFFIX(AST) ((AST)->print_stmt_arg.suffix)
+
+struct pkl_ast_print_stmt_arg
+{
+  struct pkl_ast_common common;
+
+  int base;
+  char *suffix;
+  union pkl_ast_node *exp;
+};
+
+pkl_ast_node pkl_ast_make_print_stmt_arg (pkl_ast ast, pkl_ast_node exp);
 
 /* PKL_AST_BREAK_STMT nodes represent `break' statements.  Each break
    statement is associated to a loop or switch node.
@@ -1489,6 +1513,7 @@ union pkl_ast_node
   struct pkl_ast_break_stmt break_stmt;
   struct pkl_ast_raise_stmt raise_stmt;
   struct pkl_ast_print_stmt print_stmt;
+  struct pkl_ast_print_stmt_arg print_stmt_arg;
 };
 
 /* The `pkl_ast' struct defined below contains a PKL abstract syntax tree.

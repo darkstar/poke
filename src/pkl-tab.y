@@ -268,7 +268,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <opcode> unary_operator
 
 %type <ast> start program program_elem_list program_elem
-%type <ast> expression comma_expression_list primary identifier bconc map
+%type <ast> expression primary identifier bconc map
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
@@ -277,7 +277,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
-%type <ast> comp_stmt stmt_decl_list stmt
+%type <ast> comp_stmt stmt_decl_list stmt print_stmt_arg_list
 %type <ast> funcall_stmt funcall_stmt_arg_list funcall_stmt_arg
 
 /* The following two tokens are used in order to support several start
@@ -590,13 +590,6 @@ expression:
 	| bconc
         | map
         ;
-
-comma_expression_list:
-	expression
-        | comma_expression_list ',' expression
-        {
-          $$ = pkl_ast_chainon ($1, $3);
-        }
 
 bconc:
 	  expression BCONC expression
@@ -1480,19 +1473,10 @@ stmt:
                                                 NULL /* fmt */, $2);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | PRINTF STR ';'
+	| PRINTF STR print_stmt_arg_list ';'
         	{
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
-                                                $2, NULL /* args */);
-                  PKL_AST_LOC ($2) = @2;
-                  if (PKL_AST_TYPE ($2))
-                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
-                  PKL_AST_LOC ($$) = @$;
-                }
-        | PRINTF STR ',' comma_expression_list ';'
-        	{
-                  $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
-                                                $2, $4);
+                                                $2, $3);
                   PKL_AST_LOC ($2) = @2;
                   if (PKL_AST_TYPE ($2))
                     PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
@@ -1505,6 +1489,21 @@ stmt:
                   PKL_AST_LOC ($$) = @$;
                 }
         ;
+
+print_stmt_arg_list:
+	  %empty
+		{
+                  $$ = NULL;
+                }
+        | print_stmt_arg_list ',' expression
+        	{
+                  pkl_ast_node arg
+                    = pkl_ast_make_print_stmt_arg (pkl_parser->ast, $3);
+                  PKL_AST_LOC (arg) = @3;
+                  
+                  $$ = pkl_ast_chainon ($1, arg);
+                }
+	;
 
 funcall_stmt:
 	primary funcall_stmt_arg_list
