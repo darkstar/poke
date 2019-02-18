@@ -1665,8 +1665,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
       if (PKL_AST_TYPE_CODE (operand_type) != PKL_TYPE_OFFSET)
         goto invalid_attribute;
 
-      /* The type of 'magnitude is uint<64> */
-      exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+      /* The type of 'magnitude is the type of the offset's
+         magnitude.  */
+      exp_type = PKL_AST_TYPE_O_BASE_TYPE (operand_type);
       PKL_AST_TYPE (exp) = ASTREF (exp_type);
       break;
     case PKL_AST_ATTR_UNIT:

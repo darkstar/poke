@@ -63,13 +63,11 @@ defun dump = (off64 from = pk_dump_offset,
        {
          printf "%u32x: ", offset / #B;
          
-         defvar o = offset;
-         defvar i = 0;
-         while (o < offset + step)
+         defvar i = 0UL;
+         while (i < step'magnitude)
            {
-             printf "%u8x", int<8> @ o;
+             printf "%u8x", int<8> @ (offset + i#B);
              if (i % 2) print " ";
-             o = o + 1#B;
              i = i + 1;
            }
          print "\n";
