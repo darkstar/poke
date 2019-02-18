@@ -49,14 +49,14 @@ defun dump = (off64 from = pk_dump_offset,
    try
      while (offset < top)
        {
-         printf "%u32x:", offset / #B;
+         printf ("%u32x:", offset / #B);
 
          defvar o = offset;
          while (o < offset + step)
            {
              if ((o - offset) % group_by == 0#B)
                print " ";
-             printf "%u8x", int<8> @ o;
+             printf ("%u8x", int<8> @ o);
              o = o + 1#B;
            }
          print "\n";
