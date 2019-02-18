@@ -267,7 +267,10 @@ PKL_PHASE_END_HANDLER
 
 /* Variables that refer to parameterless functions are transformed
    into funcalls to these functions, but only if the variables are not
-   part of funcall themselves! :) */
+   part of funcall themselves! :)
+
+   XXX: the same applies to functions having optional parameters
+   only.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
 {
