@@ -63,10 +63,7 @@ defun dump = (off64 from = pk_dump_offset,
          
          offset = offset + step;
        }
-   catch if E_eof
-   {
-       print "\n";
-   }
+   catch if E_eof { print "\n"; }
 
    pk_dump_offset = from;
   }
