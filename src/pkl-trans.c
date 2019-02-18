@@ -647,6 +647,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         }
     }
 
+  if (nargs > ntag)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+                 "too many arguments in printf");
+      payload->errors++;
+      PKL_PASS_ERROR;
+    }
+
   PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
   PKL_AST_PRINT_STMT_PIECES (print_stmt) = pieces;
   PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
