@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* XXX Register the help text of this command.  */
-
 pk_help_str = pk_help_str
   + "\ndump\t\tDisplay the contents of an IO range.";
 
