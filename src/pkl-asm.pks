@@ -241,6 +241,13 @@
         nip2                    ; OFF2 OFF1 RESU
         swap                    ; OFF2 RESU OFF1
         nrot                    ; OFF1 OFF2 RESU
+        ;; If the result unit is 0, then turn it into bits.
+        bz @unit_type, .one
+        ba .end
+.one:
+        drop
+        push ulong<64>1         ; OFF1 OFF2 1UL
+.end:
         .end
         
 ;;; ADDO unit_type base_type

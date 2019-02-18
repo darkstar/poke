@@ -171,4 +171,5 @@
 /* { dg-command { 0UL#1024 } }*/
 /* { dg-output "\n0UL#Kb" } */
 
-
+/* { dg-command { 0#b + 0#B } } */
+/* { dg-output "\n0#b" } */
