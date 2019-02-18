@@ -8,3 +8,6 @@ printf "%i32d", 10;           /* { dg-output "10" } */
 printf "foo%i32dbar", 10;     /* { dg-output "foo10bar" } */
 printf "%i32d %i32d", 10, 20; /* { dg-output "10 20" } */
 printf "%i32d %i32d", 20, 10; /* { dg-output "20 10" } */
+
+printf "%i32x", 10;           /* { dg-output "0000000a" } */
+printf "%i64x", 10;           /* { dg-output "000000000000000a" } */

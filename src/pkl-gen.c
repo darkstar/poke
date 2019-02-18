@@ -650,7 +650,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
         } while (0)
       
       npiece = 0;
-      EMIT_PIECE;
+      if (PKL_AST_STRING_POINTER (print_stmt_fmt)[0] != '\0')
+        EMIT_PIECE;
 
       for (arg = print_stmt_args, i = 0;
            arg;
