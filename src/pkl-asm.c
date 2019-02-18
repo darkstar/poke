@@ -170,7 +170,7 @@ pkl_asm_push_val (pvm_program program, pvm_val val)
 }
 
 /* Macro-instruction: OTO from_type, to_type
-   ( OFF(from_type) FROMUNIT TOUNIT -- OFF(from_type) OFF(to_type) )
+   ( OFF(from_type) TOUNIT -- OFF(to_type) )
 
    Generate code to convert an offset value from FROM_TYPE to
    TO_TYPE.  */
@@ -769,16 +769,20 @@ pkl_asm_insn_divo (pkl_asm pasm, pkl_ast_node base_type)
 }
 
 /* Macro-instruction: MODO base_type
-   ( OFF OFF UNIT -- OFF OFF VAL )
+   ( OFF OFF -- OFF OFF OFF )
 
    Calculate the modulus of two offsets.  The result of the operation
-   is a magnitude.  The types of both the offsets base type and the
+   is an offset.    The types of both the offsets base type and the
    magnitude type is BASE_TYPE.  */
 
 static void
 pkl_asm_insn_modo (pkl_asm pasm, pkl_ast_node base_type)
 {
-  RAS_MACRO_MODO (base_type);
+  pkl_ast_node unit_type
+    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
+
+  RAS_MACRO_MODO (unit_type, base_type);
+  ASTREF (unit_type); pkl_ast_node_free (unit_type);  
 }
 
 

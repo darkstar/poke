@@ -129,7 +129,7 @@
         .end
 
 ;;; RAS_MACRO_OFFSET_CAST
-;;; ( OFF FROMUNIT TOUNIT -- OFF )
+;;; ( OFF TOUNIT -- OFF )
 ;;;
 ;;; This macro generates code that converts an offset of a given type
 ;;; into an offset of another given type.  This is the implementation of
@@ -147,12 +147,12 @@
 
         .macro offset_cast @from_base_type @from_unit_type @to_base_type @to_unit_type
         ;; XXX use OGETMC here.
-        ;; XXX can't FROMUNIT be derived from OFF? (ogetu)
         ;; XXX we have to do the arithmetic in unit_types, then
         ;; convert to to_base_type, to assure that to_base_type can hold
         ;; the to_base_unit.  Otherwise weird division by zero occurs.
         pushf
-        regvar $tounit                          ; OFF FROMUNIT
+        regvar $tounit                          ; OFF
+        ogetu                                   ; OFF FROMUNIT
         regvar $fromunit                        ; OFF
         ;; Get the magnitude of the offset and convert it to the new
         ;; magnitude type.
@@ -409,7 +409,7 @@
         .end
 
 ;;; MODO unit_type base_type
-;;; ( OFF OFF UNIT -- OFF OFF UNIT OFF )
+;;; ( OFF OFF -- OFF OFF OFF )
 ;;;
 ;;; Calculate the modulus of two given offsets. The result of the
 ;;; operation is an offset having unit UNIT.  The types of both the
@@ -419,25 +419,38 @@
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
-        .macro modo @base_type
-        ;; Calculate the magnitude fo the new offset, which is
-        ;; the modulus of both magnitudes, the second argument
-        ;; converted to first's units.
-        tor			; OFF1 OFF2
-        atr                     ; OFF1 OFF2 UNIT
-        ogetmc @base_type       ; OFF1 OFF2 OFF2M
-        rot                     ; OFF2 OFF2U OFF1
-        ogetm                   ; OFF2 OFF2U OFF1 OFF1M
-        rot                     ; OFF2 OFF1 OFF1M OFF2M
-        mod @base_type
-        nip2                    ; OFF2 OFF1 (OFF1M%OFF2M)
-        nrot                    ; (OFF1M%OFF2M) OFF2 OFF1
-        swap                    ; (OFF1M%OFF2M) OFF1 OFF2
-        rot                     ; OFF1 OFF2 (OFF1M%OFF2M)
-        atr                     ; OFF1 OFF2 (OFF1M%OFF2M) UNIT
-        mko                     ; OFF1 OFF2 OFFRES
-        fromr                   ; OFF1 OFF2 OFFRES UNIT
-        swap                    ; OFF1 OFF2 UNIT OFFRES
+        .macro modo @unit_type @base_type
+        pushf
+        regvar $off2
+        regvar $off1
+        ;; Calculate the unit of the result.
+        push ulong<64>1
+        ;; Get the magnitude of the first array, in result's units.
+        pushvar $off1           ; RESU OFF1
+        swap                    ; OFF1 RESU
+        dup                     ; OFF1 RESU RESU
+        nrot                    ; RESU OFF1 RESU
+        ogetmc @base_type       ; RESU OFF1 OFF1M
+        nip                     ; RESU OFF1M
+        ;; Get the magnitude of the second array, in result's units.
+        pushvar $off2           ; RESU OFF1M OFF2
+        rot                     ; OFF1M OFF2 RESU
+        dup                     ; OFF1M OFF2 RESU RESU
+        nrot                    ; OFF1M RESU OFF2 RESU
+        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
+        nip                     ; OFF1M RESU OFF2M
+        ;; Calculate the modulus of the two magnitudes.
+        rot                     ; RESU OFF2M OFF1M
+        swap                    ; RESU OFF1M OFF2M
+        mod @base_type          ; RESU OFF1M OFF2M RESM
+        nip2                    ; RESU RESM
+        ;; Build the result offset.
+        swap                    ; RESM RESU
+        mko                     ; RESO
+        pushvar $off1           ; RESO OFF1
+        pushvar $off2           ; RESO OFF1 OFF2
+        rot                     ; OFF1 OFF2 RESO
+        popf 1
         .end
 
 ;;; ATRIM array_type

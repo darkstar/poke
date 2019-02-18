@@ -37,7 +37,7 @@
 /* { dg-output "\n2" } */
 
 /* { dg-command {  3#nibble%#byte } } */
-/* { dg-output "\n1#N" } */
+/* { dg-output "\n4#b" } */
 
 /* { dg-command {  1#b + 2#b } } */
 /* { dg-output "\n3#b" } */

@@ -1127,10 +1127,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
   else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
     {
-      pkl_ast_node from_unit = PKL_AST_TYPE_O_UNIT (from_type);
       pkl_ast_node to_unit = PKL_AST_TYPE_O_UNIT (to_type);
       
-      PKL_PASS_SUBPASS (from_unit);
       PKL_PASS_SUBPASS (to_unit);
       pkl_asm_insn (pasm, PKL_INSN_OTO, from_type, to_type);
     }
@@ -2008,14 +2006,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
     case PKL_TYPE_OFFSET:
       {
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-        pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
-        pkl_ast_node op1_type = PKL_AST_TYPE (op1);
-        pkl_ast_node op1_unit = PKL_AST_TYPE_O_UNIT (op1_type);
         
-        PKL_PASS_SUBPASS (op1_unit);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MODO, base_type);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
         break;
       }
     default:
