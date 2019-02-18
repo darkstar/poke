@@ -619,28 +619,58 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_exp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * PRINT_STMT
  * | ARG
  * | ...
- * PRINT_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_print_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
 {
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
   int *print_stmt_bases = PKL_AST_PRINT_STMT_BASES (print_stmt);
-  pkl_ast_node t;
-  size_t i;
+  char **print_stmt_pieces = PKL_AST_PRINT_STMT_PIECES (print_stmt);
 
   if (print_stmt_fmt)
     {
-      for (i = 0, t = print_stmt_args; t; t = PKL_AST_CHAIN (t), i++)
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (t),
-                      print_stmt_bases[i]);
+      size_t npiece, i;
+      pkl_ast_node arg;
+
+#define EMIT_PIECE                                              \
+      do                                                        \
+        {                                                       \
+          char *piece = print_stmt_pieces[npiece++];            \
+          if (piece)                                            \
+            {                                                   \
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,         \
+                            pvm_make_string (piece));           \
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);      \
+            }                                                   \
+        } while (0)
+      
+      npiece = 0;
+      EMIT_PIECE;
+
+      for (arg = print_stmt_args, i = 0;
+           arg;
+           arg = PKL_AST_CHAIN (arg), i++)
+        {
+          /* Emit value and print instruction.  */
+          PKL_PASS_SUBPASS (arg);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (arg),
+                        print_stmt_bases[i]);
+
+          EMIT_PIECE;
+        }
     }
   else
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
+    {
+      PKL_PASS_SUBPASS (print_stmt_args);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
+    }
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -2289,7 +2319,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_gen_ps_print_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_PRINT_STMT, pkl_gen_pr_print_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_gen_ps_raise_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_gen_pr_try_catch_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL_ARG, pkl_gen_ps_funcall_arg),

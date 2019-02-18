@@ -529,9 +529,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
-  char *fmt, *p;
+  char *fmt, *p, **pieces = NULL;
   pkl_ast_node t;
-  int ntag, nargs = 0;
+  int ntag, nargs = 0, npiece = 0;
   int *bases;
   pkl_ast_node types = NULL;
 
@@ -543,18 +543,36 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   if (!print_fmt)
     PKL_PASS_DONE;
 
+  fmt = PKL_AST_STRING_POINTER (print_fmt);
   bases = xmalloc (sizeof (int) * nargs);
+  pieces = xmalloc (strlen (fmt) * sizeof (char*));
+  memset (pieces, 0, strlen (fmt) * sizeof (char*));
+  if (fmt[0] == '%')
+    npiece++;
 
   /* Process the format string.  */
-  fmt = PKL_AST_STRING_POINTER (print_fmt);
-  for (types = NULL, ntag = 0, p = fmt; *p != '\0'; p++)
+  for (types = NULL, ntag = 0, p = fmt; *p != '\0';)
     {
       if (*p != '%')
         {
           /* Build a piece.  */
+          size_t j;
+          char *piece = xmalloc (strlen (fmt + 1));
+
+          j = 0;
+          while (*p != '%' && *p != '\0')
+            {
+              piece[j] = *p;
+              p++;
+              j++;
+            }
+          piece[j] = '\0';
+          pieces[npiece++] = piece;
         }
       else
         {
+          pkl_ast_node atype;
+
           if (ntag >= nargs)
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
@@ -568,8 +586,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
             case 's':
               p += 2;
               bases[ntag] = 10; /* Arbitrary */
-              types = pkl_ast_chainon (types,
-                                       pkl_ast_make_string_type (PKL_PASS_AST));
+              atype = pkl_ast_make_string_type (PKL_PASS_AST);
+              PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+              types = pkl_ast_chainon (types, atype);
               break;
             case 'i':
             case 'u':
@@ -604,11 +623,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                         goto invalid_tag;
                       }
 
-                    types
-                      = pkl_ast_chainon (types,
-                                         pkl_ast_make_integral_type (PKL_PASS_AST,
-                                                                     bits,
-                                                                     p[1] == 'i'));
+                    atype = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                        bits, p[1] == 'i');
+                    PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+                    types = pkl_ast_chainon (types, atype);
 
                     if (base_idx == 4)
                       p += 5;
@@ -623,12 +641,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
               goto invalid_tag;
             }
 
+          if (*p == '%')
+            npiece++;
           ntag++;
         }
     }
 
   PKL_AST_PRINT_STMT_BASES (print_stmt) = bases;
+  PKL_AST_PRINT_STMT_PIECES (print_stmt) = pieces;
   PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
+
+  PKL_PASS_RESTART=1;
   PKL_PASS_DONE;
 
  invalid_tag:

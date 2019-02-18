@@ -551,16 +551,35 @@ end
 instruction printi (?n popf_printer, ?n popf_printer) # ( INT -- )
   code
     int32_t val = PVM_VAL_INT (JITTER_TOP_STACK ());
-    const char *fmt;
+    char fmt[6];  /* %0NNd */
 
-    switch (JITTER_ARGN1)
+    fmt[0] = '%';
+    fmt[1] = '0';
+    if (JITTER_ARGN1 == 10)
     {
-     case 10: fmt = "%d"; break;
-     case 16: fmt = "%04x"; break; /* XXX field width depends on JITTER_ARGN1  */
-     case 8:  fmt = "%0o"; break;
-     case 2:  /* XXX */
-     default:
-       assert (0);
+      fmt[2] = 'd';
+      fmt[3] = '\0';
+    }
+    else
+    {
+      if (JITTER_ARGN1 == 16)
+      {
+        fmt[4] = 'x';
+        JITTER_ARGN0 /= 4;
+      }
+      else if (JITTER_ARGN1 == 8)
+      {
+        fmt[4] = 'o';
+        JITTER_ARGN0 /= 3;
+      }
+      else if (JITTER_ARGN1 == 2)
+      {
+        assert (0); /* XXX */
+      }
+
+      fmt[2] = '0' + (JITTER_ARGN0 / 10);
+      fmt[3] = '0' + JITTER_ARGN0 - (JITTER_ARGN0 / 10 * 10);
+      fmt[5] = '\0';
     }
 
     printf (fmt, val);

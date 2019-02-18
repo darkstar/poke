@@ -1485,6 +1485,8 @@ stmt:
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
                                                 $2, NULL /* args */);
                   PKL_AST_LOC ($2) = @2;
+                  if (PKL_AST_TYPE ($2))
+                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
         | PRINTF STR ',' comma_expression_list ';'
@@ -1492,6 +1494,8 @@ stmt:
                   $$ = pkl_ast_make_print_stmt (pkl_parser->ast,
                                                 $2, $4);
                   PKL_AST_LOC ($2) = @2;
+                  if (PKL_AST_TYPE ($2))
+                    PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
 	| funcall_stmt ';'

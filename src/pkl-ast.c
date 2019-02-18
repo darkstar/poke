@@ -1691,19 +1691,30 @@ pkl_ast_node_free (pkl_ast_node ast)
       break;
 
     case PKL_AST_PRINT_STMT:
-      free (PKL_AST_PRINT_STMT_BASES (ast));
-      pkl_ast_node_free (PKL_AST_PRINT_STMT_FMT (ast));
-      for (t = PKL_AST_PRINT_STMT_ARGS (ast); t; t = n)
-        {
-          n = PKL_AST_CHAIN (t);
-          pkl_ast_node_free (t);
-        }
-      for (t = PKL_AST_PRINT_STMT_TYPES (ast); t; t = n)
-        {
-          n = PKL_AST_CHAIN (t);
-          pkl_ast_node_free (t);
-        }
-      break;
+      {
+        //        pkl_ast_node print_stmt_fmt = PKL_AST_PRINT_STMT_FMT (ast);
+
+        free (PKL_AST_PRINT_STMT_BASES (ast));
+        // XXX        if (print_stmt_fmt)
+        //          {
+        //            size_t s = (strlen (PKL_AST_STRING_POINTER (print_stmt_fmt))
+        //                        * sizeof (char *));
+        //            for (i = 0; i < s; ++i)
+        //              free (PKL_AST_PRINT_STMT_PIECE (ast, i));
+        //          }
+        for (t = PKL_AST_PRINT_STMT_ARGS (ast); t; t = n)
+          {
+            n = PKL_AST_CHAIN (t);
+            pkl_ast_node_free (t);
+          }
+        for (t = PKL_AST_PRINT_STMT_TYPES (ast); t; t = n)
+          {
+            n = PKL_AST_CHAIN (t);
+            pkl_ast_node_free (t);
+          }
+        pkl_ast_node_free (PKL_AST_PRINT_STMT_FMT (ast));
+        break;
+      }
 
     case PKL_AST_BREAK_STMT:
       break;
