@@ -1488,18 +1488,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
 
           if (!pkl_ast_type_equal (arg_type, type))
             {
-              /* XXX Do promo.  */
-              char *found_type = pkl_type_str (arg_type, 1);
-              char *expected_type = pkl_type_str (type, 1);
-
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
-                         "printf argument is of an invalid type\n\
+              if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL
+                  && PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL)
+                /* Integers can be promoted.  */
+                ;
+              else
+                {
+                  char *found_type = pkl_type_str (arg_type, 1);
+                  char *expected_type = pkl_type_str (type, 1);
+                  
+                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
+                             "printf argument is of an invalid type\n\
 expected %s, got %s",
-                         expected_type, found_type);
-              free (found_type);
-              free (expected_type);
-              payload->errors++;
-              PKL_PASS_ERROR;
+                             expected_type, found_type);
+                  free (found_type);
+                  free (expected_type);
+                  payload->errors++;
+                  PKL_PASS_ERROR;
+                }
             }
         }
     }
