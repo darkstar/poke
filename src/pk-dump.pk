@@ -43,9 +43,9 @@ defun dump = (off64 from = pk_dump_offset,
   {
    defvar step = 16#B;
 
-   /* The `dump' command is byte-oriented.  If the base offset
-      provided is not aligned to 8 bits, it is truncated.  Likewise
-      for the provided size.  The casts below make sure of that.  */
+   /* The `dump' command is byte-oriented.  Both the base offset and
+      the size of the dump are truncated to bytes.  Hence the casts
+      below.  */
    defvar offset = from as offset<uint<64>,B>;
    defvar top = (from + size) as offset<uint<64>,B>;
 
@@ -59,8 +59,8 @@ defun dump = (off64 from = pk_dump_offset,
      }
 
    /* Iterate and print lines with the bytes of each step, grouping
-      them as indicated by group_by.  The output can be truncated in
-      case an EOF occurs.  */
+      them as indicated by group_by.  The output is truncated in case
+      an EOF occurs.  */
    try
      while (offset < top)
        {
