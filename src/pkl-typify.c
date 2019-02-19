@@ -1059,31 +1059,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       assert (aa_type);
 
       if (!PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
-          && !pkl_ast_type_equal (fa_type, aa_type))
+          && !pkl_ast_type_promoteable (aa_type, fa_type,
+                                        1 /* promote_array_of_any */))
         {
           char *passed_type = pkl_type_str (aa_type, 1);
           char *expected_type = pkl_type_str (fa_type, 1);
 
-          if (PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_ANY
-              || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_INTEGRAL
-                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_INTEGRAL)
-              || (PKL_AST_TYPE_CODE (aa_type) == PKL_TYPE_OFFSET
-                  && PKL_AST_TYPE_CODE (fa_type) == PKL_TYPE_OFFSET))
-            /* Integers and offsets can be promoted, and anything
-               can be promoted to ANY.  */
-            ;
-          else
-            {
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                         "function argument %d has the wrong type\n\
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                     "function argument %d has the wrong type\n\
 expected %s, got %s",
-                         narg + 1, expected_type, passed_type);
-              free (expected_type);
-              free (passed_type);
+                     narg + 1, expected_type, passed_type);
+          free (expected_type);
+          free (passed_type);
                   
-              payload->errors++;
-              PKL_PASS_ERROR;
-            }
+          payload->errors++;
+          PKL_PASS_ERROR;
         }
 
       narg++;
@@ -1140,33 +1130,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
   pkl_ast_node lvalue_type = PKL_AST_TYPE (lvalue);
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
 
-  if (PKL_AST_TYPE_CODE (lvalue_type) != PKL_TYPE_ANY
-      && !pkl_ast_type_equal (lvalue_type, exp_type))
+  if (!pkl_ast_type_promoteable (exp_type, lvalue_type,
+                                 0 /* promote_array_of_any */))
     {
-      if (PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_ANY
-          || (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_INTEGRAL
-              && PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_INTEGRAL)
-          || (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_OFFSET
-              && PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_OFFSET))
-        /* Integers and offsets can be promoted, and anything can be
-           promoted to ANY.  */
-        ;
-      else
-        {
-          char *expected_type = pkl_type_str (lvalue_type, 1);
-          char *found_type = pkl_type_str (exp_type, 1);
-
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
-                     "r-value in assignment has the wrong type\n\
+      char *expected_type = pkl_type_str (lvalue_type, 1);
+      char *found_type = pkl_type_str (exp_type, 1);
+      
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+                 "r-value in assignment has the wrong type\n\
 expected %s got %s",
-                     expected_type, found_type);
-          
-          free (found_type);
-          free (expected_type);
-          
-          payload->errors++;
-          PKL_PASS_ERROR;
-        }
+                 expected_type, found_type);
+      
+      free (found_type);
+      free (expected_type);
+      
+      payload->errors++;
+      PKL_PASS_ERROR;
     }
 
 #if 0
@@ -1806,31 +1785,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
   expected_type = PKL_AST_FUNC_RET_TYPE (function);
 
   if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
-      && !pkl_ast_type_equal (returned_type, expected_type))
+      && !pkl_ast_type_promoteable (returned_type, expected_type,
+                                    0 /* promote_array_of_any */))
     {
-      if (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_ANY
-          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_INTEGRAL
-              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_INTEGRAL)
-          || (PKL_AST_TYPE_CODE (expected_type) == PKL_TYPE_OFFSET
-              && PKL_AST_TYPE_CODE (returned_type) == PKL_TYPE_OFFSET))
-        /* Integers and offsets can be promoted, and anything can be
-           promoted to ANY.  */
-        ;
-      else
-      {
-        char *returned_type_str = pkl_type_str (returned_type, 1);
-        char *expected_type_str = pkl_type_str (expected_type, 1);
+      char *returned_type_str = pkl_type_str (returned_type, 1);
+      char *expected_type_str = pkl_type_str (expected_type, 1);
 
-        pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
-                   "returning an expression of the wrong type\n\
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+                 "returning an expression of the wrong type\n\
 expected %s, got %s",
-                   expected_type_str, returned_type_str);
-        free (expected_type_str);
-        free (returned_type_str);
-        
-        payload->errors++;
-        PKL_PASS_ERROR;
-      }
+                 expected_type_str, returned_type_str);
+      free (expected_type_str);
+      free (returned_type_str);
+      
+      payload->errors++;
+      PKL_PASS_ERROR;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1851,31 +1820,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
       pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
       pkl_ast_node initial_type = PKL_AST_TYPE (initial);
 
-      if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_ANY
-          && !pkl_ast_type_equal (arg_type, initial_type))
+      if (!pkl_ast_type_promoteable (initial_type, arg_type,
+                                     0 /* promote_aray_of_any */))
         {
-          if (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_ANY
-              || (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL
-                  && PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_INTEGRAL)
-              || (PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_OFFSET
-                  && PKL_AST_TYPE_CODE (initial_type) == PKL_TYPE_OFFSET))
-            /* Integers and offsets can be promoted.  */
-            ;
-          else
-            {
-              char *arg_type_str = pkl_type_str (arg_type, 1);
-              char *initial_type_str = pkl_type_str (initial_type, 1);
-
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (initial),
-                         "argument initializer is of the wrong type\n\
+          char *arg_type_str = pkl_type_str (arg_type, 1);
+          char *initial_type_str = pkl_type_str (initial_type, 1);
+          
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (initial),
+                     "argument initializer is of the wrong type\n\
 expected %s, got %s",
-                         arg_type_str, initial_type_str);
-              free (arg_type_str);
-              free (initial_type_str);
-        
-              payload->errors++;
-              PKL_PASS_ERROR;
-            }
+                     arg_type_str, initial_type_str);
+          free (arg_type_str);
+          free (initial_type_str);
+          
+          payload->errors++;
+          PKL_PASS_ERROR;
         }
     }
 }

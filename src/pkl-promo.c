@@ -852,6 +852,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
                   PKL_PASS_ERROR;
                 }
               break;
+            case PKL_TYPE_ARRAY:
+              /* These are any[].  Nothing to do.  */
+              break;
             default:
               pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),
                        "funcall contains non-promoteable arguments at promo time");

@@ -637,6 +637,41 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
   return 1;
 }
 
+/* Return whether the type FT is promoteable to type TT.  Note that,
+   unlike pkl_ast_type_equal above, this operation is not
+   generally commutative.  */
+
+int
+pkl_ast_type_promoteable (pkl_ast_node ft, pkl_ast_node tt,
+                          int promote_array_of_any)
+{
+  if (pkl_ast_type_equal (ft, tt))
+    return 1;
+
+  /* Any type is promoteable to ANY.  */
+  if (PKL_AST_TYPE_CODE (tt) == PKL_TYPE_ANY)
+    return 1;
+
+  /* An integral type is promoteable to other integral types.  */
+  if (PKL_AST_TYPE_CODE (tt) == PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (ft) == PKL_TYPE_INTEGRAL)
+    return 1;
+
+  /* An offset type is promoteable to other offset types.  */
+  if (PKL_AST_TYPE_CODE (tt) == PKL_TYPE_OFFSET
+      && PKL_AST_TYPE_CODE (ft) == PKL_TYPE_OFFSET)
+    return 1;
+
+  /* Any array[] type is promoteable to ANY[].  */
+  if (promote_array_of_any
+      && PKL_AST_TYPE_CODE (ft) == PKL_TYPE_ARRAY
+      && PKL_AST_TYPE_CODE (tt) == PKL_TYPE_ARRAY
+      && PKL_AST_TYPE_CODE (PKL_AST_TYPE_A_ETYPE (tt)) == PKL_TYPE_ANY)
+    return 1;
+
+  return 0;
+}
+
 /* Build and return an expression that computes the size of TYPE in
    bits, as an unsigned 64-bit value.  */
 
