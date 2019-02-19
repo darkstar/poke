@@ -45,7 +45,6 @@ defun dump = (off64 from = pk_dump_offset,
   {
    defun print_ruler = void:
      {
-       /* XXX honor use group_by  */
       print "87654321 ";
       defvar o = 0#B;
       for (s in ["00", "11", "22", "33", "44", "55", "66",
