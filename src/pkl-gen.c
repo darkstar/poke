@@ -455,13 +455,46 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
                     PKL_AST_VAR_BACK (lvalue), PKL_AST_VAR_OVER (lvalue));
       break;
     case PKL_AST_INDEXER:
-      /* Stack: VAL ARRAY INDEX */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* ARRAY INDEX VAL */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);  /* ARRAY */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE); /* ARRAY */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);  /* The array
-                                                     value.  */
-      break;
+      {
+        /* Stack: VAL ARRAY INDEX */
+
+        pkl_ast_node array = PKL_AST_INDEXER_ENTITY (lvalue);
+        pkl_ast_node array_type = PKL_AST_TYPE (array);
+        pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (array_type);
+
+        /* If the type of the array is ANY[], then check at runtime
+           that the type of the value matches the type of the elements
+           in the array.  */
+        if (PKL_AST_TYPE_CODE (etype) == PKL_TYPE_ANY)
+          {
+            jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);  /* INDEX VAL ARRAY */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TYPOF); /* INDEX VAL ARRAY ATYPE */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TYAGETT); /* INDEX VAL ARRAY ATYPE ETYPE */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* INDEX VAL ARRAY ETYPE */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* INDEX ARRAY ETYPE VAL */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);  /* INDEX ARRAY VAL ETYPE */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ISA);   /* INDEX ARRAY VAL ETYPE BOOL */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* INDEX ARRAY VAL BOOL */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNZI, label);
+
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+
+            pkl_asm_label (PKL_GEN_ASM, label);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);  /* INDEX ARRAY VAL */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);  /* INDEX VAL ARRAY */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* VAL ARRAY INDEX */
+          }
+
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* ARRAY INDEX VAL */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ASET);  /* ARRAY */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_WRITE); /* ARRAY */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);  /* The array
+                                                       value.  */
+        break;
+      }
     case PKL_AST_STRUCT_REF:
       /* Stack: VAL SCT ID */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);
