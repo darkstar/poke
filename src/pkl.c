@@ -149,24 +149,24 @@ rest_of_compilation (pkl_compiler compiler,
 
   void *middleend_payloads[]
     = { &trans4_payload,
+        &analf_payload,
   };
 
   struct pkl_phase *middleend_phases[]
     = { &pkl_phase_trans4,
+        &pkl_phase_analf,
         NULL
   };
 
   /* Note that gen does subpasses, so no transformation phases should
      be invoked in the bakend pass.  */
   struct pkl_phase *backend_phases[]
-    = { &pkl_phase_analf,
-        &pkl_phase_gen,
+    = { &pkl_phase_gen,
         NULL
   };
 
   void *backend_payloads[]
-    = { &analf_payload,
-        &gen_payload
+    = { &gen_payload
   };
 
   /* Initialize payloads.  */

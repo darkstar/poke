@@ -62,7 +62,10 @@
    is being generated.  0 otherwise.
 
    IN_WRITER is 1 when a writer function for an array or a struct type
-   is begin generated.  0 otherwise. */
+   is begin generated.  0 otherwise.
+
+   IN_LVALUE is 1 in a sub-tree corresponding to the l-value of an
+   assignment statement.  0 otherwise.  */
 
 struct pkl_gen_payload
 {
@@ -76,6 +79,7 @@ struct pkl_gen_payload
   int in_mapper;
   int in_writer;
   int in_valmapper;
+  int in_lvalue;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;

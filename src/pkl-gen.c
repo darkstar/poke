@@ -273,8 +273,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_var)
 {
   pkl_ast_node var = PKL_PASS_NODE;
 
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+  if (PKL_PASS_PARENT == NULL && PKL_GEN_PAYLOAD->in_lvalue)
     {
       /* This is a l-value in an assignment.  Generate nothing, as
          this node is only used as a recipient for the lexical address
@@ -356,16 +355,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * ASS_STMT
  * | EXP
  * | LVALUE
- * ASS_STMT
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
 {
   pkl_ast_node ass_stmt = PKL_PASS_NODE;
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
   pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
+
+  PKL_PASS_SUBPASS (exp);
+
+  PKL_GEN_PAYLOAD->in_lvalue = 1;
+  PKL_PASS_SUBPASS (lvalue);
+  PKL_GEN_PAYLOAD->in_lvalue = 0;
 
   /* At this point the r-value, generated from executing EXP, is in
      the stack.  If its type can be mapped, then we need to generate
@@ -468,6 +473,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_ass_stmt)
     default:
       break;
     }
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -1299,16 +1306,14 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_indexer)
 {
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+
+  if (PKL_PASS_PARENT == NULL && PKL_GEN_PAYLOAD->in_lvalue)
     {
-      /* XXX the parent == stmt doesn't work!  We need
-         PKL_GEN_PAYLOAD->in_lvalue instead.  */
       /* This is a l-value in an assignment.  The array and the index
          are pushed to the stack for the ass_stmt PS handler.  Nothing
-         else to do here.  Note that analf guarantees that the
-         entity in this indexer is an array, not a string.  */
-     }
+         else to do here.  Note that analf guarantees that the entity
+         in this indexer is an array, not a string.  */
+    }
   else
     {
       pkl_ast_node indexer = PKL_PASS_NODE;
@@ -1388,11 +1393,8 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
 {
-  if (PKL_PASS_PARENT
-      && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
+  if (PKL_PASS_PARENT == NULL && PKL_GEN_PAYLOAD->in_lvalue)
     {
-      /* XXX the parent == stmt doesn't work!  We need
-         PKL_GEN_PAYLOAD->in_lvalue instead.  */
       /* This is a -lvalue in an assignment.  The struct and the
          identifier are pushed to the stack for the ass_stmt PS
          handler.  Nothing else to do here.  */
@@ -2305,7 +2307,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_COMP_STMT, pkl_gen_pr_comp_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_COMP_STMT, pkl_gen_ps_comp_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_NULL_STMT, pkl_gen_ps_null_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_gen_ps_ass_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_ASS_STMT, pkl_gen_pr_ass_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_IF_STMT, pkl_gen_pr_if_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_BREAK_STMT, pkl_gen_ps_break_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
