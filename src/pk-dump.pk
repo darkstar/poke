@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/* XXX colorize  */
+
 pk_help_str = pk_help_str
   + "\ndump\t\tDisplay the contents of an IO range.";
 
@@ -24,7 +26,7 @@ pk_help_str = pk_help_str
 
 defvar pk_dump_size = 128#B;
 defvar pk_dump_group_by = 2#B;
-defvar pk_dump_rule = 0;
+defvar pk_dump_ruler = 0;
 defvar pk_dump_ascii = 0;
 
 /* `pk_dump_offset' keeps the last base offset used by `dump'.  It is
@@ -38,18 +40,10 @@ defvar pk_dump_offset = 0#B; /* This gets updated by `dump'.  */
 defun dump = (off64 from = pk_dump_offset,
               off64 size = pk_dump_size,
               off64 group_by = pk_dump_group_by,
-              int rule = pk_dump_rule,
+              int ruler = pk_dump_ruler,
               int ascii = pk_dump_ascii) void:
   {
-   defvar step = 16#B;
-
-   /* The `dump' command is byte-oriented.  Both the base offset and
-      the size of the dump are truncated to bytes.  Hence the casts
-      below.  */
-   defvar offset = from as offset<uint<64>,B>;
-   defvar top = (from + size) as offset<uint<64>,B>;
-
-   if (rule)
+   defun print_ruler = void:
      {
        /* XXX honor use group_by  */
        print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
@@ -58,12 +52,10 @@ defun dump = (off64 from = pk_dump_offset,
        print "\n";
      }
 
-   /* Iterate and print lines with the bytes of each step, grouping
-      them as indicated by group_by.  The output is truncated in case
-      an EOF occurs.  */
-   try
-     while (offset < top)
-       {
+   defun print_lines = (off64 offset, off64 top, off64 step) void:
+     {
+      while (offset < top)
+        {
          printf ("%u32x:", offset / #B);
 
          defvar o = offset;
@@ -78,6 +70,18 @@ defun dump = (off64 from = pk_dump_offset,
          
          offset = offset + step;
        }
+     }
+
+   /* The `dump' command is byte-oriented.  Both the base offset and
+      the size of the dump are truncated to bytes.  Hence the casts
+      below.  */
+   defvar offset = from as offset<uint<64>,B>;
+   defvar top = (from + size) as offset<uint<64>,B>;
+
+   if (ruler)
+     print_ruler;
+
+   try print_lines :offset offset :top top :step 16#B;
    catch if E_eof { print "\n"; }
 
    pk_dump_offset = from;
