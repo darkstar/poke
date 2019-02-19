@@ -59,7 +59,7 @@ defun dump = (off64 from = pk_dump_offset,
          printf ("%u32x:", offset / #B);
 
          defvar o = offset;
-         while (o < offset + step)
+         while (o < offset + step && o < top)
            {
              if ((o - offset) % group_by == 0#B)
                print " ";
