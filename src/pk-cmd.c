@@ -40,7 +40,6 @@
 
 /* Table of supported commands.  */
 
-extern struct pk_cmd dump_cmd; /* pk-dump.c  */
 extern struct pk_cmd file_cmd; /* pk-file.c  */
 extern struct pk_cmd close_cmd; /* pk-file.c */
 extern struct pk_cmd load_cmd; /* pk-file.c */
@@ -57,7 +56,6 @@ struct pk_cmd null_cmd =
 
 static struct pk_cmd *cmds[] =
   {
-    &dump_cmd,
     &file_cmd,
     &exit_cmd,
     &version_cmd,
