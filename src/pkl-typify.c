@@ -1131,7 +1131,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
 
   if (!pkl_ast_type_promoteable (exp_type, lvalue_type,
-                                 0 /* promote_array_of_any */))
+                                 1 /* promote_array_of_any */))
     {
       char *expected_type = pkl_type_str (lvalue_type, 1);
       char *found_type = pkl_type_str (exp_type, 1);
@@ -1786,7 +1786,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
 
   if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID
       && !pkl_ast_type_promoteable (returned_type, expected_type,
-                                    0 /* promote_array_of_any */))
+                                    1 /* promote_array_of_any */))
     {
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
@@ -1821,7 +1821,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
       pkl_ast_node initial_type = PKL_AST_TYPE (initial);
 
       if (!pkl_ast_type_promoteable (initial_type, arg_type,
-                                     0 /* promote_aray_of_any */))
+                                     1 /* promote_aray_of_any */))
         {
           char *arg_type_str = pkl_type_str (arg_type, 1);
           char *initial_type_str = pkl_type_str (initial_type, 1);
