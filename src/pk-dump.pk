@@ -26,7 +26,7 @@ pk_help_str = pk_help_str
 
 defvar pk_dump_size = 128#B;
 defvar pk_dump_group_by = 2#B;
-defvar pk_dump_ruler = 0;
+defvar pk_dump_ruler = 1;
 defvar pk_dump_ascii = 0;
 
 /* `pk_dump_offset' keeps the last base offset used by `dump'.  It is
@@ -46,7 +46,17 @@ defun dump = (off64 from = pk_dump_offset,
    defun print_ruler = void:
      {
        /* XXX honor use group_by  */
-       print "87654321  0011 2233 4455 6677 8899 aabb ccdd eeff";
+      print "87654321 ";
+      defvar o = 0#B;
+      for (s in ["00", "11", "22", "33", "44", "55", "66",
+                 "77", "88", "99", "aa", "bb", "cc", "dd",
+                 "ee", "ff"])
+        {
+          if (o % group_by == 0#B)
+            print " ";
+          print s;
+          o = o + 1#B;
+        }
        if (ascii)
          print "  0123456789ABCDEF";
        print "\n";
