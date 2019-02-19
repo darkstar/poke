@@ -6,6 +6,5 @@ defun foo = (string[] array) void:
      print (a + "\n");
   }
 
-/* { dg-command {  foo (["foo", "bar"]) } } */
-/* { dg-output "foo\nbar" } */
+foo (["foo", "bar"]); /* { dg-output "foo\nbar" } */
 
