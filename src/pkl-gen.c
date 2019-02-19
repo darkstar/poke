@@ -1302,6 +1302,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_indexer)
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
     {
+      /* XXX the parent == stmt doesn't work!  We need
+         PKL_GEN_PAYLOAD->in_lvalue instead.  */
       /* This is a l-value in an assignment.  The array and the index
          are pushed to the stack for the ass_stmt PS handler.  Nothing
          else to do here.  Note that analf guarantees that the
@@ -1389,6 +1391,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct_ref)
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_ASS_STMT)
     {
+      /* XXX the parent == stmt doesn't work!  We need
+         PKL_GEN_PAYLOAD->in_lvalue instead.  */
       /* This is a -lvalue in an assignment.  The struct and the
          identifier are pushed to the stack for the ass_stmt PS
          handler.  Nothing else to do here.  */

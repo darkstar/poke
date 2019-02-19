@@ -20,4 +20,15 @@
 /* { dg-command { o } } */
 /* { dg-output "\n2#B" } */
 
+defvar a = 10;
+defvar b = 20;
 
+/* { dg-command { a = b } } */
+/* { dg-command { a } } */
+/* { dg-output "\n20" } */
+
+defvar aa = [1,2,3];
+
+/* { dg-command { aa[0] = aa[1] } } */
+/* { dg-command { aa[0] } } */
+/* { dg-output "\n2" } */
