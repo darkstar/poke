@@ -33,7 +33,7 @@ defvar pk_dump_ascii = 0;
    the offset to be used in case the command is invoked with no :from
    argument.  */
 
-defvar pk_dump_offset = 0#B; /* This gets updated by `dump'.  */
+defvar pk_dump_offset = 0#B;
 
 /* And the command itself.  */
 
