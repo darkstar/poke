@@ -52,7 +52,7 @@ defun dump = (off64 from = pk_dump_offset,
        print "\n";
      }
 
-   defun print_lines = (off64 offset, off64 top, off64 step) void:
+   defun print_data = (off64 offset, off64 top, off64 step) void:
      {
       while (offset < top)
         {
@@ -81,7 +81,7 @@ defun dump = (off64 from = pk_dump_offset,
    if (ruler)
      print_ruler;
 
-   try print_lines :offset offset :top top :step 16#B;
+   try print_data :offset offset :top top :step 16#B;
    catch if E_eof { print "\n"; }
 
    pk_dump_offset = from;
