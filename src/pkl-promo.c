@@ -752,7 +752,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
       switch (PKL_AST_TYPE_CODE (lvalue_type))
         {
         case PKL_TYPE_ANY:
-          /* Nothing to do.  */
+        case PKL_TYPE_ARRAY: /* any[] */
           break;
         case PKL_TYPE_INTEGRAL:
           if (!promote_integral (PKL_PASS_AST,
@@ -825,6 +825,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
           switch (PKL_AST_TYPE_CODE (fa_type))
             {
             case PKL_TYPE_ANY:
+            case PKL_TYPE_ARRAY: /* any[] */
               /* Do nothing.  Promoting to ANY doesn't require
                  altering the AST in any way.  */
               break;
@@ -851,9 +852,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
                            "couldn't promote funcall argument");
                   PKL_PASS_ERROR;
                 }
-              break;
-            case PKL_TYPE_ARRAY:
-              /* These are any[].  Nothing to do.  */
               break;
             default:
               pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),
@@ -898,6 +896,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
       switch (PKL_AST_TYPE_CODE (expected_type))
         {
         case PKL_TYPE_ANY:
+        case PKL_TYPE_ARRAY: /* any[] */
           /* Nothing to do.  */
           break;
         case PKL_TYPE_INTEGRAL:
@@ -993,6 +992,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
           switch (PKL_AST_TYPE_CODE (arg_type))
             {
             case PKL_TYPE_ANY:
+            case PKL_TYPE_ARRAY: /* any[] */
               /* Nothing to do.  */
               break;
             case PKL_TYPE_INTEGRAL:
