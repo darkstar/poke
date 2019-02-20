@@ -1873,8 +1873,48 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
 {
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
-      /* XXX: add mapper code for a struct elem type.  */
-      /* XXX: add constructor code for a struct elem type.  */
+      pkl_ast_node elem = PKL_PASS_NODE;
+      pkl_ast_node elem_name = PKL_AST_STRUCT_ELEM_TYPE_NAME (elem);
+      pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
+
+      /* Add mapper code for a struct elem type.  */
+      {
+        pkl_ast_node offset_base_type
+          = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+
+        /* At this point the offset of this element is on the stack.  */
+        /* The mapped struct to build is: OFFSET NAME VALUE  */
+
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);           /* OFF OFF */
+        PKL_GEN_PAYLOAD->in_mapper = 1;
+        PKL_PASS_SUBPASS (elem_type);                       /* OFF VALUE */
+        PKL_GEN_PAYLOAD->in_mapper = 0;
+
+        /* Calculate the offset of the next element.  */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);           /* OFF VALUE SIZ */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);           /* VALUE SIZ OFF */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDO,
+                      offset_base_type);                    /* VALUE SIZ OFF NOFF */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);           /* VALUE OFF NOFF SIZ */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);          /* VALUE OFF NOFF */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);           /* OFF NOFF VALUE */
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);          /* OFF VALUE NOFF */
+        if (elem_name)
+          PKL_PASS_SUBPASS (elem_name);                       /* OFF VALUE NOFF NAME */
+        else
+          /* XXX */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (""));
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);          /* OFF VALUE NAME NOFF */
+
+
+        ASTREF (offset_base_type); pkl_ast_node_free (offset_base_type);
+      }
+
+      /* Add constructor code for a struct elem type.  */
+      {
+        /* XXX writeme */
+      }
+      
       /* Do not process the child nodes.  */
       PKL_PASS_BREAK;
     }
