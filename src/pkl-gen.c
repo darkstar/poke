@@ -1024,6 +1024,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
      circumstances.  In any other cases, break the pass to avoid
      post-order hooks to be invoked.  */
 
+  if (PKL_GEN_PAYLOAD->in_struct_decl)
+    PKL_PASS_DONE;
+
   if (PKL_PASS_PARENT)
     {
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
@@ -1782,11 +1785,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 
         /* Put the arguments in the current environment:
          
-           OFFSET: offset of the struct to map.
-           EBOUND: always null
-           SBOUND: always null  */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
+           OFFSET: offset of the struct to map.  */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
 
         /* Push the offset to the stack.  */
