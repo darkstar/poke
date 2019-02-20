@@ -34,3 +34,7 @@
 /* { dg-command {try c = int[3] @ 4#B; catch if E_eof { print ("catched\n"); } } } */
 /* { dg-output "\ncatched" }  */
 
+/* { dg-command {.set obase 16} } */
+/* { dg-command {deftype Array = byte[2]} } */
+/* { dg-command {Array @ 1#B} } */
+/* { dg-output "\n\\\[0x20B,0x30B\\\]"} */
