@@ -154,3 +154,60 @@ defun format = (string fmt, args...) string:
 
    return res;
   }
+
+/* Quicksort.  */
+
+deftype Comparator = (any,any)int;
+
+defun CmpInt = (any a, any b) int:
+  {
+   defvar ai = a as int;
+   defvar bi = b as int;
+
+   if (ai == bi)
+     return 0;
+   else if (ai < bi)
+     return -1;
+   else
+     return 1;
+  }
+
+defun qsort = (any[] array, Comparator cmp_f,
+               long left = 0, long right = array'length - 1) void:
+  {
+   defun swap = (long i1, long i2) void:
+   {
+    defvar t = array[i1];
+    array[i1] = array[i2];
+    array[i2] = t;
+   }
+
+   defun partition = int:
+   {
+    defvar pivot = array[right];
+    defvar i = left - 1;
+    
+    defvar j = left;
+    while (j <= right - 1)
+      {
+        if (cmp_f (array[j], pivot) <= 0)
+          {
+            i = i + 1;
+            swap (i, j);
+          }
+
+        j = j + 1;
+      }
+
+    swap (i + 1, right);
+    return i + 1;
+   }
+
+   if (left < right)
+     {
+      defvar pi = partition;
+      
+      qsort (array, cmp_f, left, pi - 1);
+      qsort (array, cmp_f, pi + 1, right);
+     }
+  }

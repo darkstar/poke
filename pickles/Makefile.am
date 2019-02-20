@@ -14,6 +14,5 @@ dist_pkgdata_DATA = bmp.pk \
                     leb128.pk \
                     mp3.pk \
                     patterns.pk \
-                    qsort.pk \
                     sparc.pk \
                     swf.pk

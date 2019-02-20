@@ -346,8 +346,8 @@ late-header-c
     fmt[4] = 'l';                                                           \
     if (JITTER_ARGN1 == 10)                                                 \
     {                                                                       \
-      fmt[5] = IFORMAT;                                                     \
-      fmt[6] = '\0';                                                        \
+      fmt[2] = IFORMAT;                                                     \
+      fmt[3] = '\0';                                                        \
     }                                                                       \
     else                                                                    \
     {                                                                       \
