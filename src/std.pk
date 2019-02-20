@@ -162,15 +162,15 @@ deftype Comparator = (any,any)int;
 defun qsort = (any[] array, Comparator cmp_f,
                long left = 0, long right = array'length - 1) void:
   {
-   defun swap = (long i1, long i2) void:
-   {
-    defvar t = array[i1];
-    array[i1] = array[i2];
-    array[i2] = t;
-   }
-
    defun partition = int:
    {
+    defun swap = (long i1, long i2) void:
+    {
+     defvar t = array[i1];
+     array[i1] = array[i2];
+     array[i2] = t;
+    }
+
     defvar pivot = array[right];
     defvar i = left - 1;
     
