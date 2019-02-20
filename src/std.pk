@@ -206,7 +206,7 @@ defun qsort = (any[] array, Comparator cmp_f,
    if (left < right)
      {
       defvar pi = partition;
-      
+
       qsort (array, cmp_f, left, pi - 1);
       qsort (array, cmp_f, pi + 1, right);
      }
