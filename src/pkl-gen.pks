@@ -87,7 +87,7 @@
         drop                    ; OFF
 
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        .c PKL_PASS_SUBPASS (array_type);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
 
                                 ; OFF ATYPE
@@ -310,7 +310,7 @@
 
 .ebound_ok:
         .c PKL_GEN_PAYLOAD->in_valmapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        .c PKL_PASS_SUBPASS (array_type);
         .c PKL_GEN_PAYLOAD->in_valmapper = 1;
                                 ; OFF ATYPE
 

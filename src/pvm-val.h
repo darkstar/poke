@@ -218,7 +218,6 @@ void pvm_print_string (FILE *out, pvm_val string);
 #define PVM_VAL_ARR_MAPPER(V) (PVM_VAL_ARR(V)->mapper)
 #define PVM_VAL_ARR_WRITER(V) (PVM_VAL_ARR(V)->writer)
 #define PVM_VAL_ARR_TYPE(V) (PVM_VAL_ARR(V)->type)
-#define PVM_VAL_ARR_ARRAYOF(V) (PVM_VAL_ARR(V)->type)
 #define PVM_VAL_ARR_NELEM(V) (PVM_VAL_ARR(V)->nelem)
 #define PVM_VAL_ARR_ELEM(V,I) (PVM_VAL_ARR(V)->elems[(I)])
 
