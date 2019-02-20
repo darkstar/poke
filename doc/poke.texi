@@ -131,6 +131,9 @@ Poke Language Reference Manual
 @c   The Standard Library
 @c       Integer Standard Types
 
+@c XXX: writing generic code: any and any[]
+
+
 Old
 * Structs::
 * Unions::
