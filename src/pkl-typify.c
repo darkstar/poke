@@ -1602,18 +1602,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
   switch (attr)
     {
     case PKL_AST_ATTR_SIZE:
-      /* 'size is defined for integral values, string values, array
-         values, struct values and offset values.  */
+      /* 'size is defined for all kind of value, but functions.  */
       switch (PKL_AST_TYPE_CODE (operand_type))
         {
-        case PKL_TYPE_INTEGRAL:
-        case PKL_TYPE_STRING:
-        case PKL_TYPE_ARRAY:
-        case PKL_TYPE_STRUCT:
-        case PKL_TYPE_OFFSET:
-          break;
-        default:
+        case PKL_TYPE_FUNCTION:
           goto invalid_attribute;
+        default:
           break;
         }
 

@@ -2043,6 +2043,12 @@ instruction typof () # ( VAL -- VAL TYP )
   end
 end
 
+instruction tyisc () # ( VAL -- VAL BOOL )
+  code
+    JITTER_PUSH_STACK (pvm_make_int (PVM_IS_CLS (JITTER_TOP_STACK ()), 32));
+  end
+end
+
 # `Any' type.
 
 instruction mktyany () # ( -- TYP )

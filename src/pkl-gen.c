@@ -2197,6 +2197,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
   switch (attr)
     {
     case PKL_AST_ATTR_SIZE:
+      /* If the value is an ANY, check the type is NOT a function
+         value.  */
+      if (PKL_AST_TYPE_CODE (operand_type) == PKL_TYPE_ANY)
+        {
+          jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TYISC);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BZI, label);
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
+
+          pkl_asm_label (PKL_GEN_ASM, label);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+        }
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
       break;

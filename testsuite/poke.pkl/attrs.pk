@@ -60,3 +60,9 @@
 /* { dg-command {  [1,2,3]'length } } */
 /* { dg-output "\n3UL" } */
 
+
+/* { dg-command { defun fff = (any a) offset<int,B>: { return a'size; } } } */
+/* { dg-command { fff (10) } } */
+/* { dg-output "\n4#B" } */
+/* { dg-command { try fff (fff); catch if E_conv { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
