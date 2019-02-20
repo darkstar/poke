@@ -1896,6 +1896,35 @@ instruction mksct () # ( [STR VAL]... ULONG -- SCT )
   end
 end
 
+instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG -- SCT )
+  code
+    size_t e;
+    pvm_val nelem, sct;
+
+    nelem = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+
+    sct = pvm_make_struct (nelem);
+
+    for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
+    {
+      PVM_VAL_SCT_ELEM_VALUE (sct, e) = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_NAME (sct, e) = JITTER_UNDER_TOP_STACK ();
+
+      JITTER_DROP_STACK ();
+      JITTER_DROP_STACK ();
+
+      PVM_VAL_SCT_ELEM_OFFSET (sct, e) = JITTER_TOP_STACK ();
+      JITTER_DROP_STACK ();
+    }
+
+    PVM_VAL_SCT_OFFSET (sct) = JITTER_TOP_STACK();
+    JITTER_DROP_STACK ();
+
+    JITTER_PUSH_STACK (sct);
+  end
+end
+
 instruction revsct () # ( SCT -- SCT )
   code
     pvm_reverse_struct (JITTER_TOP_STACK ());
