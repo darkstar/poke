@@ -159,19 +159,6 @@ defun format = (string fmt, args...) string:
 
 deftype Comparator = (any,any)int;
 
-defun CmpInt = (any a, any b) int:
-  {
-   defvar ai = a as int;
-   defvar bi = b as int;
-
-   if (ai == bi)
-     return 0;
-   else if (ai < bi)
-     return -1;
-   else
-     return 1;
-  }
-
 defun qsort = (any[] array, Comparator cmp_f,
                long left = 0, long right = array'length - 1) void:
   {
