@@ -1754,6 +1754,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
          FUNCTION prologue and epilogue in the PS handler.  The code
          in between is common (for function and inline cases.)  */
 
+      /* If the mapper function of the struct doesn't exist, compile it
+         and complete it using the current environment.  */
+
+      /* Build the arguments and call the mapper to get a mapped
+         struct value.  */
+
+      /* Install the mapper into the value.  */
+
+      /* If the writer function of the struct doesn't exist, compile
+         it and complete it using the current environmetn.  */
+
+      /* Install the writer into the value.  */
+
       assert (0);
     }
   
