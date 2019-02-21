@@ -479,14 +479,26 @@
                                 ; OFF VAL
         dup                     ; OFF VAL VAL
         regvar $val             ; OFF VAL
-     .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
         push null
-     .c else
+   .c else
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
                                 ; OFF VAL STR
         swap                    ; OFF STR VAL
-        ;; XXX evaluate the element's constraint and raise
-        ;; PVM_E_CONSTRAINT if not satisfied.
+        ;; Evaluate the element's constraint and raise
+        ;; an exception if not satisfied.
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem) != NULL)
+   .c {
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem));
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+        bnzi .constraint_ok
+        drop
+        push PVM_E_CONSTRAINT
+        raise
+.constraint_ok:
+        drop
+   .c }
         .end
         
 ;;; RAS_FUNCTION_STRUCT_MAPPER
