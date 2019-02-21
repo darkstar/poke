@@ -529,10 +529,14 @@
         nip                     ;          ...         ESIZM
         pushvar $eoff           ;          ...         ESIZM EOFF
         ogetm                   ;          ...         ESIZM EOFF EOFFM
-        nip                     ;          ...         ESIZM EOFFM
+        swap                    ;          ...         ESIZM EOFFM EOFF
+        ogetu                   ;          ...         ESIZM EOFFM EOFF EOFFU
+        nip                     ;          ...         ESIZM EOFFM EOFFU
+        mullu
+        nip2                    ;          ...         ESIZM (EOFFM*EOFFU)
         addlu
-        nip2                    ;          ...         (ESIZM+EOFFM)
-        push ulong<64>1         ;          ...         (ESIZM+EOFFM) 1UL
+        nip2                    ;          ...         (ESIZM+EOFFM*EOFFU)
+        push ulong<64>1         ;          ...         (ESIZM+EOFFM*EOFFU) 1UL
         mko                     ;          ...         EOFF
         popvar $eoff            ; ...[EOFF ENAME EVAL]
         ;; Increase the number of elements.
