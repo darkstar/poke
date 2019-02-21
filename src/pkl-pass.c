@@ -313,7 +313,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
       if (PKL_AST_STRUCT_ELEM_NAME (node))
         PKL_PASS (PKL_AST_STRUCT_ELEM_NAME (node));
       PKL_PASS (PKL_AST_STRUCT_ELEM_EXP (node));
-
+      if (PKL_AST_STRUCT_ELEM_CONSTRAINT (node))
+        PKL_PASS (PKL_AST_STRUCT_ELEM_CONSTRAINT (node));
       break;
     case PKL_AST_STRUCT_REF:
       PKL_PASS (PKL_AST_STRUCT_REF_STRUCT (node));

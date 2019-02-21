@@ -789,12 +789,18 @@ struct_elem_list:
 struct_elem:
 	  expression
           	{
-                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast, NULL, $1);
+                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
+                                                   NULL /* name */,
+                                                   $1,
+                                                   NULL /* constraint */);
                     PKL_AST_LOC ($$) = @$;
                 }
         | identifier '=' expression
 	        {
-                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $1, $3);
+                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
+                                                   $1,
+                                                   $3,
+                                                   NULL /* constraint */);
                     PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
@@ -1091,7 +1097,8 @@ struct_elem_type_list:
 struct_elem_type:
 	  type_specifier identifier ';'
           	{
-                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1);
+                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
+                                                      NULL /* constraint */);
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
@@ -1124,7 +1131,8 @@ struct_elem_type:
                 }
         | type_specifier ';'
         	{
-                    $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1);
+                    $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1,
+                                                        NULL /* constraint */);
                     PKL_AST_LOC ($$) = @$;
                 }
         ;

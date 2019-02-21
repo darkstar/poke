@@ -401,10 +401,20 @@ pkl_ast_node pkl_ast_make_struct (pkl_ast ast,
                                   pkl_ast_node elems);
 
 /* PKL_AST_STRUCT_ELEM nodes represent elements in struct
-   literals.  */
+   literals.
+
+   NAME is a PKL_AST_IDENTIFIER node with the name of the struct
+   element.  If no name is specified, this is NULL.
+
+   EXP is the value of the struct element.
+
+   CONSTRAINT is a constraint associated with the struct element.  It
+   should be an expression evaluating to a boolean.  If the element
+   has no constraint, this is NULL.  */
 
 #define PKL_AST_STRUCT_ELEM_NAME(AST) ((AST)->sct_elem.name)
 #define PKL_AST_STRUCT_ELEM_EXP(AST) ((AST)->sct_elem.exp)
+#define PKL_AST_STRUCT_ELEM_CONSTRAINT(AST) ((AST)->sct_elem.constraint)
 
 struct pkl_ast_struct_elem
 {
@@ -412,11 +422,13 @@ struct pkl_ast_struct_elem
 
   union pkl_ast_node *name;
   union pkl_ast_node *exp;
+  union pkl_ast_node *constraint;
 };
 
 pkl_ast_node pkl_ast_make_struct_elem (pkl_ast ast,
                                        pkl_ast_node name,
-                                       pkl_ast_node exp);
+                                       pkl_ast_node exp,
+                                       pkl_ast_node constraint);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.
@@ -695,10 +707,14 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
    NAME is a PKL_AST_IDENTIFIER node, or NULL if the struct type
    element has no name.
 
-   TYPE is a PKL_AST_TYPE node.  */
+   TYPE is a PKL_AST_TYPE node.
+ 
+   EXP is a constraint associated with the struct elem.  It is
+   an expression that should evaluate to a boolean.  */
 
 #define PKL_AST_STRUCT_ELEM_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
 #define PKL_AST_STRUCT_ELEM_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
+#define PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
 
 struct pkl_ast_struct_elem_type
 {
@@ -706,11 +722,13 @@ struct pkl_ast_struct_elem_type
 
   union pkl_ast_node *name;
   union pkl_ast_node *type;
+  union pkl_ast_node *constraint;
 };
 
 pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
                                             pkl_ast_node name,
-                                            pkl_ast_node type);
+                                            pkl_ast_node type,
+                                            pkl_ast_node constraint);
 
 /* PKL_AST_FUNC_TYPE_ARG nodes represent the arguments part of a
    function type.

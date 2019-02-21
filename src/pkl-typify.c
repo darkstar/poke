@@ -772,7 +772,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
       pkl_ast_node struct_elem_type
         =  pkl_ast_make_struct_elem_type (PKL_PASS_AST,
                                           PKL_AST_STRUCT_ELEM_NAME (t),
-                                          PKL_AST_TYPE (t));
+                                          PKL_AST_TYPE (t),
+                                          PKL_AST_STRUCT_ELEM_CONSTRAINT (t));
       PKL_AST_LOC (struct_elem_type) = PKL_AST_LOC (t);
 
       struct_elem_types = pkl_ast_chainon (struct_elem_types,
