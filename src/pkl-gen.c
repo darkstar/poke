@@ -114,12 +114,11 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
-  //  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
+  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
 
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_TYPE:
-#if 0
       if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
         {
           /* INITIAL is a struct type.  We need to compile two
@@ -143,7 +142,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
 
           PKL_GEN_PAYLOAD->in_struct_decl = 1;
         }
-#endif
       break;
     case PKL_AST_DECL_KIND_FUNC:
 
@@ -169,7 +167,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 {
   pkl_ast_node decl = PKL_PASS_NODE;
-  //  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
+  pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
 
   switch (PKL_AST_DECL_KIND (decl))
     {
@@ -178,7 +176,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);
       break;
     case PKL_AST_DECL_KIND_TYPE:
-#if 0
       if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
         {
           /* Finish both the struct constructor and struct mapper
@@ -209,7 +206,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
             closure = pvm_make_cls (program);
           
             /*XXX*/
-            /* pvm_print_program (stdout, program); */
+            /* pvm_print_program (stdout, program);*/
             
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -237,7 +234,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
 
           PKL_GEN_PAYLOAD->in_struct_decl = 0;
         }
-#endif
       break;
     case PKL_AST_DECL_KIND_FUNC:
       {
