@@ -1944,8 +1944,12 @@ end
 
 instruction sref () # ( SCT STR -- SCT STR VAL )
   code
-    JITTER_PUSH_STACK (pvm_ref_struct (JITTER_UNDER_TOP_STACK (),
-                                       JITTER_TOP_STACK ()));
+    pvm_val val = pvm_ref_struct (JITTER_UNDER_TOP_STACK (),
+                                  JITTER_TOP_STACK ());
+
+    if (val == PVM_NULL)
+      PVM_RAISE (PVM_E_ELEM);
+    JITTER_PUSH_STACK (val);
   end
 end
 
