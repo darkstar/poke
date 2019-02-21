@@ -546,7 +546,7 @@
         pushvar $eoff           ; ... EOFF
         .e struct_elem_mapper   ; ... [EOFF ENAME EVAL]
         ;; Increase the element's offset by the size of the
-        ;; element just mapped.
+        ;; element just mapped.  XXX: pinned structs.
         siz                     ; ...[EOFF ENAME EVAL] ESIZ
         ogetm                   ;          ...         ESIZ ESIZM
         nip                     ;          ...         ESIZM
