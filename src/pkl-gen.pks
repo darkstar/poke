@@ -474,7 +474,12 @@
 ;;; OFF should be of type offset<uint<64>,*>.
 ;;;
 ;;; This macro should only be used in the pkl_gen_pr_type_struct GEN
-;;; handler.
+;;; handler.  The C environment required is:
+;;; 
+;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; of the struct type being processed.
+;;; 
+;;; `elem' is a scratch pkl_ast_node.
 
         .function struct_mapper
         prolog
