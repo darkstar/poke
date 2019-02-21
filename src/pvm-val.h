@@ -265,7 +265,7 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
    mapped.  If the structure is not mapped then this is PVM_NULL.
 
    TYPE is the type of the struct.  This includes the types of the
-   struct elements.  XXX: really needed??
+   struct elements.
 
    NELEM is the number of elements conforming the structure.
 
@@ -317,7 +317,7 @@ struct pvm_struct_elem
 
 typedef struct pvm_struct *pvm_struct;
 
-pvm_val pvm_make_struct (pvm_val nelem);
+pvm_val pvm_make_struct (pvm_val nelem, pvm_val type);
 void pvm_reverse_struct (pvm_val sct);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 

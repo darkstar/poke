@@ -1873,7 +1873,7 @@ end
 
 ## Struct instructions.
 
-instruction mksct () # ( [STR VAL]... ULONG -- SCT )
+instruction mksct () # TYP ( [STR VAL]... ULONG -- SCT )
   code
     size_t e;
     pvm_val nelem, sct;
@@ -1881,7 +1881,7 @@ instruction mksct () # ( [STR VAL]... ULONG -- SCT )
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem);
+    sct = pvm_make_struct (nelem, PVM_NULL /* type */);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
@@ -1892,11 +1892,14 @@ instruction mksct () # ( [STR VAL]... ULONG -- SCT )
       JITTER_DROP_STACK ();
     }
 
+    PVM_VAL_SCT_TYPE (sct) = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
+
     JITTER_PUSH_STACK (sct);
   end
 end
 
-instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG -- SCT )
+instruction mkmsct () # ( TYP OFF [OFF STR VAL]... ULONG -- SCT )
   code
     size_t e;
     pvm_val nelem, sct;
@@ -1904,7 +1907,7 @@ instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG -- SCT )
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem);
+    sct = pvm_make_struct (nelem, PVM_NULL /* type */);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
@@ -1919,6 +1922,9 @@ instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG -- SCT )
     }
 
     PVM_VAL_SCT_OFFSET (sct) = JITTER_TOP_STACK();
+    JITTER_DROP_STACK ();
+
+    PVM_VAL_SCT_TYPE (sct) = JITTER_TOP_STACK();
     JITTER_DROP_STACK ();
 
     JITTER_PUSH_STACK (sct);

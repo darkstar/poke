@@ -109,7 +109,7 @@ pvm_make_array (pvm_val nelem, pvm_val type)
 }
 
 pvm_val
-pvm_make_struct (pvm_val nelem)
+pvm_make_struct (pvm_val nelem, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
   pvm_struct sct = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_struct));
@@ -118,7 +118,7 @@ pvm_make_struct (pvm_val nelem)
   sct->offset = PVM_NULL;
   sct->mapper = PVM_NULL;
   sct->writer = PVM_NULL;
-  sct->type = PVM_NULL; /* XXX add type in constructor.  */
+  sct->type = type;
   sct->nelem = nelem;
   sct->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
   memset (sct->elems, 0, nbytes);
@@ -209,6 +209,7 @@ pvm_make_struct_type (pvm_val nelem,
 {
   pvm_val stype = pvm_make_type (PVM_TYPE_STRUCT);
 
+  PVM_VAL_TYP_S_NAME (stype) = PVM_NULL;
   PVM_VAL_TYP_S_NELEM (stype) = nelem;
   PVM_VAL_TYP_S_ENAMES (stype) = enames;
   PVM_VAL_TYP_S_ETYPES (stype) = etypes;
@@ -726,9 +727,17 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
   else if (PVM_IS_SCT (val))
     {
       size_t nelem, idx;
+      pvm_val struct_type = PVM_VAL_SCT_TYPE (val);
+      pvm_val struct_type_name = PVM_VAL_TYP_S_NAME (struct_type);
 
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
-      /* XXX print the struct type's name here.  */
+
+      if (struct_type_name != PVM_NULL)
+        fputs (PVM_VAL_STR (struct_type_name), out);
+      else
+        fputs ("struct", out);
+      fputs (" ", out);
+      
       fprintf (out, "{");
       for (idx = 0; idx < nelem; ++idx)
         {

@@ -497,6 +497,9 @@
 ;;; OFF should be of type offset<uint<64>,*>.
 ;;;
 ;;; The C environment required is:
+;;;
+;;; `type_struct' is a pkl_ast_node with the struct type being
+;;;  processed.
 ;;; 
 ;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
 ;;; of the struct type being processed.
@@ -514,9 +517,12 @@
         regvar $off
         push ulong<64>0
         regvar $nelem
-        pushvar $off            ; OFF
-        dup                     ; OFF OFF
-        regvar $eoff            ; OFF
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (type_struct);
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+        pushvar $off            ; TYP OFF
+        dup                     ; TYP OFF OFF
+        regvar $eoff            ; TYP OFF
         ;; Iterate over the elements of the struct type.
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
@@ -549,7 +555,7 @@
         ;; Ok, at this point all the struct element triplets are
         ;; in the stack.  Push the number of elements, create
         ;; the mapped struct and return it.
-        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        pushvar $nelem          ; TYP OFF [OFF STR VAL]... NELEM
         mkmsct                  ; SCT
         popf 1
         return
