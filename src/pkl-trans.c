@@ -987,21 +987,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_array)
 }
 PKL_PHASE_END_HANDLER
 
-/* Reverse the struct literal elements.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_struct)
-{
-  pkl_ast_node astruct = PKL_PASS_NODE;
-  pkl_ast_node astruct_elems = PKL_AST_STRUCT_ELEMS (astruct);
-
-  astruct_elems = pkl_ast_reverse (astruct_elems);
-  PKL_AST_STRUCT_ELEMS (astruct) = ASTREF (astruct_elems);
-}
-PKL_PHASE_END_HANDLER
-
 struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans4_ps_array),
-   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_trans4_ps_struct),
   };

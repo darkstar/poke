@@ -1888,8 +1888,10 @@ instruction mksct () # ( [STR VAL]... ULONG TYP -- SCT )
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
-      PVM_VAL_SCT_ELEM_VALUE (sct, e) = JITTER_TOP_STACK ();
-      PVM_VAL_SCT_ELEM_NAME (sct, e) = JITTER_UNDER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
+          = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
+          = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
@@ -1914,8 +1916,10 @@ instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
-      PVM_VAL_SCT_ELEM_VALUE (sct, e) = JITTER_TOP_STACK ();
-      PVM_VAL_SCT_ELEM_NAME (sct, e) = JITTER_UNDER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
+          = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
+          = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
