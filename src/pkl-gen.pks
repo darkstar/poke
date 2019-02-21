@@ -506,9 +506,11 @@
 ;;; 
 ;;; `elem' is a scratch pkl_ast_node.
 
-        ;; XXX we can't use regvar here for temporaries, because
-        ;; of the lexical environment expected by the variables.
-        ;; Or, at least, we should coordinate with pkl-tab.y.
+        ;; NOTE: please be careful when altering the lexical structure of
+        ;; this code (and of the code in expanded macros). Every local
+        ;; added should be also reflected in the compile-time environment
+        ;; in pkl-tab.y, or horrible things _will_ happen.
+
         .function struct_mapper
         prolog
         pushf
@@ -517,12 +519,9 @@
         regvar $off
         push ulong<64>0
         regvar $nelem
-        .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (type_struct);
-        .c PKL_GEN_PAYLOAD->in_mapper = 1;
-        pushvar $off            ; TYP OFF
-        dup                     ; TYP OFF OFF
-        regvar $eoff            ; TYP OFF
+        pushvar $off            ; OFF
+        dup                     ; OFF OFF
+        regvar $eoff            ; OFF
         ;; Iterate over the elements of the struct type.
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
@@ -555,7 +554,11 @@
         ;; Ok, at this point all the struct element triplets are
         ;; in the stack.  Push the number of elements, create
         ;; the mapped struct and return it.
-        pushvar $nelem          ; TYP OFF [OFF STR VAL]... NELEM
+        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (type_struct);
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+                                ; OFF [OFF STR VAL]... NELEM TYP
         mkmsct                  ; SCT
         popf 1
         return
