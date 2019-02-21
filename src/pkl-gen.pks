@@ -475,9 +475,53 @@
 ;;; are not bounded by either number of elements or size.
 ;;;
 ;;; OFF should be of type offset<uint<64>,*>.
+;;;
+;;; This macro should only be used in the pkl_gen_pr_type_struct GEN
+;;; handler.
 
         .function struct_mapper
-        ;; XXX writeme
+        prolog
+        pushf
+        drop                    ; sbound
+        drop                    ; ebound
+        regvar $off
+        push ulong<64>0
+        regvar $nelem
+        pushvar $off            ; OFF
+        dup                     ; OFF OFF
+        regvar $eoff            ; OFF
+        ;; Iterate over the elements of the struct type.
+ .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+ .c {
+        pushvar $eoff           ; ... EOFF
+        .c PKL_PASS_SUBPASS (elem);
+        ;; Increase the element's offset by the size of the
+        ;; element just mapped.
+        siz                     ; ...[EOFF ENAME EVAL] ESIZ
+        ogetm                   ;          ...         ESIZ ESIZM
+        nip                     ;          ...         ESIZM
+        pushvar $eoff           ;          ...         ESIZM EOFF
+        ogetm                   ;          ...         ESIZM EOFF EOFFM
+        nip                     ;          ...         ESIZM EOFFM
+        addlu
+        nip2                    ;          ...         (ESIZM+EOFFM)
+        push ulong<64>1         ;          ...         (ESIZM+EOFFM) 1UL
+        mko                     ;          ...         EOFF
+        popvar $eoff            ; ...[EOFF ENAME EVAL]
+        ;; Increase the number of elements.
+        pushvar $nelem          ; ...[EOFF ENAME EVAL] NELEM
+        push ulong<64>1         ; ...[EOFF ENAME EVAL] NELEM 1UL
+        addl
+        nip2                    ; ...[EOFF ENAME EVAL] (NELEM+1UL)
+        popvar $nelem           ; ...[EOFF ENAME EVAL]
+ .c }
+        ;; Ok, at this point all the struct element triplets are
+        ;; in the stack.  Push the number of elements, create
+        ;; the mapped struct and return it.
+        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        mkmsct                  ; SCT
+        popf 1
+        return
         .end
 
 ;;; RAS_FUNCTION_STRUCT_WRITER

@@ -1749,6 +1749,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       pvm_val mapper_closure;
       pvm_val writer_closure;
 
+      pkl_ast_node type_struct = PKL_PASS_NODE;
+      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node elem;
+
       /* Compile a mapper function and complete it using the current
          environment.  */
       RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
@@ -1823,6 +1827,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
     }
   else if (PKL_GEN_PAYLOAD->in_mapper)
     {
+      /* Input: OFFSET */
+      /* Output: EOFF ENAME VAL  */
       assert (0);
     }
   else if (PKL_GEN_PAYLOAD->in_constructor)
