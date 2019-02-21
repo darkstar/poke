@@ -510,7 +510,9 @@
         ;; NOTE: please be careful when altering the lexical structure of
         ;; this code (and of the code in expanded macros). Every local
         ;; added should be also reflected in the compile-time environment
-        ;; in pkl-tab.y, or horrible things _will_ happen.
+        ;; in pkl-tab.y, or horrible things _will_ happen.  So if you
+        ;; add/remove locals here, adjust accordingly in
+        ;; pkl-tab.y:struct_type_specifier.  Thank you very mucho!
 
         .function struct_mapper
         prolog

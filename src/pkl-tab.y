@@ -1052,29 +1052,30 @@ struct_type_specifier:
                        rule.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | pushlevel STRUCT '{' struct_elem_type_list '}'
+        | pushlevel STRUCT '{'
         	{
-                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
-                    PKL_AST_LOC ($$) = @$;
+                  /* Register dummies for the locals used in
+                     pkl-gen.pks:struct_mapper.  */
 
-                    /* Register dummies for the locals used in
-                       pkl-gen.pks:struct_mapper.  */
-                    {
-                      pkl_ast_node id = pkl_ast_make_identifier (pkl_parser->ast,
-                                                                 "@**@");
-                      pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
-                                                             PKL_AST_DECL_KIND_VAR,
-                                                             id, NULL /* initial */,
-                                                             NULL /* source */);
+                  pkl_ast_node id = pkl_ast_make_identifier (pkl_parser->ast,
+                                                             "@**@");
+                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                         PKL_AST_DECL_KIND_VAR,
+                                                         id, NULL /* initial */,
+                                                         NULL /* source */);
                       
-                      if (!pkl_env_register (pkl_parser->env, "@*UNUSABLE_OFF*@",
-                                             decl)
-                          || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_NELEM*@",
-                                                decl)
-                          || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_EOFF*@",
-                                                decl))
-                        assert (0);
-                    }
+                  if (!pkl_env_register (pkl_parser->env, "@*UNUSABLE_OFF*@",
+                                         decl)
+                      || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_NELEM*@",
+                                            decl)
+                      || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_EOFF*@",
+                                            decl))
+                    assert (0);
+                }
+          struct_elem_type_list '}'
+        	{
+                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $5);
+                    PKL_AST_LOC ($$) = @$;
 
                     /* Pop the frame pushed in the `pushlevel' above.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);

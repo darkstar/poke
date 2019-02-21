@@ -7,4 +7,4 @@ deftype Packet = struct { byte ndata; byte[ndata] bytes; };
 
 /* { dg-command { defvar p = Packet @ 0#B } } */
 /* { dg-command { p } } */
-/* { dg-output "Packet \\{ndata=0x04,bytes=\\\[0x20UB,0x30UB,0x40UB,0x50UB\\\]\\}" } */
+/* { dg-output "Packet \\{ndata=0x4UB,bytes=\\\[0x20UB,0x30UB,0x40UB,0x50UB\\\]\\}" } */
