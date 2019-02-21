@@ -474,8 +474,12 @@
 
         .macro struct_elem_mapper
         ;; XXX increase OFF by the label, if the element has one.
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
+        dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+                                ; OFF VAL
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
+                                ; OFF VAL STR
+        swap                    ; OFF STR VAL
         ;; XXX evaluate the element's constraint and raise
         ;; PVM_E_CONSTRAINT if not satisfied.
         .end
