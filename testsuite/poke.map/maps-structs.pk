@@ -10,4 +10,8 @@ deftype Packet = struct { int i; long j; };
 /* { dg-command { p } } */
 /* { dg-output "Packet \\{i=0x10203040,j=0x5060708090a0b0c0L\\}" } */
 
+/* { dg-command { p.i } } */
+/* { dg-output "\n0x10203040" } */
 
+/* { dg-command { p.j } } */
+/* { dg-output "\n0x5060708090a0b0c0L" } */
