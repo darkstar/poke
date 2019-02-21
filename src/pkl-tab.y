@@ -1094,29 +1094,22 @@ struct_elem_type_list:
         ;
 
 struct_elem_type:
-	  type_specifier identifier struct_elem_type_constraint ';'
+	  type_specifier identifier
           	{
-                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
-                                                      $3);
-                  PKL_AST_LOC ($$) = @$;
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
-                  ASTREF (PKL_AST_TYPE ($2));
-                  PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
-
                   /* Register a variable IDENTIFIER in the current
-                     environment.  */
-                  {
-                    pkl_ast_node dummy, decl;
+                     environment.  We do it in this mid-rule so the
+                     element can be used in the constraint.  */
 
-                    dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
-                    PKL_AST_TYPE (dummy) = ASTREF ($1);
-                    decl = pkl_ast_make_decl (pkl_parser->ast,
-                                              PKL_AST_DECL_KIND_VAR,
-                                              $2, dummy,
-                                              NULL /* source */);
+                  pkl_ast_node dummy, decl;
+
+                  dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
+                  PKL_AST_TYPE (dummy) = ASTREF ($1);
+                  decl = pkl_ast_make_decl (pkl_parser->ast,
+                                            PKL_AST_DECL_KIND_VAR,
+                                            $2, dummy,
+                                            NULL /* source */);
                     PKL_AST_LOC (decl) = @$;
-
+                    
                     if (!pkl_env_register (pkl_parser->env,
                                            PKL_AST_IDENTIFIER_POINTER ($2),
                                            decl))
@@ -1126,7 +1119,16 @@ struct_elem_type:
                                    PKL_AST_IDENTIFIER_POINTER ($2));
                         YYERROR;
                       }
-                  }
+                }
+          struct_elem_type_constraint ';'
+          	{
+                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
+                                                      $4);
+                  PKL_AST_LOC ($$) = @$;
+                  PKL_AST_LOC ($2) = @2;
+                  PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
+                  ASTREF (PKL_AST_TYPE ($2));
+                  PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                 }
         | type_specifier struct_elem_type_constraint ';'
         	{
