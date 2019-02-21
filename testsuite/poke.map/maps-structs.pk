@@ -15,3 +15,9 @@ deftype Packet = struct { int i; long j; };
 
 /* { dg-command { p.j } } */
 /* { dg-output "\n0x5060708090a0b0c0L" } */
+
+deftype Packet2 = struct {byte[3] magic; int data; };
+
+/* { dg-command { defvar p2 = Packet2 @ 0#B } } */
+/* { dg-command { p2 } } */
+/* { dg-output "\nPacket2 \\{magic=\\\[0x10UB,0x20UB,0x30UB\\\],data=0x40506070\\}" } */
