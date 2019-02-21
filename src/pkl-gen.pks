@@ -529,7 +529,7 @@
         drop
         .c }
         ;; Calculate the offset marking the end of the element, which is
-        ;; the element's offset plus it's size. XXX: pinned structs.
+        ;; the element's offset plus it's size.
         rot                    ; STR VAL OFF
         swap                   ; STR OFF VAL
         siz                    ; STR OFF VAL ESIZ
@@ -597,6 +597,7 @@
  .c {
         pushvar $off            ; ... NEOFF OFF
         .e struct_elem_mapper   ; ... [EOFF ENAME EVAL] NEOFF
+        ;; XXX if the struct is pinned, replace NEOFF with OFF
         ;; Increase the number of elements.
         pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
         push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
