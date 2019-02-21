@@ -477,7 +477,8 @@
         dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
-        ;; XXX register the field-variable
+        dup                     ; OFF VAL VAL
+        regvar $val             ; OFF VAL
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
                                 ; OFF VAL STR
         swap                    ; OFF STR VAL

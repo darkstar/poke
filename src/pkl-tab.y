@@ -1057,6 +1057,25 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $4);
                     PKL_AST_LOC ($$) = @$;
 
+                    /* Register dummies for the locals used in
+                       pkl-gen.pks:struct_mapper.  */
+                    {
+                      pkl_ast_node id = pkl_ast_make_identifier (pkl_parser->ast,
+                                                                 "@**@");
+                      pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                             PKL_AST_DECL_KIND_VAR,
+                                                             id, NULL /* initial */,
+                                                             NULL /* source */);
+                      
+                      if (!pkl_env_register (pkl_parser->env, "@*UNUSABLE_OFF*@",
+                                             decl)
+                          || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_NELEM*@",
+                                                decl)
+                          || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_EOFF*@",
+                                                decl))
+                        assert (0);
+                    }
+
                     /* Pop the frame pushed in the `pushlevel' above.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
@@ -1078,8 +1097,29 @@ struct_elem_type:
                   ASTREF (PKL_AST_TYPE ($2));
                   PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
 
-                  /* XXX register a variable IDENTIFIER in the current
+                  /* Register a variable IDENTIFIER in the current
                      environment.  */
+                  {
+                    pkl_ast_node dummy, decl;
+
+                    dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
+                    PKL_AST_TYPE (dummy) = ASTREF ($1);
+                    decl = pkl_ast_make_decl (pkl_parser->ast,
+                                              PKL_AST_DECL_KIND_VAR,
+                                              $2, dummy,
+                                              NULL /* source */);
+                    PKL_AST_LOC (decl) = @$;
+
+                    if (!pkl_env_register (pkl_parser->env,
+                                           PKL_AST_IDENTIFIER_POINTER ($2),
+                                           decl))
+                      {
+                        pkl_error (pkl_parser->ast, PKL_AST_LOC ($2),
+                                   "duplicated struct element '%s'",
+                                   PKL_AST_IDENTIFIER_POINTER ($2));
+                        YYERROR;
+                      }
+                  }
                 }
         | type_specifier ';'
         	{
