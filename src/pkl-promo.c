@@ -1070,6 +1070,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
 {
   pkl_ast_node elem = PKL_PASS_NODE;
   pkl_ast_node elem_constraint = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
+  pkl_ast_node elem_label = PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem);
 
   if (elem_constraint)
     {
@@ -1096,6 +1097,42 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
         }        
 
       PKL_PASS_RESTART = restart;
+    }
+
+  if (elem_label)
+    {
+      pkl_ast_node label_type = PKL_AST_TYPE (elem_label);
+      int restart = 0;
+        
+      switch (PKL_AST_TYPE_CODE (label_type))
+        {
+        case PKL_TYPE_OFFSET:
+          {
+            pkl_ast_node to_magnitude_type
+              = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                            64, 0);
+            PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (elem_label);
+            
+            if (!promote_offset (PKL_PASS_AST,
+                                 to_magnitude_type,
+                                 PKL_AST_TYPE_O_UNIT (label_type),
+                                 &PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem),
+                                 &restart))
+              {
+                pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_label),
+                         "couldn't promote struct element label");
+                PKL_PASS_ERROR;
+              }
+            break;
+          }
+        default:
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_label),
+                   "non-promoteable struct element label at promo time");
+          PKL_PASS_ERROR;
+          break;
+        }        
+
+      PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
     }
 }
 PKL_PHASE_END_HANDLER

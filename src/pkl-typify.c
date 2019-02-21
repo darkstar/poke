@@ -1743,6 +1743,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
   pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
   pkl_ast_node elem_constraint
     = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
+  pkl_ast_node elem_label
+    = PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem);
 
   /* Function types cannot appear in the definition of a struct type
      element.  */
@@ -1771,7 +1773,32 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
           payload->errors++;
           PKL_PASS_ERROR;
         }
-    }  
+
+      ASTREF (bool_type); pkl_ast_node_free (bool_type);
+    }
+
+  /* If specified, the label of a struct elem should be promoteable to
+     an offset<uint<64>,*>.  */
+  if (elem_label)
+    {
+      pkl_ast_node label_type = PKL_AST_TYPE (elem_label);
+      pkl_ast_node offset_type
+        = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                    pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0),
+                                    pkl_ast_make_integer (PKL_PASS_AST, 1));
+
+
+      if (!pkl_ast_type_promoteable (label_type, offset_type,
+                                     1 /* promote_array_of_any */))
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_label),
+                     "struct element label should evaluate to an offset");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+      
+      ASTREF (offset_type); pkl_ast_node_free (offset_type);
+    }
 }
 PKL_PHASE_END_HANDLER
 

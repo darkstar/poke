@@ -388,6 +388,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
       PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (node));
       if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (node))
         PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (node));
+      if (PKL_AST_STRUCT_ELEM_TYPE_LABEL (node))
+        PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_LABEL (node));
       break;
     case PKL_AST_DECL:
       PKL_PASS (PKL_AST_DECL_INITIAL (node));

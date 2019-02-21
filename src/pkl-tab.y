@@ -275,7 +275,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> type_specifier simple_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
-%type <ast> struct_elem_type_constraint
+%type <ast> struct_elem_type_constraint struct_elem_type_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
 %type <ast> comp_stmt stmt_decl_list stmt print_stmt_arg_list
@@ -1118,23 +1118,35 @@ struct_elem_type:
                         YYERROR;
                       }
                 }
-          struct_elem_type_constraint ';'
+          struct_elem_type_constraint struct_elem_type_label ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
-                                                      $4, NULL /* label */);
+                                                      $4, $5);
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
                   ASTREF (PKL_AST_TYPE ($2));
                   PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                 }
-        | type_specifier struct_elem_type_constraint ';'
+        | type_specifier struct_elem_type_constraint struct_elem_type_label ';'
         	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1,
-                                                        $2, NULL /* label */);
+                                                        $2, $3);
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
+
+struct_elem_type_label:
+	  %empty
+		{
+                  $$ = NULL;
+                }
+                | '@' expression
+        	{
+                  $$ = $2;
+                  PKL_AST_LOC ($$) = @$;
+                }
+	;
 
 struct_elem_type_constraint:
 	  %empty
