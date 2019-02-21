@@ -1128,10 +1128,10 @@ struct_elem_type:
                       }
                   }
                 }
-        | type_specifier ';'
+        | type_specifier struct_elem_type_constraint ';'
         	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1,
-                                                        NULL /* constraint */);
+                                                        $2);
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
