@@ -407,9 +407,8 @@
         raise
         .end
 
-
 ;;; RAS_FUNCTION_ARRAY_WRITER
-;;; ( OFFSET VAL -- )
+;;; ( OFF VAL -- )
 ;;;
 ;;; Assemble a function that pokes a mapped array value to it's mapped
 ;;; offset in the current IOS.
@@ -466,3 +465,29 @@
         return
         .end                    ; array_writer
 
+;;; RAS_FUNCTION_STRUCT_MAPPER
+;;; ( OFF EBOUND SBOUND -- SCT )
+;;;
+;;; Assemble a function that maps a struct value at the given offset
+;;; OFF.
+;;;
+;;; Both EBOUND and SBOUND are always null, and not used, i.e. struct maps
+;;; are not bounded by either number of elements or size.
+;;;
+;;; OFF should be of type offset<uint<64>,*>.
+
+        .function struct_mapper
+        ;; XXX writeme
+        .end
+
+;;; RAS_FUNCTION_STRUCT_WRITER
+;;; ( OFF VAL -- )
+;;;
+;;; Assemble a function that pokes a mapped struct value to it's mapped
+;;; offset in the current IOS.
+
+        .function struct_writer
+        ;; XXX writeme
+        .end
+
+        

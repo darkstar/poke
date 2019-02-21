@@ -1744,29 +1744,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
     }
   else if (PKL_GEN_PAYLOAD->in_mapper)
     {
-      /* XXX: Generate code like in the case below for in_struct_decl.
-         The code should expect the offset in the stack, followed by
-         the struct arguments, and should build a mapped struct at the
-         top of the main stack.
+      /* Stack: OFF */
 
-         In this schema, in_struct_decl is only used to emit the
-         FUNCTION prologue and epilogue in the PS handler.  The code
-         in between is common (for function and inline cases.)  */
+      pvm_val mapper_closure;
+      pvm_val writer_closure;
 
-      /* If the mapper function of the struct doesn't exist, compile it
-         and complete it using the current environment.  */
+      /* Compile a mapper function and complete it using the current
+         environment.  */
+      RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
 
-      /* Build the arguments and call the mapper to get a mapped
-         struct value.  */
+      /* Complete the mapper closure with the current environment.  */
+                                                                 /* OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
+
+      /* Build the arguments and call the mapper to get a struct
+         value.  For structs, both EBOUND and SBOUND are always
+         null.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                /* CLS CLS OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS CLS OFF EBOUND */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS CLS OFF EBOUND SBOUND */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                /* CLS VAL */
 
       /* Install the mapper into the value.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                /* VAL CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);               /* VAL */
 
-      /* If the writer function of the struct doesn't exist, compile
-         it and complete it using the current environmetn.  */
+      /* Compile a writer function, complete it using the current
+         environment, and install it in the struct as its writer.  */
+      RAS_FUNCTION_STRUCT_WRITER (writer_closure);
 
-      /* Install the writer into the value.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* VAL CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL CLS */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETW);                /* VAL */
 
-      assert (0);
+      /* And we are done.  */
       PKL_PASS_BREAK;
     }
 }
