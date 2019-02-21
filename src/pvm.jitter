@@ -1873,15 +1873,18 @@ end
 
 ## Struct instructions.
 
-instruction mksct () # TYP ( [STR VAL]... ULONG -- SCT )
+instruction mksct () # ( [STR VAL]... ULONG TYP -- SCT )
   code
     size_t e;
-    pvm_val nelem, sct;
+    pvm_val nelem, sct, type;
+
+    type = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
 
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem, PVM_NULL /* type */);
+    sct = pvm_make_struct (nelem, type);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
@@ -1892,22 +1895,22 @@ instruction mksct () # TYP ( [STR VAL]... ULONG -- SCT )
       JITTER_DROP_STACK ();
     }
 
-    PVM_VAL_SCT_TYPE (sct) = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
     JITTER_PUSH_STACK (sct);
   end
 end
 
-instruction mkmsct () # ( TYP OFF [OFF STR VAL]... ULONG -- SCT )
+instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
   code
     size_t e;
-    pvm_val nelem, sct;
+    pvm_val nelem, sct, type;
+
+    type = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
 
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem, PVM_NULL /* type */);
+    sct = pvm_make_struct (nelem, type);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
@@ -1922,9 +1925,6 @@ instruction mkmsct () # ( TYP OFF [OFF STR VAL]... ULONG -- SCT )
     }
 
     PVM_VAL_SCT_OFFSET (sct) = JITTER_TOP_STACK();
-    JITTER_DROP_STACK ();
-
-    PVM_VAL_SCT_TYPE (sct) = JITTER_TOP_STACK();
     JITTER_DROP_STACK ();
 
     JITTER_PUSH_STACK (sct);
@@ -2165,10 +2165,13 @@ end
 
 # Struct types
 
-instruction mktysct () # ( [STRING TYP]... NLONG -- TYP )
+instruction mktysct () # ( [STRING TYP]... NLONG NAME -- TYP )
   code
     size_t i;
-    pvm_val nelem, *etypes, *enames;
+    pvm_val nelem, name, *etypes, *enames;
+
+    name = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
 
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
@@ -2186,7 +2189,7 @@ instruction mktysct () # ( [STRING TYP]... NLONG -- TYP )
       JITTER_DROP_STACK ();
     }
 
-    JITTER_PUSH_STACK (pvm_make_struct_type (nelem, PVM_NULL /* name */,
+    JITTER_PUSH_STACK (pvm_make_struct_type (nelem, name,
                                              enames, etypes));
   end
 end

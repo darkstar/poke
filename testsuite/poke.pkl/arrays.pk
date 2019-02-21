@@ -7,7 +7,7 @@
 /* { dg-output "\n1" } */
 
 /* { dg-command {  [struct {.foo=10}] } } */
-/* { dg-output "\n\\\[\\{.foo=10\\}\\\]" } */
+/* { dg-output "\n\\\[struct \\{.foo=10\\}\\\]" } */
 
 /* { dg-command {  [.[2]=10] } } */
 /* { dg-output "\n\\\[null,null,10\\\]" } */

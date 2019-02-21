@@ -1,10 +1,10 @@
 /* { dg-do run } */
 
 /* { dg-command {  struct {} } } */
-/* { dg-output "\\{\\}" } */
+/* { dg-output "struct \\{\\}" } */
 
 /* { dg-command {  struct {1,2} } } */
-/* { dg-output "\n\\{1,2\\}" } */
+/* { dg-output "\nstruct \\{1,2\\}" } */
 
 /* { dg-command {  (struct {.fo=10}).fo } } */
 /* { dg-output "\n10" } */

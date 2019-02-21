@@ -1397,12 +1397,13 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
 {
-  pkl_asm pasm = PKL_GEN_ASM;
+  pkl_ast_node sct = PKL_PASS_NODE;
+  pkl_ast_node sct_type = PKL_AST_TYPE (sct);
 
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_STRUCT_NELEM (PKL_PASS_NODE), 64));
-
-  pkl_asm_insn (pasm, PKL_INSN_MKSCT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                pvm_make_ulong (PKL_AST_STRUCT_NELEM (sct), 64));
+  PKL_PASS_SUBPASS (sct_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1807,8 +1808,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
   else
     {
       /* We are generating a PVM struct type.  */
+
+      pkl_ast_node struct_type = PKL_PASS_NODE;
+      pkl_ast_node type_name = PKL_AST_TYPE_NAME (struct_type);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                    pvm_make_ulong (PKL_AST_TYPE_S_NELEM (PKL_PASS_NODE), 64));
+                    pvm_make_ulong (PKL_AST_TYPE_S_NELEM (struct_type), 64));
+      if (type_name)
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                      pvm_make_string (PKL_AST_IDENTIFIER_POINTER (type_name)));
+      else
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYSCT);
     }
 }
