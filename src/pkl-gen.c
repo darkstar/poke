@@ -1767,9 +1767,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       /* Build the arguments and call the mapper to get a struct
          value.  For structs, both EBOUND and SBOUND are always
          null.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                /* CLS CLS OFF */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS CLS OFF EBOUND */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS CLS OFF EBOUND SBOUND */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TOR);                 /* CLS OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS OFF EBOUND */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);      /* CLS OFF EBOUND SBOUND */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_FROMR);               /* CLS OFF EBOUND SBOUND CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);                /* CLS VAL */
 
       /* Install the mapper into the value.  */

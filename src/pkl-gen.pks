@@ -473,7 +473,11 @@
 ;;; mapped.
 
         .macro struct_elem_mapper
-        ;; XXX writeme
+        ;; XXX increase OFF by the label, if the element has one.
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        ;; XXX evaluate the element's constraint and raise
+        ;; PVM_E_CONSTRAINT if not satisfied.
         .end
         
 ;;; RAS_FUNCTION_STRUCT_MAPPER
