@@ -477,6 +477,7 @@
         dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
+        ;; XXX register the field-variable
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
                                 ; OFF VAL STR
         swap                    ; OFF STR VAL
@@ -502,6 +503,8 @@
 ;;; 
 ;;; `elem' is a scratch pkl_ast_node.
 
+        ;; XXX we can't use regvar here for temporaries, because
+        ;; of the lexical environment expected by the variables.
         .function struct_mapper
         prolog
         pushf

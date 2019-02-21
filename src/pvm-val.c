@@ -728,6 +728,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       size_t nelem, idx;
 
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
+      /* XXX print the struct type's name here.  */
       fprintf (out, "{");
       for (idx = 0; idx < nelem; ++idx)
         {
