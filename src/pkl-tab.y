@@ -791,16 +791,14 @@ struct_elem:
           	{
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
                                                    NULL /* name */,
-                                                   $1,
-                                                   NULL /* constraint */);
+                                                   $1);
                     PKL_AST_LOC ($$) = @$;
                 }
         | identifier '=' expression
 	        {
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
                                                    $1,
-                                                   $3,
-                                                   NULL /* constraint */);
+                                                   $3);
                     PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }

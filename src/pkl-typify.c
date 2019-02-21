@@ -773,7 +773,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
         =  pkl_ast_make_struct_elem_type (PKL_PASS_AST,
                                           PKL_AST_STRUCT_ELEM_NAME (t),
                                           PKL_AST_TYPE (t),
-                                          PKL_AST_STRUCT_ELEM_CONSTRAINT (t));
+                                          NULL /* constraint */);
       PKL_AST_LOC (struct_elem_type) = PKL_AST_LOC (t);
 
       struct_elem_types = pkl_ast_chainon (struct_elem_types,
@@ -1160,34 +1160,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node struct_elem = PKL_PASS_NODE;
   pkl_ast_node struct_elem_exp
     = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
   pkl_ast_node struct_elem_exp_type
     = PKL_AST_TYPE (struct_elem_exp);
-  pkl_ast_node struct_elem_constraint
-    = PKL_AST_STRUCT_ELEM_CONSTRAINT (struct_elem);
-
-  /* If specified, the constraint of a struct elem should be of type
-     boolean.  */
-  if (struct_elem_constraint)
-    {
-      pkl_ast_node constraint_type
-        = PKL_AST_TYPE (struct_elem_constraint);
-
-      if (PKL_AST_TYPE_CODE (constraint_type) != PKL_TYPE_INTEGRAL
-          && PKL_AST_TYPE_I_SIGNED (constraint_type) != 1
-          && PKL_AST_TYPE_I_SIZE (constraint_type) != 32)
-        {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (struct_elem_constraint),
-                     "struct element constraint should evaluate to a boolean");
-          payload->errors++;
-          PKL_PASS_ERROR;
-        }
-    }  
 
   /* The type of a STRUCT_ELEM in a struct initializer is the type of
      it's expression.  */
@@ -1756,9 +1733,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 }
 PKL_PHASE_END_HANDLER
 
-/* Function types cannot appear in the definition of a struct type
-   element.  */
-
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
 {
   pkl_typify_payload payload
@@ -1766,7 +1740,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
 
   pkl_ast_node elem = PKL_PASS_NODE;
   pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
+  pkl_ast_node elem_constraint
+    = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
 
+
+  /* Function types cannot appear in the definition of a struct type
+     element.  */
   if (PKL_AST_TYPE_CODE (elem_type) == PKL_TYPE_FUNCTION)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_type),
@@ -1774,6 +1753,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
       payload->errors++;
       PKL_PASS_ERROR;
     }
+
+  /* If specified, the constraint of a struct elem should be of type
+     boolean.  */
+  if (elem_constraint)
+    {
+      pkl_ast_node constraint_type
+        = PKL_AST_TYPE (elem_constraint);
+
+      if (PKL_AST_TYPE_CODE (constraint_type) != PKL_TYPE_INTEGRAL
+          && PKL_AST_TYPE_I_SIGNED (constraint_type) != 1
+          && PKL_AST_TYPE_I_SIZE (constraint_type) != 32)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
+                     "struct element constraint should evaluate to a boolean");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }  
 }
 PKL_PHASE_END_HANDLER
 

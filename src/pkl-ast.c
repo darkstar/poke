@@ -1032,15 +1032,12 @@ pkl_ast_make_struct (pkl_ast ast,
 pkl_ast_node
 pkl_ast_make_struct_elem (pkl_ast ast,
                           pkl_ast_node name,
-                          pkl_ast_node exp,
-                          pkl_ast_node constraint)
+                          pkl_ast_node exp)
 {
   pkl_ast_node elem = pkl_ast_make_node (ast, PKL_AST_STRUCT_ELEM);
 
   if (name != NULL)
     PKL_AST_STRUCT_ELEM_NAME (elem) = ASTREF (name);
-  if (constraint != NULL)
-    PKL_AST_STRUCT_ELEM_CONSTRAINT (elem) = ASTREF (constraint);
   PKL_AST_STRUCT_ELEM_EXP (elem) = ASTREF (exp);
 
   return elem;
@@ -1633,7 +1630,6 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_NAME (ast));
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_EXP (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_CONSTRAINT (ast));
       break;
 
     case PKL_AST_STRUCT:
@@ -2199,7 +2195,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (name, STRUCT_ELEM_NAME);
       PRINT_AST_SUBAST (exp, STRUCT_ELEM_EXP);
-      PRINT_AST_SUBAST (constraint, STRUCT_ELEM_CONSTRAINT);
       break;
 
     case PKL_AST_STRUCT:
