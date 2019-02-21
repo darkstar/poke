@@ -1821,14 +1821,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
 {
+  assert (!PKL_GEN_PAYLOAD->in_mapper);
+
   if (PKL_GEN_PAYLOAD->in_writer)
     {
-      assert (0);
-    }
-  else if (PKL_GEN_PAYLOAD->in_mapper)
-    {
-      /* Input: OFFSET */
-      /* Output: EOFF ENAME VAL  */
       assert (0);
     }
   else if (PKL_GEN_PAYLOAD->in_constructor)

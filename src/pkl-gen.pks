@@ -462,6 +462,20 @@
         return
         .end                    ; array_writer
 
+;;; RAS_MACRO_STRUCT_ELEM_MAPPER
+;;; ( OFF -- OFF STR VAL )
+;;;
+;;; Map a struct element from the current IOS.
+;;;
+;;; The C environment required is:
+;;;
+;;; `elem' is a pkl_ast_node with the struct element being
+;;; mapped.
+
+        .macro struct_elem_mapper
+        ;; XXX writeme
+        .end
+        
 ;;; RAS_FUNCTION_STRUCT_MAPPER
 ;;; ( OFF EBOUND SBOUND -- SCT )
 ;;;
@@ -473,8 +487,7 @@
 ;;;
 ;;; OFF should be of type offset<uint<64>,*>.
 ;;;
-;;; This macro should only be used in the pkl_gen_pr_type_struct GEN
-;;; handler.  The C environment required is:
+;;; The C environment required is:
 ;;; 
 ;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
 ;;; of the struct type being processed.
@@ -496,7 +509,7 @@
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
         pushvar $eoff           ; ... EOFF
-        .c PKL_PASS_SUBPASS (elem);
+        .e struct_elem_mapper   ; ... [EOFF ENAME EVAL]
         ;; Increase the element's offset by the size of the
         ;; element just mapped.
         siz                     ; ...[EOFF ENAME EVAL] ESIZ
