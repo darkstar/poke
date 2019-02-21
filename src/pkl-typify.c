@@ -773,7 +773,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
         =  pkl_ast_make_struct_elem_type (PKL_PASS_AST,
                                           PKL_AST_STRUCT_ELEM_NAME (t),
                                           PKL_AST_TYPE (t),
-                                          NULL /* constraint */);
+                                          NULL /* constraint */,
+                                          NULL /* label */);
       PKL_AST_LOC (struct_elem_type) = PKL_AST_LOC (t);
 
       struct_elem_types = pkl_ast_chainon (struct_elem_types,
@@ -1743,7 +1744,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
   pkl_ast_node elem_constraint
     = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
 
-
   /* Function types cannot appear in the definition of a struct type
      element.  */
   if (PKL_AST_TYPE_CODE (elem_type) == PKL_TYPE_FUNCTION)
@@ -1754,16 +1754,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
       PKL_PASS_ERROR;
     }
 
-  /* If specified, the constraint of a struct elem should be of type
-     boolean.  */
+  /* If specified, the constraint of a struct elem should be
+     promoteable to a boolean.  */
   if (elem_constraint)
     {
+      pkl_ast_node bool_type
+        = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
       pkl_ast_node constraint_type
         = PKL_AST_TYPE (elem_constraint);
 
-      if (PKL_AST_TYPE_CODE (constraint_type) != PKL_TYPE_INTEGRAL
-          && PKL_AST_TYPE_I_SIGNED (constraint_type) != 1
-          && PKL_AST_TYPE_I_SIZE (constraint_type) != 32)
+      if (!pkl_ast_type_promoteable (constraint_type, bool_type,
+                                     1 /* promote_array_of_any */))
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
                      "struct element constraint should evaluate to a boolean");

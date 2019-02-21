@@ -421,7 +421,8 @@ pkl_ast_node
 pkl_ast_make_struct_elem_type (pkl_ast ast,
                                pkl_ast_node name,
                                pkl_ast_node type,
-                               pkl_ast_node constraint)
+                               pkl_ast_node constraint,
+                               pkl_ast_node label)
 {
   pkl_ast_node struct_type_elem
     = pkl_ast_make_node (ast, PKL_AST_STRUCT_ELEM_TYPE);
@@ -433,6 +434,9 @@ pkl_ast_make_struct_elem_type (pkl_ast ast,
   if (constraint)
     PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (struct_type_elem)
       = ASTREF (constraint);
+  if (label)
+    PKL_AST_STRUCT_ELEM_TYPE_LABEL (struct_type_elem)
+      = ASTREF (label);
 
   return struct_type_elem;
 }
@@ -515,6 +519,8 @@ pkl_ast_dup_type (pkl_ast_node type)
             = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
           pkl_ast_node struct_type_elem_constraint
             = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (t);
+          pkl_ast_node struct_type_elem_label
+            = PKL_AST_STRUCT_ELEM_TYPE_LABEL (t);
           pkl_ast_node new_struct_type_elem_name
             = (struct_type_elem_name
                ? pkl_ast_make_identifier (PKL_AST_AST (new),
@@ -524,7 +530,8 @@ pkl_ast_dup_type (pkl_ast_node type)
             = pkl_ast_make_struct_elem_type (PKL_AST_AST (new),
                                              new_struct_type_elem_name,
                                              pkl_ast_dup_type (struct_type_elem_type),
-                                             struct_type_elem_constraint);
+                                             struct_type_elem_constraint,
+                                             struct_type_elem_label);
 
           PKL_AST_TYPE_S_ELEMS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_S_ELEMS (new),
@@ -1571,6 +1578,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_NAME (ast));
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_TYPE (ast));
       pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_ELEM_TYPE_LABEL (ast));
       break;
 
     case PKL_AST_FUNC_TYPE_ARG:
@@ -2305,6 +2313,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (name, STRUCT_ELEM_TYPE_NAME);
       PRINT_AST_SUBAST (type, STRUCT_ELEM_TYPE_TYPE);
       PRINT_AST_SUBAST (exp, STRUCT_ELEM_TYPE_CONSTRAINT);
+      PRINT_AST_SUBAST (exp, STRUCT_ELEM_TYPE_LABEL);
       break;
 
     case PKL_AST_FUNC_TYPE_ARG:

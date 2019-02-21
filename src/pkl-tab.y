@@ -1123,7 +1123,7 @@ struct_elem_type:
           struct_elem_type_constraint ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
-                                                      $4);
+                                                      $4, NULL /* label */);
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
@@ -1133,7 +1133,7 @@ struct_elem_type:
         | type_specifier struct_elem_type_constraint ';'
         	{
                     $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1,
-                                                        $2);
+                                                        $2, NULL /* label */);
                     PKL_AST_LOC ($$) = @$;
                 }
         ;

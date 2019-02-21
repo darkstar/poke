@@ -1063,6 +1063,43 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
 }
 PKL_PHASE_END_HANDLER
 
+/* Element constraints in struct types are promoteable to
+   booleans.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
+{
+  pkl_ast_node elem = PKL_PASS_NODE;
+  pkl_ast_node elem_constraint = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
+
+  if (elem_constraint)
+    {
+      pkl_ast_node constraint_type = PKL_AST_TYPE (elem_constraint);
+      int restart = 0;
+        
+      switch (PKL_AST_TYPE_CODE (constraint_type))
+        {
+        case PKL_TYPE_INTEGRAL:
+          if (!promote_integral (PKL_PASS_AST, 32, 1,
+                                 &PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem),
+                                 &restart))
+            {
+              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
+                       "couldn't promote struct element constraint");
+              PKL_PASS_ERROR;
+            }
+          break;
+        default:
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
+                   "non-promoteable struct element constraint at promo time");
+          PKL_PASS_ERROR;
+          break;
+        }        
+
+      PKL_PASS_RESTART = restart;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
@@ -1095,5 +1132,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_promo_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_promo_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_promo_ps_print_stmt),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_promo_ps_struct_elem_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };
