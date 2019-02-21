@@ -527,7 +527,7 @@
         raise
 .constraint_ok:
         drop
-        .c }
+   .c }
         ;; Calculate the offset marking the end of the element, which is
         ;; the element's offset plus it's size.
         rot                    ; STR VAL OFF
