@@ -275,6 +275,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> type_specifier simple_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
+%type <ast> struct_elem_type_constraint
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
 %type <ast> comp_stmt stmt_decl_list stmt print_stmt_arg_list
@@ -1093,10 +1094,10 @@ struct_elem_type_list:
         ;
 
 struct_elem_type:
-	  type_specifier identifier ';'
+	  type_specifier identifier struct_elem_type_constraint ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
-                                                      NULL /* constraint */);
+                                                      $3);
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_LOC ($2) = @2;
                   PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
@@ -1134,6 +1135,18 @@ struct_elem_type:
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
+
+struct_elem_type_constraint:
+	  %empty
+		{
+                  $$ = NULL;
+                }
+          | ':' expression
+          	{
+                  $$ = $2;
+                  PKL_AST_LOC ($$) = @$;
+                }
+          ;
 
 /*
  * Declarations.
