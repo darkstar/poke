@@ -463,10 +463,11 @@
         .end                    ; array_writer
 
 ;;; RAS_MACRO_STRUCT_ELEM_MAPPER
-;;; ( OFF -- OFF STR VAL NOFF )
+;;; ( OFF SOFF -- OFF STR VAL NOFF )
 ;;;
-;;; Map a struct element from the current IOS.  NOFF is the offset marking
-;;; the end of this element.
+;;; Map a struct element from the current IOS.
+;;; SOFF is the offset of the beginning of the struct.
+;;; NOFF is the offset marking the end of this element.
 ;;;
 ;;; The C environment required is:
 ;;;
@@ -474,7 +475,34 @@
 ;;; mapped.
 
         .macro struct_elem_mapper
-        ;; XXX increase OFF by the label, if the element has one.
+        ;; Increase OFF by the label, if the element has one.
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem) == NULL)
+        drop                    ; OFF
+   .c else
+   .c {
+        nip                     ; SOFF
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem));
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+                                ; SOFF LOFF
+        ogetm                   ; SOFF LOFF LOFFM
+        swap                    ; SOFF LOFFM LOFF
+        ogetu                   ; SOFF LOFFM LOFF LOFFU
+        nip                     ; SOFF LOFFM LOFFU
+        mullu
+        nip2                    ; SOFF (LOFFM*LOFFU)
+        swap                    ; (LOFFM*LOFFU) SOFF
+        ogetm                   ; (LOFFM*LOFFU) SOFF SOFFM
+        swap                    ; (LOFFM*LOFFU) SOFFM SOFF
+        ogetu                   ; (LOFFM*LOFFU) SOFFM SOFF SOFFU
+        nip                     ; (LOFFM*LOFFU) SOFFM SOFFU
+        mullu
+        nip2                    ; (LOFFM*LOFFU) (SOFFM*SOFFU)
+        addlu
+        nip2                    ; (LOFFM*LOFFU+SOFFM*SOFFU)
+        push ulong<64>1         ; (LOFFM*LOFFU+SOFFM*SOFFU) 1UL
+        mko                     ; OFF
+   .c }
         dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
@@ -567,6 +595,7 @@
         ;; Iterate over the elements of the struct type.
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
+        pushvar $off            ; ... NEOFF OFF
         .e struct_elem_mapper   ; ... [EOFF ENAME EVAL] NEOFF
         ;; Increase the number of elements.
         pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
