@@ -479,6 +479,9 @@
                                 ; OFF VAL
         dup                     ; OFF VAL VAL
         regvar $val             ; OFF VAL
+     .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
+        push null
+     .c else
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
                                 ; OFF VAL STR
         swap                    ; OFF STR VAL
