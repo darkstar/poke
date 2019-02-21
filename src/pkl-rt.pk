@@ -49,6 +49,7 @@ defvar E_eof           = 6;
 defvar E_map           = 7;
 defvar E_conv          = 8;
 defvar E_elem          = 9;
+defvar E_constraint    = 10;
 
 /* Default exception handler.
 
@@ -67,6 +68,8 @@ defun _pkl_exception_handler = (Exception exception) void:
      print "EOF";
    else if (exception == E_elem)
      print "invalid element";
+   else if (exception == E_constraint)
+     print "constraint violated";
    else if (exception == E_conv)
      print "conversion error";
    else if (exception == E_map_bounds)

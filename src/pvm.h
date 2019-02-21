@@ -53,6 +53,7 @@ enum pvm_exit_code
 #define PVM_E_MAP           7
 #define PVM_E_CONV          8
 #define PVM_E_ELEM          9
+#define PVM_E_CONSTRAINT   10
 
 /* Note that the jitter-generated header should be included this late
    in the file because it uses some stuff defined above.  */
