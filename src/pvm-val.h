@@ -399,7 +399,7 @@ pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_any_type (void);
 pvm_val pvm_make_array_type (pvm_val type);
-pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val *enames, pvm_val *etypes);
+pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val name, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
 pvm_val pvm_make_closure_type (pvm_val rtype, pvm_val nargs, pvm_val *atypes);
 

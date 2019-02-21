@@ -2186,7 +2186,7 @@ instruction mktysct () # ( [STRING TYP]... NLONG -- TYP )
       JITTER_DROP_STACK ();
     }
 
-    JITTER_PUSH_STACK (pvm_make_struct_type (nelem,
+    JITTER_PUSH_STACK (pvm_make_struct_type (nelem, PVM_NULL /* name */,
                                              enames, etypes));
   end
 end

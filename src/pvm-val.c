@@ -204,12 +204,12 @@ pvm_make_array_type (pvm_val type)
 }
 
 pvm_val
-pvm_make_struct_type (pvm_val nelem,
+pvm_make_struct_type (pvm_val nelem, pvm_val name,
                       pvm_val *enames, pvm_val *etypes)
 {
   pvm_val stype = pvm_make_type (PVM_TYPE_STRUCT);
 
-  PVM_VAL_TYP_S_NAME (stype) = PVM_NULL;
+  PVM_VAL_TYP_S_NAME (stype) = name;
   PVM_VAL_TYP_S_NELEM (stype) = nelem;
   PVM_VAL_TYP_S_ENAMES (stype) = enames;
   PVM_VAL_TYP_S_ETYPES (stype) = etypes;
@@ -926,25 +926,7 @@ pvm_typeof (pvm_val val)
   else if (PVM_IS_ARR (val))
     type = PVM_VAL_ARR_TYPE (val);
   else if (PVM_IS_SCT (val))
-    {
-      size_t i;
-      pvm_val *enames = NULL, *etypes = NULL;
-      pvm_val nelem = PVM_VAL_SCT_NELEM (val);
-
-      if (PVM_VAL_ULONG (nelem) > 0)
-        {
-          enames = GC_MALLOC_UNCOLLECTABLE (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-          etypes = GC_MALLOC_UNCOLLECTABLE (PVM_VAL_ULONG (nelem) * sizeof (pvm_val));
-      
-          for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
-            {
-              enames[i] = PVM_VAL_SCT_ELEM_NAME (val, i);
-              etypes[i] = pvm_typeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
-            }
-        }
-      
-      type = pvm_make_struct_type (nelem, enames, etypes);
-    }
+    type = PVM_VAL_SCT_TYPE (val);
   else
     assert (0);
 
