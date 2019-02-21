@@ -26,3 +26,10 @@ deftype Packet3 = struct { byte uno; byte; byte tres; };
 
 /* { dg-command { Packet3 @ 0#B } } */
 /* { dg-output "\nPacket3 \\{uno=0x10UB,0x20UB,tres=0x30UB\\}" } */
+
+deftype Packet4 = struct {int i; struct { long l; } s;};
+
+/* { dg-command { Packet4 @ 0#B } } */
+/* { dg-output "\nPacket4 \\{i=0x10203040,s=struct \\{l=0x5060708090a0b0c0L\\}\\}" } */
+
+
