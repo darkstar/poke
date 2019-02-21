@@ -1931,12 +1931,6 @@ instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
   end
 end
 
-instruction revsct () # ( SCT -- SCT )
-  code
-    pvm_reverse_struct (JITTER_TOP_STACK ());
-  end
-end
-
 instruction sset () # ( SCT STR VAL -- SCT )
   code
   end

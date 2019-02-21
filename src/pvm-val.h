@@ -318,7 +318,6 @@ struct pvm_struct_elem
 typedef struct pvm_struct *pvm_struct;
 
 pvm_val pvm_make_struct (pvm_val nelem, pvm_val type);
-void pvm_reverse_struct (pvm_val sct);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 
 /* Types are also boxed.  */

@@ -779,9 +779,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
                                            ASTREF (struct_elem_type));
     }
 
-  /* Reverse.  */
-  struct_elem_types = pkl_ast_reverse (struct_elem_types);
-
   /* Build the type of the struct.  */
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),

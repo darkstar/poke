@@ -396,30 +396,6 @@ pvm_sizeof (pvm_val val)
   return 0;
 }
 
-void
-pvm_reverse_struct (pvm_val sct)
-{
-  size_t i, end, nelem;
-  struct pvm_struct_elem *elems;
-
-  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
-  elems = PVM_VAL_SCT (sct)->elems;
-
-  end = nelem - 1;
-  for (i = 0; i < nelem / 2; ++i)
-    {
-      pvm_val tmp_value = elems[i].value;
-      pvm_val tmp_name = elems[i].name;
-
-      elems[i].name = elems[end].name;
-      elems[i].value = elems[end].value;
-
-      elems[end].name = tmp_name;      
-      elems[end].value = tmp_value;
-      --end;
-    }
-}
-
 /* XXX use similar printers for hexadecimal and octal, so we can use
    _'s */
 
