@@ -1158,17 +1158,39 @@ expected %s got %s",
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of a STRUCT_ELEM in a struct initializer is the type of
-   it's expression.  */
-
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem)
 {
+  pkl_typify_payload payload
+    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
+
   pkl_ast_node struct_elem = PKL_PASS_NODE;
   pkl_ast_node struct_elem_exp
     = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
   pkl_ast_node struct_elem_exp_type
     = PKL_AST_TYPE (struct_elem_exp);
-  
+  pkl_ast_node struct_elem_constraint
+    = PKL_AST_STRUCT_ELEM_CONSTRAINT (struct_elem);
+
+  /* If specified, the constraint of a struct elem should be of type
+     boolean.  */
+  if (struct_elem_constraint)
+    {
+      pkl_ast_node constraint_type
+        = PKL_AST_TYPE (struct_elem_constraint);
+
+      if (PKL_AST_TYPE_CODE (constraint_type) != PKL_TYPE_INTEGRAL
+          && PKL_AST_TYPE_I_SIGNED (constraint_type) != 1
+          && PKL_AST_TYPE_I_SIZE (constraint_type) != 32)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (struct_elem_constraint),
+                     "struct element constraint should evaluate to a boolean");
+          payload->errors++;
+          PKL_PASS_ERROR;
+        }
+    }  
+
+  /* The type of a STRUCT_ELEM in a struct initializer is the type of
+     it's expression.  */
   PKL_AST_TYPE (struct_elem) = ASTREF (struct_elem_exp_type);
   PKL_PASS_RESTART = 1;
 }
