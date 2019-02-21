@@ -32,4 +32,7 @@ deftype Packet4 = struct {int i; struct { long l; } s;};
 /* { dg-command { Packet4 @ 0#B } } */
 /* { dg-output "\nPacket4 \\{i=0x10203040,s=struct \\{l=0x5060708090a0b0c0L\\}\\}" } */
 
+deftype Empty = struct {};
 
+/* { dg-command { Empty @ 0#B } } */
+/* { dg-output "\nEmpty {}" } */
