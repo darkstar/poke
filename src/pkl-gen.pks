@@ -559,7 +559,6 @@
         .c PKL_PASS_SUBPASS (type_struct);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
                                 ; OFF [OFF STR VAL]... NELEM TYP
-        strace
         mkmsct                  ; SCT
         popf 1
         return

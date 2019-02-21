@@ -240,7 +240,7 @@ late-header-c
          JITTER_TOP_STACK () = PVM_NULL;                                     \
        }                                                                     \
      else                                                                    \
-       JITTER_TOP_STACK () = pvm_make_##IOTYPE (value, bits);                \
+       JITTER_TOP_STACK () = pvm_make_##TYPE (value, bits);                  \
    } while (0)
 
 /* Integral poke instructions.
