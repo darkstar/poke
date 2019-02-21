@@ -1886,6 +1886,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
 {
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     {
+#if 0
       pkl_ast_node elem = PKL_PASS_NODE;
       pkl_ast_node elem_name = PKL_AST_STRUCT_ELEM_TYPE_NAME (elem);
       pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
@@ -1927,9 +1928,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
       {
         /* XXX writeme */
       }
-      
+#endif
       /* Do not process the child nodes.  */
       PKL_PASS_BREAK;
+
     }
   else
     {
