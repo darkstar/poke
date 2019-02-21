@@ -2183,9 +2183,8 @@ instruction mktysct () # ( [STRING TYP]... NLONG NAME -- TYP )
     for (i = 0; i < PVM_VAL_ULONG (nelem); ++i)
     {
       /* XXX: check pvm_val types?  */
-
-      enames[i] = JITTER_UNDER_TOP_STACK ();
-      etypes[i] = JITTER_TOP_STACK ();
+      enames[PVM_VAL_ULONG (nelem) - i - 1] = JITTER_UNDER_TOP_STACK ();
+      etypes[PVM_VAL_ULONG (nelem) - i - 1] = JITTER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
