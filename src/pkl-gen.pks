@@ -17,9 +17,6 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
-;;; Note that map-related routines live in their dedicated file:
-;;; pkl-gen-maps.pks.
-        
 ;;; RAS_FUNCTION_ARRAY_MAPPER
 ;;; ( OFF EBOUND SBOUND -- ARR )
 ;;; 
