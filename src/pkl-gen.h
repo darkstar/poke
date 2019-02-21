@@ -64,6 +64,9 @@
    IN_WRITER is 1 when a writer function for an array or a struct type
    is begin generated.  0 otherwise.
 
+   IN_CONSTRUCTOR is 1 when a struct constructor is being generated.
+   0 otherwise.
+
    IN_LVALUE is 1 in a sub-tree corresponding to the l-value of an
    assignment statement.  0 otherwise.  */
 
@@ -77,6 +80,7 @@ struct pkl_gen_payload
   pvm_program program;
   int in_struct_decl;
   int in_mapper;
+  int in_constructor;
   int in_writer;
   int in_valmapper;
   int in_lvalue;
