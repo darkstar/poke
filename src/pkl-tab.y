@@ -1078,6 +1078,9 @@ struct_elem_type:
                   PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
                   ASTREF (PKL_AST_TYPE ($2));
                   PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+
+                  /* XXX register a variable IDENTIFIER in the current
+                     environment.  */
                 }
         | type_specifier ';'
         	{
