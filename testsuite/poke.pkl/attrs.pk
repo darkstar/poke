@@ -48,7 +48,7 @@
 /* { dg-command {  struct {}'length } } */
 /* { dg-output "\n0UL" } */
 
-/* { dg-command {  struct {1, .bar="foo"}'length } } */
+/* { dg-command {  struct {1, bar="foo"}'length } } */
 /* { dg-output "\n2UL" } */
 
 /* { dg-command {  ""'length } } */

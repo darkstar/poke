@@ -6,10 +6,10 @@
 /* { dg-command {  struct {1,2} } } */
 /* { dg-output "\nstruct \\{1,2\\}" } */
 
-/* { dg-command {  (struct {.fo=10}).fo } } */
+/* { dg-command {  (struct {fo=10}).fo } } */
 /* { dg-output "\n10" } */
 
-defvar struct_ref_2 = struct {.fo = 10#Kb};
+defvar struct_ref_2 = struct {fo = 10#Kb};
   
 /* { dg-command {  struct_ref_2.fo/2#Kb } } */
 /* { dg-output "\n5" } */

@@ -747,7 +747,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
           if (idx != 0)
             fprintf (out, ",");
           if (name != PVM_NULL)
-            fprintf (out, ".%s=", PVM_VAL_STR (name));
+            fprintf (out, "%s=", PVM_VAL_STR (name));
           pvm_print_val (out, value, base, flags);
         }
       fprintf (out, "}");

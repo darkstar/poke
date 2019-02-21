@@ -1,6 +1,6 @@
 /* { dg-do run } */
 
-defvar triplet = struct {.uno = 1, .dos = 2, .tres = "foo"};
+defvar triplet = struct {uno = 1, dos = 2, tres = "foo"};
 
 /* { dg-command {  triplet.uno } } */
 /* { dg-command {  triplet.dos } } */

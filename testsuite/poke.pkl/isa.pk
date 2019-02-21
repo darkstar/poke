@@ -51,5 +51,5 @@ defun foo2 = (any a) void:
 /* { dg-command { foo2 ([1UL, 2UL]) } } */
 /* { dg-output "\nan uint64 array" } */
 
-/* { dg-command { foo2 (struct {.i=10,.j="foo"}) } } */
+/* { dg-command { foo2 (struct {i=10, j="foo"}) } } */
 /* { dg-output "\nunknown" } */

@@ -793,10 +793,10 @@ struct_elem:
                     $$ = pkl_ast_make_struct_elem (pkl_parser->ast, NULL, $1);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | '.' identifier '=' expression
+        | identifier '=' expression
 	        {
-                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $2, $4);
-                    PKL_AST_LOC ($2) = @2;
+                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast, $1, $3);
+                    PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
         ;
