@@ -463,9 +463,10 @@
         .end                    ; array_writer
 
 ;;; RAS_MACRO_STRUCT_ELEM_MAPPER
-;;; ( OFF -- OFF STR VAL )
+;;; ( OFF -- OFF STR VAL NOFF )
 ;;;
-;;; Map a struct element from the current IOS.
+;;; Map a struct element from the current IOS.  NOFF is the offset marking
+;;; the end of this element.
 ;;;
 ;;; The C environment required is:
 ;;;
@@ -498,7 +499,31 @@
         raise
 .constraint_ok:
         drop
-   .c }
+        .c }
+        ;; Calculate the offset marking the end of the element, which is
+        ;; the element's offset plus it's size. XXX: pinned structs.
+        rot                    ; STR VAL OFF
+        swap                   ; STR OFF VAL
+        siz                    ; STR OFF VAL ESIZ
+        rot                    ; STR VAL ESIZ OFF
+        swap                   ; STR VAL OFF ESIZ
+        ogetm                  ; STR VAL OFF ESIZ ESIZM
+        nip                    ; STR VAL OFF ESIZM
+        swap                   ; STR VAL ESIZM OFF
+        ogetm                  ; STR VAL ESIZM OFF OFFM
+        swap                   ; STR VAL ESIZM OFFM OFF
+        ogetu                  ; STR VAL ESIZM OFFM OFF OFFU
+        rot                    ; STR VAL ESIZM OFF OFFU OFFM
+        mullu
+        nip2                   ; STR VAL ESIZM OFF (OFFU*OFFM)
+        rot                    ; STR VAL OFF (OFFU*OFFM) ESIZM
+        addlu
+        nip2                   ; STR VAL OFF (OFFU*OFFM+ESIZM)
+        push ulong<64>1        ; STR VAL OFF (OFFU*OFFM+ESIZM) 1UL
+        mko                    ; STR VAL OFF NOFF
+        tor                    ; STR VAL OFF
+        nrot                   ; OFF STR VAL
+        fromr                  ; OFF STR VAL NOFF
         .end
         
 ;;; RAS_FUNCTION_STRUCT_MAPPER
@@ -539,36 +564,18 @@
         regvar $nelem
         pushvar $off            ; OFF
         dup                     ; OFF OFF
-        regvar $eoff            ; OFF
         ;; Iterate over the elements of the struct type.
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
-        pushvar $eoff           ; ... EOFF
-        .e struct_elem_mapper   ; ... [EOFF ENAME EVAL]
-        ;; Increase the element's offset by the size of the
-        ;; element just mapped.  XXX: pinned structs.
-        siz                     ; ...[EOFF ENAME EVAL] ESIZ
-        ogetm                   ;          ...         ESIZ ESIZM
-        nip                     ;          ...         ESIZM
-        pushvar $eoff           ;          ...         ESIZM EOFF
-        ogetm                   ;          ...         ESIZM EOFF EOFFM
-        swap                    ;          ...         ESIZM EOFFM EOFF
-        ogetu                   ;          ...         ESIZM EOFFM EOFF EOFFU
-        nip                     ;          ...         ESIZM EOFFM EOFFU
-        mullu
-        nip2                    ;          ...         ESIZM (EOFFM*EOFFU)
-        addlu
-        nip2                    ;          ...         (ESIZM+EOFFM*EOFFU)
-        push ulong<64>1         ;          ...         (ESIZM+EOFFM*EOFFU) 1UL
-        mko                     ;          ...         EOFF
-        popvar $eoff            ; ...[EOFF ENAME EVAL]
+        .e struct_elem_mapper   ; ... [EOFF ENAME EVAL] NEOFF
         ;; Increase the number of elements.
-        pushvar $nelem          ; ...[EOFF ENAME EVAL] NELEM
-        push ulong<64>1         ; ...[EOFF ENAME EVAL] NELEM 1UL
+        pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
+        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
         addl
-        nip2                    ; ...[EOFF ENAME EVAL] (NELEM+1UL)
-        popvar $nelem           ; ...[EOFF ENAME EVAL]
+        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NELEM+1UL)
+        popvar $nelem           ; ...[EOFF ENAME EVAL] NEOFF
  .c }
+        drop  			; ...[EOFF ENAME EVAL]
         ;; Ok, at this point all the struct element triplets are
         ;; in the stack.  Push the number of elements, create
         ;; the mapped struct and return it.

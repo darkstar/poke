@@ -1072,8 +1072,6 @@ struct_type_specifier:
                   if (!pkl_env_register (pkl_parser->env, "@*UNUSABLE_OFF*@",
                                          decl)
                       || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_NELEM*@",
-                                            decl)
-                      || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_EOFF*@",
                                             decl))
                     assert (0);
                 }
