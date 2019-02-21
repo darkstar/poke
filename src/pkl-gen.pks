@@ -505,6 +505,7 @@
 
         ;; XXX we can't use regvar here for temporaries, because
         ;; of the lexical environment expected by the variables.
+        ;; Or, at least, we should coordinate with pkl-tab.y.
         .function struct_mapper
         prolog
         pushf
