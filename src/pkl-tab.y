@@ -191,6 +191,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 /* Reserved words.  */
 
 %token ENUM
+%token <integer> PINNED
 %token STRUCT
 %token CONST
 %token CONTINUE
@@ -274,7 +275,9 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 %type <ast> struct struct_elem_list struct_elem
 %type <ast> type_specifier simple_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
-%type <ast> struct_type_specifier struct_elem_type_list struct_elem_type
+%type <ast> struct_type_specifier
+%type <integer> struct_type_pinned
+%type <ast> struct_elem_type_list struct_elem_type
 %type <ast> struct_elem_type_constraint struct_elem_type_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
@@ -1046,9 +1049,12 @@ function_type_arg:
 	;
 
 struct_type_specifier:
-	  pushlevel STRUCT '{' '}'
+	  pushlevel struct_type_pinned STRUCT '{' '}'
           	{
-                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0, NULL);
+                    $$ = pkl_ast_make_struct_type (pkl_parser->ast,
+                                                   0 /* nelem */,
+                                                   NULL /* elems */,
+                                                   $2);
                     PKL_AST_LOC ($$) = @$;
 
                     /* The pushlevel in this rule and the subsequent
@@ -1057,7 +1063,7 @@ struct_type_specifier:
                        rule.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | pushlevel STRUCT '{'
+        | pushlevel struct_type_pinned STRUCT '{'
         	{
                   /* Register dummies for the locals used in
                      pkl-gen.pks:struct_mapper.  */
@@ -1077,12 +1083,20 @@ struct_type_specifier:
                 }
           struct_elem_type_list '}'
         	{
-                    $$ = pkl_ast_make_struct_type (pkl_parser->ast, 0 /* nelem */, $5);
+                    $$ = pkl_ast_make_struct_type (pkl_parser->ast,
+                                                   0 /* nelem */,
+                                                   $6,
+                                                   $2);
                     PKL_AST_LOC ($$) = @$;
 
                     /* Pop the frame pushed in the `pushlevel' above.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
+        ;
+
+struct_type_pinned:
+	%empty		{ $$ = 0; }
+	| PINNED	{ $$ = 1; }
         ;
 
 struct_elem_type_list:

@@ -146,6 +146,7 @@ D [0-9]
 
 "//"[^\n]*	{ /* Partial-line comment.  */ }
 
+"pinned"	{ return PINNED; }
 "struct"	{ return STRUCT; }
 "else"		{ return ELSE; }
 "while"		{ return WHILE; }
