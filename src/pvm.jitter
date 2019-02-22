@@ -59,6 +59,8 @@ wrapped-functions
   pvm_allocate_struct_attrs
   pvm_make_struct_type
   pvm_typeof
+  pvm_ref_struct
+  pvm_set_struct
   ios_cur
   ios_read_int
   ios_read_uint
@@ -1937,6 +1939,16 @@ end
 
 instruction sset () # ( SCT STR VAL -- SCT )
   code
+    pvm_val val = JITTER_TOP_STACK ();
+    pvm_val name = JITTER_UNDER_TOP_STACK ();
+    pvm_val sct;
+
+    JITTER_DROP_STACK ();
+    JITTER_DROP_STACK ();
+
+    sct = JITTER_TOP_STACK ();
+    if (!pvm_set_struct (sct, name, val))
+       PVM_RAISE (PVM_E_ELEM);
   end
 end
 
@@ -1958,7 +1970,7 @@ instruction srefi () # ( SCT ULONG -- SCT ULONG VAL )
 
     if (PVM_VAL_ULONG (index) < 0
         || (PVM_VAL_ULONG (index) >=
-            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (sct))))
+            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NELEM (sct))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
     JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_VALUE (sct,
@@ -1973,7 +1985,7 @@ instruction srefio () # ( SCT ULONG -- SCT ULONG OFF )
 
     if (PVM_VAL_ULONG (index) < 0
         || (PVM_VAL_ULONG (index) >=
-            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (sct))))
+            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NELEM (sct))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
     JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_OFFSET (sct,

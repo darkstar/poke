@@ -643,8 +643,8 @@
         .function struct_writer
         prolog
         pushf
-        drop                    ; OFF is not used.
         regvar $sct
+        drop                    ; OFF is not used.
 .c { uint64_t i;
  .c for (i = 0, elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem), ++i)
  .c {

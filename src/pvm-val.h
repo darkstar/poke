@@ -319,6 +319,7 @@ typedef struct pvm_struct *pvm_struct;
 
 pvm_val pvm_make_struct (pvm_val nelem, pvm_val type);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
+int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
 
 /* Types are also boxed.  */
 

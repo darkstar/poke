@@ -149,6 +149,31 @@ pvm_ref_struct (pvm_val sct, pvm_val name)
   return PVM_NULL;
 }
 
+int
+pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val)
+{
+  size_t nelem, i;
+  struct pvm_struct_elem *elems;
+
+  assert (PVM_IS_SCT (sct) && PVM_IS_STR (name));
+  
+  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
+  elems = PVM_VAL_SCT (sct)->elems;
+  
+  for (i = 0; i < nelem; ++i)
+    {
+      if (elems[i].name != PVM_NULL
+          && strcmp (PVM_VAL_STR (elems[i].name),
+                     PVM_VAL_STR (name)) == 0)
+        {
+          PVM_VAL_SCT_ELEM_VALUE (sct,i) = val;
+          return 1;
+        }
+    }
+          
+  return 0;
+}
+
 static pvm_val
 pvm_make_type (enum pvm_type_code code)
 {
