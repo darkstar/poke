@@ -419,6 +419,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
         if (PKL_AST_ASS_STMT_VALMAPPER_P (ass_stmt))
           {
             /* XXX this never happens atm  */
+            assert (0);
             int valmapper_back = PKL_AST_ASS_STMT_VALMAPPER_BACK (ass_stmt);
             int valmapper_over = PKL_AST_ASS_STMT_VALMAPPER_OVER (ass_stmt);
 
