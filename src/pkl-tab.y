@@ -987,7 +987,8 @@ simple_type_specifier:
                 }
 	| simple_type_specifier '[' expression ']'
         	{
-                    /* XXX fix conflicts */
+                  /* XXX: synchronize lexical environment with
+                     the array mapper.  */
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                   PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
                   PKL_AST_LOC ($$) = @$;
