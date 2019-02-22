@@ -300,7 +300,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> integral_type_specifier offset_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
-%type <integer> struct_type_pinned
+%type <integer> struct_type_pinned integral_type_sign
 %type <ast> struct_elem_type_list struct_elem_type
 %type <ast> struct_elem_type_constraint struct_elem_type_label
 %type <ast> declaration
@@ -328,13 +328,13 @@ pushlevel:
         ;
 
 
-poplevel:
+/*poplevel:
  	  %empty
 		{
                   pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
 	;
-
+*/
 start:
 	  START_EXP expression
           	{
@@ -989,24 +989,20 @@ simple_type_specifier:
         ;
 
 integral_type_specifier:
-          INTCONSTR INTEGER '>'
+          integral_type_sign INTEGER '>'
                 {
                     /* XXX: $3 can be any expression!.  */
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2),
-                                                     1 /* signed */);
+                                                     $1);
                     ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | UINTCONSTR INTEGER '>'
-                {
-                    /* XXX: $3 can be any expression!.  */
-                    $$ = pkl_ast_make_integral_type (pkl_parser->ast,
-                                                     PKL_AST_INTEGER_VALUE ($2),
-                                                     0 /* signed */);
-                    ASTREF ($2); pkl_ast_node_free ($2);
-                    PKL_AST_LOC ($$) = @$;
-                }
+	;
+
+integral_type_sign:
+          INTCONSTR { $$ = 1; }
+	| UINTCONSTR { $$ = 0; }
 	;
 
 offset_type_specifier:
