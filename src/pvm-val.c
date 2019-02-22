@@ -304,10 +304,8 @@ pvm_val_writer (pvm_val val)
 {
   if (PVM_IS_ARR (val))
     return PVM_VAL_ARR_WRITER (val);
-  /* XXX
   if (PVM_IS_SCT (val))
     return PVM_VAL_SCT_WRITER (val);
-  */
 
   return PVM_NULL;
 }
