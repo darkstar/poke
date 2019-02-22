@@ -595,10 +595,15 @@
         ;; Iterate over the elements of the struct type.
  .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  .c {
-        pushvar $off            ; ... NEOFF OFF
-        .e struct_elem_mapper   ; ... [EOFF ENAME EVAL] NEOFF
-        ;; XXX if the struct is pinned, replace NEOFF with OFF
+        pushvar $off            ; ...[EOFF ENAME EVAL] NEOFF OFF
+        .e struct_elem_mapper   ; ...[EOFF ENAME EVAL] NEOFF
+        ;; If the struct is pinned, replace NEOFF with OFF
         ;; Increase the number of elements.
+   .c if (PKL_AST_TYPE_S_PINNED (type_struct))
+   .c {
+        drop
+        pushvar $off            ; ...[EOFF ENAME EVAL] OFF
+   .c }
         pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
         push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
         addl
