@@ -296,7 +296,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
-%type <ast> type_specifier simple_type_specifier
+%type <ast> type_specifier simple_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned
@@ -325,6 +325,14 @@ pushlevel:
                   pkl_parser->env = pkl_env_push_frame (pkl_parser->env);
                 }
         ;
+
+
+poplevel:
+ 	  %empty
+		{
+                  pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+                }
+	;
 
 start:
 	  START_EXP expression
@@ -1003,20 +1011,30 @@ simple_type_specifier:
                                                    $2, $4);
                     PKL_AST_LOC ($$) = @$;
                 }
-	| simple_type_specifier '[' ']' 
+	| array_type_specifier
+        	{
+                  $$ = $1;
+                }
+        ;
+
+array_type_specifier:
+	  simple_type_specifier /* poplevel */ '[' ']' 
         	{
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| simple_type_specifier '[' expression ']'
+	| simple_type_specifier /* poplevel */ '[' expression ']'
         	{
-                  /* XXX: synchronize lexical environment with
-                     the array mapper.  */
+                  /* Note that the pushlevel in this rule is to
+                     reflect the lexical environment level introduced
+                     by the array mapper.  This is to evaluate nested
+                     bounding expressions.  */
+
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                   PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        ;
+	;
 
 function_type_specifier:
 	   '(' function_type_arg_list ')' simple_type_specifier
