@@ -422,17 +422,18 @@
         push ulong<64>0         ; 0UL
         regvar $idx             ; _
 
-        .while
+     .while
         pushvar $idx            ; I
         pushvar $value          ; I ARRAY
         sel                     ; I ARRAY NELEM
         nip                     ; I NELEM
         ltlu                    ; I NELEM (NELEM<I)
         nip2                    ; (NELEM<I)
-        .loop
+     .loop
                                 ; _
 
         ;; Poke this array element
+        ;; XXX OFF is not used in the loop.  Remove it.
         pushvar $offset         ; OFF
         pushvar $value          ; OFF ARRAY
         pushvar $idx            ; OFF ARRAY I
@@ -455,7 +456,7 @@
         addlu                   ; EDIX 1UL (EIDX+1UL)
         nip2                    ; (EIDX+1UL)
         popvar $idx             ; _
-        .endloop 
+     .endloop 
 
         popf 1
         push null
@@ -629,9 +630,41 @@
 ;;;
 ;;; Assemble a function that pokes a mapped struct value to it's mapped
 ;;; offset in the current IOS.
+;;; The C environment required is:
+;;;
+;;; `type_struct' is a pkl_ast_node with the struct type being
+;;;  processed.
+;;; 
+;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; of the struct type being processed.
+;;; 
+;;; `elem' is a scratch pkl_ast_node.
 
         .function struct_writer
-        ;; XXX writeme
+        prolog
+        pushf
+        drop                    ; OFF is not used.
+        regvar $sct
+.c { uint64_t i;
+ .c for (i = 0, elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem), ++i)
+ .c {
+        ;; Poke this struct element
+        pushvar $sct            ; SCT
+        .c pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (i, 64));
+                                ; SCT I
+        srefi                   ; SCT I EVAL
+        nrot                    ; EVAL SCT I
+        srefio                  ; EVAL SCT I EOFF
+        nip2                    ; EVAL EOFF
+        swap                    ; EOFF EVAL
+        .c PKL_GEN_PAYLOAD->in_writer = 1;
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        .c PKL_GEN_PAYLOAD->in_writer = 0;
+ .c }
+.c }
+        popf 1
+        push null
+        return
         .end
 
         

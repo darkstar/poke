@@ -1951,6 +1951,36 @@ instruction sref () # ( SCT STR -- SCT STR VAL )
   end
 end
 
+instruction srefi () # ( SCT ULONG -- SCT ULONG VAL )
+  code
+    pvm_val sct = JITTER_UNDER_TOP_STACK ();
+    pvm_val index = JITTER_TOP_STACK ();
+
+    if (PVM_VAL_ULONG (index) < 0
+        || (PVM_VAL_ULONG (index) >=
+            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (sct))))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_VALUE (sct,
+                                               PVM_VAL_ULONG (index)));
+  end
+end
+
+instruction srefio () # ( SCT ULONG -- SCT ULONG OFF )
+  code
+    pvm_val sct = JITTER_UNDER_TOP_STACK ();
+    pvm_val index = JITTER_TOP_STACK ();
+
+    if (PVM_VAL_ULONG (index) < 0
+        || (PVM_VAL_ULONG (index) >=
+            PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (sct))))
+      PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
+
+    JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_OFFSET (sct,
+                                                PVM_VAL_ULONG (index)));
+  end
+end
+
 
 
 ## Offset instructions.
