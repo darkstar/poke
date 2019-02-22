@@ -740,12 +740,19 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
         {
           pvm_val name = PVM_VAL_SCT_ELEM_NAME(val, idx);
           pvm_val value = PVM_VAL_SCT_ELEM_VALUE(val, idx);
+          pvm_val offset = PVM_VAL_SCT_ELEM_OFFSET(val, idx);
 
           if (idx != 0)
             fprintf (out, ",");
           if (name != PVM_NULL)
             fprintf (out, "%s=", PVM_VAL_STR (name));
           pvm_print_val (out, value, base, flags);
+          
+          if (flags & PVM_PRINT_F_MAPS && offset != PVM_NULL)
+            {
+              fputc ('@', out);
+              pvm_print_val (out, offset, base, flags);
+            }      
         }
       fprintf (out, "}");
     }

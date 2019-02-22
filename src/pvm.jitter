@@ -697,7 +697,7 @@ instruction strace () # ( -- )
      while (JITTER_HEIGHT_STACK () !=
             jitter_original_state->pvm_state_backing.canary)
         {
-          pvm_print_val (stdout, JITTER_TOP_STACK (), 16, 0);
+          pvm_print_val (stdout, JITTER_TOP_STACK (), 16, PVM_PRINT_F_MAPS);
           fprintf (stdout, "\n");
           tmp[i++] = JITTER_TOP_STACK ();
           JITTER_DROP_STACK ();
@@ -1926,7 +1926,8 @@ instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
 
-      PVM_VAL_SCT_ELEM_OFFSET (sct, e) = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_ELEM_OFFSET (sct, PVM_VAL_ULONG (nelem) - e -1)
+          = JITTER_TOP_STACK ();
       JITTER_DROP_STACK ();
     }
 
