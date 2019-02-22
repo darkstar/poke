@@ -40,16 +40,15 @@
    See the handlers below for detailed information about what these
    phases check for.  */
 
+#define PKL_ANAL_PAYLOAD ((pkl_anal_payload) PKL_PASS_PAYLOAD)
+
 /* The following handler is used in all anal phases, and initializes
    the phase payload.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal_pr_program)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-    
   /* No errors initially.  */
-  payload->errors = 0;
+  PKL_ANAL_PAYLOAD->errors = 0;
 }
 PKL_PHASE_END_HANDLER
 
@@ -58,9 +57,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node elems = PKL_AST_STRUCT_ELEMS (node);
   pkl_ast_node t;
@@ -85,7 +81,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (uname),
                          "duplicated name element in struct");
-              payload->errors++;
+              PKL_ANAL_PAYLOAD->errors++;
               PKL_PASS_ERROR;
               /* Do not report more duplicates in this struct.  */
               break;
@@ -100,9 +96,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node struct_type = PKL_PASS_NODE;
   pkl_ast_node struct_type_elems
     = PKL_AST_TYPE_S_ELEMS (struct_type);
@@ -123,7 +116,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (u),
                          "duplicated element name in struct type spec");
-              payload->errors++;
+              PKL_ANAL_PAYLOAD->errors++;
               PKL_PASS_ERROR;
             }
         }
@@ -136,8 +129,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_comp_stmt)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
 
   if (PKL_AST_COMP_STMT_BUILTIN (comp_stmt) != PKL_AST_BUILTIN_NONE
@@ -145,7 +136,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_comp_stmt)
     {
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (comp_stmt),
                "builtin comp-stmt contains statements");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -172,9 +163,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node funcall = PKL_PASS_NODE;
   pkl_ast_node funcall_arg;
   int some_named = 0;
@@ -195,7 +183,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
                  "mixed named and not-named arguments not allowed in funcall");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -218,7 +206,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
                 {
                   pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                              "duplicated argument in funcall");
-                  payload->errors++;
+                  PKL_ANAL_PAYLOAD->errors++;
                   PKL_PASS_ERROR;
                 }
             }
@@ -232,9 +220,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node func = PKL_PASS_NODE;
   pkl_ast_node fa;
 
@@ -248,7 +233,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
                      "non-optional argument after optional arguments");
-          payload->errors++;
+          PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -259,7 +244,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
                      "vararg argument should be the last argument");
-          payload->errors++;
+          PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -271,9 +256,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_function)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node func_type = PKL_PASS_NODE;
   pkl_ast_node arg;
 
@@ -286,7 +268,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_function)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
                      "vararg argument should be the last argument");
-          payload->errors++;
+          PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -297,15 +279,13 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_break_stmt)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node break_stmt = PKL_PASS_NODE;
 
   if (!PKL_AST_BREAK_STMT_ENTITY (break_stmt))
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (break_stmt),
                  "`break' statement without containing statement");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -331,8 +311,6 @@ struct pkl_phase pkl_phase_anal1 =
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_checktype)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);
 
@@ -341,7 +319,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_checktype)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
                "node #%" PRIu64 " has no type",
                PKL_AST_UID (node));
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -351,7 +329,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_checktype)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (type),
                "type completeness is unknown in node #%" PRIu64,
                PKL_AST_UID (node));
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -362,9 +340,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (node);
   pkl_ast_node magnitude_type = PKL_AST_TYPE (magnitude);
@@ -375,7 +350,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (magnitude_type),
                  "expected integer expression in offset");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -384,7 +359,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (node),
                "node #% " PRIu64 " has no type",
                PKL_AST_UID (node));
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -394,7 +369,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
       pkl_ice (PKL_PASS_AST, PKL_AST_LOC (type),
                "type completeness is unknown in node #%" PRIu64,
                PKL_AST_UID (node));
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -406,9 +381,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node return_stmt = PKL_PASS_NODE;
   pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
   pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
@@ -418,7 +390,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                  "returning a value in a void function");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
   else if (!exp
@@ -426,7 +398,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (return_stmt),
                  "the function expects a return value");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -437,9 +409,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node funcall = PKL_PASS_NODE;
   pkl_ast_node funcall_function = PKL_AST_FUNCALL_FUNCTION (funcall);
   pkl_ast_node function_type = PKL_AST_TYPE (funcall_function);
@@ -450,7 +419,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "call to void function in expression");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -490,9 +459,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
 {
-  pkl_anal_payload payload
-    = (pkl_anal_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node ass_stmt = PKL_PASS_NODE;
   pkl_ast_node ass_stmt_lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
 
@@ -500,7 +466,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt_lvalue),
                  "invalid l-value in assignment");
-      payload->errors++;
+      PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
