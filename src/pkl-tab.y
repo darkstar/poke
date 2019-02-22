@@ -146,6 +146,29 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
   return 1;
 }
 
+/* Register N dummy entries in the compilation environment.  */
+
+void
+pkl_register_dummies (struct pkl_parser *parser, int n)
+{
+  int i;
+  for (i = 0; i < n; ++i)
+    {
+      char *name;
+      pkl_ast_node id;
+      pkl_ast_node decl;
+      
+      asprintf (&name, "@*UNUSABLE_OFF_%d*@", i);
+      id = pkl_ast_make_identifier (parser->ast, name);
+      decl = pkl_ast_make_decl (parser->ast,
+                                PKL_AST_DECL_KIND_VAR,
+                                id, NULL /* initial */,
+                                NULL /* source */);
+
+      assert (pkl_env_register (parser->env, name, decl));
+    }
+}
+
 %}
 
 %union {
@@ -1068,19 +1091,7 @@ struct_type_specifier:
         	{
                   /* Register dummies for the locals used in
                      pkl-gen.pks:struct_mapper.  */
-
-                  pkl_ast_node id = pkl_ast_make_identifier (pkl_parser->ast,
-                                                             "@**@");
-                  pkl_ast_node decl = pkl_ast_make_decl (pkl_parser->ast,
-                                                         PKL_AST_DECL_KIND_VAR,
-                                                         id, NULL /* initial */,
-                                                         NULL /* source */);
-                      
-                  if (!pkl_env_register (pkl_parser->env, "@*UNUSABLE_OFF*@",
-                                         decl)
-                      || !pkl_env_register (pkl_parser->env, "@*UNUSABLE_NELEM*@",
-                                            decl))
-                    assert (0);
+                  pkl_register_dummies (pkl_parser, 2);
                 }
           struct_elem_type_list '}'
         	{
