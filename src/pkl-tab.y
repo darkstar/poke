@@ -296,7 +296,8 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
 %type <ast> struct struct_elem_list struct_elem
-%type <ast> type_specifier simple_type_specifier array_type_specifier
+%type <ast> type_specifier simple_type_specifier
+%type <ast> integral_type_specifier offset_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned
@@ -982,11 +983,18 @@ simple_type_specifier:
                   $$ = pkl_ast_make_string_type (pkl_parser->ast);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | INTCONSTR INTEGER '>'
+	| integral_type_specifier
+	| offset_type_specifier
+	| array_type_specifier
+        ;
+
+integral_type_specifier:
+          INTCONSTR INTEGER '>'
                 {
                     /* XXX: $3 can be any expression!.  */
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
-                                                     PKL_AST_INTEGER_VALUE ($2), 1 /* signed */);
+                                                     PKL_AST_INTEGER_VALUE ($2),
+                                                     1 /* signed */);
                     ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
@@ -994,11 +1002,15 @@ simple_type_specifier:
                 {
                     /* XXX: $3 can be any expression!.  */
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
-                                                     PKL_AST_INTEGER_VALUE ($2), 0 /* signed */);
+                                                     PKL_AST_INTEGER_VALUE ($2),
+                                                     0 /* signed */);
                     ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
-        | OFFSETCONSTR simple_type_specifier ',' IDENTIFIER '>'
+	;
+
+offset_type_specifier:
+          OFFSETCONSTR simple_type_specifier ',' IDENTIFIER '>'
                 {
                     $$ = pkl_ast_make_offset_type (pkl_parser->ast,
                                                    $2, $4);
@@ -1011,11 +1023,7 @@ simple_type_specifier:
                                                    $2, $4);
                     PKL_AST_LOC ($$) = @$;
                 }
-	| array_type_specifier
-        	{
-                  $$ = $1;
-                }
-        ;
+	;
 
 array_type_specifier:
 	  simple_type_specifier /* poplevel */ '[' ']' 
