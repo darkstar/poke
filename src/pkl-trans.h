@@ -22,16 +22,31 @@
 #include <config.h>
 #include "pkl-pass.h"
 
+/* The following struct defines the payload of the trans phases.
+
+   ERRORS is the number of errors detected while running the phase.
+   
+   ADD_FRAMES is the number of frames to add to lexical addresses.
+   This is used in transl.  */
+
 struct pkl_trans_payload
 {
   int errors;
+  int add_frames;
 };
 
 typedef struct pkl_trans_payload *pkl_trans_payload;
 
+extern struct pkl_phase pkl_phase_transl;
 extern struct pkl_phase pkl_phase_trans1;
 extern struct pkl_phase pkl_phase_trans2;
 extern struct pkl_phase pkl_phase_trans3;
 extern struct pkl_phase pkl_phase_trans4;
+
+static inline void
+pkl_trans_init_payload (pkl_trans_payload payload)
+{
+  memset (payload, 0, sizeof (struct pkl_trans_payload));
+}
 
 #endif /* PKL_TRANS_H */

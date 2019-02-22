@@ -1022,18 +1022,13 @@ offset_type_specifier:
 	;
 
 array_type_specifier:
-	  simple_type_specifier /* poplevel */ '[' ']' 
+	  simple_type_specifier '[' ']' 
         	{
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| simple_type_specifier /* poplevel */ '[' expression ']'
+	| simple_type_specifier '[' expression ']'
         	{
-                  /* Note that the pushlevel in this rule is to
-                     reflect the lexical environment level introduced
-                     by the array mapper.  This is to evaluate nested
-                     bounding expressions.  */
-
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
                   PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
                   PKL_AST_LOC ($$) = @$;

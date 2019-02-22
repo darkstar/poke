@@ -29,6 +29,10 @@
 /* This file implements several transformation compiler phases which,
    generally speaking, are restartable.
 
+   `transl' makes adjustments to the compile-time lexical environment,
+            after parsing.  This phase should run on its own pass, and
+            is not restartable.
+
    `trans1' finishes ARRAY, STRUCT and TYPE_STRUCT nodes by
             determining its number of elements and characteristics.
             It also finishes OFFSET nodes by replacing certain unit
@@ -47,6 +51,9 @@
 
    See the handlers below for details.  */
 
+
+#define PKL_TRANS_PAYLOAD ((pkl_trans_payload) PKL_PASS_PAYLOAD)
+
 /* The following handler is used in all trans phases and initializes
    the phase payload.  */
 
@@ -55,8 +62,47 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans_pr_program)
   pkl_trans_payload payload
     = (pkl_trans_payload) PKL_PASS_PAYLOAD;
   payload->errors = 0;
+  payload->add_frames = -1;
 }
 PKL_PHASE_END_HANDLER
+
+/* The array mappers introduce a lexical frame.  Unfortunately, it is
+   not possible to add this frame in the bison parser due to syntactic
+   ambiguities.  So, we need to reflect the extra lexical frame
+   here, by adjusting lexical addresses accordingly.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_type_array)
+{
+  PKL_TRANS_PAYLOAD->add_frames += 1;
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_type_array)
+{
+  assert (PKL_TRANS_PAYLOAD->add_frames != -1);
+  PKL_TRANS_PAYLOAD->add_frames -= 1;
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_var)
+{
+  if (PKL_TRANS_PAYLOAD->add_frames != -1)
+    {
+        pkl_ast_node var = PKL_PASS_NODE;
+        PKL_AST_VAR_BACK (var) += PKL_TRANS_PAYLOAD->add_frames;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+struct pkl_phase pkl_phase_transl =
+  {
+   PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_transl_ps_var),
+   PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_pr_type_array),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_ps_type_array),
+  };
+
+
 
 /* Compute and set the number of elements in a STRUCT node.  */
 

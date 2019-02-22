@@ -35,6 +35,7 @@
 #include "pkl-parser.h"
 #include "pkl-pass.h"
 #include "pkl-gen.h"
+#include "pkl-trans.h"
 #include "pkl-anal.h"
 #include "pkl-trans.h"
 #include "pkl-typify.h"
@@ -113,14 +114,23 @@ rest_of_compilation (pkl_compiler compiler,
   struct pkl_anal_payload anal1_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
   struct pkl_anal_payload analf_payload = { 0 };
-  
-  struct pkl_trans_payload trans1_payload = { 0 };
-  struct pkl_trans_payload trans2_payload = { 0 };
-  struct pkl_trans_payload trans3_payload = { 0 };
-  struct pkl_trans_payload trans4_payload = { 0 };
+
+  struct pkl_trans_payload transl_payload;
+  struct pkl_trans_payload trans1_payload;
+  struct pkl_trans_payload trans2_payload;
+  struct pkl_trans_payload trans3_payload;
+  struct pkl_trans_payload trans4_payload;
   
   struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_typify_payload typify2_payload = { 0 };
+
+  struct pkl_phase *lex_phases[]
+    = { &pkl_phase_transl,
+        NULL
+  };
+
+  void *lex_payloads[]
+    = { &transl_payload };
   
   struct pkl_phase *frontend_phases[]
     = { &pkl_phase_trans1,
@@ -170,7 +180,18 @@ rest_of_compilation (pkl_compiler compiler,
   };
 
   /* Initialize payloads.  */
+  pkl_trans_init_payload (&transl_payload);
+  pkl_trans_init_payload (&trans1_payload);
+  pkl_trans_init_payload (&trans2_payload);
+  pkl_trans_init_payload (&trans3_payload);
+  pkl_trans_init_payload (&trans4_payload);
   pkl_gen_init_payload (&gen_payload, compiler);
+
+  if (!pkl_do_pass (ast, lex_phases, lex_payloads))
+    goto error;
+
+  if (transl_payload.errors > 0)
+    goto error;
 
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
