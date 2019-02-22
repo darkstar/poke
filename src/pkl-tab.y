@@ -1001,8 +1001,8 @@ integral_type_specifier:
 	;
 
 integral_type_sign:
-          INTCONSTR { $$ = 1; }
-	| UINTCONSTR { $$ = 0; }
+          INTCONSTR	{ $$ = 1; }
+	| UINTCONSTR	{ $$ = 0; }
 	;
 
 offset_type_specifier:
