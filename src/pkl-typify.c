@@ -44,6 +44,8 @@
 #include "pkl-pass.h"
 #include "pkl-typify.h"
 
+#define PKL_TYPIFY_PAYLOAD ((pkl_typify_payload) PKL_PASS_PAYLOAD)
+
 /* Note the following macro evaluates the arguments twice!  */
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
 
@@ -52,10 +54,7 @@
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify_pr_program)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
-  payload->errors = 0;
+  PKL_TYPIFY_PAYLOAD->errors = 0;
 }
 PKL_PHASE_END_HANDLER
 
@@ -65,9 +64,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_not)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node op = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
   pkl_ast_node op_type = PKL_AST_TYPE (op);
 
@@ -75,7 +71,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_not)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
                  "invalid operand to NOT");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
   else
@@ -95,9 +91,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_rela)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
   int op1_type_code = PKL_AST_TYPE_CODE (op1_type);
@@ -121,7 +114,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_rela)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (PKL_PASS_NODE),
                  "invalid operands to relational operator");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -206,9 +199,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node cast = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
   pkl_ast_node exp = PKL_AST_CAST_EXP (cast);
@@ -218,7 +208,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "casting a value to `any' is not allowed");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -226,7 +216,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "casting a value to a function type is not allowed");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -234,7 +224,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "casting a function to any other type is not allowed");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -251,7 +241,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 expected uint<8>, got %s.",
                  found_type);
       free (found_type);
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -288,9 +278,6 @@ PKL_PHASE_END_HANDLER
 #define TYPIFY_BIN(OP)                                                  \
   PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_##OP)                         \
   {                                                                     \
-    pkl_typify_payload payload                                          \
-      = (pkl_typify_payload) PKL_PASS_PAYLOAD;                          \
-                                                                        \
     pkl_ast_node exp = PKL_PASS_NODE;                                   \
     pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);                    \
     pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);                    \
@@ -319,7 +306,7 @@ PKL_PHASE_END_HANDLER
   error:                                                                \
     pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),                         \
                "invalid operands in expression");                       \
-    payload->errors++;                                                  \
+    PKL_TYPIFY_PAYLOAD->errors++;                                                  \
     PKL_PASS_ERROR;                                                     \
   }                                                                     \
   PKL_PHASE_END_HANDLER
@@ -450,9 +437,6 @@ TYPIFY_BIN (add);
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_mul)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-    
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
@@ -525,7 +509,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_mul)
  error:
   pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
              "invalid operands in expression");
-  payload->errors++;
+  PKL_TYPIFY_PAYLOAD->errors++;
   PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
@@ -543,9 +527,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
@@ -561,7 +542,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                  "operator requires integral arguments");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -572,7 +553,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
                  "the sum of the width of the operators should not exceed 64-bit");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -633,9 +614,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node array = PKL_PASS_NODE;
   pkl_ast_node initializers = PKL_AST_ARRAY_INITIALIZERS (array);
   
@@ -653,7 +631,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (array),
                      "array initializers should be of the same type");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }        
     }
@@ -673,9 +651,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node trimmer = PKL_PASS_NODE;
   pkl_ast_node from_idx = PKL_AST_TRIMMER_FROM (trimmer);
   pkl_ast_node to_idx = PKL_AST_TRIMMER_TO (trimmer);
@@ -688,7 +663,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (from_idx),
                  "index in trimmer should be an integer");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -696,7 +671,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (to_idx),
                  "index in trimmer should be an integer");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -710,9 +685,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node indexer = PKL_PASS_NODE;
   pkl_ast_node index = PKL_AST_INDEXER_INDEX (indexer);
   pkl_ast_node container = PKL_AST_INDEXER_ENTITY (indexer);
@@ -739,7 +711,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
     default:
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
                  "operator to [] must be an arry or a string");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;      
     }
 
@@ -747,7 +719,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (index),
                  "index should be an integer");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -840,9 +812,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node funcall = PKL_PASS_NODE;
   pkl_ast_node funcall_function
     = PKL_AST_FUNCALL_FUNCTION (funcall);
@@ -858,7 +827,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "variable is not a function");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -879,7 +848,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "too few arguments passed to function");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -910,7 +879,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "too many arguments passed to function");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -950,7 +919,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               {
                 pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
                            "function doesn't take named arguments");
-                payload->errors++;
+                PKL_TYPIFY_PAYLOAD->errors++;
                 PKL_PASS_ERROR;
               }
 
@@ -967,7 +936,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
             pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                        "function doesn't take a `%s' argument",
                        PKL_AST_IDENTIFIER_POINTER (aa_name));
-            payload->errors++;
+            PKL_TYPIFY_PAYLOAD->errors++;
             PKL_PASS_ERROR;
           }
       }
@@ -992,7 +961,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
               {
                 pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
                            "function doesn't take named arguments");
-                payload->errors++;
+                PKL_TYPIFY_PAYLOAD->errors++;
                 PKL_PASS_ERROR;
               }
 
@@ -1011,7 +980,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
             pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
                        "required argument `%s' not specified in funcall",
                        PKL_AST_IDENTIFIER_POINTER (fa_name));
-            payload->errors++;
+            PKL_TYPIFY_PAYLOAD->errors++;
             PKL_PASS_ERROR;
           }
 
@@ -1072,7 +1041,7 @@ expected %s, got %s",
           free (expected_type);
           free (passed_type);
                   
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -1103,7 +1072,7 @@ expected %s, got %s",
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
                  "function doesn't return a value");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
   }
@@ -1121,9 +1090,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node ass_stmt = PKL_PASS_NODE;
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
   pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
@@ -1144,7 +1110,7 @@ expected %s got %s",
       free (found_type);
       free (expected_type);
       
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1153,7 +1119,7 @@ expected %s got %s",
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
                  "l-value in assignment cannot be a function");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 #endif
@@ -1180,9 +1146,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node struct_ref = PKL_PASS_NODE;
   pkl_ast_node astruct =
     PKL_AST_STRUCT_REF_STRUCT (struct_ref);
@@ -1195,7 +1158,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (astruct),
                  "expected struct");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1219,7 +1182,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (field_name),
                  "referred field doesn't exist in struct");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1233,9 +1196,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node type = PKL_PASS_NODE;
 
   if (PKL_AST_TYPE_I_SIZE (type) < 1
@@ -1243,7 +1203,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
                  "the width of an integral type should be in the [1,64] range");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -1254,9 +1214,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
   pkl_ast_node nelem_type;
 
@@ -1270,7 +1227,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (nelem),
                  "expected integral or offset value");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1283,9 +1240,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node map = PKL_PASS_NODE;
   pkl_ast_node map_type = PKL_AST_MAP_TYPE (map);
   pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
@@ -1295,7 +1249,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (map_offset),
                  "expected offset");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1308,9 +1262,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node scons = PKL_PASS_NODE;
   pkl_ast_node scons_type = PKL_AST_SCONS_TYPE (scons);
 
@@ -1320,7 +1271,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (scons_type),
                  "expected struct type in constructor");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
   
@@ -1357,9 +1308,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node loop_stmt = PKL_PASS_NODE;
   pkl_ast_node condition = PKL_AST_LOOP_STMT_CONDITION (loop_stmt);
   pkl_ast_node iterator = PKL_AST_LOOP_STMT_ITERATOR (loop_stmt);
@@ -1369,7 +1317,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
   if (container)
     {
       PKL_PASS_SUBPASS (container);
-      if (payload->errors > 0)
+      if (PKL_TYPIFY_PAYLOAD->errors > 0)
         PKL_PASS_ERROR;
     }
 
@@ -1388,7 +1336,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
       {
         pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
                    "expected array or string");
-        payload->errors++;
+        PKL_TYPIFY_PAYLOAD->errors++;
         PKL_PASS_ERROR;
       }
 
@@ -1414,7 +1362,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
       pkl_ast_node condition_type;
 
       PKL_PASS_SUBPASS (condition);
-      if (payload->errors > 0)
+      if (PKL_TYPIFY_PAYLOAD->errors > 0)
         PKL_PASS_ERROR;
       
       condition_type = PKL_AST_TYPE (condition);
@@ -1425,13 +1373,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
                      "expected boolean expression");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
 
   PKL_PASS_SUBPASS (body);
-  if (payload->errors > 0)
+  if (PKL_TYPIFY_PAYLOAD->errors > 0)
         PKL_PASS_ERROR;
   PKL_PASS_BREAK;
 }
@@ -1441,9 +1389,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node print_stmt_args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_stmt_types = PKL_AST_PRINT_STMT_TYPES (print_stmt);
@@ -1482,7 +1427,7 @@ expected %s, got %s",
                              expected_type, found_type);
                   free (found_type);
                   free (expected_type);
-                  payload->errors++;
+                  PKL_TYPIFY_PAYLOAD->errors++;
                   PKL_PASS_ERROR;
                 }
             }
@@ -1499,7 +1444,7 @@ expected %s, got %s",
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
                      "expected a string");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -1511,9 +1456,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node raise_stmt = PKL_PASS_NODE;
   pkl_ast_node raise_stmt_exp = PKL_AST_RAISE_STMT_EXP (raise_stmt);
 
@@ -1528,7 +1470,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (raise_stmt),
                      "exception in `raise' statement should be an integral number.");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -1544,9 +1486,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node try_catch_stmt = PKL_PASS_NODE;
   pkl_ast_node try_catch_stmt_arg = PKL_AST_TRY_CATCH_STMT_ARG (try_catch_stmt);
   pkl_ast_node try_catch_stmt_exp = PKL_AST_TRY_CATCH_STMT_EXP (try_catch_stmt);
@@ -1561,7 +1500,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
                      "expected int<32> for exception type");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -1574,7 +1513,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp_type),
                      "invalid exception number");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -1586,9 +1525,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node exp = PKL_PASS_NODE;
   pkl_ast_node operand = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node operand_type = PKL_AST_TYPE (operand);
@@ -1729,7 +1665,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
                operand_type_str);
     free (operand_type_str);
 
-    payload->errors++;
+    PKL_TYPIFY_PAYLOAD->errors++;
     PKL_PASS_ERROR;
   }
 }
@@ -1737,9 +1673,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node elem = PKL_PASS_NODE;
   pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
   pkl_ast_node elem_constraint
@@ -1753,7 +1686,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_type),
                  "invalid type in struct element");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -1771,7 +1704,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
                      "struct element constraint should evaluate to a boolean");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -1794,7 +1727,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_label),
                      "struct element label should evaluate to an offset");
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
       
@@ -1808,9 +1741,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node return_stmt = PKL_PASS_NODE;
   pkl_ast_node exp = PKL_AST_RETURN_STMT_EXP (return_stmt);
   pkl_ast_node function = PKL_AST_RETURN_STMT_FUNCTION (return_stmt);
@@ -1838,7 +1768,7 @@ expected %s, got %s",
       free (expected_type_str);
       free (returned_type_str);
       
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
@@ -1849,9 +1779,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
 {
-  pkl_typify_payload payload
-    = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node func_arg = PKL_PASS_NODE;
   pkl_ast_node initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
 
@@ -1873,7 +1800,7 @@ expected %s, got %s",
           free (arg_type_str);
           free (initial_type_str);
           
-          payload->errors++;
+          PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
     }
@@ -1945,9 +1872,6 @@ struct pkl_phase pkl_phase_typify1 =
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
-  pkl_typify_payload payload
-        = (pkl_typify_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
 
@@ -1960,7 +1884,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
                  "sized array types not allowed in this context");
-      payload->errors++;
+      PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 }
