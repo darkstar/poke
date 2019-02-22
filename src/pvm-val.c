@@ -293,10 +293,8 @@ pvm_val_mapper (pvm_val val)
 {
   if (PVM_IS_ARR (val))
     return PVM_VAL_ARR_MAPPER (val);
-  /* XXX
   if (PVM_IS_SCT (val))
     return PVM_VAL_SCT_MAPPER (val);
-  */
 
   return PVM_NULL;
 }
