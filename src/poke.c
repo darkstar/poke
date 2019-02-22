@@ -67,6 +67,11 @@ int poke_obase = 10;
 /* The following global is the poke compiler.  */
 pkl_compiler poke_compiler;
 
+/* The following global indicates whether to load an user
+   initialization file.  It default to 1.  */
+
+int poke_load_init_file = 1;
+
 /* the following global is the poke virtual machine.  */
 pvm poke_vm;
 
@@ -79,6 +84,7 @@ enum
   QUIET_ARG,
   LOAD_ARG,
   CMD_ARG,
+  NO_INIT_FILE_ARG,
   SCRIPT_ARG,
 };
 
@@ -90,6 +96,7 @@ static const struct option long_options[] =
   {"load", required_argument, NULL, LOAD_ARG},
   {"command", required_argument, NULL, CMD_ARG},
   {"script", required_argument, NULL, SCRIPT_ARG},
+  {"no-init-file", no_argument, NULL, NO_INIT_FILE_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -127,6 +134,7 @@ Commanding poke from the command line:\n\
   /* TRANSLATORS: --help output, less used poke arguments.
      no-wrap */
   fputs (_("\
+  -q, --no-init-file                  do not load an init file.\n\
       --quiet                         be as terse as possible.\n\
       --help                          print a help message and exit.\n\
       --version                       show version and exit.\n"),
@@ -184,7 +192,7 @@ parse_args (int argc, char *argv[])
 
   while ((ret = getopt_long (argc,
                              argv,
-                             "l:c:s:",
+                             "ql:c:s:",
                              long_options,
                              NULL)) != -1)
     {
@@ -201,6 +209,10 @@ parse_args (int argc, char *argv[])
           break;
         case QUIET_ARG:
           poke_quiet_p = 1;
+          break;
+        case 'q':
+        case NO_INIT_FILE_ARG:
+          poke_load_init_file = 0;
           break;
         case 'l':
         case LOAD_ARG:
@@ -349,6 +361,33 @@ initialize ()
 }
 
 static void
+initialize_user ()
+{
+  /* Load the user's initialization file ~/.pokerc, if it exist in the
+     HOME directory.  */
+  char *homedir = getenv ("HOME");
+
+  if (homedir != NULL)
+    {
+      int ret;
+      char *pokerc;
+
+      pokerc = xmalloc (strlen (homedir) + strlen ("/.pokerc") + 1);
+      strcpy (pokerc, homedir);
+      strcat (pokerc, "/.pokerc");
+
+      if (access (pokerc, R_OK) == 0)
+        {
+          ret = pk_cmd_exec_script (pokerc);
+          if (ret == 1)
+            exit (EXIT_FAILURE);
+        }
+      
+      free (pokerc);
+    }
+}
+
+static void
 finalize ()
 {
   ios_shutdown ();
@@ -365,6 +404,10 @@ main (int argc, char *argv[])
 
   /* Parse args, loading files, opening files for IO, etc etc */
   parse_args (argc, argv);
+
+  /* User's initialization.  */
+  if (poke_load_init_file)
+    initialize_user ();
 
   /* Enter the REPL.  */
   if (poke_interactive_p)

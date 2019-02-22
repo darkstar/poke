@@ -111,7 +111,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
             set output_file "${objdir}/[file rootname [file tail $prog]]"
             set fd [open $output_file w]
             puts $fd "#!/bin/bash"
-            puts $fd "$POKE --quiet -l $prog $extra_tool_flags $poke_commands"
+            puts $fd "$POKE --quiet -q -l $prog $extra_tool_flags $poke_commands"
             close $fd
             file attributes $output_file -permissions a+rx
         }
