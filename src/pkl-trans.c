@@ -59,10 +59,8 @@
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans_pr_program)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-  payload->errors = 0;
-  payload->add_frames = -1;
+  PKL_TRANS_PAYLOAD->errors = 0;
+  PKL_TRANS_PAYLOAD->add_frames = -1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -221,9 +219,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_offset)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node unit = PKL_AST_OFFSET_UNIT (offset);
 
@@ -251,7 +246,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_offset)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
                      "expected `b', `N', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
-          payload->errors++;
+          PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -269,9 +264,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_offset)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node offset_type = PKL_PASS_NODE;
   pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (offset_type);
 
@@ -284,7 +276,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_offset)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
                      "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
-          payload->errors++;
+          PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -346,9 +338,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node string = PKL_PASS_NODE;
   char *string_pointer = PKL_AST_STRING_POINTER (string);
   char *new_string_pointer;
@@ -374,7 +363,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
             default:
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (string),
                          "invalid \\%c sequence in string", p[1]);
-              payload->errors++;
+              PKL_TRANS_PAYLOAD->errors++;
               PKL_PASS_ERROR;
             }
           p++;
@@ -416,8 +405,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
   pkl_ast_node exp = PKL_PASS_NODE;
 
   pkl_ast_node identifier = PKL_AST_EXP_OPERAND (exp, 1);
@@ -437,7 +424,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (identifier),
                  "invalid attribute '%s", identifier_name);
-      payload->errors++;
+      PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -570,9 +557,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 {
-  pkl_trans_payload payload __attribute((unused))
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node print_stmt = PKL_PASS_NODE;
   pkl_ast_node args = PKL_AST_PRINT_STMT_ARGS (print_stmt);
   pkl_ast_node print_fmt = PKL_AST_PRINT_STMT_FMT (print_stmt);
@@ -621,7 +605,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
                      "not enough arguments in printf");
-          payload->errors++;
+          PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
 
@@ -708,7 +692,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
                  "too many arguments in printf");
-      payload->errors++;
+      PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -720,7 +704,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
  invalid_tag:
   pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_fmt),
              "invalid %%- tag in format string");
-  payload->errors++;
+  PKL_TRANS_PAYLOAD->errors++;
   PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
@@ -882,9 +866,6 @@ struct pkl_phase pkl_phase_trans2 =
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node op = PKL_AST_EXP_OPERAND (node, 0);
   pkl_ast_node offset, offset_type, unit, unit_type;
@@ -894,7 +875,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
                  "sizeof only works on complete types");
-      payload->errors++;
+      PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -936,9 +917,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_OFFSET_UNIT (offset);
   pkl_ast_node unit;
@@ -951,7 +929,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
                  "offsets only work on complete types");
-      payload->errors++;
+      PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
@@ -973,9 +951,6 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset_type)
 {
-  pkl_trans_payload payload
-    = (pkl_trans_payload) PKL_PASS_PAYLOAD;
-
   pkl_ast_node type = PKL_PASS_NODE;
   pkl_ast_node unit_type = PKL_AST_TYPE_O_UNIT (type);
   pkl_ast_node unit;
@@ -988,7 +963,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset_type)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit_type),
                  "offset types only work on complete types");
-      payload->errors++;
+      PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
