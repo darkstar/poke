@@ -1675,23 +1675,33 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
     }
-}
-PKL_PHASE_END_HANDLER
+  else
+    {
+      /* Generating a PVM array type.  This doesn't include the number
+         of elements, which is only used to build
+         mappers/writers/etc.  */
 
-/*
- * | ETYPE
- * | NELEM
- * TYPE_ARRAY
- */
+      /* XXX this is replicating the logic in pkl_gen_pr_type.  */
+      if (PKL_PASS_PARENT)
+        {
+          switch (PKL_AST_CODE (PKL_PASS_PARENT))
+            {
+            case PKL_AST_ARRAY:
+            case PKL_AST_TYPE:
+            case PKL_AST_STRUCT_ELEM_TYPE:
+              /* Process these.  */
+              break;
+            default:
+              PKL_PASS_BREAK;
+              break;
+            }
+        }
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_array)
-{
-  if (PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE))
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* XXX: drop the number
-                                                  of elements, as it
-                                                  isn't used at the
-                                                  PVM level.  */
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
+      PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (PKL_PASS_NODE));
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
+
+      PKL_PASS_BREAK;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -2389,7 +2399,6 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_gen_ps_type_function),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_pr_type_array),
-   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_gen_ps_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRING, pkl_gen_ps_type_string),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_pr_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_gen_ps_type_struct),
