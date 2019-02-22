@@ -523,6 +523,52 @@ ios_write_int (ios io, ios_off offset, int flags,
             
             break;
           }
+        case 64:
+          {
+            int32_t c1, c2, c3, c4, c5, c6, c7, c8;
+
+            c1 = (value >> 56) & 0xff;
+            c2 = (value >> 48) & 0xff;
+            c3 = (value >> 40) & 0xff;
+            c4 = (value >> 32) & 0xff;
+            c5 = (value >> 24) & 0xff;
+            c6 = (value >> 16) & 0xff;
+            c7 = (value >> 8) & 0xff;
+            c8 = value & 0xff;
+
+            if (io->dev_if->put_c (io->dev, c1)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c2)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c3)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c4)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c5)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c6)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c7)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c8)
+                == IOD_EOF)
+              return IOS_EIOFF;
+            break;
+          }
         default:
           assert (0);
           break;
@@ -542,18 +588,101 @@ ios_write_uint (ios io, ios_off offset, int flags,
 {
   /* XXX: writeme.  */
 
-  if (offset % 8 == 0 && bits == 8)
+
+  if (offset % 8 == 0)
     {
       if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
           == -1)
         return IOS_EIOFF;
 
-      if (io->dev_if->put_c (io->dev, (int) value)
-          == IOD_EOF)
-        return IOS_EIOBJ;
+      switch (bits)
+        {
+        case 8:
+          if (io->dev_if->put_c (io->dev, (int) value)
+              == IOD_EOF)
+            return IOS_EIOBJ;
+          break;
+        case 32:
+          {
+            int32_t c1, c2, c3, c4;
+            
+            c1 = (value >> 24) & 0xff;
+            c2 = (value >> 16) & 0xff;
+            c3 = (value >> 8) & 0xff;
+            c4 = value & 0xff;
+
+            if (io->dev_if->put_c (io->dev, c1)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c2)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c3)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c4)
+                == IOD_EOF)
+              return IOS_EIOFF;
+            
+            break;
+          }
+        case 64:
+          {
+            int32_t c1, c2, c3, c4, c5, c6, c7, c8;
+
+            c1 = (value >> 56) & 0xff;
+            c2 = (value >> 48) & 0xff;
+            c3 = (value >> 40) & 0xff;
+            c4 = (value >> 32) & 0xff;
+            c5 = (value >> 24) & 0xff;
+            c6 = (value >> 16) & 0xff;
+            c7 = (value >> 8) & 0xff;
+            c8 = value & 0xff;
+
+            if (io->dev_if->put_c (io->dev, c1)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c2)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c3)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c4)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c5)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c6)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c7)
+                == IOD_EOF)
+              return IOS_EIOFF;
+
+            if (io->dev_if->put_c (io->dev, c8)
+                == IOD_EOF)
+              return IOS_EIOFF;
+            break;
+          }
+        default:
+          assert (0);
+          break;
+        }
     }
   else
     assert (0);
+
 
   return IOS_OK;
 }
