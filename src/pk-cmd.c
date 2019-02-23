@@ -342,75 +342,23 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
               
               switch (*a)
                 {
-                case 'd':
                 case 'e':
-                case 'T':
                   {
                     /* Compile a poke program.  */
                     pvm_program prog;
                     char *end;
                     char *program_string;
-                    int trailing_semicolon = 0;
 
-                    if (*a == 'd') 
-                      {
-                        /* The command name (deftype, defvar, etc) is
-                           the first part of the program to compile.
-                           Also, add the final ';' for defvar and
-                           deftype.  */
-                        program_string = xmalloc (strlen (cmd_name) + strlen (p)
-                                                  + 2 + 1);
-                        strcpy (program_string, cmd_name);
-                        strcat (program_string, " ");
-                        strcat (program_string, p);
-                        
-                        if (strcmp (cmd_name, "defvar") == 0
-                            || strcmp (cmd_name, "deftype") == 0)
-                          {
-                            strcat (program_string, ";");
-                            trailing_semicolon = 1;
-                          }
-                      }
-                    else
-                      program_string = p;
-
-                    if (*a == 'e')
-                      prog = pkl_compile_buffer (poke_compiler,
-                                                 PKL_WHAT_EXPRESSION,
-                                                 program_string, &end);
-                    else if (*a == 'T')
-                      prog = pkl_compile_buffer (poke_compiler,
-                                                 PKL_WHAT_STATEMENT,
-                                                 program_string, &end);
-                    else
-                      prog = pkl_compile_buffer (poke_compiler,
-                                                 PKL_WHAT_DECLARATION,
-                                                 program_string, &end);
-
+                    program_string = p;
+                    prog = pkl_compile_expression (poke_compiler,
+                                                   program_string, &end);
                     if (prog != NULL)
                       {
                         argv[argc].val.prog = prog;
                         match = 1;
 
-                        if (*a == 'd')
-                          {
-                            argv[argc].type = PK_CMD_ARG_DEF;
-                            p += end - program_string - 1 - strlen (cmd_name);
-                            if (trailing_semicolon)
-                              p--;
-
-                            free (program_string);
-                          }
-                        else if (*a == 'T')
-                          {
-                            argv[argc].type = PK_CMD_ARG_STMT;
-                            p = end;
-                          }
-                        else
-                          {
-                            argv[argc].type = PK_CMD_ARG_EXP;
-                            p = end;
-                          }
+                        argv[argc].type = PK_CMD_ARG_EXP;
+                        p = end;
                       }
                     else
                       /* The compiler should have emitted diagnostic
@@ -652,44 +600,47 @@ pk_cmd_exec (char *str)
   else
     {
       char *ecmd, *end;
-      pvm_program prog;
       pvm_val val;
-      int what;
-      int pvm_ret;
+      int what; /* 0 -> declaration, 1 -> statement */
 
       ecmd = xmalloc (strlen (cmd) + 2);
       strcpy (ecmd, cmd);
 
       if (strncmp (ecmd, "defun ", 6) == 0
           || strncmp (ecmd, "defun\t", 6) == 0)
-        what = PKL_WHAT_DECLARATION;
+        what = 0;
       else
         {
           if (strncmp (ecmd, "defvar ", 6) == 0
               || strncmp (ecmd, "defvar\t", 6) == 0
               || strncmp (ecmd, "deftype ", 8) == 0
               || strncmp (ecmd, "deftype\t", 8) == 0)
-            what = PKL_WHAT_DECLARATION;
+            what = 0;
           else
-            what = PKL_WHAT_STATEMENT;
+            what = 1;
         }
 
       if (strncmp (ecmd, "defun ", 6) != 0
           && strncmp (ecmd, "defun\t", 6) != 0)
         strcat (ecmd, ";");
 
-      prog  = pkl_compile_buffer (poke_compiler, what, ecmd, &end);
-      if (prog == NULL)
-        goto error;
-
-      pvm_ret = pvm_run (poke_vm, prog, &val);
-      if (pvm_ret != PVM_EXIT_OK)
-        goto error;
-
-      if (val != PVM_NULL)
+      if (what == 0)
         {
-          pvm_print_val (stdout, val, poke_obase, 0);
-          fputc ('\n', stdout);
+          /* Declaration.  */
+          if (!pkl_compile_buffer (poke_compiler, ecmd, &end))
+            goto error;
+        }
+      else
+        {
+          /* Statement.  */
+          if (!pkl_compile_statement (poke_compiler, ecmd, &end, &val))
+            goto error;
+
+          if (val != PVM_NULL)
+            {
+              pvm_print_val (stdout, val, poke_obase, 0);
+              fputc ('\n', stdout);
+            }
         }
       
       return 1;

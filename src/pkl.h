@@ -32,12 +32,9 @@
    compile poke programs incrementally.
 
    A poke program is a sequence of declarations of several classes of
-   entities, namely variables, types and functions.  Unlike in many
-   other programming languages, there is not a main function or
-   procedure where execution starts by default.  Poke programs, as
-   such, are not executable.
+   entities, namely variables, types and functions, and statements.
 
-   Instead, the poke compiler works as follows:
+   The PKL compiler works as follows:
 
    First, a compiler is created and initialized with `pkl_new'.  At
    this point, the internal program is almost empty, but not quite:
@@ -48,8 +45,7 @@
    Then, subsequent calls to `pkl_compile_buffer' and
    `pkl_compile_file (..., PKL_PROGRAM, ...)' expands the
    internally-maintained program, with definitions of variables,
-   types, function etc from the user.  They return a PVM program that
-   should be executed to complete the declaration.
+   types, function etc from the user.
 
    At any point, the user can request to compile a poke expression
    with `pkl_compile_expression'.  This returns a PVM program that,
@@ -77,19 +73,26 @@ void pkl_free (pkl_compiler compiler);
 
 int pkl_compile_file (pkl_compiler compiler, const char *fname);
 
-/* Compile a poke program, declaration, expression or statement
-   (according to WHAT) from a NULL-terminated string BUFFER.  Return
-   NULL in case of a compilation error.  If not NULL, END is set to
-   the first character in BUFFER that is not part of the
+/* Compile a Poke program from a NULL-terminated string BUFFER.
+   Return 0 in case of a compilation error, 1 otherwise.  If not NULL,
+   END is set to the first character in BUFFER that is not part of the
    compiled entity.  */
 
-#define PKL_WHAT_PROGRAM 0
-#define PKL_WHAT_DECLARATION 1
-#define PKL_WHAT_EXPRESSION 2
-#define PKL_WHAT_STATEMENT 3
+int pkl_compile_buffer (pkl_compiler compiler, char *buffer, char **end);
 
-pvm_program pkl_compile_buffer (pkl_compiler compiler, int what,
-                                char *buffer, char **end);
+/* Like pkl_compile_buffer but compile a single Poke statement, which
+   may generate a value in VAL if it is an "expression statement".  */
+
+int pkl_compile_statement (pkl_compiler compiler, char *buffer, char **end,
+                           pvm_val *val);
+
+
+/* Like pkl_compile_buffer, but compile a Poke expression and return a
+   PVM program that evaluates to the expression.  In case of error
+   return NULL.  */
+
+pvm_program pkl_compile_expression (pkl_compiler compiler,
+                                    char *buffer, char **end);
 
 /* Return the current compile-time environment in COMPILER.  */
 
