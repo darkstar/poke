@@ -120,6 +120,9 @@
         push ulong<64>1         ; ... EOMAG EOUNIT
         mko                     ; ... EOFF
         dup                     ; ... EOFF EOFF
+        ;; XXX install handler for E_constraint, that will re-raise
+        ;; it if the array is bounded, or jump to .mountarray
+        ;; otherwise.
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
         bn .eof
         
