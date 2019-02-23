@@ -623,6 +623,34 @@
         return
         .end
 
+;;; RAS_MACRO_STRUCT_ELEM_WRITER
+;;; ( SCT I -- )
+;;;
+;;; Macro that writes the Ith element of struct SCT to IO space.
+;;;
+;;; C environment required:
+;;; `elem' is a pkl_ast_node with the type of the element to write.
+        
+        .macro struct_elem_writer
+         smodi                   ; SCT I MODIFIED
+        bzi .unmodified
+        drop                    ; SCT I
+        srefi                   ; SCT I EVAL
+        nrot                    ; EVAL SCT I
+        srefio                  ; EVAL SCT I EOFF
+        nip2                    ; EVAL EOFF
+        swap                    ; EOFF EVAL
+        .c PKL_GEN_PAYLOAD->in_writer = 1;
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        .c PKL_GEN_PAYLOAD->in_writer = 0;
+        ba .next
+.unmodified:
+        drop                    ; SCT I
+        drop                    ; SCT
+        drop                    ; _
+.next:
+        .end
+        
 ;;; RAS_FUNCTION_STRUCT_WRITER
 ;;; ( OFF VAL -- )
 ;;;
@@ -646,30 +674,12 @@
 .c { uint64_t i;
  .c for (i = 0, elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem), ++i)
  .c {
- .c     jitter_label unmodified = pkl_asm_fresh_label (RAS_ASM);
- .c     jitter_label next = pkl_asm_fresh_label (RAS_ASM);
-        ;; Poke this struct element, but only if it has been modified
+         ;; Poke this struct element, but only if it has been modified
         ;; since the last mapping.
         pushvar $sct            ; SCT
         .c pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (i, 64));
                                 ; SCT I
-        smodi                   ; SCT I MODIFIED
-        .c pkl_asm_insn (RAS_ASM, PKL_INSN_BZI, unmodified);
-        drop                    ; SCT I
-        srefi                   ; SCT I EVAL
-        nrot                    ; EVAL SCT I
-        srefio                  ; EVAL SCT I EOFF
-        nip2                    ; EVAL EOFF
-        swap                    ; EOFF EVAL
-        .c PKL_GEN_PAYLOAD->in_writer = 1;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
-        .c PKL_GEN_PAYLOAD->in_writer = 0;
-        .c pkl_asm_insn (RAS_ASM, PKL_INSN_BA, next);
-.c pkl_asm_label (RAS_ASM, unmodified);
-        drop                    ; SCT I
-        drop                    ; SCT
-        drop                    ; _
-.c pkl_asm_label (RAS_ASM, next);
+        .e struct_elem_writer
  .c }
 .c }
         popf 1
