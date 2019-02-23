@@ -11,3 +11,5 @@ deftype Foo = struct { byte b : b < 0x40; };
 /* { dg-command { try Foo[4] @ 0#B; catch if E_constraint { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
 
+/* { dg-command { Foo[] @ 0#B } } */
+/* { dg-output "\n\\\[Foo \\{b=0x10UB\\},Foo \\{b=0x20UB\\},Foo \\{b=0x30UB\\}\\\]" } */

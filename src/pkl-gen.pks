@@ -148,7 +148,8 @@
         ;; Remove the partial element from the stack.
                                 ; ... EOFF EOFF
         drop
-        drop                    ; ...
+        drop
+        drop
         ;; If the array is bounded, raise E_CONSTRAINT
         pushvar $ebound         ; ... EBOUND
         nn                      ; ... EBOUND (EBOUND!=NULL)
