@@ -632,7 +632,9 @@
 ;;; `elem' is a pkl_ast_node with the type of the element to write.
         
         .macro struct_elem_writer
-         smodi                   ; SCT I MODIFIED
+        ;; The element is written out only if it hasn't
+        ;; been modified since the last mapping.
+        smodi                   ; SCT I MODIFIED
         bzi .unmodified
         drop                    ; SCT I
         srefi                   ; SCT I EVAL
