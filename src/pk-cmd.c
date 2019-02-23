@@ -788,9 +788,6 @@ pk_cmd_init (void)
 
   /* Compile commands written in Poke.  */
   {
-    pvm_program program;
-    int pvm_ret;
-    pvm_val val;
     char *poke_cmdfile;
 
 #define LOAD_PK_FILE(filename)                                          \
@@ -799,17 +796,9 @@ pk_cmd_init (void)
         poke_cmdfile = xmalloc (strlen (poke_datadir) + strlen ("/" filename) + 1); \
         strcpy (poke_cmdfile, poke_datadir);                            \
         strcat (poke_cmdfile, "/" filename);                            \
-        program = pkl_compile_file (poke_compiler, poke_cmdfile);       \
-        free (poke_cmdfile);                                            \
-        if (program == NULL)                                            \
+        if (!pkl_compile_file (poke_compiler, poke_cmdfile))            \
           exit (1);                                                     \
-                                                                        \
-        pvm_ret = pvm_run (poke_vm, program, &val);                     \
-        if (pvm_ret != PVM_EXIT_OK)                                     \
-          {                                                             \
-            printf (_("run-time error\n"));                             \
-            exit (1);                                                   \
-          }                                                             \
+        free (poke_cmdfile);                                            \
       }                                                                 \
     while (0)
 

@@ -156,9 +156,6 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   /* load FILENAME */
 
   const char *filename;
-  pvm_program program;
-  int pvm_ret;
-  pvm_val val;
 
   assert (argc == 1);
   filename = PK_CMD_ARG_STR (argv[0]);
@@ -169,17 +166,9 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       return 0;
     }
 
-  program = pkl_compile_file (poke_compiler, filename);
-  if (program == NULL)
+  if (!pkl_compile_file (poke_compiler, filename))
     /* Note that the compiler emits it's own error messages.  */
     return 0;
-
-  pvm_ret = pvm_run (poke_vm, program, &val);
-  if (pvm_ret != PVM_EXIT_OK)
-    {
-      printf (_("run-time error\n"));
-      return 0;
-    }
 
   return 1;
 }

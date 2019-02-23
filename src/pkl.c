@@ -73,23 +73,19 @@ pkl_new ()
   /* Bootstrap the compiler.  An error bootstraping is an internal
      error and should be reported as such.  */
   {
-    pvm_val val;
-    pvm_program pkl_prog;
     char *poke_rt_pk;
 
     poke_rt_pk = xmalloc (strlen (poke_datadir) + strlen ("/pkl-rt.pk") + 1);
     strcpy (poke_rt_pk, poke_datadir);
     strcat (poke_rt_pk, "/pkl-rt.pk");
-    pkl_prog = pkl_compile_file (compiler, poke_rt_pk);
-    free (poke_rt_pk);
 
-    if (pkl_prog == NULL
-        || (pvm_run (poke_vm, pkl_prog, &val) != PVM_EXIT_OK))
+    if (!pkl_compile_file (compiler, poke_rt_pk))
       {
         fprintf (stderr,
                  "Internal error: compiler failed to bootstrap itself\n");
         exit (1);
       }
+    free (poke_rt_pk);
 
     compiler->bootstrapped = 1;
     /* XXX: disable compiler built-ins from this point on.  */
@@ -288,7 +284,7 @@ pkl_compile_buffer (pkl_compiler compiler, int what,
   return NULL;
 }
 
-pvm_program
+int
 pkl_compile_file (pkl_compiler compiler, const char *fname)
 {
   int ret;
@@ -303,7 +299,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   if (!fd)
     {
       perror (fname);
-      return NULL;
+      return 0;
     }
 
   env = pkl_env_dup_toplevel (compiler->env);
@@ -321,17 +317,28 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   if (program == NULL)
     goto error;
 
-  compiler->env = env;
   pvm_specialize_program (program);
   /* XXX */  
   /* pvm_print_program (stdout, program); */
   fclose (fd);
-  return program;
+
+  /* Execute the program in the poke vm.  */
+  {
+    pvm_val val;
+
+    if (pvm_run (poke_vm, program, &val) != PVM_EXIT_OK)
+      goto error;
+
+    /* Discard the value.  */
+  }
+
+  compiler->env = env;
+  return 1;
 
  error:
   fclose (fd);
   pkl_env_free (env);
-  return NULL;
+  return 0;
 }
 
 pkl_env

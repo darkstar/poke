@@ -216,25 +216,9 @@ parse_args (int argc, char *argv[])
           break;
         case 'l':
         case LOAD_ARG:
-          {
-            pvm_val val;
-            int ret;
-            pvm_program program
-              = pkl_compile_file (poke_compiler, optarg);
-
-            if (program == NULL)
-              /* The compiler emits it's own error messages.  */
-              exit (EXIT_FAILURE);
-
-            ret = pvm_run (poke_vm, program, &val);
-            if (ret != PVM_EXIT_OK)
-              {
-                fprintf (stderr, _("run-time error\n"));
-                exit (EXIT_FAILURE);
-              }
-            
-            break;
-          }
+          if (!pkl_compile_file (poke_compiler, optarg))
+            exit (EXIT_FAILURE);
+          break;
         case 'c':
         case CMD_ARG:
           {
@@ -332,24 +316,14 @@ initialize ()
      library.  */
   poke_compiler = pkl_new ();
   {
-    pvm_program program;
-    int pvm_ret;
-    pvm_val val;
     char *poke_std_pk;
 
     poke_std_pk = xmalloc (strlen (poke_datadir) + strlen ("/std.pk") + 1);
     strcpy (poke_std_pk, poke_datadir);
     strcat (poke_std_pk, "/std.pk");
-    program = pkl_compile_file (poke_compiler, poke_std_pk);
+    if (!pkl_compile_file (poke_compiler, poke_std_pk))
+      exit (1);
     free (poke_std_pk);
-
-    if (program == NULL)
-      /* XXX explanatory error message.  */
-      exit (1);
-
-    pvm_ret = pvm_run (poke_vm, program, &val);
-    if (pvm_ret != PVM_EXIT_OK)
-      exit (1);
   }
 
   /* Initialize the command subsystem.  This should be done even if

@@ -72,10 +72,10 @@ typedef struct pkl_compiler *pkl_compiler; /* This data structure is
 pkl_compiler pkl_new (void);
 void pkl_free (pkl_compiler compiler);
 
-/* Compile a poke program from the given file FNAME.  Return NULL in
-   case of a compilation error.  */
+/* Compile a poke program from the given file FNAME.  Return 1 if the
+   compilation was successful, 0 otherwise.  */
 
-pvm_program pkl_compile_file (pkl_compiler compiler, const char *fname);
+int pkl_compile_file (pkl_compiler compiler, const char *fname);
 
 /* Compile a poke program, declaration, expression or statement
    (according to WHAT) from a NULL-terminated string BUFFER.  Return
