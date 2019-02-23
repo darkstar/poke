@@ -430,7 +430,6 @@
      .loop
                                 ; _
         ;; Poke this array element
-        ;; XXX OFF is not used in the loop.  Remove it.
         pushvar $value          ; ARRAY
         pushvar $idx            ; ARRAY I
         aref                    ; ARRAY I VAL
