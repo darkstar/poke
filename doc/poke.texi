@@ -52,7 +52,7 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
-Writing Poke Programs (tutorial)
+* Mapping::			Structuring the IO space.
 
 Advanced Editing
 @c Searching
@@ -133,17 +133,6 @@ Poke Language Reference Manual
 
 @c XXX: writing generic code: any and any[]
 
-@c XXX
-@c mapping arrays
-@c  bounded by size: rela sections in ELF example
-@c  Difference between bounded with a mapped value and not doing so
-@c    Elf64_Rela[shdr.sh_size]
-@c  vs
-@c    defvar size = shdr.shsize;
-@c    Elf64_Rela[size]
-@c  In the former case, the map's boundary will change if the shdr
-@c  entry changes in IO.  This can be advantagenous, but also a
-@c  source of trouble.  Use wisely!
 
 Old
 * Structs::
@@ -157,7 +146,7 @@ Old
 * Variables::
 * Statements::
 * Procedures::
-* Mapping::			Accessing the IO space from poke programs.
+* MappingB::
 
 Hacking Poke
 * Why Hacking Poke::
@@ -210,6 +199,150 @@ XXX: aspects to discuss here:
      - poke          => bytes editor
      - poke + elf.pk => elf editor
      - poke + foo.pk => foo editor
+
+@node Mapping
+@chapter Mapping
+
+@menu
+* Mapping Arrays::	
+@end menu
+
+@node Mapping Arrays
+@section Mapping Arrays
+
+Arrays can be mapped in IO space in three different ways: bounded by
+number of elements, bounded by size, and unbounded maps.
+
+@subsection Array maps bounded by number of elements
+
+An array map bounded by number of elements uses the following syntax:
+
+@example
+@var{type}[@var{n}] @@ @var{offset}
+@end example
+
+where @var{type} is the type of the array elements and @var{n} the
+number of elements to map.  For example, this is how we would map an
+array of four 32-bit signed integers in the current IO space:
+
+@example
+(poke) int[4] @@ 0#B
+[10,20,30,40]
+@end example
+
+The number of elements doesn't need to be constant.  Any expression
+evaluating to an integral value is accepted in this context.  The
+resulting value is promoted to an unsigned 64-bit integer, much like
+in array subscripts. For example, given the variable @code{nelems} has
+a value of @code{2}:
+
+@example
+(poke) int[nelems + 1] @@ 0#B
+[100,222,333]
+@end example
+
+If an end-of-file condition happens while mapping the array, because
+the number of elements specified in the map at the given offset
+exceeds the capacity of the underneath IO device, an exception is
+raised and the mapping is not performed:
+
+@example
+(poke) int[99999999999] @@ 0#B
+unhandled EOF exception
+@end example
+
+@subsection Array maps bounded by size
+
+While dealing with binary formats, it often happens that the number of
+entities in a collection is given by the space they occupy, rather
+than the count itself.
+
+For example, consider ELF sections holding relocations.  These
+sections contain a collection of zero or more relocations. The layout
+of each relocation is specified using the following type:
+
+@example
+deftype Elf64_Rela =
+  struct
+  @{
+    offset<Elf64_Addr,B> r_offset;
+    Elf64_Xword r_info;
+    Elf64_Sxword r_addend;
+  @};
+@end example
+
+The section is described by an entry in the ELF sections header table:
+
+@example
+deftype Elf64_Shdr =
+  struct
+  @{
+    Elf_Word sh_name;
+    Elf_Word sh_type;
+    Elf64_Xword sh_flags;
+    Elf64_Addr sh_addr;
+    Elf64_Off sh_offset;
+    offset<Elf64_Xword,B> sh_size;
+    Elf_Word sh_link;
+    Elf_Word sh_info;
+    Elf64_Xword sh_addralign;
+    offset<Elf64_Xword,b> sh_entsize;
+  @};
+@end example
+
+The relevant elements of @code{Elf64_Shdr} are @code{sh_offset} and
+@code{sh_size}, which indicate the offset of the beginning of the
+section's contents, and it's size, respectively.  At this point, if we
+wanted to get an array with all the relocations in the section, we
+could use a map bounded by number of elements like we saw in the
+previous section, like this:
+
+@example
+(poke) Elf64_Rela[sh_size / 1#Elf64_Rela]
+[... relocs ...]
+@end example
+
+However, this approach adoleces from two main problems.  First, it
+doesn't work with any entity type.  For an offset like
+@code{1#Elf64_Rela} to work it is required for the unit type to be
+complete, as we saw in previous chapters.  In the particular case of
+@code{Elf64_Rela}, that condition is satisfied, but too often that's
+not the case.  For example, think about a section containing
+@code{NULL} terminated strings.
+
+Another problem is when the data in the header is corrupted.  Using
+the mapping bounded by number of elements, we wouldn't realize it.  It
+would be good if the tool would tell us whether the specified size
+actually holds an exact number of elements.
+
+A mapping bound by size is what we need.  Fortunately, @command{poke}
+allows to specify an offset instead of an integral value, in the array
+type specification.  The right amount of entities (in this case
+relocations) to strictly satisfy the provided size will be mapped in
+the IO space.  So, obtain an array containing all the relocations in
+the section, we simply write:
+
+@example
+(poke) Elf64_Rela[sh_size]
+[... relocs ...]
+@end example
+
+The strictness 
+
+@c mapping arrays
+@c  bounded by size: rela sections in ELF example
+@c  Difference between bounded with a mapped value and not doing so
+@c    Elf64_Rela[shdr.sh_size]
+@c  vs
+@c    defvar size = shdr.shsize;
+@c    Elf64_Rela[size]
+@c  In the former case, the map's boundary will change if the shdr
+@c  entry changes in IO.  This can be advantagenous, but also a
+@c  source of trouble.  Use wisely!
+@c
+@c  Assigning a new value to a mapped array: valmappers.
+
+
 
 @node Introduction
 @chapter Introduction
@@ -2965,8 +3098,8 @@ no memory allocated in each iteration.  This is important, since it
 allows writing recursive functions operating on large structures in IO
 space.
 
-@node Mapping
-@chapter Mapping
+@node MappingB
+@chapter MappingB
 
 The idea is that the same poke code will execute on mapped and
 non-mapped variables, with no changes.
