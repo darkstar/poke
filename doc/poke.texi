@@ -204,8 +204,19 @@ XXX: aspects to discuss here:
 @chapter Mapping
 
 @menu
-* Mapping Arrays::	
+* Mapping Structs::
+* Mapping Arrays::
 @end menu
+
+@node Mapping Structs
+@section Mapping Structs
+
+Struct values are mapped in the IO space by specifying the name of the
+struct type in the map @code{@@} operation:
+
+@example
+@code{StructType} @@ @var{offset}
+@end example
 
 @node Mapping Arrays
 @section Mapping Arrays
