@@ -128,6 +128,7 @@ pvm_make_struct (pvm_val nelem, pvm_val type)
       sct->elems[i].offset = PVM_NULL;
       sct->elems[i].name = PVM_NULL;
       sct->elems[i].value = PVM_NULL;
+      sct->elems[i].modified = pvm_make_int (0, 32);
     }
 
   PVM_VAL_BOX_SCT (box) = sct;
@@ -174,6 +175,8 @@ pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val)
                      PVM_VAL_STR (name)) == 0)
         {
           PVM_VAL_SCT_ELEM_VALUE (sct,i) = val;
+          PVM_VAL_SCT_ELEM_MODIFIED (sct,i) =
+            pvm_make_int (1, 32);
           return 1;
         }
     }

@@ -302,17 +302,23 @@ struct pvm_struct
 
    VALUE is the value contained in the element.  If the struct is
    mapped then this is the cached value, which is returned by
-   `sref'.  */
+   `sref'.
+
+   MODIFIED is a C boolean indicating whether the element value has
+   been modified since struct creation, or since last mapping if the
+   struct is mapped.  */
 
 #define PVM_VAL_SCT_ELEM_OFFSET(V,I) (PVM_VAL_SCT_ELEM((V),(I)).offset)
 #define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
 #define PVM_VAL_SCT_ELEM_VALUE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).value)
+#define PVM_VAL_SCT_ELEM_MODIFIED(V,I) (PVM_VAL_SCT_ELEM((V),(I)).modified)
 
 struct pvm_struct_elem
 {
   pvm_val offset;
   pvm_val name;
   pvm_val value;
+  pvm_val modified;
 };
 
 typedef struct pvm_struct *pvm_struct;
