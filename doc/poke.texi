@@ -133,6 +133,17 @@ Poke Language Reference Manual
 
 @c XXX: writing generic code: any and any[]
 
+@c XXX
+@c mapping arrays
+@c  bounded by size: rela sections in ELF example
+@c  Difference between bounded with a mapped value and not doing so
+@c    Elf64_Rela[shdr.sh_size]
+@c  vs
+@c    defvar size = shdr.shsize;
+@c    Elf64_Rela[size]
+@c  In the former case, the map's boundary will change if the shdr
+@c  entry changes in IO.  This can be advantagenous, but also a
+@c  source of trouble.  Use wisely!
 
 Old
 * Structs::
