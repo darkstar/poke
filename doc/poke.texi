@@ -384,18 +384,56 @@ the blocks, the constraint in the @code{magic} field will fail and
 will delimit the map that way (provided the binary format is well
 designed.)
 
-@c  Difference between bounded with a mapped value and not doing so
-@c    Elf64_Rela[shdr.sh_size]
-@c  vs
-@c    defvar size = shdr.shsize;
-@c    Elf64_Rela[size]
-@c  In the former case, the map's boundary will change if the shdr
-@c  entry changes in IO.  This can be advantagenous, but also a
-@c  source of trouble.  Use wisely!
-@c
+@subsection Mapped bounds in bounded arrays
+
+When an array map is bounded, be it by number of elements or by size,
+the bounding value can be mapped itself.  To illustrate how this
+works, let's go back to our ELF file and the section containing
+relocations.  First, we map an @code{Elf64_Shdr} to get the section
+header:
+
+@example
+(poke) defvar shdr = Elf64_Shdr @@ @var{offset}
+(poke) shdr.sh_offset
+120#B
+(poke) shdr.sh_size
+24#B
+@end example
+
+Now we map an array with the relocations themselves, using a map
+bounded by size, as we learned in the last section:
+
+@example
+(poke) defvar relocs = ELF64_Rela[shdr.sh_size] @@ shdr.sh_offset
+(poke) relocs'length
+3
+@end example
+
+Now, observe that @code{shdr.sh_size} is mapped itself!  This means
+that, should the section size be modified (to accommodate an extra
+relocation, for example) the mapping of @code{relocs} will reflect
+that automatically:
+
+@example
+(poke) shdr.sh_size = shdr.sh_size + 1#Elf64_Rela
+(poke) relocs'length
+4
+@end example
+
+This is certainly an useful idiom, that is often used while Poking
+around.  However, sometimes this is @emph{not} what we want.  If we
+don't want the mapping bounds of @code{relocs} to be tied to
+@code{shdr}, we can just use a temporary for the size:
+
+@example
+(poke) defvar s = shdr.sh_size
+(poke) defvar relocs = Elf64_Rela[s] @@ shdr.sh_offset
+@end example
+
+Since simple values (such as the size above) are not mapped, this
+trick works as intended.
+
 @c  Assigning a new value to a mapped array: valmappers.
-
-
 
 @node Introduction
 @chapter Introduction
