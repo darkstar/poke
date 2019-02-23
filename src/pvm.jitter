@@ -2450,7 +2450,7 @@ end
 
 # pushe LABEL
 #
-# ( EXCEPTION_TYPE -- EXCEPTION_HANDLER )
+# ( EXCEPTION_TYPE -- )
 
 instruction pushe (?l)
   code

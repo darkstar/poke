@@ -120,10 +120,10 @@
         push ulong<64>1         ; ... EOMAG EOUNIT
         mko                     ; ... EOFF
         dup                     ; ... EOFF EOFF
-        ;; XXX install handler for E_constraint, that will re-raise
-        ;; it if the array is bounded, or jump to .mountarray
-        ;; otherwise.
+        push PVM_E_CONSTRAINT
+        pushe .constraint_error
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        pope
         bn .eof
         
         ;; Update the current offset with the size of the value just
@@ -152,6 +152,23 @@
 
         push null
         ba .mountarray
+.constraint_error:
+        ;; Remove the partial element from the stack.
+                                ; ... EOFF EOFF
+        drop
+        drop                    ; ...
+        ;; If the array is bounded, raise E_CONSTRAINT
+        pushvar $ebound         ; ... EBOUND
+        nn                      ; ... EBOUND (EBOUND!=NULL)
+        nip                     ; ... (EBOUND!=NULL)
+        pushvar $sbound         ; ... (EBOUND!=NULL) SBOUND
+        nn                      ; ... (EBOUND!=NULL) SBOUND (SBOUND!=NULL)
+        nip                     ; ... (EBOUND!=NULL) (SBOUND!=NULL)
+        or                      ; ... (EBOUND!=NULL) (SBOUND!=NULL) ARRAYBOUNDED
+        nip2                    ; ... ARRAYBOUNDED
+        bzi .mountarray
+        push PVM_E_CONSTRAINT
+        raise
 .eof:
         ;; Remove the partial EOFF null element from the stack.
                                 ; ... EOFF null
