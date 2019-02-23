@@ -1073,15 +1073,15 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
 {
-  pkl_ast_node offset_type = PKL_PASS_NODE;
+  //  pkl_ast_node offset_type = PKL_PASS_NODE;
 
   /* Note that the check for in_writer should appear first than the
      check for in_mapper.  */
-  if (PKL_GEN_PAYLOAD->in_writer)
-    /* Stack: OFF VAL */
+  /*  if (PKL_GEN_PAYLOAD->in_writer)
+    / * Stack: OFF VAL * /
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKED,
                   PKL_AST_TYPE_O_BASE_TYPE (offset_type));
-  else if (PKL_GEN_PAYLOAD->in_mapper)
+  else */if (PKL_GEN_PAYLOAD->in_mapper)
     /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
