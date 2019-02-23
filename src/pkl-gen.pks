@@ -145,8 +145,8 @@
         ba .mountarray
 .constraint_error:
         ;; Remove the partial element from the stack.
-                                ; ... EOFF EOFF
-        drop                    ; XXX why 3 drops and not 2??
+                                ; ... EOFF EOFF EXCEPTION
+        drop
         drop
         drop
         ;; If the array is bounded, raise E_CONSTRAINT
