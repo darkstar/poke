@@ -113,7 +113,7 @@ pvm_make_struct (pvm_val nelem, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
   pvm_struct sct = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_struct));
-  size_t nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
+  size_t i, nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
 
   sct->offset = PVM_NULL;
   sct->mapper = PVM_NULL;
@@ -122,6 +122,13 @@ pvm_make_struct (pvm_val nelem, pvm_val type)
   sct->nelem = nelem;
   sct->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
   memset (sct->elems, 0, nbytes);
+
+  for (i = 0; i < PVM_VAL_ULONG (sct->nelem); ++i)
+    {
+      sct->elems[i].offset = PVM_NULL;
+      sct->elems[i].name = PVM_NULL;
+      sct->elems[i].value = PVM_NULL;
+    }
 
   PVM_VAL_BOX_SCT (box) = sct;
   return PVM_BOX (box);
@@ -377,17 +384,38 @@ pvm_sizeof (pvm_val val)
     }
   else if (PVM_IS_SCT (val))
     {
-      size_t nelem, i, size;
+      pvm_val sct_offset = PVM_VAL_SCT_OFFSET (val);
+      size_t nelem, i, size, sct_offset_bits;
+
+      if (sct_offset == PVM_NULL)
+        sct_offset_bits = 0;
+      else
+        sct_offset_bits = (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (sct_offset))
+                           * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (sct_offset)));
 
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
 
       size = 0;
       for (i = 0; i < nelem; ++i)
         {
-          pvm_val off = pvm_sizeof (PVM_VAL_SCT_ELEM_VALUE (val, i));
+          pvm_val elem_value = PVM_VAL_SCT_ELEM_VALUE (val, i);
+          pvm_val elem_offset = PVM_VAL_SCT_ELEM_OFFSET (val, i);
+          pvm_val elem_size = pvm_sizeof (elem_value);
+          uint64_t elem_size_bits
+            = (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (elem_size))
+               * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (elem_size)));
+          uint64_t elem_offset_bits;
 
-          size += (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (off))
-                   * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (off)));
+          if (elem_offset == PVM_NULL)
+            size += elem_size_bits;
+          else
+            {
+              elem_offset_bits = ((PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (elem_offset))
+                                   * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (elem_offset))));
+
+#define MAX(A,B) ((A) > (B) ? (A) : (B))
+              size = MAX (size, elem_offset_bits - sct_offset_bits + elem_size_bits);
+            }
         }
 
       return pvm_make_offset (pvm_make_ulong (size, 64),
