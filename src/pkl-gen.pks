@@ -45,7 +45,6 @@
         regvar $sbound           ; Argument
         regvar $ebound           ; Argument
         regvar $off              ; Argument
-
         ;; Determine the offset of the array, in bits, and put it in a
         ;; local.
         pushvar $off            ; OFF
@@ -56,17 +55,14 @@
         mullu                   ; OFF OUNIT OMAG (OUNIT*OMAG)
         nip2                    ; OFF (OUNIT*OMAG)
         regvar $eomag           ; OFF
-
         ;; Initialize the element index to 0UL, and put it
         ;; in a local.
         push ulong<64>0         ; OFF 0UL
         regvar $eidx            ; OFF
-
         ;; Save the offset in bits of the beginning of the array in a
         ;; local.
         pushvar $eomag          ; OFF EOMAG
         regvar $aomag           ; OFF
-
         ;; If it is not null, transform the SBOUND from an offset to a
         ;; magnitude in bits.
         pushvar $sbound         ; OFF SBOUND
@@ -82,11 +78,9 @@
         push null               ; OFF null
 .after_sbound_conv:
         drop                    ; OFF
-
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
         .c PKL_PASS_SUBPASS (array_type);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
-
                                 ; OFF ATYPE
         .while
         ;; If there is an EBOUND, check it.
@@ -125,7 +119,6 @@
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
         pope
         bn .eof
-        
         ;; Update the current offset with the size of the value just
         ;; peeked.
         siz                     ; ... EOFF EVAL ESIZ
@@ -149,7 +142,6 @@
         nip2                    ; ... EOFF EIDX EVAL (EIDX+1UL)
         popvar $eidx            ; ... EOFF EIDX EVAL
         .endloop
-
         push null
         ba .mountarray
 .constraint_error:
@@ -191,7 +183,6 @@
         pushvar $eidx          ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
         dup                    ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
         mkma                   ; ARRAY
-
         ;; Check that the resulting array satisfies the mapping's
         ;; bounds (number of elements and total size.)
         pushvar $ebound        ; ARRAY EBOUND
@@ -212,7 +203,6 @@
         drop                   ; ARRAY NELEM
         drop                   ; ARRAY
         ba .bounds_ok
-
 .check_sbound:
         swap                   ; SBOUNDM ARRAY
         siz                    ; SBOUNDM ARRAY OFF
@@ -228,17 +218,14 @@
         drop                   ; ARRAY (OFFU*OFFM) SBOUNDM
         drop                   ; ARRAY (OFFU*OFFM)
         drop                   ; ARRAY
-
 .bounds_ok:
         ;; Set the map bound attributes in the new object.
         pushvar $sbound       ; ARRAY SBOUND
         msetsiz               ; ARRAY
         pushvar $ebound       ; ARRAY EBOUND
         msetsel               ; ARRAY
-
         popf 1
         return
-
 .bounds_fail:
         push PVM_E_MAP_BOUNDS
         raise
