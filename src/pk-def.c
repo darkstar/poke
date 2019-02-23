@@ -1,4 +1,4 @@
-/* pk-def.c - `def*' commands.  */
+/* pk-def.c - commands related to definitions.  */
 
 /* Copyright (C) 2019 Jose E. Marchesi */
 
