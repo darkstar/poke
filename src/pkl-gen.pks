@@ -417,11 +417,9 @@
         prolog
         pushf
         regvar $value           ; Argument
-        regvar $offset          ; Argument
-           
+        drop                    ; The offset is not used.
         push ulong<64>0         ; 0UL
         regvar $idx             ; _
-
      .while
         pushvar $idx            ; I
         pushvar $value          ; I ARRAY
@@ -431,24 +429,19 @@
         nip2                    ; (NELEM<I)
      .loop
                                 ; _
-
         ;; Poke this array element
         ;; XXX OFF is not used in the loop.  Remove it.
-        pushvar $offset         ; OFF
-        pushvar $value          ; OFF ARRAY
-        pushvar $idx            ; OFF ARRAY I
-        aref                    ; OFF ARRAY I VAL
-        nrot                    ; OFF VAL ARRAY I
-        arefo                   ; OFF VAL ARRAY I EOFF
-        nip2                    ; OFF VAL EOFF
-        swap                    ; OFF EOFF VAL
-
+        pushvar $value          ; ARRAY
+        pushvar $idx            ; ARRAY I
+        aref                    ; ARRAY I VAL
+        nrot                    ; VAL ARRAY I
+        arefo                   ; VAL ARRAY I EOFF
+        nip2                    ; VAL EOFF
+        swap                    ; EOFF VAL
         .c PKL_GEN_PAYLOAD->in_writer = 1;
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
         .c PKL_GEN_PAYLOAD->in_writer = 0;
-                                ; OFF
-        drop                    ; _
-
+                                ; _
         ;; Increase the current index and process the next
         ;; element.
         pushvar $idx            ; EIDX
@@ -457,7 +450,6 @@
         nip2                    ; (EIDX+1UL)
         popvar $idx             ; _
      .endloop 
-
         popf 1
         push null
         return
