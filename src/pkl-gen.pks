@@ -134,7 +134,6 @@
         drop                    ; ... EVAL EOFF
         pushvar $eidx           ; ... EVAL EOFF EIDX
         rot                     ; ... EOFF EIDX EVAL
-
         ;; Increase the current index and process the next element.
         pushvar $eidx           ; ... EOFF EIDX EVAL EIDX
         push ulong<64>1         ; ... EOFF EIDX EVAL EIDX 1UL
@@ -147,7 +146,7 @@
 .constraint_error:
         ;; Remove the partial element from the stack.
                                 ; ... EOFF EOFF
-        drop
+        drop                    ; XXX why 3 drops and not 2??
         drop
         drop
         ;; If the array is bounded, raise E_CONSTRAINT
