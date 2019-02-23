@@ -251,6 +251,9 @@ raised and the mapping is not performed:
 unhandled EOF exception
 @end example
 
+If a constraint fails while performing the mapping, an exception is
+raised and the map is aborted.
+
 @subsection Array maps bounded by size
 
 While dealing with binary formats, it often happens that the number of
@@ -313,7 +316,7 @@ not the case.  For example, think about a section containing
 Another problem is when the data in the header is corrupted.  Using
 the mapping bounded by number of elements, we wouldn't realize it.  It
 would be good if the tool would tell us whether the specified size
-actually holds an exact number of elements.
+actually holds an exact number of the requested elements.
 
 A mapping bound by size is what we need.  Fortunately, @command{poke}
 allows to specify an offset instead of an integral value, in the array
@@ -327,10 +330,60 @@ the section, we simply write:
 [... relocs ...]
 @end example
 
-The strictness 
+The strictness mentioned above is important.  Poke will complain (and
+abort the mapping) if it is not possible to map an exact number of
+elements.  Thus the following mapping would not be successful:
 
-@c mapping arrays
-@c  bounded by size: rela sections in ELF example
+@example
+(poke) int[33#b] @ 0#B
+unhandled out of map bounds exception
+@end example
+
+Like in mappings bounded by number of elements, if a constraint fails
+while performing the mapping, an exception is raised and the map is
+aborted.
+
+@subsection Unbounded array maps
+
+We mentioned above that if an end-of-file condition happens while
+performing a mapping (be it bounded by number of elements or by size)
+an EOF exception is raised, and the mapping is aborted.
+
+Unbounded array mappings are done like this:
+
+@example
+@var{type}[] @ 0#B
+@end example
+
+The above construction will map values of type @var{type} in the IO
+space until there is an end-of-file condition, or a constraint fails,
+whatever happens first.
+
+Let's assume a binary file contains a series of blocks, located one
+after the other, of a kind described by the following struct type:
+
+@example
+deftype Block =
+  struct
+  @{
+     byte magic[2] : magic[0] == 'B' && magic[1] == 'K';
+     ... other data ...
+  @};
+@end example
+
+we can map the blocks using an unbounded array map:
+
+@example
+(poke) Block[] @@ 0#B
+[ ... blocks ... ]
+@end example
+
+If the blocks extend up to the end of the IO space, that many blocks
+will be mapped.  If there is some other content in the file following
+the blocks, the constraint in the @code{magic} field will fail and
+will delimit the map that way (provided the binary format is well
+designed.)
+
 @c  Difference between bounded with a mapped value and not doing so
 @c    Elf64_Rela[shdr.sh_size]
 @c  vs
