@@ -26,7 +26,7 @@
 # and don't break it.
 #
 # This code is supposed to run well on any POSIX-compatible awk.
-# Please send us a patch if it doesn't!
+# Please send us a patch if you find out it doesn't!
 
 ### Documentation
 
