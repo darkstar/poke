@@ -251,8 +251,9 @@ raised and the mapping is not performed:
 unhandled EOF exception
 @end example
 
-If a constraint fails while performing the mapping, an exception is
-raised and the map is aborted.
+Likewise, if a constraint fails while performing the mapping (while
+mapping an array of structs, for example) an exception is raised and
+the map is aborted.
 
 @subsection Array maps bounded by size
 
