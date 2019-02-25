@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* This file contains a PCL (poke command language) description of the
- * ELF (Executable and Linking Format) object file format.  The ELF
- * format is described in the chapter 4 of the SysV ABI.
+/* This file contains a Poke description of the ELF (Executable and
+ * Linking Format) object file format.  The ELF format is described in
+ * the chapter 4 of the SysV ABI.
  *
  * Both ELF32 and ELF64 are supported.
  *

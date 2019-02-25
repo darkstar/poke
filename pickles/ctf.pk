@@ -1,0 +1,248 @@
+/* elf.pk - CTF implementation for GNU poke.  */
+
+/* Copyright (C) 2019 Oracle Inc.  */
+
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/* This file contains a Poke description of the CTF format.
+
+   The Compact ANSI-C Type Format is described in
+   https://github.com/oracle/libdtrace-ctf  */
+
+defvar CTF_MAX_SIZE = 0xfffffffe;
+defvar CTF_LSIZE_SENT = 0xffffffff;
+
+defvar CTF_MAGIC = 0xdff2;
+defvar CTF_VERSION = 3;
+
+defvar CTF_K_UNKNOWN  = 0U;
+defvar CTF_K_INTEGER  = 1U;
+defvar CTF_K_FLOAT    = 2U;
+defvar CTF_K_POINTER  = 3U;
+defvar CTF_K_ARRAY    = 4U;
+defvar CTF_K_FUNCTION = 5U;
+defvar CTF_K_STRUCT   = 6U;
+defvar CTF_K_UNION    = 7U;
+defvar CTF_K_ENUM     = 8U;
+defvar CTF_K_FORWARD  = 9U;
+defvar CTF_K_TYPEDEF  = 10U;
+defvar CTF_K_VOLATILE = 11U;
+defvar CTF_K_CONST    = 12U;
+defvar CTF_K_RESTRICT = 13U;
+defvar CTF_K_MAX = 63U;
+
+defvar CTF_STRTAB_0 = 0; /* Name is in the in-CTF string table.  */
+defvar CTF_STRTAB_1 = 1; /* Name is in an ELF strtab.  */
+
+deftype Ctf_Name =
+  struct
+  {
+    uint<1> stid;
+    offset<uint<31>,B> offset;
+  };
+
+deftype Ctf_Type_Id =
+  struct
+  {
+    uint<31> index;
+    uint<1> is_parent;
+  };
+
+deftype Ctf_Preamble =
+  struct
+  {
+    uint<16> ctp_magic : ctp_magic == CTF_MAGIC;
+    byte ctp_version : ctp_version == CTF_VERSION;
+    byte ctp_flags;
+  };
+
+deftype Ctf_Header =
+  struct
+  {
+    Ctf_Preamble cth_preamble;
+    Ctf_Name cth_parlabel;
+    Ctf_Name cth_lbloff;
+    offset<uint32,B> cth_objtoff;	/* Offset of label section.  */
+    offset<uint32,B> cth_funcoff;	/* Offset of object section.  */
+    offset<uint32,B> cth_varoff;	/* Offset of function section.  */
+    offset<uint32,B> cth_typeoff;	/* Offset of variable section.  */
+    offset<uint32,B> cth_stroff;	/* Offset of string section.  */
+    offset<uint32,B> cth_strlen;	/* Length of string section in bytes.  */
+  };
+
+deftype Ctf_Lblent =
+  struct
+  {
+    Ctf_Name ctl_label;
+    Ctf_Type_Id ctl_type;
+  };
+
+deftype Ctf_Varent =
+  struct
+  {
+    Ctf_Name ctv_name;
+    Ctf_Type_Id ctv_type;
+  };
+
+deftype Ctf_Info_V1 =
+  struct
+  {
+    uint<5> kind;
+    uint<1> isroot;
+    uint<10> vlen;
+  };
+
+deftype Ctf_Info_V2 =
+  struct
+  {
+    uint<6> kind;
+    uint<1> isroot;
+    uint<25> vlen;
+  };
+
+deftype Ctf_Stype_V1 =
+  struct
+  {
+    Ctf_Name ctt_name;
+    Ctf_Info_V1 ctt_info;
+    pinned struct
+    {
+      uint32 _size;		/* Size of entire type in bytes.  */
+      uint32 _type;		/* Reference to another type.  */
+    } _u;
+  };
+
+deftype Ctf_Type_V1 =
+  struct
+  {
+   Ctf_Name ctt_name;
+   Ctf_Info_V1 ctt_info;
+   pinned struct
+   {
+     uint32 _size : _size == CTF_LSIZE_SENT;
+     uint32;
+   } _u;
+   uint32 ctt_lsizehi;
+   uint32 ctt_lsizelo;
+  };
+
+deftype Ctf_Stype =
+  struct
+  {
+    Ctf_Name ctt_name;	/* Reference to name in string table.  */
+    Ctf_Info_V2 ctt_info;
+    pinned struct
+    {
+      uint32 _size : _size <= CTF_MAX_SIZE;
+      uint32 _type;
+    } _u;
+  };
+
+deftype Ctf_Type =
+  struct
+  {
+   Ctf_Name ctt_name;
+   Ctf_Info_V2 ctt_info;
+   pinned struct
+   {
+     uint32 _size : _size == CTF_LSIZE_SENT;
+     uint32;
+   } _u;
+   uint32 ctt_lsizehi;
+   uint32 ctt_lsizelo;
+  };
+
+defvar CTF_INT_SIGNED  = 0x01UB;
+defvar CTF_INT_CHAR    = 0x02UB;
+defvar CTF_INT_BOOL    = 0x04UB;
+defvar CTF_INT_VARARGS = 0x08UB;
+
+deftype Ctf_Integer_Type =
+  struct
+  {
+    uint<8> encoding : encoding <= CTF_INT_VARARGS;
+    offset<uint<8>,b> offset;
+    offset<uint<16>,b> bits;
+  };
+
+defvar CTF_FP_SINGLE = 1UB;
+defvar CTF_FP_DOUBLE = 2UB;
+defvar CTF_FP_CPLX   = 3UB;
+defvar CTF_FP_DCPLX  = 4UB;
+defvar CTF_FP_LDCPLX = 5UB;
+defvar CTF_FP_LDOUBLE = 6UB;
+defvar CTF_FP_INTRVL = 7UB;
+defvar CTF_FP_DINTRVL = 8UB;
+defvar CTF_FP_LDINTRVL = 9UB;
+defvar CTF_FP_IMAGRY = 10UB;
+defvar CTF_FP_DIMAGRY = 11UB;
+defvar CTF_FP_LDIMAGRY = 12UB;
+
+deftype Ctf_Float_Type =
+  struct
+  {
+    uint<8> encoding: encoding <= CTF_FP_LDIMAGRY;
+    offset<uint<8>,b> offset;
+    offset<uint<16>,b> bits;
+  };
+
+deftype Ctf_Array_V1 =
+  struct
+  {
+    offset<uint<16>,B> cta_contents;
+    offset<uint<16>,B> cta_index;
+    uint<32> cta_nelems;
+  };
+
+deftype Ctf_Array_V2 =
+  struct
+  {
+    Ctf_Type_Id cta_contents;
+    Ctf_Type_Id cta_index;
+    uint<32> cta_nelems;
+  };
+
+deftype Ctf_Member_V2 =
+  struct
+  {
+    Ctf_Name ctm_name;
+    offset<uint32,b> ctm_offset;
+    Ctf_Type_Id ctm_type;
+  };
+
+deftype Ctf_Lmember_V2 =
+  struct
+  {
+    Ctf_Name ctlm_name;
+    uint32 ctlm_offsethi;
+    Ctf_Type_Id ctlm_type;
+    uint32 ctlm_offsetlo;
+  };
+
+deftype Ctf_Enum =
+  struct
+  {
+    Ctf_Name cte_name;
+    int<32> cte_value;
+  };
+
+defun ctf_name_string = (Ctf_Header header, Ctf_Name name) string:
+{
+ if (name.stid == CTF_STRTAB_0)
+   return string @ (header.cth_stroff + name.offset);
+ else
+   /* XXX use elf.pk to access the ELF's strtab.  */
+   return "";
+}
