@@ -262,8 +262,12 @@ pkl_env_dup_toplevel (pkl_env env)
   new = pkl_env_new ();
   for (i = 0; i < HASH_TABLE_SIZE; ++i)
     {
+      pkl_ast_node t;
+
       pkl_ast_node decl = env->hash_table[i];
-      new->hash_table[i] = ASTREF (decl);
+      for (t = decl; t; t = PKL_AST_CHAIN2 (t))
+        t = ASTREF (t);
+      new->hash_table[i] = decl;
     }
 
   new->num_types = env->num_types;
