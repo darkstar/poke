@@ -1948,7 +1948,7 @@ pkl_ast_finish_breaks (pkl_ast_node entity, pkl_ast_node stmt)
 
 static void
 pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
-                          int *nframes)
+                          int *nframes, int *ndrops)
 {
   /* STMT can be a statement or a declaration.  */
 
@@ -1957,6 +1957,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
     case PKL_AST_RETURN_STMT:
       PKL_AST_RETURN_STMT_FUNCTION (stmt) = function; /* Note no ASTREF.  */
       PKL_AST_RETURN_STMT_NFRAMES (stmt) = *nframes;
+      PKL_AST_RETURN_STMT_NDROPS (stmt) = *ndrops;
       break;
     case PKL_AST_COMP_STMT:
       {
@@ -1965,7 +1966,7 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
         *nframes += 1;
         for (t = PKL_AST_COMP_STMT_STMTS (stmt); t;
              t = PKL_AST_CHAIN (t))
-          pkl_ast_finish_returns_1 (function, t, nframes);
+          pkl_ast_finish_returns_1 (function, t, nframes, ndrops);
 
         /* Pop the frame of the compound itself.  */
         *nframes -= 1;
@@ -1974,24 +1975,28 @@ pkl_ast_finish_returns_1 (pkl_ast_node function, pkl_ast_node stmt,
     case PKL_AST_IF_STMT:
       pkl_ast_finish_returns_1 (function,
                                 PKL_AST_IF_STMT_THEN_STMT (stmt),
-                                nframes);
+                                nframes, ndrops);
       if (PKL_AST_IF_STMT_ELSE_STMT (stmt))
         pkl_ast_finish_returns_1 (function,
                                   PKL_AST_IF_STMT_ELSE_STMT (stmt),
-                                  nframes);
+                                  nframes, ndrops);
       break;
     case PKL_AST_LOOP_STMT:
+      if (PKL_AST_LOOP_STMT_CONTAINER (stmt))
+        *ndrops += 3;
       pkl_ast_finish_returns_1 (function,
                                 PKL_AST_LOOP_STMT_BODY (stmt),
-                                nframes);
+                                nframes, ndrops);
+      if (PKL_AST_LOOP_STMT_CONTAINER (stmt))
+        *ndrops -= 3;
       break;
     case PKL_AST_TRY_CATCH_STMT:
       pkl_ast_finish_returns_1 (function,
                                 PKL_AST_TRY_CATCH_STMT_CODE (stmt),
-                                nframes);
+                                nframes, ndrops);
       pkl_ast_finish_returns_1 (function,
                                 PKL_AST_TRY_CATCH_STMT_HANDLER (stmt),
-                                nframes);
+                                nframes, ndrops);
       break;
     case PKL_AST_DECL:
     case PKL_AST_EXP_STMT:
@@ -2011,8 +2016,9 @@ void
 pkl_ast_finish_returns (pkl_ast_node function)
 {
   int nframes = 0;
+  int ndrops = 0;
   pkl_ast_finish_returns_1 (function, PKL_AST_FUNC_BODY (function),
-                            &nframes);
+                            &nframes, &ndrops);
 }
 
 int

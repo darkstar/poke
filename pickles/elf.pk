@@ -103,6 +103,5 @@ defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset) string:
  for (s in shdr where s.sh_type == SHT_STRTAB)
    return string @ (s.sh_offset + offset);
 
-  /* No strtab section found.  */
-  return "";
+ return "";
 }

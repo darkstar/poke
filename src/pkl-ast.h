@@ -1317,11 +1317,15 @@ pkl_ast_node pkl_ast_make_loop_stmt (pkl_ast ast,
    NFRAMES is the number of lexical frames to pop before returning
    from the function.  This is used by the code generator.
 
+   NDROPS is the number of stack elements to drop before returning
+   from the function.
+
    FUNCTION is the PKL_AST_FUNCTION containing this return
    statement. */
 
 #define PKL_AST_RETURN_STMT_EXP(AST) ((AST)->return_stmt.exp)
 #define PKL_AST_RETURN_STMT_NFRAMES(AST) ((AST)->return_stmt.nframes)
+#define PKL_AST_RETURN_STMT_NDROPS(AST) ((AST)->return_stmt.ndrops)
 #define PKL_AST_RETURN_STMT_FUNCTION(AST) ((AST)->return_stmt.function)
 
 struct pkl_ast_return_stmt
@@ -1331,6 +1335,7 @@ struct pkl_ast_return_stmt
   union pkl_ast_node *exp;
   union pkl_ast_node *function;
   int nframes;
+  int ndrops;
 };
 
 pkl_ast_node pkl_ast_make_return_stmt (pkl_ast ast, pkl_ast_node exp);

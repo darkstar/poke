@@ -614,6 +614,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
 PKL_PHASE_END_HANDLER
 
 /*
+ * RETURN
+ * | EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_return_stmt)
+{
+  /* Clean the stack before returning.  */
+  size_t i;
+
+  for (i = 0; i < PKL_AST_RETURN_STMT_NDROPS (PKL_PASS_NODE); ++i)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | EXP
  * RETURN
  */
@@ -2340,6 +2355,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PR_HANDLER (PKL_AST_IF_STMT, pkl_gen_pr_if_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_BREAK_STMT, pkl_gen_ps_break_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_LOOP_STMT, pkl_gen_pr_loop_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_pr_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_gen_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_EXP_STMT, pkl_gen_ps_exp_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_PRINT_STMT, pkl_gen_pr_print_stmt),
