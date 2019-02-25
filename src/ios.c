@@ -476,8 +476,28 @@ ios_read_uint (ios io, ios_off offset, int flags,
 int
 ios_read_string (ios io, ios_off offset, int flags, char **value)
 {
-  /* XXX: writeme.  */
-  *value = xstrdup ("bleh");
+  char *str = NULL;
+  size_t i = 0;
+  int c;
+
+  if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
+      == -1)
+    return IOS_EIOFF;
+
+  do
+    {
+      if (i % 128 == 0)
+        str = xrealloc (str, i + 128 * sizeof (char));
+
+      c = io->dev_if->get_c (io->dev);
+      if (c == IOD_EOF)
+        str[i] = '\0';
+      else
+        str[i] = (char) c;
+    }
+  while (str[i++] != '\0');
+  
+  *value = str;
   return IOS_OK;
 }
 

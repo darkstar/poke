@@ -2445,12 +2445,19 @@ end
 instruction peeks ()
   code
     ios io;
+    ios_off offset;
+    char *ios_str;
 
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (PVM_E_NO_IOS);
 
-    JITTER_TOP_STACK () = pvm_make_string ("");
-    /* XXX: WRITEME */
+    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
+              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+
+    if (ios_read_string (io, offset, 0 /* flags */, &ios_str) != IOS_OK)
+      JITTER_TOP_STACK () = PVM_NULL;
+    else
+      JITTER_TOP_STACK () = pvm_make_string (ios_str);
   end
 end
 
