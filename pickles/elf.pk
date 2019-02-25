@@ -5,6 +5,7 @@ deftype Elf64_Sxword = int<64>;
 deftype Elf64_Addr = uint<64>;
 deftype Elf64_Off = offset<uint<64>,B>;
 
+defvar SHT_STRTAB = 3;
 defvar SHT_RELA = 4;
 
 deftype Elf64_Rela =
@@ -67,8 +68,10 @@ deftype Elf64_Ehdr =
 
 defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset) string:
 {
-  /* XXX writeme */
-  /* Find the STRTAB section.  */
-  /* Lookup the name in it.  */
+ defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
+ for (s in shdr where s.sh_type == SHT_STRTAB)
+   return string @ (s.sh_offset + offset);
+
+  /* No strtab section found.  */
   return "";
 }

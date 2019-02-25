@@ -253,11 +253,12 @@ defun ctf_section = (Elf64_Ehdr ehdr) Elf64_Shdr:
  raise E_generic;
 }
 
-defun ctf_name_string = (Ctf_Header header, Ctf_Name name) string:
+defun ctf_string = (Elf64_Ehdr ehdr,
+                    Ctf_Header header,
+                    Ctf_Name name) string:
 {
  if (name.stid == CTF_STRTAB_0)
    return string @ (header.cth_stroff + name.offset);
  else
-   /* XXX use elf.pk to access the ELF's strtab.  */
-   return "";
+   return elf_string (ehdr, name.offset);
 }
