@@ -131,6 +131,7 @@ Poke Language Reference Manual
 @c   The Standard Library
 @c       Integer Standard Types
 
+@c XXX ~/.pokerc
 @c XXX: writing generic code: any and any[]
 
 

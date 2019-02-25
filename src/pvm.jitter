@@ -2461,6 +2461,13 @@ instruction peeks ()
   end
 end
 
+instruction pokes ()
+  code
+    /* XXX writeme */
+    assert (0);
+  end
+end
+
 
 
 ## Exceptions handling instructions
