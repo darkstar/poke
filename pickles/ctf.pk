@@ -21,6 +21,8 @@
    The Compact ANSI-C Type Format is described in
    https://github.com/oracle/libdtrace-ctf  */
 
+/* require elf; */
+
 defvar CTF_MAX_SIZE = 0xfffffffe;
 defvar CTF_LSIZE_SENT = 0xffffffff;
 
@@ -237,6 +239,19 @@ deftype Ctf_Enum =
     Ctf_Name cte_name;
     int<32> cte_value;
   };
+
+defun ctf_section = (Elf64_Ehdr ehdr) Elf64_Shdr:
+{
+ defvar i = 0;
+ defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
+ for (s in shdr)
+   {
+     if (elf_string (ehdr, s.sh_name) == ".ctf")
+       return s;
+   }
+
+ raise E_generic;
+}
 
 defun ctf_name_string = (Ctf_Header header, Ctf_Name name) string:
 {

@@ -18,7 +18,7 @@ deftype Elf64_Rela =
 deftype Elf64_Shdr =
   struct
   {
-    Elf_Word sh_name;
+    offset<Elf_Word,B> sh_name;
     Elf_Word sh_type;
     Elf64_Xword sh_flags;
     Elf64_Addr sh_addr;
@@ -64,3 +64,11 @@ deftype Elf64_Ehdr =
     Elf_Half e_shnum;
     Elf_Half e_shstrndx;
   };
+
+defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset) string:
+{
+  /* XXX writeme */
+  /* Find the STRTAB section.  */
+  /* Lookup the name in it.  */
+  return "";
+}
