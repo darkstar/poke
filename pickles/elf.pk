@@ -94,11 +94,12 @@ deftype Elf64_Ehdr =
     Elf_Half e_phnum;
     offset<Elf_Half,B> e_shentsize;
     Elf_Half e_shnum;
-    Elf_Half e_shstrndx;
+    Elf_Half e_shstrndx : e_shstrndx < e_shnum;
   };
 
-defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset) string:
+defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset,
+                    Elf_Half strtab = ehdr.e_shstrndx) string:
 {
  defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
- return string @ (shdr[ehdr.e_shstrndx].sh_offset + offset);
+ return string @ (shdr[strtab].sh_offset + offset);
 }
