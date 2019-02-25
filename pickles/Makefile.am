@@ -16,4 +16,5 @@ dist_pkgdata_DATA = bmp.pk \
                     patterns.pk \
                     sparc.pk \
                     swf.pk \
-                    ctf.pk
+                    ctf.pk \
+                    tar.pk
