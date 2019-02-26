@@ -515,8 +515,6 @@
    .c  }
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
-        ;; XXX remove {mapper,writer}_{back_over} from payload after
-        ;; subpassing.
         dup                     ; OFF VAL VAL
         regvar $val             ; OFF VAL
    .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
