@@ -156,7 +156,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
 
           if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
             {
-              RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure)     ;     /* CLS */
+              RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                    /* _ */
