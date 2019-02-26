@@ -513,7 +513,7 @@
    .c    PKL_GEN_PAYLOAD->writer_back = PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK (elem);
    .c    PKL_GEN_PAYLOAD->writer_over = PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER (elem);
    .c  }
-   .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
         ;; XXX remove {mapper,writer}_{back_over} from payload after
         ;; subpassing.
