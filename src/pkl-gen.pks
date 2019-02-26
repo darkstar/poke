@@ -502,8 +502,16 @@
         push ulong<64>1         ; (LOFFM*LOFFU+SOFFM*SOFFU) 1UL
         mko                     ; OFF
    .c }
-        ;; XXX set {mapper,writer}_{back_over} in payload before
-        ;; subpassing.
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_MAPPER_P (elem))
+   .c  {
+   .c    PKL_GEN_PAYLOAD->mapper_back = PKL_AST_STRUCT_ELEM_TYPE_MAPPER_BACK (elem);
+   .c    PKL_GEN_PAYLOAD->mapper_over = PKL_AST_STRUCT_ELEM_TYPE_MAPPER_OVER (elem);
+   .c  }
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_WRITER_P (elem))
+   .c  {
+   .c    PKL_GEN_PAYLOAD->writer_back = PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK (elem);
+   .c    PKL_GEN_PAYLOAD->writer_over = PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER (elem);
+   .c  }
         dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL

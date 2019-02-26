@@ -12,7 +12,7 @@ deftype Bar = struct { Foo f; byte x; };
 defun bar = Bar: { return Bar @ 4#B; };
 
 /* { dg-command { Bar @ 4#B } } */
-/* { dg-output "Bar \\{Foo \\{i=0x50UB,0x04UB\\},x=0x70UB\\}" } */
+/* { dg-output "Bar \\{f=Foo \\{i=0x50UB,j=0x4UB\\},x=0x70UB\\}" } */
 
 /* { dg-command { bar } } */
-/* { dg-output "Bar \\{Foo \\{i=0x50UB,0x04UB\\},x=0x70UB\\}" } */
+/* { dg-output "\nBar \\{f=Foo \\{i=0x50UB,j=0x4UB\\},x=0x70UB\\}" } */
