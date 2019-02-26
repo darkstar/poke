@@ -688,5 +688,26 @@
         push null
         return
         .end
-
         
+;;; RAS_FUNCTION_STRUCT_CONSTRUCTOR
+;;; ( SCT -- SCT SCT )
+;;;
+;;; Assemble a function that constructs a struct value of a given type
+;;; from another struct value.
+;;;
+;;; The C environment required is:
+;;;
+;;; The C environment required is:
+;;;
+;;; `type_struct' is a pkl_ast_node with the struct type being
+;;;  processed.
+;;; 
+;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; of the struct type being processed.
+;;; 
+;;; `elem' is a scratch pkl_ast_node.
+
+        .function struct_constructor
+        ;; XXX WRITEME
+        dup
+        .end

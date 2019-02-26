@@ -643,33 +643,46 @@ map:
                     PKL_AST_LOC ($$) = @$;
 
                     /* If the type specifier is of a struct, then look
-                       for the lexical address of its mapper function
-                       in the compilation environment and set it in
-                       the map AST node.  */
+                       for the lexical address of its mapper and
+                       writer functions in the compilation environment
+                       and set it in the map AST node.  */
 
                     if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
                       {
-                        int mapper_back;
-                        int mapper_over;
+                        int mapper_back, writer_back;
+                        int mapper_over, writer_over;
                         
                         const char *type_name
                           = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
                           
                         char *mapper_name = xmalloc (strlen (type_name) +
                                                      strlen ("_pkl_mapper_") + 1);
+                        char *writer_name = xmalloc (strlen (type_name) +
+                                                     strlen ("_pkl_writer_") + 1);
                         
                         pkl_ast_node mapper_decl;
+                        pkl_ast_node writer_decl;
 
                         strcpy (mapper_name, "_pkl_mapper_");
                         strcat (mapper_name, type_name);
+
+                        strcpy (writer_name, "_pkl_writer_");
+                        strcat (writer_name, type_name);
                         
                         mapper_decl = pkl_env_lookup (pkl_parser->env,
                                                       mapper_name,
                                                       &mapper_back, &mapper_over);
                         assert (mapper_decl);
 
+                        writer_decl = pkl_env_lookup (pkl_parser->env,
+                                                      writer_name,
+                                                      &writer_back, &writer_over);
+                        assert (writer_decl);
+
                         PKL_AST_MAP_MAPPER_BACK($$) = mapper_back;
                         PKL_AST_MAP_MAPPER_OVER($$) = mapper_over;
+                        PKL_AST_MAP_WRITER_BACK($$) = writer_back;
+                        PKL_AST_MAP_WRITER_OVER($$) = writer_over;
 
                         free (mapper_name);
                       }
@@ -1299,22 +1312,27 @@ declaration:
                       YYERROR;
                     }
 
-                  /* If the type is a struct, register the mapping and
-                     the constructor functions.  In both cases, the
-                     INITIAL of the declaration are the struct type
-                     itself.  That is what will be used by subsequent
-                     passes in the compiler to build these function
-                     bodies.  */
+                  /* If the type is a struct, register the mapping,
+                     writer and constructor functions.  In all three
+                     cases, the INITIAL of the declaration are the
+                     struct type itself.  That is what will be used by
+                     subsequent passes in the compiler to build these
+                     function bodies.  */
                   if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
                     {
                       const char *type_name = PKL_AST_IDENTIFIER_POINTER ($2);
 
+                      char *writer_name = xmalloc (strlen (type_name) +
+                                                   strlen ("_pkl_writer_") + 1);
                       char *mapper_name = xmalloc (strlen (type_name) +
                                                    strlen ("_pkl_mapper_") + 1);
                       char *constructor_name = xmalloc (strlen (type_name) +
                                                         strlen ("_pkl_constructor_") + 1);
 
                       
+                      strcpy (writer_name, "_pkl_writer_");
+                      strcat (writer_name, type_name);
+
                       strcpy (mapper_name, "_pkl_mapper_");
                       strcat (mapper_name, type_name);
                       
@@ -1322,10 +1340,19 @@ declaration:
                       strcat (constructor_name, type_name);
                       
                       {
+                        pkl_ast_node writer_identifier
+                          = pkl_ast_make_identifier (pkl_parser->ast, writer_name);
                         pkl_ast_node mapper_identifier
                           = pkl_ast_make_identifier (pkl_parser->ast, mapper_name);
                         pkl_ast_node constructor_identifier
                           = pkl_ast_make_identifier (pkl_parser->ast, constructor_name);
+
+                        pkl_ast_node writer_decl
+                          = pkl_ast_make_decl (pkl_parser->ast,
+                                               PKL_AST_DECL_KIND_FUNC,
+                                               writer_identifier,
+                                               $4,
+                                               pkl_parser->filename);
 
                         pkl_ast_node mapper_decl
                           = pkl_ast_make_decl (pkl_parser->ast,
@@ -1342,6 +1369,12 @@ declaration:
                                                pkl_parser->filename);
 
                         if (!pkl_env_register (pkl_parser->env,
+                                               writer_name,
+                                               writer_decl))
+                          /* This should never happen.  */
+                          assert (0);
+
+                        if (!pkl_env_register (pkl_parser->env,
                                                mapper_name,
                                                mapper_decl))
                           /* This should never happen.  */
@@ -1353,6 +1386,7 @@ declaration:
                           /* This should never happen.  */
                           assert (0);
 
+                        free (writer_name);
                         free (mapper_name);
                         free (constructor_name);
                       }
