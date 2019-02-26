@@ -1880,10 +1880,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
       && PKL_AST_TYPE_A_NELEM (type) != NULL
       && PKL_PASS_PARENT
-      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_TYPE_ARG))
+      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_TYPE_ARG
+          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL))
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
-                 "sized array types not allowed in this context");
+                 "invalid array type");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
