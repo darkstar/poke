@@ -347,7 +347,7 @@ pkl_lookup_mapper_writer (struct pkl_parser *parser,
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned integral_type_sign
-%type <ast> struct_elem_type_list struct_elem_type
+%type <ast> struct_elem_type_list struct_elem_type struct_elem_type_identifier
 %type <ast> struct_elem_type_constraint struct_elem_type_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
@@ -1169,49 +1169,55 @@ struct_elem_type_list:
         ;
 
 struct_elem_type:
-	  type_specifier identifier
+	  type_specifier struct_elem_type_identifier
           	{
-                  /* Register a variable IDENTIFIER in the current
-                     environment.  We do it in this mid-rule so the
-                     element can be used in the constraint.  */
+                  if ($2 != NULL)
+                    {
+                      /* Register a variable IDENTIFIER in the current
+                         environment.  We do it in this mid-rule so
+                         the element can be used in the
+                         constraint.  */
 
-                  pkl_ast_node dummy, decl;
+                      pkl_ast_node dummy, decl;
 
-                  dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
-                  PKL_AST_TYPE (dummy) = ASTREF ($1);
-                  decl = pkl_ast_make_decl (pkl_parser->ast,
-                                            PKL_AST_DECL_KIND_VAR,
-                                            $2, dummy,
-                                            NULL /* source */);
-                    PKL_AST_LOC (decl) = @$;
-                    
-                    if (!pkl_env_register (pkl_parser->env,
-                                           PKL_AST_IDENTIFIER_POINTER ($2),
-                                           decl))
-                      {
-                        pkl_error (pkl_parser->ast, PKL_AST_LOC ($2),
-                                   "duplicated struct element '%s'",
-                                   PKL_AST_IDENTIFIER_POINTER ($2));
-                        YYERROR;
-                      }
+                      dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
+                      PKL_AST_TYPE (dummy) = ASTREF ($1);
+                      decl = pkl_ast_make_decl (pkl_parser->ast,
+                                                PKL_AST_DECL_KIND_VAR,
+                                                $2, dummy,
+                                                NULL /* source */);
+                      PKL_AST_LOC (decl) = @$;
+                      
+                      if (!pkl_env_register (pkl_parser->env,
+                                             PKL_AST_IDENTIFIER_POINTER ($2),
+                                             decl))
+                        {
+                          pkl_error (pkl_parser->ast, PKL_AST_LOC ($2),
+                                     "duplicated struct element '%s'",
+                                     PKL_AST_IDENTIFIER_POINTER ($2));
+                          YYERROR;
+                        }
+                    }
                 }
           struct_elem_type_constraint struct_elem_type_label ';'
           	{
                   $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
                                                       $4, $5);
                   PKL_AST_LOC ($$) = @$;
-                  PKL_AST_LOC ($2) = @2;
-                  PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
-                  ASTREF (PKL_AST_TYPE ($2));
-                  PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
-                }
-        | type_specifier struct_elem_type_constraint struct_elem_type_label ';'
-        	{
-                    $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, NULL, $1,
-                                                        $2, $3);
-                    PKL_AST_LOC ($$) = @$;
+                  if ($2 != NULL)
+                    {
+                      PKL_AST_LOC ($2) = @2;
+                      PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
+                      ASTREF (PKL_AST_TYPE ($2));
+                      PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                    }
                 }
         ;
+
+struct_elem_type_identifier:
+	  %empty	{ $$ = NULL; }
+	| identifier	{ $$ = $1; }
+	;
 
 struct_elem_type_label:
 	  %empty
