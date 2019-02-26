@@ -688,10 +688,10 @@ map:
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
 
-                    /* If the type specifier is of a struct, then look
-                       for the lexical address of its mapper and
-                       writer functions in the compilation environment
-                       and set it in the map AST node.  */
+                    /* If the type specifier is of a struct or an
+                       array, then look for the lexical address of its
+                       mapper and writer functions in the compilation
+                       environment and set it in the map AST node.  */
                     /* XXX: do the same for arrays.  */
 
                     if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
@@ -1210,6 +1210,27 @@ struct_elem_type:
                       PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
                       ASTREF (PKL_AST_TYPE ($2));
                       PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                    }
+
+                  /* If the type of the struct element is a struct or
+                     an array, and it is named, then look for the
+                     lexical address of its mapper and writer
+                     functions in the compilation environment and set
+                     it in the AST node.  */
+                  /* XXX: do the same for arrays.  */
+                  if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
+                      && PKL_AST_TYPE_NAME ($1))
+                    {
+                      const char *type_name
+                        = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
+
+                      if (!pkl_lookup_mapper_writer (pkl_parser,
+                                                   type_name,
+                                                  &PKL_AST_STRUCT_ELEM_TYPE_MAPPER_BACK ($$),
+                                                  &PKL_AST_STRUCT_ELEM_TYPE_MAPPER_OVER ($$),
+                                                  &PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK ($$),
+                                                  &PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER ($$)))
+                        assert (0);
                     }
                 }
         ;
