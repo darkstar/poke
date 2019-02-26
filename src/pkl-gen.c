@@ -82,6 +82,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_program)
   PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST,
                              PKL_GEN_PAYLOAD->compiler,
                              1 /* prologue */);
+
+  PKL_GEN_PAYLOAD->mapper_back = -1;
+  PKL_GEN_PAYLOAD->mapper_over = -1;
+  PKL_GEN_PAYLOAD->writer_back = -1;
+  PKL_GEN_PAYLOAD->writer_over = -1;
 }
 PKL_PHASE_END_HANDLER
 
@@ -1193,34 +1198,24 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
   /* Push the offset of the map.  */
   PKL_PASS_SUBPASS (map_offset);
 
-  /* Generate code to peek from the offset generated above.
-
-     If there is a lexical address stored in the map AST node, then it
-     refers to a mapper function.  In that case, we should call the
-     mapper function.  The map's offset is passed to the function,
-     which will return the mapped value.
-
-     Otherwise (there is not a lexical address in the map AST node)
-     let the code generator generate code for peeking the mapped type.
-     The generated code expects the map offset at the top of the
-     stack.  
-
-     XXX: install exception handlers for constraints etc.  */
-  if (PKL_AST_MAP_MAPPER_P (map) && 0 /* XXX */)
+  /* Generate code to peek from the offset generated above.  */
+  if (PKL_AST_MAP_MAPPER_P (map))
     {
-      int mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
-      int mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
-
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                    mapper_back, mapper_over);
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+      PKL_GEN_PAYLOAD->mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
+      PKL_GEN_PAYLOAD->mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
     }
-  else
+  if (PKL_AST_MAP_WRITER_P (map))
     {
-      PKL_GEN_PAYLOAD->in_mapper = 1;
-      PKL_PASS_SUBPASS (map_type);
-      PKL_GEN_PAYLOAD->in_mapper = 0;
+      PKL_GEN_PAYLOAD->writer_back = PKL_AST_MAP_WRITER_BACK (map);
+      PKL_GEN_PAYLOAD->writer_over = PKL_AST_MAP_WRITER_OVER (map);
     }
+  PKL_GEN_PAYLOAD->in_mapper = 1;
+
+  PKL_PASS_SUBPASS (map_type);
+
+  PKL_GEN_PAYLOAD->in_mapper = 0;
+  PKL_GEN_PAYLOAD->mapper_back = -1;
+  PKL_GEN_PAYLOAD->mapper_over = -1;
 
   /* If the mapped value is PVM_NULL then raise an exception.  */
   {

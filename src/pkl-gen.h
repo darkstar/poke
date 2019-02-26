@@ -68,7 +68,12 @@
    0 otherwise.
 
    IN_LVALUE is 1 in a sub-tree corresponding to the l-value of an
-   assignment statement.  0 otherwise.  */
+   assignment statement.  0 otherwise.
+
+   MAPPER_BACK, MAPPER_OVER, WRITER_BACK and WRITER_OVER conform the
+   lexical addresses of a mapper function and a writer function,
+   respectively, that will be used whenever a mapper/writer is
+   generated for an array or a struct.   */
 
 struct pkl_gen_payload
 {
@@ -84,6 +89,10 @@ struct pkl_gen_payload
   int in_writer;
   int in_valmapper;
   int in_lvalue;
+  int mapper_back;
+  int mapper_over;
+  int writer_back;
+  int writer_over;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;

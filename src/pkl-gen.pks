@@ -502,9 +502,13 @@
         push ulong<64>1         ; (LOFFM*LOFFU+SOFFM*SOFFU) 1UL
         mko                     ; OFF
    .c }
+        ;; XXX set {mapper,writer}_{back_over} in payload before
+        ;; subpassing.
         dup                     ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
                                 ; OFF VAL
+        ;; XXX remove {mapper,writer}_{back_over} from payload after
+        ;; subpassing.
         dup                     ; OFF VAL VAL
         regvar $val             ; OFF VAL
    .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
