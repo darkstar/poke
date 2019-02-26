@@ -1215,9 +1215,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
       PKL_GEN_PAYLOAD->writer_over = PKL_AST_MAP_WRITER_OVER (map);
     }
   PKL_GEN_PAYLOAD->in_mapper = 1;
-
   PKL_PASS_SUBPASS (map_type);
-
   PKL_GEN_PAYLOAD->in_mapper = 0;
   PKL_GEN_PAYLOAD->mapper_back = -1;
   PKL_GEN_PAYLOAD->mapper_over = -1;
