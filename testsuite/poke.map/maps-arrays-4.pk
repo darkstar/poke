@@ -3,13 +3,11 @@
 
 /* { dg-command {.set obase 16} } */
 
-defvar N = 4;
+deftype Array = byte[];
+defun array = Array: { return Array @ 8#B; } 
 
-deftype Array = byte[N];
-defun array = Array: { return Array @ 0#B; } 
-
-/* { dg-command { Array @ 0#B } } */
-/* { dg-output "\\\[0x10UB,0x20UB,0x30UB,0x40UB\\\]" } */
+/* { dg-command { Array @ 8#B } } */
+/* { dg-output "\\\[0x90UB,0xa0UB,0xb0UB,0xc0UB\\\]" } */
 
 /* { dg-command { array } } */
-/* { dg-output "\\\[0x10UB,0x20UB,0x30UB,0x40UB\\\]" } */
+/* { dg-output "\n\\\[0x90UB,0xa0UB,0xb0UB,0xc0UB\\\]" } */
