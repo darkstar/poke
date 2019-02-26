@@ -154,6 +154,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
           PKL_GEN_PAYLOAD->in_mapper = 0;
 
+#if 0
+          if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_ARRAY)
+            {
+              /* XXX use this for structs as well.  */
+              PKL_GEN_PAYLOAD->in_valmapper = 1;
+              RAS_FUNCTION_ARRAY_VALMAPPER (valmapper_closure);
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, valmapper_closure); /* CLS */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                     /* CLS */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                  /* _ */
+              PKL_GEN_PAYLOAD->in_valmapper = 0;
+            }
+#endif
           if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
             {
               RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
