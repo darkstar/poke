@@ -92,10 +92,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_var)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_map)
+{
+  if (PKL_TRANS_PAYLOAD->add_frames != -1)
+    {
+      pkl_ast_node map = PKL_PASS_NODE;
+      PKL_AST_MAP_MAPPER_BACK (map) += PKL_TRANS_PAYLOAD->add_frames;
+      PKL_AST_MAP_WRITER_BACK (map) += PKL_TRANS_PAYLOAD->add_frames;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_transl =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_transl_ps_var),
+   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_transl_ps_map),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_pr_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_ps_type_array),
   };
