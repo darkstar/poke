@@ -139,15 +139,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
              registration of declarations in the compile-time
              environment (in pkl-tab.y).  */
 
+          PKL_GEN_PAYLOAD->in_writer = 1;
           RAS_FUNCTION_STRUCT_WRITER (writer_closure);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+          PKL_GEN_PAYLOAD->in_writer = 0;
 
+          PKL_GEN_PAYLOAD->in_mapper = 1;
           RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+          PKL_GEN_PAYLOAD->in_mapper = 0;
 
           RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure)     ;     /* CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
@@ -1720,37 +1724,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
   else if (PKL_GEN_PAYLOAD->in_mapper)
     {
       /* Stack: OFF */
-
-      pvm_val mapper_closure;
-      pvm_val writer_closure;
-
       pkl_ast_node type_struct = PKL_PASS_NODE;
       pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
       pkl_ast_node elem;
 
-      /* XXX if PAYLOAD->mapper_back and PAYLOAD->mapper_over contain
-         a valid lexical address, it is the address of the mapper for
-         this type.  Use it instead of compiling an in-place
-         mapper.  */
-      /* if (...) */
-      /* {
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                          mapper_back, mapper_over);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
-         }
-         else*/
-      {
-      /* Compile a mapper function and complete it using the current
-         environment.  */
-      RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
+      if (PKL_GEN_PAYLOAD->mapper_back != -1
+          && PKL_GEN_PAYLOAD->mapper_over != -1)
+        {
+          /* The lexical address in the payload is the address of the
+             mapper closure for this type.  Use it.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                        PKL_GEN_PAYLOAD->mapper_back,
+                        PKL_GEN_PAYLOAD->mapper_over); /* OFF CLS */
+        }
+      else
+        {
+          /* Compile a mapper function and complete it using the
+             current environment.  */
+          pvm_val mapper_closure;
 
-      /* Complete the mapper closure with the current environment.  */
-                                                                 /* OFF */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+          RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
+
+          /* Complete the mapper closure with the current environment.  */
+                                                                     /* OFF */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+        }
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
-      }
 
       /* Build the arguments and call the mapper to get a struct
          value.  For structs, both EBOUND and SBOUND are always
@@ -1765,24 +1767,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                /* VAL CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);               /* VAL */
 
-      /* XXX if PAYLOAD->writer_back and PAYLOAD->writer_over contain
-         a valid lexical address, use it.  */
-      /* if (...) */
-      /* {
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                          writer_back, writer_over);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
-         }
-         else*/
-      {
-        /* Compile a writer function, complete it using the current
-           environment, and install it in the struct as its
-           writer.  */
-        RAS_FUNCTION_STRUCT_WRITER (writer_closure);
+      if (PKL_GEN_PAYLOAD->writer_back != -1
+          && PKL_GEN_PAYLOAD->writer_over != -1)
+        {
+          /* The lexical address in the payload is the address of the
+             writer closure for this type.  Use it.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                        PKL_GEN_PAYLOAD->writer_back,
+                        PKL_GEN_PAYLOAD->writer_over); /* VAL CLS */
+        }
+      else
+        {
+          /* Compile a writer function and complete it using the
+             current environment.  */
+          pvm_val writer_closure;
 
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* VAL CLS */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL CLS */
-      }
+          RAS_FUNCTION_STRUCT_WRITER (writer_closure);
+
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* VAL CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL CLS */
+        }
+
+      /* Install the writer into the value.  */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETW);                /* VAL */
 
       /* And we are done.  */

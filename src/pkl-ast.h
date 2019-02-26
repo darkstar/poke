@@ -707,12 +707,28 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
 
    LABEL is an expression that, if present, should evaluate to an
    offset value.  If the struct type element doesn't have a label,
-   this is NULL.  */
+   this is NULL.
+
+   MAPPER_BACK and MAPPER_OVER, if specified, conform the lexical
+   address of a mapper function.  See pkl-env.h for a description of
+   lexical addresses.
+
+   WRITER_BACK and WRITER_OVER, if specified, conform the lexical
+   address of a writer function.  See pkl-env.h for a description of
+   lexical addresses.  */
 
 #define PKL_AST_STRUCT_ELEM_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
 #define PKL_AST_STRUCT_ELEM_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
 #define PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
 #define PKL_AST_STRUCT_ELEM_TYPE_LABEL(AST) ((AST)->sct_type_elem.label)
+#define PKL_AST_STRUCT_ELEM_TYPE_MAPPER_BACK(AST) ((AST)->sct_type_elem.mapper_back)
+#define PKL_AST_STRUCT_ELEM_TYPE_MAPPER_OVER(AST) ((AST)->sct_type_elem.mapper_over)
+#define PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK(AST) ((AST)->sct_type_elem.writer_back)
+#define PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER(AST) ((AST)->sct_type_elem.writer_over)
+#define PKL_AST_STRUCT_ELEM_TYPE_MAPPER_P(AST)  \
+  ((AST)->sct_type_elem.mapper_back != -1 && (AST)->sct_type_elem.mapper_over != -1)
+#define PKL_AST_STRUCT_ELEM_TYPE_WRITER_P(AST)  \
+  ((AST)->sct_type_elem.writer_back != -1 && (AST)->sct_type_elem.writer_over != -1)
 
 struct pkl_ast_struct_elem_type
 {
@@ -722,6 +738,10 @@ struct pkl_ast_struct_elem_type
   union pkl_ast_node *type;
   union pkl_ast_node *constraint;
   union pkl_ast_node *label;
+  int mapper_back;
+  int mapper_over;
+  int writer_back;
+  int writer_over;
 };
 
 pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
