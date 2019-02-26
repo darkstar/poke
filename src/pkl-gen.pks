@@ -38,6 +38,10 @@
 ;;;
 ;;; Only one of EBOUND or SBOUND simultanously are supported.
 ;;; Note that OFF should be of type offset<uint<64>,*>.
+;;; 
+;;; The C environment required is:
+;;;
+;;; `array_type' is a pkl_ast_node with the array type being mapped.
 
         .function array_mapper
         prolog

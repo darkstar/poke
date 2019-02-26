@@ -124,65 +124,84 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
   switch (PKL_AST_DECL_KIND (decl))
     {
     case PKL_AST_DECL_KIND_TYPE:
-      if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
-        /* XXX || PKL_AST_TYPE_CODE (initial) == PKL_TYPE_ARRAY) */
+      switch (PKL_AST_TYPE_CODE (initial))
         {
-          pvm_val mapper_closure;
-          pvm_val writer_closure;
-          pvm_val constructor_closure;
+        case PKL_TYPE_STRUCT:
+          {
+            pvm_val mapper_closure;
+            pvm_val writer_closure;
+            pvm_val constructor_closure;
+            
+            pkl_ast_node type_struct = initial;
+            pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
+            pkl_ast_node elem;
+            
+            /* Compile the struct functions.
+               Note that this should be done in the same order than the
+               registration of declarations in the compile-time
+               environment (in pkl-tab.y).  */
+            
+            PKL_GEN_PAYLOAD->in_writer = 1;
+            RAS_FUNCTION_STRUCT_WRITER (writer_closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            PKL_GEN_PAYLOAD->in_writer = 0;
+            
+            PKL_GEN_PAYLOAD->in_mapper = 1;
+            RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            PKL_GEN_PAYLOAD->in_mapper = 0;
 
-          pkl_ast_node type_struct = initial;
-          pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
-          pkl_ast_node elem;
+            RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                    /* _ */
 
-          /* Compile the struct functions.
-             Note that this should be done in the same order than the
-             registration of declarations in the compile-time
-             environment (in pkl-tab.y).  */
+            PKL_PASS_BREAK;
+            break;
+          }
+        case PKL_TYPE_ARRAY:
+          {
+            pvm_val mapper_closure;
+            pvm_val writer_closure;
+            
+            pkl_ast_node array_type = initial;
+            
+            /* Compile the array functions.
+               Note that this should be done in the same order than the
+               registration of declarations in the compile-time
+               environment (in pkl-tab.y).  */
+            
+            PKL_GEN_PAYLOAD->in_writer = 1;
+            RAS_FUNCTION_ARRAY_WRITER (writer_closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            PKL_GEN_PAYLOAD->in_writer = 0;
+            
+            PKL_GEN_PAYLOAD->in_mapper = 1;
+            RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            PKL_GEN_PAYLOAD->in_mapper = 0;
 
-          PKL_GEN_PAYLOAD->in_writer = 1;
-          RAS_FUNCTION_STRUCT_WRITER (writer_closure);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
-          PKL_GEN_PAYLOAD->in_writer = 0;
-
-          PKL_GEN_PAYLOAD->in_mapper = 1;
-          RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
-          PKL_GEN_PAYLOAD->in_mapper = 0;
-
-#if 0
-          if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_ARRAY)
-            {
-              /* XXX use this for structs as well.  */
-              PKL_GEN_PAYLOAD->in_valmapper = 1;
-              RAS_FUNCTION_ARRAY_VALMAPPER (valmapper_closure);
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, valmapper_closure); /* CLS */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                     /* CLS */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                  /* _ */
-              PKL_GEN_PAYLOAD->in_valmapper = 0;
-            }
-#endif
-          if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
-            {
-              RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                    /* _ */
-            }
-          
-          PKL_PASS_BREAK;
+            PKL_PASS_BREAK;
+            break;
+          }
+        default:
+          break;
         }
       break;
     case PKL_AST_DECL_KIND_FUNC:
 
-      /* INITIAL is either a PKL_AST_FUNC, that will compile into a
-         program containing the function code.  Push a new assembler
-         to the stack of assemblers in the payload and use it to
-         process INITIAL.  */
+      /* INITIAL is a PKL_AST_FUNC, that will compile into a program
+         containing the function code.  Push a new assembler to the
+         stack of assemblers in the payload and use it to process
+         INITIAL.  */
       PKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST,
                                      PKL_GEN_PAYLOAD->compiler,
                                      0 /* prologue */));
@@ -1234,6 +1253,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
   PKL_GEN_PAYLOAD->in_mapper = 0;
   PKL_GEN_PAYLOAD->mapper_back = -1;
   PKL_GEN_PAYLOAD->mapper_over = -1;
+  PKL_GEN_PAYLOAD->writer_back = -1;
+  PKL_GEN_PAYLOAD->writer_over = -1;
 
   /* If the mapped value is PVM_NULL then raise an exception.  */
   {
@@ -1549,8 +1570,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
 
-      pvm_val writer_closure;
-
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
           pvm_val mapper_closure;
@@ -1593,17 +1612,30 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
       else
         {
-          pvm_val mapper_closure;
+          if (PKL_GEN_PAYLOAD->mapper_back != -1
+              && PKL_GEN_PAYLOAD->mapper_over != -1)
+            {
+              /* The lexical address in the payload is the address of
+                 the mapper closure for this type.  Use it.  */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                            PKL_GEN_PAYLOAD->mapper_back,
+                            PKL_GEN_PAYLOAD->mapper_over); /* OFF CLS */
+            }
+          else
+            {
+              /* Compile a mapper function and complete it using the
+                 current environment.  */
+              pvm_val mapper_closure;
 
-          /* Compile a mapper function and complete it using the
-             current environment.  */
-          RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
+              RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
 
-          /* Complete the mapper closure with the current
-             environment.  */
-                                                                     /* OFF */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+              /* Complete the mapper closure with the current
+                 environment.  */
+              /* OFF */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
+            }
+
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);                  /* OFF CLS CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);                 /* CLS OFF CLS */
 
@@ -1644,15 +1676,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM); /* VAL */
         }
 
-      /* Compile a writer function to a closure.  */
-      RAS_FUNCTION_ARRAY_WRITER (writer_closure);
+      if (PKL_GEN_PAYLOAD->writer_back != -1
+          && PKL_GEN_PAYLOAD->writer_over != -1)
+        {
+          /* The lexical address in the payload is the address of
+             the writer closure for this type.  Use it.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
+                        PKL_GEN_PAYLOAD->writer_back,
+                        PKL_GEN_PAYLOAD->writer_over); /* VAL CLS */
+        }
+      else
+        {
+          pvm_val writer_closure;
+          
+          /* Compile a writer function to a closure.  */
+          RAS_FUNCTION_ARRAY_WRITER (writer_closure);
 
-      /* Complete the writer closure with the current environment, and
-         install it in the array as its writer.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* VAL CLS */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL CLS */
+          /* Complete the writer closure with the current
+             environment.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* VAL CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL CLS */
+        }
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETW);                /* VAL */
-
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
     }

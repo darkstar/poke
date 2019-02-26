@@ -692,9 +692,9 @@ map:
                        array, then look for the lexical address of its
                        mapper and writer functions in the compilation
                        environment and set it in the map AST node.  */
-                    /* XXX: do the same for arrays.  */
-
-                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
+                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
+                        ||(PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY
+                           && PKL_AST_TYPE_NAME ($1)))
                       {
                         const char *type_name
                           = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
@@ -1360,13 +1360,13 @@ declaration:
                       YYERROR;
                     }
 
-                  /* If the type is a struct, register the mapping,
-                     writer and constructor functions.  In all three
-                     cases, the INITIAL of the declaration are the
-                     struct type itself.  That is what will be used by
-                     subsequent passes in the compiler to build these
-                     function bodies.  */
-                  if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
+                  /* If the type is a struct or an array, register the
+                     type functions.  In all cases the INITIAL of the
+                     declaration are the struct/array type itself.
+                     That is what will be used by subsequent passes in
+                     the compiler to build these function bodies.  */
+                  if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT
+                      || PKL_AST_TYPE_CODE ($4) == PKL_TYPE_ARRAY)
                     {
                       const char *type_name = PKL_AST_IDENTIFIER_POINTER ($2);
 
@@ -1374,9 +1374,6 @@ declaration:
                                                    strlen ("_pkl_writer_") + 1);
                       char *mapper_name = xmalloc (strlen (type_name) +
                                                    strlen ("_pkl_mapper_") + 1);
-                      char *constructor_name = xmalloc (strlen (type_name) +
-                                                        strlen ("_pkl_constructor_") + 1);
-
                       
                       strcpy (writer_name, "_pkl_writer_");
                       strcat (writer_name, type_name);
@@ -1384,16 +1381,11 @@ declaration:
                       strcpy (mapper_name, "_pkl_mapper_");
                       strcat (mapper_name, type_name);
                       
-                      strcpy (constructor_name, "_pkl_constructor_");
-                      strcat (constructor_name, type_name);
-                      
                       {
                         pkl_ast_node writer_identifier
                           = pkl_ast_make_identifier (pkl_parser->ast, writer_name);
                         pkl_ast_node mapper_identifier
                           = pkl_ast_make_identifier (pkl_parser->ast, mapper_name);
-                        pkl_ast_node constructor_identifier
-                          = pkl_ast_make_identifier (pkl_parser->ast, constructor_name);
 
                         pkl_ast_node writer_decl
                           = pkl_ast_make_decl (pkl_parser->ast,
@@ -1406,13 +1398,6 @@ declaration:
                           = pkl_ast_make_decl (pkl_parser->ast,
                                                PKL_AST_DECL_KIND_FUNC,
                                                mapper_identifier,
-                                               $4,
-                                               pkl_parser->filename);
-                      
-                        pkl_ast_node constructor_decl
-                          = pkl_ast_make_decl (pkl_parser->ast,
-                                               PKL_AST_DECL_KIND_FUNC,
-                                               constructor_identifier,
                                                $4,
                                                pkl_parser->filename);
 
@@ -1428,15 +1413,33 @@ declaration:
                           /* This should never happen.  */
                           assert (0);
 
-                        if (!pkl_env_register (pkl_parser->env,
-                                               constructor_name,
-                                               constructor_decl))
-                          /* This should never happen.  */
-                          assert (0);
-
                         free (writer_name);
                         free (mapper_name);
-                        free (constructor_name);
+
+                        if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
+                          {
+                            char *constructor_name
+                              = xmalloc (strlen (type_name) +
+                                         strlen ("_pkl_constructor_") + 1);
+                            pkl_ast_node constructor_identifier
+                              = pkl_ast_make_identifier (pkl_parser->ast,
+                                                         constructor_name);
+                            pkl_ast_node constructor_decl
+                              = pkl_ast_make_decl (pkl_parser->ast,
+                                                   PKL_AST_DECL_KIND_FUNC,
+                                                   constructor_identifier,
+                                                   $4,
+                                                   pkl_parser->filename);
+
+                            strcpy (constructor_name, "_pkl_constructor_");
+                            strcat (constructor_name, type_name);
+                            if (!pkl_env_register (pkl_parser->env,
+                                                   constructor_name,
+                                                   constructor_decl))
+                              /* This should never happen.  */
+                              assert (0);
+                            free (constructor_name);
+                          }
                       }
                     }
                 }
