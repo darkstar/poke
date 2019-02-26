@@ -148,7 +148,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
 
 /* Register N dummy entries in the compilation environment.  */
 
-void
+static void
 pkl_register_dummies (struct pkl_parser *parser, int n)
 {
   int i;
@@ -167,6 +167,52 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 
       assert (pkl_env_register (parser->env, name, decl));
     }
+}
+
+/* Search and return the lexical addresses of the mapper/writer for
+   the given type name.  If no such addresses are found, return 0.
+   Otherwise return 1.  */
+
+static int
+pkl_lookup_mapper_writer (struct pkl_parser *parser,
+                          const char *type_name,
+                          int *mapper_back, int *mapper_over,
+                          int *writer_back, int *writer_over)
+{
+  char *mapper_name = xmalloc (strlen (type_name) +
+                               strlen ("_pkl_mapper_") + 1);
+  char *writer_name = xmalloc (strlen (type_name) +
+                               strlen ("_pkl_writer_") + 1);
+  
+  pkl_ast_node mapper_decl;
+  pkl_ast_node writer_decl;
+  
+  strcpy (mapper_name, "_pkl_mapper_");
+  strcat (mapper_name, type_name);
+  
+  strcpy (writer_name, "_pkl_writer_");
+  strcat (writer_name, type_name);
+  
+  mapper_decl = pkl_env_lookup (parser->env,
+                                mapper_name,
+                                mapper_back, mapper_over);
+  if (!mapper_decl)
+    goto error;
+  
+  writer_decl = pkl_env_lookup (parser->env,
+                                writer_name,
+                                writer_back, writer_over);
+  if (!writer_decl)
+    goto error;
+  
+  free (mapper_name);
+  free (writer_name);
+  return 1;
+
+ error:
+  free (mapper_name);
+  free (writer_name);
+  return 0;
 }
 
 %}
@@ -646,45 +692,20 @@ map:
                        for the lexical address of its mapper and
                        writer functions in the compilation environment
                        and set it in the map AST node.  */
+                    /* XXX: do the same for arrays.  */
 
                     if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT)
                       {
-                        int mapper_back, writer_back;
-                        int mapper_over, writer_over;
-                        
                         const char *type_name
                           = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
-                          
-                        char *mapper_name = xmalloc (strlen (type_name) +
-                                                     strlen ("_pkl_mapper_") + 1);
-                        char *writer_name = xmalloc (strlen (type_name) +
-                                                     strlen ("_pkl_writer_") + 1);
-                        
-                        pkl_ast_node mapper_decl;
-                        pkl_ast_node writer_decl;
 
-                        strcpy (mapper_name, "_pkl_mapper_");
-                        strcat (mapper_name, type_name);
-
-                        strcpy (writer_name, "_pkl_writer_");
-                        strcat (writer_name, type_name);
-                        
-                        mapper_decl = pkl_env_lookup (pkl_parser->env,
-                                                      mapper_name,
-                                                      &mapper_back, &mapper_over);
-                        assert (mapper_decl);
-
-                        writer_decl = pkl_env_lookup (pkl_parser->env,
-                                                      writer_name,
-                                                      &writer_back, &writer_over);
-                        assert (writer_decl);
-
-                        PKL_AST_MAP_MAPPER_BACK($$) = mapper_back;
-                        PKL_AST_MAP_MAPPER_OVER($$) = mapper_over;
-                        PKL_AST_MAP_WRITER_BACK($$) = writer_back;
-                        PKL_AST_MAP_WRITER_OVER($$) = writer_over;
-
-                        free (mapper_name);
+                        if (!pkl_lookup_mapper_writer (pkl_parser,
+                                                       type_name,
+                                                       &PKL_AST_MAP_MAPPER_BACK ($$),
+                                                       &PKL_AST_MAP_MAPPER_OVER ($$),
+                                                       &PKL_AST_MAP_WRITER_BACK ($$),
+                                                       &PKL_AST_MAP_WRITER_OVER ($$)))
+                          assert (0);
                       }
                 }
 

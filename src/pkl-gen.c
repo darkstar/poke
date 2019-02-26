@@ -125,6 +125,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
     {
     case PKL_AST_DECL_KIND_TYPE:
       if (PKL_AST_TYPE_CODE (initial) == PKL_TYPE_STRUCT)
+        /* XXX || PKL_AST_TYPE_CODE (initial) == PKL_TYPE_ARRAY) */
         {
           pvm_val mapper_closure;
           pvm_val writer_closure;
