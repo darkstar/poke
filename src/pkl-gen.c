@@ -1804,8 +1804,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
           pvm_val mapper_closure;
 
           RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
-
-          /* Complete the mapper closure with the current environment.  */
                                                                      /* OFF */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* OFF CLS */
