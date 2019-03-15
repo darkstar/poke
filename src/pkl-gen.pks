@@ -46,6 +46,7 @@
         .function array_mapper
         prolog
         pushf
+        ;; XXX get the sbound and/or ebound from the array type
         regvar $sbound           ; Argument
         regvar $ebound           ; Argument
         regvar $off              ; Argument
