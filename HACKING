@@ -1,0 +1,416 @@
+========================
+GNU Poke - Hacking Notes
+========================
+
+Welcome, adventurous poker!
+This file contains useful information for you.
+
+Please be as good as to update the table of contents below if you
+modify the sectioning of the document.  If in Emacs, M-xrst-toc-update
+should take care of it automatically.
+
+.. contents:: 
+..
+    1  The Source Tree
+      1.1  The Compiler
+      1.2  The Poke Virtual Machine
+      1.3  The IO Subsystem
+      1.4  Poke Program
+      1.5  Pickles and Libraries
+      1.6  Test Suite
+      1.7  Documentation
+      1.8  Other Stuff
+    2  Poke Architecture
+    3  The Poke Compiler
+      3.1  Compiler Overview
+      3.2  The bison Parser in pkl-tab.y
+      3.3  Compiler Passes and Phases
+    4  The Poke Virtual Machine
+      4.1  Exception Handling
+    5  Debugging Poke
+      5.1  Building with Debugging support
+      5.2  Using GDB extensions
+      5.3  Valgrind and Poke
+    2  Poke Architecture
+  
+The Source Tree
+---------------
+
+The Compiler
+~~~~~~~~~~~~
+Support for abstract syntax trees:
+- src/pkl-ast.c
+- src/pkl-ast.h
+- src/pkl-ops.def
+- src/pkl-attrs.def
+
+The compiler driver:
+- src/pkl.h
+- src/pkl.c
+- src/pkl-pass.c
+- src/pkl-pass.h
+
+The lexer, and parser:
+- src/pkl-lex.l
+- src/pkl-tab.y
+- src/pkl-parser.c
+- src/pkl-parser.h
+
+Compile-time lexical environment:
+- src/pkl-env.h
+- src/pkl-env.c
+
+Analysis phases:
+- src/pkl-anal.c
+- src/pkl-anal.h
+
+Transformation phases:
+- src/pkl-trans.c
+- src/pkl-trans.h
+
+Type system related phases:
+- src/pkl-typify.c
+- src/pkl-typify.h
+
+Constant folding phase:
+- src/pkl-fold.c
+- src/pkl-fold.h
+
+Coercions phases:
+- src/pkl-promo.c
+- src/pkl-promo.h
+
+The code generator:
+- src/pkl-gen.h
+- src/pkl-gen.c
+- src/pkl-gen.pks
+
+The macro-assembler:
+- src/pkl-insn.def
+- src/pkl-asm.h
+- src/pkl-asm.c
+- src/pkl-asm.pks
+
+Our good friend ras:
+- src/ras.
+
+Compiler run-time library:
+- src/pkl-rt.pk
+
+The Poke Virtual Machine
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Virtual machine driver:
+- src/pvm.c
+- src/pvm.h
+
+Virtual machine values:
+- src/pvm-val.c
+- src/pvm-val.h
+
+Run-time environment:
+- src/pvm-env.c
+- src/pvm-env.h
+
+Virtual machine instructions:
+- src/pvm.jitter
+
+The IO Subsystem
+~~~~~~~~~~~~~~~~
+
+Support for IO spaces:
+- src/ios.h
+- src/ios.c
+
+Support for IO devices:
+- src/ios-dev.h
+
+Supported IO devices:
+- src/ios-dev-file.c
+
+Poke Program
+~~~~~~~~~~~~
+
+Main program:
+- src/poke.h
+- src/poke.c
+
+Infrastructure for writing poke commands:
+- src/pk-cmd.h
+- src/pk-cmd.c
+
+Terminal stuff:
+- src/pk-term.h
+
+Commands:
+- src/pk-def.c
+- src/pk-dump.pk
+- src/pk-file.c
+- src/pk-help.c
+- src/pk-info.c
+- src/pk-misc.h
+- src/pk-set.c
+- src/pk-vm.c
+
+Pickles and Libraries
+~~~~~~~~~~~~~~~~~~~~~
+
+Standard library:
+- src/std.pk
+
+Pickles:
+
+- pickles/elf.pk
+- pickles/ctf.pk
+
+Test Suite
+~~~~~~~~~~
+Target-specific dejagnu configuration:
+- testsuite/config/default.exp
+- testsuite/config/unix.exp
+
+Poke test drivers:
+- testsuite/lib/poke.exp
+- testsuite/lib/poke-dg.exp
+
+Compiler test suite:
+- testsuite/poke.pkl/pkl.exp
+- testsuite/poke.pkl/*.pk
+
+Compiler test suite (mapping):
+- testsuite/poke.map/map.exp
+- testsuite/poke.pkl/*.pk
+
+Standard library test suite:
+- testsuite/poke.std/std.exp
+- testsuite/poke.std/*.pk
+
+Tests for Poke commands:
+- testsuite/poke.cmd/cmd.exp
+- testsuite/poke.cmd/*.pk
+
+Documentation
+~~~~~~~~~~~~~
+The Poke book:
+- doc/poke.texi
+
+Other Stuff
+~~~~~~~~~~~
+
+GDB extensions to better debug poke:
+- etc/poke-gdb.scm
+
+Suppression list for memcheck:
+- etc/boehm-gc.suppressions
+
+Poke Architecture
+-----------------
+
+This figure depicts the overall architecture of Poke::
+  
+  +----------+
+  | compiler |      
+  +----------+      +------+
+       |            |      |
+       v            |      |
+  +----------+      |      |
+  |   PVM    | <--->|  IO  |
+  +----------+      |      |
+       ^            |      |
+       |            |      |
+       v            +------+
+  +----------+
+  | command  |
+  +----------+
+
+The Poke Compiler
+-----------------
+
+Compiler Overview
+~~~~~~~~~~~~~~~~~
+
+This figure depicts the architecutre of the compiler::
+  
+      /--------\
+      | source |
+      \---+----/
+          |
+          v
+  +-----------------+
+  |      Parser     |
+  +-----------------+
+  |  analysis and   |
+  | transformation  |
+  |     phases      |
+  +-----------------+    
+  | code generation |
+  |      phase      |
+  +-----------------+
+  | Macro assembler |
+  +-----------------+
+          |
+          v
+     /---------\
+     | program |
+     \---------/
+
+The bison Parser in pkl-tab.y
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The only purpose of the bison parser in pkl-tab.y is to do the
+syntactic analysis, build the initial AST, and set the locations of
+the AST nodes.
+
+Unfortunately, currently it also does some extra work, due to
+limitations in the LARL parser:
+
+- It builds the compile-time environment and register type, variable
+  and function declarations.
+- It annotates variables with their lexical addresses.
+- It links return statements with their containing functions.
+- It annotates return statements with he number of lexical frames they
+  should pop before exitting the function.
+
+As we shall see below, any further analysis and transformations on the
+AST are performed by the compiler phases, which are implemented
+elsewhere.  This greatly helps to keep the parser code clean and easy
+to read, and also eases changing the syntactic structure of poke
+programs.
+
+Compiler Passes and Phases
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These are the phases currently implemented in the poke compiler (the
+phases marked with a * are optional)::
+
+    [parser]
+    --- Front-end pass
+    trans1     Transformation phase 1.
+    anal1      Analysis phase 1.
+    typify1    Type analysis and transformation 1.
+    promo      Operand promotion phase.
+    trans2     Transformation phase 2.
+  * fold       Constant folding.
+    typify2    Type analysis and transformation 2.
+    trans3     Transformation phase 3.
+    anal2      Analysis phase 2.
+    --- Middle-end pass
+    trans4     Transformation phase 4.
+    --- Back-end pass
+    analf      Analysis final phase.
+    gen        Code generation.
+
+The phases above are organized in several passes:
+
+Pass1
+  anal1 typify1 promo trans2 fold typify2 trans3 anal2
+Pass2
+  trans4
+Pass3
+  analf gen
+
+Follows a brief but complete description of the tasks performed by
+each phase.  Please keep it up to date.
+
+trans1
+- Finishes strings by expanding \-sequences, emitting diagnostics if
+  an invalid \-sequence is found.
+
+anal1
+- Checks that every return statement is linked to a function.
+- Checks that no return statement is linked to a void function.
+
+typify1
+- Checks that the expression in which a funcall is applied is a
+  function, and that the types of the formal parameters mach the types
+  of the funcall arguments.
+- Checks that void functions are not called in contexts where a value
+  is expected.
+
+typify2
+- Checks that the type of the expression in a return statement matches
+  the return type of its containing function.
+
+trans4
+- Reverses the list of actual arguments in function calls, so the code
+  generator tackles them in the right (reversed) order, as it is
+  expected by the callee.
+
+The Poke Virtual Machine
+------------------------
+
+Exception Handling
+~~~~~~~~~~~~~~~~~~
+
+Exception types are signed 32-bit integers, and are defined in
+src/pkl-rt.pkl.
+
+There are two ways an exception can be raised in the PVM:
+
+- Explicitly, when the instruction 'raise' is executed.
+- Implicitly, when some instruction needs to fail.  For example,
+  an integer division instruction divides by zero.
+
+In either case, the treatment of a raised exception is the same:
+
+1. Pop an exception handler from the exception handler stack.
+2. If the exception handler matches the raised exception type, then
+   i. Restore the heights of the main and return stacks.
+   ii. Restore the dynamic environment.
+   iii. Push the cached exception type to the stack.
+   iv. Branch to the exception handler.
+3. Repeat.
+
+The default exception handler, which catches ``unhandled'' exceptions,
+is installed by the macro-assembler in src/pkl-asm.c:pkl_asm_new and
+src/pkl-asm.c:pkl_asm_finish.  It calls the function
+'_pkl_exception_handler', that is defined in the compiler runtime in
+src/pkl-rt.pkl.
+
+Debugging Poke
+--------------
+
+Building with Debugging support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Configure the sources with --enable-debug.  This will:
+
+1. Use a threaded jitter dispatching model.
+2. Build the sources with -O0 -g3 in CFLAGS.
+
+Using GDB extensions
+~~~~~~~~~~~~~~~~~~~~
+
+In order to use the GDB pretty-printers and other goodies brought to
+you courtesy of the poke hackers, just source the poke-gdb.scm file
+from your debugger::
+
+  (gdb) source etc/poke-gdb.scm
+
+Valgrind and Poke
+~~~~~~~~~~~~~~~~~
+
+The PVM uses the Boehm conservative garbage collector in order to
+manage the memory used by the VM values.  Other parts of poke, such as
+the PKL compiler, manage their own memory.
+
+Valgrind gets easily confused by the GCs tampering with the stack, and
+emits a lot of spurious warnings.  Fortunately it is possible to tell
+memcheck to omit these warnings: the file etc/boehm-gc.suppresions
+contains a list of suppresions.
+
+Invoke valgrind with --suppressions=etc/boehm-gc.suppressions.
+
+If despite using the suppressions file you see some spurious warning,
+please use::
+
+  $ valgrind --tool=memcheck --gen-suppressions=all --log-file=raw.log
+
+
+Then process raw.log with the etc/parse-valgrind-suppressions.sh
+script, wilcard the result as much as you can, and append the results
+to etc/boehm-gc.suppressions.
+
+Local Variables:
+mode: rst
+End:
