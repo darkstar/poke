@@ -1,6 +1,6 @@
 --## poke.tpp - GNU poke presentation
 --##
---## Copyright (c) 2018 Jose E. Marchesi.
+--## Copyright (c) 2019 Jose E. Marchesi.
 --##
 --## This program is free software: you can redistribute it and/or modify
 --## it under the terms of the GNU General Public License as published by

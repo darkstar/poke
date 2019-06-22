@@ -149,14 +149,6 @@ Old
 * Procedures::
 * MappingB::
 
-Hacking Poke
-* Why Hacking Poke::
-* The Source Tree::
-* Poke Architecture::
-* The PKL Compiler::
-* The Poke Virtual Machine::
-* Debugging Poke::
-
 Extending Poke
 @c * Writing commands in C::
 @c * Writing commands in Poke::
@@ -348,7 +340,7 @@ abort the mapping) if it is not possible to map an exact number of
 elements.  Thus the following mapping would not be successful:
 
 @example
-(poke) int[33#b] @ 0#B
+(poke) int[33#b] @@ 0#B
 unhandled out of map bounds exception
 @end example
 
@@ -365,7 +357,7 @@ an EOF exception is raised, and the mapping is aborted.
 Unbounded array mappings are done like this:
 
 @example
-@var{type}[] @ 0#B
+@var{type}[] @@ 0#B
 @end example
 
 The above construction will map values of type @var{type} in the IO
@@ -1659,10 +1651,12 @@ backwards-compatible way:
 @itemize @bullet
 @item
 Support for recursive types.  It may be useful, although binary file
-formats are seldom defined in a recursive way.
+formats are seldom defined in a recursive way.  In most (all?) cases,
+offsets are used instead.
 
 @item
-Variable types, eg. @code{int<@var{exp}>} where @var{exp} is not constant.
+Supporting dynamic integer types, i.e. variable types,
+eg. @code{int<@var{exp}>} where @var{exp} is not constant.
 
 @item
 Evolve into a kind of gradual typing, to provide more dynamism while
@@ -1895,7 +1889,7 @@ XXX: discuss labels and offsets.
 
      Offsets are used to map elements to IO space.  Conceptually, the
      offset of a non-composite type is always @code{0}, i.e. the IO
-     offset of a @code{int @ 0xff} is @code{0xff + 0}.  Mapping-offset
+     offset of a @code{int @@ 0xff} is @code{0xff + 0}.  Mapping-offset
      + offset.  (XXX: this is elegant.)
 
      The operator @@field can be used to get the offset in bytes of a
@@ -1996,7 +1990,7 @@ struct file
 @end example
 
 @example
-(poke) defvar file f @ 0x0     <- this reads nothing.
+(poke) defvar file f @@ 0x0     <- this reads nothing.
 (poke) print f.size            <- this reads size.
 1000000000
 (poke) print f.records[10000]  <- this reads a record.
@@ -2031,7 +2025,7 @@ void zero_inodes (inode i)
     i.data[0:i.size] = 0x0;
 
   if (i.next != 0)
-    print_inodes (inode @ i.next);
+    print_inodes (inode @@ i.next);
 @}
 @end example
 
@@ -3224,7 +3218,7 @@ which is of any type, and is not equal to any other other value.
 The following example:
 
 @example
-defvar a = byte[] @ 0x0;
+defvar a = byte[] @@ 0x0;
 @end example
 
 defines an array that covers the entire IO space.  Remember that empty
@@ -3240,7 +3234,7 @@ struct
   byte b : b == eof;
 @};
 
-defvar a = elem_type[] @ 0x00;
+defvar a = elem_type[] @@ 0x00;
 @end example
 
 but in practice it is detected by the run-time and reported as a
@@ -3258,7 +3252,7 @@ XXX: the equivalent of
 
      is
 
-     int32 @ 0x0 = 0xff
+     int32 @@ 0x0 = 0xff
 
      i.e. a map as a l-value creates a mapped variable.
 
@@ -3268,7 +3262,7 @@ XXX: the equivalent of
 
      is
 
-     doshit (int32 @ 0x0)
+     doshit (int32 @@ 0x0)
 
      i.e. a map as a r-value creates a mapped variable and then gets
      its value.
@@ -3281,11 +3275,11 @@ XXX: getting attributes of maps: beginning offset and end offset.
 @section The Map Operator
 
 XXX: since we want dynamically typed variables, we can't associate
-     maps with variables.  Instead, the @ operator creates mapped
+     maps with variables.  Instead, the @@ operator creates mapped
      _values:
 
 @example
-/* The @ operator creates mapped _values_:  */
+/* The @@ operator creates mapped _values_:  */
 
 let i = int32 @@ 0x00; /* This evals to a mapped int32 value.  */
 
@@ -3312,7 +3306,7 @@ XXX Explain handling of EOF: There is _never_ EOF poking to IO space:
     full, or whatever.  But that is another level.
 
 @example
-     defvar i = int @ 0xffff;
+     defvar i = int @@ 0xffff;
      i = 25;
 @end example
 
@@ -3372,460 +3366,6 @@ Integer values are de/encoded as follows:
       @code{0x0000}, @code{0x0000_0000} and
       @code{0x0000_0000_0000_0000} respectively.
 @end itemize
-
-@node Why Hacking Poke
-@chapter Why Hacking Poke
-
-Poke is free software.
-It is fun! :)
-
-@node The Source Tree
-@chapter The Source Tree
-
-@section PKL Compiler
-
-@table @file
-@item src/pkl-ast.c
-@itemx src/pkl-ast.h
-@itemx src/pkl-ops.def
-@itemx src/pkl-types.def
-
-Support for abstract syntax trees.
-
-@item src/pkl.h
-@itemx src/pkl.c
-@itemx src/pkl-pass.c
-@itemx src/pkl-pass.h
-
-Compiler driver.
-
-@item src/pkl-lex.l
-@itemx src/pkl-tab.y
-@itemx src/pkl-parser.c
-@itemx src/pkl-parser.h
-
-Lexer and parser.
-
-@item src/pkl-anal.c
-@itemx src/pkl-anal.h
-
-Analysis phases.
-
-@item src/pkl-trans.c
-@itemx src/pkl-trans.h
-
-Transformation phases.
-
-@item src/pkl-typify.c
-@itemx src/pkl-typify.h
-
-Type system phases.
-
-@item src/pkl-fold.c
-@itemx src/pkl-fold.h
-
-Constant folding phase.
-
-@item src/pkl-promo.c
-@itemx src/pkl-promo.h
-
-Operands promotion phase.
-
-@item src/pkl-gen.c
-@itemx src/pkl-gen.h
-
-Code generator.
-
-@item src/pkl-asm.c
-@itemx src/pkl-asm.h
-@itemx src/pkl-insn.def
-
-Macro-assembler.
-
-@item pk/pkl.pk
-
-Run-time library.
-@end table
-
-@section Poke Virtual Machine
-
-@table @file
-@item src/pvm.c
-@itemx src/pvm.h
-
-Virtual machine driver.
-
-@item src/pvm-val.c
-@itemx src/pvm-val.h
-
-Virtual machine values.
-
-@item src/pvm-env.c
-@itemx src/pvm-env.h
-
-Run-time environment.
-
-@item src/pvm.jitter
-
-Virtual machine instructions.
-@end table
-
-@section Poke Utility
-
-@table @file
-@item src/poke.h
-@itemx src/poke.c
-
-Main program.
-
-@item src/pk-io.c
-@item src/pk-io.h
-
-IO handling.
-
-@item src/ok-term.h
-
-Terminal handling.
-
-@item src/pk-cmd.c
-@itemx src/pk-cmd.h
-
-Infrastructure for writing poke commands.
-
-@item src/pk-dump.c
-@itemx src/pk-file.c
-@itemx src/pk-help.c
-@itemx src/pk-info.c
-@itemx src/pk-misc.c
-@itemx src/pk-peek.c
-@itemx src/pk-poke.c
-@itemx src/pk-print.c
-@itemx src/pk-def.c
-@itemx src/pk-vm.c
-
-Commands.
-@end table
-
-@section PKL libraries
-
-@table @file
-@item pk/std.pk
-
-PKL standard library.
-@end table
-
-@section Test Suite
-
-@table @file
-@item testsuite/config/default.exp
-@itemx testsuite/config/unix.exp
-
-Target-specific dejagnu configuration.
-
-@item testsuite/lib/poke.exp
-@itemx testsuite/lib/poke-dg.exp
-
-Poke test drivers.
-
-@item poke.pkl/pkl.exp
-@itemx poke.pkl/*.pk
-
-PKL compiler test suite.
-@end table
-
-@section Documentation
-
-@table @file
-@item doc/poke.texi
-
-The Poke book.
-
-@item doc/pokeint.texi
-
-The Poke Internals manual.  This very document.
-
-@item doc/pkl-spec.texi
-
-The PKL Specification.
-@end table
-
-@section Other Stuff
-
-@table @file
-@item etc/poke-gdb.scm
-
-GDB extensions to debug poke.
-
-@item etc/boehm-gc.suppressions
-
-Suppression list for making using memcheck with poke a sane
-experience.
-@end table
-
-@node Poke Architecture
-@chapter Poke Architecture
-
-@float Figure,fig:pokearch
-@verbatim
-+----------+
-| compiler |      
-+----------+      +------+
-     |            |      |
-     v            |      |
-+----------+      |      |
-|   PVM    | <--->|  IO  |
-+----------+      |      |
-     ^            |      |
-     |            |      |
-     v            +------+
-+----------+
-| command  |
-+----------+
-@end verbatim
-@caption{Overall Architecture of Poke}
-@end float
-
-@node The PKL Compiler
-@chapter The PKL Compiler
-
-@section Compiler Overview
-
-@float Figure,fig:compiler
-@verbatim
-      /--------\
-      | source |
-      \---+----/
-          |
-          v
-  +-----------------+
-  |      Parser     |
-  +-----------------+
-  |  analysis and   |
-  | transformation  |
-  |     phases      |
-  +-----------------+    
-  | code generation |
-  |      phase      |
-  +-----------------+
-  | Macro assembler |
-  +-----------------+
-          |
-          v
-     /---------\
-     | program |
-     \---------/
-@end verbatim
-@caption{The PKL compiler}
-@end float
-
-@section The bison Parser in @file{pkl-tab.y}
-
-The only purpose of the bison parser in pkl-tab.y is to do the
-syntactic analysis, build the initial AST, and set the locations of
-the AST nodes.
-
-Unfortunately, currently it also does some extra work, due to
-limitations in the LARL parser:
-
-@itemize
-@item
-It builds the compile-time environment and register type, variable and
-function declarations.
-@item
-It annotates variables with their lexical addresses.
-@item
-It links return statements with their containing functions.
-@item
-It annotates return statements with he number of lexical frames they
-should pop before exitting the function.
-@end itemize
-
-As we shall see below, any further analysis and transformations on the
-@acronym{AST, Abstract Syntax Tree} are performed by the compiler
-phases, which are implemented elsewhere.  This helps a lot to keep the
-parser code clean and easy to read, and also eases changing the
-syntactic structure of poke programs.
-
-@section Compiler Passes and Phases
-
-These are the phases currently implemented in the poke compiler (the
-phases marked with a * are optional):
-
-@verbatim
-    [parser]
-    --- Front-end pass
-    trans1     Transformation phase 1.
-    anal1      Analysis phase 1.
-    typify1    Type analysis and transformation 1.
-    promo      Operand promotion phase.
-    trans2     Transformation phase 2.
-  * fold       Constant folding.
-    typify2    Type analysis and transformation 2.
-    trans3     Transformation phase 3.
-    anal2      Analysis phase 2.
-    --- Middle-end pass
-    trans4     Transformation phase 4.
-    --- Back-end pass
-    analf      Analysis final phase.
-    gen        Code generation.
-@end verbatim
-
-@noindent
-The phases above are organized in two passes:
-
-@table @emph
-@item Pass1
-trans1 anal1 typify1 promo trans2 fold typify2 trans3 anal2
-@item Pass2
-trans4
-@item Pass3
-analf gen
-@end table
-
-The following sections contain a brief but complete description of the
-tasks performed by each phase.  Please keep it up to date.
-
-@section trans1
-
-@itemize
-@item
-Finishes strings by expanding \-sequences, emitting diagnostics if an
-invalid \-sequence is found.
-@end itemize
-
-@section anal1
-
-@itemize
-@item
-Checks that every return statement is linked to a function.
-@item
-Checks that no return statement is linked to a void function.
-@end itemize
-
-@section typify1
-
-@itemize
-@item
-Checks that the expression in which a funcall is applied is a
-function, and that the types of the formal parameters mach the types
-of the funcall arguments.
-@item
-Checks that void functions are not called in contexts where a value is
-expected.
-@end itemize
-
-@section typify2
-
-@itemize
-@item
-Checks that the type of the expression in a return statement matches
-the return type of its containing function.
-@end itemize
-
-@section trans4
-
-@itemize
-@item
-Reverse the list of actual arguments in function calls, so the code
-generator tackles them in the right (reversed) order, as it is
-expected by the callee.
-@end itemize
-
-@node The Poke Virtual Machine
-@chapter The Poke Virtual Machine
-
-@section Exception Handling
-
-Exception types are signed 32-bit integers, and are defined in
-@file{src/pkl-rt.pkl}.
-
-There are two ways an exception can be raised in the PVM:
-
-@itemize
-@item Explicitly, when the instruction @code{raise} is executed.
-@item Implicitly, when some instruction needs to fail.  For example,
-      an integer division instruction divides by zero.
-@end itemize
-
-In either case, the treatment of a raised exception is the same:
-
-@enumerate
-@item
-Pop an exception handler from the exception handler stack.
-@item
-If the exception handler matches the raised exception type, then
-@enumerate
-@item
-Restore the heights of the main and return stacks.
-@item
-Restore the dynamic environment.
-@item
-Push the cached exception type to the stack.
-@item
-Branch to the exception handler.
-@end enumerate
-@item
-Back to 1.
-@end enumerate
-
-The default exception handler, which catches ``unhandled'' exceptions,
-is installed by the macro-assembler in
-@file{src/pkl-asm.c:pkl_asm_new} and
-@file{src/pkl-asm.c:pkl_asm_finish}.  It calls the function
-@code{_pkl_exception_handler}, that is defined in the compiler runtime
-in @file{src/pkl-rt.pkl}.
-
-@node Debugging Poke
-@chapter Debugging Poke
-
-@section Building with Debugging support
-
-Configure the sources with @option{--enable-debug}.  This will:
-
-@enumerate
-@item
-Use a threaded jitter dispatching model.
-
-@item
-Build the sources with @option{-O0 -g3}.
-@end enumerate
-
-@section Using GDB extensions
-
-In order to use the GDB pretty-printers and other goodies brought to
-you courtesy of the poke hackers, just source the poke-gdb.scm file
-from your debugger:
-
-@example
-(gdb) source etc/poke-gdb.scm
-@end example
-
-@section Valgrind and Poke
-
-The @acronym{PVM, Poke Virtual Machine} uses the Boehm conservative
-garbage collector in order to manage the memory used by the VM values.
-Other parts of poke, such as the PKL compiler, manage their own
-memory.
-
-Valgrind gets easily confused by the GCs tampering with the stack, and
-emits a lot of spurious warnings.  Fortunately it is possible to tell
-memcheck to omit these warnings: the file
-@file{etc/boehm-gc.suppresions} contains a list of suppresions.
-
-Invoke valgrind with @option{--suppressions=etc/boehm-gc.suppressions}
-
-If despite using the suppressions file you see some spurious warning,
-please use:
-
-@example
-$ valgrind --tool=memcheck --gen-suppressions=all --log-file=raw.log
-@end example
-
-@noindent
-Then process raw.log with the
-@file{etc/parse-valgrind-suppressions.sh} script, wilcard the result
-as much as you can, and append the results to
-@file{etc/boehm-gc.suppressions}.
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License

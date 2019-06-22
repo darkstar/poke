@@ -779,7 +779,7 @@ struct pkl_ast_func_type_arg
 pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
                                          pkl_ast_node type, pkl_ast_node name);
 
-/* PKL_AST_TYPE nodes represent types.
+/* PKL_AST_TYPE nodes represent type expressions.
    
    If NAME is not NULL, then this specific type instance has a given
    name, which is encoded in a PKL_AST_IDENTIFIER node.
@@ -838,7 +838,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_COMPLETE_UNKNOWN 0
 #define PKL_AST_TYPE_COMPLETE_YES 1
 #define PKL_AST_TYPE_COMPLETE_NO 2
-  
+
 struct pkl_ast_type
 {
   struct pkl_ast_common common;

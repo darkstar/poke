@@ -886,7 +886,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
       != PKL_AST_TYPE_COMPLETE_YES)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
-                 "sizeof only works on complete types");
+                 "invalid operand to sizeof");
       PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
