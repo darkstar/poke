@@ -31,8 +31,8 @@ should take care of it automatically.
       5.1  Building with Debugging support
       5.2  Using GDB extensions
       5.3  Valgrind and Poke
-    2  Poke Architecture
-  
+
+
 The Source Tree
 ---------------
 
