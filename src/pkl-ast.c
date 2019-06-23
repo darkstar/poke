@@ -350,15 +350,16 @@ pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 }
 
 pkl_ast_node
-pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype)
+pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound)
 {
   pkl_ast_node type = pkl_ast_make_type (ast);
 
   assert (etype);
 
   PKL_AST_TYPE_CODE (type) = PKL_TYPE_ARRAY;
-  PKL_AST_TYPE_A_NELEM (type) = NULL;
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
+  if (bound)
+    PKL_AST_TYPE_A_BOUND (type) = ASTREF (bound);
 
   return type;
 }
@@ -513,7 +514,7 @@ pkl_ast_dup_type (pkl_ast_node type)
       {
         pkl_ast_node etype
           = pkl_ast_dup_type (PKL_AST_TYPE_A_ETYPE (type));
-        PKL_AST_TYPE_A_NELEM (new) = ASTREF (PKL_AST_TYPE_A_NELEM (type));
+        PKL_AST_TYPE_A_BOUND (new) = ASTREF (PKL_AST_TYPE_A_BOUND (type));
         PKL_AST_TYPE_A_ETYPE (new) = ASTREF (etype);
       }
       break;
@@ -725,7 +726,7 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
           = pkl_ast_sizeof_type (ast,
                                  PKL_AST_TYPE_A_ETYPE (type));
         res= pkl_ast_make_binary_exp (ast, PKL_AST_OP_MUL,
-                                      PKL_AST_TYPE_A_NELEM (type),
+                                      PKL_AST_TYPE_A_BOUND (type),
                                       sizeof_etype);
         PKL_AST_LOC (res) = PKL_AST_LOC (type);
         PKL_AST_TYPE (res) = ASTREF (res_type);
@@ -798,10 +799,22 @@ pkl_ast_type_is_complete (pkl_ast_node type)
          array are specified and it is a literal expression.  */
     case PKL_TYPE_ARRAY:
       {
-        pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (type);
+        pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (type);
 
-        if (nelem && PKL_AST_LITERAL_P (nelem))
-          complete = PKL_AST_TYPE_COMPLETE_YES;
+        if (bound)
+          {
+            pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+
+            /* The type of the bounding expression should have been
+               calculated at this point.  */
+            assert (bound_type);
+
+            if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL
+                && PKL_AST_LITERAL_P (bound))
+              complete = PKL_AST_TYPE_COMPLETE_YES;
+            else
+              complete = PKL_AST_TYPE_COMPLETE_NO;
+          }
         else
           complete = PKL_AST_TYPE_COMPLETE_NO;
       }
@@ -2296,7 +2309,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
               PRINT_AST_IMM (size, TYPE_I_SIZE, "%zu");
               break;
             case PKL_TYPE_ARRAY:
-              PRINT_AST_SUBAST (nelem, TYPE_A_NELEM);
+              PRINT_AST_SUBAST (bound, TYPE_A_BOUND);
               PRINT_AST_SUBAST (etype, TYPE_A_ETYPE);
               break;
             case PKL_TYPE_STRUCT:

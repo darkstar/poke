@@ -352,8 +352,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
           {
           case PKL_TYPE_ARRAY:
             PKL_PASS (PKL_AST_TYPE_A_ETYPE (node));
-            if (PKL_AST_TYPE_A_NELEM (node))
-              PKL_PASS (PKL_AST_TYPE_A_NELEM (node));
+            if (PKL_AST_TYPE_A_BOUND (node))
+              PKL_PASS (PKL_AST_TYPE_A_BOUND (node));
 
             break;
           case PKL_TYPE_STRUCT:

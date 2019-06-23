@@ -958,7 +958,8 @@ function_arg:
                     = pkl_ast_make_any_type (pkl_parser->ast);
                   pkl_ast_node array_type
                     = pkl_ast_make_array_type (pkl_parser->ast,
-                                               type);
+                                               type,
+                                               NULL /* bound */);
 
                   PKL_AST_LOC (type) = @1;
                   PKL_AST_LOC (array_type) = @1;
@@ -1058,13 +1059,13 @@ offset_type_specifier:
 array_type_specifier:
 	  simple_type_specifier '[' ']' 
         	{
-                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
+                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $1,
+                                                NULL /* bound */);
                   PKL_AST_LOC ($$) = @$;
                 }
 	| simple_type_specifier '[' expression ']'
         	{
-                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $1);
-                  PKL_AST_TYPE_A_NELEM ($$) = ASTREF ($3);
+                  $$ = pkl_ast_make_array_type (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
 	;
@@ -1111,7 +1112,7 @@ function_type_arg:
                     = pkl_ast_make_any_type (pkl_parser->ast);
                   pkl_ast_node array_type
                     = pkl_ast_make_array_type (pkl_parser->ast,
-                                               type);
+                                               type, NULL /* bound */);
 
                   PKL_AST_LOC (type) = @1;
                   PKL_AST_LOC (array_type) = @1;

@@ -605,22 +605,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
 {
   int restart;
   pkl_ast_node array_type = PKL_PASS_NODE;
-  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (array_type);
-  pkl_ast_node nelem_type;
+  pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (array_type);
+  pkl_ast_node bound_type;
   
-  if (nelem == NULL)
+  if (bound == NULL)
     /* This array type hasn't a number of elements.  Be done.  */
     PKL_PASS_DONE;
 
-  nelem_type = PKL_AST_TYPE (nelem);
+  bound_type = PKL_AST_TYPE (bound);
 
-  switch (PKL_AST_TYPE_CODE (nelem_type))
+  switch (PKL_AST_TYPE_CODE (bound_type))
     {
     case PKL_TYPE_INTEGRAL:
       if (!promote_integral (PKL_PASS_AST, 64, 0,
-                             &PKL_AST_TYPE_A_NELEM (array_type), &restart))
+                             &PKL_AST_TYPE_A_BOUND (array_type), &restart))
         {
-          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (nelem),
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (bound),
                    "couldn't promote array type size expression");
           PKL_PASS_ERROR;
         }
@@ -629,13 +629,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
       {
         pkl_ast_node to_magnitude_type
           = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
-        PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (nelem);
+        PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (bound);
         
         if (!promote_offset (PKL_PASS_AST,
-                             to_magnitude_type, PKL_AST_TYPE_O_UNIT (nelem_type),
-                             &PKL_AST_TYPE_A_NELEM (array_type), &restart))
+                             to_magnitude_type, PKL_AST_TYPE_O_UNIT (bound_type),
+                             &PKL_AST_TYPE_A_BOUND (array_type), &restart))
           {
-            pkl_ice (PKL_PASS_AST, PKL_AST_LOC (nelem),
+            pkl_ice (PKL_PASS_AST, PKL_AST_LOC (bound),
                      "couldn't promote array type size expression");
             PKL_PASS_ERROR;
           }

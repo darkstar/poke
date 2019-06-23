@@ -636,8 +636,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
         }        
     }
 
-  /* Build the type of the array. */
-  type = pkl_ast_make_array_type (PKL_PASS_AST, type);
+  /* Build the type of the array.  The arrays built from array
+     literals are unbounded.  */
+  type = pkl_ast_make_array_type (PKL_PASS_AST, type, NULL /* bound */);
   PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
   PKL_AST_TYPE (array) = ASTREF (type);
 
@@ -1218,29 +1219,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
 }
 PKL_PHASE_END_HANDLER
 
-/* The array sizes in array type literals, if present, should be
-   integer expressions, or offsets.  */
+/* The array bounds in array type literals, if present, should be
+   integer expressions, or offset expressions.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
 {
-  pkl_ast_node nelem = PKL_AST_TYPE_A_NELEM (PKL_PASS_NODE);
-  pkl_ast_node nelem_type;
+  pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (PKL_PASS_NODE);
+  pkl_ast_node bound_type;
 
-  if (nelem == NULL)
-    /* This array type hasn't a number of elements.  Be done.  */
+  if (bound == NULL)
+    /* This array type isn't bounded.  Be done.  */
     PKL_PASS_DONE;
 
-  nelem_type = PKL_AST_TYPE (nelem);
-  if (PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_INTEGRAL
-      && PKL_AST_TYPE_CODE (nelem_type) != PKL_TYPE_OFFSET)
+  bound_type = PKL_AST_TYPE (bound);
+  if (PKL_AST_TYPE_CODE (bound_type) != PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (bound_type) != PKL_TYPE_OFFSET)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (nelem),
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (bound),
                  "expected integral or offset value");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
 
-  PKL_PASS_RESTART = 1;
+  PKL_PASS_RESTART = 1; /* XXX ? */
 }
 PKL_PHASE_END_HANDLER
 
@@ -1884,10 +1885,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
 
-  /* XXX: this doesn't cover all possibilities: what about
-     sub-arrays.  */
+  /* XXX: remove this!! :D  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
-      && PKL_AST_TYPE_A_NELEM (type) != NULL
+      && PKL_AST_TYPE_A_BOUND (type) != NULL
       && PKL_PASS_PARENT
       && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_TYPE_ARG
           || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL))

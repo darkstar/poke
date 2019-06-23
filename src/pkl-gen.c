@@ -1568,7 +1568,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
   else if (PKL_GEN_PAYLOAD->in_mapper || PKL_GEN_PAYLOAD->in_valmapper)
     {
       pkl_ast_node array_type = PKL_PASS_NODE;
-      pkl_ast_node array_type_nelem = PKL_AST_TYPE_A_NELEM (array_type);
+      pkl_ast_node array_type_bound = PKL_AST_TYPE_A_BOUND (array_type);
 
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
@@ -1642,12 +1642,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           /* Build the arguments and call the mapper to get a mapped
              array value.  Whether the mapping is bounded, and exactly
              how, is determined from the array type.  */
-          if (array_type_nelem
-              && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_nelem))
+          if (array_type_bound
+              && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_bound))
                   == PKL_TYPE_INTEGRAL))
             {
               PKL_GEN_PAYLOAD->in_mapper = 0;
-              PKL_PASS_SUBPASS (array_type_nelem);
+              PKL_PASS_SUBPASS (array_type_bound);
               PKL_GEN_PAYLOAD->in_mapper = 1;
             }
           else
@@ -1656,12 +1656,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);     /* CLS OFF EBOUND CLS */
 
-          if (array_type_nelem
-              && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_nelem))
+          if (array_type_bound
+              && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_bound))
                   == PKL_TYPE_OFFSET))
             {
               PKL_GEN_PAYLOAD->in_mapper = 0;
-              PKL_PASS_SUBPASS (array_type_nelem);
+              PKL_PASS_SUBPASS (array_type_bound);
               PKL_GEN_PAYLOAD->in_mapper = 1;
             }
           else

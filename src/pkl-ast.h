@@ -791,9 +791,12 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    type.  In non-integral types SIGNED is 0.  SIZE is the size in bits
    of type.
 
-   In array types, ETYPE is a PKL_AST_TYPE node.  If NELEM is present
-   then it is the number of elements in the array.  NELEM is only
-   used when defining struct elements. XXX.
+   In array types, ETYPE is a PKL_AST_TYPE node reflecting the type of
+   the elements stored in the array.  If the array type is bounded by
+   number of elements, then BOUND is an expression that must evaluate
+   to an integer.  If the array type is bounded by size, then BOUND is
+   an expression that must evaluate to an offset.  If the array type
+   is unbounded, then BOUND is NULL.
 
    In struct types, NELEM is the number of elements in the struct
    type.  ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.  PINNED
@@ -822,7 +825,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_COMPLETE(AST) ((AST)->type.complete)
 #define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
-#define PKL_AST_TYPE_A_NELEM(AST) ((AST)->type.val.array.nelem)
+#define PKL_AST_TYPE_A_BOUND(AST) ((AST)->type.val.array.bound)
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
 #define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
@@ -857,7 +860,7 @@ struct pkl_ast_type
 
     struct
     {
-      union pkl_ast_node *nelem;
+      union pkl_ast_node *bound;
       union pkl_ast_node *etype;
     } array;
 
@@ -890,7 +893,7 @@ pkl_ast_node pkl_ast_make_named_type (pkl_ast ast, pkl_ast_node name);
 pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p);
 pkl_ast_node pkl_ast_make_void_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
-pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype);
+pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems,
                                        int pinned);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
