@@ -1704,9 +1704,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
     }
   else
     {
-      /* Generating a PVM array type.  This doesn't include the number
-         of elements, which is only used to build
-         mappers/writers/etc.  */
+      /* Generating a PVM array type.  */
+
+      pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (PKL_PASS_NODE);
+      pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (PKL_PASS_NODE);
 
       /* XXX this is replicating the logic in pkl_gen_pr_type.  */
       if (PKL_PASS_PARENT)
@@ -1724,7 +1725,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
             }
         }
 
-      PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (PKL_PASS_NODE));
+      PKL_PASS_SUBPASS (etype);
+      if (bound)
+        PKL_PASS_SUBPASS (bound);
+      else
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYA);
 
       PKL_PASS_BREAK;

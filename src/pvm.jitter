@@ -2180,15 +2180,25 @@ end
 
 # Array types
 
-instruction mktya () # ( TYP -- TYP )
+instruction mktya () # ( TYP BOUND -- TYP )
   code
-    JITTER_TOP_STACK () = pvm_make_array_type (JITTER_TOP_STACK ());
+     pvm_val bound = JITTER_TOP_STACK ();
+     pvm_val etype = JITTER_UNDER_TOP_STACK ();
+
+     JITTER_DROP_STACK ();
+     JITTER_TOP_STACK () = pvm_make_array_type (etype, bound);
   end
 end
 
 instruction tyagett () # ( TYP -- TYP TYP )
   code
     JITTER_PUSH_STACK (PVM_VAL_TYP_A_ETYPE (JITTER_TOP_STACK ()));
+  end
+end
+
+instruction tyagetb () # ( TYP - TYP BOUND )
+  code
+    JITTER_PUSH_STACK (PVM_VAL_TYP_A_BOUND (JITTER_TOP_STACK ()));
   end
 end
 

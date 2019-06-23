@@ -230,11 +230,12 @@ pvm_make_offset_type (pvm_val base_type, pvm_val unit)
 }
 
 pvm_val
-pvm_make_array_type (pvm_val type)
+pvm_make_array_type (pvm_val type, pvm_val bound)
 {
   pvm_val atype = pvm_make_type (PVM_TYPE_ARRAY);
 
   PVM_VAL_TYP_A_ETYPE (atype) = type;
+  PVM_VAL_TYP_A_BOUND (atype) = bound;
   return atype;
 }
 
@@ -814,7 +815,10 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
           break;
         case PVM_TYPE_ARRAY:
           pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base, flags);
-          fprintf (out, "[]");
+          fputc ('[', out);
+          if (PVM_VAL_TYP_A_BOUND (val) != PVM_NULL)
+            pvm_print_val (out, PVM_VAL_TYP_A_BOUND (val), base, flags);
+          fputc (']', out);
           break;
         case PVM_TYPE_OFFSET:
           fprintf (out, "[");

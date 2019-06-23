@@ -204,7 +204,8 @@ void pvm_print_string (FILE *out, pvm_val string);
    not mapped.
 
    TYPE is the type of the array.  This includes the type of the
-   elements of the array.
+   elements of the array and the boundaries of the array, in case it
+   is bounded.
 
    NELEM is the number of elements contained in the array.
 
@@ -334,6 +335,7 @@ int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
 #define PVM_VAL_TYP_CODE(V) (PVM_VAL_TYP((V))->code)
 #define PVM_VAL_TYP_I_SIZE(V) (PVM_VAL_TYP((V))->val.integral.size)
 #define PVM_VAL_TYP_I_SIGNED(V) (PVM_VAL_TYP((V))->val.integral.signed_p)
+#define PVM_VAL_TYP_A_BOUND(V) (PVM_VAL_TYP((V))->val.array.bound)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
 #define PVM_VAL_TYP_S_NAME(V) (PVM_VAL_TYP((V))->val.sct.name)
 #define PVM_VAL_TYP_S_NELEM(V) (PVM_VAL_TYP((V))->val.sct.nelem)
@@ -373,6 +375,7 @@ struct pvm_type
 
     struct
     {
+      pvm_val bound;
       pvm_val etype;
     } array;
 
@@ -404,7 +407,7 @@ typedef struct pvm_type *pvm_type;
 pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_any_type (void);
-pvm_val pvm_make_array_type (pvm_val type);
+pvm_val pvm_make_array_type (pvm_val type, pvm_val bound);
 pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val name, pvm_val *enames, pvm_val *etypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
 pvm_val pvm_make_closure_type (pvm_val rtype, pvm_val nargs, pvm_val *atypes);
