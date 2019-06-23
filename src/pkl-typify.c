@@ -637,11 +637,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
     }
 
   /* Build the type of the array.  The arrays built from array
-     literals are unbounded.  */
-  type = pkl_ast_make_array_type (PKL_PASS_AST, type, NULL /* bound */);
-  PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
-  PKL_AST_TYPE (array) = ASTREF (type);
+     literals are bounded by number of elements, and this number is
+     always constant.  */
+  {
+    pkl_ast_node bound
+      = pkl_ast_make_integer (PKL_PASS_AST, PKL_AST_ARRAY_NELEM (array));
+    pkl_ast_node bound_type
+      = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
 
+    PKL_AST_TYPE (bound) = ASTREF (bound_type);
+    PKL_AST_LOC (bound) = PKL_AST_LOC (PKL_PASS_NODE);
+    PKL_AST_LOC (bound_type) = PKL_AST_LOC (PKL_PASS_NODE);
+
+    type = pkl_ast_make_array_type (PKL_PASS_AST, type, bound);
+    PKL_AST_LOC (type) = PKL_AST_LOC (PKL_PASS_NODE);
+    PKL_AST_TYPE (array) = ASTREF (type);
+  }
+    
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
@@ -1817,6 +1829,32 @@ expected %s, got %s",
 }
 PKL_PHASE_END_HANDLER
 
+/* Manually promote integers used as array boundaries to uint<64>.
+   XXX: this horrible hack is for the static array type checking to do
+   a decent job before constant folding is finished and working.  To
+   remove then.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_integer)
+{
+  pkl_ast_node integer = PKL_PASS_NODE;
+  pkl_ast_node parent = PKL_PASS_PARENT;
+
+  if (parent
+      && PKL_AST_CODE (parent) == PKL_AST_TYPE
+      && PKL_AST_TYPE_CODE (parent) == PKL_TYPE_ARRAY)
+    {
+      pkl_ast_node integer_type = PKL_AST_TYPE (integer);
+
+      assert (integer_type);
+
+      /* This doesn't work well for negative indexes.  */
+      PKL_AST_TYPE_I_SIZE (integer_type) = 64;
+      PKL_AST_TYPE_I_SIGNED (integer_type) = 0;
+    }
+}
+PKL_PHASE_END_HANDLER
+
+
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1872,13 +1910,13 @@ struct pkl_phase pkl_phase_typify1 =
 
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),
+
+   PKL_PHASE_PS_HANDLER (PKL_AST_INTEGER, pkl_typify1_ps_integer),
   };
 
 
 
-/* Determine the completeness of a type node.
-  
-   Also, sized array types are not allowed in certain contexts.  */
+/* Determine the completeness of a type node.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
@@ -1886,6 +1924,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
 
   /* XXX: remove this!! :D  */
+#if 0
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
       && PKL_AST_TYPE_A_BOUND (type) != NULL
       && PKL_PASS_PARENT
@@ -1897,6 +1936,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
+#endif
 }
 PKL_PHASE_END_HANDLER
 

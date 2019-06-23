@@ -609,6 +609,28 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
       break;
     case PKL_TYPE_ARRAY:
       {
+        /* If the array types denote static arrays, i.e. the array
+           types are bounded by a _constant_ number of elements then
+           we can actually do some control here.  */
+        pkl_ast_node ba = PKL_AST_TYPE_A_BOUND (a);
+        pkl_ast_node bb = PKL_AST_TYPE_A_BOUND (b);
+
+        if (ba && bb)
+          {
+            pkl_ast_node tba = PKL_AST_TYPE (ba);
+            pkl_ast_node tbb = PKL_AST_TYPE (bb);
+
+            if (PKL_AST_TYPE_CODE (tba) == PKL_TYPE_INTEGRAL
+                && PKL_AST_CODE (ba) == PKL_AST_INTEGER
+                && PKL_AST_TYPE_CODE (tbb) == PKL_TYPE_INTEGRAL
+                && PKL_AST_CODE (bb) == PKL_AST_INTEGER)
+              {
+                if (PKL_AST_INTEGER_VALUE (ba)
+                    != PKL_AST_INTEGER_VALUE (bb))
+                  return 0;
+              }
+          }
+        
         return pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
                                    PKL_AST_TYPE_A_ETYPE (b));
         break;
@@ -866,10 +888,26 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
       fprintf (out, "string");
       break;
     case PKL_TYPE_ARRAY:
-      pkl_print_type (out, PKL_AST_TYPE_A_ETYPE (type),
-                      use_given_name);
-      fputs ("[]", out);
-      break;
+      {
+        pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (type);
+        
+        pkl_print_type (out, PKL_AST_TYPE_A_ETYPE (type),
+                        use_given_name);
+        fputc ('[', out);
+        if (bound != NULL)
+          {
+            pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+
+            if (bound_type
+                && PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL
+                && PKL_AST_CODE (bound) == PKL_AST_INTEGER)
+              {
+                fprintf (out, "%" PRIu64, PKL_AST_INTEGER_VALUE (bound));
+              }
+          }
+        fputc (']', out);
+        break;
+      }
     case PKL_TYPE_STRUCT:
       {
         pkl_ast_node t;

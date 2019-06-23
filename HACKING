@@ -527,6 +527,18 @@ Then process raw.log with the etc/parse-valgrind-suppressions.sh
 script, wilcard the result as much as you can, and append the results
 to etc/boehm-gc.suppressions.
 
+Future Developments
+-------------------
+
+- Allow variable expressions in array initializer indexes.  Something
+  like::
+
+    [1,[foo*2]=666]
+
+  this will of course mean that the types of literal arrays won't be
+  necessarily be bounded by a constant number of elements.  No bid
+  deal.
+
 Local Variables:
 mode: rst
 End:

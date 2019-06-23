@@ -1,4 +1,4 @@
-/* dg-do compile */
+/* { dg-do compile } */
 
 defun myprint = (string str1, string str2, string str3) void:
   {
