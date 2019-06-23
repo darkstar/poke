@@ -25,6 +25,8 @@ should take care of it automatically.
       3.1  Compiler Overview
       3.2  The bison Parser in pkl-tab.y
       3.3  Compiler Passes and Phases
+      3.4  The Type System
+        3.4.1  Type Expressions
     4  The Poke Virtual Machine
       4.1  Exception Handling
     5  Debugging Poke
@@ -32,117 +34,140 @@ should take care of it automatically.
       5.2  Using GDB extensions
       5.3  Valgrind and Poke
 
-
 The Source Tree
 ---------------
 
 The Compiler
 ~~~~~~~~~~~~
 Support for abstract syntax trees:
+
 - src/pkl-ast.c
 - src/pkl-ast.h
 - src/pkl-ops.def
 - src/pkl-attrs.def
 
 The compiler driver:
+
 - src/pkl.h
 - src/pkl.c
 - src/pkl-pass.c
 - src/pkl-pass.h
 
 The lexer, and parser:
+
 - src/pkl-lex.l
 - src/pkl-tab.y
 - src/pkl-parser.c
 - src/pkl-parser.h
 
 Compile-time lexical environment:
+
 - src/pkl-env.h
 - src/pkl-env.c
 
 Analysis phases:
+
 - src/pkl-anal.c
 - src/pkl-anal.h
 
 Transformation phases:
+
 - src/pkl-trans.c
 - src/pkl-trans.h
 
 Type system related phases:
+
 - src/pkl-typify.c
 - src/pkl-typify.h
 
 Constant folding phase:
+
 - src/pkl-fold.c
 - src/pkl-fold.h
 
 Coercions phases:
+
 - src/pkl-promo.c
 - src/pkl-promo.h
 
 The code generator:
+
 - src/pkl-gen.h
 - src/pkl-gen.c
 - src/pkl-gen.pks
 
 The macro-assembler:
+
 - src/pkl-insn.def
 - src/pkl-asm.h
 - src/pkl-asm.c
 - src/pkl-asm.pks
 
 Our good friend ras:
+
 - src/ras.
 
 Compiler run-time library:
+
 - src/pkl-rt.pk
 
 The Poke Virtual Machine
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Virtual machine driver:
+
 - src/pvm.c
 - src/pvm.h
 
 Virtual machine values:
+
 - src/pvm-val.c
 - src/pvm-val.h
 
 Run-time environment:
+
 - src/pvm-env.c
 - src/pvm-env.h
 
 Virtual machine instructions:
+
 - src/pvm.jitter
 
 The IO Subsystem
 ~~~~~~~~~~~~~~~~
 
 Support for IO spaces:
+
 - src/ios.h
 - src/ios.c
 
 Support for IO devices:
+
 - src/ios-dev.h
 
 Supported IO devices:
+
 - src/ios-dev-file.c
 
 Poke Program
 ~~~~~~~~~~~~
 
 Main program:
+
 - src/poke.h
 - src/poke.c
 
 Infrastructure for writing poke commands:
+
 - src/pk-cmd.h
 - src/pk-cmd.c
 
 Terminal stuff:
+
 - src/pk-term.h
 
 Commands:
+
 - src/pk-def.c
 - src/pk-dump.pk
 - src/pk-file.c
@@ -156,6 +181,7 @@ Pickles and Libraries
 ~~~~~~~~~~~~~~~~~~~~~
 
 Standard library:
+
 - src/std.pk
 
 Pickles:
@@ -166,41 +192,50 @@ Pickles:
 Test Suite
 ~~~~~~~~~~
 Target-specific dejagnu configuration:
+
 - testsuite/config/default.exp
 - testsuite/config/unix.exp
 
 Poke test drivers:
+
 - testsuite/lib/poke.exp
 - testsuite/lib/poke-dg.exp
 
 Compiler test suite:
+
 - testsuite/poke.pkl/pkl.exp
-- testsuite/poke.pkl/*.pk
+- testsuite/poke.pkl/\*.pk
 
 Compiler test suite (mapping):
+
 - testsuite/poke.map/map.exp
-- testsuite/poke.pkl/*.pk
+- testsuite/poke.pkl/\*.pk
 
 Standard library test suite:
+
 - testsuite/poke.std/std.exp
-- testsuite/poke.std/*.pk
+- testsuite/poke.std/\*.pk
 
 Tests for Poke commands:
+
 - testsuite/poke.cmd/cmd.exp
-- testsuite/poke.cmd/*.pk
+- testsuite/poke.cmd/\*.pk
 
 Documentation
 ~~~~~~~~~~~~~
 The Poke book:
+
 - doc/poke.texi
 
 Other Stuff
 ~~~~~~~~~~~
 
 GDB extensions to better debug poke:
+
 - etc/poke-gdb.scm
 
 Suppression list for memcheck:
+
 - etc/boehm-gc.suppressions
 
 Poke Architecture
@@ -313,14 +348,17 @@ Follows a brief but complete description of the tasks performed by
 each phase.  Please keep it up to date.
 
 trans1
+
 - Finishes strings by expanding \-sequences, emitting diagnostics if
   an invalid \-sequence is found.
 
 anal1
+
 - Checks that every return statement is linked to a function.
 - Checks that no return statement is linked to a void function.
 
 typify1
+
 - Checks that the expression in which a funcall is applied is a
   function, and that the types of the formal parameters mach the types
   of the funcall arguments.
@@ -328,13 +366,91 @@ typify1
   is expected.
 
 typify2
+
 - Checks that the type of the expression in a return statement matches
   the return type of its containing function.
 
 trans4
+
 - Reverses the list of actual arguments in function calls, so the code
   generator tackles them in the right (reversed) order, as it is
   expected by the callee.
+
+The Type System
+~~~~~~~~~~~~~~~
+
+This section describes the type system implemented in the 'poke'
+language.
+
+Type Expressions
+................
+
+A *type expression* denotes some particular type.  Type expressions
+can be one of:
+
+A *simple type*
+  Simple types are types that are not composed of other types.  In
+  this discussion we use the following sexp-like notations for them:
+
+  (int N)
+    Signed integer of N bits, where 0 < N <= 64.
+  (uint N)
+    Likewise, but the integer is unsigned.
+  string
+    NULL-terminated C-like string.
+  void
+    This is the null type.  Used for several purposes.
+
+A *product*
+  Products of two type expressions are used to aggregate types in more
+  complex structures, such as lists.  We denote them by using the
+  following sexp-like notation:
+
+  (T1 . T2)
+    product of the type expressions T1 and T2.
+
+  In order to simplify, we use the same list abbreviation used by Lisp
+  in order to denote aggregations of types built with products::
+
+    (T1 . (T2 . (T3 . T4))) -> (T1 T2 T3 T4)
+  
+  Note that type products are not really valid types by themselves.
+
+An *array type*
+
+A *struct type*
+  Type expressions for structs are characterized by many attributes.
+  We denote these expressions by using the following sexp-like
+  notation.
+
+  (struct PINNED ((L1 N1 T1 C1)...))
+     where L1 is the label of the first element: a poke expression
+     evaluating to an offset.  N1 is the name of the element, which is
+     optional.  T1 is a type expression denoting the type of the
+     element.  C1 is a poke expression evaluating to a boolean; it is
+     the constraint associated to the element.   Of all these
+     attributes, only T1 is mandatory.  PINNED is a boolean indicating
+     whether structs having this type are pinnned.
+
+A *function type*
+  Type expressions for functions are characterized by a type
+  expression denoting the types of it's arguments and the type of the
+  value returned by the function.  We denote them using the following
+  sexp-like notation:
+
+  (fun T1 T2)
+    where T1 is the type of the arguments to the function, and T2 is
+    the type of the value returned by the function.
+
+  Usually T1 will be an aggregation of types built as nested
+  products.  For example, the type expression for a function that
+  takes three 32-bit signed integers and returns a string is::
+
+    (fun ((int 32) (int 32) (int 32)) string)
+
+  If a type expression denotes the type of a function which doesn't
+  take any argument, T1 should be 'void'.  Likewise, if the function
+  doesn't return a value, T2 should be 'void'.
 
 The Poke Virtual Machine
 ------------------------
@@ -361,7 +477,7 @@ In either case, the treatment of a raised exception is the same:
    iv. Branch to the exception handler.
 3. Repeat.
 
-The default exception handler, which catches ``unhandled'' exceptions,
+The default exception handler, which catches "unhandled" exceptions,
 is installed by the macro-assembler in src/pkl-asm.c:pkl_asm_new and
 src/pkl-asm.c:pkl_asm_finish.  It calls the function
 '_pkl_exception_handler', that is defined in the compiler runtime in
