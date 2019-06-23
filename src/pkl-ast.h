@@ -793,7 +793,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 
    In array types, ETYPE is a PKL_AST_TYPE node.  If NELEM is present
    then it is the number of elements in the array.  NELEM is only
-   used when defining struct elements.
+   used when defining struct elements. XXX.
 
    In struct types, NELEM is the number of elements in the struct
    type.  ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.  PINNED

@@ -877,8 +877,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       && (PKL_AST_FUNCALL_NARG (funcall) >
           PKL_AST_TYPE_F_NARG (funcall_function_type)))
     {
+      char *function_name = PKL_AST_FUNC_NAME (funcall_function);
+      char *function_type_str = pkl_type_str (funcall_function_type,
+                                              0 /* use_given_name */);
+
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
-                 "too many arguments passed to function");
+                 "too many arguments passed to function %s\n\
+with prototype %s",
+                 function_name != NULL ? function_name : "",
+                 function_type_str);
+      free (function_type_str);
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
@@ -1017,7 +1025,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
   /* Ok, check that the types of the actual arguments match the
      types of the corresponding formal arguments.  */
   for (fa = PKL_AST_TYPE_F_ARGS  (funcall_function_type),
-         aa = PKL_AST_FUNCALL_ARGS (funcall);
+         aa = PKL_AST_FUNCALL_ARGS (funcall),
+         narg = 0;
        fa && aa;
        fa = PKL_AST_CHAIN (fa), aa = PKL_AST_CHAIN (aa))
     {
