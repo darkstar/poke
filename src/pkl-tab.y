@@ -1420,21 +1420,26 @@ declaration:
 
                         if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
                           {
-                            char *constructor_name
+                            char *constructor_name;
+                            pkl_ast_node constructor_identifier;
+                            pkl_ast_node constructor_decl;
+
+                            constructor_name
                               = xmalloc (strlen (type_name) +
                                          strlen ("_pkl_constructor_") + 1);
-                            pkl_ast_node constructor_identifier
+                            strcpy (constructor_name, "_pkl_constructor_");
+                            strcat (constructor_name, type_name);
+                            
+                            constructor_identifier
                               = pkl_ast_make_identifier (pkl_parser->ast,
                                                          constructor_name);
-                            pkl_ast_node constructor_decl
+                            constructor_decl
                               = pkl_ast_make_decl (pkl_parser->ast,
                                                    PKL_AST_DECL_KIND_FUNC,
                                                    constructor_identifier,
                                                    $4,
                                                    pkl_parser->filename);
 
-                            strcpy (constructor_name, "_pkl_constructor_");
-                            strcat (constructor_name, type_name);
                             if (!pkl_env_register (pkl_parser->env,
                                                    constructor_name,
                                                    constructor_decl))

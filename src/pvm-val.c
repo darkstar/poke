@@ -77,7 +77,8 @@ pvm_make_string (const char *str)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_STR);
 
-  PVM_VAL_BOX_STR (box) = GC_STRDUP (str);
+  /* XXX: GC_STRDUP */
+  PVM_VAL_BOX_STR (box) = xstrdup (str);
   return PVM_BOX (box);
 }
 
