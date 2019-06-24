@@ -1138,7 +1138,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_isa)
 PKL_PHASE_END_HANDLER
 
 /*
- * | TYPE
+ * | [TYPE is not generated]
  * | EXP
  * CAST
  */
@@ -1191,9 +1191,51 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       pkl_asm_insn (pasm, PKL_INSN_CTOS);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
     }
+  else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_ARRAY)
+    {
+      /* Casts from array to array perform run-time checks on array
+         boundaries, and then sets the boundary in the resulting
+         value.  */
+
+      pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
+
+      if (bound == NULL)
+        {
+          /* No checks are due in this case, but the value itself
+             should be typed as an unbound array.  */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB);         /* ARR */
+        }
+      else if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (bound))
+               ==  PKL_TYPE_INTEGRAL)
+        {
+          jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+          /* Make sure the array in expression has the right number of
+             elements.  */
+          pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
+          PKL_PASS_SUBPASS (bound);             /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
+          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (pasm, PKL_INSN_RAISE);
+          pkl_asm_label (pasm, label);
+          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_NIP);    /* ARR BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */
+        }
+      else if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (bound))
+               == PKL_TYPE_OFFSET)
+        {
+          /* Make sure the array in expression has the right
+             size.  */
+          assert (0); /* XXX */
+        }
+      else
+        assert (0);
+    }
   else
-    /* XXX: handle casts to structs and arrays.  For structs,
-       reorder fields.  */
+    /* XXX: handle casts to structs.  For structs, reorder fields.  */
     assert (0);
 
 }

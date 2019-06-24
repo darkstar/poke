@@ -1,0 +1,7 @@
+/* { dg-do run } */
+
+defvar x = 3;
+
+/* { dg-command { try [1,2,3] as int[x + 1]; catch if E_conv { print "catched\n"; } } } */
+/* { dg-output "catched" } */
+

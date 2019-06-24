@@ -304,7 +304,7 @@
 ;;; SUBO unit_type base_type
 ;;; ( OFF OFF -- OFF OFF OFF )
 ;;;
-;;; Add the two given offsets in the stack, which must be of the
+;;; Subtract the two given offsets in the stack, which must be of the
 ;;; given base type.  The unit of the result is the greatest common
 ;;; divisor of the operands units.  The base type  of the result is the base
 ;;; type of the operands.
