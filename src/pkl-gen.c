@@ -1232,10 +1232,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
           /* Make sure the array in expression has the right
              size.  */
 
-          /* Note that both SIZ is guaranteed to have base type
-             uint<64> and unit bits (as per pvm_val_sizeof).  The
-             bound is guaranteed to have type offset<uint<64>,*> (as
-             per pkl_promo_ps_type_array).  This eases the
+          /* Note that SIZ is guaranteed to have base type uint<64>
+             and unit bits (as per pvm_val_sizeof).  On the other
+             hand, BOUND is guaranteed to have type offset<uint<64>,*>
+             (as per pkl_promo_ps_type_array).  This eases the
              calculations here.  */
           pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
           pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
