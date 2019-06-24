@@ -406,7 +406,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
     pvm_val val;
 
     if (pvm_run (poke_vm, program, &val) != PVM_EXIT_OK)
-      goto error;
+      goto error_no_close;
 
     /* Discard the value.  */
   }
@@ -416,6 +416,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
 
  error:
   fclose (fd);
+ error_no_close:
   pkl_env_free (env);
   return 0;
 }
