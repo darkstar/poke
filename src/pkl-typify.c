@@ -203,15 +203,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
   pkl_ast_node type = PKL_AST_CAST_TYPE (cast);
   pkl_ast_node exp = PKL_AST_CAST_EXP (cast);
   pkl_ast_node exp_type = PKL_AST_TYPE (exp);
-  
-  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
-    {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
-                 "casting a value to `any' is not allowed");
-      PKL_TYPIFY_PAYLOAD->errors++;
-      PKL_PASS_ERROR;
-    }
 
+
+  /* Casting from or to a function type is forbidden.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_FUNCTION)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
@@ -227,6 +221,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
+
+  /* Casting to ANY is always forbidden.  But casting from ANY is
+     always allowed.  */
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
+    {
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+                 "casting a value to `any' is not allowed");
+      PKL_TYPIFY_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  if (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_ANY)
+    goto done;
 
   /* Only characters (uint<8>) can be casted to string.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING
@@ -245,6 +252,22 @@ expected uint<8>, got %s.",
       PKL_PASS_ERROR;
     }
 
+  /* Only arrays can be casted to arrays.  */
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
+      && PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_ARRAY)
+    {
+      char *found_type = pkl_type_str (exp_type, 1);
+
+      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+                 "invalid cast to array\n\
+expected array, got %s.",
+                 found_type);
+      free (found_type);
+      PKL_TYPIFY_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+
+ done:
   PKL_AST_TYPE (cast) = ASTREF (type);
   PKL_PASS_RESTART = 1;
 }
