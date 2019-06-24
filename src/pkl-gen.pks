@@ -45,6 +45,16 @@
 
         .function array_mapper
         prolog
+        ;; Note we have to subpass on the array type here, before the pushf.
+        ;; The reason for this is that the array type may include a boundary
+        ;; which is an expression, and in that expression there could be
+        ;; variable references.  These references are not taking into account
+        ;; the lexical frame introduced by this mapper.
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (array_type);
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+                                ; OFF EBOUND SBOUND ATYPE
+        tor                     ; OFF EBOUND SBOUND
         pushf
         ;; XXX get the sbound and/or ebound from the array type
         regvar $sbound           ; Argument
@@ -83,10 +93,7 @@
         push null               ; OFF null
 .after_sbound_conv:
         drop                    ; OFF
-        .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (array_type);
-        .c PKL_GEN_PAYLOAD->in_mapper = 1;
-                                ; OFF ATYPE
+        fromr                   ; OFF ATYPE
         .while
         ;; If there is an EBOUND, check it.
         ;; Else, if there is a SBOUND, check it.
@@ -249,6 +256,13 @@
 
         .function array_valmapper
         prolog
+        ;; Note we have to subpass on the array type here, before the
+        ;; pushf.  See explanation in array_mapper above for the reason
+        ;; why.
+        .c PKL_GEN_PAYLOAD->in_valmapper = 0;
+        .c PKL_PASS_SUBPASS (array_type);
+        .c PKL_GEN_PAYLOAD->in_valmapper = 1;
+        tor                     ; VAL NVAL OFF
         pushf
         regvar $off             ; Argument
         regvar $nval            ; Argument
@@ -318,11 +332,7 @@
         drop                    ; OFF
 
 .ebound_ok:
-        .c PKL_GEN_PAYLOAD->in_valmapper = 0;
-        .c PKL_PASS_SUBPASS (array_type);
-        .c PKL_GEN_PAYLOAD->in_valmapper = 1;
-                                ; OFF ATYPE
-
+        fromr                   ; OFF ATYPE
         .while
         pushvar $eidx           ; OFF ATYPE I
         pushvar $nelem          ; OFF ATYPE I NELEM
