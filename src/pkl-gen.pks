@@ -84,9 +84,10 @@
         drop                    ; OFF
         ;; Build the type of the new mapped array.  Note that we use
         ;; the bounds passed to the mapper instead of just subpassing
-        ;; in array_type, in order to avoid evaluating the boundary
-        ;; expression in the array type twice... this is to avoid possible
-        ;; surprising side effects, and to avoid nasty lexical constraints.
+        ;; in array_type.  This is because this mapper should work for
+        ;; both bounded and unbounded array types.  Also, this avoids
+        ;; evaluating the boundary expression in the array type
+        ;; twice.
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -329,13 +330,14 @@
 
 .ebound_ok:
         ;; Build the type of the new mapped array.  Note that we use
-        ;; the mapping bounds extracted above instead of subpassing
-        ;; in array_type, in order to avoid evaluating the boundary
-        ;; expression in the array type twice... this is to avoid possible
-        ;; surprising side effects, and to avoid nasty lexical constraints.
-        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        ;; the bounds extracted above instead of just subpassing in
+        ;; array_type.  This is because this function should work for
+        ;; both bounded and unbounded array types.  Also, this avoids
+        ;; evaluating the boundary expression in the array type
+        ;; twice.
+        .c PKL_GEN_PAYLOAD->in_valmapper = 0;
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
-        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+        .c PKL_GEN_PAYLOAD->in_valmapper = 1;
                                 ; OFF ETYPE
         pushvar $ebound         ; OFF ETYPE EBOUND
         bnn .atype_bound_done
@@ -369,7 +371,6 @@
         nrot                    ; ... EOFF OVAL ENVAL EOFF
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
                                 ; ... EOFF EVAL
-
         ;; Update the current offset with the size of the value just
         ;; peeked.
         siz                     ; ... EOFF EVAL ESIZ
