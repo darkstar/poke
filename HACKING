@@ -33,6 +33,9 @@ should take care of it automatically.
       5.1  Building with Debugging support
       5.2  Using GDB extensions
       5.3  Valgrind and Poke
+      5.4  Debugging PVM Assembler
+    6  Future Developments
+
 
 The Source Tree
 ---------------
@@ -526,6 +529,78 @@ please use::
 Then process raw.log with the etc/parse-valgrind-suppressions.sh
 script, wilcard the result as much as you can, and append the results
 to etc/boehm-gc.suppressions.
+
+Debugging PVM Assembler
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Hacking some areas of the compiler, such as the code generator pass,
+involves meta-programming PVM assembler.  It is easy to find examples
+anywhere in src/pkl-gen.c::
+
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+  pkl_asm_insn (pasm, PKL_INSN_MULLU);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
+
+Or, alternatively, the code may be written in RAS in some of the .pks
+files.  Like::
+
+  .loop:
+        bz @type, .endloop      ; ... A B
+        mod @type               ; ... A B A%B
+        rot                     ; ... B A%B A
+        drop                    ; ... B A%B
+        ba .loop
+
+Often, a run-time problem becomes apparent while the PVM executes the
+generated code.  Typical cases are when a PVM value doesn't contain
+what it's supposed to contain, and accessing the wrong boxed value
+causes a segmentation fault (if we are lucky) or a non-crashing
+invalid memory access (if we are very unlucky.)  Whenever that kind of
+crap happens, we find ourselves in the need of debugging the PVM code,
+which is a big PITA.
+
+Bad news are: we don't have a PVM debugger (yet).
+Good news are: we have a couple of tools that may help.
+
+The first of such tools is the ``prints`` instruction.  This
+instructions basically prints in the standard output the string value
+on the TOS, and then drops it.  It is a wonderful way to trace PVM
+code.
+
+For example, let's say we are trying to find out how many times the
+loop above gets executed.  We can install traces like::
+
+        push "XXX entering loop\n"
+        prints
+  .loop:
+        push "XXX in loop\n"
+        prints
+        mod @type
+        rot
+        drop
+        ba .loop
+
+The other tool is the ``strace`` instruction.  It prints the contents
+of the stack (one value per line) from the TOS to it's very beginning.
+It is very useful in many situations, like when a loop is composing
+values in the stack and something is going banana.  It is also useful
+to determine what kind of value is being accessed by a given
+instruction.
+
+For example, lets say that we are hunting some segmentation fault.  We
+highly suspect the code generated in the first example in this
+section, above.  Of the three instructions, ``mullu`` is the only one
+that could conceivably generate a segfault, so we add a stack trace
+instruction right before it::
+
+  pkl_asm_insn (pasm, PKL_INSN_ROT);
+  pkl_asm_insn (pasm, PKL_INSN_STRACE); /* XXX remove me */
+  pkl_asm_insn (pasm, PKL_INSN_MULLU);
+  pkl_asm_insn (pasm, PKL_INSN_NIP2);
+
+We recompile, re-run, and we find out that the elements at the TOS
+when ``mullu`` is executed are a pair of stupid signed integers, which
+are not boxed and not what the instruction expects.  Mystery solved.
 
 Future Developments
 -------------------
