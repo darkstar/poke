@@ -803,7 +803,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   pkl_ast_node function = PKL_AST_FUNCALL_FUNCTION (funcall);
   pkl_ast_node function_type = PKL_AST_TYPE (function);
   int vararg = PKL_AST_TYPE_F_VARARG (function_type);
-  int i, aindex = 0, vararg_actual = 0;
+  int i, aindex = 0, vararg_actual = 0, optionals_specified = 0;
   pkl_ast_node aa;
  
   /* Push the actuals to the stack. */
@@ -821,7 +821,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
           aindex++;
         }
 
-      PKL_PASS_SUBPASS (aa);
+      if (!PKL_AST_FUNCALL_ARG_EXP (aa))
+        {
+          /* This is a non-specified actual for a formal having a
+             default value.  */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+          optionals_specified++;
+        }
+      else
+        PKL_PASS_SUBPASS (aa);
     }
   
   if (vararg)
@@ -840,7 +848,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
     int non_specified
       = (PKL_AST_TYPE_F_NARG (function_type)
          - PKL_AST_FUNCALL_NARG (funcall)
-         - PKL_AST_TYPE_F_VARARG (function_type));
+         - PKL_AST_TYPE_F_VARARG (function_type)
+         - optionals_specified);
 
     for (i = 0; i < non_specified; ++i)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
@@ -1037,7 +1046,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
 {
   /* Type nodes are handled by the code generator only in certain
      circumstances.  In any other cases, break the pass to avoid
-     post-order hooks to be invoked.  */
+     post-order hooks to be invoked.  Note that this logic is
+     duplicated in pkl_gen_pr_type_array.  Please keep them
+     synchronized!  */
 
   if (PKL_GEN_PAYLOAD->in_struct_decl)
     PKL_PASS_DONE;

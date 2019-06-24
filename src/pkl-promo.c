@@ -873,8 +873,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
     {
       pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
       pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
-      pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
+      pkl_ast_node aa_type;
       int restart = 0;
+
+      /* Ignore non-specified actuals for optional formals.  */
+      if (!aa_exp)
+        continue;
+
+      aa_type =  PKL_AST_TYPE (aa_exp);
 
       /* Do not promote varargs.  */
       if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))

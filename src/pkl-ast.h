@@ -1139,7 +1139,9 @@ pkl_ast_node pkl_ast_make_funcall (pkl_ast ast,
 /* PKL_AST_FUNCALL_ARG nodes represent actual arguments in function
    calls.
 
-   EXP is the value passed for the argument.
+   EXP is the value passed for the argument.  Note that this can be
+   NULL for a placeholder for a missing actual to an optional formal
+   argument.
 
    NAME, if not NULL, is an IDENTIFIER node with the name of the
    argument.

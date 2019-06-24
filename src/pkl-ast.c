@@ -1287,9 +1287,8 @@ pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,
   pkl_ast_node funcall_arg = pkl_ast_make_node (ast,
                                                 PKL_AST_FUNCALL_ARG);
 
-  assert (exp);
-
-  PKL_AST_FUNCALL_ARG_EXP (funcall_arg) = ASTREF (exp);
+  if (exp)
+    PKL_AST_FUNCALL_ARG_EXP (funcall_arg) = ASTREF (exp);
   if (name)
     PKL_AST_FUNCALL_ARG_NAME (funcall_arg) = ASTREF (name);
   PKL_AST_FUNCALL_ARG_FIRST_VARARG (funcall_arg) = 0;

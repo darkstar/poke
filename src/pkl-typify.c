@@ -986,7 +986,8 @@ with prototype %s",
       }
       
     /* Reorder the actual arguments to match the arguments specified
-       in the function type.  */
+       in the function type.  For not mentioned optional formal
+       arguments, add a NULL.  */
     for (narg = 0, nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
          fa;
          nfa++, fa = PKL_AST_CHAIN (fa))
@@ -1014,12 +1015,23 @@ with prototype %s",
               break;
           }
 
-        if (!aa &&
-            (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa)
-             || PKL_AST_FUNC_TYPE_ARG_VARARG (fa)))
+        if (aa)
+          {
+            new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
+                                               PKL_AST_FUNCALL_ARG_EXP (aa),
+                                               PKL_AST_FUNCALL_ARG_NAME (aa));
+            PKL_AST_LOC (new_aa) = PKL_AST_LOC (aa);
+          }
+        else if (PKL_AST_FUNC_TYPE_ARG_OPTIONAL (fa))
+          {
+            new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
+                                               NULL,
+                                               fa_name);
+            PKL_AST_LOC (new_aa) = PKL_AST_LOC (funcall);
+          }
+        else if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
           continue;
-
-        if (!aa)
+        else
           {
             pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
                        "required argument `%s' not specified in funcall",
@@ -1027,11 +1039,6 @@ with prototype %s",
             PKL_TYPIFY_PAYLOAD->errors++;
             PKL_PASS_ERROR;
           }
-
-        new_aa = pkl_ast_make_funcall_arg (PKL_PASS_AST,
-                                           PKL_AST_FUNCALL_ARG_EXP (aa),
-                                           PKL_AST_FUNCALL_ARG_NAME (aa));
-        PKL_AST_LOC (new_aa) = PKL_AST_LOC (aa);
 
         ordered_arg_list
           = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
@@ -1068,26 +1075,34 @@ with prototype %s",
     {
       pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
       pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
-      pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
 
-      assert (aa_type);
-
-      if (!PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
-          && !pkl_ast_type_promoteable (aa_type, fa_type,
-                                        1 /* promote_array_of_any */))
+      if (!aa_exp)
         {
-          char *passed_type = pkl_type_str (aa_type, 1);
-          char *expected_type = pkl_type_str (fa_type, 1);
+          /* This is an optional argument that hasn't been specified.
+             Do not check.  */
+          continue;
+        }
+      else
+        {
+          pkl_ast_node aa_type =  PKL_AST_TYPE (aa_exp);
 
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
-                     "function argument %d has the wrong type\n\
+          if (!PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
+              && !pkl_ast_type_promoteable (aa_type, fa_type,
+                                            1 /* promote_array_of_any */))
+            {
+              char *passed_type = pkl_type_str (aa_type, 1);
+              char *expected_type = pkl_type_str (fa_type, 1);
+              
+              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                         "function argument %d has the wrong type\n\
 expected %s, got %s",
-                     narg + 1, expected_type, passed_type);
-          free (expected_type);
-          free (passed_type);
+                         narg + 1, expected_type, passed_type);
+              free (expected_type);
+              free (passed_type);
                   
-          PKL_TYPIFY_PAYLOAD->errors++;
-          PKL_PASS_ERROR;
+              PKL_TYPIFY_PAYLOAD->errors++;
+              PKL_PASS_ERROR;
+            }
         }
 
       narg++;
