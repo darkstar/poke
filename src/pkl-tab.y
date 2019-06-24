@@ -692,9 +692,9 @@ map:
                        array, then look for the lexical address of its
                        mapper and writer functions in the compilation
                        environment and set it in the map AST node.  */
-                    if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
-                        ||(PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY
-                           && PKL_AST_TYPE_NAME ($1)))
+                    if ((PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
+                        || PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY)
+                        && PKL_AST_TYPE_NAME ($1))
                       {
                         const char *type_name
                           = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
@@ -1219,7 +1219,8 @@ struct_elem_type:
                      functions in the compilation environment and set
                      it in the AST node.  */
                   /* XXX: do the same for arrays.  */
-                  if (PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
+                  if ((PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
+                       || PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY)
                       && PKL_AST_TYPE_NAME ($1))
                     {
                       const char *type_name
