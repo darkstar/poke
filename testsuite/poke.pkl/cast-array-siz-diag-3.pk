@@ -2,5 +2,5 @@
 
 deftype Matrix = int[8#B][8#B];
 
-/* { dg-command { try [[1,2] as int[],[1,2,3] as int[]] as Matrix; catch if E_conv { print "catched\n"; } } } */
+/* { dg-command { try [[1,2,3],[4,5,6]] as Matrix; catch if E_conv { print "catched\n"; } } } */
 /* { dg-output "catched" } */
