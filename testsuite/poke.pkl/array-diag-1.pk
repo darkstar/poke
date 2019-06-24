@@ -1,4 +1,0 @@
-/* { dg-do compile } */
-
-deftype Array = int[2];  /* { dg-error "" } */
-
