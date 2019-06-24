@@ -4,32 +4,3 @@ defun def1 = (int a, int b, int c = 0) int: { return a + b + c; }
 
 /* { dg-command { def1 (10, 20, 30) } } */
 /* { dg-output "60" } */
-
-defun def2 = (int a, int b = 1, int c = 0) int: { return a + b + c; }
-
-/* { dg-command { def2 (10, 20, 30) } } */
-/* { dg-output "\n60" } */
-
-defun def3 = (int a, int b, int c = 1) int: { return a + b + c; }
-
-/* { dg-command { def3 (10, 20) } } */
-/* { dg-output "\n31" } */
-
-/* { dg-command { def3 :a 10 :b 20 } } */
-/* { dg-output "\n31" } */
-
-defun def4 = (int a, int b, int c = 1, int d = 2) int: { return a + b + c + d; }
-
-/* { dg-command { def4 :a 10 :b 20 :d 30 } } */
-/* { dg-output "\n62" } */
-
-/* { dg-command { def4 :b 20 :a 10 } } */
-/* { dg-output "\n33" } */
-
-defun def5 = (int a, int b, int c = 1, int d = 2UL) int: { return a + b + c + d; }
-
-/* { dg-command { def5 :a 10 :b 20 :d 30 } } */
-/* { dg-output "\n62" } */
-
-/* { dg-command { def5 :b 20 :a 10 } } */
-/* { dg-output "\n33" } */
