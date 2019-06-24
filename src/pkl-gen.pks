@@ -45,18 +45,7 @@
 
         .function array_mapper
         prolog
-        ;; Note we have to subpass on the array type here, before the pushf.
-        ;; The reason for this is that the array type may include a boundary
-        ;; which is an expression, and in that expression there could be
-        ;; variable references.  These references are not taking into account
-        ;; the lexical frame introduced by this mapper.
-        .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (array_type);
-        .c PKL_GEN_PAYLOAD->in_mapper = 1;
-                                ; OFF EBOUND SBOUND ATYPE
-        tor                     ; OFF EBOUND SBOUND
         pushf
-        ;; XXX get the sbound and/or ebound from the array type
         regvar $sbound           ; Argument
         regvar $ebound           ; Argument
         regvar $off              ; Argument
@@ -93,7 +82,21 @@
         push null               ; OFF null
 .after_sbound_conv:
         drop                    ; OFF
-        fromr                   ; OFF ATYPE
+        ;; Build the type of the new mapped array.  Note that we use
+        ;; the bounds passed to the mapper instead of just subpassing
+        ;; in array_type, in order to avoid evaluating the boundary
+        ;; expression in the array type twice... this is to avoid possible
+        ;; surprising side effects, and to avoid nasty lexical constraints.
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+                                ; OFF ETYPE
+        pushvar $ebound         ; OFF ETYPE EBOUND
+        bnn .atype_bound_done
+        drop                    ; OFF ETYPE
+        pushvar $sbound         ; OFF ETYPE (SBOUND|NULL)
+.atype_bound_done:
+        mktya                   ; OFF ATYPE
         .while
         ;; If there is an EBOUND, check it.
         ;; Else, if there is a SBOUND, check it.
@@ -256,13 +259,6 @@
 
         .function array_valmapper
         prolog
-        ;; Note we have to subpass on the array type here, before the
-        ;; pushf.  See explanation in array_mapper above for the reason
-        ;; why.
-        .c PKL_GEN_PAYLOAD->in_valmapper = 0;
-        .c PKL_PASS_SUBPASS (array_type);
-        .c PKL_GEN_PAYLOAD->in_valmapper = 1;
-        tor                     ; VAL NVAL OFF
         pushf
         regvar $off             ; Argument
         regvar $nval            ; Argument
@@ -332,7 +328,21 @@
         drop                    ; OFF
 
 .ebound_ok:
-        fromr                   ; OFF ATYPE
+        ;; Build the type of the new mapped array.  Note that we use
+        ;; the mapping bounds extracted above instead of subpassing
+        ;; in array_type, in order to avoid evaluating the boundary
+        ;; expression in the array type twice... this is to avoid possible
+        ;; surprising side effects, and to avoid nasty lexical constraints.
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+                                ; OFF ETYPE
+        pushvar $ebound         ; OFF ETYPE EBOUND
+        bnn .atype_bound_done
+        drop                    ; OFF ETYPE
+        pushvar $sbound         ; OFF ETYPE (SBOUND|NULL)
+.atype_bound_done:
+        mktya                   ; OFF ATYPE
         .while
         pushvar $eidx           ; OFF ATYPE I
         pushvar $nelem          ; OFF ATYPE I NELEM
