@@ -101,6 +101,53 @@ promote_offset (pkl_ast ast,
   return 0;
 }
 
+/* Promote a given node A, which should be an array expression, to the
+   given array type.  Put the resulting node in A.  Return 1 if the
+   promotion was successful, 0 otherwise.  */
+
+static int
+promote_array (pkl_ast ast,
+               pkl_ast_node type,
+               pkl_ast_node *a,
+               int *restart)
+{
+  pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (type);
+  pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (type);
+
+  *restart = 0;
+  
+  /* Note that at this point it is assured (by typify1) that the array
+     element types of both arrays are equivalent.  */
+
+  /* Promotions to any[] do not require any explicit action.  */
+  if (PKL_AST_TYPE_CODE (etype) == PKL_TYPE_ANY)
+    return 1;
+
+  /* Coercing to an unbounded array type doesn't require of any
+     cast.  */
+  if (bound == NULL)
+    return 1;
+
+  /* The case of static array types (bounded by constant number of
+     elements) is handled in type equivalence.  No cast is needed.  */
+  if (PKL_AST_CODE (bound) == PKL_AST_INTEGER)
+    return 1;
+
+  /* Any other promotion requires a cast.  */
+  {
+    pkl_ast_loc loc = PKL_AST_LOC (*a);
+              
+    *a = pkl_ast_make_cast (ast, type, *a);
+    PKL_AST_TYPE (*a) = ASTREF (type);
+    PKL_AST_LOC (*a) = loc;
+    ASTREF (*a);
+    *restart = 1;
+    return 1;
+  }
+  
+  return 0;
+}
+
 /* Division is defined on the following configurations of operands and
    result types:
 
@@ -747,46 +794,55 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
      lvalue_type, or typify1 wouldn't have allowed this node to
      pass.  */
 
-  if (!pkl_ast_type_equal (lvalue_type, exp_type))
+  /* If the lvalue type is not an array, and both types are
+     equivalent, then we are done.  Arrays are excluded because of how
+     the boundary is ignored in type equivalence.  */
+  if (PKL_AST_TYPE_CODE (lvalue_type) != PKL_TYPE_ARRAY
+      && pkl_ast_type_equal (lvalue_type, exp_type))
+    PKL_PASS_DONE;
+  
+  /* A promotion is needed.  */
+  switch (PKL_AST_TYPE_CODE (lvalue_type))
     {
-      switch (PKL_AST_TYPE_CODE (lvalue_type))
-        {
-        case PKL_TYPE_ANY:
-        case PKL_TYPE_ARRAY: /* any[] */
-          break;
-        case PKL_TYPE_INTEGRAL:
-          if (!promote_integral (PKL_PASS_AST,
-                                 PKL_AST_TYPE_I_SIZE (lvalue_type),
-                                 PKL_AST_TYPE_I_SIGNED (lvalue_type),
-                                 &PKL_AST_ASS_STMT_EXP (ass_stmt),
-                                 &restart))
-            {
-              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
-                       "couldn't promote r-value in assignment");
-              PKL_PASS_ERROR;
-            }
-          break;
-        case PKL_TYPE_OFFSET:
-          if (!promote_offset (PKL_PASS_AST,
-                               PKL_AST_TYPE_O_BASE_TYPE (lvalue_type),
-                               PKL_AST_TYPE_O_UNIT (lvalue_type),
-                               &PKL_AST_ASS_STMT_EXP (ass_stmt),
-                               &restart))
-            {
-              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
-                       "couldn't promote r-value in assignment");
-              PKL_PASS_ERROR;
-            }
-          break;
-        default:
-          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
-                   "non-promoteable r-value in assignment statement at promo time");
-          PKL_PASS_ERROR;
-          break;
-        }
-
-      PKL_PASS_RESTART = restart;
+    case PKL_TYPE_ANY:
+      break;
+    case PKL_TYPE_ARRAY:
+      if (!promote_array (PKL_PASS_AST,
+                          lvalue_type,
+                          &PKL_AST_ASS_STMT_EXP (ass_stmt),
+                          &restart))
+        goto error;
+      break;
+    case PKL_TYPE_INTEGRAL:
+      if (!promote_integral (PKL_PASS_AST,
+                             PKL_AST_TYPE_I_SIZE (lvalue_type),
+                             PKL_AST_TYPE_I_SIGNED (lvalue_type),
+                             &PKL_AST_ASS_STMT_EXP (ass_stmt),
+                             &restart))
+        goto error;
+      break;
+    case PKL_TYPE_OFFSET:
+      if (!promote_offset (PKL_PASS_AST,
+                           PKL_AST_TYPE_O_BASE_TYPE (lvalue_type),
+                           PKL_AST_TYPE_O_UNIT (lvalue_type),
+                           &PKL_AST_ASS_STMT_EXP (ass_stmt),
+                           &restart))
+        goto error;
+      break;
+    default:
+      pkl_ice (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+               "non-promoteable r-value in assignment statement at promo time");
+      PKL_PASS_ERROR;
+      break;
     }
+  
+  PKL_PASS_RESTART = restart;
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (exp),
+           "couldn't promote r-value in assignment");
+  PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
 
@@ -809,6 +865,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
       pkl_ast_node fa_type = PKL_AST_FUNC_ARG_TYPE (fa);
       pkl_ast_node aa_exp = PKL_AST_FUNCALL_ARG_EXP (aa);
       pkl_ast_node aa_type = PKL_AST_TYPE (aa_exp);
+      int restart = 0;
 
       /* Do not promote varargs.  */
       if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa))
@@ -816,53 +873,59 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
 
       /* At this point it is assured that the types of the actual
          argument and the formal argument are promoteable, or typify
-         wouldn't have allowed it to pass.  If both types are equal,
-         we have got nothing to do.  */
-      if (!pkl_ast_type_equal (fa_type, aa_type))
-        {
-          int restart;
-          
-          switch (PKL_AST_TYPE_CODE (fa_type))
-            {
-            case PKL_TYPE_ANY:
-            case PKL_TYPE_ARRAY: /* any[] */
-              /* Do nothing.  Promoting to ANY doesn't require
-                 altering the AST in any way.  */
-              break;
-            case PKL_TYPE_INTEGRAL:
-              if (!promote_integral (PKL_PASS_AST,
-                                     PKL_AST_TYPE_I_SIZE (fa_type),
-                                     PKL_AST_TYPE_I_SIGNED (fa_type),
-                                     &PKL_AST_FUNCALL_ARG_EXP (aa),
-                                     &restart))
-                {
-                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
-                           "couldn't promote funcall argument");
-                  PKL_PASS_ERROR;
-                }
-              break;
-            case PKL_TYPE_OFFSET:
-              if (!promote_offset (PKL_PASS_AST,
-                                   PKL_AST_TYPE_O_BASE_TYPE (fa_type),
-                                   PKL_AST_TYPE_O_UNIT (fa_type),
-                                   &PKL_AST_FUNCALL_ARG_EXP (aa),
-                                   &restart))
-                {
-                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
-                           "couldn't promote funcall argument");
-                  PKL_PASS_ERROR;
-                }
-              break;
-            default:
-              pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),
-                       "funcall contains non-promoteable arguments at promo time");
-              PKL_PASS_ERROR;
-              break;
-            }
+         wouldn't have allowed it to pass.  */
 
-          PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
+      /* If the formal type is not an array, and both types are
+         equivalent, then we are done.  Arrays are excluded because of
+         how the boundary is ignored in type equivalence.  */
+      if (PKL_AST_TYPE_CODE (fa_type) != PKL_TYPE_ARRAY
+          && pkl_ast_type_equal (fa_type, aa_type))
+        continue;
+
+      /* A promotion is needed.  */
+      switch (PKL_AST_TYPE_CODE (fa_type))
+        {
+        case PKL_TYPE_ANY:
+          break;
+        case PKL_TYPE_ARRAY:
+          if (!promote_array (PKL_PASS_AST,
+                              fa_type,
+                              &PKL_AST_FUNCALL_ARG_EXP (aa),
+                              &restart))
+            goto error;
+          break;
+        case PKL_TYPE_INTEGRAL:
+          if (!promote_integral (PKL_PASS_AST,
+                                 PKL_AST_TYPE_I_SIZE (fa_type),
+                                 PKL_AST_TYPE_I_SIGNED (fa_type),
+                                 &PKL_AST_FUNCALL_ARG_EXP (aa),
+                                 &restart))
+            goto error;
+          break;
+        case PKL_TYPE_OFFSET:
+          if (!promote_offset (PKL_PASS_AST,
+                               PKL_AST_TYPE_O_BASE_TYPE (fa_type),
+                               PKL_AST_TYPE_O_UNIT (fa_type),
+                               &PKL_AST_FUNCALL_ARG_EXP (aa),
+                               &restart))
+            goto error;
+          break;
+        default:
+          pkl_ice (PKL_PASS_AST, PKL_AST_LOC (funcall),
+                   "funcall contains non-promoteable arguments at promo time");
+          PKL_PASS_ERROR;
+          break;
         }
+
+      PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
     }
+
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (aa),
+           "couldn't promote funcall argument");
+  PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
 
