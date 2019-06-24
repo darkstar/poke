@@ -6,5 +6,5 @@ pk_dump_group_by = 2#B;
 pk_dump_ruler = 0;
 pk_dump_ascii = 0;
 
-/* { dg-command { dump :from 0#B } } */
-/* { dg-output "00000000: 1020 3040 5060 7080" } */
+/* { dg-command { dump :from 0#B :group_by 8#B } } */
+/* { dg-output "00000000: 1020304050607080" } */
