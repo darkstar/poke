@@ -1057,16 +1057,29 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
     {
       pkl_ast_node arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
       pkl_ast_node initial_type = PKL_AST_TYPE (initial);
+      int restart = 0;
 
-      if (!pkl_ast_type_equal (arg_type, initial_type))
-        {
-          int restart = 0;
+      /* At this point it is assured that the arg type and initial
+         types are promoteable, or typify wouldn't have allowed it to
+         pass.  */
 
-          switch (PKL_AST_TYPE_CODE (arg_type))
+      /* If the arg tyep is not an array, and both types are
+         equivalent, then we are done.  Arrays are excluded because of
+         how the boundary is ignored in type equivalence.  */
+      if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_ARRAY
+          && pkl_ast_type_equal (arg_type, initial_type))
+        PKL_PASS_DONE;
+
+      switch (PKL_AST_TYPE_CODE (arg_type))
             {
             case PKL_TYPE_ANY:
-            case PKL_TYPE_ARRAY: /* any[] */
-              /* Nothing to do.  */
+              break;
+            case PKL_TYPE_ARRAY:
+              if (!promote_array (PKL_PASS_AST,
+                                  arg_type,
+                                  &PKL_AST_FUNC_ARG_INITIAL (func_arg),
+                                  &restart))
+                goto error;
               break;
             case PKL_TYPE_INTEGRAL:
               if (!promote_integral (PKL_PASS_AST,
@@ -1074,11 +1087,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
                                      PKL_AST_TYPE_I_SIGNED (arg_type),
                                      &PKL_AST_FUNC_ARG_INITIAL (func_arg),
                                      &restart))
-                {
-                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
-                           "couldn't promote argument initializer");
-                  PKL_PASS_ERROR;
-                }
+                goto error;
               break;
             case PKL_TYPE_OFFSET:
               if (!promote_offset (PKL_PASS_AST,
@@ -1086,11 +1095,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
                                    PKL_AST_TYPE_O_UNIT (arg_type),
                                    &PKL_AST_FUNC_ARG_INITIAL (func_arg),
                                    &restart))
-                {
-                  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
-                           "couldn't promote argument initializer");
-                  PKL_PASS_ERROR;
-                }
+                goto error;
               break;
             default:
               pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
@@ -1098,9 +1103,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
               PKL_PASS_ERROR;
             }
 
-          PKL_PASS_RESTART = restart;
-        }
+      PKL_PASS_RESTART = restart;
     }
+
+  PKL_PASS_DONE;
+
+ error:  
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
+           "couldn't promote argument initializer");
+  PKL_PASS_ERROR;
 }
 PKL_PHASE_END_HANDLER
 
