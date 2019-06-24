@@ -111,29 +111,38 @@ promote_array (pkl_ast ast,
                pkl_ast_node *a,
                int *restart)
 {
+  /* XXX this should be, somehow, recursive, to handle arrays of
+     arrays... */
+
+  pkl_ast_node from_type = PKL_AST_TYPE (*a);
   pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (type);
   pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (type);
+  pkl_ast_node from_bound = PKL_AST_TYPE_A_BOUND (from_type);
 
   *restart = 0;
   
   /* Note that at this point it is assured (by typify1) that the array
-     element types of both arrays are equivalent.  */
+     element types of both arrays are equivalent.  XXX but not really,
+     because the bounds in contained arrays may be different!!  We
+     need a strict version of type_equal for arrays.  */
 
   /* Promotions to any[] do not require any explicit action.  */
   if (PKL_AST_TYPE_CODE (etype) == PKL_TYPE_ANY)
     return 1;
 
-  /* Coercing to an unbounded array type doesn't require of any
-     cast.  */
-  if (bound == NULL)
-    return 1;
-
   /* The case of static array types (bounded by constant number of
      elements) is handled in type equivalence.  No cast is needed.  */
-  if (PKL_AST_CODE (bound) == PKL_AST_INTEGER)
+  if (bound && PKL_AST_CODE (bound) == PKL_AST_INTEGER)
     return 1;
 
-  /* Any other promotion requires a cast.  */
+  /* Unbounded array to unbounded array doesn't require of any
+     cast.  */
+  if (!bound && !from_bound)
+    return 1;
+
+  /* Any other promotion requires a cast.  Note that this includes
+     unbounded arrays, for which run-time type change should be
+     performed even if there is not an actual check.  */
   {
     pkl_ast_loc loc = PKL_AST_LOC (*a);
               

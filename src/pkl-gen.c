@@ -1191,20 +1191,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       pkl_asm_insn (pasm, PKL_INSN_CTOS);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
     }
-  else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_ARRAY)
+  else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_ARRAY
+           && PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_ARRAY)
     {
       /* Casts from array to array perform run-time checks on array
          boundaries, and then sets the boundary in the resulting
          value.  */
 
       pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
+      pkl_ast_node from_bound = PKL_AST_TYPE_A_BOUND (from_type);
 
       if (bound == NULL)
         {
-          /* No checks are due in this case, but the value itself
-             should be typed as an unbound array.  */
-          pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
-          pkl_asm_insn (pasm, PKL_INSN_ASETTB);         /* ARR */
+          if (from_bound != NULL)
+            {
+              /* No checks are due in this case, but the value itself
+                 should be typed as an unbound array.  */
+              pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
+              pkl_asm_insn (pasm, PKL_INSN_ASETTB);         /* ARR */
+            }
         }
       else if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (bound))
                ==  PKL_TYPE_INTEGRAL)
