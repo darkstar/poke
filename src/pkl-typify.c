@@ -1045,11 +1045,11 @@ with prototype %s",
            aa;
            aa = ta)
         {
+          ta = PKL_AST_CHAIN (aa);
           if (PKL_AST_REFCOUNT (aa) > 1)
             PKL_AST_REFCOUNT (aa) -= 1;
           else
             free (aa);
-          ta = PKL_AST_CHAIN (aa);
         }
     }
 
