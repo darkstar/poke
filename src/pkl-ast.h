@@ -1053,16 +1053,10 @@ pkl_ast_node pkl_ast_make_map (pkl_ast ast,
 
    TYPE is a struct type.
 
-   VALUE is a struct value.
-
-   CONSTRUCTOR_BACK and CONSTRUCTOR_OVER conform the lexical address
-   of a constructor function.  See pkl-env.h for a description of
-   lexical addresses.  */
+   VALUE is a struct value.  */
 
 #define PKL_AST_SCONS_TYPE(AST) ((AST)->scons.type)
 #define PKL_AST_SCONS_VALUE(AST) ((AST)->scons.value)
-#define PKL_AST_SCONS_CONSTRUCTOR_BACK(AST) ((AST)->scons.constructor_back)
-#define PKL_AST_SCONS_CONSTRUCTOR_OVER(AST) ((AST)->scons.constructor_over)
 
 struct pkl_ast_scons
 {
@@ -1070,15 +1064,11 @@ struct pkl_ast_scons
 
   union pkl_ast_node *type;
   union pkl_ast_node *value;
-  int constructor_back;
-  int constructor_over;
 };
 
 pkl_ast_node pkl_ast_make_scons (pkl_ast ast,
                                  pkl_ast_node type,
-                                 pkl_ast_node value,
-                                 int constructor_back,
-                                 int constructor_over);
+                                 pkl_ast_node value);
 
 /* PKL_AST_FUNCALL nodes represent the invocation of a function.
 

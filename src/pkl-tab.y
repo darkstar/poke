@@ -560,10 +560,7 @@ expression:
         | TYPENAME '{' struct_elem_list '}'
           	{
                   pkl_ast_node type;
-                  pkl_ast_node constructor_decl, astruct;
-                  const char *type_name;
-                  char *constructor_name;
-                  int constructor_back, constructor_over;
+                  pkl_ast_node astruct;
 
                   pkl_ast_node decl = pkl_env_lookup (pkl_parser->env,
                                                       PKL_AST_IDENTIFIER_POINTER ($1),
@@ -580,31 +577,14 @@ expression:
                     }
                   PKL_AST_TYPE_NAME (type) = ASTREF ($1);
 
-                  type_name =
-                    PKL_AST_IDENTIFIER_POINTER ($1);
-
-                  constructor_name = xmalloc (strlen (type_name) +
-                                              strlen ("_pkl_constructor_") + 1);
-                  strcpy (constructor_name, "_pkl_constructor_");
-                  strcat (constructor_name, type_name);
-
-                  constructor_decl = pkl_env_lookup (pkl_parser->env,
-                                                     constructor_name,
-                                                     &constructor_back, &constructor_over);
-                  assert (constructor_decl);
-
                   astruct = pkl_ast_make_struct (pkl_parser->ast,
                                                  0 /* nelem */, $3);
                   PKL_AST_LOC (astruct) = @$;
 
                   $$ = pkl_ast_make_scons (pkl_parser->ast,
                                            type,
-                                           astruct,
-                                           constructor_back,
-                                           constructor_over);
+                                           astruct);
                   PKL_AST_LOC ($$) = @$;
-
-                  free (constructor_name);
         	}
         | UNIT
 		{

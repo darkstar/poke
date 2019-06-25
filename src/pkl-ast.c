@@ -1243,8 +1243,7 @@ pkl_ast_make_map (pkl_ast ast,
 
 pkl_ast_node
 pkl_ast_make_scons (pkl_ast ast,
-                    pkl_ast_node type, pkl_ast_node value,
-                    int constructor_back, int constructor_over)
+                    pkl_ast_node type, pkl_ast_node value)
 {
   pkl_ast_node scons = pkl_ast_make_node (ast, PKL_AST_SCONS);
 
@@ -1252,9 +1251,6 @@ pkl_ast_make_scons (pkl_ast ast,
 
   PKL_AST_SCONS_TYPE (scons) = ASTREF (type);
   PKL_AST_SCONS_VALUE (scons) = ASTREF (value);
-  PKL_AST_SCONS_CONSTRUCTOR_BACK (scons) = constructor_back;
-  PKL_AST_SCONS_CONSTRUCTOR_OVER (scons) = constructor_over;
-
   return scons;
 }
 
@@ -2485,8 +2481,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (scons_type, SCONS_TYPE);
       PRINT_AST_SUBAST (scons_value, SCONS_VALUE);
-      PRINT_AST_IMM (constructor_back, SCONS_CONSTRUCTOR_BACK, "%d");
-      PRINT_AST_IMM (constructor_over, SCONS_CONSTRUCTOR_OVER, "%d");
       break;
 
     case PKL_AST_FUNCALL:
