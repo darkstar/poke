@@ -1235,10 +1235,6 @@ pkl_ast_make_map (pkl_ast ast,
 
   PKL_AST_MAP_TYPE (map) = ASTREF (type);
   PKL_AST_MAP_OFFSET (map) = ASTREF (offset);
-  PKL_AST_MAP_MAPPER_BACK (map) = -1;
-  PKL_AST_MAP_MAPPER_OVER (map) = -1;
-  PKL_AST_MAP_WRITER_BACK (map) = -1;
-  PKL_AST_MAP_WRITER_OVER (map) = -1;
 
   return map;
 }
@@ -1354,8 +1350,6 @@ pkl_ast_make_ass_stmt (pkl_ast ast, pkl_ast_node lvalue,
 
   PKL_AST_ASS_STMT_LVALUE (ass_stmt) = ASTREF (lvalue);
   PKL_AST_ASS_STMT_EXP (ass_stmt) = ASTREF (exp);
-  PKL_AST_ASS_STMT_VALMAPPER_BACK (ass_stmt) = -1;
-  PKL_AST_ASS_STMT_VALMAPPER_OVER (ass_stmt) = -1;
 
   return ass_stmt;
 }
@@ -2482,10 +2476,6 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, TYPE);
       PRINT_AST_SUBAST (map_type, MAP_TYPE);
       PRINT_AST_SUBAST (offset, MAP_OFFSET);
-      PRINT_AST_IMM (mapper_back, MAP_MAPPER_BACK, "%d");
-      PRINT_AST_IMM (mapper_over, MAP_MAPPER_OVER, "%d");
-      PRINT_AST_IMM (writer_back, MAP_WRITER_BACK, "%d");
-      PRINT_AST_IMM (writer_over, MAP_WRITER_OVER, "%d");
       break;
 
     case PKL_AST_SCONS:
