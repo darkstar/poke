@@ -68,7 +68,10 @@
    0 otherwise.
 
    IN_LVALUE is 1 in a sub-tree corresponding to the l-value of an
-   assignment statement.  0 otherwise.  */
+   assignment statement.  0 otherwise.
+
+   IN_ARRAY_BOUNDER is 1 when an array bounder function is being
+   generated.  0 otherwise.  */
 
 struct pkl_gen_payload
 {
@@ -84,6 +87,7 @@ struct pkl_gen_payload
   int in_writer;
   int in_valmapper;
   int in_lvalue;
+  int in_array_bounder;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;

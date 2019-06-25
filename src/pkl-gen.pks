@@ -487,6 +487,29 @@
         return
         .end                    ; array_writer
 
+;;; RAS_FUNCTION_ARRAY_BOUNDER
+;;; ( ARR -- BOUND )
+;;;
+;;; Assemble a function that returns the boundary of a given array.
+;;; If the array is not bounded by either number of elements nor size
+;;; then PVM_NULL is returned.
+;;;
+;;; Note how this function doesn't introduce any lexical level.  This
+;;; is important, so keep it this way!
+;;;
+;;; The C environment required is:
+;;;
+;;; `array_type' is a pkl_ast_node with the type of ARR.
+
+        .function array_bounder
+        prolog
+        .c if (PKL_AST_TYPE_A_BOUND (array_type) == NULL)
+        push null
+        .c else
+        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_BOUND (array_type));
+        return
+        .end
+        
 ;;; RAS_MACRO_STRUCT_ELEM_MAPPER
 ;;; ( OFF SOFF -- OFF STR VAL NOFF )
 ;;;
