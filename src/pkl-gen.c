@@ -136,10 +136,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
             pkl_ast_node elem;
             
-            /* Compile the struct functions.
-               Note that this should be done in the same order than the
-               registration of declarations in the compile-time
-               environment (in pkl-tab.y).  */
+            /* Compile the struct closures and complete them using the
+               current environment.  */
             
             PKL_GEN_PAYLOAD->in_writer = 1;
             RAS_FUNCTION_STRUCT_WRITER (writer_closure);
@@ -160,6 +158,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                    /* _ */
 
+            /* Install the closures in the type AST node.  */
+
+            PKL_AST_TYPE_S_WRITER (type_struct) = writer_closure;
+            PKL_AST_TYPE_S_MAPPER (type_struct) = mapper_closure;
+            PKL_AST_TYPE_S_CONSTRUCTOR (type_struct) = constructor_closure;
+
             PKL_PASS_BREAK;
             break;
           }
@@ -170,11 +174,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             
             pkl_ast_node array_type = initial;
             
-            /* Compile the array functions.
-               Note that this should be done in the same order than the
-               registration of declarations in the compile-time
-               environment (in pkl-tab.y).  */
-            
+            /* Compile the arrays closures and complete them using the
+               current environment.  */
+
             PKL_GEN_PAYLOAD->in_writer = 1;
             RAS_FUNCTION_ARRAY_WRITER (writer_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
@@ -188,6 +190,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
             PKL_GEN_PAYLOAD->in_mapper = 0;
+
+            /* Install the closures in the type AST node.  */
+
+            PKL_AST_TYPE_A_WRITER (array_type) = writer_closure;
+            PKL_AST_TYPE_A_MAPPER (array_type) = mapper_closure;
 
             PKL_PASS_BREAK;
             break;
