@@ -503,10 +503,14 @@
 
         .function array_bounder
         prolog
-        .c if (PKL_AST_TYPE_A_BOUND (array_type) == NULL)
-        push null
+        .c if (PKL_AST_TYPE_A_BOUND (array_type))
+        .c {
+        .c   PKL_GEN_PAYLOAD->in_array_bounder = 0;
+        .c   PKL_PASS_SUBPASS (PKL_AST_TYPE_A_BOUND (array_type)) ;
+        .c   PKL_GEN_PAYLOAD->in_array_bounder = 1;
+        .c }
         .c else
-        .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_BOUND (array_type));
+             push null
         return
         .end
         
