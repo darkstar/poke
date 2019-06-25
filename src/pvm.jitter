@@ -1741,7 +1741,7 @@ instruction substr () # ( STR ULONG ULONG -- STR ULONG ULONG STR )
         || PVM_VAL_ULONG (from) > PVM_VAL_ULONG (to))
         PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    s = xmalloc (slen); /* XX XGC */
+    s = xmalloc (slen + 1); /* XX XGC */
     strncpy (s,
              PVM_VAL_STR (str) + PVM_VAL_ULONG (from),
              slen);

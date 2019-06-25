@@ -592,7 +592,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   /* Process the prefix string, if any.  */
   if (*p != '%')
     {
-      char *prefix = xmalloc (strlen (fmt + 1));
+      char *prefix = xmalloc (strlen (fmt) + 1);
       size_t j = 0;
 
       while (*p != '%' && *p != '\0')
@@ -686,7 +686,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         {
           /* This argument has a prefix.  */
           size_t j;
-          char *suffix = xmalloc (strlen (fmt + 1));
+          char *suffix = xmalloc (strlen (fmt) + 1);
 
           j = 0;
           while (*p != '%' && *p != '\0')

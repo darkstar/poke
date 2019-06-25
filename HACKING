@@ -530,6 +530,14 @@ Then process raw.log with the etc/parse-valgrind-suppressions.sh
 script, wilcard the result as much as you can, and append the results
 to etc/boehm-gc.suppressions.
 
+In order to run the testsuite with valgring, edit lib/poke-dg.exp and
+uncomment the lines::
+
+      set VALGRIND "valgrind --quiet --suppressions=${srcdir}/../etc/boehm-gc.suppressions \
+                           --tool=memcheck --gen-suppressions=all"
+
+Then run ``make check`` as usual.
+
 Debugging PVM Assembler
 ~~~~~~~~~~~~~~~~~~~~~~~
 
