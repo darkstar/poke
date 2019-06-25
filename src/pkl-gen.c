@@ -1338,24 +1338,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
   /* Push the offset of the map.  */
   PKL_PASS_SUBPASS (map_offset);
 
-  /* Generate code to peek from the offset generated above.  */
-  if (PKL_AST_MAP_MAPPER_P (map))
-    {
-      PKL_GEN_PAYLOAD->mapper_back = PKL_AST_MAP_MAPPER_BACK (map);
-      PKL_GEN_PAYLOAD->mapper_over = PKL_AST_MAP_MAPPER_OVER (map);
-    }
-  if (PKL_AST_MAP_WRITER_P (map))
-    {
-      PKL_GEN_PAYLOAD->writer_back = PKL_AST_MAP_WRITER_BACK (map);
-      PKL_GEN_PAYLOAD->writer_over = PKL_AST_MAP_WRITER_OVER (map);
-    }
   PKL_GEN_PAYLOAD->in_mapper = 1;
   PKL_PASS_SUBPASS (map_type);
   PKL_GEN_PAYLOAD->in_mapper = 0;
-  PKL_GEN_PAYLOAD->mapper_back = -1;
-  PKL_GEN_PAYLOAD->mapper_over = -1;
-  PKL_GEN_PAYLOAD->writer_back = -1;
-  PKL_GEN_PAYLOAD->writer_over = -1;
 
   /* If the mapped value is PVM_NULL then raise an exception.  */
   {
