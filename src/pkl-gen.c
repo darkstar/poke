@@ -1817,7 +1817,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, bounder_closure); /* CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                   /* CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                  /* _ */
-      
+
+      /* XXX */
+      /* pvm_print_program (stdout, PVM_VAL_CLS_PROGRAM (bounder_closure)); */
+
       PKL_AST_TYPE_A_BOUNDER (array_type) = bounder_closure;
       PKL_PASS_BREAK;
     }
