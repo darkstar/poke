@@ -1744,7 +1744,7 @@ instruction substr () # ( STR ULONG ULONG -- STR ULONG ULONG STR )
     s = xmalloc (slen); /* XX XGC */
     strncpy (s,
              PVM_VAL_STR (str) + PVM_VAL_ULONG (from),
-             PVM_VAL_ULONG (to) - PVM_VAL_ULONG (from) + 1);
+             slen);
     s[slen] = '\0';
 
     JITTER_PUSH_STACK (pvm_make_string (s));
