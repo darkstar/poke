@@ -1812,6 +1812,18 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       /* Yay!, we are done ;) */
       PKL_PASS_BREAK;
     }
+  else if (PKL_GEN_PAYLOAD->in_array_bounder)
+    {
+      pkl_ast_node array_type = PKL_PASS_NODE;
+      pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (array_type);
+
+      if (bound)
+        PKL_PASS_SUBPASS (bound);
+      else
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
+      PKL_PASS_BREAK;
+    }
   else
     {
       /* Generating a PVM array type.  */
