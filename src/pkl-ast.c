@@ -24,7 +24,9 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "xalloc.h"
+
 #include "pkl-ast.h"
+#include "pvm-val.h" /* For PVM_NULL */
 
 /* Return the default endianness.  */
 
@@ -360,6 +362,8 @@ pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound)
   PKL_AST_TYPE_A_ETYPE (type) = ASTREF (etype);
   if (bound)
     PKL_AST_TYPE_A_BOUND (type) = ASTREF (bound);
+  PKL_AST_TYPE_A_MAPPER (type) = PVM_NULL;
+  PKL_AST_TYPE_A_WRITER (type) = PVM_NULL;
 
   return type;
 }
@@ -417,6 +421,9 @@ pkl_ast_make_struct_type (pkl_ast ast,
   if (struct_type_elems)
     PKL_AST_TYPE_S_ELEMS (type) = ASTREF (struct_type_elems);
   PKL_AST_TYPE_S_PINNED (type) = pinned;
+  PKL_AST_TYPE_S_MAPPER (type) = PVM_NULL;
+  PKL_AST_TYPE_S_WRITER (type) = PVM_NULL;
+  PKL_AST_TYPE_S_CONSTRUCTOR (type) = PVM_NULL;
 
   return type;
 }

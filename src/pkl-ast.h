@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "pvm-val.h" /* For pvm_val */
+
 /* The following enumeration defines the codes characterizing the
    several types of nodes supported in the PKL abstract syntax
    trees.  */
@@ -794,11 +796,13 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    number of elements, then BOUND is an expression that must evaluate
    to an integer.  If the array type is bounded by size, then BOUND is
    an expression that must evaluate to an offset.  If the array type
-   is unbounded, then BOUND is NULL.
+   is unbounded, then BOUND is NULL.  MAPPER and WRITER are used to
+   closures, or PVM_NULL.
 
    In struct types, NELEM is the number of elements in the struct
    type.  ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.  PINNED
-   is 1 if the struct is pinned, 0 otherwise.
+   is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER and
+   CONSTRUCTOR are used to hold closures, or PVM_NULL.
 
    In offset types, BASE_TYPE is a PKL_AST_TYPE with the base type for
    the offset's magnitude, and UNIT is either a PKL_AST_IDENTIFIER
@@ -825,9 +829,14 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_BOUND(AST) ((AST)->type.val.array.bound)
 #define PKL_AST_TYPE_A_ETYPE(AST) ((AST)->type.val.array.etype)
+#define PKL_AST_TYPE_A_MAPPER(AST) ((AST)->type.val.array.mapper)
+#define PKL_AST_TYPE_A_WRITER(AST) ((AST)->type.val.array.writer)
 #define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
 #define PKL_AST_TYPE_S_PINNED(AST) ((AST)->type.val.sct.pinned)
+#define PKL_AST_TYPE_S_MAPPER(AST) ((AST)->type.val.sct.mapper)
+#define PKL_AST_TYPE_S_WRITER(AST) ((AST)->type.val.sct.writer)
+#define PKL_AST_TYPE_S_CONSTRUCTOR(AST) ((AST)->type.val.sct.constructor)
 #define PKL_AST_TYPE_O_UNIT(AST) ((AST)->type.val.off.unit)
 #define PKL_AST_TYPE_O_BASE_TYPE(AST) ((AST)->type.val.off.base_type)
 #define PKL_AST_TYPE_F_RTYPE(AST) ((AST)->type.val.fun.rtype)
@@ -860,6 +869,8 @@ struct pkl_ast_type
     {
       union pkl_ast_node *bound;
       union pkl_ast_node *etype;
+      pvm_val mapper;
+      pvm_val writer;
     } array;
 
     struct
@@ -867,6 +878,9 @@ struct pkl_ast_type
       size_t nelem;
       union pkl_ast_node *elems;
       int pinned;
+      pvm_val mapper;
+      pvm_val writer;
+      pvm_val constructor;
     } sct;
 
     struct
