@@ -183,7 +183,7 @@ rest_of_compilation (pkl_compiler compiler,
   pkl_trans_init_payload (&trans4_payload);
   pkl_gen_init_payload (&gen_payload, compiler);
 
-  if (!pkl_do_pass (ast, lex_phases, lex_payloads))
+  if (!pkl_do_pass (ast, lex_phases, lex_payloads, PKL_PASS_F_TYPES))
     goto error;
 
   if (transl_payload.errors > 0)
@@ -192,7 +192,7 @@ rest_of_compilation (pkl_compiler compiler,
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
       
-  if (!pkl_do_pass (ast, frontend_phases, frontend_payloads))
+  if (!pkl_do_pass (ast, frontend_phases, frontend_payloads, PKL_PASS_F_TYPES))
     goto error;
     
   if (trans1_payload.errors > 0
@@ -207,7 +207,7 @@ rest_of_compilation (pkl_compiler compiler,
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
 
-  if (!pkl_do_pass (ast, middleend_phases, middleend_payloads))
+  if (!pkl_do_pass (ast, middleend_phases, middleend_payloads, PKL_PASS_F_TYPES))
     goto error;
 
   if (trans4_payload.errors > 0)
@@ -216,7 +216,7 @@ rest_of_compilation (pkl_compiler compiler,
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
   
-  if (!pkl_do_pass (ast, backend_phases, backend_payloads))
+  if (!pkl_do_pass (ast, backend_phases, backend_payloads, PKL_PASS_F_TYPES))
     goto error;
   
   if (analf_payload.errors > 0)

@@ -1232,6 +1232,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
           /* Make sure the array in expression has the right number of
              elements.  */
           pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
+          /* XXX call the closure in the AST type instead of
+             subpassing bound.  */
           PKL_PASS_SUBPASS (bound);             /* ARR SEL BOUND */
           pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
           pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
@@ -1258,6 +1260,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
           pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
           pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
           pkl_asm_insn (pasm, PKL_INSN_NIP);   /* ARR SIZM */
+          /* XXX call the closure in the AST type instead of
+             subpassing bound.  */
           PKL_PASS_SUBPASS (bound);            /* ARR SIZM BOUND */
           pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZM BOUND BOUNDM */
           pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* ARR SIZM BOUNDM BOUND */
@@ -1732,6 +1736,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
               && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_bound))
                   == PKL_TYPE_INTEGRAL))
             {
+              /* XXX call closure in AST node instead of subpassing.
+                 The closure has been compiled in the `else'
+                 below.  */
               PKL_GEN_PAYLOAD->in_mapper = 0;
               PKL_PASS_SUBPASS (array_type_bound);
               PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -1746,6 +1753,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
               && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_bound))
                   == PKL_TYPE_OFFSET))
             {
+              /* XXX call closure in AST node instead of subpassing.
+                 The closure has been compiled in the `else'
+                 below.  */
               PKL_GEN_PAYLOAD->in_mapper = 0;
               PKL_PASS_SUBPASS (array_type_bound);
               PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -1813,6 +1823,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
       PKL_PASS_SUBPASS (etype);
       if (bound)
+        /* XXX compile a closure with the code in `bound' and call it
+           to get the value.  Install the closure in the AST node so
+           subsequent references to the type have access to it.  */
         PKL_PASS_SUBPASS (bound);
       else
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);

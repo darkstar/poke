@@ -41,7 +41,8 @@
                                                                   parent, \
                                                                   &dobreak, \
                                                                   payloads, \
-                                                                  phases);    \
+                                                                  phases,\
+                                                                  flags); \
               *handlers_used += 1;                                      \
               if (dobreak)                                              \
                 goto _exit;                                             \
@@ -53,7 +54,8 @@
                                         child_pos,                      \
                                         parent,                         \
                                         payloads + i + 1,               \
-                                        phases + i + 1);                \
+                                        phases + i + 1,                 \
+                                        flags);                         \
                   /* goto restart */                                    \
                   goto restart;                                         \
                 }                                                       \
@@ -83,7 +85,8 @@
                                              parent,                    \
                                              &dobreak,                  \
                                              payloads,                  \
-                                             phases);                   \
+                                             phases,                    \
+                                             flags);                    \
               if (dobreak)                                              \
                 goto _exit;                                             \
                                                                         \
@@ -94,7 +97,8 @@
                                         child_pos,                      \
                                         parent,                         \
                                         payloads + i + 1,               \
-                                        phases + i + 1);                \
+                                        phases + i + 1,                 \
+                                        flags);                         \
                   /* goto restart */                                    \
                   goto restart;                                         \
                 }                                                       \
@@ -110,7 +114,8 @@ static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
                                    pkl_ast_node node,
                                    size_t child_pos,
                                    pkl_ast_node parent,
-                                   void *payloads[], struct pkl_phase *phases[]);
+                                   void *payloads[], struct pkl_phase *phases[],
+                                   int flags);
 
 
 #define PKL_PASS_PRE_ORDER 0
@@ -126,7 +131,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
                         size_t child_pos,
                         pkl_ast_node parent,
                         int *_dobreak,
-                        int order)
+                        int order,
+                        int flags)
 {
   int node_code = PKL_AST_CODE (node);
   int dobreak = 0;
@@ -191,13 +197,14 @@ pkl_call_node_handlers (jmp_buf toplevel,
   return node;
 }
 
-#define PKL_PASS(CHILD)                                 \
-  do                                                    \
-    {                                                   \
-      (CHILD) = pkl_do_pass_1 (toplevel, ast,           \
-                               (CHILD), 0, node,        \
-                               payloads, phases);       \
-    }                                                   \
+#define PKL_PASS(CHILD)                                      \
+  do                                                         \
+    {                                                        \
+      (CHILD) = pkl_do_pass_1 (toplevel, ast,                \
+                               (CHILD), 0, node,             \
+                               payloads, phases,             \
+                               flags);                       \
+    }                                                        \
   while (0)
 
 /* Note that in the following macro CHAIN should expand to an
@@ -212,7 +219,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
       elem = (CHAIN);                                           \
       next = PKL_AST_CHAIN (elem);                              \
       CHAIN = pkl_do_pass_1 (toplevel, ast, elem, cpos++, node,         \
-                             payloads, phases);                         \
+                             payloads, phases, flags);                  \
       last = (CHAIN);                                           \
       elem = next;                                              \
                                                                 \
@@ -226,7 +233,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
                                                 cpos++,         \
                                                 node,           \
                                                 payloads,       \
-                                                phases);        \
+                                                phases,         \
+                                                flags);         \
           last = PKL_AST_CHAIN (last);                          \
           elem = next;                                          \
         }                                                       \
@@ -238,7 +246,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
                pkl_ast_node node,
                size_t child_pos,
                pkl_ast_node parent,
-               void *payloads[], struct pkl_phase *phases[])
+               void *payloads[], struct pkl_phase *phases[],
+               int flags)
 {
   pkl_ast_node node_orig = node;
   int node_code = PKL_AST_CODE (node);
@@ -252,16 +261,20 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* Call the pre-order handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
-                                 PKL_PASS_POST_ORDER);
+                                 PKL_PASS_POST_ORDER, flags);
   if (dobreak)
     goto _exit;
 
   /* Process child nodes.  */
-  if (PKL_AST_TYPE (node))
-    PKL_AST_TYPE (node)
-      = pkl_do_pass_1 (toplevel, ast,
-                       PKL_AST_TYPE (node), 0, node,
-                       payloads, phases);
+
+  if (flags & PKL_PASS_F_TYPES)
+    {
+      if (PKL_AST_TYPE (node))
+        PKL_AST_TYPE (node)
+          = pkl_do_pass_1 (toplevel, ast,
+                           PKL_AST_TYPE (node), 0, node,
+                           payloads, phases, flags);
+    }
 
   switch (node_code)
     {
@@ -496,7 +509,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
   /* Call the post-order handlers from registered phases.  */
   node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
-                                 PKL_PASS_PRE_ORDER);
+                                 PKL_PASS_PRE_ORDER, flags);
 
   /* If no handler has been invoked, call the default handler of the
      registered phases in case they are defined.  */
@@ -517,7 +530,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
 int
 pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
-                struct pkl_phase *phases[], void *payloads[])
+                struct pkl_phase *phases[], void *payloads[],
+                int flags)
 {
   jmp_buf toplevel;
 
@@ -525,7 +539,7 @@ pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
     {
     case 0:
       ast->ast = pkl_do_pass_1 (toplevel, ast, node, 0, NULL /* parent */,
-                                payloads, phases);
+                                payloads, phases, flags);
       break;
     case 1:
       /* Non-error non-local exit.  */
@@ -541,7 +555,8 @@ pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
 
 int
 pkl_do_pass (pkl_ast ast,
-             struct pkl_phase *phases[], void *payloads[])
+             struct pkl_phase *phases[], void *payloads[],
+             int flags)
 {
-  return pkl_do_subpass (ast, ast->ast, phases, payloads);
+  return pkl_do_subpass (ast, ast->ast, phases, payloads, flags);
 }

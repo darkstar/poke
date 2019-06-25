@@ -94,7 +94,8 @@ typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
                                               pkl_ast_node parent,
                                               int *dobreak,
                                               void *payloads[],
-                                              struct pkl_phase *phases[]);
+                                              struct pkl_phase *phases[],
+                                              int flags);
 
 struct pkl_phase
 {
@@ -201,7 +202,8 @@ typedef struct pkl_phase *pkl_phase;
       if (pkl_do_subpass (PKL_PASS_AST,             \
                           (NODE),                   \
                           _phases,                  \
-                          _payloads) == 2)          \
+                          _payloads,                \
+                          _flags) == 2)             \
         PKL_PASS_ERROR;                             \
     }                                               \
   while (0)
@@ -232,7 +234,8 @@ typedef struct pkl_phase *pkl_phase;
                             int *_restart, size_t _child_pos,           \
                             pkl_ast_node _parent, int *_dobreak,        \
                             void *_payloads[],                          \
-                            struct pkl_phase *_phases[])                \
+                            struct pkl_phase *_phases[],                \
+                            int _flags)                                 \
   {                                                                     \
   /* printf (#name " on node %" PRIu64 "\n", PKL_AST_UID (_node)); */   \
      PKL_PASS_RESTART = 0;
@@ -289,6 +292,12 @@ pkl_phase_parent_in (pkl_ast_node parent,
    array.  There should be as much payloads as phases, and it is not
    needed to terminate this array with NULL.
 
+   FLAGS is a set of ORed flags, that modify the behavior or
+   pkl_do_pass.  Allowed flags are:
+
+   PKL_PASS_F_TYPES
+      Traverse type tags in AST nodes.
+
    Running several phases in "parallel" in the same pass is good for
    performance.  However, there is an important consideration: if a
    phase requires to process each AST nodes just once, no restarting
@@ -298,13 +307,17 @@ pkl_phase_parent_in (pkl_ast_node parent,
    Return 0 if some error occurred during the pass execution.  Return
    1 otherwise.  */
 
+#define PKL_PASS_F_TYPES 1
+
 int pkl_do_pass (pkl_ast ast,
-                 struct pkl_phase *phases[], void *payloads[]);
+                 struct pkl_phase *phases[], void *payloads[],
+                 int flags);
 
 /* The following function is to be used by the PKL_PASS_SUBPASS macro
    defined above.  */
 
 int pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
-                    struct pkl_phase *phases[], void *payloads[]);
+                    struct pkl_phase *phases[], void *payloads[],
+                    int flags);
 
 #endif /* PKL_PASS_H  */
