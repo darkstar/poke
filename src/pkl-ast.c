@@ -449,11 +449,6 @@ pkl_ast_make_struct_elem_type (pkl_ast ast,
     PKL_AST_STRUCT_ELEM_TYPE_LABEL (struct_type_elem)
       = ASTREF (label);
 
-  PKL_AST_STRUCT_ELEM_TYPE_MAPPER_BACK (struct_type_elem) = -1;
-  PKL_AST_STRUCT_ELEM_TYPE_MAPPER_OVER (struct_type_elem) = -1;
-  PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK (struct_type_elem) = -1;
-  PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER (struct_type_elem) = -1;
-
   return struct_type_elem;
 }
 
