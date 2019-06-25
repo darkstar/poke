@@ -67,7 +67,12 @@ PKL_PHASE_END_HANDLER
 /* The array mappers introduce a lexical frame.  Unfortunately, it is
    not possible to add this frame in the bison parser due to syntactic
    ambiguities.  So, we need to reflect the extra lexical frame
-   here, by adjusting lexical addresses accordingly.  */
+   here, by adjusting lexical addresses accordingly.
+
+   XXX this should not be necessary, really.  The boundary expressions
+   in array types should convey their own lexical environment, because
+   they are executed in many different environments.  What about
+   clobbered variables that appear in the expression, for example?  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_type_array)
 {
