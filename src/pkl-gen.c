@@ -1678,6 +1678,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_ast_node array_type = PKL_PASS_NODE;
       pkl_ast_node array_type_bound = PKL_AST_TYPE_A_BOUND (array_type);
 
+      pvm_val array_type_mapper = PKL_AST_TYPE_A_MAPPER (array_type);
+      pvm_val array_type_writer = PKL_AST_TYPE_A_WRITER (array_type);
+
       if (PKL_GEN_PAYLOAD->in_valmapper)
         {
           pvm_val mapper_closure;
@@ -1720,14 +1723,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         }
       else
         {
-          if (PKL_GEN_PAYLOAD->mapper_back != -1
-              && PKL_GEN_PAYLOAD->mapper_over != -1)
+          if (array_type_mapper != PVM_NULL)
             {
-              /* The lexical address in the payload is the address of
-                 the mapper closure for this type.  Use it.  */
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                            PKL_GEN_PAYLOAD->mapper_back,
-                            PKL_GEN_PAYLOAD->mapper_over); /* OFF CLS */
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                            array_type_mapper); /* OFF CLS */
             }
           else
             {
@@ -1771,9 +1770,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
               && (PKL_AST_TYPE_CODE (PKL_AST_TYPE (array_type_bound))
                   == PKL_TYPE_OFFSET))
             {
-              /* XXX call closure in AST node instead of subpassing.
-                 The closure has been compiled in the `else'
-                 below.  */
+              /* XXX call closure in AST type node instead of
+                 subpassing.  PKL_AST_TYPE_A_BOUND.  */
               PKL_GEN_PAYLOAD->in_mapper = 0;
               PKL_PASS_SUBPASS (array_type_bound);
               PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -1790,14 +1788,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM); /* VAL */
         }
 
-      if (PKL_GEN_PAYLOAD->writer_back != -1
-          && PKL_GEN_PAYLOAD->writer_over != -1)
+      if (array_type_writer != PVM_NULL)
         {
-          /* The lexical address in the payload is the address of
-             the writer closure for this type.  Use it.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                        PKL_GEN_PAYLOAD->writer_back,
-                        PKL_GEN_PAYLOAD->writer_over); /* VAL CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        array_type_writer); /* VAL CLS */
         }
       else
         {
@@ -1910,14 +1904,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
       pkl_ast_node elem;
 
-      if (PKL_GEN_PAYLOAD->mapper_back != -1
-          && PKL_GEN_PAYLOAD->mapper_over != -1)
+      pvm_val type_struct_mapper = PKL_AST_TYPE_S_MAPPER (type_struct);
+      pvm_val type_struct_writer = PKL_AST_TYPE_S_WRITER (type_struct);
+
+      if (type_struct_mapper != PVM_NULL)
         {
-          /* The lexical address in the payload is the address of the
-             mapper closure for this type.  Use it.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                        PKL_GEN_PAYLOAD->mapper_back,
-                        PKL_GEN_PAYLOAD->mapper_over); /* OFF CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        type_struct_mapper); /* OFF CLS */
         }
       else
         {
@@ -1947,14 +1940,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);                /* VAL CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MSETM);               /* VAL */
 
-      if (PKL_GEN_PAYLOAD->writer_back != -1
-          && PKL_GEN_PAYLOAD->writer_over != -1)
+      if (type_struct_writer != PVM_NULL)
         {
-          /* The lexical address in the payload is the address of the
-             writer closure for this type.  Use it.  */
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                        PKL_GEN_PAYLOAD->writer_back,
-                        PKL_GEN_PAYLOAD->writer_over); /* VAL CLS */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        type_struct_writer); /* VAL CLS */
         }
       else
         {
