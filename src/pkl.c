@@ -216,7 +216,7 @@ rest_of_compilation (pkl_compiler compiler,
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
   
-  if (!pkl_do_pass (ast, backend_phases, backend_payloads, PKL_PASS_F_TYPES))
+  if (!pkl_do_pass (ast, backend_phases, backend_payloads, 0))
     goto error;
   
   if (analf_payload.errors > 0)
