@@ -1224,6 +1224,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
       pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
       pkl_ast_node from_bound = PKL_AST_TYPE_A_BOUND (from_type);
 
+      /* Make sure the cast type has a bounder.  If it doesn't,
+         compile and install one.  */
+      if (PKL_AST_TYPE_A_BOUNDER (to_type) == PVM_NULL)
+        {
+          PKL_GEN_PAYLOAD->in_array_bounder = 1;
+          PKL_PASS_SUBPASS (to_type);
+          PKL_GEN_PAYLOAD->in_array_bounder = 0;
+        }
+
       if (bound == NULL)
         {
           if (from_bound != NULL)
@@ -1242,9 +1251,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
           /* Make sure the array in expression has the right number of
              elements.  */
           pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
-          /* XXX call the closure in the AST type instead of
-             subpassing bound.  */
-          PKL_PASS_SUBPASS (bound);             /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SEL BOUND */
           pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
           pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
           pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
@@ -1270,9 +1278,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
           pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
           pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
           pkl_asm_insn (pasm, PKL_INSN_NIP);   /* ARR SIZM */
-          /* XXX call the closure in the AST type instead of
-             subpassing bound.  */
-          PKL_PASS_SUBPASS (bound);            /* ARR SIZM BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SIZM BOUND */
           pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZM BOUND BOUNDM */
           pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* ARR SIZM BOUNDM BOUND */
           pkl_asm_insn (pasm, PKL_INSN_OGETU); /* ARR SIZM BOUNDM BOUND BOUNDU */
