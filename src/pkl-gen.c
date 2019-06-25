@@ -82,11 +82,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_program)
   PKL_GEN_ASM = pkl_asm_new (PKL_PASS_AST,
                              PKL_GEN_PAYLOAD->compiler,
                              1 /* prologue */);
-
-  PKL_GEN_PAYLOAD->mapper_back = -1;
-  PKL_GEN_PAYLOAD->mapper_over = -1;
-  PKL_GEN_PAYLOAD->writer_back = -1;
-  PKL_GEN_PAYLOAD->writer_over = -1;
 }
 PKL_PHASE_END_HANDLER
 
