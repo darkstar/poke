@@ -370,6 +370,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
   pkl_ast_node lvalue = PKL_AST_ASS_STMT_LVALUE (ass_stmt);
   pkl_ast_node exp = PKL_AST_ASS_STMT_EXP (ass_stmt);
 
+  pvm_val valmapper;
+
   PKL_PASS_SUBPASS (exp);
 
   PKL_GEN_PAYLOAD->in_lvalue = 1;
@@ -391,10 +393,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
     case PKL_AST_INDEXER:
       /* Note that analf guarantees that the entity in this indexer is
          an array, not a string.  */
+
+      valmapper = PVM_NULL; /* XXX PKL_AST_TYPE_A_VALMAPPER (lvalue_type) */
+      /* Fallthrough.  */
     case PKL_AST_STRUCT_REF:
       {
         jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
         
+        valmapper = PVM_NULL; /* XXX PKL_AST_TYPE_S_VALMAPPER (lvalue_type) */
+
         /* We need to get the value (array element, or struct element)
            that will be replaced in the lvalue.  */
 
@@ -420,16 +427,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* LVALUE IDX OFFSET VAL EXP */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);       /* LVALUE IDX VAL EXP OFFSET */
 
-        if (PKL_AST_ASS_STMT_VALMAPPER_P (ass_stmt))
+        if (valmapper != PVM_NULL)
           {
             /* XXX this never happens atm  */
             assert (0);
-            int valmapper_back = PKL_AST_ASS_STMT_VALMAPPER_BACK (ass_stmt);
-            int valmapper_over = PKL_AST_ASS_STMT_VALMAPPER_OVER (ass_stmt);
-
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                          valmapper_back, valmapper_over);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, valmapper);
           }
         else
           {
