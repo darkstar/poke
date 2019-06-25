@@ -138,20 +138,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             RAS_FUNCTION_STRUCT_WRITER (writer_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_writer = 0;
             
             PKL_GEN_PAYLOAD->in_mapper = 1;
             RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_mapper = 0;
 
             RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);                    /* _ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      /* _ */
 
             /* Install the closures in the type AST node.  */
 
@@ -176,14 +176,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             RAS_FUNCTION_ARRAY_WRITER (writer_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_writer = 0;
             
             PKL_GEN_PAYLOAD->in_mapper = 1;
             RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_REGVAR);               /* _ */
+            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_mapper = 0;
 
             /* Install the closures in the type AST node.  */

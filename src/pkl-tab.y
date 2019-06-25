@@ -169,52 +169,6 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
     }
 }
 
-/* Search and return the lexical addresses of the mapper/writer for
-   the given type name.  If no such addresses are found, return 0.
-   Otherwise return 1.  */
-
-static int
-pkl_lookup_mapper_writer (struct pkl_parser *parser,
-                          const char *type_name,
-                          int *mapper_back, int *mapper_over,
-                          int *writer_back, int *writer_over)
-{
-  char *mapper_name = xmalloc (strlen (type_name) +
-                               strlen ("_pkl_mapper_") + 1);
-  char *writer_name = xmalloc (strlen (type_name) +
-                               strlen ("_pkl_writer_") + 1);
-  
-  pkl_ast_node mapper_decl;
-  pkl_ast_node writer_decl;
-  
-  strcpy (mapper_name, "_pkl_mapper_");
-  strcat (mapper_name, type_name);
-  
-  strcpy (writer_name, "_pkl_writer_");
-  strcat (writer_name, type_name);
-  
-  mapper_decl = pkl_env_lookup (parser->env,
-                                mapper_name,
-                                mapper_back, mapper_over);
-  if (!mapper_decl)
-    goto error;
-  
-  writer_decl = pkl_env_lookup (parser->env,
-                                writer_name,
-                                writer_back, writer_over);
-  if (!writer_decl)
-    goto error;
-  
-  free (mapper_name);
-  free (writer_name);
-  return 1;
-
- error:
-  free (mapper_name);
-  free (writer_name);
-  return 0;
-}
-
 %}
 
 %union {
@@ -687,26 +641,6 @@ map:
                 {
                     $$ = pkl_ast_make_map (pkl_parser->ast, $1, $3);
                     PKL_AST_LOC ($$) = @$;
-
-                    /* If the type specifier is of a struct or an
-                       array, then look for the lexical address of its
-                       mapper and writer functions in the compilation
-                       environment and set it in the map AST node.  */
-                    if ((PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
-                        || PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY)
-                        && PKL_AST_TYPE_NAME ($1))
-                      {
-                        const char *type_name
-                          = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
-
-                        if (!pkl_lookup_mapper_writer (pkl_parser,
-                                                       type_name,
-                                                       &PKL_AST_MAP_MAPPER_BACK ($$),
-                                                       &PKL_AST_MAP_MAPPER_OVER ($$),
-                                                       &PKL_AST_MAP_WRITER_BACK ($$),
-                                                       &PKL_AST_MAP_WRITER_OVER ($$)))
-                          assert (0);
-                      }
                 }
 
 ;
@@ -1212,28 +1146,6 @@ struct_elem_type:
                       ASTREF (PKL_AST_TYPE ($2));
                       PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
                     }
-
-                  /* If the type of the struct element is a struct or
-                     an array, and it is named, then look for the
-                     lexical address of its mapper and writer
-                     functions in the compilation environment and set
-                     it in the AST node.  */
-                  /* XXX: do the same for arrays.  */
-                  if ((PKL_AST_TYPE_CODE ($1) == PKL_TYPE_STRUCT
-                       || PKL_AST_TYPE_CODE ($1) == PKL_TYPE_ARRAY)
-                      && PKL_AST_TYPE_NAME ($1))
-                    {
-                      const char *type_name
-                        = PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME ($1));
-
-                      if (!pkl_lookup_mapper_writer (pkl_parser,
-                                                   type_name,
-                                                  &PKL_AST_STRUCT_ELEM_TYPE_MAPPER_BACK ($$),
-                                                  &PKL_AST_STRUCT_ELEM_TYPE_MAPPER_OVER ($$),
-                                                  &PKL_AST_STRUCT_ELEM_TYPE_WRITER_BACK ($$),
-                                                  &PKL_AST_STRUCT_ELEM_TYPE_WRITER_OVER ($$)))
-                        assert (0);
-                    }
                 }
         ;
 
@@ -1360,94 +1272,6 @@ declaration:
                                  "the type `%s' is already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       YYERROR;
-                    }
-
-                  /* If the type is a struct or an array, register the
-                     type functions.  In all cases the INITIAL of the
-                     declaration are the struct/array type itself.
-                     That is what will be used by subsequent passes in
-                     the compiler to build these function bodies.  */
-                  if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT
-                      || PKL_AST_TYPE_CODE ($4) == PKL_TYPE_ARRAY)
-                    {
-                      const char *type_name = PKL_AST_IDENTIFIER_POINTER ($2);
-
-                      char *writer_name = xmalloc (strlen (type_name) +
-                                                   strlen ("_pkl_writer_") + 1);
-                      char *mapper_name = xmalloc (strlen (type_name) +
-                                                   strlen ("_pkl_mapper_") + 1);
-                      
-                      strcpy (writer_name, "_pkl_writer_");
-                      strcat (writer_name, type_name);
-
-                      strcpy (mapper_name, "_pkl_mapper_");
-                      strcat (mapper_name, type_name);
-                      
-                      {
-                        pkl_ast_node writer_identifier
-                          = pkl_ast_make_identifier (pkl_parser->ast, writer_name);
-                        pkl_ast_node mapper_identifier
-                          = pkl_ast_make_identifier (pkl_parser->ast, mapper_name);
-
-                        pkl_ast_node writer_decl
-                          = pkl_ast_make_decl (pkl_parser->ast,
-                                               PKL_AST_DECL_KIND_FUNC,
-                                               writer_identifier,
-                                               $4,
-                                               pkl_parser->filename);
-
-                        pkl_ast_node mapper_decl
-                          = pkl_ast_make_decl (pkl_parser->ast,
-                                               PKL_AST_DECL_KIND_FUNC,
-                                               mapper_identifier,
-                                               $4,
-                                               pkl_parser->filename);
-
-                        if (!pkl_env_register (pkl_parser->env,
-                                               writer_name,
-                                               writer_decl))
-                          /* This should never happen.  */
-                          assert (0);
-
-                        if (!pkl_env_register (pkl_parser->env,
-                                               mapper_name,
-                                               mapper_decl))
-                          /* This should never happen.  */
-                          assert (0);
-
-                        free (writer_name);
-                        free (mapper_name);
-
-                        if (PKL_AST_TYPE_CODE ($4) == PKL_TYPE_STRUCT)
-                          {
-                            char *constructor_name;
-                            pkl_ast_node constructor_identifier;
-                            pkl_ast_node constructor_decl;
-
-                            constructor_name
-                              = xmalloc (strlen (type_name) +
-                                         strlen ("_pkl_constructor_") + 1);
-                            strcpy (constructor_name, "_pkl_constructor_");
-                            strcat (constructor_name, type_name);
-                            
-                            constructor_identifier
-                              = pkl_ast_make_identifier (pkl_parser->ast,
-                                                         constructor_name);
-                            constructor_decl
-                              = pkl_ast_make_decl (pkl_parser->ast,
-                                                   PKL_AST_DECL_KIND_FUNC,
-                                                   constructor_identifier,
-                                                   $4,
-                                                   pkl_parser->filename);
-
-                            if (!pkl_env_register (pkl_parser->env,
-                                                   constructor_name,
-                                                   constructor_decl))
-                              /* This should never happen.  */
-                              assert (0);
-                            free (constructor_name);
-                          }
-                      }
                     }
                 }
         ;
