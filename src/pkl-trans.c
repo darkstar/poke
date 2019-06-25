@@ -71,6 +71,9 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_type_array)
 {
+  /* XXX this should only happen if we are into a map.  Because array
+     types can also be in other contexts: return type in functions,
+     argument type in functions, casts, ... */
   PKL_TRANS_PAYLOAD->add_frames += 1;
 }
 PKL_PHASE_END_HANDLER
