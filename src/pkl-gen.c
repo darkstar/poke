@@ -1057,7 +1057,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
     {
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
         {
-        case PKL_AST_ARRAY:
         case PKL_AST_TYPE:
         case PKL_AST_STRUCT_ELEM_TYPE:
           /* Process these.  */
@@ -1373,22 +1372,34 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array_initializer)
 PKL_PHASE_END_HANDLER
 
 /*
- *  | ARRAY_TYPE
+ *  ARRAY
  *  | ARRAY_INITIALIZER
  *  | ...
- *  ARRAY
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_array)
+{
+  PKL_PASS_SUBPASS (PKL_AST_TYPE (PKL_PASS_NODE));
+}
+PKL_PHASE_END_HANDLER
+
+/*
+ * | ARRAY_TYPE
+ * | ARRAY_INITIALIZER
+ * | ...
+ * ARRAY
  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_array)
 {
   pkl_asm pasm = PKL_GEN_ASM;
-  pkl_ast_node node = PKL_PASS_NODE;
+  pkl_ast_node array = PKL_PASS_NODE;
 
   pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_ARRAY_NELEM (node), 64));
+                pvm_make_ulong (PKL_AST_ARRAY_NELEM (array), 64));
 
   pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (node), 64));
+                pvm_make_ulong (PKL_AST_ARRAY_NINITIALIZER (array), 64));
 
   pkl_asm_insn (pasm, PKL_INSN_MKA);
 }
@@ -1810,7 +1821,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
         {
           switch (PKL_AST_CODE (PKL_PASS_PARENT))
             {
-            case PKL_AST_ARRAY:
             case PKL_AST_TYPE:
             case PKL_AST_STRUCT_ELEM_TYPE:
               /* Process these.  */
@@ -2522,6 +2532,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_ISA, pkl_gen_ps_isa),
    PKL_PHASE_PR_HANDLER (PKL_AST_MAP, pkl_gen_pr_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_SCONS, pkl_gen_ps_scons),
+   PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY, pkl_gen_pr_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_gen_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_gen_ps_indexer),
