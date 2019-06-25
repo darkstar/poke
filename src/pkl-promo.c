@@ -890,11 +890,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
          argument and the formal argument are promoteable, or typify
          wouldn't have allowed it to pass.  */
 
-      /* If the formal type is not an array, and both types are
-         equivalent, then we are done.  Arrays are excluded because of
-         how the boundary is ignored in type equivalence.  */
-      if (PKL_AST_TYPE_CODE (fa_type) != PKL_TYPE_ARRAY
-          && pkl_ast_type_equal (fa_type, aa_type))
+      /* If both types are equivalent, then we are done.  */
+      if (pkl_ast_type_equal (fa_type, aa_type))
         continue;
 
       /* A promotion is needed.  */
@@ -903,11 +900,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
         case PKL_TYPE_ANY:
           break;
         case PKL_TYPE_ARRAY:
-          if (!promote_array (PKL_PASS_AST,
-                              fa_type,
-                              &PKL_AST_FUNCALL_ARG_EXP (aa),
-                              &restart))
-            goto error;
+          /* Array promotion of arguments is performed in the function
+             prologue, not here.  This is because the target type is
+             defined in the function's environment.  */
           break;
         case PKL_TYPE_INTEGRAL:
           if (!promote_integral (PKL_PASS_AST,

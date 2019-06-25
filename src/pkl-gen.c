@@ -915,6 +915,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
      will create it's own frame.  */
   if (PKL_AST_FUNC_ARGS (PKL_PASS_NODE))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+
+  /* If the function's return type is an array type, make sure it has
+     a bounder.  If it hasn't one, then compute it in this
+     environment.  */
+  {
+    pkl_ast_node rtype = PKL_AST_FUNC_RET_TYPE (PKL_PASS_NODE);
+
+    if (PKL_AST_TYPE_CODE (rtype) == PKL_TYPE_ARRAY
+        && PKL_AST_TYPE_A_BOUNDER (rtype) == PVM_NULL)
+      {
+        PKL_GEN_PAYLOAD->in_array_bounder = 1;
+        PKL_PASS_SUBPASS (rtype);
+        PKL_GEN_PAYLOAD->in_array_bounder = 0;        
+      }
+  }
 }
 PKL_PHASE_END_HANDLER
 
@@ -925,8 +940,11 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_arg)
 {
+  pkl_asm pasm = PKL_GEN_ASM;
   pkl_ast_node func_arg = PKL_PASS_NODE;
   pkl_ast_node func_arg_initial = PKL_AST_FUNC_ARG_INITIAL (func_arg);
+  pkl_ast_node func_arg_type = PKL_AST_FUNC_ARG_TYPE (func_arg);
+  jitter_label after_conv_label = pkl_asm_fresh_label (PKL_GEN_ASM);
 
   if (func_arg_initial)
     {
@@ -937,8 +955,97 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_arg)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, label);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP); /* Drop the null */
       PKL_PASS_SUBPASS (func_arg_initial);
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, after_conv_label);
       pkl_asm_label (PKL_GEN_ASM, label);
     }
+
+  /* If the argument is an array, check/cast to it's type, in order to
+     perform whatever needed run-time checks.  This is done here and
+     not in a cast at funcall time because the argument's type is
+     evaluated in the function's lexical environment.  As per promo,
+     we know that the value on the stack is an array with the same
+     base type, but possibly different bounding.
+
+     Note that if the initial argument is used, then this code is not
+     executed, as promo inserted a cast there whenever necessary.  */
+  if (PKL_AST_TYPE_CODE (func_arg_type) == PKL_TYPE_ARRAY)
+    {
+      /* XXX avoid code duplication with ps_cast.  */
+      pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (func_arg_type);
+
+      /* Make sure the cast type has a bounder.  If it doesn't,
+         compile and install one.  */
+      if (PKL_AST_TYPE_A_BOUNDER (func_arg_type) == PVM_NULL)
+        {
+          PKL_GEN_PAYLOAD->in_array_bounder = 1;
+          PKL_PASS_SUBPASS (func_arg_type);
+          PKL_GEN_PAYLOAD->in_array_bounder = 0;
+        }
+
+      if (bound == NULL)
+        {
+          /* No checks are due in this case, but the value itself
+             should be typed as an unbound array.  */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB);         /* ARR */
+        }
+      else if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (bound))
+               ==  PKL_TYPE_INTEGRAL)
+        {
+          jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+          /* Make sure the array in expression has the right number of
+             elements.  */
+          pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (func_arg_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
+          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (pasm, PKL_INSN_RAISE);
+          pkl_asm_label (pasm, label);
+          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_NIP);    /* ARR BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */
+        }
+      else if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (bound))
+               == PKL_TYPE_OFFSET)
+        {
+          jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+          /* Make sure the array in expression has the right
+             size.  */
+
+          /* Note that SIZ is guaranteed to have base type uint<64>
+             and unit bits (as per pvm_val_sizeof).  On the other
+             hand, BOUND is guaranteed to have type offset<uint<64>,*>
+             (as per pkl_promo_ps_type_array).  This eases the
+             calculations here.  */
+          pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
+          pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_NIP);   /* ARR SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (func_arg_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SIZM BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZM BOUND BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* ARR SIZM BOUNDM BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_OGETU); /* ARR SIZM BOUNDM BOUND BOUNDU */
+          pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR SIZM BOUND BOUNDU BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_MULLU);
+          pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR SIZM BOUND BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR BOUND BOUNDM SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_EQLU);  /* ARR BOUND BOUNDM SIZM (BOUNDM==SIZM) */
+          pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR BOUND (BOUNDM==SIZM) */
+          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (pasm, PKL_INSN_RAISE);
+          pkl_asm_label (pasm, label);
+          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */          
+        }
+      else
+        assert (0);
+    }
+  pkl_asm_label (PKL_GEN_ASM, after_conv_label);
 
   /* Pop the actual argument from the stack and put it in the current
      environment.  */

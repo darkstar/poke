@@ -1,0 +1,7 @@
+/* { dg-do run } */
+
+defvar x = 2;
+defun foo = (int[x] a = [1,2,3]) int: { return a[1]; }
+
+/* { dg-command {try foo; catch if E_conv { print "catched\n"; }} } */
+/* { dg-output "catched" } */
