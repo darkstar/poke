@@ -641,7 +641,6 @@ primary:
                      annotated with its initialization.  */
 
                   int back, over;
-
                   const char *name = PKL_AST_IDENTIFIER_POINTER ($1);
 
                   pkl_ast_node decl
