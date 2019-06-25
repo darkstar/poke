@@ -1303,17 +1303,22 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_scons)
 {
   pkl_ast_node scons = PKL_PASS_NODE;
+  pkl_ast_node scons_type = PKL_AST_SCONS_TYPE (scons);
 
-  /* Call the constructor function of the struct type, whose lexical
-     address is stored in the scons AST node, passing SCONS_VALUE as
-     an argument.  The constructor will return a struct on the top of
-     the stack.
+  /* Call the constructor function of the struct type, passing
+     SCONS_VALUE as an argument.  The constructor will return a struct
+     on the top of the stack.
+
+     Since we know that the type has been specified by name, due to
+     syntax, then the constructor closure is for sure defined in the
+     type AST node.
 
      XXX: install an exception handler for constraint errors, etc.  */
 
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR,
-                PKL_AST_SCONS_CONSTRUCTOR_BACK (scons),
-                PKL_AST_SCONS_CONSTRUCTOR_OVER (scons));
+  pvm_val constructor = PKL_AST_TYPE_S_CONSTRUCTOR (scons_type);
+
+  assert (constructor != PVM_NULL);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);
 }
 PKL_PHASE_END_HANDLER
