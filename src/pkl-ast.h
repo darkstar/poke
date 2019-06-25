@@ -24,8 +24,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "pkl-ast.h"
-
 /* The following enumeration defines the codes characterizing the
    several types of nodes supported in the PKL abstract syntax
    trees.  */
