@@ -1885,12 +1885,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_integer)
       && PKL_AST_TYPE_CODE (parent) == PKL_TYPE_ARRAY)
     {
       pkl_ast_node integer_type = PKL_AST_TYPE (integer);
+      uint64_t value = PKL_AST_INTEGER_VALUE (integer);
 
-      assert (integer_type);
+      value = value << (64 - PKL_AST_TYPE_I_SIZE (integer_type));
+      if (value & (((uint64_t) 1) << 63))
+        {
+          PKL_AST_TYPE_I_SIGNED (integer_type) = 1;
+          value = ((int64_t) value) >> (64 - PKL_AST_TYPE_I_SIZE (integer_type));
+        }
+      else
+        {
+          PKL_AST_TYPE_I_SIGNED (integer_type) = 0;
+          value >>= 64 - PKL_AST_TYPE_I_SIZE (integer_type);
+        }
 
-      /* This doesn't work well for negative indexes.  */
+      PKL_AST_INTEGER_VALUE (integer) = value;
       PKL_AST_TYPE_I_SIZE (integer_type) = 64;
-      PKL_AST_TYPE_I_SIGNED (integer_type) = 0;
     }
 }
 PKL_PHASE_END_HANDLER
@@ -1962,7 +1972,34 @@ struct pkl_phase pkl_phase_typify1 =
 PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
   pkl_ast_node type = PKL_PASS_NODE;
+
+  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
+      || PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRUCT)
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
+}
+PKL_PHASE_END_HANDLER
+
+/* Static array indexes should be bigger than 0.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type_array)
+{
+  pkl_ast_node array = PKL_PASS_NODE;
+  pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (array);
+
+  if (bound)
+    {
+      pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+
+      if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL
+          && PKL_AST_CODE (bound) == PKL_AST_INTEGER
+          && ((int64_t) PKL_AST_INTEGER_VALUE (bound)) <= 0)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (bound),
+                     "array dimentions should be > 0");
+          PKL_TYPIFY_PAYLOAD->errors++;
+          PKL_PASS_ERROR;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1981,7 +2018,7 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
-   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_ps_type),
-   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_typify2_ps_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_typify2_ps_type),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_ps_type_array),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_ps_op_sizeof),
   };
