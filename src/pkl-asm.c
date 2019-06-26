@@ -192,73 +192,95 @@ pkl_asm_insn_oto (pkl_asm pasm,
                          to_base_type, to_unit_type);
 }
 
-/* Macro-instruction: ATOA to_type
+/* Macro-instruction: ATOA from_type to_type
   ( ARR -- ARR(to_type) )
 
-  Generate code to convert an array value to TO_TYPE.  */
+  Generate code to convert an array value from FROM_TYPE to TO_TYPE.
+  Both types should be array types.  FROM_TYPE can be NULL.  */
 
 static void
 pkl_asm_insn_atoa (pkl_asm pasm,
+                   pkl_ast_node from_type,
                    pkl_ast_node to_type)
 {
   pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
-  pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+  pkl_ast_node from_bound = NULL;
 
-  if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL)
-    // RAS_MACRO_ARRAY_CONV_SEL (bound);
+  if (from_type)
+    from_bound = PKL_AST_TYPE_A_BOUND (from_type);
+
+  if (bound == NULL)
     {
-      jitter_label label = pkl_asm_fresh_label (pasm);
+      if (from_type && from_bound == NULL)
+        /* Both array types are unbounded, hence they are identical =>
+           no need to do anything.  */
+        return;
       
-      /* Make sure the array in expression has the right number of
-         elements.  */
-      pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
-      pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
-      pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SEL BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
-      pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
-      pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
-      pkl_asm_insn (pasm, PKL_INSN_RAISE);
-      pkl_asm_label (pasm, label);
-      pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR SEL BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_NIP);    /* ARR BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */
-    }
-  else if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_OFFSET)
-    // RAS_MACRO_ARRAY_CONV_SIZ (bound);
-    {
-      jitter_label label = pkl_asm_fresh_label (pasm);
-
-      /* Make sure the array in expression has the right
-         size.  */
-
-      /* Note that SIZ is guaranteed to have base type uint<64> and
-         unit bits (as per pvm_val_sizeof).  On the other hand, BOUND
-         is guaranteed to have type offset<uint<64>,*> (as per
-         pkl_promo_ps_type_array).  This eases the calculations
-         here.  */
-      pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
-      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
-      pkl_asm_insn (pasm, PKL_INSN_NIP);   /* ARR SIZM */
-      pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
-      pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SIZM BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZM BOUND BOUNDM */
-      pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* ARR SIZM BOUNDM BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_OGETU); /* ARR SIZM BOUNDM BOUND BOUNDU */
-      pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR SIZM BOUND BOUNDU BOUNDM */
-      pkl_asm_insn (pasm, PKL_INSN_MULLU);
-      pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR SIZM BOUND BOUNDM */
-      pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR BOUND BOUNDM SIZM */
-      pkl_asm_insn (pasm, PKL_INSN_EQLU);  /* ARR BOUND BOUNDM SIZM (BOUNDM==SIZM) */
-      pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR BOUND (BOUNDM==SIZM) */
-      pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
-      pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
-      pkl_asm_insn (pasm, PKL_INSN_RAISE);
-      pkl_asm_label (pasm, label);
-      pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR BOUND */
-      pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */          
+      /* No checks are due in this case, but the value itself
+         should be typed as an unbound array.  */
+      pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
+      pkl_asm_insn (pasm, PKL_INSN_ASETTB);         /* ARR */
     }
   else
-    assert (0);
+    {
+      pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+      
+      if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL)
+        // RAS_MACRO_ARRAY_CONV_SEL (bound);
+        {
+          jitter_label label = pkl_asm_fresh_label (pasm);
+          
+          /* Make sure the array in expression has the right number of
+             elements.  */
+          pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
+          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (pasm, PKL_INSN_RAISE);
+          pkl_asm_label (pasm, label);
+          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR SEL BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_NIP);    /* ARR BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */
+        }
+      else if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_OFFSET)
+        // RAS_MACRO_ARRAY_CONV_SIZ (bound);
+        {
+          jitter_label label = pkl_asm_fresh_label (pasm);
+          
+          /* Make sure the array in expression has the right
+             size.  */
+          
+          /* Note that SIZ is guaranteed to have base type uint<64> and
+             unit bits (as per pvm_val_sizeof).  On the other hand, BOUND
+             is guaranteed to have type offset<uint<64>,*> (as per
+             pkl_promo_ps_type_array).  This eases the calculations
+             here.  */
+          pkl_asm_insn (pasm, PKL_INSN_SIZ);   /* ARR SIZ */
+          pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZ SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_NIP);   /* ARR SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
+          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SIZM BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_OGETM); /* ARR SIZM BOUND BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* ARR SIZM BOUNDM BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_OGETU); /* ARR SIZM BOUNDM BOUND BOUNDU */
+          pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR SIZM BOUND BOUNDU BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_MULLU);
+          pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR SIZM BOUND BOUNDM */
+          pkl_asm_insn (pasm, PKL_INSN_ROT);   /* ARR BOUND BOUNDM SIZM */
+          pkl_asm_insn (pasm, PKL_INSN_EQLU);  /* ARR BOUND BOUNDM SIZM (BOUNDM==SIZM) */
+          pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* ARR BOUND (BOUNDM==SIZM) */
+          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
+          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
+          pkl_asm_insn (pasm, PKL_INSN_RAISE);
+          pkl_asm_label (pasm, label);
+          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR BOUND */
+          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */          
+        }
+      else
+        assert (0);
+    }
 }
 
 /* Macro-instruction: BCONC op1_type, op2_type, res_type
@@ -1138,6 +1160,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
           }
         case PKL_INSN_NTON:
         case PKL_INSN_OTO:
+        case PKL_INSN_ATOA:
           {
             pkl_ast_node from_type;
             pkl_ast_node to_type;
@@ -1149,19 +1172,10 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
             if (insn == PKL_INSN_NTON)
               pkl_asm_insn_nton (pasm, from_type, to_type);
+            else if (insn == PKL_INSN_ATOA)
+              pkl_asm_insn_atoa (pasm, from_type, to_type);
             else
               pkl_asm_insn_oto (pasm, from_type, to_type);
-            break;
-          }
-        case PKL_INSN_ATOA:
-          {
-            pkl_ast_node to_type;
-
-            va_start (valist, insn);
-            to_type = va_arg (valist, pkl_ast_node);
-            va_end (valist);
-
-            pkl_asm_insn_atoa (pasm, to_type);
             break;
           }
         case PKL_INSN_PEEK:

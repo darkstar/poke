@@ -373,7 +373,7 @@ PKL_DEF_INSN (PKL_INSN_MACRO, "", "")
 
 PKL_DEF_INSN (PKL_INSN_NTON, "aa", "nton")
 PKL_DEF_INSN (PKL_INSN_OTO,  "aa", "oto")
-PKL_DEF_INSN (PKL_INSN_ATOA, "a", "atoa")
+PKL_DEF_INSN (PKL_INSN_ATOA, "aa", "atoa")
 
 PKL_DEF_INSN (PKL_INSN_NEG, "a", "neg")
 PKL_DEF_INSN (PKL_INSN_ADD, "a", "add")
