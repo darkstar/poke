@@ -63,7 +63,7 @@
 # and _macros_.  Macros are defined using .macro/.end pairs of
 # assembler directives, and look like this:
 #
-#  .macro NAME [@ARG]...
+#  .macro NAME [(@ARG|#ARG)]...
 #  ...
 #  .end
 #
@@ -87,7 +87,7 @@
 # Once defined, a macro NAME can be expanded using the .e
 # assembler directive:
 #
-# .e NAME [@ARG, ...]
+# .e NAME [(@ARG|#ARG), ...]
 #
 # In the C level, this will expand RAS_MACRO_NAME (ARG, ...)
 #
@@ -149,8 +149,11 @@
 # Exception Arguments are written like PVM_E_*.  See the file pvm.h
 # for the set of valid exceptions.
 #
-# AST node arguments and are written like @this.  They are usually
-# (always?) passed to the current entity as an argument.
+# PVM values passed as arguments to the current entity are written
+# like #this.
+#
+# AST node arguments passed as arguments to the current entity are
+# written like @this.
 #
 # Labels
 # ------
@@ -396,7 +399,9 @@ BEGIN {
     string_re="(\"[^\"]*\")"
     var_re="(\\$[a-zA-Z][0-9a-zA-Z_]*)"
     expt_re="(PVM_E_[A-Z_]+)"
-    marg_re="@([a-zA-Z_][0-9a-zA-Z_]*)"
+    anode_re="@([a-zA-Z_][0-9a-zA-Z_]*)"
+    aval_re="#([a-zA-Z_][0-9a-zA-Z_]*)"
+    marg_re= "(@|#)([a-zA-Z_][0-9a-zA-Z_]*)"
 
     ideffile = srcdir "/pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
@@ -445,12 +450,12 @@ BEGIN {
                         break
                     case "v":
                         re="(" null_re "|" int_re "|" long_re \
-                           "|" string_re "|" expt_re ")"
+                           "|" string_re "|" expt_re "|" aval_re ")"
                         break
                     case "r":
                         break
                     case "a":
-                        re=marg_re
+                        re=anode_re
                         break
                     default:
                         error(" unknown insn argument type " a)
@@ -509,7 +514,7 @@ BEGIN {
 }
 
 # .macro NAME
-/^[ \t]*\.macro[ \t]+[a-zA-Z][0-9a-zA-Z_]*[ \t]*(@[a-zA-Z_][0-9a-zA-Z_]*[ \t]*)*[ \t]*(;.*)?$/ {
+/^[ \t]*\.macro[ \t]+[a-zA-Z][0-9a-zA-Z_]*[ \t]*((@|#)[a-zA-Z_][0-9a-zA-Z_]*[ \t]*)*[ \t]*(;.*)?$/ {
     # Get the macro name
     macro_name = $2
     if (match (macro_name, /^[a-zA-Z][0-9a-zA-Z_]*$/) == 0)
@@ -525,7 +530,7 @@ BEGIN {
         {
             if (i != 3)
                 macro_args = macro_args ","
-            macro_args = macro_args gensub (marg_re, "\\1_arg", "g", $i);
+            macro_args = macro_args gensub (marg_re, "\\2_arg", "g", $i);
         }
         if (i == NF)
             macro_args = macro_args ")"
@@ -630,10 +635,11 @@ BEGIN {
     if (match ($0, marg_re) != 0)
     {
         # Add parenthesis
-        $0 = gensub (marg_re, "(@\\1", 1, $0)
+        $0 = gensub (anode_re, "(@\\1", 1, $0)
+        $0 = gensub (aval_re, "(#\\1", 1, $0)
         $0 = $0 ")"
         # Process the macro arguments
-        $0 = gensub (marg_re, "(\\1_arg)", "g", $0)
+        $0 = gensub (marg_re, "(\\2_arg)", "g", $0)
     }
     out($0 ";  \\")
     next
@@ -718,7 +724,7 @@ BEGIN {
     $0 = gensub (expt_re, "pvm_make_int (\\1, 32)", "g", $0);
 
     # Substitute and check macro arguments.
-    $0 = gensub (marg_re, "(\\1_arg)", "g", $0);
+    $0 = gensub (marg_re, "(\\2_arg)", "g", $0);
 
     # Substitute variable arguments and perform side-effects.
     # This assumes instructions have at most one variable argument.

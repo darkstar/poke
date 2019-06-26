@@ -224,26 +224,10 @@ pkl_asm_insn_atoa (pkl_asm pasm,
   else
     {
       pkl_ast_node bound_type = PKL_AST_TYPE (bound);
+      pvm_val bounder = PKL_AST_TYPE_A_BOUNDER (to_type);
       
       if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_INTEGRAL)
-        // RAS_MACRO_ARRAY_CONV_SEL (bound);
-        {
-          jitter_label label = pkl_asm_fresh_label (pasm);
-          
-          /* Make sure the array in expression has the right number of
-             elements.  */
-          pkl_asm_insn (pasm, PKL_INSN_SEL);    /* ARR SEL */
-          pkl_asm_insn (pasm, PKL_INSN_PUSH, PKL_AST_TYPE_A_BOUNDER (to_type));
-          pkl_asm_insn (pasm, PKL_INSN_CALL);   /* ARR SEL BOUND */
-          pkl_asm_insn (pasm, PKL_INSN_EQLU);   /* ARR SEL BOUND (SEL==BOUND) */
-          pkl_asm_insn (pasm, PKL_INSN_BNZI, label);
-          pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_E_CONV, 32));
-          pkl_asm_insn (pasm, PKL_INSN_RAISE);
-          pkl_asm_label (pasm, label);
-          pkl_asm_insn (pasm, PKL_INSN_DROP);   /* ARR SEL BOUND */
-          pkl_asm_insn (pasm, PKL_INSN_NIP);    /* ARR BOUND */
-          pkl_asm_insn (pasm, PKL_INSN_ASETTB); /* ARR */
-        }
+        RAS_MACRO_ARRAY_CONV_SEL (bounder);
       else if (PKL_AST_TYPE_CODE (bound_type) == PKL_TYPE_OFFSET)
         // RAS_MACRO_ARRAY_CONV_SIZ (bound);
         {

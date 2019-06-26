@@ -600,31 +600,63 @@
         popf 1
         .end
 
-;; ;;; RAS_MACRO_ARRAY_CONV_SEL
-;; ;;; ( ARR -- ARR )
-;; ;;;
-;; ;;; This macro generates code that checks that ARR has the right number
-;; ;;; of elements as specified by an array type bounder.  If the check fails
-;; ;;; then PVM_E_CONV is raised.  If the check is ok, then it updates ARR's
-;; ;;; type boundary.
-;; ;;;
-;; ;;; Macro arguments:
-;; ;;; @bounder
-;; ;;;    a bounder closure.
+;;; RAS_MACRO_ARRAY_CONV_SEL
+;;; ( ARR -- ARR )
+;;;
+;;; This macro generates code that checks that ARR has the right number
+;;; of elements as specified by an array type bounder.  If the check fails
+;;; then PVM_E_CONV is raised.  If the check is ok, then it updates ARR's
+;;; type boundary.
+;;;
+;;; Macro arguments:
+;;; @bounder
+;;;    a bounder closure.
 
-;;         .macro array_conv_sel @bounder
-;;         sel                     ; ARR SEL
-;;         ;; XXX: accept pvm_val arguments to macros
-;;         .c pkl_asm_insn (pasm, PKL_INSN_PUSH, @bounder)
-;;         call                    ; ARR SEL BOUND
-;;         eqlu                    ; ARR SEL BOUND (SEL==BOUND)
-;;         bnzi .bound_ok
-;;         push PVM_E_CONV
-;;         raise
-;; .bound_ok:
-;;         drop                    ; ARR SEL BOUND
-;;         nip                     ; ARR BOUND
-;;         asettb                  ; ARR
-;;         .end
-        
-        
+        .macro array_conv_sel #bounder
+        sel                     ; ARR SEL
+        push #bounder           ; ARR SEL CLS
+        call                    ; ARR SEL BOUND
+        eqlu                    ; ARR SEL BOUND (SEL==BOUND)
+        bnzi .bound_ok
+        push PVM_E_CONV
+        raise
+.bound_ok:
+        drop                    ; ARR SEL BOUND
+        nip                     ; ARR BOUND
+        asettb                  ; ARR
+        .end
+
+;;; RAS_MACRO_ARRAY_CONV_SIZ
+;;; ( ARR -- ARR )
+;;;
+;;; This macro generates code that checks that ARR has the right size
+;;; as specified by an array type bounder.  If the check fails then
+;;; PVM_E_CONV is raised.  If the check is ok, then it updates ARR's
+;;; type boundary.
+;;;
+;;; Macro arguments:
+;;; @bounder
+;;;    a bounder closure.
+
+        .macro array_conv_siz #bounder
+        siz                     ; ARR SIZ
+        ogetm                   ; ARR SIZ SIZM
+        nip                     ; ARR SIZM
+        push #bounder           ; ARR SIZM CLS
+        call                    ; ARR SIZM BOUND
+        ogetm                   ; ARR SIZM BOUND BOUNDM
+        swap                    ; ARR SIZM BOUNDM BOUND
+        ogetu                   ; ARR SIZM BOUNDM BOUND BOUNDU
+        rot                     ; ARR SIZM BOUND BOUNDU BOUNDM
+        mullu
+        nip2                    ; ARR SIZM BOUND BOUNDM
+        rot                     ; ARR BOUND BOUNDM SIZM
+        eqlu                    ; ARR BOUND BOUNDM SIZM (BOUNDM==SIZM)
+        nip2                    ; ARR BOUND (BOUNDM==SIZM)
+        bnzi .bound_ok
+        push PVM_E_CONV
+        raise
+.bound_ok:
+        drop                    ; ARR BOUND
+        asettb                  ; ARR
+        .end
