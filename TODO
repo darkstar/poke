@@ -1,12 +1,14 @@
--*- mode: org -*-
+=====================
+GNU Poke - TODO lists
+=====================
 
 NOTE: this file is not your typical abandoned TODO file that nobody
-      reads and nobody updates.  We _do_ use this file, and these are
-      tasks that really need to get done.
+      reads and nobody updates.  We **do** use this file, and these
+      are tasks that really need to get done.
 
 If you start working on a complex task, please let us know in the
 development mailing list so we can be aware of your efforts, and
-provide help.
+probably help you.
 
 If you complete a task, please include a patch for this file in your
 patch submission, removing the corresponding entry.
@@ -15,30 +17,37 @@ The tasks below are generally ordered in reverse order of importance
 within their categories, i.e. the most important tasks are listed
 first.
 
-* build
+For help on how to hack GNU poke, please see the file HACKING in this
+very directory.
 
-  - Use jitter deopt options only where needed.  At the moment the
-    JITTER_CFLAGS and friends are applied to all the sources of the
-    `poke' program.  As jitter does some deoptimizations, it would be
-    more efficient to use these flags only in jitter-generated vm
-    files.  This could be achieved using a libtool convenience
-    library.
+Happy poking!
 
-* asm, gen
+build
+-----
 
-  - The assembly code snippets in both the code generator and the
-    macro assembler make an excessive use of `regvar'.  It would be
-    more efficient to use the return stack to store temporaries
-    (tor/fromr).  Patches in this spirit are welcome.
+- Use jitter deopt options only where needed.  At the moment the
+  JITTER_CFLAGS and friends are applied to all the sources of the
+  `poke' program.  As jitter does some deoptimizations, it would be
+  more efficient to use these flags only in jitter-generated vm files.
+  This could be achieved using a libtool convenience library.
+
+asm, gen
+--------
+
+- The assembly code snippets in both the code generator and the macro
+  assembler make an excessive use of `regvar'.  It would be more
+  efficient to use the return stack to store temporaries (tor/fromr).
+  Patches in this spirit are welcome.
   
-* ras
+ras
+---
 
-  - Validate the number of bits in u?int and u?long arguments.
-  - Make sure that label arguments are defined.
-  - Make sure that macro arguments are defined when used.
-  - Support macro arguments for PVM values.  These should use a
-    different prefix than @foo (for example, #foo) and allow them
-    in arguments `v' of instructions and macro-instructions.
-  - Write error messages to stderr.
-  - Pretty print: indentation in .loop/.endloop etc.
+- Validate the number of bits in u?int and u?long arguments.
+- Make sure that label arguments are defined.
+- Make sure that macro arguments are defined when used.
+- Pretty print: indentation in .loop/.endloop etc.
 
+
+Local Variables:
+mode: rst
+End:
