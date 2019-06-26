@@ -193,7 +193,7 @@ pkl_asm_insn_oto (pkl_asm pasm,
 }
 
 /* Macro-instruction: ATOA from_type to_type
-  ( ARR -- ARR(to_type) )
+  ( ARR(from_type) -- ARR(to_type) )
 
   Generate code to convert an array value from FROM_TYPE to TO_TYPE.
   Both types should be array types.  FROM_TYPE can be NULL.  */
