@@ -96,6 +96,8 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
     global POKE
 
     set VALGRIND ""
+    # Uncomment the following couple of lines to run the testsuite with
+    # valgring.
 #    set VALGRIND "valgrind --quiet --suppressions=${srcdir}/../etc/boehm-gc.suppressions \
 #                           --tool=memcheck --gen-suppressions=all"
 
