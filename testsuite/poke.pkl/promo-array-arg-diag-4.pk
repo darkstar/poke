@@ -2,6 +2,10 @@
 
 defvar x = 2;
 defun foo = (int n, int[n+x] a) int: { return a[1]; }
+defun bar = (int n, int[n+x][n+x] a) int: { return a[1][1]; }
 
 /* { dg-command {try foo (1, [1,2,3,4]); catch if E_conv { print "catched\n"; }} } */
 /* { dg-output "catched" } */
+
+/* { dg-command {try foo (1, [[1],[2]]); catch if E_conv { print "catched\n"; }} } */
+/* { dg-output "\ncatched" } */
