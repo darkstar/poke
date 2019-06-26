@@ -5,3 +5,5 @@ defvar x = 3;
 /* { dg-command { try [1,2] as int[x]; catch if E_conv { print "catched\n"; } } } */
 /* { dg-output "catched" } */
 
+/* { dg-command { try [[1,2],[3,4]] as int[x][x]; catch if E_conv { print "catched\n"; } } } */
+/* { dg-output "\ncatched" } */
