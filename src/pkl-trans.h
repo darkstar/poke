@@ -33,6 +33,7 @@ struct pkl_trans_payload
 {
   int errors;
   int add_frames;
+  int in_map;
 };
 
 typedef struct pkl_trans_payload *pkl_trans_payload;

@@ -13,6 +13,6 @@ defun bar = (int[x][x] a = [[1,2],[3,4]]) int: { return a[1][1]; }
 /* { dg-command {bar} } */
 /* { dg-output "\n4" } */
 
-/* { dg-command {foo([[10,20],[30,40]])} } */
+/* { dg-command {bar([[10,20],[30,40]])} } */
 /* { dg-output "\n40" } */
 

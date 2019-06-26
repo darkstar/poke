@@ -67,18 +67,26 @@ PKL_PHASE_END_HANDLER
 /* The array mappers introduce a lexical frame.  Unfortunately, it is
    not possible to add this frame in the bison parser due to syntactic
    ambiguities.  So, we need to reflect the extra lexical frame
-   here, by adjusting lexical addresses accordingly.
+   here, by adjusting lexical addresses accordingly.  */
 
-   XXX this should not be necessary, really.  The boundary expressions
-   in array types should convey their own lexical environment, because
-   they are executed in many different environments.  What about
-   clobbered variables that appear in the expression, for example?  */
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_map)
+{
+  PKL_TRANS_PAYLOAD->in_map += 1;
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_map)
+{
+  assert (PKL_TRANS_PAYLOAD->in_map > 0);
+  PKL_TRANS_PAYLOAD->in_map -= 1;
+}
+PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_type_array)
 {
-  /* XXX this should only happen if we are into a map.  Because array
-     types can also be in other contexts: return type in functions,
-     argument type in functions, casts, ... */
+  if (PKL_TRANS_PAYLOAD->in_map == 0)
+    PKL_PASS_BREAK;
+
   PKL_TRANS_PAYLOAD->add_frames += 1;
 }
 PKL_PHASE_END_HANDLER
@@ -102,6 +110,8 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_transl =
   {
+   PKL_PHASE_PR_HANDLER (PKL_AST_MAP, pkl_transl_pr_map),
+   PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_transl_ps_map),
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_transl_ps_var),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_pr_type_array),
