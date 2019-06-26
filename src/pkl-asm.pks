@@ -599,3 +599,32 @@
         drop
         popf 1
         .end
+
+;; ;;; RAS_MACRO_ARRAY_CONV_SEL
+;; ;;; ( ARR -- ARR )
+;; ;;;
+;; ;;; This macro generates code that checks that ARR has the right number
+;; ;;; of elements as specified by an array type bounder.  If the check fails
+;; ;;; then PVM_E_CONV is raised.  If the check is ok, then it updates ARR's
+;; ;;; type boundary.
+;; ;;;
+;; ;;; Macro arguments:
+;; ;;; @bounder
+;; ;;;    a bounder closure.
+
+;;         .macro array_conv_sel @bounder
+;;         sel                     ; ARR SEL
+;;         ;; XXX: accept pvm_val arguments to macros
+;;         .c pkl_asm_insn (pasm, PKL_INSN_PUSH, @bounder)
+;;         call                    ; ARR SEL BOUND
+;;         eqlu                    ; ARR SEL BOUND (SEL==BOUND)
+;;         bnzi .bound_ok
+;;         push PVM_E_CONV
+;;         raise
+;; .bound_ok:
+;;         drop                    ; ARR SEL BOUND
+;;         nip                     ; ARR BOUND
+;;         asettb                  ; ARR
+;;         .end
+        
+        
