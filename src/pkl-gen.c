@@ -966,8 +966,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_arg)
      we know that the value on the stack is an array with the same
      base type, but possibly different bounding.
 
-     Note that if the initial argument is used, then this code is not
-     executed, as promo inserted a cast there whenever necessary.  */
+     Note that if the initial argument is used, then the flow jumps to
+     `after_conv_label' and therefore the code below is not executed,
+     as promo already performed a cast if needed.  */
   if (PKL_AST_TYPE_CODE (func_arg_type) == PKL_TYPE_ARRAY)
     {
       /* Make sure the cast type has a bounder.  If it doesn't,
@@ -1262,10 +1263,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
   else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_ARRAY
            && PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_ARRAY)
     {
-      /* Casts from array to array perform run-time checks on array
-         boundaries, and then sets the boundary in the resulting
-         value.  */
-
       /* Make sure the cast type has a bounder.  If it doesn't,
          compile and install one.  */
       if (PKL_AST_TYPE_A_BOUNDER (to_type) == PVM_NULL)
