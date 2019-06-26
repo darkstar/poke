@@ -6,4 +6,5 @@ defvar a = ["foo", "bar", "baz"]
 /* { dg-command {try a[1] = "xxxx"; catch if E_conv { print "catched\n"; }} } */
 /* { dg-output "catched" } */
 
-  
+/* { dg-command {a[1]} } */
+/* { dg-output "\n\"bar\"" } */

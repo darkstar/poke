@@ -1821,11 +1821,15 @@ instruction mkma ()
   end
 end
 
+# Executing this instruction can result in the following exceptions:
+#   PVM_E_CONV
+
 instruction aset () # ( ARR ULONG VAL -- ARR )
   code
     uint64_t idx;
     pvm_val val;
     pvm_val arr;
+    pvm_val array_type, bound;
 
     val= JITTER_TOP_STACK ();
     idx = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
@@ -1837,7 +1841,35 @@ instruction aset () # ( ARR ULONG VAL -- ARR )
     if (idx < 0 || idx >= PVM_VAL_INTEGRAL (PVM_VAL_ARR_NELEM (arr)))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    PVM_VAL_ARR_ELEM_VALUE (arr, idx) = val;
+    /* If the array is bounded by size, check whether the new value
+       results in a different size.  */
+
+    array_type = PVM_VAL_ARR_TYPE (arr);
+    bound = PVM_VAL_TYP_A_BOUND (array_type);
+
+    if (PVM_IS_OFF (bound))
+      {
+        pvm_val new_size;
+        pvm_val oval = PVM_VAL_ARR_ELEM_VALUE (arr, idx);
+        uint64_t old_size_bits;
+        uint64_t new_size_bits;
+
+        PVM_VAL_ARR_ELEM_VALUE (arr, idx) = val;
+        new_size = pvm_sizeof (arr);
+
+        old_size_bits = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (bound))
+                         * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (bound)));
+        new_size_bits = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (new_size))
+                         * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (new_size)));
+
+        if (new_size_bits != old_size_bits)
+         {
+           PVM_VAL_ARR_ELEM_VALUE (arr, idx) = oval;
+           PVM_RAISE (PVM_E_CONV);
+         }
+      }
+   else
+     PVM_VAL_ARR_ELEM_VALUE (arr, idx) = val;
   end
 end
 
