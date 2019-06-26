@@ -1,0 +1,9 @@
+/* { dg-do run } */
+
+defvar a = ["foo", "bar", "baz"]
+           as string["foo"'size+"bar"'size+"baz"'size];
+
+/* { dg-command {try a[1] = "xxxx"; catch if E_conv { print "catched\n"; }} } */
+/* { dg-output "catched" } */
+
+  
