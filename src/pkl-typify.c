@@ -1963,21 +1963,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type)
 {
   pkl_ast_node type = PKL_PASS_NODE;
   PKL_AST_TYPE_COMPLETE (type) = pkl_ast_type_is_complete (type);
-
-  /* XXX: remove this!! :D  */
-#if 0
-  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
-      && PKL_AST_TYPE_A_BOUND (type) != NULL
-      && PKL_PASS_PARENT
-      && (PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_FUNC_TYPE_ARG
-          || PKL_AST_CODE (PKL_PASS_PARENT) == PKL_AST_DECL))
-    {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
-                 "invalid array type");
-      PKL_TYPIFY_PAYLOAD->errors++;
-      PKL_PASS_ERROR;
-    }
-#endif
 }
 PKL_PHASE_END_HANDLER
 
