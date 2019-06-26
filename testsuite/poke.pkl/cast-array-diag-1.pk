@@ -1,5 +1,4 @@
-/* { dg-do run } */
+/* { dg-do compile } */
 
-/* { dg-command { try [1,2] as int[3]; catch if E_conv { print "catched\n"; } } } */
-/* { dg-output "catched" } */
+defvar a = [1,2] as int[3]; /* { dg-error "" } */
 

@@ -205,19 +205,18 @@ pkl_asm_insn_atoa (pkl_asm pasm,
                    pkl_ast_node from_type,
                    pkl_ast_node to_type)
 {
-  //  pkl_ast_node to_type_etype = PKL_AST_TYPE_A_ETYPE (to_type);
+  pkl_ast_node to_type_etype = PKL_AST_TYPE_A_ETYPE (to_type);
   pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
 
-  //pkl_ast_node from_type_etype = NULL;
+  pkl_ast_node from_type_etype = NULL;
   pkl_ast_node from_bound = NULL;
 
   if (from_type)
     {
-      //      from_type_etype = PKL_AST_TYPE_A_ETYPE (from_type);
+      from_type_etype = PKL_AST_TYPE_A_ETYPE (from_type);
       from_bound = PKL_AST_TYPE_A_BOUND (from_type);
     }
 
-#if 0  
   /* If the array element is also an array, then convert each of it's
      elements, recursively.  */
   if (PKL_AST_TYPE_CODE (to_type_etype) == PKL_TYPE_ARRAY)
@@ -225,6 +224,7 @@ pkl_asm_insn_atoa (pkl_asm pasm,
       pkl_asm_for (pasm, PKL_TYPE_ARRAY, NULL /* selector */);
       {
         /* The array is already in the stack.  */
+        pkl_asm_insn (pasm, PKL_INSN_DUP);
       }
       pkl_asm_for_where (pasm);
       {
@@ -232,12 +232,12 @@ pkl_asm_insn_atoa (pkl_asm pasm,
       }
       pkl_asm_for_loop (pasm);
       {
-        pkl_asm_insn_atoa (pasm, from_type_etype, to_type_etype);
-        pkl_asm_insn (pasm, PKL_INSN_DROP);
+        pkl_asm_insn (pasm, PKL_INSN_PUSHVAR, 0, 0);              /* ELEM */
+        pkl_asm_insn_atoa (pasm, from_type_etype, to_type_etype); /* ELEM */
+        pkl_asm_insn (pasm, PKL_INSN_DROP);                       /* _ */
       }
       pkl_asm_for_endloop (pasm);
     }
-#endif
 
   /* Now process the array itself.  */
   if (bound == NULL)
