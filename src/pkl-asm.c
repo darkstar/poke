@@ -82,6 +82,7 @@ struct pkl_asm_level
   jitter_label label3;
   pkl_ast_node node1;
   pkl_ast_node node2;
+  int int1;
 
   jitter_label break_label;
 };
@@ -196,19 +197,49 @@ pkl_asm_insn_oto (pkl_asm pasm,
   ( ARR(from_type) -- ARR(to_type) )
 
   Generate code to convert an array value from FROM_TYPE to TO_TYPE.
-  Both types should be array types.  FROM_TYPE can be NULL.  */
+  Both types should be array types, equal but for the boundaries.
+  FROM_TYPE can be NULL.  */
 
 static void
 pkl_asm_insn_atoa (pkl_asm pasm,
                    pkl_ast_node from_type,
                    pkl_ast_node to_type)
 {
+  //  pkl_ast_node to_type_etype = PKL_AST_TYPE_A_ETYPE (to_type);
   pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (to_type);
+
+  //pkl_ast_node from_type_etype = NULL;
   pkl_ast_node from_bound = NULL;
 
   if (from_type)
-    from_bound = PKL_AST_TYPE_A_BOUND (from_type);
+    {
+      //      from_type_etype = PKL_AST_TYPE_A_ETYPE (from_type);
+      from_bound = PKL_AST_TYPE_A_BOUND (from_type);
+    }
 
+#if 0  
+  /* If the array element is also an array, then convert each of it's
+     elements, recursively.  */
+  if (PKL_AST_TYPE_CODE (to_type_etype) == PKL_TYPE_ARRAY)
+    {
+      pkl_asm_for (pasm, PKL_TYPE_ARRAY, NULL /* selector */);
+      {
+        /* The array is already in the stack.  */
+      }
+      pkl_asm_for_where (pasm);
+      {
+        /* No condition.  */
+      }
+      pkl_asm_for_loop (pasm);
+      {
+        pkl_asm_insn_atoa (pasm, from_type_etype, to_type_etype);
+        pkl_asm_insn (pasm, PKL_INSN_DROP);
+      }
+      pkl_asm_for_endloop (pasm);
+    }
+#endif
+
+  /* Now process the array itself.  */
   if (bound == NULL)
     {
       if (from_type && from_bound == NULL)
@@ -1572,7 +1603,7 @@ pkl_asm_endloop (pkl_asm pasm)
 */
 
 void
-pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
+pkl_asm_for (pkl_asm pasm, int container_type,
              pkl_ast_node selector)
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_FOR_LOOP);
@@ -1581,12 +1612,12 @@ pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
   pasm->level->label2 = jitter_fresh_label (pasm->program);
   pasm->level->label3 = jitter_fresh_label (pasm->program);
   pasm->level->break_label = jitter_fresh_label (pasm->program);
- 
 
   if (selector)
     pasm->level->node1 = ASTREF (selector);
-  assert (container);
-  pasm->level->node2 = ASTREF (container);
+  assert (container_type == PKL_TYPE_ARRAY
+          || container_type == PKL_TYPE_STRING);
+  pasm->level->int1 = container_type;
 }
 
 void
@@ -1612,8 +1643,7 @@ pkl_asm_for_where (pkl_asm pasm)
   /* Set the iterator for this iteration.  */
   pkl_asm_insn (pasm, PKL_INSN_ROT);
   pkl_asm_insn (pasm, PKL_INSN_ROT);
-  if (PKL_AST_TYPE_CODE (PKL_AST_TYPE (pasm->level->node2))
-      == PKL_TYPE_ARRAY)
+  if (pasm->level->int1 == PKL_TYPE_ARRAY)
     pkl_asm_insn (pasm, PKL_INSN_AREF);
   else
     pkl_asm_insn (pasm, PKL_INSN_STRREF);
@@ -1661,7 +1691,6 @@ pkl_asm_for_endloop (pkl_asm pasm)
 
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
-  pkl_ast_node_free (pasm->level->node2);
   pkl_asm_poplevel (pasm);
 }
 

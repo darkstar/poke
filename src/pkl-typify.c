@@ -252,17 +252,20 @@ expected uint<8>, got %s.",
       PKL_PASS_ERROR;
     }
 
-  /* Only arrays can be casted to arrays.  */
+  /* Only arrays can be casted to arrays.  Also, only array boundaries
+     may differ.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ARRAY
-      && PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_ARRAY)
+      && !pkl_ast_type_equal (type, exp_type))
     {
-      char *found_type = pkl_type_str (exp_type, 1);
+      char *type_str = pkl_type_str (type, 1);
+      char *found_type_str = pkl_type_str (exp_type, 1);
 
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "invalid cast to array\n\
-expected array, got %s.",
-                 found_type);
-      free (found_type);
+expected %s, got %s.",
+                 type_str, found_type_str);
+      free (type_str);
+      free (found_type_str);
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }

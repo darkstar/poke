@@ -597,8 +597,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
     }
   else if (iterator && container)
     {
+      pkl_ast_node container_type = PKL_AST_TYPE (container);
+      
       /* This is a FOR-IN[-WHERE] loop.  */
-      pkl_asm_for (PKL_GEN_ASM, container, condition);
+      pkl_asm_for (PKL_GEN_ASM,
+                   PKL_AST_TYPE_CODE (container_type),
+                   condition);
       {
         PKL_PASS_SUBPASS (container);
       }

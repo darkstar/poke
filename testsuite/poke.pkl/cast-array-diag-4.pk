@@ -1,6 +1,4 @@
-/* { dg-do run } */
+/* { dg-do compile } */
 
 deftype Matrix = int[2][2];
-
-/* { dg-command { try [[1,2,3],[4,5,6]] as Matrix; catch if E_conv { print "catched\n"; } } } */
-/* { dg-output "catched" } */
+defvar a = [[1,2,3],[4,5,6]] as Matrix; /* { dg-error "" } */

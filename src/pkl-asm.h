@@ -128,7 +128,7 @@ void pkl_asm_endloop (pkl_asm pasm);
 
 /* For-in-where loops.
  *
- * pkl_asm_for (pasm, container, selector)
+ * pkl_asm_for (pasm, container_type, selector)
  *
  * ... container ...
  *
@@ -144,7 +144,7 @@ void pkl_asm_endloop (pkl_asm pasm);
  *
  */
 
-void pkl_asm_for (pkl_asm pasm, pkl_ast_node container,
+void pkl_asm_for (pkl_asm pasm, int container_type,
                   pkl_ast_node selector);
 void pkl_asm_for_where (pkl_asm pasm);
 void pkl_asm_for_loop (pkl_asm pasm);
