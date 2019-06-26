@@ -1,0 +1,4 @@
+/* { dg-do compile } */
+
+deftype foo = int[-1];  /* { dg-error "" } */
+
