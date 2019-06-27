@@ -35,55 +35,69 @@
 
 /* Emulation routines.  */
 
+#define EMUL_UNA_PROTO(OP,SIGN,TYPE,RTYPE)              \
+  static inline RTYPE emul_##SIGN##_##OP (TYPE op)
+
 #define EMUL_BIN_PROTO(OP,SIGN,TYPE,RTYPE)                      \
   static inline RTYPE emul_##SIGN##_##OP (TYPE op1, TYPE op2)
 
-#define EMUL_BIN_III_S(OP)                      \
+#define EMUL_II(OP)                       \
+  EMUL_UNA_PROTO (OP,s,int64_t,int64_t)
+#define EMUL_UU(OP)                       \
+  EMUL_UNA_PROTO (OP,u,uint64_t,uint64_t)
+#define EMUL_III(OP)                      \
   EMUL_BIN_PROTO (OP,s,int64_t,int64_t)
-#define EMUL_BIN_III_U(OP)                      \
+#define EMUL_UUU(OP)                      \
   EMUL_BIN_PROTO (OP,u,uint64_t,uint64_t)
-#define EMUL_BIN_SSI_S(OP)                      \
+#define EMUL_SSI(OP)                          \
   EMUL_BIN_PROTO (OP,s,const char *,int64_t)
 
-EMUL_BIN_III_U (or) { return op1 || op2; }
-EMUL_BIN_III_S (or) { return op1 || op2; }
-EMUL_BIN_III_U (ior) { return op1 | op2; }
-EMUL_BIN_III_S (ior) { return op1 | op2; }
-EMUL_BIN_III_U (xor) { return op1 ^ op2; }
-EMUL_BIN_III_S (xor) { return op1 ^ op2; }
-EMUL_BIN_III_U (and) { return op1 && op2; }
-EMUL_BIN_III_S (and) { return op1 && op2; }
-EMUL_BIN_III_U (band) { return op1 & op2; }
-EMUL_BIN_III_S (band) { return op1 & op2; }
-EMUL_BIN_III_U (eq) { return op1 == op2; }
-EMUL_BIN_III_S (eq) { return op1 == op2; }
-EMUL_BIN_III_U (ne) { return op1 != op2; }
-EMUL_BIN_III_S (ne) { return op1 != op2; }
-EMUL_BIN_III_U (add) { return op1 + op2; }
-EMUL_BIN_III_S (add) { return op1 + op2; }
-EMUL_BIN_III_U (sub) { return op1 - op2; }
-EMUL_BIN_III_S (sub) { return op1 - op2; }
-EMUL_BIN_III_U (mul) { return op1 * op2; }
-EMUL_BIN_III_S (mul) { return op1 * op2; }
-EMUL_BIN_III_U (div) { return op1 / op2; }
-EMUL_BIN_III_S (div) { return op1 / op2; }
-EMUL_BIN_III_U (mod) { return op1 % op2; }
-EMUL_BIN_III_S (mod) { return op1 % op2; }
-EMUL_BIN_III_U (lt) { return op1 < op2; }
-EMUL_BIN_III_S (lt) { return op1 < op2; }
-EMUL_BIN_III_U (gt) { return op1 > op2; }
-EMUL_BIN_III_S (gt) { return op1 > op2; }
-EMUL_BIN_III_U (le) { return op1 <= op2; }
-EMUL_BIN_III_S (le) { return op1 <= op2; }
-EMUL_BIN_III_U (ge) { return op1 >= op2; }
-EMUL_BIN_III_S (ge) { return op1 >= op2; }
+EMUL_II (neg) { return -op; }
+EMUL_UU (neg) { return -op; }
+EMUL_II (not) { return !op; }
+EMUL_UU (not) { return !op; }
+EMUL_II (bnot) { return ~op; }
+EMUL_UU (bnot) { return ~op; }
 
-EMUL_BIN_III_U (sl) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_BIN_III_S (sl) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_BIN_III_U (sr) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_BIN_III_S (sr) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_UUU (or) { return op1 || op2; }
+EMUL_III (or) { return op1 || op2; }
+EMUL_UUU (ior) { return op1 | op2; }
+EMUL_III (ior) { return op1 | op2; }
+EMUL_UUU (xor) { return op1 ^ op2; }
+EMUL_III (xor) { return op1 ^ op2; }
+EMUL_UUU (and) { return op1 && op2; }
+EMUL_III (and) { return op1 && op2; }
+EMUL_UUU (band) { return op1 & op2; }
+EMUL_III (band) { return op1 & op2; }
+EMUL_UUU (eq) { return op1 == op2; }
+EMUL_III (eq) { return op1 == op2; }
+EMUL_UUU (ne) { return op1 != op2; }
+EMUL_III (ne) { return op1 != op2; }
+EMUL_UUU (add) { return op1 + op2; }
+EMUL_III (add) { return op1 + op2; }
+EMUL_UUU (sub) { return op1 - op2; }
+EMUL_III (sub) { return op1 - op2; }
+EMUL_UUU (mul) { return op1 * op2; }
+EMUL_III (mul) { return op1 * op2; }
+EMUL_UUU (div) { return op1 / op2; }
+EMUL_III (div) { return op1 / op2; }
+EMUL_UUU (mod) { return op1 % op2; }
+EMUL_III (mod) { return op1 % op2; }
+EMUL_UUU (lt) { return op1 < op2; }
+EMUL_III (lt) { return op1 < op2; }
+EMUL_UUU (gt) { return op1 > op2; }
+EMUL_III (gt) { return op1 > op2; }
+EMUL_UUU (le) { return op1 <= op2; }
+EMUL_III (le) { return op1 <= op2; }
+EMUL_UUU (ge) { return op1 >= op2; }
+EMUL_III (ge) { return op1 >= op2; }
 
-EMUL_BIN_SSI_S (eqs) { return (strcmp (op1, op2) == 0); }
+EMUL_UUU (sl) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_III (sl) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_UUU (sr) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_III (sr) { assert (0); return 0; } /* XXX WRITEME */
+
+EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
 
 #if 0
 /* Auxiliary macros used in the handlers below.  */
@@ -179,7 +193,6 @@ PKL_PHASE_HANDLER_UNIMPL (elemsof);
 PKL_PHASE_HANDLER_UNIMPL (typeof);
 PKL_PHASE_HANDLER_UNIMPL (sizeof);
 PKL_PHASE_HANDLER_UNIMPL (pos);
-PKL_PHASE_HANDLER_UNIMPL (neg);
 PKL_PHASE_HANDLER_UNIMPL (bnot);
 PKL_PHASE_HANDLER_UNIMPL (not);
 PKL_PHASE_HANDLER_UNIMPL (sconc);
