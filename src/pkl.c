@@ -134,7 +134,7 @@ rest_of_compilation (pkl_compiler compiler,
         &pkl_phase_typify1,
         &pkl_phase_promo,
         &pkl_phase_trans2,
-        /*            &pkl_phase_fold,*/
+        &pkl_phase_fold,
         &pkl_phase_typify2,
         &pkl_phase_trans3,
         &pkl_phase_anal2,
@@ -147,7 +147,7 @@ rest_of_compilation (pkl_compiler compiler,
         &typify1_payload,
         NULL, /* promo */
         &trans2_payload,
-        /*  NULL,*/ /* fold */
+        NULL, /* fold */
         &typify2_payload,
         &trans3_payload,
         &anal2_payload,
