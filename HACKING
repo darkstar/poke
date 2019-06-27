@@ -245,6 +245,22 @@ Suppression list for memcheck:
 
 - etc/boehm-gc.suppressions
 
+Coding Style and Conventions
+----------------------------
+
+Poke Code
+~~~~~~~~~
+
+- Do not separate magnitudes and units when writing offsets.  Do it
+  like this::
+
+    16#B
+
+  instead of::
+
+    16 #B
+
+
 Poke Architecture
 -----------------
 
