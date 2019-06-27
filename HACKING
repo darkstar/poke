@@ -2,12 +2,12 @@
 GNU Poke - Hacking Notes
 ========================
 
-Welcome, adventurous poker!
-This file contains useful information for you.
+Welcome, adventurous poker! This file contains useful information for
+you.
 
-Please be as good as to update the table of contents below if you
-modify the sectioning of the document.  If in Emacs, M-xrst-toc-update
-should take care of it automatically.
+..  Please be as good as to update the table of contents below if you
+    modify the sectioning of the document.  If in Emacs,
+    M-xrst-toc-update should take care of it automatically.
 
 .. contents:: 
 ..
@@ -350,6 +350,74 @@ Pass2
   trans4
 Pass3
   analf gen
+
+Naming Conventions for Phases
+.............................
+
+We use the following convention to name phases::
+
+  {NAME}{SUFFIX}
+
+where ``NAME`` reflects a phase category (see below) and ``SUFFIX`` is
+usually an integer that specifies the order in which the phases are
+applied.  Thus, for example, ``name4`` is performed after ``name1``.
+Sometimes, ``SUFFIX`` is ``f`` (meaning "final").
+
+The suffix is not used if there is only one phase in the given
+category.
+
+We use the following phase categories:
+
+anal
+  For phases whose main purpose is to perform checks on the AST,
+  and/or the contents of the AST nodes, and emit errors/warnings.
+
+trans
+  For phases whose main purpose is to alter the structure of the AST,
+  and/or the contents of the AST nodes.
+
+typify
+  For phases whose main purpose is to perform type checks, and
+  otherwise do work on types.
+
+promo
+  For phases whose main purpose is to perform coercions wherever
+  appropriate.  Currently there is only one phase in this category.
+
+fold
+  For phases whose main purpose is to pre-compute areas of the AST
+  whenever it is possible to do so at compile-time.  Currently there
+  is only one phase in this category, that performs constant folding.
+
+gen
+  For phases whose main purpose is to generate PVM code.  Currently
+  there is only one phase in this category.
+
+The phases in category ``NAME`` are implemented in the source files
+``src/pkl-NAME.[ch]``.
+
+
+Naming Conventions for Handlers
+...............................
+
+We use the following convention to name phase handlers::
+
+  pkl_PHASE_{ps,pr}_NODE
+
+where ``PHASE`` can be a complete phase name (like ``typify1``) if the
+handler is to be installed in that phase only, or a phase category
+name (like ``typify``) if the handler is to be installed in several
+phases in that category.  If the phase is to be executed in pre-order,
+``pr`` follows, otherwise, ``ps``.  Finally, ``NODE`` is the name of
+the AST node.
+
+For example, the handler::
+
+  pkl_anal1_ps_comp_stmt
+
+is installed in the phase ``anal1``, executes in post-order, and
+serves the AST nodes with code ``PKL_AST_COMP_STMT``.
+
 
 Transformation Phases
 .....................
