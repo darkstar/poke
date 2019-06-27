@@ -33,126 +33,59 @@
 #define GCD pkl_gcd
 #include <gcd.c>
 
+/* Emulation routines.  */
+
+#define EMUL_BIN_PROTO(OP,SIGN,TYPE,RTYPE)                      \
+  static inline RTYPE emul_##SIGN##_##OP (TYPE op1, TYPE op2)
+
+#define EMUL_BIN_III_S(OP)                      \
+  EMUL_BIN_PROTO (OP,s,int64_t,int64_t)
+#define EMUL_BIN_III_U(OP)                      \
+  EMUL_BIN_PROTO (OP,u,uint64_t,uint64_t)
+#define EMUL_BIN_SSI_S(OP)                      \
+  EMUL_BIN_PROTO (OP,s,const char *,int64_t)
+
+EMUL_BIN_III_U (or) { return op1 || op2; }
+EMUL_BIN_III_S (or) { return op1 || op2; }
+EMUL_BIN_III_U (ior) { return op1 | op2; }
+EMUL_BIN_III_S (ior) { return op1 | op2; }
+EMUL_BIN_III_U (xor) { return op1 ^ op2; }
+EMUL_BIN_III_S (xor) { return op1 ^ op2; }
+EMUL_BIN_III_U (and) { return op1 && op2; }
+EMUL_BIN_III_S (and) { return op1 && op2; }
+EMUL_BIN_III_U (band) { return op1 & op2; }
+EMUL_BIN_III_S (band) { return op1 & op2; }
+EMUL_BIN_III_U (eq) { return op1 == op2; }
+EMUL_BIN_III_S (eq) { return op1 == op2; }
+EMUL_BIN_III_U (ne) { return op1 != op2; }
+EMUL_BIN_III_S (ne) { return op1 != op2; }
+EMUL_BIN_III_U (add) { return op1 + op2; }
+EMUL_BIN_III_S (add) { return op1 + op2; }
+EMUL_BIN_III_U (sub) { return op1 - op2; }
+EMUL_BIN_III_S (sub) { return op1 - op2; }
+EMUL_BIN_III_U (mul) { return op1 * op2; }
+EMUL_BIN_III_S (mul) { return op1 * op2; }
+EMUL_BIN_III_U (div) { return op1 / op2; }
+EMUL_BIN_III_S (div) { return op1 / op2; }
+EMUL_BIN_III_U (mod) { return op1 % op2; }
+EMUL_BIN_III_S (mod) { return op1 % op2; }
+EMUL_BIN_III_U (lt) { return op1 < op2; }
+EMUL_BIN_III_S (lt) { return op1 < op2; }
+EMUL_BIN_III_U (gt) { return op1 > op2; }
+EMUL_BIN_III_S (gt) { return op1 > op2; }
+EMUL_BIN_III_U (le) { return op1 <= op2; }
+EMUL_BIN_III_S (le) { return op1 <= op2; }
+EMUL_BIN_III_U (ge) { return op1 >= op2; }
+EMUL_BIN_III_S (ge) { return op1 >= op2; }
+
+EMUL_BIN_III_U (sl) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_BIN_III_S (sl) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_BIN_III_U (sr) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_BIN_III_S (sr) { assert (0); return 0; } /* XXX WRITEME */
+
+EMUL_BIN_SSI_S (eqs) { return (strcmp (op1, op2) == 0); }
 
 #if 0
-static inline uint64_t
-emul_or (uint64_t op1, uint64_t op2)
-{
-  return op1 || op2;
-}
-
-static inline uint64_t
-emul_ior (uint64_t op1, uint64_t op2)
-{
-  return op1 | op2;
-}
-
-static inline uint64_t
-emul_xor (uint64_t op1, uint64_t op2)
-{
-  return op1 ^ op2;
-}
-
-static inline uint64_t
-emul_and (uint64_t op1, uint64_t op2)
-{
-  return op1 && op2;
-}
-
-static inline uint64_t
-emul_band (uint64_t op1, uint64_t op2)
-{
-  return op1 & op2;
-}
-
-static inline uint64_t
-emul_eq (uint64_t op1, uint64_t op2)
-{
-  return op1 == op2;
-}
-
-static inline uint64_t
-emul_eqs (const char *op1, const char *op2)
-{
-  return (strcmp (op1, op2) == 0);
-}
-
-static inline uint64_t
-emul_ne (uint64_t op1, uint64_t op2)
-{
-  return (op1 != op2);
-}
-
-static inline uint64_t
-emul_sl (uint64_t op1, uint64_t op2)
-{
-  /* XXX writeme */
-  assert (0);
-  return 0;
-}
-
-static inline uint64_t
-emul_sr (uint64_t op1, uint64_t op2)
-{
-  /* XXX writeme */
-  assert (0);
-  return 0;
-}
-
-static inline uint64_t
-emul_add (uint64_t op1, uint64_t op2)
-{
-  return op1 + op2;
-}
-
-static inline uint64_t
-emul_sub (uint64_t op1, uint64_t op2)
-{
-  return op1 - op2;
-}
-
-static inline uint64_t
-emul_mul (uint64_t op1, uint64_t op2)
-{
-  return op1 * op2;
-}
-
-static inline uint64_t
-emul_div (uint64_t op1, uint64_t op2)
-{
-  return op1 / op2;
-}
-
-static inline uint64_t
-emul_mod (uint64_t op1, uint64_t op2)
-{
-  return op1 % op2;
-}
-
-static inline uint64_t
-emul_lt (uint64_t op1, uint64_t op2)
-{
-  return op1 < op2;
-}
-
-static inline uint64_t
-emul_gt (uint64_t op1, uint64_t op2)
-{
-  return op1 > op2;
-}
-
-static inline uint64_t
-emul_le (uint64_t op1, uint64_t op2)
-{
-  return op1 <= op2;
-}
-
-static inline uint64_t
-emul_ge (uint64_t op1, uint64_t op2)
-{
-  return op1 >= op2;
-}
-
 /* Auxiliary macros used in the handlers below.  */
 
 #define OP_BINARY_INT(emul)                                             \
@@ -218,6 +151,8 @@ PKL_PHASE_HANDLER_BIN_INT (sr, emul_sr);
 PKL_PHASE_HANDLER_BIN_INT (add, emul_add);
 PKL_PHASE_HANDLER_BIN_INT (sub, emul_sub);
 PKL_PHASE_HANDLER_BIN_INT (mul, emul_mul);
+/* XXX the handler for div and mod should check for division by
+   zero.  */
 PKL_PHASE_HANDLER_BIN_INT (div, emul_div);
 PKL_PHASE_HANDLER_BIN_INT (mod, emul_mod);
 PKL_PHASE_HANDLER_BIN_INT (lt, emul_lt);
@@ -312,6 +247,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_ps_cast)
     }
   else
     PKL_PASS_DONE;
+
+  /* XXX handle array casts.  */
 
   /* `new' is the node to replace the cast.  */
   PKL_AST_TYPE (new) = ASTREF (to_type);
