@@ -28,7 +28,7 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
-/* Get our own GCD from gnulib.  */
+/* Roll out our own GCD from gnulib.  */
 #define WORD_T uint64_t
 #define GCD pkl_gcd
 #include <gcd.c>
