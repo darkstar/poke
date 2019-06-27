@@ -308,7 +308,9 @@ pkl_ast_node pkl_ast_make_identifier (pkl_ast ast,
 
 /* PKL_AST_INTEGER nodes represent integer constants in poke programs.
 
-   VALUE contains a 64-bit unsigned integer.  */
+   VALUE contains a 64-bit unsigned integer.  This contains the
+   encoding of a Poke integer, which may be signed or unsigned.  The
+   lexer generates only unsigned integers.  */
 
 #define PKL_AST_INTEGER_VALUE(AST) ((AST)->integer.value)
 

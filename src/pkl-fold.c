@@ -26,6 +26,7 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
+#if 0
 static inline uint64_t
 emul_or (uint64_t op1, uint64_t op2)
 {
@@ -240,36 +241,27 @@ PKL_PHASE_HANDLER_UNIMPL (bnot);
 PKL_PHASE_HANDLER_UNIMPL (not);
 PKL_PHASE_HANDLER_UNIMPL (sconc);
 
+#endif
+
 PKL_PHASE_BEGIN_HANDLER (pkl_fold_ps_cast)
 {
-  pkl_ast_node node = PKL_PASS_NODE;
-  pkl_ast_node exp = PKL_AST_CAST_EXP (node);
-
-  pkl_ast_node to_type = PKL_AST_CAST_TYPE (node);
+  pkl_ast_node cast = PKL_PASS_NODE;
+  pkl_ast_node exp = PKL_AST_CAST_EXP (cast);
   pkl_ast_node from_type = PKL_AST_TYPE (exp);
+  pkl_ast_node to_type = PKL_AST_CAST_TYPE (cast);
 
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
-      && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL)
+      && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_CODE (exp) == PKL_AST_INTEGER)
     {
-      //      size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
-      //      int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
-      
-      //      size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
-      //      int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
-
-      pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
-      pkl_ast_node new;
-      uint64_t new_value;
-
-      new_value = PKL_AST_INTEGER_VALUE (op1);
-
-      new = pkl_ast_make_integer (PKL_PASS_AST, new_value);
+      pkl_ast_node new
+        = pkl_ast_make_integer (PKL_PASS_AST,
+                                PKL_AST_INTEGER_VALUE (exp));
       PKL_AST_TYPE (new) = ASTREF (to_type);
-      PKL_AST_LOC (new) = PKL_AST_LOC (op1);
+      PKL_AST_LOC (new) = PKL_AST_LOC (exp);
       
-      pkl_ast_node_free (PKL_PASS_NODE);
+      pkl_ast_node_free (cast);
       PKL_PASS_NODE = new;
-      PKL_PASS_RESTART = 1; /* XXX ??? */
     }
 }
 PKL_PHASE_END_HANDLER
@@ -277,6 +269,7 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_fold =
   {
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_fold_ps_cast),
+#if 0
 #define ENTRY(ops, fs)\
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_##ops, pkl_fold_##fs)
 
@@ -291,4 +284,5 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
    ENTRY (NOT, not), ENTRY (SIZEOF, sizeof),
 #undef ENTRY
+#endif
   };
