@@ -20,25 +20,28 @@ you.
       1.6  Test Suite
       1.7  Documentation
       1.8  Other Stuff
-    2  Poke Architecture
-    3  The Poke Compiler
-      3.1  Compiler Overview
-      3.2  The bison Parser in pkl-tab.y
-      3.3  Compiler Passes and Phases
-        3.3.1  Transformation Phases
-        3.3.2  Analysis Phases
-        3.3.3  Type System Phases
-      3.4  The Type System
-        3.4.1  Type Expressions
-    4  The Poke Virtual Machine
-      4.1  Exception Handling
-    5  Debugging Poke
-      5.1  Building with Debugging support
-      5.2  Using GDB extensions
-      5.3  Valgrind and Poke
-      5.4  Debugging PVM Assembly Code
-    6  Future Developments
-
+    2  Coding Style and Conventions
+      2.1  When writing Poke
+    3  Poke Architecture
+    4  The Poke Compiler
+      4.1  Compiler Overview
+      4.2  The bison Parser in pkl-tab.y
+      4.3  Compiler Passes and Phases
+        4.3.1  Naming Conventions for Phases
+        4.3.2  Naming Conventions for Handlers
+        4.3.3  Transformation Phases
+        4.3.4  Analysis Phases
+        4.3.5  Type System Phases
+      4.4  The Type System
+        4.4.1  Type Expressions
+    5  The Poke Virtual Machine
+      5.1  Exception Handling
+    6  Debugging Poke
+      6.1  Building with Debugging support
+      6.2  Using GDB extensions
+      6.3  Valgrind and Poke
+      6.4  Debugging PVM Assembly Code
+    7  Future Developments
 
 
 The Source Tree
@@ -248,8 +251,8 @@ Suppression list for memcheck:
 Coding Style and Conventions
 ----------------------------
 
-Poke Code
-~~~~~~~~~
+When writing Poke
+~~~~~~~~~~~~~~~~~
 
 - Do not separate magnitudes and units when writing offsets.  Do it
   like this::
