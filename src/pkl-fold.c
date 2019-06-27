@@ -33,7 +33,15 @@
 #define GCD pkl_gcd
 #include <gcd.c>
 
-/* Emulation routines.  */
+/* Emulation routines.
+
+   The letter-codes after EMUL_ specify the number and kind of
+   arguments that the operations receive and return.  The type of the
+   returned value comes last.
+   
+   So, for example, EMUL_III declares an int64 OP int64 -> int64
+   operation, whereas EMUL_SSI declares a string OP string -> int64
+   operation.  */
 
 #define EMUL_UNA_PROTO(OP,SIGN,TYPE,RTYPE)              \
   static inline RTYPE emul_##SIGN##_##OP (TYPE op)
@@ -189,12 +197,8 @@ PKL_PHASE_END_HANDLER
   PKL_PHASE_END_HANDLER
 
 PKL_PHASE_HANDLER_UNIMPL (map);
-PKL_PHASE_HANDLER_UNIMPL (elemsof);
-PKL_PHASE_HANDLER_UNIMPL (typeof);
 PKL_PHASE_HANDLER_UNIMPL (sizeof);
 PKL_PHASE_HANDLER_UNIMPL (pos);
-PKL_PHASE_HANDLER_UNIMPL (bnot);
-PKL_PHASE_HANDLER_UNIMPL (not);
 PKL_PHASE_HANDLER_UNIMPL (sconc);
 
 #endif
