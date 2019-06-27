@@ -353,7 +353,7 @@ PKL_DEF_INSN (PKL_INSN_PRINTS, "", "prints")
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")
 PKL_DEF_INSN (PKL_INSN_NOTE, "v", "note")
 PKL_DEF_INSN (PKL_INSN_SIZ, "", "siz")
-PKL_DEF_INSN (PKL_INSN_STRACE, "", "strace")
+PKL_DEF_INSN (PKL_INSN_STRACE, "n", "strace")
 
 /* Exceptions handling instructions.  */
 

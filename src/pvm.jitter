@@ -689,14 +689,17 @@ instruction siz () # ( VAL -- VAL OFF )
   end
 end
 
-instruction strace () # ( -- )
+instruction strace (?n) # ( -- )
   code
      pvm_val tmp[1024];
      int i = 0, j;
+     int num_elems = (int) JITTER_ARGN0;
 
-     while (JITTER_HEIGHT_STACK () !=
-            jitter_original_state->pvm_state_backing.canary)
+     while (((num_elems == 0 || i < num_elems)
+             && (JITTER_HEIGHT_STACK () !=
+                 jitter_original_state->pvm_state_backing.canary)))
         {
+          assert (i < 1024);
           pvm_print_val (stdout, JITTER_TOP_STACK (), 16, PVM_PRINT_F_MAPS);
           fprintf (stdout, "\n");
           tmp[i++] = JITTER_TOP_STACK ();

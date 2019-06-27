@@ -25,6 +25,9 @@ should take care of it automatically.
       3.1  Compiler Overview
       3.2  The bison Parser in pkl-tab.y
       3.3  Compiler Passes and Phases
+        3.3.1  Transformation Phases
+        3.3.2  Analysis Phases
+        3.3.3  Type System Phases
       3.4  The Type System
         3.4.1  Type Expressions
     4  The Poke Virtual Machine
@@ -33,8 +36,9 @@ should take care of it automatically.
       5.1  Building with Debugging support
       5.2  Using GDB extensions
       5.3  Valgrind and Poke
-      5.4  Debugging PVM Assembler
+      5.4  Debugging PVM Assembly Code
     6  Future Developments
+
 
 
 The Source Tree
@@ -347,37 +351,39 @@ Pass2
 Pass3
   analf gen
 
-Follows a brief but complete description of the tasks performed by
-each phase.  Please keep it up to date.
+Transformation Phases
+.....................
 
 trans1
-
-- Finishes strings by expanding \-sequences, emitting diagnostics if
-  an invalid \-sequence is found.
-
-anal1
-
-- Checks that every return statement is linked to a function.
-- Checks that no return statement is linked to a void function.
-
-typify1
-
-- Checks that the expression in which a funcall is applied is a
-  function, and that the types of the formal parameters mach the types
-  of the funcall arguments.
-- Checks that void functions are not called in contexts where a value
-  is expected.
-
-typify2
-
-- Checks that the type of the expression in a return statement matches
-  the return type of its containing function.
+  - Finishes strings by expanding \-sequences, emitting diagnostics if
+    an invalid \-sequence is found.
 
 trans4
+  - Reverses the list of actual arguments in function calls, so the
+    code generator tackles them in the right (reversed) order, as it
+    is expected by the callee.
 
-- Reverses the list of actual arguments in function calls, so the code
-  generator tackles them in the right (reversed) order, as it is
-  expected by the callee.
+Analysis Phases
+...............
+
+anal1
+  - Checks that every return statement is linked to a function.
+  - Checks that no return statement is linked to a void function.
+
+Type System Phases
+..................
+
+typify1
+  - Checks that the expression in which a funcall is applied is a
+    function, and that the types of the formal parameters mach the
+    types of the funcall arguments.
+  - Checks that void functions are not called in contexts where a
+    value is expected.
+
+typify2
+  - Checks that the type of the expression in a return statement
+    matches the return type of its containing function.
+
 
 The Type System
 ~~~~~~~~~~~~~~~
@@ -462,11 +468,11 @@ Exception Handling
 ~~~~~~~~~~~~~~~~~~
 
 Exception types are signed 32-bit integers, and are defined in
-src/pkl-rt.pkl.
+``src/pkl-rt.pkl``.
 
 There are two ways an exception can be raised in the PVM:
 
-- Explicitly, when the instruction 'raise' is executed.
+- Explicitly, when the instruction ``raise`` is executed.
 - Implicitly, when some instruction needs to fail.  For example,
   an integer division instruction divides by zero.
 
@@ -481,10 +487,10 @@ In either case, the treatment of a raised exception is the same:
 3. Repeat.
 
 The default exception handler, which catches "unhandled" exceptions,
-is installed by the macro-assembler in src/pkl-asm.c:pkl_asm_new and
-src/pkl-asm.c:pkl_asm_finish.  It calls the function
-'_pkl_exception_handler', that is defined in the compiler runtime in
-src/pkl-rt.pkl.
+is installed by the macro-assembler in ``src/pkl-asm.c:pkl_asm_new``
+and ``src/pkl-asm.c:pkl_asm_finish``.  It calls the function
+``_pkl_exception_handler``, that is defined in the compiler runtime in
+``src/pkl-rt.pkl``.
 
 Debugging Poke
 --------------
@@ -492,10 +498,10 @@ Debugging Poke
 Building with Debugging support
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Configure the sources with --enable-debug.  This will:
+Configure the sources with ``--enable-debug``.  This will:
 
 1. Use a threaded jitter dispatching model.
-2. Build the sources with -O0 -g3 in CFLAGS.
+2. Build the sources with ``-O0 -g3`` in CFLAGS.
 
 Using GDB extensions
 ~~~~~~~~~~~~~~~~~~~~
@@ -518,7 +524,7 @@ emits a lot of spurious warnings.  Fortunately it is possible to tell
 memcheck to omit these warnings: the file etc/boehm-gc.suppresions
 contains a list of suppresions.
 
-Invoke valgrind with --suppressions=etc/boehm-gc.suppressions.
+Invoke valgrind with ``--suppressions=etc/boehm-gc.suppressions``.
 
 If despite using the suppressions file you see some spurious warning,
 please use::
@@ -526,31 +532,32 @@ please use::
   $ valgrind --tool=memcheck --gen-suppressions=all --log-file=raw.log
 
 
-Then process raw.log with the etc/parse-valgrind-suppressions.sh
+Then process raw.log with the ``etc/parse-valgrind-suppressions.sh``
 script, wilcard the result as much as you can, and append the results
-to etc/boehm-gc.suppressions.
+to ``etc/boehm-gc.suppressions``.
 
 In order to run the testsuite with valgring, edit lib/poke-dg.exp and
 uncomment the lines::
 
-      set VALGRIND "valgrind --quiet --suppressions=${srcdir}/../etc/boehm-gc.suppressions \
-                           --tool=memcheck --gen-suppressions=all"
+ set VALGRIND "valgrind --quiet \
+               --suppressions=${srcdir}/../etc/boehm-gc.suppressions \
+               --tool=memcheck --gen-suppressions=all"
 
 Then run ``make check`` as usual.
 
-Debugging PVM Assembler
-~~~~~~~~~~~~~~~~~~~~~~~
+Debugging PVM Assembly Code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hacking some areas of the compiler, such as the code generator pass,
 involves meta-programming PVM assembler.  It is easy to find examples
-anywhere in src/pkl-gen.c::
+anywhere in ``src/pkl-gen.c``::
 
   pkl_asm_insn (pasm, PKL_INSN_ROT);
   pkl_asm_insn (pasm, PKL_INSN_MULLU);
   pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
-Or, alternatively, the code may be written in RAS in some of the .pks
-files.  Like::
+Or, alternatively, the code may be written in RAS in a ``.pks`` file.
+Like::
 
   .loop:
         bz @type, .endloop      ; ... A B
@@ -589,20 +596,20 @@ loop above gets executed.  We can install traces like::
         ba .loop
 
 The other tool is the ``strace`` instruction.  It prints the contents
-of the stack (one value per line) from the TOS to it's very beginning.
-It is very useful in many situations, like when a loop is composing
-values in the stack and something is going banana.  It is also useful
-to determine what kind of value is being accessed by a given
-instruction.
+of the stack (one value per line) from the TOS.  It gets the number of
+stack values to print as an argument, 0 meaning all of them.  It is
+very useful in many situations, like when a loop is composing values
+in the stack and something is going banana.  It is also useful to
+determine what kind of value is being accessed by a given instruction.
 
 For example, lets say that we are hunting some segmentation fault.  We
 highly suspect the code generated in the first example in this
 section, above.  Of the three instructions, ``mullu`` is the only one
 that could conceivably generate a segfault, so we add a stack trace
-instruction right before it::
+instruction right before it to inspect it's two arguments::
 
   pkl_asm_insn (pasm, PKL_INSN_ROT);
-  pkl_asm_insn (pasm, PKL_INSN_STRACE); /* XXX remove me */
+  pkl_asm_insn (pasm, PKL_INSN_STRACE, 2); /* XXX remove me */
   pkl_asm_insn (pasm, PKL_INSN_MULLU);
   pkl_asm_insn (pasm, PKL_INSN_NIP2);
 
@@ -619,9 +626,10 @@ Future Developments
     [1,[foo*2]=666]
 
   this will of course mean that the types of literal arrays won't be
-  necessarily be bounded by a constant number of elements.  No bid
+  necessarily be bounded by a constant number of elements.  No big
   deal.
 
-Local Variables:
-mode: rst
-End:
+..
+  Local Variables:
+  mode: rst
+  End:
