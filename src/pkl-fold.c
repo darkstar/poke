@@ -23,8 +23,16 @@
 #include <string.h>
 #include <stdint.h>
 #include <assert.h>
+
+#include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+
+/* Get our own GCD from gnulib.  */
+#define WORD_T uint64_t
+#define GCD pkl_gcd
+#include <gcd.c>
+
 
 #if 0
 static inline uint64_t
@@ -250,19 +258,66 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_ps_cast)
   pkl_ast_node from_type = PKL_AST_TYPE (exp);
   pkl_ast_node to_type = PKL_AST_CAST_TYPE (cast);
 
+  pkl_ast_node new = NULL;
+
   if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_INTEGRAL
       && PKL_AST_CODE (exp) == PKL_AST_INTEGER)
     {
-      pkl_ast_node new
-        = pkl_ast_make_integer (PKL_PASS_AST,
-                                PKL_AST_INTEGER_VALUE (exp));
-      PKL_AST_TYPE (new) = ASTREF (to_type);
-      PKL_AST_LOC (new) = PKL_AST_LOC (exp);
-      
-      pkl_ast_node_free (cast);
-      PKL_PASS_NODE = new;
+      new = pkl_ast_make_integer (PKL_PASS_AST,
+                                  PKL_AST_INTEGER_VALUE (exp));
     }
+  else if (PKL_AST_TYPE_CODE (from_type) == PKL_TYPE_OFFSET
+           && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET
+           && PKL_AST_CODE (exp) == PKL_AST_OFFSET)
+    {
+      pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (exp);
+      pkl_ast_node unit = PKL_AST_OFFSET_UNIT (exp);
+      pkl_ast_node to_unit = PKL_AST_TYPE_O_UNIT (to_type);
+      pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
+      pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
+
+      if (PKL_AST_CODE (magnitude) != PKL_AST_INTEGER
+          || PKL_AST_CODE (unit) != PKL_AST_INTEGER
+          || PKL_AST_CODE (to_unit) != PKL_AST_INTEGER)
+        /* We can't fold this cast.  */
+        PKL_PASS_DONE;
+
+      /* Transform magnitude to bits.  */
+      PKL_AST_INTEGER_VALUE (magnitude)
+        = (PKL_AST_INTEGER_VALUE (magnitude) *
+           PKL_AST_INTEGER_VALUE (unit));
+
+      /* Calculate the new unit.  */
+      PKL_AST_INTEGER_VALUE (unit)
+        = PKL_AST_INTEGER_VALUE (to_unit);
+
+      /* We may need to create a new magnitude node, if the base type
+         is different.  */
+      if (!pkl_ast_type_equal (from_base_type, to_base_type))
+        {
+          magnitude = pkl_ast_make_integer  (PKL_PASS_AST,
+                                             PKL_AST_INTEGER_VALUE (magnitude));
+          PKL_AST_TYPE (magnitude) = ASTREF (to_base_type);
+          PKL_AST_LOC (magnitude) = PKL_AST_LOC (cast);
+        }
+
+      /* Transform magnitude to new unit.  */
+      PKL_AST_INTEGER_VALUE (magnitude)
+        = (PKL_AST_INTEGER_VALUE (magnitude)
+           /  PKL_AST_INTEGER_VALUE (unit));
+
+      new = pkl_ast_make_offset (PKL_PASS_AST,
+                                 magnitude, unit);
+    }
+  else
+    PKL_PASS_DONE;
+
+  /* `new' is the node to replace the cast.  */
+  PKL_AST_TYPE (new) = ASTREF (to_type);
+  PKL_AST_LOC (new) = PKL_AST_LOC (exp);
+  pkl_ast_node_free (cast);
+  PKL_PASS_NODE = new;
 }
 PKL_PHASE_END_HANDLER
 
