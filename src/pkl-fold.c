@@ -57,6 +57,8 @@
   EMUL_BIN_PROTO (OP,s,int64_t,int64_t)
 #define EMUL_UUU(OP)                      \
   EMUL_BIN_PROTO (OP,u,uint64_t,uint64_t)
+#define EMUL_UUI(OP)                      \
+  EMUL_BIN_PROTO (OP,u,uint64_t,int64_t)
 #define EMUL_SSI(OP)                          \
   EMUL_BIN_PROTO (OP,s,const char *,int64_t)
 
@@ -114,6 +116,21 @@ EMUL_SSI (lts) { return (strcmp (op1, op2) < 0); }
 EMUL_SSI (les) { return (strcmp (op1, op2) <= 0); }
 EMUL_SSI (ges) { return (strcmp (op1, op2) >= 0); }
 
+/* The following emulation routines work on offset magnitudes
+   normalized to bits.  */
+EMUL_UUI (eqo) { return op1 == op2; }
+EMUL_UUI (neo) { return op1 != op2; }
+EMUL_UUI (gto) { return op1 > op2; }
+EMUL_UUI (lto) { return op1 < op2; }
+EMUL_UUI (leo) { return op1 <= op2; }
+EMUL_UUI (geo) { return op1 >= op2; }
+EMUL_III (eqo) { return op1 == op2; }
+EMUL_III (neo) { return op1 != op2; }
+EMUL_III (gto) { return op1 > op2; }
+EMUL_III (lto) { return op1 < op2; }
+EMUL_III (leo) { return op1 <= op2; }
+EMUL_III (geo) { return op1 >= op2; }
+
 /* Auxiliary macros used in the handlers below.  */
 
 #define OP_UNARY_II(OP)                         \
@@ -142,6 +159,60 @@ EMUL_SSI (ges) { return (strcmp (op1, op2) >= 0); }
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
           PKL_PASS_NODE = new;                                          \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+#define OP_BINARY_OOI(OP)                                               \
+  do                                                                    \
+    {                                                                   \
+      pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
+      pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);        \
+      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
+      pkl_ast_node op1_type = PKL_AST_TYPE (op1);                       \
+      pkl_ast_node op2_type = PKL_AST_TYPE (op2);                       \
+                                                                        \
+      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL                 \
+          && PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET            \
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)           \
+        {                                                               \
+          pkl_ast_node new;                                             \
+          pkl_ast_node op1_magnitude = PKL_AST_OFFSET_MAGNITUDE (op1);  \
+          pkl_ast_node op1_unit = PKL_AST_OFFSET_UNIT (op1);            \
+          pkl_ast_node op2_magnitude = PKL_AST_OFFSET_MAGNITUDE (op2);  \
+          pkl_ast_node op2_unit = PKL_AST_OFFSET_UNIT (op2);            \
+          uint64_t result;                                              \
+          uint64_t op1_magnitude_bits;                                  \
+          uint64_t op2_magnitude_bits;                                  \
+                                                                        \
+          if (PKL_AST_CODE (op1) != PKL_AST_OFFSET                      \
+              || PKL_AST_CODE (op2) != PKL_AST_OFFSET                   \
+              || PKL_AST_CODE (op1_magnitude) != PKL_AST_INTEGER        \
+              || PKL_AST_CODE (op1_unit) != PKL_AST_INTEGER             \
+              || PKL_AST_CODE (op2_magnitude) != PKL_AST_INTEGER        \
+              || PKL_AST_CODE (op2_unit) != PKL_AST_INTEGER)            \
+            /* We cannot fold this expression.  */                      \
+            PKL_PASS_DONE;                                              \
+                                                                        \
+          op1_magnitude_bits = (PKL_AST_INTEGER_VALUE (op1_magnitude)   \
+                                * PKL_AST_INTEGER_VALUE (op1_unit));    \
+          op2_magnitude_bits = (PKL_AST_INTEGER_VALUE (op2_magnitude)   \
+                                * PKL_AST_INTEGER_VALUE (op2_unit));    \
+                                                                        \
+          if (PKL_AST_TYPE_I_SIGNED (op1_type))                         \
+            result = emul_s_##OP (op1_magnitude_bits,                   \
+                                  op2_magnitude_bits);                  \
+          else                                                          \
+            result = emul_u_##OP (op1_magnitude_bits,                   \
+                                  op2_magnitude_bits);                  \
+                                                                        \
+          new = pkl_ast_make_integer (PKL_PASS_AST, result);            \
+          PKL_AST_TYPE (new) = ASTREF (type);                           \
+          PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);              \
+                                                                        \
+          pkl_ast_node_free (PKL_PASS_NODE);                            \
+          PKL_PASS_NODE = new;                                          \
+          PKL_PASS_DONE;                                                \
         }                                                               \
     }                                                                   \
   while (0)
@@ -180,6 +251,7 @@ EMUL_SSI (ges) { return (strcmp (op1, op2) >= 0); }
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
           PKL_PASS_NODE = new;                                          \
+          PKL_PASS_DONE;                                                \
         }                                                               \
     }                                                                   \
   while (0)
@@ -212,6 +284,7 @@ EMUL_SSI (ges) { return (strcmp (op1, op2) >= 0); }
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
           PKL_PASS_NODE = new;                                          \
+          PKL_PASS_DONE;                                                \
         }                                                               \
     }                                                                   \
   while (0)
@@ -247,7 +320,7 @@ PKL_PHASE_HANDLER_BIN_INT (band);
   PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
   {                                                  \
     OP_BINARY_III (OP);                              \
-    /*    OP_BINARY_OOI (OP##o); */                  \
+    OP_BINARY_OOI (OP##o);                           \
     OP_BINARY_SSI (OP##s);                           \
   }                                                  \
   PKL_PHASE_END_HANDLER
