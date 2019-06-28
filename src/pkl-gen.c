@@ -2226,7 +2226,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, insn, type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
-      if (insn != PKL_INSN_NEG)
+      if (insn != PKL_INSN_NEG && insn != PKL_INSN_BNOT)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     default:
