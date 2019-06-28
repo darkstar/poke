@@ -130,6 +130,12 @@ EMUL_III (gto) { return op1 > op2; }
 EMUL_III (lto) { return op1 < op2; }
 EMUL_III (leo) { return op1 <= op2; }
 EMUL_III (geo) { return op1 >= op2; }
+EMUL_UUU (addo) { return op1 + op2; }
+EMUL_III (addo) { return op1 + op2; }
+EMUL_UUU (subo) { return op1 - op2; }
+EMUL_III (subo) { return op1 - op2; }
+EMUL_UUU (mulo) { return op1 * op2; }
+EMUL_III (mulo) { return op1 * op2; }
 
 /* Auxiliary macros used in the handlers below.  */
 
@@ -207,6 +213,72 @@ EMUL_III (geo) { return op1 >= op2; }
                                   op2_magnitude_bits);                  \
                                                                         \
           new = pkl_ast_make_integer (PKL_PASS_AST, result);            \
+          PKL_AST_TYPE (new) = ASTREF (type);                           \
+          PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);              \
+                                                                        \
+          pkl_ast_node_free (PKL_PASS_NODE);                            \
+          PKL_PASS_NODE = new;                                          \
+          PKL_PASS_DONE;                                                \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
+#define OP_BINARY_OOO(OP)                                               \
+  do                                                                    \
+    {                                                                   \
+      pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
+      pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);        \
+      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
+      pkl_ast_node op1_type = PKL_AST_TYPE (op1);                       \
+      pkl_ast_node op2_type = PKL_AST_TYPE (op2);                       \
+                                                                        \
+      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_OFFSET                   \
+          && PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_OFFSET            \
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)           \
+        {                                                               \
+          pkl_ast_node new;                                             \
+          pkl_ast_node type_base_type = PKL_AST_TYPE_O_BASE_TYPE (type);\
+          pkl_ast_node type_unit = PKL_AST_TYPE_O_UNIT (type);          \
+          pkl_ast_node op1_magnitude = PKL_AST_OFFSET_MAGNITUDE (op1);  \
+          pkl_ast_node op1_unit = PKL_AST_OFFSET_UNIT (op1);            \
+          pkl_ast_node op2_magnitude = PKL_AST_OFFSET_MAGNITUDE (op2);  \
+          pkl_ast_node op2_unit = PKL_AST_OFFSET_UNIT (op2);            \
+          pkl_ast_node magnitude;                                       \
+          uint64_t result;                                              \
+          uint64_t op1_magnitude_bits;                                  \
+          uint64_t op2_magnitude_bits;                                  \
+                                                                        \
+          if (PKL_AST_CODE (op1) != PKL_AST_OFFSET                      \
+              || PKL_AST_CODE (op2) != PKL_AST_OFFSET                   \
+              || PKL_AST_CODE (op1_magnitude) != PKL_AST_INTEGER        \
+              || PKL_AST_CODE (op1_unit) != PKL_AST_INTEGER             \
+              || PKL_AST_CODE (op2_magnitude) != PKL_AST_INTEGER        \
+              || PKL_AST_CODE (op2_unit) != PKL_AST_INTEGER)            \
+            /* We cannot fold this expression.  */                      \
+            PKL_PASS_DONE;                                              \
+                                                                        \
+          op1_magnitude_bits = (PKL_AST_INTEGER_VALUE (op1_magnitude)   \
+                                * PKL_AST_INTEGER_VALUE (op1_unit));    \
+          op2_magnitude_bits = (PKL_AST_INTEGER_VALUE (op2_magnitude)   \
+                                * PKL_AST_INTEGER_VALUE (op2_unit));    \
+                                                                        \
+          if (PKL_AST_TYPE_I_SIGNED (op1_type))                         \
+            result = emul_s_##OP (op1_magnitude_bits,                   \
+                                  op2_magnitude_bits);                  \
+          else                                                          \
+            result = emul_u_##OP (op1_magnitude_bits,                   \
+                                  op2_magnitude_bits);                  \
+                                                                        \
+          /* Convert bits to the result unit.  */                       \
+          assert (PKL_AST_INTEGER_VALUE (type_unit) != 0);              \
+          result = result / PKL_AST_INTEGER_VALUE (type_unit);          \
+                                                                        \
+          magnitude = pkl_ast_make_integer (PKL_PASS_AST, result);      \
+          PKL_AST_TYPE (magnitude) = ASTREF (type_base_type);           \
+          PKL_AST_LOC (magnitude) = PKL_AST_LOC (PKL_PASS_NODE);        \
+                                                                        \
+          new = pkl_ast_make_offset (PKL_PASS_AST, magnitude,           \
+                                     type_unit);                        \
           PKL_AST_TYPE (new) = ASTREF (type);                           \
           PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);              \
                                                                         \
@@ -332,9 +404,24 @@ PKL_PHASE_HANDLER_BIN_RELA (gt);
 PKL_PHASE_HANDLER_BIN_RELA (le);
 PKL_PHASE_HANDLER_BIN_RELA (ge);
 
-PKL_PHASE_HANDLER_BIN_INT (add); /* XXX */
-PKL_PHASE_HANDLER_BIN_INT (sub);
-PKL_PHASE_HANDLER_BIN_INT (mul);
+#define PKL_PHASE_HANDLER_BIN_ARITH(OP)              \
+  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
+  {                                                  \
+    OP_BINARY_III (OP);                              \
+    /*    OP_BINARY_OOO (OP##o);*/                   \
+  }                                                  \
+  PKL_PHASE_END_HANDLER
+
+PKL_PHASE_HANDLER_BIN_ARITH (add); /* XXX */
+PKL_PHASE_HANDLER_BIN_ARITH (sub);
+
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_mul)
+{
+  OP_BINARY_III (mul);
+  /* XXX handle offset * integral. */
+}
+PKL_PHASE_END_HANDLER
+
 /* XXX the handler for div and mod should check for division by
    zero.  */
 PKL_PHASE_HANDLER_BIN_INT (div);

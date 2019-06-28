@@ -434,7 +434,7 @@ TYPIFY_BIN (mod);
     PKL_AST_LOC (unit_type) = PKL_AST_LOC (exp);                        \
                                                                         \
     pkl_ast_node unit                                                   \
-      = pkl_ast_make_integer (PKL_PASS_AST, 1);                         \
+      = pkl_ast_make_integer (PKL_PASS_AST, 1 /* XXX GCD */);           \
     PKL_AST_LOC (unit) = PKL_AST_LOC (exp);                             \
                                                                         \
     PKL_AST_TYPE (unit) = ASTREF (unit_type);                           \
