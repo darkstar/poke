@@ -329,10 +329,10 @@ PKL_PHASE_HANDLER_BIN_RELA (eq);
 PKL_PHASE_HANDLER_BIN_RELA (ne);
 PKL_PHASE_HANDLER_BIN_RELA (lt);
 PKL_PHASE_HANDLER_BIN_RELA (gt);
-PKL_PHASE_HANDLER_BIN_RELA (le); /* XXX */
+PKL_PHASE_HANDLER_BIN_RELA (le);
 PKL_PHASE_HANDLER_BIN_RELA (ge);
 
-PKL_PHASE_HANDLER_BIN_INT (add);
+PKL_PHASE_HANDLER_BIN_INT (add); /* XXX */
 PKL_PHASE_HANDLER_BIN_INT (sub);
 PKL_PHASE_HANDLER_BIN_INT (mul);
 /* XXX the handler for div and mod should check for division by
@@ -351,7 +351,6 @@ PKL_PHASE_HANDLER_UNIMPL (sconc);
 PKL_PHASE_HANDLER_UNIMPL (bconc);
 PKL_PHASE_HANDLER_UNIMPL (sl);
 PKL_PHASE_HANDLER_UNIMPL (sr);
-PKL_PHASE_HANDLER_UNIMPL (sizeof);
 
 PKL_PHASE_BEGIN_HANDLER (pkl_fold_ps_cast)
 {
@@ -440,6 +439,6 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (GE, ge), ENTRY (SCONC, sconc),
    ENTRY (BCONC, bconc),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
-   ENTRY (NOT, not), ENTRY (SIZEOF, sizeof),
+   ENTRY (NOT, not),
 #undef ENTRY
   };
