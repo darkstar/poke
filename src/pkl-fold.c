@@ -108,6 +108,11 @@ EMUL_UUU (sr) { assert (0); return 0; } /* XXX WRITEME */
 EMUL_III (sr) { assert (0); return 0; } /* XXX WRITEME */
 
 EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
+EMUL_SSI (nes) { return (strcmp (op1, op2) != 0); }
+EMUL_SSI (gts) { return (strcmp (op1, op2) > 0); }
+EMUL_SSI (lts) { return (strcmp (op1, op2) < 0); }
+EMUL_SSI (les) { return (strcmp (op1, op2) <= 0); }
+EMUL_SSI (ges) { return (strcmp (op1, op2) >= 0); }
 
 /* Auxiliary macros used in the handlers below.  */
 
@@ -144,11 +149,15 @@ EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
 #define OP_BINARY_III(OP)                                               \
   do                                                                    \
     {                                                                   \
-      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
       pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
       pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);        \
+      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
+      pkl_ast_node op1_type = PKL_AST_TYPE (op1);                       \
+      pkl_ast_node op2_type = PKL_AST_TYPE (op2);                       \
                                                                         \
-      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)                \
+      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL                 \
+          && PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_INTEGRAL          \
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_INTEGRAL)         \
         {                                                               \
           pkl_ast_node new;                                             \
           uint64_t result;                                              \
@@ -178,23 +187,27 @@ EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
 #define OP_BINARY_SSI(OP)                                               \
   do                                                                    \
     {                                                                   \
-      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
       pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
       pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);        \
+      pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);                 \
+      pkl_ast_node op1_type = PKL_AST_TYPE (op1);                       \
+      pkl_ast_node op2_type = PKL_AST_TYPE (op2);                       \
                                                                         \
-      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING)                  \
+      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL                 \
+          && PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_STRING            \
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_STRING)           \
         {                                                               \
           pkl_ast_node new;                                             \
                                                                         \
           if (PKL_AST_CODE (op1) != PKL_AST_STRING                      \
               || PKL_AST_CODE (op2) != PKL_AST_STRING)                  \
-            /* We cannot fold this exprssion.  */                       \
+            /* We cannot fold this expression.  */                      \
             PKL_PASS_DONE;                                              \
                                                                         \
           new = pkl_ast_make_integer (PKL_PASS_AST,                     \
                                       emul_s_##OP (PKL_AST_STRING_POINTER (op1), \
                                                    PKL_AST_STRING_POINTER (op2))); \
-          PKL_AST_TYPE (new) = ASTREF (PKL_AST_TYPE (type));            \
+          PKL_AST_TYPE (new) = ASTREF (type);                           \
           PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);              \
                                                                         \
           pkl_ast_node_free (PKL_PASS_NODE);                            \
@@ -204,13 +217,6 @@ EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
   while (0)
 
 /* Handlers for the several expression codes.  */
-
-#define PKL_PHASE_HANDLER_BIN_INT(OP)                \
-  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
-  {                                                  \
-    OP_BINARY_III (OP);                              \
-  }                                                  \
-  PKL_PHASE_END_HANDLER
 
 #define PKL_PHASE_HANDLER_UNA_INT(OP)           \
   PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)       \
@@ -224,12 +230,35 @@ PKL_PHASE_HANDLER_UNA_INT (pos);
 PKL_PHASE_HANDLER_UNA_INT (not);
 PKL_PHASE_HANDLER_UNA_INT (bnot);
 
+#define PKL_PHASE_HANDLER_BIN_INT(OP)                \
+  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
+  {                                                  \
+    OP_BINARY_III (OP);                              \
+  }                                                  \
+  PKL_PHASE_END_HANDLER
+
 PKL_PHASE_HANDLER_BIN_INT (or);
 PKL_PHASE_HANDLER_BIN_INT (ior);
 PKL_PHASE_HANDLER_BIN_INT (xor);
 PKL_PHASE_HANDLER_BIN_INT (and);
-PKL_PHASE_HANDLER_BIN_INT (band); /* XXX */
-PKL_PHASE_HANDLER_BIN_INT (ne);
+PKL_PHASE_HANDLER_BIN_INT (band);
+
+#define PKL_PHASE_HANDLER_BIN_RELA(OP)               \
+  PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
+  {                                                  \
+    OP_BINARY_III (OP);                              \
+    /*    OP_BINARY_OOI (OP##o); */                  \
+    OP_BINARY_SSI (OP##s);                           \
+  }                                                  \
+  PKL_PHASE_END_HANDLER
+
+PKL_PHASE_HANDLER_BIN_RELA (eq); /* XXX */
+PKL_PHASE_HANDLER_BIN_RELA (ne);
+PKL_PHASE_HANDLER_BIN_RELA (lt);
+PKL_PHASE_HANDLER_BIN_RELA (gt);
+PKL_PHASE_HANDLER_BIN_RELA (le);
+PKL_PHASE_HANDLER_BIN_RELA (ge);
+
 PKL_PHASE_HANDLER_BIN_INT (add);
 PKL_PHASE_HANDLER_BIN_INT (sub);
 PKL_PHASE_HANDLER_BIN_INT (mul);
@@ -237,17 +266,6 @@ PKL_PHASE_HANDLER_BIN_INT (mul);
    zero.  */
 PKL_PHASE_HANDLER_BIN_INT (div);
 PKL_PHASE_HANDLER_BIN_INT (mod);
-PKL_PHASE_HANDLER_BIN_INT (lt);
-PKL_PHASE_HANDLER_BIN_INT (gt);
-PKL_PHASE_HANDLER_BIN_INT (le);
-PKL_PHASE_HANDLER_BIN_INT (ge);
-
-PKL_PHASE_BEGIN_HANDLER (pkl_fold_eq)
-{
-  OP_BINARY_III (eq);
-  OP_BINARY_SSI (eqs);
-}
-PKL_PHASE_END_HANDLER
 
 #define PKL_PHASE_HANDLER_UNIMPL(op)            \
   PKL_PHASE_BEGIN_HANDLER (pkl_fold_##op)       \
