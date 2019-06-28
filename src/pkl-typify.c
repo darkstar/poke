@@ -1870,42 +1870,6 @@ expected %s, got %s",
 }
 PKL_PHASE_END_HANDLER
 
-/* Manually promote integers used as array boundaries to uint<64>.
-   XXX: this horrible hack is for the static array type checking to do
-   a decent job before constant folding is finished and working.  To
-   remove then.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_integer)
-{
-  pkl_ast_node integer = PKL_PASS_NODE;
-  pkl_ast_node parent = PKL_PASS_PARENT;
-
-  if (parent
-      && PKL_AST_CODE (parent) == PKL_AST_TYPE
-      && PKL_AST_TYPE_CODE (parent) == PKL_TYPE_ARRAY)
-    {
-      pkl_ast_node integer_type = PKL_AST_TYPE (integer);
-      uint64_t value = PKL_AST_INTEGER_VALUE (integer);
-
-      value = value << (64 - PKL_AST_TYPE_I_SIZE (integer_type));
-      if (value & (((uint64_t) 1) << 63))
-        {
-          PKL_AST_TYPE_I_SIGNED (integer_type) = 1;
-          value = ((int64_t) value) >> (64 - PKL_AST_TYPE_I_SIZE (integer_type));
-        }
-      else
-        {
-          PKL_AST_TYPE_I_SIGNED (integer_type) = 0;
-          value >>= 64 - PKL_AST_TYPE_I_SIZE (integer_type);
-        }
-
-      PKL_AST_INTEGER_VALUE (integer) = value;
-      PKL_AST_TYPE_I_SIZE (integer_type) = 64;
-    }
-}
-PKL_PHASE_END_HANDLER
-
-
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
@@ -1961,8 +1925,6 @@ struct pkl_phase pkl_phase_typify1 =
 
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),
-
-   PKL_PHASE_PS_HANDLER (PKL_AST_INTEGER, pkl_typify1_ps_integer),
   };
 
 
