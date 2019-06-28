@@ -62,6 +62,8 @@
 
 EMUL_II (neg) { return -op; }
 EMUL_UU (neg) { return -op; }
+EMUL_II (pos) { return op; }
+EMUL_UU (pos) { return op; }
 EMUL_II (not) { return !op; }
 EMUL_UU (not) { return !op; }
 EMUL_II (bnot) { return ~op; }
@@ -218,17 +220,16 @@ EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
   PKL_PHASE_END_HANDLER
 
 PKL_PHASE_HANDLER_UNA_INT (neg);
+PKL_PHASE_HANDLER_UNA_INT (pos);
 PKL_PHASE_HANDLER_UNA_INT (not);
 PKL_PHASE_HANDLER_UNA_INT (bnot);
 
 PKL_PHASE_HANDLER_BIN_INT (or);
-PKL_PHASE_HANDLER_BIN_INT (ior); /* XXX */
-PKL_PHASE_HANDLER_BIN_INT (xor);
+PKL_PHASE_HANDLER_BIN_INT (ior);
+PKL_PHASE_HANDLER_BIN_INT (xor); /* XXX */
 PKL_PHASE_HANDLER_BIN_INT (and);
 PKL_PHASE_HANDLER_BIN_INT (band);
 PKL_PHASE_HANDLER_BIN_INT (ne);
-PKL_PHASE_HANDLER_BIN_INT (sl);
-PKL_PHASE_HANDLER_BIN_INT (sr);
 PKL_PHASE_HANDLER_BIN_INT (add);
 PKL_PHASE_HANDLER_BIN_INT (sub);
 PKL_PHASE_HANDLER_BIN_INT (mul);
@@ -255,11 +256,11 @@ PKL_PHASE_END_HANDLER
   }                                             \
   PKL_PHASE_END_HANDLER
 
-PKL_PHASE_HANDLER_UNIMPL (map);
-PKL_PHASE_HANDLER_UNIMPL (sizeof);
-PKL_PHASE_HANDLER_UNIMPL (pos);
 PKL_PHASE_HANDLER_UNIMPL (sconc);
 PKL_PHASE_HANDLER_UNIMPL (bconc);
+PKL_PHASE_HANDLER_UNIMPL (sl);
+PKL_PHASE_HANDLER_UNIMPL (sr);
+PKL_PHASE_HANDLER_UNIMPL (sizeof);
 
 PKL_PHASE_BEGIN_HANDLER (pkl_fold_ps_cast)
 {
@@ -345,7 +346,7 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (SR, sr), ENTRY (ADD, add), ENTRY (SUB, sub),
    ENTRY (MUL, mul), ENTRY (DIV, div), ENTRY (MOD, mod),
    ENTRY (LT, lt), ENTRY (GT, gt), ENTRY (LE, le),
-   ENTRY (GE, ge), ENTRY (SCONC, sconc), ENTRY (MAP, map),
+   ENTRY (GE, ge), ENTRY (SCONC, sconc),
    ENTRY (BCONC, bconc),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
    ENTRY (NOT, not), ENTRY (SIZEOF, sizeof),

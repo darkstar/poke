@@ -2207,6 +2207,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
 
   enum pkl_asm_insn insn;
 
+  if (PKL_AST_EXP_CODE (node) == PKL_AST_OP_POS)
+    /* POS in integers is basically a nop.  */
+    PKL_PASS_DONE;
+
   switch (PKL_AST_EXP_CODE (node))
     {
     case PKL_AST_OP_BAND: insn = PKL_INSN_BAND; break;
@@ -2226,7 +2230,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
     case PKL_TYPE_INTEGRAL:
       pkl_asm_insn (pasm, insn, type);
       pkl_asm_insn (pasm, PKL_INSN_NIP);
-      if (insn != PKL_INSN_NEG && insn != PKL_INSN_BNOT)
+      if (insn != PKL_INSN_NEG
+          && insn != PKL_INSN_BNOT)
         pkl_asm_insn (pasm, PKL_INSN_NIP);
       break;
     default:
@@ -2544,6 +2549,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BAND, pkl_gen_ps_op_intexp),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_gen_ps_op_intexp),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_gen_ps_op_intexp),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_gen_ps_op_intexp),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IOR, pkl_gen_ps_op_intexp),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_XOR, pkl_gen_ps_op_intexp),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SL, pkl_gen_ps_op_intexp),
