@@ -26,14 +26,16 @@ you.
     4  The Poke Compiler
       4.1  Compiler Overview
       4.2  The bison Parser in pkl-tab.y
-      4.3  Compiler Passes and Phases
-        4.3.1  Naming Conventions for Phases
-        4.3.2  Naming Conventions for Handlers
-        4.3.3  Transformation Phases
-        4.3.4  Analysis Phases
-        4.3.5  Type System Phases
-      4.4  The Type System
-        4.4.1  Type Expressions
+      4.3  The AST
+        4.3.1  Using ASTREF
+      4.4  Compiler Passes and Phases
+        4.4.1  Naming Conventions for Phases
+        4.4.2  Naming Conventions for Handlers
+        4.4.3  Transformation Phases
+        4.4.4  Analysis Phases
+        4.4.5  Type System Phases
+      4.5  The Type System
+        4.5.1  Type Expressions
     5  The Poke Virtual Machine
       5.1  Exception Handling
     6  Debugging Poke
@@ -42,7 +44,6 @@ you.
       6.3  Valgrind and Poke
       6.4  Debugging PVM Assembly Code
     7  Future Developments
-
 
 The Source Tree
 ---------------
@@ -337,6 +338,34 @@ AST are performed by the compiler phases, which are implemented
 elsewhere.  This greatly helps to keep the parser code clean and easy
 to read, and also eases changing the syntactic structure of poke
 programs.
+
+The AST
+~~~~~~~
+
+Using ASTREF
+............
+
+The AST uses reference counting in order to manage the memory used by
+the nodes.  Every time you store a pointer to an AST node, you should
+use the macro ``ASTREF`` in order to increase it's counter::
+
+  pkl_ast_node foo = ASTREF (node);
+
+Note that the ``pkl_ast_make_*`` constructors do ``ASTREF``
+internally, so you don't need to use it in calls like::
+
+  pkl_ast_node new = pkl_ast_make_struct (ast, 5, elems_node);
+
+There is a little caveat: the way ASTREF is defined, it requires a
+l-value to work properly.  Therefore, this doesn't work::
+
+  pkl_ast_node foo = ASTREF (PKL_AST_TYPE (node));
+
+instead, write::
+
+  pkl_ast_node type = PKL_AST_TYPE (node);
+  pkl_ast_node foo = ASTREF (type);
+
 
 Compiler Passes and Phases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
