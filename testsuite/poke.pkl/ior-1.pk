@@ -1,0 +1,13 @@
+/* { dg-do compile } */
+
+defvar x = 0;
+
+/* { dg-command { .set obase 16 } } */
+
+/* { dg-command { x | 0xeadbeef } } */
+/* { dg-output "0xdeadbeef" } */
+
+/* For constant folding: */
+/* { dg-command { 0 | 0x0eadbeef } } */
+/* { dg-output "\n0xeadbeef" } */
+
