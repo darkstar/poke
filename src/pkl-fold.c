@@ -412,8 +412,8 @@ PKL_PHASE_HANDLER_BIN_RELA (ge);
   }                                                  \
   PKL_PHASE_END_HANDLER
 
-PKL_PHASE_HANDLER_BIN_ARITH (add); /* XXX */
-PKL_PHASE_HANDLER_BIN_ARITH (sub);
+PKL_PHASE_HANDLER_BIN_ARITH (add);
+PKL_PHASE_HANDLER_BIN_ARITH (sub); /* XXX */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_fold_mul)
 {
