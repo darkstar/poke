@@ -408,7 +408,7 @@ PKL_PHASE_HANDLER_BIN_RELA (ge);
   PKL_PHASE_BEGIN_HANDLER (pkl_fold_##OP)            \
   {                                                  \
     OP_BINARY_III (OP);                              \
-    /*    OP_BINARY_OOO (OP##o);*/                   \
+    OP_BINARY_OOO (OP##o);                           \
   }                                                  \
   PKL_PHASE_END_HANDLER
 

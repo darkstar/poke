@@ -160,6 +160,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
           /* Unknown operation code.  */
           assert (0);
         }
+
+      node_code = PKL_AST_CODE (node);
     }
 
   /* Call the phase handlers defined for specific types, in the given
@@ -174,8 +176,10 @@ pkl_call_node_handlers (jmp_buf toplevel,
         PKL_CALL_PHASES (type, pr, typecode);
       else
         assert (0);
-    }
 
+      node_code = PKL_AST_CODE (node);
+    }
+  
   /* Call the phase handlers defined for node codes, in the given
      order.  */
   if (order == PKL_PASS_PRE_ORDER)
