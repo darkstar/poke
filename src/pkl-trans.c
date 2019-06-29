@@ -929,42 +929,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
 }
 PKL_PHASE_END_HANDLER
 
-/* In OFFSET nodes whose units are types, these should be replaced
-   with an expression that calculates their size.  This only works
-   with complete types.  */
-
-PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset)
-{
-  pkl_ast_node offset = PKL_PASS_NODE;
-  pkl_ast_node type = PKL_AST_OFFSET_UNIT (offset);
-  pkl_ast_node unit;
-
-  if (PKL_AST_CODE (type) != PKL_AST_TYPE)
-    /* The unit of this offset is not a type.  Nothing to do.  */
-    PKL_PASS_DONE;
-
-  if (PKL_AST_TYPE_COMPLETE (type) != PKL_AST_TYPE_COMPLETE_YES)
-    {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
-                 "offsets only work on complete types");
-      PKL_TRANS_PAYLOAD->errors++;
-      PKL_PASS_ERROR;
-    }
-
-  /* Calculate the size of the complete type in bytes and put it in
-     an integer node.  */
-  unit = pkl_ast_sizeof_type (PKL_PASS_AST, type);
-  PKL_AST_LOC (unit) = PKL_AST_LOC (type);
-  PKL_AST_LOC (PKL_AST_TYPE (unit)) = PKL_AST_LOC (type);
-
-  /* Replace the unit type with this expression.  */
-  PKL_AST_OFFSET_UNIT (offset) = ASTREF (unit);
-  pkl_ast_node_free (type);
-
-  PKL_PASS_RESTART = 1;
-}
-PKL_PHASE_END_HANDLER
-
 /* Ditto for offset types.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_offset_type)
@@ -1002,7 +966,6 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
-   PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_trans3_ps_offset),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans3_ps_offset_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_ps_op_sizeof),
   };

@@ -624,14 +624,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_offset)
   pkl_ast_node offset = PKL_PASS_NODE;
   pkl_ast_node magnitude_type
     = PKL_AST_TYPE (PKL_AST_OFFSET_MAGNITUDE (offset));
-  pkl_ast_node type
-    = pkl_ast_make_offset_type (PKL_PASS_AST,
-                                magnitude_type,
-                                PKL_AST_OFFSET_UNIT (offset));
+  pkl_ast_node unit = PKL_AST_OFFSET_UNIT (offset);
+  pkl_ast_node type;
 
+  /* If the unit is expressed as a type (which must be complete) then
+     replace it with an integer expressing its size in bits.  */
+  if (PKL_AST_CODE (unit) == PKL_AST_TYPE)
+    {
+      pkl_ast_node new_unit;
+      
+      if (PKL_AST_TYPE_COMPLETE (unit) != PKL_AST_TYPE_COMPLETE_YES)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+                     "offsets only work on complete types");
+          PKL_TYPIFY_PAYLOAD->errors++;
+          PKL_PASS_ERROR;
+        }
+
+      /* Calculate the size of the complete type in bits and put it in
+         an integer node.  */
+      new_unit = pkl_ast_sizeof_type (PKL_PASS_AST, unit);
+      PKL_AST_LOC (new_unit) = PKL_AST_LOC (unit);
+      PKL_AST_LOC (PKL_AST_TYPE (new_unit)) = PKL_AST_LOC (unit);
+
+      pkl_ast_node_free (unit);
+      unit = new_unit;
+      PKL_AST_OFFSET_UNIT (offset) = ASTREF (unit);
+    }
+  
+  type = pkl_ast_make_offset_type (PKL_PASS_AST,
+                                   magnitude_type, unit);
   PKL_AST_LOC (type) = PKL_AST_LOC (offset);
   PKL_AST_TYPE (offset) = ASTREF (type);
-  PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
 
