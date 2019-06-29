@@ -161,6 +161,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
           assert (0);
         }
 
+      /* The node may have been replaced by the handler above.
+         Refresh the code.  */
       node_code = PKL_AST_CODE (node);
     }
 
@@ -177,6 +179,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
       else
         assert (0);
 
+      /* The node may have been replaced by the handler above.
+         Refresh the code.  */
       node_code = PKL_AST_CODE (node);
     }
   
