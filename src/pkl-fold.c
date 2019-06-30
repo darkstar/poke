@@ -28,11 +28,6 @@
 #include "pkl-ast.h"
 #include "pkl-pass.h"
 
-/* Roll out our own GCD from gnulib.  */
-#define WORD_T uint64_t
-#define GCD pkl_gcd
-#include <gcd.c>
-
 /* Emulation routines.
 
    The letter-codes after EMUL_ specify the number and kind of
