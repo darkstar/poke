@@ -18,8 +18,8 @@
 /* { dg-command {  [[1]][0] } } */
 /* { dg-output "\n\\\[1\\\]" } */
 
-/* { dg-command {  [2#B, 3#b] } } */
-/* { dg-output "\n\\\[2#B,3#b\\\]" } */
+/* { dg-command {  [2#b, 3#b] } } */
+/* { dg-output "\n\\\[2#b,3#b\\\]" } */
 
 /* { dg-command { "foo"[0] } } */
 /* { dg-output "\n102UB" } */
