@@ -183,14 +183,10 @@ pkl_asm_insn_oto (pkl_asm pasm,
 {
   pkl_ast_node from_base_type = PKL_AST_TYPE_O_BASE_TYPE (from_type);
   pkl_ast_node from_base_unit = PKL_AST_TYPE_O_UNIT (from_type);
-  pkl_ast_node from_unit_type = PKL_AST_TYPE (from_base_unit);
-  
   pkl_ast_node to_base_type = PKL_AST_TYPE_O_BASE_TYPE (to_type);
-  pkl_ast_node to_base_unit = PKL_AST_TYPE_O_UNIT (to_type);
-  pkl_ast_node to_unit_type = PKL_AST_TYPE (to_base_unit);
+  pkl_ast_node unit_type = PKL_AST_TYPE (from_base_unit);
 
-  RAS_MACRO_OFFSET_CAST (from_base_type, from_unit_type, \
-                         to_base_type, to_unit_type);
+  RAS_MACRO_OFFSET_CAST (from_base_type, to_base_type, unit_type);
 }
 
 /* Macro-instruction: ATOA from_type to_type
@@ -788,18 +784,14 @@ pkl_asm_insn_gcd (pkl_asm pasm, pkl_ast_node type)
    Add the two given offsets in the stack, which must be of the given
    base type.
 
-   The base type of the result is BASE_TYPE.
-   The unit of the result is the greatest common divisor of the
-   operand's units.  */
+   The base type of the result is BASE_TYPE.  */
 
 static void
-pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
+pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type,
+                   pkl_ast_node unit)
 {
-  pkl_ast_node unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-
-  RAS_MACRO_ADDO (unit_type, base_type);
-  ASTREF (unit_type); pkl_ast_node_free (unit_type);
+  RAS_MACRO_ADDO (base_type,
+                  pvm_make_ulong (PKL_AST_INTEGER_VALUE (unit), 64));
 }
 
 /* Macro-instruction: SUBO base_type
@@ -808,18 +800,14 @@ pkl_asm_insn_addo (pkl_asm pasm, pkl_ast_node base_type)
    Subtract the two given offsets in the stack, which must be of the given
    base type.
 
-   The base type of the result is BASE_TYPE.
-   The unit of the result is the greatest common divisor of the
-   operand's units.  */
+   The base type of the result is BASE_TYPE.  */
 
 static void
-pkl_asm_insn_subo (pkl_asm pasm, pkl_ast_node base_type)
+pkl_asm_insn_subo (pkl_asm pasm, pkl_ast_node base_type,
+                   pkl_ast_node unit)
 {
-  pkl_ast_node unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-
-  RAS_MACRO_SUBO (unit_type, base_type);
-  ASTREF (unit_type); pkl_ast_node_free (unit_type);
+  RAS_MACRO_SUBO (base_type,
+                  pvm_make_ulong (PKL_AST_INTEGER_VALUE (unit), 64));
 }
 
 /* Macro-instruction: MULO base_type
@@ -851,17 +839,14 @@ pkl_asm_insn_divo (pkl_asm pasm, pkl_ast_node base_type)
    ( OFF OFF -- OFF OFF OFF )
 
    Calculate the modulus of two offsets.  The result of the operation
-   is an offset.    The types of both the offsets base type and the
-   magnitude type is BASE_TYPE.  */
+   is an offset.  */
 
 static void
-pkl_asm_insn_modo (pkl_asm pasm, pkl_ast_node base_type)
+pkl_asm_insn_modo (pkl_asm pasm, pkl_ast_node base_type,
+                   pkl_ast_node unit)
 {
-  pkl_ast_node unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-
-  RAS_MACRO_MODO (unit_type, base_type);
-  ASTREF (unit_type); pkl_ast_node_free (unit_type);  
+  RAS_MACRO_MODO (base_type,
+                  pvm_make_ulong (PKL_AST_INTEGER_VALUE (unit), 64));
 }
 
 
@@ -1323,21 +1308,25 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
         case PKL_INSN_MODO:
           {
             pkl_ast_node base_type;
+            pkl_ast_node unit = NULL;
 
             va_start (valist, insn);
             base_type = va_arg (valist, pkl_ast_node);
+            if (insn == PKL_INSN_ADDO || insn == PKL_INSN_SUBO
+                || insn == PKL_INSN_MODO)
+              unit = va_arg (valist, pkl_ast_node);
             va_end (valist);
 
             if (insn == PKL_INSN_ADDO)
-              pkl_asm_insn_addo (pasm, base_type);
+              pkl_asm_insn_addo (pasm, base_type, unit);
             else if (insn == PKL_INSN_SUBO)
-              pkl_asm_insn_subo (pasm, base_type);
+              pkl_asm_insn_subo (pasm, base_type, unit);
             else if (insn == PKL_INSN_MULO)
               pkl_asm_insn_mulo (pasm, base_type);
             else if (insn == PKL_INSN_DIVO)
               pkl_asm_insn_divo (pasm, base_type);
-            else
-              pkl_asm_insn_modo (pasm, base_type);
+            else /* MODO */
+              pkl_asm_insn_modo (pasm, base_type, unit);
             break;
           }
         case PKL_INSN_REMAP:

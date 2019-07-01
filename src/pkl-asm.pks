@@ -121,7 +121,7 @@
         rot                     ; TOUNIT OFF UNIT MAGNITUDE
         mul @base_type          ; TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE)
         nip2                    
-        rot                     ; OFF (UNIT*MAGNITUIDE) TOUNIT
+        rot                     ; OFF (UNIT*MAGNITUDE) TOUNIT
         nton @unit_type, @base_type ; OFF (MAGNITUDE*UNIT) TOUNIT
         nip                     ; OFF (MAGNITUDE*UNIT) TOUNIT
         div @base_type
@@ -138,16 +138,13 @@
 ;;; Macro arguments:
 ;;; @from_base_type
 ;;;    pkl_ast_node reflecting the type of the source offset magnitude.
-;;; @from_unit_type
-;;;    pkl_ast_node reflecting the type of the source offset unit.
 ;;; @to_base_type
 ;;;    pkl_ast_node reflecting the type of the result offset magnitude.
-;;; @to_unit_type
-;;;    pkl_ast_node reflecting the type of the result offset unit.
+;;; @unit_type
+;;;    pkl_ast_node reflecting the type of an unit, i.e. uint<64>.
 
-        .macro offset_cast @from_base_type @from_unit_type @to_base_type @to_unit_type
-        ;; XXX use OGETMC here.
-        ;; XXX we have to do the arithmetic in unit_types, then
+        .macro offset_cast @from_base_type @to_base_type @unit_type
+        ;; Note that we have to do the arithmetic in unit_types, then
         ;; convert to to_base_type, to assure that to_base_type can hold
         ;; the to_base_unit.  Otherwise weird division by zero occurs.
         pushf
@@ -161,13 +158,13 @@
         nip                                     ; OFF OFFMC
         ;; Now do the same for the unit.
         pushvar $fromunit                       ; OFF OFFMC OFFU
-        nton @from_unit_type, @to_base_type     ; OFF OFFMC OFFU OFFUC
+        nton @unit_type, @to_base_type          ; OFF OFFMC OFFU OFFUC
         nip                                     ; OFF OFFMC OFFUC
         mul @to_base_type                       ; OFF OFFMC OFFUC (OFFMC*OFFUC)
         nip2                                    ; OFF (OFFMC*OFFUC)
         ;; Convert the new unit.
         pushvar $tounit                         ; OFF (OFFMC*OFFUC) TOUNIT
-        nton @to_unit_type, @to_base_type       ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
+        nton @unit_type, @to_base_type          ; OFF (OFFMC*OFFUNC) TOUNIT TOUNITC
         nip                                     ; OFF (OFFMC*OFFUNC) TOUNITC
         div @to_base_type
         nip2                                    ; OFF (OFFMC*OFFUNC/TOUNITC)
@@ -202,154 +199,56 @@
         drop                    ; A B GCD
         .end
 
-;;; OGCDUNIT unit_type base_type
-;;; ( OFF1 OFF2 -- OFF1 OFF2 UNIT )
-;;;
-;;; Given two offsets in the stack, of base type BASE_TYPE, calculate
-;;; the greatest common divisor of their units and push it in the
-;;; stack.
-;;;
-;;; Macro arguments:
-;;; @unit_type
-;;;   a pkl_ast_node with a type uint<64>.
-;;; @base_type
-;;;   a pkl_ast_node with the base type of the offsets.
-
-        .macro ogcdunit @unit_type @base_type
-        dup                     ; OFF1 OFF2 OFF2
-        rot                     ; OFF2 OFF2 OFF1
-        dup                     ; OFF2 OFF2 OFF1 OFF1
-        rot                     ; OFF2 OFF1 OFF1 OFF2
-        ogetu                   ;    ...    OFF1 OFF2 OFF2U
-        swap                    ;    ...    OFF1 OFF2U OFF2
-        ogetm                   ;    ...    OFF1 OFF2U OFF2 OFF2M
-        nton @base_type, @unit_type
-        nip                     ;    ...    OFF1 OFF2U OFF2 OFF2M
-        nip                     ;    ...    OFF1 OFF2U OFF2M
-        mul @unit_type
-        nip2                    ;    ...    OFF1 (OFF2U*OFF2M)
-        swap                    ;    ...    (OFF2U*OFF2M) OFF1
-        ogetu                   ;    ...    (OFF2U*OFF2M) OFF1 OFF1U
-        swap                    ;    ...    (OFF2U*OFF2M) OFF1U OFF1
-        ogetm                   ;    ...    (OFF2U*OFF2M) OFF1U OFF1 OFF1M
-        nton @base_type, @unit_type
-        nip                     ;    ...    (OFF2U*OFF2M) OFF1U OFF1 OFF1M
-        nip                     ;    ...    (OFF2U*OFF2M) OFF1U OFF1M
-        mul @unit_type
-        nip2                    ;    ...    (OFF2U*OFF2M) (OFF1U*OFF1M)
-        gcd @unit_type          ;    ...    OFF2 OFF1 OFF2U OFF1U RESU
-        nip2                    ; OFF2 OFF1 RESU
-        swap                    ; OFF2 RESU OFF1
-        nrot                    ; OFF1 OFF2 RESU
-        ;; If the result unit is 0, then turn it into bits.
-        bz @unit_type, .one
-        ba .end
-.one:
-        drop
-        push ulong<64>1         ; OFF1 OFF2 1UL
-.end:
-        .end
-        
 ;;; ADDO unit_type base_type
 ;;; ( OFF OFF -- OFF OFF OFF )
 ;;;
 ;;; Add the two given offsets in the stack, which must be of the
-;;; given base type.  The unit of the result is the greatest common
-;;; divisor of the operands units.  The base type  of the result is the base
-;;; type of the operands.
+;;; same base type, and same units.
 ;;;
 ;;; Macro arguments:
 ;;;
-;;; @unit_type
-;;;   a pkl_ast_node with a type uint<64>.
+;;; #unit
+;;;   an ulong<64> with the unit of the result.
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
-        .macro addo @unit_type @base_type
-        pushf
-        regvar $off2
-        regvar $off1
-        ;; Calculate the unit of the result.
-        pushvar $off1           ; OFF1
-        pushvar $off2           ; OFF2
-        .e ogcdunit @unit_type, @base_type ; OFF1 OFF2 RESU
-        nip2                    ; RESU
-        ;; Get the magnitude of the first array, in result's units.
-        pushvar $off1           ; RESU OFF1
-        swap                    ; OFF1 RESU
-        dup                     ; OFF1 RESU RESU
-        nrot                    ; RESU OFF1 RESU
-        ogetmc @base_type       ; RESU OFF1 OFF1M
-        nip                     ; RESU OFF1M
-        ;; Get the magnitude of the second array, in result's units.
-        pushvar $off2           ; RESU OFF1M OFF2
-        rot                     ; OFF1M OFF2 RESU
-        dup                     ; OFF1M OFF2 RESU RESU
-        nrot                    ; OFF1M RESU OFF2 RESU
-        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
-        nip                     ; OFF1M RESU OFF2M
-        ;; Add the two magnitudes.
-        rot                     ; RESU OFF2M OFF1M
-        add @base_type          ; RESU OFF2M OFF1M RESM
-        nip2                    ; RESU RESM
-        ;; Build the result offset.
-        swap                    ; RESM RESU
-        mko                     ; RESO
-        pushvar $off1           ; RESO OFF1
-        pushvar $off2           ; RESO OFF1 OFF2
-        rot                     ; OFF1 OFF2 RESO
-        popf 1
+        .macro addo @base_type #unit
+        swap                    ; OFF2 OFF1
+        ogetm                   ; OFF2 OFF1 OFF1M
+        rot                     ; OFF1 OFF1M OFF2
+        ogetm                   ; OFF1 OFF1M OFF2 OFF2M
+        rot                     ; OFF1 OFF2 OFF2M OFF1M
+        swap                    ; OFF1 OFF2 OFF1M OFF2M
+        add @base_type
+        nip2                    ; OFF1 OFF2 (OFF1M+OFF2M)
+        push #unit              ; OFF1 OFF2 (OFF1M+OFF2M) UNIT
+        mko                     ; OFF1 OFF2 OFFR
         .end
 
 ;;; SUBO unit_type base_type
 ;;; ( OFF OFF -- OFF OFF OFF )
 ;;;
 ;;; Subtract the two given offsets in the stack, which must be of the
-;;; given base type.  The unit of the result is the greatest common
-;;; divisor of the operands units.  The base type  of the result is the base
-;;; type of the operands.
+;;; same base type and same units.
 ;;;
 ;;; Macro arguments:
-;;; @unit_type
-;;;   a pkl_ast_node with a type uint<64>.
+;;;
+;;; #unit
+;;;   an ulong<64> with the unit of the result.
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
-        .macro subo @unit_type @base_type
-        pushf
-        regvar $off2
-        regvar $off1
-        ;; Calculate the unit of the result.
-        pushvar $off1           ; OFF1
-        pushvar $off2           ; OFF2
-        .e ogcdunit @unit_type, @base_type ; OFF1 OFF2 RESU
-        nip2                    ; RESU
-        ;; Get the magnitude of the first array, in result's units.
-        pushvar $off1           ; RESU OFF1
-        swap                    ; OFF1 RESU
-        dup                     ; OFF1 RESU RESU
-        nrot                    ; RESU OFF1 RESU
-        ogetmc @base_type       ; RESU OFF1 OFF1M
-        nip                     ; RESU OFF1M
-        ;; Get the magnitude of the second array, in result's units.
-        pushvar $off2           ; RESU OFF1M OFF2
-        rot                     ; OFF1M OFF2 RESU
-        dup                     ; OFF1M OFF2 RESU RESU
-        nrot                    ; OFF1M RESU OFF2 RESU
-        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
-        nip                     ; OFF1M RESU OFF2M
-        ;; Subtrace the two magnitudes.
-        rot                     ; RESU OFF2M OFF1M
-        swap                    ; RESU OFF1M OFF2M
+        .macro subo @base_type #unit
+        swap                    ; OFF2 OFF1
+        ogetm                   ; OFF2 OFF1 OFF1M
+        rot                     ; OFF1 OFF1M OFF2
+        ogetm                   ; OFF1 OFF1M OFF2 OFF2M
+        rot                     ; OFF1 OFF2 OFF2M OFF1M
+        swap                    ; OFF1 OFF2 OFF1M OFF2M
         sub @base_type
-        nip2                    ; RESU RESM
-        ;; Build the result offset.
-        swap                    ; RESM RESU
-        mko                     ; RESO
-        pushvar $off1           ; RESO OFF1
-        pushvar $off2           ; RESO OFF1 OFF2
-        rot                     ; OFF1 OFF2 RESO
-        popf 1
+        nip2                    ; OFF1 OFF2 (OFF1M+OFF2M)
+        push #unit              ; OFF1 OFF2 (OFF1M+OFF2M) UNIT
+        mko                     ; OFF1 OFF2 OFFR
         .end
 
 ;;; MULO base_type
@@ -363,22 +262,20 @@
 ;;;   a pkl_ast_node with the base type of the offset.
 
         .macro mulo @base_type
-        dup                     ; OFF VAL VAL
-        rot                     ; VAL VAL OFF
-        dup                     ; VAL VAL OFF OFF
-        rot                     ; VAL OFF OFF VAL
-        swap                    ;   ...   VAL OFF
-        ogetm                   ;   ...   VAL OFF OFFM
-        rot                     ;   ...   OFF OFFM VAL
+        dup                     ; VAL VAL
+        tor                     ; VAL
+        swap                    ; VAL OFF
+        ogetm                   ; VAL OFF OFFM
+        rot                     ; OFF OFFM VAL
         mul @base_type
-        nip2                    ;   ...   OFF (VAL*OFFM)
-        swap                    ;   ...   (VAL*OFFM) OFF
-        ogetu
-        nip                     ;   ...   (VAL*OFFM) OFFU
-        mko                     ; VAL OFF OFFR
-        nrot                    ; OFFR VAL OFF
-        swap                    ; OFFR OFF VAL
-        rot                     ; OFF VAL OFFR
+        nip2                    ; OFF (OFFM*VAL)
+        swap                    ; (OFFM*VAL) OFF
+        ogetu                   ; (OFFM*VAL) OFF UNIT
+        rot                     ; OFF UNIT (OFFM*VAL)
+        swap                    ; OFF (OFFM*VAL) UNIT
+        mko                     ; OFF OFFR
+        fromr                   ; OFF OFFR VAL
+        swap                    ; OFF VAL OFFR
         .end
 
 ;;; DIVO unit_type base_type
@@ -393,17 +290,12 @@
 ;;;   a pkl_ast_node with the base type of the offsets.
 
         .macro divo @base_type
-        ;; Normalize the magnitude of the first offset to bits.
         swap                    ; OFF2 OFF1
-        push ulong<64>1         ; OFF2 OFF1 1UL
-        ogetmc @base_type       ; OFF2 OFF1 OFF1M
+        ogetm                   ; OFF2 OFF1 OFF1M
         rot                     ; OFF1 OFF1M OFF2
-        ;; Normalize the magnitude of the second offset to bits.
-        push ulong<64>1         ; OFF1 OFF1M OFF2 1UL
-        ogetmc @base_type       ; OFF1 OFF1M OFF2 OFF2M
+        ogetm                   ; OFF1 OFF1M OFF2 OFF2M
         rot                     ; OFF1 OFF2 OFF2M OFF1M
         swap                    ; OFF1 OFF2 OFF1M OFF2M
-
         div @base_type
         nip2                    ; OFF1 OFF2 (OFF1M/OFF2M)
         .end
@@ -416,41 +308,23 @@
 ;;; offsets type and the magnitude type is BASE_TYPE.
 ;;;
 ;;; Macro arguments:
+;;;
+;;; #unit
+;;;   an ulong<64> with the unit of the result.
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offsets.
 
-        .macro modo @unit_type @base_type
-        pushf
-        regvar $off2
-        regvar $off1
-        ;; Calculate the unit of the result.
-        push ulong<64>1
-        ;; Get the magnitude of the first array, in result's units.
-        pushvar $off1           ; RESU OFF1
-        swap                    ; OFF1 RESU
-        dup                     ; OFF1 RESU RESU
-        nrot                    ; RESU OFF1 RESU
-        ogetmc @base_type       ; RESU OFF1 OFF1M
-        nip                     ; RESU OFF1M
-        ;; Get the magnitude of the second array, in result's units.
-        pushvar $off2           ; RESU OFF1M OFF2
-        rot                     ; OFF1M OFF2 RESU
-        dup                     ; OFF1M OFF2 RESU RESU
-        nrot                    ; OFF1M RESU OFF2 RESU
-        ogetmc @base_type       ; OFF1M RESU OFF2 OFF2M
-        nip                     ; OFF1M RESU OFF2M
-        ;; Calculate the modulus of the two magnitudes.
-        rot                     ; RESU OFF2M OFF1M
-        swap                    ; RESU OFF1M OFF2M
-        mod @base_type          ; RESU OFF1M OFF2M RESM
-        nip2                    ; RESU RESM
-        ;; Build the result offset.
-        swap                    ; RESM RESU
-        mko                     ; RESO
-        pushvar $off1           ; RESO OFF1
-        pushvar $off2           ; RESO OFF1 OFF2
-        rot                     ; OFF1 OFF2 RESO
-        popf 1
+        .macro modo @base_type #unit
+        swap                    ; OFF2 OFF1
+        ogetm                   ; OFF2 OFF1 OFF1M
+        rot                     ; OFF1 OFF1M OFF2
+        ogetm                   ; OFF1 OFF1M OFF2 OFF2M
+        rot                     ; OFF1 OFF2 OFF2M OFF1M
+        swap                    ; OFF1 OFF2 OFF1M OFF2M
+        mod @base_type
+        nip2                    ; OFF1 OFF2 (OFF1M%OFF2M)
+        push #unit              ; OFF1 OFF2 (OFF1M%OFF2M) UNIT
+        mko                     ; OFF1 OFF2 OFFR
         .end
 
 ;;; ATRIM array_type
@@ -644,12 +518,7 @@
         nip                     ; ARR SIZM
         push #bounder           ; ARR SIZM CLS
         call                    ; ARR SIZM BOUND
-        ogetm                   ; ARR SIZM BOUND BOUNDM
-        swap                    ; ARR SIZM BOUNDM BOUND
-        ogetu                   ; ARR SIZM BOUNDM BOUND BOUNDU
-        rot                     ; ARR SIZM BOUND BOUNDU BOUNDM
-        mullu
-        nip2                    ; ARR SIZM BOUND BOUNDM
+        .e ogetmn               ; ARR SIZM BOUND BOUNDM
         rot                     ; ARR BOUND BOUNDM SIZM
         eqlu                    ; ARR BOUND BOUNDM SIZM (BOUNDM==SIZM)
         nip2                    ; ARR BOUND (BOUNDM==SIZM)

@@ -675,8 +675,21 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
         break;
       }
     case PKL_TYPE_OFFSET:
-      return pkl_ast_type_equal (PKL_AST_TYPE_O_BASE_TYPE (a),
-                                 PKL_AST_TYPE_O_BASE_TYPE (b));
+      {
+        pkl_ast_node a_unit = PKL_AST_TYPE_O_UNIT (a);
+        pkl_ast_node b_unit = PKL_AST_TYPE_O_UNIT (b);
+
+        /* If the units of the types are not known yet (because they
+           are identifiers, or whatever then we cannot guarantee the
+           types are the same.  */
+        if (PKL_AST_CODE (a_unit) != PKL_AST_INTEGER
+            || PKL_AST_CODE (b_unit) != PKL_AST_INTEGER)
+          return 0;
+
+        return (PKL_AST_INTEGER_VALUE (a_unit) == PKL_AST_INTEGER_VALUE (b_unit)
+                && pkl_ast_type_equal (PKL_AST_TYPE_O_BASE_TYPE (a),
+                                       PKL_AST_TYPE_O_BASE_TYPE (b)));
+      }
       break;
     case PKL_TYPE_STRING:
       /* Fallthrough.  */

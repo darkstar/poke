@@ -71,26 +71,23 @@ promote_integral (pkl_ast ast,
 
 static int
 promote_offset (pkl_ast ast,
-                pkl_ast_node base_type, pkl_ast_node unit,
+                pkl_ast_node type,
                 pkl_ast_node *a,
                 int *restart)
 {
-  pkl_ast_node type = PKL_AST_TYPE (*a);
+  pkl_ast_node a_type = PKL_AST_TYPE (*a);
   
   *restart = 0;
-  if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_OFFSET)
+  if (PKL_AST_TYPE_CODE (a_type) == PKL_TYPE_OFFSET)
     {
-      if (!pkl_ast_type_equal (base_type,
-                               PKL_AST_TYPE_O_BASE_TYPE (type)))
+      if (!pkl_ast_type_equal (type, a_type))
         {
-          pkl_ast_node desired_type
-            = pkl_ast_make_offset_type (ast, base_type, unit);
           pkl_ast_loc loc = PKL_AST_LOC (*a);
 
-          *a = pkl_ast_make_cast (ast, desired_type, *a);
-          PKL_AST_TYPE (*a) = ASTREF (desired_type);
+          assert (PKL_AST_TYPE_CODE (type) == PKL_TYPE_OFFSET); /* XXX */
+          *a = pkl_ast_make_cast (ast, type, *a);
+          PKL_AST_TYPE (*a) = ASTREF (type);
           PKL_AST_LOC (*a) = loc;
-          PKL_AST_LOC (desired_type) = loc;
           ASTREF (*a);
           *restart = 1;
         }
@@ -168,17 +165,17 @@ promote_array (pkl_ast ast,
 
    In the O / O -> I configuration, the magnitude types of the offset
    operands are promoted to match the type of the integral result, if
-   needed.  */
+   needed.  The units are normalized to bits.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_div)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
-  pkl_ast_node type = PKL_AST_TYPE (exp);
-  size_t size = PKL_AST_TYPE_I_SIZE (type);
-  int sign = PKL_AST_TYPE_I_SIGNED (type);
+  pkl_ast_node exp_type = PKL_AST_TYPE (exp);
+  size_t size = PKL_AST_TYPE_I_SIZE (exp_type);
+  int sign = PKL_AST_TYPE_I_SIGNED (exp_type);
   pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
         
   /* Note we discriminate on the first operand type in order to
@@ -203,16 +200,45 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_div)
     case PKL_TYPE_OFFSET:
       {
         int restart1, restart2;
+
+        pkl_ast_node op1_base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
+        pkl_ast_node op2_base_type = PKL_AST_TYPE_O_BASE_TYPE (op2_type);
+
+        size_t size = MAX (PKL_AST_TYPE_I_SIZE (op1_base_type),
+                           PKL_AST_TYPE_I_SIZE (op2_base_type));
+        int sign = (PKL_AST_TYPE_I_SIGNED (op1_base_type)
+                    && PKL_AST_TYPE_I_SIGNED (op2_base_type));
+
+        pkl_ast_node base_type;
+        pkl_ast_node unit, unit_type;
+        pkl_ast_node type;
+        
+        base_type = pkl_ast_make_integral_type (PKL_PASS_AST, size, sign);
+        PKL_AST_LOC (base_type) = PKL_AST_LOC (exp);
+        unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        PKL_AST_LOC (unit_type) = PKL_AST_LOC (exp);
+        unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+        PKL_AST_TYPE (unit) = ASTREF (unit_type);
+        PKL_AST_LOC (unit) = PKL_AST_LOC (exp);
+
+        type =
+          pkl_ast_make_offset_type (PKL_PASS_AST, base_type, unit);
+        PKL_AST_LOC (type) = PKL_AST_LOC (exp);
         
         if (!promote_offset (PKL_PASS_AST,
-                             type, PKL_AST_TYPE_O_UNIT (op1_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
           goto error;
 
         if (!promote_offset (PKL_PASS_AST,
-                             type, PKL_AST_TYPE_O_UNIT (op2_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
           goto error;
+
+        if (!restart1 || !restart2)
+          {
+            ASTREF (type); pkl_ast_node_free (type);
+          }
 
         PKL_PASS_RESTART = restart1 || restart2;
         break;
@@ -256,10 +282,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_add_sub_mod)
   pkl_ast_node type = PKL_AST_TYPE (exp);
   size_t size = PKL_AST_TYPE_I_SIZE (type);
   int sign = PKL_AST_TYPE_I_SIGNED (type);
-  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
-  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
-  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
-  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
         
   switch (PKL_AST_TYPE_CODE (type))
     {
@@ -281,15 +303,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_add_sub_mod)
     case PKL_TYPE_OFFSET:
       {
         int restart1, restart2;
-        pkl_ast_node exp_base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
         
         if (!promote_offset (PKL_PASS_AST,
-                             exp_base_type, PKL_AST_TYPE_O_UNIT (op1_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
           goto error;
 
         if (!promote_offset (PKL_PASS_AST,
-                             exp_base_type, PKL_AST_TYPE_O_UNIT (op2_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
           goto error;
 
@@ -369,10 +390,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_mul)
         }
       else if (PKL_AST_TYPE_CODE (op_type) == PKL_TYPE_OFFSET)
         {
-          pkl_ast_node exp_base_type = PKL_AST_TYPE_O_BASE_TYPE (exp_type);
-        
           if (!promote_offset (PKL_PASS_AST,
-                               exp_base_type, PKL_AST_TYPE_O_UNIT (op_type),
+                               exp_type,
                                &PKL_AST_EXP_OPERAND (exp, i), &restart))
             goto error;
 
@@ -455,24 +474,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_rela)
         int sign = (PKL_AST_TYPE_I_SIGNED (op1_base_type)
                     && PKL_AST_TYPE_I_SIGNED (op2_base_type));
 
-        pkl_ast_node to_type =
-          pkl_ast_make_integral_type (PKL_PASS_AST, size, sign);
-        PKL_AST_LOC (to_type) = PKL_AST_LOC (PKL_PASS_NODE);
+        pkl_ast_node base_type;
+        pkl_ast_node unit, unit_type;
+        pkl_ast_node type;
         
+        base_type = pkl_ast_make_integral_type (PKL_PASS_AST, size, sign);
+        PKL_AST_LOC (base_type) = PKL_AST_LOC (exp);
+        unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        PKL_AST_LOC (unit_type) = PKL_AST_LOC (exp);
+        unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+        PKL_AST_TYPE (unit) = ASTREF (unit_type);
+        PKL_AST_LOC (unit) = PKL_AST_LOC (exp);
+
+        type =
+          pkl_ast_make_offset_type (PKL_PASS_AST, base_type, unit);
+        PKL_AST_LOC (type) = PKL_AST_LOC (exp);
+
         if (!promote_offset (PKL_PASS_AST,
-                             to_type, PKL_AST_TYPE_O_UNIT (op1_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
           goto error;
 
         if (!promote_offset (PKL_PASS_AST,
-                             to_type, PKL_AST_TYPE_O_UNIT (op2_type),
+                             type,
                              &PKL_AST_EXP_OPERAND (exp, 1), &restart2))
           goto error;
 
-        if (!restart1 && !restart2)
+        if (!restart1 || !restart2)
           {
-            ASTREF (to_type);
-            pkl_ast_node_free (to_type);
+            ASTREF (type); pkl_ast_node_free (type);
           }
 
         PKL_PASS_RESTART = restart1 || restart2;
@@ -654,7 +684,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_trimmer)
 PKL_PHASE_END_HANDLER
 
 /* Handler for promoting the array size in array type literals to 64
-   unsigned bit values, or to offset<uint<64>,*> if they are
+   unsigned bit values, or to offset<uint<64>,b> if they are
    offsets.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
@@ -683,18 +713,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
       break;
     case PKL_TYPE_OFFSET:
       {
-        pkl_ast_node to_magnitude_type
-          = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
-        PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (bound);
+        pkl_ast_node base_type, unit, unit_type;
+        pkl_ast_node type;
+
+
+        base_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        PKL_AST_LOC (base_type) = PKL_AST_LOC (bound);
+
+        unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+        PKL_AST_LOC (unit_type) = PKL_AST_LOC (bound);
         
+        unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+        PKL_AST_LOC (unit) = PKL_AST_LOC (bound);
+        PKL_AST_TYPE (unit) = ASTREF (unit_type);
+
+        type = pkl_ast_make_offset_type (PKL_PASS_AST, base_type, unit);
+        PKL_AST_LOC (type) = PKL_AST_LOC (bound);
+
         if (!promote_offset (PKL_PASS_AST,
-                             to_magnitude_type, PKL_AST_TYPE_O_UNIT (bound_type),
+                             type,
                              &PKL_AST_TYPE_A_BOUND (array_type), &restart))
           {
             pkl_ice (PKL_PASS_AST, PKL_AST_LOC (bound),
                      "couldn't promote array type size expression");
             PKL_PASS_ERROR;
           }
+
+        if (!restart)
+          {
+            ASTREF (type);
+            pkl_ast_node_free (type);
+          }
+        
         break;
       }
     default:
@@ -832,8 +882,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
       break;
     case PKL_TYPE_OFFSET:
       if (!promote_offset (PKL_PASS_AST,
-                           PKL_AST_TYPE_O_BASE_TYPE (lvalue_type),
-                           PKL_AST_TYPE_O_UNIT (lvalue_type),
+                           lvalue_type,
                            &PKL_AST_ASS_STMT_EXP (ass_stmt),
                            &restart))
         goto error;
@@ -914,8 +963,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_funcall)
           break;
         case PKL_TYPE_OFFSET:
           if (!promote_offset (PKL_PASS_AST,
-                               PKL_AST_TYPE_O_BASE_TYPE (fa_type),
-                               PKL_AST_TYPE_O_UNIT (fa_type),
+                               fa_type,
                                &PKL_AST_FUNCALL_ARG_EXP (aa),
                                &restart))
             goto error;
@@ -993,8 +1041,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
           break;
         case PKL_TYPE_OFFSET:
           if (!promote_offset (PKL_PASS_AST,
-                               PKL_AST_TYPE_O_BASE_TYPE (expected_type),
-                               PKL_AST_TYPE_O_UNIT (expected_type),
+                               expected_type,
                                &PKL_AST_RETURN_STMT_EXP (return_stmt),
                                &restart))
             goto error;
@@ -1101,8 +1148,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
               break;
             case PKL_TYPE_OFFSET:
               if (!promote_offset (PKL_PASS_AST,
-                                   PKL_AST_TYPE_O_BASE_TYPE (arg_type),
-                                   PKL_AST_TYPE_O_UNIT (arg_type),
+                                   arg_type,
                                    &PKL_AST_FUNC_ARG_INITIAL (func_arg),
                                    &restart))
                 goto error;
@@ -1134,16 +1180,19 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
   pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
   pkl_ast_node map_offset_type = PKL_AST_TYPE (map_offset);
 
-  pkl_ast_node to_magnitude_type;
+  pkl_ast_node base_type;
+  pkl_ast_node type;
+
   int restart;
 
-  to_magnitude_type = pkl_ast_make_integral_type (PKL_PASS_AST,
-                                                  64, 0);
-  PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (map_offset);
+  base_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+  PKL_AST_LOC (base_type) = PKL_AST_LOC (map);
+  type = pkl_ast_make_offset_type (PKL_PASS_AST, base_type,
+                                   PKL_AST_TYPE_O_UNIT (map_offset_type));
+  PKL_AST_LOC (type) = PKL_AST_LOC (map);
 
   if (!promote_offset (PKL_PASS_AST,
-                       to_magnitude_type,
-                       PKL_AST_TYPE_O_UNIT (map_offset_type),
+                       type,
                        &PKL_AST_MAP_OFFSET (map),
                        &restart))
     {
@@ -1151,6 +1200,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
                "couldn't promote offset of map #%" PRIu64,
                PKL_AST_UID (map));
       PKL_PASS_ERROR;
+    }
+
+  if (!restart)
+    {
+      ASTREF (type); pkl_ast_node_free (type);
     }
 
   PKL_PASS_RESTART = restart;
@@ -1202,20 +1256,30 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
         {
         case PKL_TYPE_OFFSET:
           {
-            pkl_ast_node to_magnitude_type
-              = pkl_ast_make_integral_type (PKL_PASS_AST,
-                                            64, 0);
-            PKL_AST_LOC (to_magnitude_type) = PKL_AST_LOC (elem_label);
+            pkl_ast_node base_type, type;
+
+            
+            base_type = pkl_ast_make_integral_type (PKL_PASS_AST,
+                                                    64, 0);
+            PKL_AST_LOC (base_type) = PKL_AST_LOC (elem_label);
+
+            type = pkl_ast_make_offset_type (PKL_PASS_AST, base_type,
+                                             PKL_AST_TYPE_O_UNIT (label_type));
+            PKL_AST_LOC (type) = PKL_AST_LOC (elem_label);
             
             if (!promote_offset (PKL_PASS_AST,
-                                 to_magnitude_type,
-                                 PKL_AST_TYPE_O_UNIT (label_type),
+                                 type,
                                  &PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem),
                                  &restart))
               {
                 pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_label),
                          "couldn't promote struct element label");
                 PKL_PASS_ERROR;
+              }
+
+            if (!restart)
+              {
+                ASTREF (type); pkl_ast_node_free (type);
               }
             break;
           }

@@ -401,9 +401,21 @@ TYPIFY_BIN (band);
       }                                                                 \
     else if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_MOD)                  \
       {                                                                 \
+        pkl_ast_node unit_type_1 = PKL_AST_TYPE_O_UNIT (t1);            \
+        pkl_ast_node unit_type_2 = PKL_AST_TYPE_O_UNIT (t2);            \
+        uint64_t t1_unit = PKL_AST_INTEGER_VALUE (unit_type_1);         \
+        uint64_t t2_unit = PKL_AST_INTEGER_VALUE (unit_type_2);         \
+        pkl_ast_node unit_type                                          \
+          = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);           \
+                                                                        \
+        pkl_ast_node unit = pkl_ast_make_integer (PKL_PASS_AST,         \
+                                                  pkl_typify_gcd (t1_unit, t2_unit)); \
+        PKL_AST_LOC (unit) = PKL_AST_LOC (exp);                         \
+        PKL_AST_LOC (unit_type) = PKL_AST_LOC (exp);                    \
+        PKL_AST_TYPE (unit) = ASTREF (unit_type);                       \
+                                                                        \
         type = pkl_ast_make_offset_type (PKL_PASS_AST,                  \
-                                         base_type_1,                   \
-                                         PKL_AST_TYPE_O_UNIT (t2));     \
+                                         base_type_1, unit);            \
       }                                                                 \
     else                                                                \
       assert (0);                                                       \

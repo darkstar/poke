@@ -1158,15 +1158,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
 {
-  //  pkl_ast_node offset_type = PKL_PASS_NODE;
+  /* Note that in_writer is handled in the pre-order handler, and not
+     here.  */
 
-  /* Note that the check for in_writer should appear first than the
-     check for in_mapper.  */
-  /*  if (PKL_GEN_PAYLOAD->in_writer)
-    / * Stack: OFF VAL * /
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKED,
-                  PKL_AST_TYPE_O_BASE_TYPE (offset_type));
-  else */if (PKL_GEN_PAYLOAD->in_mapper)
+  if (PKL_GEN_PAYLOAD->in_mapper)
     /* Stack: OFF */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
@@ -1255,8 +1250,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_cast)
            && PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_OFFSET)
     {
       pkl_ast_node to_unit = PKL_AST_TYPE_O_UNIT (to_type);
-      
-      PKL_PASS_SUBPASS (to_unit);
+
+      /* XXX pass `unit' as an argument to OTO.  */
+      pkl_asm_insn (pasm, PKL_INSN_PUSH,
+                    pvm_make_ulong (PKL_AST_INTEGER_VALUE (to_unit), 64));
       pkl_asm_insn (pasm, PKL_INSN_OTO, from_type, to_type);
     }
   else if (PKL_AST_TYPE_CODE (to_type) == PKL_TYPE_STRING)
@@ -2061,8 +2058,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_add)
     case PKL_TYPE_OFFSET:
       {
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+        pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (type);
 
-        pkl_asm_insn (pasm, PKL_INSN_ADDO, base_type);
+        pkl_asm_insn (pasm, PKL_INSN_ADDO, base_type, unit);
         pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
@@ -2088,7 +2086,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_sub)
     case PKL_TYPE_OFFSET:
       {
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-        pkl_asm_insn (pasm, PKL_INSN_SUBO, base_type);
+        pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (type);
+
+        pkl_asm_insn (pasm, PKL_INSN_SUBO, base_type, unit);
         pkl_asm_insn (pasm, PKL_INSN_NIP2);
       }
       break;
@@ -2186,8 +2186,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mod)
     case PKL_TYPE_OFFSET:
       {
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-        
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MODO, base_type);
+        pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (type);
+
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MODO, base_type, unit);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
         break;
       }
@@ -2294,33 +2295,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
       break;
     case PKL_TYPE_OFFSET:
       {
-        /* Calculate the resulting integral value, which is the
-           comparison of both magnitudes, once normalized to bits.
-           Note that at this point the magnitude types of both offset
-           operands are the same.  */
-
         pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
-        pkl_ast_node unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
-        pkl_ast_node unit_bits = pkl_ast_make_integer (PKL_PASS_AST, 1);
-        PKL_AST_TYPE (unit_bits) = ASTREF (unit_type);
 
         /* Equality and inequality are commutative, so we can save an
            instruction here.  */
         if (exp_code != PKL_AST_OP_EQ && exp_code != PKL_AST_OP_NE)
           pkl_asm_insn (pasm, PKL_INSN_SWAP);
 
-        PKL_PASS_SUBPASS (unit_bits);
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-        PKL_PASS_SUBPASS (unit_bits);
-        pkl_asm_insn (pasm, PKL_INSN_OGETMC, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP);
-
+        pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF2 OFF1 OFF1M */
+        pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF1M OFF2 */
+        pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF1 OFF1M OFF2 OFF2M */
+        pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF2 OFF2M OFF1M */
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF1 OFF2 OFF1M OFF2M */
         pkl_asm_insn (pasm, rela_insn, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-        ASTREF (unit_bits); pkl_ast_node_free (unit_bits);
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* OFF1 OFF2 (OFF1M?OFF2M) */
+        pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* (OFF1M?OFF2M) */
       }
       break;
     default:
