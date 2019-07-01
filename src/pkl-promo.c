@@ -1171,24 +1171,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
 }
 PKL_PHASE_END_HANDLER
 
-/* The base type of an offset in a map should be promoted to uint<64>.
-   This is expected by the code generator.  */
+/* The offsets in maps should be promoted to offset<uint<64>,b>.  This
+   is expected by the code generator and the run-time.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_map)
 {
   pkl_ast_node map = PKL_PASS_NODE;
   pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
-  pkl_ast_node map_offset_type = PKL_AST_TYPE (map_offset);
 
-  pkl_ast_node base_type;
+  pkl_ast_node base_type, unit, unit_type;
   pkl_ast_node type;
 
   int restart;
 
   base_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
   PKL_AST_LOC (base_type) = PKL_AST_LOC (map);
-  type = pkl_ast_make_offset_type (PKL_PASS_AST, base_type,
-                                   PKL_AST_TYPE_O_UNIT (map_offset_type));
+
+  unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
+  PKL_AST_LOC (unit_type) = PKL_AST_LOC (map);
+  unit = pkl_ast_make_integer (PKL_PASS_AST, 1);
+  PKL_AST_TYPE (unit) = ASTREF (unit_type);
+  PKL_AST_LOC (unit) = PKL_AST_LOC (map);
+  type = pkl_ast_make_offset_type (PKL_PASS_AST, base_type, unit);
   PKL_AST_LOC (type) = PKL_AST_LOC (map);
 
   if (!promote_offset (PKL_PASS_AST,
