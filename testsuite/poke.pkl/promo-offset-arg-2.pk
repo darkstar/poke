@@ -1,0 +1,6 @@
+/* { dg-do run } */
+
+defun foo = (offset<int,Kb> num_kb = 2#Mb) int: { return num_kb'magnitude; }
+
+/* { dg-command { foo } } */
+/* { dg-output "2048" } */

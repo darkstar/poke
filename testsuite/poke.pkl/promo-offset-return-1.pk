@@ -1,0 +1,6 @@
+/* { dg-do run } */
+
+defun ja = offset<int,Kb>: { return 1#Mb; }
+
+/* { dg-command { ja } } */
+/* { dg-output "1024#Kb" } */
