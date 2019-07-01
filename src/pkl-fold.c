@@ -27,6 +27,9 @@
 #include "pkl.h"
 #include "pkl-ast.h"
 #include "pkl-pass.h"
+#include "pkl-fold.h"
+
+#define PKL_FOLD_PAYLOAD ((pkl_fold_payload) PKL_PASS_PAYLOAD)
 
 /* Emulation routines.
 
@@ -131,6 +134,8 @@ EMUL_UUU (subo) { return op1 - op2; }
 EMUL_III (subo) { return op1 - op2; }
 EMUL_UUU (mulo) { return op1 * op2; }
 EMUL_III (mulo) { return op1 * op2; }
+EMUL_UUU (divo) { return op1 / op2; }
+EMUL_III (divo) { return op1 / op2; }
 
 /* Auxiliary macros used in the handlers below.  */
 
@@ -488,7 +493,38 @@ PKL_PHASE_END_HANDLER
 
 /* XXX the handler for div and mod should check for division by
    zero.  */
-PKL_PHASE_HANDLER_BIN_INT (div); /* XXX */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_div)
+{
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_CODE (op2) == PKL_AST_INTEGER
+      && PKL_AST_INTEGER_VALUE (op2) == 0)
+    goto divbyzero;
+
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (op2);
+
+      if (PKL_AST_CODE (magnitude) == PKL_AST_INTEGER
+          && PKL_AST_INTEGER_VALUE (magnitude) == 0)
+        goto divbyzero;
+    }
+  
+  OP_BINARY_III (div);
+  OP_BINARY_OOI (divo);
+
+  PKL_PASS_DONE;
+
+ divbyzero:
+  pkl_error (PKL_PASS_AST, PKL_AST_LOC (op2), "division by zero");
+  PKL_FOLD_PAYLOAD->errors++;
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
 PKL_PHASE_HANDLER_BIN_INT (mod);
 
 #define PKL_PHASE_HANDLER_UNIMPL(op)            \

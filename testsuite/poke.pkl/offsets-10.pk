@@ -1,4 +1,0 @@
-/* { dg-do run } */
-
-/* { dg-command {  1024UL#b/1UB#byte } } */
-/* { dg-output "128UL" } */

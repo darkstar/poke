@@ -1,0 +1,3 @@
+/* { dg-do compile } */
+
+defvar o = 3#B / (1#Mb - 1024#Kb); /* { dg-error "" } */

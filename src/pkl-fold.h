@@ -21,6 +21,13 @@
 
 #include <config.h>
 
+struct pkl_fold_payload
+{
+  int errors;
+};
+
+typedef struct pkl_fold_payload *pkl_fold_payload;
+
 extern struct pkl_phase pkl_phase_fold;
 
 #endif /* PKL_FOLD_H */

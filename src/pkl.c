@@ -120,6 +120,8 @@ rest_of_compilation (pkl_compiler compiler,
   struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_typify_payload typify2_payload = { 0 };
 
+  struct pkl_fold_payload fold_payload = { 0 };
+
   struct pkl_phase *lex_phases[]
     = { &pkl_phase_transl,
         NULL
@@ -147,7 +149,7 @@ rest_of_compilation (pkl_compiler compiler,
         &typify1_payload,
         NULL, /* promo */
         &trans2_payload,
-        NULL, /* fold */
+        &fold_payload,
         &typify2_payload,
         &trans3_payload,
         &anal2_payload,
@@ -201,6 +203,7 @@ rest_of_compilation (pkl_compiler compiler,
       || anal1_payload.errors > 0
       || anal2_payload.errors > 0
       || typify1_payload.errors > 0
+      || fold_payload.errors > 0
       || typify2_payload.errors > 0)
     goto error;
 
