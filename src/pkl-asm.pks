@@ -97,37 +97,6 @@
         drop                    ; VAL
         .end
 
-;;; RAS_MACRO_OGETMC
-;;; ( OFFSET UNIT -- OFFSET CONVERTED_MAGNITUDE )
-;;;
-;;; Given an offset and an unit in the stack, generate code to push
-;;; its magnitude converted to the given unit.  This is the implementation
-;;; of the PKL_INSN_OGETMC macro-instruction.
-;;;
-;;; Macro arguments:
-;;; @unit_type
-;;;    a pkl_ast_node with the type of an offset unit, i.e.
-;;;    uint<64>.
-;;; @base_type
-;;;    a pkl_ast_node with the base type of the offset.
-
-        .macro ogetmc @unit_type @base_type
-        swap                    ; TOUNIT OFF
-        ogetm                   ; TOUNIT OFF MAGNITUDE
-        swap                    ; TOUNIT MAGNITUDE OFF
-        ogetu                   ; TOUNIT MAGNITUDE OFF UNIT
-        nton @unit_type, @base_type ; TOUNIT MAGNITUDE OFF UNIT
-        nip                     ; TOUNIT MAGNITUDE OFF UNIT
-        rot                     ; TOUNIT OFF UNIT MAGNITUDE
-        mul @base_type          ; TOUNIT OFF UNIT MAGNITUDE (UNIT*MAGNITUDE)
-        nip2                    
-        rot                     ; OFF (UNIT*MAGNITUDE) TOUNIT
-        nton @unit_type, @base_type ; OFF (MAGNITUDE*UNIT) TOUNIT
-        nip                     ; OFF (MAGNITUDE*UNIT) TOUNIT
-        div @base_type
-        nip2                    ; OFF (MAGNITUDE*UNIT/TOUNIT)
-        .end
-
 ;;; RAS_MACRO_OFFSET_CAST
 ;;; ( OFF TOUNIT -- OFF )
 ;;;

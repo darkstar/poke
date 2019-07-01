@@ -749,23 +749,6 @@ pkl_asm_insn_atrim (pkl_asm pasm, pkl_ast_node array_type)
   RAS_MACRO_ATRIM (array_type);
 }
 
-/* Macro-instruction: OGETMC base_type
-   ( OFFSET UNIT -- OFFSET CONVERTED_MAGNITUDE )
-
-   Given an offset and an unit in the stack, generate code to push its
-   magnitude converted to the given unit.  */
-
-static void
-pkl_asm_insn_ogetmc (pkl_asm pasm,
-                     pkl_ast_node base_type)
-{
-  pkl_ast_node unit_type
-    = pkl_ast_make_integral_type (pasm->ast, 64, 0);
-
-  RAS_MACRO_OGETMC (unit_type, base_type);
-  ASTREF (unit_type); pkl_ast_node_free (unit_type);
-}
-
 /* Macro-instruction: GCD type
    ( VAL VAL -- VAL VAL )
 
@@ -1277,17 +1260,6 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_gcd (pasm, type);
-            break;
-          }
-        case PKL_INSN_OGETMC:
-          {
-            pkl_ast_node base_type;
-
-            va_start (valist, insn);
-            base_type = va_arg (valist, pkl_ast_node);
-            va_end (valist);
-
-            pkl_asm_insn_ogetmc (pasm, base_type);
             break;
           }
         case PKL_INSN_ATRIM:
