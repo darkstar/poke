@@ -102,10 +102,10 @@ EMUL_III (le) { return op1 <= op2; }
 EMUL_UUU (ge) { return op1 >= op2; }
 EMUL_III (ge) { return op1 >= op2; }
 
-EMUL_UUU (sl) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_III (sl) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_UUU (sr) { assert (0); return 0; } /* XXX WRITEME */
-EMUL_III (sr) { assert (0); return 0; } /* XXX WRITEME */
+EMUL_UUU (sl) { return op1 << op2; }
+EMUL_III (sl) { return op1 << op2; } /* XXX support 1c */
+EMUL_UUU (sr) { return op1 >> op2; }
+EMUL_III (sr) { return op1 >> op2; } /* XXX support 2c */
 
 EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
 EMUL_SSI (nes) { return (strcmp (op1, op2) != 0); }
