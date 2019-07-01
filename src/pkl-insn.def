@@ -407,11 +407,11 @@ PKL_DEF_INSN (PKL_INSN_BCONC, "aaa", "bconc")
 
 PKL_DEF_INSN (PKL_INSN_GCD, "a", "gcd")
 
-/* Array meta-instructions.  */
+/* Array macro-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_ATRIM, "a", "atrim")
 
-/* Offset meta-instructions.  */
+/* Offset macro-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_ADDO, "a", "addo")
 PKL_DEF_INSN (PKL_INSN_SUBO, "a", "subo")
@@ -419,12 +419,12 @@ PKL_DEF_INSN (PKL_INSN_MULO, "a", "mulo")
 PKL_DEF_INSN (PKL_INSN_DIVO, "a", "divo")
 PKL_DEF_INSN (PKL_INSN_MODO, "aa", "modo")
 
-/* Meta-instructions to handle mapped values.  */
+/* Macro-instructions to handle mapped values.  */
 
 PKL_DEF_INSN (PKL_INSN_REMAP, "", "remap")
 PKL_DEF_INSN (PKL_INSN_WRITE, "", "write")
 
-/* Printing meta-instructions.  */
+/* Printing macro-instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_PRINT, "an", "print")
 
