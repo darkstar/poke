@@ -1,0 +1,4 @@
+/* { dg-do run } */
+
+/* { dg-command {  [struct {foo=10}] } } */
+/* { dg-output "\\\[struct \\{foo=10\\}\\\]" } */

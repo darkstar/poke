@@ -1,0 +1,4 @@
+/* { dg-do run } */
+
+/* { dg-command { try ("foo" + "bar")[6]; catch if E_out_of_bounds { print "catched\n"; } } } */
+/* { dg-output "catched" } */
