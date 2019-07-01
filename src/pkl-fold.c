@@ -399,6 +399,44 @@ EMUL_III (modo) { return op1 % op2; }
     }                                                                   \
   while (0)
 
+#define OP_BINARY_SSS(OP)                                               \
+  do                                                                    \
+    {                                                                   \
+      pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);        \
+      pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);        \
+      pkl_ast_node op1_type = PKL_AST_TYPE (op1);                       \
+      pkl_ast_node op2_type = PKL_AST_TYPE (op2);                       \
+                                                                        \
+      if (PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_STRING               \
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_STRING)           \
+        {                                                               \
+          pkl_ast_node new;                                             \
+          char *res;                                                    \
+                                                                        \
+          if (PKL_AST_CODE (op1) != PKL_AST_STRING                      \
+              || PKL_AST_CODE (op2) != PKL_AST_STRING)                  \
+            /* We cannot fold this expression.  */                      \
+            PKL_PASS_DONE;                                              \
+                                                                        \
+          res = xmalloc (strlen (PKL_AST_STRING_POINTER (op1))          \
+                         + strlen (PKL_AST_STRING_POINTER (op2))        \
+                         + 1);                                          \
+                                                                        \
+          strcpy (res, PKL_AST_STRING_POINTER (op1));                   \
+          strcat (res, PKL_AST_STRING_POINTER (op2));                   \
+                                                                        \
+          new = pkl_ast_make_string (PKL_PASS_AST, res);                \
+          free (res);                                                   \
+          PKL_AST_TYPE (new) = ASTREF (op1_type);                       \
+          PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);              \
+                                                                        \
+          pkl_ast_node_free (PKL_PASS_NODE);                            \
+          PKL_PASS_NODE = new;                                          \
+          PKL_PASS_DONE;                                                \
+        }                                                               \
+    }                                                                   \
+  while (0)
+
 #define OP_BINARY_SSI(OP)                                               \
   do                                                                    \
     {                                                                   \
@@ -480,6 +518,7 @@ PKL_PHASE_HANDLER_BIN_RELA (ge);
   {                                                  \
     OP_BINARY_III (OP);                              \
     OP_BINARY_OOO (OP##o);                           \
+    OP_BINARY_SSS (OP);                              \
   }                                                  \
   PKL_PHASE_END_HANDLER
 
@@ -562,7 +601,6 @@ PKL_PHASE_END_HANDLER
   }                                             \
   PKL_PHASE_END_HANDLER
 
-PKL_PHASE_HANDLER_UNIMPL (sconc);
 PKL_PHASE_HANDLER_UNIMPL (bconc);
 PKL_PHASE_HANDLER_UNIMPL (sl);
 PKL_PHASE_HANDLER_UNIMPL (sr);
@@ -651,7 +689,7 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (SR, sr), ENTRY (ADD, add), ENTRY (SUB, sub),
    ENTRY (MUL, mul), ENTRY (DIV, div), ENTRY (MOD, mod),
    ENTRY (LT, lt), ENTRY (GT, gt), ENTRY (LE, le),
-   ENTRY (GE, ge), ENTRY (SCONC, sconc),
+   ENTRY (GE, ge),
    ENTRY (BCONC, bconc),
    ENTRY (POS, pos), ENTRY (NEG, neg), ENTRY (BNOT, bnot),
    ENTRY (NOT, not),
