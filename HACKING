@@ -97,204 +97,135 @@ The Source Tree
 
 The Compiler
 ~~~~~~~~~~~~
-Support for abstract syntax trees:
+Support for abstract syntax trees
+  ``src/pkl-ast.c``, ``src/pkl-ast.h``, ``src/pkl-ops.def``,
+  ``src/pkl-attrs.def``
 
-- src/pkl-ast.c
-- src/pkl-ast.h
-- src/pkl-ops.def
-- src/pkl-attrs.def
+The compiler driver
+  ``src/pkl.h``, ``src/pkl.c``, ``src/pkl-pass.c``,
+  ``src/pkl-pass.h``
+   
+The lexer, and parser
+  ``src/pkl-lex.l``, ``src/pkl-tab.y``, ``src/pkl-parser.c``,
+  ``src/pkl-parser.h``
+   
+Compile-time lexical environment
+  ``src/pkl-env.h, ``src/pkl-env.c``
 
-The compiler driver:
+Analysis phases
+  ``src/pkl-anal.c``, ``src/pkl-anal.h``
 
-- src/pkl.h
-- src/pkl.c
-- src/pkl-pass.c
-- src/pkl-pass.h
+Transformation phases
+  ``src/pkl-trans.c``, ``src/pkl-trans.h``
 
-The lexer, and parser:
+Type system related phases
+  ``src/pkl-typify.c``, ``src/pkl-typify.h``
 
-- src/pkl-lex.l
-- src/pkl-tab.y
-- src/pkl-parser.c
-- src/pkl-parser.h
+Constant folding phase
+  ``src/pkl-fold.c``, ``src/pkl-fold.h``
 
-Compile-time lexical environment:
+Coercions phases
+  ``src/pkl-promo.c``, ``src/pkl-promo.h``
 
-- src/pkl-env.h
-- src/pkl-env.c
+The code generator
+  ``src/pkl-gen.h``, ``src/pkl-gen.c``, ``src/pkl-gen.pks``
+  
+The macro-assembler
+  ``src/pkl-insn.def``, ``src/pkl-asm.h``, ``src/pkl-asm.c``,
+  ``src/pkl-asm.pks``
+  
+Our good friend ras
+  ``src/ras``
 
-Analysis phases:
-
-- src/pkl-anal.c
-- src/pkl-anal.h
-
-Transformation phases:
-
-- src/pkl-trans.c
-- src/pkl-trans.h
-
-Type system related phases:
-
-- src/pkl-typify.c
-- src/pkl-typify.h
-
-Constant folding phase:
-
-- src/pkl-fold.c
-- src/pkl-fold.h
-
-Coercions phases:
-
-- src/pkl-promo.c
-- src/pkl-promo.h
-
-The code generator:
-
-- src/pkl-gen.h
-- src/pkl-gen.c
-- src/pkl-gen.pks
-
-The macro-assembler:
-
-- src/pkl-insn.def
-- src/pkl-asm.h
-- src/pkl-asm.c
-- src/pkl-asm.pks
-
-Our good friend ras:
-
-- src/ras.
-
-Compiler run-time library:
-
-- src/pkl-rt.pk
+Compiler run-time library
+  ``src/pkl-rt.pk``
 
 The Poke Virtual Machine
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Virtual machine driver:
+Virtual machine driver
+  ``src/pvm.c``, ``src/pvm.h``
 
-- src/pvm.c
-- src/pvm.h
+Virtual machine values
+  ``src/pvm-val.c``, ``src/pvm-val.h``
 
-Virtual machine values:
+Run-time environment
+  ``src/pvm-env.c``, ``src/pvm-env.h``
 
-- src/pvm-val.c
-- src/pvm-val.h
-
-Run-time environment:
-
-- src/pvm-env.c
-- src/pvm-env.h
-
-Virtual machine instructions:
-
-- src/pvm.jitter
+Virtual machine instructions
+  ``src/pvm.jitter``
 
 The IO Subsystem
 ~~~~~~~~~~~~~~~~
 
-Support for IO spaces:
+Support for IO spaces
+  ``src/ios.h``, ``src/ios.c``
 
-- src/ios.h
-- src/ios.c
+Support for IO devices
+  ``src/ios-dev.h``
 
-Support for IO devices:
-
-- src/ios-dev.h
-
-Supported IO devices:
-
-- src/ios-dev-file.c
+Supported IO devices
+  ``src/ios-dev-file.c``
 
 Poke Program
 ~~~~~~~~~~~~
 
-Main program:
+Main program
+  ``src/poke.h``, ``src/poke.c``
 
-- src/poke.h
-- src/poke.c
+Infrastructure for writing poke commands
+  ``src/pk-cmd.h``, ``src/pk-cmd.c``
 
-Infrastructure for writing poke commands:
+Terminal stuff
+  ``src/pk-term.h``
 
-- src/pk-cmd.h
-- src/pk-cmd.c
-
-Terminal stuff:
-
-- src/pk-term.h
-
-Commands:
-
-- src/pk-def.c
-- src/pk-dump.pk
-- src/pk-file.c
-- src/pk-help.c
-- src/pk-info.c
-- src/pk-misc.h
-- src/pk-set.c
-- src/pk-vm.c
+Commands
+  ``src/pk-def.c``, ``src/pk-dump.pk``, ``src/pk-file.c``,
+  ``src/pk-help.c``, ``src/pk-info.c``, ``src/pk-misc.h``,
+  ``src/pk-set.c``, ``src/pk-vm.c``
 
 Pickles and Libraries
 ~~~~~~~~~~~~~~~~~~~~~
 
-Standard library:
+Standard library
+  ``src/std.pk``
 
-- src/std.pk
-
-Pickles:
-
-- pickles/elf.pk
-- pickles/ctf.pk
+Pickles
+  ``pickles/elf.pk``, ``pickles/ctf.pk``
 
 Test Suite
 ~~~~~~~~~~
-Target-specific dejagnu configuration:
+Target-specific dejagnu configuration
+ ``testsuite/config/default.exp``, ``testsuite/config/unix.exp``
+ 
+Poke test drivers
+ ``testsuite/lib/poke.exp``, ``testsuite/lib/poke-dg.exp``
 
-- testsuite/config/default.exp
-- testsuite/config/unix.exp
+Compiler test suite
+  ``testsuite/poke.pkl/pkl.exp``, ``testsuite/poke.pkl/*.pk``
 
-Poke test drivers:
+Compiler test suite (mapping)
+  ``testsuite/poke.map/map.exp``, ``testsuite/poke.pkl/*.pk``
 
-- testsuite/lib/poke.exp
-- testsuite/lib/poke-dg.exp
+Standard library test suite
+  ``testsuite/poke.std/std.exp``, ``testsuite/poke.std/*.pk``
 
-Compiler test suite:
-
-- testsuite/poke.pkl/pkl.exp
-- testsuite/poke.pkl/\*.pk
-
-Compiler test suite (mapping):
-
-- testsuite/poke.map/map.exp
-- testsuite/poke.pkl/\*.pk
-
-Standard library test suite:
-
-- testsuite/poke.std/std.exp
-- testsuite/poke.std/\*.pk
-
-Tests for Poke commands:
-
-- testsuite/poke.cmd/cmd.exp
-- testsuite/poke.cmd/\*.pk
+Tests for Poke commands
+  ``testsuite/poke.cmd/cmd.exp``, ``testsuite/poke.cmd/*.pk``
 
 Documentation
 ~~~~~~~~~~~~~
-The Poke book:
-
-- doc/poke.texi
+The Poke book
+  ``doc/poke.texi``
 
 Other Stuff
 ~~~~~~~~~~~
 
-GDB extensions to better debug poke:
+GDB extensions to better debug poke
+  ``etc/poke-gdb.scm``
 
-- etc/poke-gdb.scm
-
-Suppression list for memcheck:
-
-- etc/boehm-gc.suppressions
+Suppression list for memcheck
+  ``etc/boehm-gc.suppressions``
 
 Coding Style and Conventions
 ----------------------------
