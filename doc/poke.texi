@@ -125,6 +125,8 @@ Poke Language Reference Manual
 @c       Declaration of Variables
 @c   Functions
 @c       Declaration of Functions
+@c       Optional arguments to Functions
+@c       Variadic Functions
 @c   Mapping  (Accessing the IO space)
 @c   Searching and Patterns
 @c   Modules and Files
