@@ -729,7 +729,7 @@
 .c { uint64_t i;
  .c for (i = 0, elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem), ++i)
  .c {
-         ;; Poke this struct element, but only if it has been modified
+        ;; Poke this struct element, but only if it has been modified
         ;; since the last mapping.
         pushvar $sct            ; SCT
         .c pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (i, 64));
