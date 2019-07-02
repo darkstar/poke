@@ -52,6 +52,34 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
+@c XXX IO cache:
+@c
+@c   (poke) ... poke something ...
+@c   (poke*) ... poke something more ...
+@c   (poke*) .changes
+@c   - 000043: 0034 aabb
+@c   + 000043: ffff ffff
+@c   (poke*) .commit
+@c   Written 4 #B to IO foo.o
+@c   (poke)
+@c
+@c   (poke*) .revert
+@c   You sure you want to revert?  Use .revert yes.
+@c   (poke)
+@c
+@c   (poke*) .exit
+@c   There are unsaved changes.  Use .exit yes.
+@c
+@c .set safer 0
+@c this disables the .revert yes and .exit yes stuff.
+
+@c XXX document .set OPTION
+@c
+@c  obase
+@c  nenc
+@c  safer
+@c  etc...
+
 * Mapping::			Structuring the IO space.
 
 Advanced Editing
@@ -203,6 +231,7 @@ XXX: aspects to discuss here:
 * Mapped Values::
 * Mapping Structs::
 * Mapping Arrays::
+* Unchecked Mapping::           Accessing erroneous data.
 @end menu
 
 @node The IO Space
@@ -453,6 +482,23 @@ Since simple values (such as the size above) are not mapped, this
 trick works as intended.
 
 @c  Assigning a new value to a mapped array: valmappers.
+
+@node Unchecked Mapping
+@section Unchecked Mapping
+
+XXX WRITEME
+
+This can be either:
+
+@example
+.set checked 0
+@end example
+
+or:
+
+@example
+(poke) Reloc @@! 0#B
+@end example
 
 @node Introduction
 @chapter Introduction
