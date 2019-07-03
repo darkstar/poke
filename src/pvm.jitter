@@ -564,8 +564,9 @@ instruction return ()
   code
     jitter_uint return_address;
 
-    /* Restore the environment of the caller.  */
-    jitter_state_runtime.env = (pvm_env) JITTER_TOP_RETURNSTACK ();
+    /* Restore the environment of the caller.  Note the cast to
+       jitter_uint is to avoid a warning in 32-bit.  */
+    jitter_state_runtime.env = (pvm_env) (jitter_int) JITTER_TOP_RETURNSTACK ();
     JITTER_DROP_RETURNSTACK();
 
     return_address = JITTER_TOP_RETURNSTACK();
