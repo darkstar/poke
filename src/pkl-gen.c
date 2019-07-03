@@ -1478,6 +1478,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_indexer)
 PKL_PHASE_END_HANDLER
 
 /*
+ * STRUCT
+ * | STRUCT_ELEM
+ * | ...
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct)
+{
+  /* The offset of the new struct, which should be PVM_NULL, as it is
+     not mapped.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
+#if 0  
+  /* Counter (in bits) from the beginning of the struct.  Initially 0.
+     This is used by code generated in the pkl_gen_pr_struct_elem
+     handler.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+#endif
+}
+PKL_PHASE_END_HANDLER
+
+/*
  *  | STRUCT_ELEM
  *  | ...
  *  STRUCT
@@ -1491,7 +1512,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_STRUCT_NELEM (sct), 64));
   PKL_PASS_SUBPASS (sct_type);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMSCT);
 }
 PKL_PHASE_END_HANDLER
 
@@ -1503,10 +1524,40 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem)
 {
+  pkl_ast_node struct_elem = PKL_PASS_NODE;
+  pkl_ast_node struct_elem_name
+    = PKL_AST_STRUCT_ELEM_NAME (struct_elem);
+  pkl_ast_node struct_elem_exp
+    = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
+
+  /* XXX offset  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
   /* If the struct initializer doesn't include a name, generate a null
      value as expected by the mksct instruction.  */
-  if (!PKL_AST_STRUCT_ELEM_NAME (PKL_PASS_NODE))
+  if (struct_elem_name)
+    PKL_PASS_SUBPASS (struct_elem_name);
+  else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+
+  PKL_PASS_SUBPASS (struct_elem_exp);
+
+#if 0
+  /* Create the offset for the element, which is the current offset
+     plus the size of VAL.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* STR VAL OFFM */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);  /* STR OFFM VAL */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SIZ);   /* STR OFFM VAL SIZ */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* STR OFFM VAL SIZM */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ROT);   /* STR VAL SIZM OFFM */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);  /* STR VAL OFFM SIZM */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ADDLU); /* STR VAL OFFM SIZM (OFFM+SIZM) */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);   /* STR VAL OFFM (OFFM+SIZM) */
+  pkl_asm_insn (PKL_GEN_ASM, 
+#endif
+
+  PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
@@ -2527,6 +2578,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_gen_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_gen_ps_indexer),
    PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT, pkl_gen_pr_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_pr_struct_elem),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_ps_struct_ref),
