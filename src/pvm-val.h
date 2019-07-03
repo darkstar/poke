@@ -294,9 +294,8 @@ struct pvm_struct
 /* Struct elements hold the data of the elements, and/or information
    on how to obtain these values.
 
-   OFFSET is the offset, relative to the struct's offset, where the
-   struct element is mapped.  If the structure is not mapped then this
-   is PVM_NULL.
+   OFFSET is the offset, relative to the beginning of the struct,
+   where the struct element resides when stored.
 
    NAME is a string containing the name of the struct element.  This
    name should be unique in the struct.
