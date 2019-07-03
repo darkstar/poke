@@ -750,8 +750,6 @@
 ;;;
 ;;; The C environment required is:
 ;;;
-;;; The C environment required is:
-;;;
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;; 
