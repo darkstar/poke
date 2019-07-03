@@ -693,8 +693,9 @@
 ;;; `elem' is a scratch pkl_ast_node.
 
         .function struct_constructor
+        prolog
         ;; XXX WRITEME
-        dup
+        return
         .end
         
 ;;; RAS_MACRO_STRUCT_ELEM_WRITER
