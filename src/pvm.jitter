@@ -64,8 +64,6 @@ wrapped-functions
   ios_cur
   ios_read_int
   ios_read_uint
-  ios_read_long
-  ios_read_ulong
   ios_read_string
 end
 
