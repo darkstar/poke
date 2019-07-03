@@ -1505,7 +1505,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_STRUCT_NELEM (sct), 64));
   PKL_PASS_SUBPASS (sct_type);
-  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKMSCT);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKSCT);
 }
 PKL_PHASE_END_HANDLER
 

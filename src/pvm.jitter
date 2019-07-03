@@ -1919,35 +1919,7 @@ end
 
 ## Struct instructions.
 
-instruction mksct () # ( [STR VAL]... ULONG TYP -- SCT )
-  code
-    size_t e;
-    pvm_val nelem, sct, type;
-
-    type = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
-    nelem = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
-    sct = pvm_make_struct (nelem, type);
-
-    for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
-    {
-      PVM_VAL_SCT_ELEM_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
-          = JITTER_TOP_STACK ();
-      PVM_VAL_SCT_ELEM_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
-          = JITTER_UNDER_TOP_STACK ();
-
-      JITTER_DROP_STACK ();
-      JITTER_DROP_STACK ();
-    }
-
-    JITTER_PUSH_STACK (sct);
-  end
-end
-
-instruction mkmsct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
+instruction mksct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
   code
     size_t e;
     pvm_val nelem, sct, type;

@@ -237,7 +237,6 @@ PKL_DEF_INSN (PKL_INSN_ASETTB, "", "asettb")
 /* Struct instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKSCT, "", "mksct")
-PKL_DEF_INSN (PKL_INSN_MKMSCT, "", "mkmsct")
 PKL_DEF_INSN (PKL_INSN_SREF, "", "sref")
 PKL_DEF_INSN (PKL_INSN_SREFI, "", "srefi")
 PKL_DEF_INSN (PKL_INSN_SREFIO, "", "srefio")

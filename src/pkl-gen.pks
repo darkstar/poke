@@ -671,7 +671,7 @@
         .c PKL_PASS_SUBPASS (type_struct);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
                                 ; OFF [OFF STR VAL]... NELEM TYP
-        mkmsct                  ; SCT
+        mksct                   ; SCT
         popf 1
         return
         .end
@@ -732,7 +732,7 @@
  ;;        .c PKL_PASS_SUBPASS (type_struct);
  ;;        .c PKL_GEN_PAYLOAD->in_mapper = 1;
  ;;                                ; OFF [OFF STR VAL]... NELEM TYP
- ;;        mkmsct                  ; SCT
+ ;;        mksct                   ; SCT
  ;;        popf 1
         return
         .end
