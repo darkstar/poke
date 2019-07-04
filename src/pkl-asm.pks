@@ -340,6 +340,7 @@
         ;; subset of the elements of the array.
         typof                   ; ARR ATYP
         tyagett                 ; ARR ATYP ETYP
+        push null               ; NULL ETYP
         nip2                    ; ETYP
         pushvar $from
         regvar $idx
@@ -350,18 +351,19 @@
         nip2                    ; ... (IDX<=TO)
       .loop
         ;; Mount the IDX-FROMth element of the new array.
-        pushvar $idx            ; ... IDX
-        pushvar $array          ; ... IDX ARR
-        swap                    ; ... ARR IDX
-        aref                    ; ... ARR IDX EVAL
-        rot                     ; ... IDX EVAL ARR
-        drop                    ; ... IDX EVAL
-        pushvar $from           ; ... IDX EVAL FROM
-        rot                     ; ... EVAL FROM IDX
-        swap                    ; ... EVAL IDX FROM
+        push null               ; ... NULL IDX
+        pushvar $idx            ; ... NULL IDX
+        pushvar $array          ; ... NULL IDX ARR
+        swap                    ; ... NULL ARR IDX
+        aref                    ; ... NULL ARR IDX EVAL
+        rot                     ; ... NULL IDX EVAL ARR
+        drop                    ; ... NULL IDX EVAL
+        pushvar $from           ; ... NULL IDX EVAL FROM
+        rot                     ; ... NULL EVAL FROM IDX
+        swap                    ; ... NULL EVAL IDX FROM
         sublu
-        nip2                    ; ... EVAL (IDX-FROM)
-        swap                    ; ... (IDX-FROM) EVAL
+        nip2                    ; ... NULL EVAL (IDX-FROM)
+        swap                    ; ... NULL (IDX-FROM) EVAL
         ;; Increase index and loop.
         pushvar $idx            ; ... IDX
         push ulong<64>1         ; ... IDX 1UL
@@ -379,7 +381,7 @@
         push ulong<64>1         ; ... (TO-FROM) 1
         addlu
         nip2                    ; ... (TO-FROM+1)
-        dup                     ; ETYP [IDX VAL...] NELEM NINIT
+        dup                     ; NULL ETYP [NULL IDX VAL...] NELEM NINIT
         mka
         ;; If the trimmed array is mapped then the resulting array
         ;; is mapped as well, with the following attributes:

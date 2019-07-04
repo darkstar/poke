@@ -198,7 +198,7 @@
         drop                   ; OFF ATYPE [EOFF EIDX EVAL]...
         pushvar $eidx          ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
         dup                    ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
-        mkma                   ; ARRAY
+        mka                    ; ARRAY
         ;; Check that the resulting array satisfies the mapping's
         ;; bounds (number of elements and total size.)
         pushvar $ebound        ; ARRAY EBOUND
@@ -397,7 +397,7 @@
 
         pushvar $eidx           ; OFF ATYPE [EOFF EIDX EVAL]... NELEM
         dup                     ; OFF ATYPE [EOFF EIDX EVAL]... NELEM NINITIALIZER
-        mkma                    ; ARRAY
+        mka                     ; ARRAY
 
         ;; Check that the resulting array satisfies the mapping's
         ;; total size bound.

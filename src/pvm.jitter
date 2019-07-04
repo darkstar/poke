@@ -1757,38 +1757,8 @@ end
 
 ## Array instructions.
 
-# ( TYP [IDX VAL]... ULONG(nelem) ULONG(ninitializer) -- ARR )
-instruction mka ()
-  code
-    size_t i;
-    pvm_val nelem, ninitializer, arr;
-
-    ninitializer = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
-    nelem = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
-    arr = pvm_make_array (nelem, PVM_NULL /* type */);
-    for (i = 0; i < PVM_VAL_ULONG (ninitializer); ++i)
-    {
-      size_t index
-        = PVM_VAL_ULONG (JITTER_UNDER_TOP_STACK ());
-
-      PVM_VAL_ARR_ELEM_VALUE (arr, index) = JITTER_TOP_STACK ();
-      JITTER_DROP_STACK ();
-      JITTER_DROP_STACK ();
-    }
-
-    PVM_VAL_ARR_TYPE (arr) = JITTER_TOP_STACK ();
-    JITTER_DROP_STACK ();
-
-    JITTER_PUSH_STACK (arr);
-  end
-end
-
 # ( OFF TYP [OFF IDX VAL]... ULONG(nelem) ULONG(ninitializer) -- ARR )
-instruction mkma ()
+instruction mka ()
   code
     size_t i;
     pvm_val nelem, ninitializer, arr;

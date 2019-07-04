@@ -826,12 +826,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
     {
       if (PKL_AST_FUNCALL_ARG_FIRST_VARARG (aa))
         {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* Array offset. */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
           vararg_actual = 1;
         }
 
       if (vararg_actual)
         {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* Elem offset. */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
           aindex++;
         }
@@ -1344,6 +1346,20 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
 PKL_PHASE_END_HANDLER
 
 /*
+ * ARRAY_INITIALIZER
+ * | ARRAY_INITIALIZER_INDEX
+ * | ARRAY_INITIALIZER_EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_array_initializer)
+{
+  /* Offset of the array initializer.  PVM_NULL since this array is
+     not mapped.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+}
+PKL_PHASE_END_HANDLER
+
+/*
  * | ARRAY_INITIALIZER_INDEX
  * | ARRAY_INITIALIZER_EXP
  * ARRAY_INITIALIZER
@@ -1363,6 +1379,10 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_array)
 {
+  /* The offset for mka, in this case PVM_NULL, since this array is
+     not mapped.  */
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   PKL_PASS_SUBPASS (PKL_AST_TYPE (PKL_PASS_NODE));
 }
 PKL_PHASE_END_HANDLER
@@ -2547,7 +2567,8 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_gen_ps_array),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_gen_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_gen_ps_indexer),
-   PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
+   PKL_PHASE_PR_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_pr_array_initializer),
+   PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT, pkl_gen_pr_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_pr_struct_elem),
