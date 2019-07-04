@@ -519,6 +519,9 @@
 ;;;
 ;;; Given a value and an offset in the stack, provide an offset whose
 ;;; value is OFF + sizeof(VAL).
+;;;
+;;; XXX this can be greatly simplified if it can be assumed OFF
+;;; is of type offset<uint<64>,b>.
 
         .macro off_plus_sizeof
         swap                   ; OFF VAL
@@ -540,21 +543,20 @@
         push ulong<64>1        ; VAL OFF (OFFU*OFFM+ESIZM) 1UL
         mko                    ; VAL OFF NOFF
         .end
-        
-;;; RAS_MACRO_STRUCT_ELEM_MAPPER
-;;; ( OFF SOFF -- OFF STR VAL NOFF )
+
+;;; RAS_MACRO_HANDLE_STRUCT_ELEM_LABEL
+;;; ( OFF SOFF - OFF )
 ;;;
-;;; Map a struct element from the current IOS.
-;;; SOFF is the offset of the beginning of the struct.
-;;; NOFF is the offset marking the end of this element.
+;;; Given a struct type element, it's offset and the offset of the struct
+;;; on the stack, increase the offset by the element's label, in case
+;;; it exists.
 ;;;
 ;;; The C environment required is:
 ;;;
 ;;; `elem' is a pkl_ast_node with the struct element being
 ;;; mapped.
-
-        .macro struct_elem_mapper
-        ;; Increase OFF by the label, if the element has one.
+        
+        .macro handle_struct_elem_label
    .c if (PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem) == NULL)
         drop                    ; OFF
    .c else
@@ -582,17 +584,34 @@
         push ulong<64>1         ; (LOFFM*LOFFU+SOFFM*SOFFU) 1UL
         mko                     ; OFF
    .c }
-        dup                     ; OFF OFF
+        .end
+        
+;;; RAS_MACRO_STRUCT_ELEM_MAPPER
+;;; ( OFF SOFF -- OFF STR VAL NOFF )
+;;;
+;;; Map a struct element from the current IOS.
+;;; SOFF is the offset of the beginning of the struct.
+;;; NOFF is the offset marking the end of this element.
+;;;
+;;; The C environment required is:
+;;;
+;;; `elem' is a pkl_ast_node with the struct element being
+;;; mapped.
+
+        .macro struct_elem_mapper
+        ;; Increase OFF by the label, if the element has one.
+        .e handle_struct_elem_label     ; OFF
+        dup                             ; OFF OFF
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
-                                ; OFF VAL
-        dup                     ; OFF VAL VAL
-        regvar $val             ; OFF VAL
+                                	; OFF VAL
+        dup                             ; OFF VAL VAL
+        regvar $val                     ; OFF VAL
    .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
         push null
    .c else
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
-                                ; OFF VAL STR
-        swap                    ; OFF STR VAL
+                                	; OFF VAL STR
+        swap                            ; OFF STR VAL
         ;; Evaluate the element's constraint and raise
         ;; an exception if not satisfied.
    .c if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem) != NULL)
