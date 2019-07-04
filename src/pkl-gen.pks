@@ -709,7 +709,7 @@
  ;; .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
  ;; .c {
  ;;        pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
- ;;        .e struct_elem_mapper ; ...[EOFF ENAME EVAL] NEOFF
+ ;;        .e struct_elem_constructor ; ...[EOFF ENAME EVAL] NEOFF
  ;;        ;; If the struct is pinned, replace NEOFF with OFF
  ;;   .c if (PKL_AST_TYPE_S_PINNED (type_struct))
  ;;   .c {
