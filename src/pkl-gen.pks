@@ -513,6 +513,33 @@
              push null
         return
         .end
+
+;;; RAS_MACRO_OFF_PLUS_SIZEOF
+;;; ( VAL OFF -- VAL OFF NOFF )
+;;;
+;;; Given a value and an offset in the stack, provide an offset whose
+;;; value is OFF + sizeof(VAL).
+
+        .macro off_plus_sizeof
+        swap                   ; OFF VAL
+        siz                    ; OFF VAL ESIZ
+        rot                    ; VAL ESIZ OFF
+        swap                   ; VAL OFF ESIZ
+        ogetm                  ; VAL OFF ESIZ ESIZM
+        nip                    ; VAL OFF ESIZM
+        swap                   ; VAL ESIZM OFF
+        ogetm                  ; VAL ESIZM OFF OFFM
+        swap                   ; VAL ESIZM OFFM OFF
+        ogetu                  ; VAL ESIZM OFFM OFF OFFU
+        rot                    ; VAL ESIZM OFF OFFU OFFM
+        mullu
+        nip2                   ; VAL ESIZM OFF (OFFU*OFFM)
+        rot                    ; VAL OFF (OFFU*OFFM) ESIZM
+        addlu
+        nip2                   ; VAL OFF (OFFU*OFFM+ESIZM)
+        push ulong<64>1        ; VAL OFF (OFFU*OFFM+ESIZM) 1UL
+        mko                    ; VAL OFF NOFF
+        .end
         
 ;;; RAS_MACRO_STRUCT_ELEM_MAPPER
 ;;; ( OFF SOFF -- OFF STR VAL NOFF )
@@ -583,24 +610,7 @@
         ;; Calculate the offset marking the end of the element, which is
         ;; the element's offset plus it's size.
         rot                    ; STR VAL OFF
-        swap                   ; STR OFF VAL
-        siz                    ; STR OFF VAL ESIZ
-        rot                    ; STR VAL ESIZ OFF
-        swap                   ; STR VAL OFF ESIZ
-        ogetm                  ; STR VAL OFF ESIZ ESIZM
-        nip                    ; STR VAL OFF ESIZM
-        swap                   ; STR VAL ESIZM OFF
-        ogetm                  ; STR VAL ESIZM OFF OFFM
-        swap                   ; STR VAL ESIZM OFFM OFF
-        ogetu                  ; STR VAL ESIZM OFFM OFF OFFU
-        rot                    ; STR VAL ESIZM OFF OFFU OFFM
-        mullu
-        nip2                   ; STR VAL ESIZM OFF (OFFU*OFFM)
-        rot                    ; STR VAL OFF (OFFU*OFFM) ESIZM
-        addlu
-        nip2                   ; STR VAL OFF (OFFU*OFFM+ESIZM)
-        push ulong<64>1        ; STR VAL OFF (OFFU*OFFM+ESIZM) 1UL
-        mko                    ; STR VAL OFF NOFF
+        .e off_plus_sizeof     ; STR VAL OFF NOFF
         tor                    ; STR VAL OFF
         nrot                   ; OFF STR VAL
         fromr                  ; OFF STR VAL NOFF
