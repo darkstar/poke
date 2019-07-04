@@ -2003,6 +2003,37 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
       /* And we are done.  */
       PKL_PASS_BREAK;
     }
+  else if (PKL_GEN_PAYLOAD->in_constructor)
+    {
+      /* Stack: SCT */
+      pkl_ast_node type_struct = PKL_PASS_NODE;
+      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node elem;
+
+      pvm_val type_struct_constructor = PKL_AST_TYPE_S_CONSTRUCTOR (type_struct);
+
+      if (type_struct_constructor != PVM_NULL)
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                        type_struct_constructor); /* SCT CLS */
+        }
+      else
+        {
+          /* Compile a constructor function and complete it using the
+             current environment.  */
+          pvm_val constructor_closure;
+
+          RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC); /* SCT CLS */
+        }
+
+      /* Call the constructor to get a new struct.  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_CALL);    /* SCT CLS CLS */
+
+      /* And we are done.  */
+      PKL_PASS_BREAK;
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -2014,28 +2045,20 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 {
-  if (PKL_GEN_PAYLOAD->in_constructor)
-    {
-      /* mksct */
-      assert (0);
-    }
+  /* We are generating a PVM struct type.  */
+  
+  pkl_ast_node struct_type = PKL_PASS_NODE;
+  pkl_ast_node type_name = PKL_AST_TYPE_NAME (struct_type);
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (struct_type), 64));
+  if (type_name)
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                  pvm_make_string (PKL_AST_IDENTIFIER_POINTER (type_name)));
   else
-    {
-      /* We are generating a PVM struct type.  */
-
-      pkl_ast_node struct_type = PKL_PASS_NODE;
-      pkl_ast_node type_name = PKL_AST_TYPE_NAME (struct_type);
-
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                    pvm_make_ulong (PKL_AST_TYPE_S_NELEM (struct_type), 64));
-      if (type_name)
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                      pvm_make_string (PKL_AST_IDENTIFIER_POINTER (type_name)));
-      else
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYSCT);
-    }
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
+  
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYSCT);
 }
 PKL_PHASE_END_HANDLER
 
