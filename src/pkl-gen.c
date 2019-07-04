@@ -148,10 +148,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_mapper = 0;
 
+            PKL_GEN_PAYLOAD->in_constructor = 1;
             RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      /* _ */
+            PKL_GEN_PAYLOAD->in_constructor = 0;
 
             /* Install the closures in the type AST node.  */
 

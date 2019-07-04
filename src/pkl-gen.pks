@@ -694,46 +694,46 @@
 
         .function struct_constructor
         prolog
- ;;        pushf
- ;;        push null               ; SCT OFF(NULL)
- ;;        ;; Initialize $nelem to 0UL
- ;;        push ulong<64>0
- ;;        regvar $nelem
- ;;        ;; Initialize $off to 0UL#b.
- ;;        push ulong<64>0
- ;;        push ulong<64>1
- ;;        mko
- ;;        dup                     ; OFF OFF
- ;;        regvar $off             ; OFF
- ;;        ;; Iterate over the elements of the struct type.
- ;; .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
- ;; .c {
- ;;        pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
- ;;        .e struct_elem_constructor ; ...[EOFF ENAME EVAL] NEOFF
- ;;        ;; If the struct is pinned, replace NEOFF with OFF
- ;;   .c if (PKL_AST_TYPE_S_PINNED (type_struct))
- ;;   .c {
- ;;        drop
- ;;        pushvar $off            ; ...[EOFF ENAME EVAL] OFF
- ;;   .c }
- ;;        ;; Increase the number of elements.
- ;;        pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
- ;;        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
- ;;        addl
- ;;        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NELEM+1UL)
- ;;        popvar $nelem           ; ...[EOFF ENAME EVAL] NEOFF
- ;; .c }
- ;;        drop  			; ...[EOFF ENAME EVAL]
- ;;        ;; Ok, at this point all the struct element triplets are
- ;;        ;; in the stack.  Push the number of elements, create
- ;;        ;; the struct and return it.
- ;;        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
- ;;        .c PKL_GEN_PAYLOAD->in_mapper = 0;
- ;;        .c PKL_PASS_SUBPASS (type_struct);
- ;;        .c PKL_GEN_PAYLOAD->in_mapper = 1;
- ;;                                ; OFF [OFF STR VAL]... NELEM TYP
- ;;        mksct                   ; SCT
- ;;        popf 1
+        pushf
+        push null               ; SCT OFF(NULL)
+        ;; Initialize $nelem to 0UL
+        push ulong<64>0
+        regvar $nelem
+        ;; Initialize $off to 0UL#b.
+        push ulong<64>0
+        push ulong<64>1
+        mko
+        dup                     ; OFF OFF
+        regvar $off             ; OFF
+        ;; Iterate over the elements of the struct type.
+ .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+ .c {
+        pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
+;        .e struct_elem_mapper      ; ...[EOFF ENAME EVAL] NEOFF
+        ;; If the struct is pinned, replace NEOFF with OFF
+   .c if (PKL_AST_TYPE_S_PINNED (type_struct))
+   .c {
+        drop
+        pushvar $off            ; ...[EOFF ENAME EVAL] OFF
+   .c }
+        ;; Increase the number of elements.
+        pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
+        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
+        addl
+        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NELEM+1UL)
+        popvar $nelem           ; ...[EOFF ENAME EVAL] NEOFF
+ .c }
+        drop  			; ...[EOFF ENAME EVAL]
+        ;; Ok, at this point all the struct element triplets are
+        ;; in the stack.  Push the number of elements, create
+        ;; the struct and return it.
+        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        .c PKL_GEN_PAYLOAD->in_constructor = 0;
+        .c PKL_PASS_SUBPASS (type_struct);
+        .c PKL_GEN_PAYLOAD->in_constructor = 1;
+                                ; OFF [OFF STR VAL]... NELEM TYP
+        mksct                   ; SCT
+        popf 1
         return
         .end
         
