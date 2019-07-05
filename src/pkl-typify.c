@@ -1369,12 +1369,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
 PKL_PHASE_END_HANDLER
 
 /* The type of a struct constructor is the type specified before the
-   struct value.  It should be a struct type.  */
+   struct value.  It should be a struct type.  Also, there are several
+   rules the struct must conform to.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
 {
   pkl_ast_node scons = PKL_PASS_NODE;
   pkl_ast_node scons_type = PKL_AST_SCONS_TYPE (scons);
+  pkl_ast_node astruct = PKL_AST_SCONS_VALUE (scons);
+  pkl_ast_node struct_elems = PKL_AST_STRUCT_ELEMS (astruct);
+  pkl_ast_node elem = NULL;
 
   /* This check is currently redundant, because it is already done in
      the parser.  */
@@ -1384,6 +1388,65 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
                  "expected struct type in constructor");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
+    }
+
+  /* Make sure that:
+     1. Every field in the initializer exists in the struct type.
+     2. The type of the initializer field should be equal to (or
+        promoteable to) the type of the struct field.  */
+  for (elem = struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+    {
+      pkl_ast_node type_elem;
+      pkl_ast_node elem_name = PKL_AST_STRUCT_ELEM_NAME (elem);
+      pkl_ast_node elem_exp = PKL_AST_STRUCT_ELEM_EXP (elem);
+      pkl_ast_node elem_type = PKL_AST_TYPE (elem_exp);
+      int found = 0;
+
+      for (type_elem = PKL_AST_TYPE_S_ELEMS (scons_type);
+           type_elem;
+           type_elem = PKL_AST_CHAIN (type_elem))
+        {
+          pkl_ast_node type_elem_name
+            = PKL_AST_STRUCT_ELEM_TYPE_NAME (type_elem);
+          
+          if (strcmp (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
+                      PKL_AST_IDENTIFIER_POINTER (elem_name)) == 0)
+            {
+              pkl_ast_node type_elem_type
+                = PKL_AST_STRUCT_ELEM_TYPE_TYPE (type_elem);
+
+              found = 1;
+
+              if (!pkl_ast_type_equal (elem_type, type_elem_type))
+                /* XXX support promo.  */
+                {
+                  char *expected_type = pkl_type_str (type_elem_type, 1);
+                  char *found_type = pkl_type_str (elem_type, 1);
+                  
+                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_exp),
+                             "invalid initializer for `%s' in constructor\n\
+expected %s, got %s.",
+                             PKL_AST_IDENTIFIER_POINTER (elem_name),
+                             expected_type, found_type);
+
+                  free (expected_type);
+                  free (found_type);
+                  PKL_TYPIFY_PAYLOAD->errors++;
+                  PKL_PASS_ERROR;
+                }
+
+              break;
+            }
+        }
+
+      if (!found)
+        {
+          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_name),
+                     "invalid struct element `%s' in constructor",
+                     PKL_AST_IDENTIFIER_POINTER (elem_name));
+          PKL_TYPIFY_PAYLOAD->errors++;
+          PKL_PASS_ERROR;
+        }
     }
   
   PKL_AST_TYPE (scons) = ASTREF (scons_type);
