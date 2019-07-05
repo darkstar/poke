@@ -589,6 +589,12 @@ Future Developments
   necessarily be bounded by a constant number of elements.  No big
   deal.
 
+- Allow anonymous initializers in struct constructors.  Something
+  like::
+
+    deftype Foo = struct { int i; long j; }
+    Foo { i = 10, j = 20L }
+
 Appendix: The Source Tree
 -------------------------
 

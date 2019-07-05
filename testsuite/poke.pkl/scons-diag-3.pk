@@ -2,4 +2,4 @@
 
 deftype Foo = struct { int i; long j; };
 
-defvar a = Foo { i = "invalid type" };  /* { dg-error "" } */
+defvar a = Foo { i = 10, 20 };  /* { dg-error "" } */

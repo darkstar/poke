@@ -73,6 +73,16 @@ Basic Editing
 @c .set safer 0
 @c this disables the .revert yes and .exit yes stuff.
 
+@c XXX document struct constructors
+@c
+@c Some special rules apply there that don't apply in struct
+@c literals:
+@c
+@c - Every initializer is named.
+@c   (This will change in the future.)
+@c - The elements in the constructor should be a subset of
+@c   the elements in the struct type.
+
 @c XXX document .set OPTION
 @c
 @c  obase
