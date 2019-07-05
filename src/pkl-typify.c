@@ -1380,8 +1380,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
   pkl_ast_node struct_elems = PKL_AST_STRUCT_ELEMS (astruct);
   pkl_ast_node elem = NULL;
 
-  /* This check is currently redundant, because it is already done in
-     the parser.  */
+  /* This check is currently redundant, because the restriction is
+     implicitly satisfied by the parser.  */
   if (PKL_AST_TYPE_CODE (scons_type) != PKL_TYPE_STRUCT)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (scons_type),
