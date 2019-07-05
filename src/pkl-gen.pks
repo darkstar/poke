@@ -585,6 +585,32 @@
         mko                     ; OFF
    .c }
         .end
+
+;;; RAS_MACRO_CHECK_STRUCT_ELEM_CONSTRAINT
+;;; ( -- )
+;;;
+;;; Evaluate the given struct element's constraint, raising an
+;;; exception if not satisfied.
+;;;
+;;; The C environment required is:
+;;;
+;;; `elem' is a pkl_ast_node with the struct element being
+;;; mapped.
+
+        .macro check_struct_elem_constraint
+   .c if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem) != NULL)
+   .c {
+        .c PKL_GEN_PAYLOAD->in_mapper = 0;
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem));
+        .c PKL_GEN_PAYLOAD->in_mapper = 1;
+        bnzi .constraint_ok
+        drop
+        push PVM_E_CONSTRAINT
+        raise
+.constraint_ok:
+        drop
+   .c }
+        .end
         
 ;;; RAS_MACRO_STRUCT_ELEM_MAPPER
 ;;; ( OFF SOFF -- OFF STR VAL NOFF )
@@ -614,18 +640,7 @@
         swap                            ; OFF STR VAL
         ;; Evaluate the element's constraint and raise
         ;; an exception if not satisfied.
-   .c if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem) != NULL)
-   .c {
-        .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem));
-        .c PKL_GEN_PAYLOAD->in_mapper = 1;
-        bnzi .constraint_ok
-        drop
-        push PVM_E_CONSTRAINT
-        raise
-.constraint_ok:
-        drop
-   .c }
+        .e check_struct_elem_constraint
         ;; Calculate the offset marking the end of the element, which is
         ;; the element's offset plus it's size.
         rot                    ; STR VAL OFF
