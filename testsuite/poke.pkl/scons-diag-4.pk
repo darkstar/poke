@@ -1,0 +1,6 @@
+/* { dg-do compile } */
+
+deftype Foo = struct { int i; long j; };
+
+defvar a = Foo { i = 10L }; /* { dg-error "" } */
+

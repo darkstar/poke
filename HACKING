@@ -595,6 +595,13 @@ Future Developments
     deftype Foo = struct { int i; long j; }
     Foo { i = 10, j = 20L }
 
+- Allow coercions in struct constructors.  Currently this is not
+  supported::
+
+    deftype Foo = struct { int i; }
+    Foo { i = 10L }
+    
+
 Appendix: The Source Tree
 -------------------------
 
