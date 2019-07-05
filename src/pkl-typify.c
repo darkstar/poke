@@ -1402,6 +1402,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
       pkl_ast_node elem_type = PKL_AST_TYPE (elem_exp);
       int found = 0;
 
+      /* XXX some elements are unnammed, and some struct type elements
+         are unnammed too.  These are resolved positionally.  */
+
       for (type_elem = PKL_AST_TYPE_S_ELEMS (scons_type);
            type_elem;
            type_elem = PKL_AST_CHAIN (type_elem))
@@ -1409,8 +1412,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
           pkl_ast_node type_elem_name
             = PKL_AST_STRUCT_ELEM_TYPE_NAME (type_elem);
           
-          if (strcmp (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
-                      PKL_AST_IDENTIFIER_POINTER (elem_name)) == 0)
+          if (type_elem_name
+              && strcmp (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
+                         PKL_AST_IDENTIFIER_POINTER (elem_name)) == 0)
             {
               pkl_ast_node type_elem_type
                 = PKL_AST_STRUCT_ELEM_TYPE_TYPE (type_elem);
