@@ -58,12 +58,12 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
 {
   pkl_ast_node node = PKL_PASS_NODE;
-  pkl_ast_node elems = PKL_AST_STRUCT_ELEMS (node);
+  pkl_ast_node elems = PKL_AST_STRUCT_FIELDS (node);
   pkl_ast_node t;
 
   for (t = elems; t; t = PKL_AST_CHAIN (t))
     {     
-      pkl_ast_node ename = PKL_AST_STRUCT_ELEM_NAME (t);
+      pkl_ast_node ename = PKL_AST_STRUCT_FIELD_NAME (t);
       pkl_ast_node u;
 
       if (ename == NULL)
@@ -71,7 +71,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
 
       for (u = elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node uname = PKL_AST_STRUCT_ELEM_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_FIELD_NAME (u);
 
           if (uname == NULL)
             continue;
@@ -106,8 +106,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
       pkl_ast_node u;
       for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node tname = PKL_AST_STRUCT_ELEM_TYPE_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
+          pkl_ast_node tname = PKL_AST_STRUCT_FIELD_TYPE_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
           
           if (uname
               && tname

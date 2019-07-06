@@ -822,28 +822,28 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
 {
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type;
-  pkl_ast_node t, struct_elem_types = NULL;
+  pkl_ast_node t, struct_field_types = NULL;
 
 
-  /* Build a chain with the types of the struct elements.  */
-  for (t = PKL_AST_STRUCT_ELEMS (node); t; t = PKL_AST_CHAIN (t))
+  /* Build a chain with the types of the struct fields.  */
+  for (t = PKL_AST_STRUCT_FIELDS (node); t; t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node struct_elem_type
-        =  pkl_ast_make_struct_elem_type (PKL_PASS_AST,
-                                          PKL_AST_STRUCT_ELEM_NAME (t),
+      pkl_ast_node struct_field_type
+        =  pkl_ast_make_struct_field_type (PKL_PASS_AST,
+                                          PKL_AST_STRUCT_FIELD_NAME (t),
                                           PKL_AST_TYPE (t),
                                           NULL /* constraint */,
                                           NULL /* label */);
-      PKL_AST_LOC (struct_elem_type) = PKL_AST_LOC (t);
+      PKL_AST_LOC (struct_field_type) = PKL_AST_LOC (t);
 
-      struct_elem_types = pkl_ast_chainon (struct_elem_types,
-                                           ASTREF (struct_elem_type));
+      struct_field_types = pkl_ast_chainon (struct_field_types,
+                                           ASTREF (struct_field_type));
     }
 
   /* Build the type of the struct.  */
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),
-                                   struct_elem_types,
+                                   struct_field_types,
                                    0 /* pinned */);
   PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
@@ -1173,7 +1173,7 @@ expected %s, got %s",
             || parent_code == PKL_AST_COND_EXP
             || parent_code == PKL_AST_ARRAY_INITIALIZER
             || parent_code == PKL_AST_INDEXER
-            || parent_code == PKL_AST_STRUCT_ELEM
+            || parent_code == PKL_AST_STRUCT_FIELD
             || parent_code == PKL_AST_OFFSET
             || parent_code == PKL_AST_CAST
             || parent_code == PKL_AST_MAP
@@ -1237,17 +1237,17 @@ expected %s got %s",
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_field)
 {
-  pkl_ast_node struct_elem = PKL_PASS_NODE;
-  pkl_ast_node struct_elem_exp
-    = PKL_AST_STRUCT_ELEM_EXP (struct_elem);
-  pkl_ast_node struct_elem_exp_type
-    = PKL_AST_TYPE (struct_elem_exp);
+  pkl_ast_node struct_field = PKL_PASS_NODE;
+  pkl_ast_node struct_field_exp
+    = PKL_AST_STRUCT_FIELD_EXP (struct_field);
+  pkl_ast_node struct_field_exp_type
+    = PKL_AST_TYPE (struct_field_exp);
 
-  /* The type of a STRUCT_ELEM in a struct initializer is the type of
+  /* The type of a STRUCT_FIELD in a struct initializer is the type of
      it's expression.  */
-  PKL_AST_TYPE (struct_elem) = ASTREF (struct_elem_exp_type);
+  PKL_AST_TYPE (struct_field) = ASTREF (struct_field_exp_type);
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
@@ -1277,14 +1277,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
   for (t = PKL_AST_TYPE_S_ELEMS (struct_type); t;
        t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node struct_elem_type_name
-        = PKL_AST_STRUCT_ELEM_TYPE_NAME (t);
+      pkl_ast_node struct_field_type_name
+        = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
       
-      if (struct_elem_type_name
-          && strcmp (PKL_AST_IDENTIFIER_POINTER (struct_elem_type_name),
+      if (struct_field_type_name
+          && strcmp (PKL_AST_IDENTIFIER_POINTER (struct_field_type_name),
                      PKL_AST_IDENTIFIER_POINTER (field_name)) == 0)
         {
-          type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (t);
+          type = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
           break;
         }
     }
@@ -1377,7 +1377,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
   pkl_ast_node scons = PKL_PASS_NODE;
   pkl_ast_node scons_type = PKL_AST_SCONS_TYPE (scons);
   pkl_ast_node astruct = PKL_AST_SCONS_VALUE (scons);
-  pkl_ast_node struct_elems = PKL_AST_STRUCT_ELEMS (astruct);
+  pkl_ast_node struct_fields = PKL_AST_STRUCT_FIELDS (astruct);
   pkl_ast_node elem = NULL;
 
   /* This check is currently redundant, because the restriction is
@@ -1395,11 +1395,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
      1. Every field in the initializer exists in the struct type.
      2. The type of the initializer field should be equal to (or
         promoteable to) the type of the struct field.  */
-  for (elem = struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+  for (elem = struct_fields; elem; elem = PKL_AST_CHAIN (elem))
     {
       pkl_ast_node type_elem;
-      pkl_ast_node elem_name = PKL_AST_STRUCT_ELEM_NAME (elem);
-      pkl_ast_node elem_exp = PKL_AST_STRUCT_ELEM_EXP (elem);
+      pkl_ast_node elem_name = PKL_AST_STRUCT_FIELD_NAME (elem);
+      pkl_ast_node elem_exp = PKL_AST_STRUCT_FIELD_EXP (elem);
       pkl_ast_node elem_type = PKL_AST_TYPE (elem_exp);
       int found = 0;
 
@@ -1416,14 +1416,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
            type_elem = PKL_AST_CHAIN (type_elem))
         {
           pkl_ast_node type_elem_name
-            = PKL_AST_STRUCT_ELEM_TYPE_NAME (type_elem);
+            = PKL_AST_STRUCT_FIELD_TYPE_NAME (type_elem);
           
           if (type_elem_name
               && strcmp (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
                          PKL_AST_IDENTIFIER_POINTER (elem_name)) == 0)
             {
               pkl_ast_node type_elem_type
-                = PKL_AST_STRUCT_ELEM_TYPE_TYPE (type_elem);
+                = PKL_AST_STRUCT_FIELD_TYPE_TYPE (type_elem);
 
               found = 1;
 
@@ -1451,7 +1451,7 @@ expected %s, got %s.",
       if (!found)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_name),
-                     "invalid struct element `%s' in constructor",
+                     "invalid struct field `%s' in constructor",
                      PKL_AST_IDENTIFIER_POINTER (elem_name));
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1854,21 +1854,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
 }
 PKL_PHASE_END_HANDLER
 
-PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_field_type)
 {
   pkl_ast_node elem = PKL_PASS_NODE;
-  pkl_ast_node elem_type = PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem);
+  pkl_ast_node elem_type = PKL_AST_STRUCT_FIELD_TYPE_TYPE (elem);
   pkl_ast_node elem_constraint
-    = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
+    = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (elem);
   pkl_ast_node elem_label
-    = PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem);
+    = PKL_AST_STRUCT_FIELD_TYPE_LABEL (elem);
 
   /* Function types cannot appear in the definition of a struct type
      element.  */
   if (PKL_AST_TYPE_CODE (elem_type) == PKL_TYPE_FUNCTION)
     {
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_type),
-                 "invalid type in struct element");
+                 "invalid type in struct field");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
@@ -1886,7 +1886,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
                                      1 /* promote_array_of_any */))
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
-                     "struct element constraint should evaluate to a boolean");
+                     "struct field constraint should evaluate to a boolean");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
@@ -1909,7 +1909,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_elem_type)
                                      1 /* promote_array_of_any */))
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_label),
-                     "struct element label should evaluate to an offset");
+                     "struct field label should evaluate to an offset");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }
@@ -2005,7 +2005,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_typify1_ps_indexer),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_typify1_ps_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_typify1_ps_ass_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM, pkl_typify1_ps_struct_elem),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_FIELD, pkl_typify1_ps_struct_field),
    PKL_PHASE_PR_HANDLER (PKL_AST_FUNC, pkl_typify1_pr_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_typify1_ps_func_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_typify1_ps_funcall),
@@ -2014,7 +2014,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_typify1_ps_print_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RAISE_STMT, pkl_typify1_ps_raise_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRY_CATCH_STMT, pkl_typify1_ps_try_catch_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_typify1_ps_struct_elem_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_FIELD_TYPE, pkl_typify1_ps_struct_field_type),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_typify1_ps_return_stmt),
 
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify1_ps_op_sizeof),

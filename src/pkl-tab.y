@@ -295,14 +295,14 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> expression primary identifier bconc map
 %type <ast> funcall funcall_arg_list funcall_arg
 %type <ast> array array_initializer_list array_initializer
-%type <ast> struct struct_elem_list struct_elem
+%type <ast> struct struct_field_list struct_field
 %type <ast> type_specifier simple_type_specifier
 %type <ast> integral_type_specifier offset_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned integral_type_sign
-%type <ast> struct_elem_type_list struct_elem_type struct_elem_type_identifier
-%type <ast> struct_elem_type_constraint struct_elem_type_label
+%type <ast> struct_field_type_list struct_field_type struct_field_type_identifier
+%type <ast> struct_field_type_constraint struct_field_type_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
 %type <ast> comp_stmt stmt_decl_list stmt print_stmt_arg_list
@@ -557,7 +557,7 @@ expression:
                   $$ = pkl_ast_make_isa (pkl_parser->ast, $3, $1);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | TYPENAME '{' struct_elem_list '}'
+        | TYPENAME '{' struct_field_list '}'
           	{
                   pkl_ast_node type;
                   pkl_ast_node astruct;
@@ -751,7 +751,7 @@ funcall_arg:
         ;
 
 struct:
-	  STRUCT '{' struct_elem_list '}'
+	  STRUCT '{' struct_field_list '}'
 		{
                     $$ = pkl_ast_make_struct (pkl_parser->ast,
                                               0 /* nelem */, $3);
@@ -759,29 +759,29 @@ struct:
                 }
 	;
 
-struct_elem_list:
+struct_field_list:
 	  %empty
 		{ $$ = NULL; }
-        | struct_elem
-        | struct_elem_list ',' struct_elem
+        | struct_field
+        | struct_field_list ',' struct_field
 		{
                   $$ = pkl_ast_chainon ($1, $3);
                 }
         ;
 
-struct_elem:
+struct_field:
 	  expression
           	{
-                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
-                                                   NULL /* name */,
-                                                   $1);
+                    $$ = pkl_ast_make_struct_field (pkl_parser->ast,
+                                                    NULL /* name */,
+                                                    $1);
                     PKL_AST_LOC ($$) = @$;
                 }
         | identifier '=' expression
 	        {
-                    $$ = pkl_ast_make_struct_elem (pkl_parser->ast,
-                                                   $1,
-                                                   $3);
+                    $$ = pkl_ast_make_struct_field (pkl_parser->ast,
+                                                    $1,
+                                                    $3);
                     PKL_AST_LOC ($1) = @1;
                     PKL_AST_LOC ($$) = @$;
                 }
@@ -1058,7 +1058,7 @@ struct_type_specifier:
                      pkl-gen.pks:struct_mapper.  */
                   pkl_register_dummies (pkl_parser, 2);
                 }
-          struct_elem_type_list '}'
+          struct_field_type_list '}'
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
@@ -1076,14 +1076,14 @@ struct_type_pinned:
 	| PINNED	{ $$ = 1; }
         ;
 
-struct_elem_type_list:
-	  struct_elem_type
-        | struct_elem_type_list struct_elem_type
+struct_field_type_list:
+	  struct_field_type
+        | struct_field_type_list struct_field_type
         	{ $$ = pkl_ast_chainon ($1, $2); }
         ;
 
-struct_elem_type:
-	  type_specifier struct_elem_type_identifier
+struct_field_type:
+	  type_specifier struct_field_type_identifier
           	{
                   if ($2 != NULL)
                     {
@@ -1107,16 +1107,16 @@ struct_elem_type:
                                              decl))
                         {
                           pkl_error (pkl_parser->ast, PKL_AST_LOC ($2),
-                                     "duplicated struct element '%s'",
+                                     "duplicated struct field '%s'",
                                      PKL_AST_IDENTIFIER_POINTER ($2));
                           YYERROR;
                         }
                     }
                 }
-          struct_elem_type_constraint struct_elem_type_label ';'
+          struct_field_type_constraint struct_field_type_label ';'
           	{
-                  $$ = pkl_ast_make_struct_elem_type (pkl_parser->ast, $2, $1,
-                                                      $4, $5);
+                  $$ = pkl_ast_make_struct_field_type (pkl_parser->ast, $2, $1,
+                                                       $4, $5);
                   PKL_AST_LOC ($$) = @$;
                   if ($2 != NULL)
                     {
@@ -1128,12 +1128,12 @@ struct_elem_type:
                 }
         ;
 
-struct_elem_type_identifier:
+struct_field_type_identifier:
 	  %empty	{ $$ = NULL; }
 	| identifier	{ $$ = $1; }
 	;
 
-struct_elem_type_label:
+struct_field_type_label:
 	  %empty
 		{
                   $$ = NULL;
@@ -1145,7 +1145,7 @@ struct_elem_type_label:
                 }
 	;
 
-struct_elem_type_constraint:
+struct_field_type_constraint:
 	  %empty
 		{
                   $$ = NULL;

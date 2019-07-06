@@ -544,7 +544,7 @@
         mko                    ; VAL OFF NOFF
         .end
 
-;;; RAS_MACRO_HANDLE_STRUCT_ELEM_LABEL
+;;; RAS_MACRO_HANDLE_STRUCT_FIELD_LABEL
 ;;; ( OFF SOFF - OFF )
 ;;;
 ;;; Given a struct type element, it's offset and the offset of the struct
@@ -553,17 +553,17 @@
 ;;;
 ;;; The C environment required is:
 ;;;
-;;; `elem' is a pkl_ast_node with the struct element being
+;;; `field' is a pkl_ast_node with the struct field being
 ;;; mapped.
         
-        .macro handle_struct_elem_label
-   .c if (PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem) == NULL)
+        .macro handle_struct_field_label
+   .c if (PKL_AST_STRUCT_FIELD_TYPE_LABEL (field) == NULL)
         drop                    ; OFF
    .c else
    .c {
         nip                     ; SOFF
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_LABEL (field));
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
                                 ; SOFF LOFF
         ogetm                   ; SOFF LOFF LOFFM
@@ -586,22 +586,22 @@
    .c }
         .end
 
-;;; RAS_MACRO_CHECK_STRUCT_ELEM_CONSTRAINT
+;;; RAS_MACRO_CHECK_STRUCT_FIELD_CONSTRAINT
 ;;; ( -- )
 ;;;
-;;; Evaluate the given struct element's constraint, raising an
+;;; Evaluate the given struct field's constraint, raising an
 ;;; exception if not satisfied.
 ;;;
 ;;; The C environment required is:
 ;;;
-;;; `elem' is a pkl_ast_node with the struct element being
+;;; `field' is a pkl_ast_node with the struct field being
 ;;; mapped.
 
-        .macro check_struct_elem_constraint
-   .c if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem) != NULL)
+        .macro check_struct_field_constraint
+   .c if (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (field) != NULL)
    .c {
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (field));
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
         bnzi .constraint_ok
         drop
@@ -612,37 +612,37 @@
    .c }
         .end
         
-;;; RAS_MACRO_STRUCT_ELEM_MAPPER
+;;; RAS_MACRO_STRUCT_FIELD_MAPPER
 ;;; ( OFF SOFF -- OFF STR VAL NOFF )
 ;;;
-;;; Map a struct element from the current IOS.
+;;; Map a struct field from the current IOS.
 ;;; SOFF is the offset of the beginning of the struct.
-;;; NOFF is the offset marking the end of this element.
+;;; NOFF is the offset marking the end of this field.
 ;;;
 ;;; The C environment required is:
 ;;;
-;;; `elem' is a pkl_ast_node with the struct element being
+;;; `field' is a pkl_ast_node with the struct field being
 ;;; mapped.
 
-        .macro struct_elem_mapper
-        ;; Increase OFF by the label, if the element has one.
-        .e handle_struct_elem_label     ; OFF
+        .macro struct_field_mapper
+        ;; Increase OFF by the label, if the field has one.
+        .e handle_struct_field_label     ; OFF
         dup                             ; OFF OFF
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (field));
                                 	; OFF VAL
         dup                             ; OFF VAL VAL
         regvar $val                     ; OFF VAL
-   .c if (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem) == NULL)
+   .c if (PKL_AST_STRUCT_FIELD_TYPE_NAME (field) == NULL)
         push null
    .c else
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (field));
                                 	; OFF VAL STR
         swap                            ; OFF STR VAL
-        ;; Evaluate the element's constraint and raise
+        ;; Evaluate the field's constraint and raise
         ;; an exception if not satisfied.
-        .e check_struct_elem_constraint
-        ;; Calculate the offset marking the end of the element, which is
-        ;; the element's offset plus it's size.
+        .e check_struct_field_constraint
+        ;; Calculate the offset marking the end of the field, which is
+        ;; the field's offset plus it's size.
         rot                    ; STR VAL OFF
         .e off_plus_sizeof     ; STR VAL OFF NOFF
         tor                    ; STR VAL OFF
@@ -657,7 +657,7 @@
 ;;; OFF.
 ;;;
 ;;; Both EBOUND and SBOUND are always null, and not used, i.e. struct maps
-;;; are not bounded by either number of elements or size.
+;;; are not bounded by either number of fields or size.
 ;;;
 ;;; OFF should be of type offset<uint<64>,*>.
 ;;;
@@ -666,10 +666,10 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;; 
-;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
 ;;; 
-;;; `elem' is a scratch pkl_ast_node.
+;;; `field' is a scratch pkl_ast_node.
 
         ;; NOTE: please be careful when altering the lexical structure of
         ;; this code (and of the code in expanded macros). Every local
@@ -685,36 +685,36 @@
         drop                    ; ebound
         regvar $off
         push ulong<64>0
-        regvar $nelem
+        regvar $nfield
         pushvar $off            ; OFF
         dup                     ; OFF OFF
-        ;; Iterate over the elements of the struct type.
- .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+        ;; Iterate over the fields of the struct type.
+ .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
  .c {
         pushvar $off            ; ...[EOFF ENAME EVAL] NEOFF OFF
-        .e struct_elem_mapper   ; ...[EOFF ENAME EVAL] NEOFF
+        .e struct_field_mapper   ; ...[EOFF ENAME EVAL] NEOFF
         ;; If the struct is pinned, replace NEOFF with OFF
    .c if (PKL_AST_TYPE_S_PINNED (type_struct))
    .c {
         drop
         pushvar $off            ; ...[EOFF ENAME EVAL] OFF
    .c }
-        ;; Increase the number of elements.
-        pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
-        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
+        ;; Increase the number of fields.
+        pushvar $nfield         ; ...[EOFF ENAME EVAL] NEOFF NFIELD
+        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NFIELD 1UL
         addl
-        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NELEM+1UL)
-        popvar $nelem           ; ...[EOFF ENAME EVAL] NEOFF
+        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NFIELD+1UL)
+        popvar $nfield          ; ...[EOFF ENAME EVAL] NEOFF
  .c }
         drop  			; ...[EOFF ENAME EVAL]
-        ;; Ok, at this point all the struct element triplets are
-        ;; in the stack.  Push the number of elements, create
+        ;; Ok, at this point all the struct field triplets are
+        ;; in the stack.  Push the number of fields, create
         ;; the mapped struct and return it.
-        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        pushvar $nfield         ; OFF [OFF STR VAL]... NFIELD
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
         .c PKL_PASS_SUBPASS (type_struct);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
-                                ; OFF [OFF STR VAL]... NELEM TYP
+                                ; OFF [OFF STR VAL]... NFIELD TYP
         mksct                   ; SCT
         popf 1
         return
@@ -731,66 +731,66 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;; 
-;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
 ;;; 
-;;; `elem' is a scratch pkl_ast_node.
+;;; `field' is a scratch pkl_ast_node.
 
         .function struct_constructor
         prolog
         pushf
         push null               ; SCT OFF(NULL)
-        ;; Initialize $nelem to 0UL
+        ;; Initialize $nfield to 0UL
         push ulong<64>0
-        regvar $nelem
+        regvar $nfield
         ;; Initialize $off to 0UL#b.
         push ulong<64>0
         push ulong<64>1
         mko
         dup                     ; OFF OFF
         regvar $off             ; OFF
-        ;; Iterate over the elements of the struct type.
- .c for (elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem))
+        ;; Iterate over the fields of the struct type.
+ .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
  .c {
         pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
-;        .e struct_elem_mapper      ; ...[EOFF ENAME EVAL] NEOFF
+;        .e struct_field_mapper      ; ...[EOFF ENAME EVAL] NEOFF
         ;; If the struct is pinned, replace NEOFF with OFF
    .c if (PKL_AST_TYPE_S_PINNED (type_struct))
    .c {
         drop
         pushvar $off            ; ...[EOFF ENAME EVAL] OFF
    .c }
-        ;; Increase the number of elements.
-        pushvar $nelem          ; ...[EOFF ENAME EVAL] NEOFF NELEM
-        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NELEM 1UL
+        ;; Increase the number of fields.
+        pushvar $nfield         ; ...[EOFF ENAME EVAL] NEOFF NFIELD
+        push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NFIELD 1UL
         addl
-        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NELEM+1UL)
-        popvar $nelem           ; ...[EOFF ENAME EVAL] NEOFF
+        nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NFIELD+1UL)
+        popvar $nfield          ; ...[EOFF ENAME EVAL] NEOFF
  .c }
         drop  			; ...[EOFF ENAME EVAL]
-        ;; Ok, at this point all the struct element triplets are
-        ;; in the stack.  Push the number of elements, create
+        ;; Ok, at this point all the struct field triplets are
+        ;; in the stack.  Push the number of fields, create
         ;; the struct and return it.
-        pushvar $nelem          ; OFF [OFF STR VAL]... NELEM
+        pushvar $nfield        ; OFF [OFF STR VAL]... NFIELD
         .c PKL_GEN_PAYLOAD->in_constructor = 0;
         .c PKL_PASS_SUBPASS (type_struct);
         .c PKL_GEN_PAYLOAD->in_constructor = 1;
-                                ; OFF [OFF STR VAL]... NELEM TYP
+                                ; OFF [OFF STR VAL]... NFIELD TYP
         mksct                   ; SCT
         popf 1
         return
         .end
         
-;;; RAS_MACRO_STRUCT_ELEM_WRITER
+;;; RAS_MACRO_STRUCT_FIELD_WRITER
 ;;; ( SCT I -- )
 ;;;
-;;; Macro that writes the Ith element of struct SCT to IO space.
+;;; Macro that writes the Ith field of struct SCT to IO space.
 ;;;
 ;;; C environment required:
-;;; `elem' is a pkl_ast_node with the type of the element to write.
+;;; `field' is a pkl_ast_node with the type of the field to write.
         
-        .macro struct_elem_writer
-        ;; The element is written out only if it hasn't
+        .macro struct_field_writer
+        ;; The field is written out only if it hasn't
         ;; been modified since the last mapping.
         smodi                   ; SCT I MODIFIED
         bzi .unmodified
@@ -801,7 +801,7 @@
         nip2                    ; EVAL EOFF
         swap                    ; EOFF EVAL
         .c PKL_GEN_PAYLOAD->in_writer = 1;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (elem));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (field));
         .c PKL_GEN_PAYLOAD->in_writer = 0;
         ba .next
 .unmodified:
@@ -821,10 +821,10 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;; 
-;;; `type_struct_elems' is a pkl_ast_node with the chained list elements
+;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
 ;;; 
-;;; `elem' is a scratch pkl_ast_node.
+;;; `field' is a scratch pkl_ast_node.
 
         .function struct_writer
         prolog
@@ -832,14 +832,14 @@
         regvar $sct
         drop                    ; OFF is not used.
 .c { uint64_t i;
- .c for (i = 0, elem = type_struct_elems; elem; elem = PKL_AST_CHAIN (elem), ++i)
+ .c for (i = 0, field = type_struct_fields; field; field = PKL_AST_CHAIN (field), ++i)
  .c {
-        ;; Poke this struct element, but only if it has been modified
+        ;; Poke this struct field, but only if it has been modified
         ;; since the last mapping.
         pushvar $sct            ; SCT
         .c pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (i, 64));
                                 ; SCT I
-        .e struct_elem_writer
+        .e struct_field_writer
  .c }
 .c }
         popf 1

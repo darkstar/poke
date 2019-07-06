@@ -1206,11 +1206,11 @@ PKL_PHASE_END_HANDLER
 /* Element constraints in struct types are promoteable to
    booleans.  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_field_type)
 {
   pkl_ast_node elem = PKL_PASS_NODE;
-  pkl_ast_node elem_constraint = PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem);
-  pkl_ast_node elem_label = PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem);
+  pkl_ast_node elem_constraint = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (elem);
+  pkl_ast_node elem_label = PKL_AST_STRUCT_FIELD_TYPE_LABEL (elem);
 
   if (elem_constraint)
     {
@@ -1221,17 +1221,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
         {
         case PKL_TYPE_INTEGRAL:
           if (!promote_integral (PKL_PASS_AST, 32, 1,
-                                 &PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (elem),
+                                 &PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (elem),
                                  &restart))
             {
               pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
-                       "couldn't promote struct element constraint");
+                       "couldn't promote struct field constraint");
               PKL_PASS_ERROR;
             }
           break;
         default:
           pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
-                   "non-promoteable struct element constraint at promo time");
+                   "non-promoteable struct field constraint at promo time");
           PKL_PASS_ERROR;
           break;
         }        
@@ -1253,11 +1253,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
 
             if (!promote_offset (PKL_PASS_AST,
                                  64, 0, unit_bits,
-                                 &PKL_AST_STRUCT_ELEM_TYPE_LABEL (elem),
+                                 &PKL_AST_STRUCT_FIELD_TYPE_LABEL (elem),
                                  &restart))
               {
                 pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_label),
-                         "couldn't promote struct element label");
+                         "couldn't promote struct field label");
                 PKL_PASS_ERROR;
               }
 
@@ -1265,7 +1265,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_elem_type)
           }
         default:
           pkl_ice (PKL_PASS_AST, PKL_AST_LOC (elem_label),
-                   "non-promoteable struct element label at promo time");
+                   "non-promoteable struct field label at promo time");
           PKL_PASS_ERROR;
           break;
         }        
@@ -1307,6 +1307,6 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_promo_ps_ass_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_promo_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_promo_ps_print_stmt),
-   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_promo_ps_struct_elem_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_FIELD_TYPE, pkl_promo_ps_struct_field_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_promo_ps_type_array),
   };

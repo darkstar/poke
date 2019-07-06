@@ -327,13 +327,13 @@ pkl_do_pass_1 (jmp_buf toplevel,
 
       break;
     case PKL_AST_STRUCT:
-      if (PKL_AST_STRUCT_ELEMS (node))
-        PKL_PASS_CHAIN (PKL_AST_STRUCT_ELEMS (node));
+      if (PKL_AST_STRUCT_FIELDS (node))
+        PKL_PASS_CHAIN (PKL_AST_STRUCT_FIELDS (node));
       break;
-    case PKL_AST_STRUCT_ELEM:
-      if (PKL_AST_STRUCT_ELEM_NAME (node))
-        PKL_PASS (PKL_AST_STRUCT_ELEM_NAME (node));
-      PKL_PASS (PKL_AST_STRUCT_ELEM_EXP (node));
+    case PKL_AST_STRUCT_FIELD:
+      if (PKL_AST_STRUCT_FIELD_NAME (node))
+        PKL_PASS (PKL_AST_STRUCT_FIELD_NAME (node));
+      PKL_PASS (PKL_AST_STRUCT_FIELD_EXP (node));
       break;
     case PKL_AST_STRUCT_REF:
       PKL_PASS (PKL_AST_STRUCT_REF_STRUCT (node));
@@ -403,14 +403,14 @@ pkl_do_pass_1 (jmp_buf toplevel,
           }
         break;
       }
-    case PKL_AST_STRUCT_ELEM_TYPE:
-      if (PKL_AST_STRUCT_ELEM_TYPE_NAME (node))
-        PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (node));
-      PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (node));
-      if (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (node))
-        PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT (node));
-      if (PKL_AST_STRUCT_ELEM_TYPE_LABEL (node))
-        PKL_PASS (PKL_AST_STRUCT_ELEM_TYPE_LABEL (node));
+    case PKL_AST_STRUCT_FIELD_TYPE:
+      if (PKL_AST_STRUCT_FIELD_TYPE_NAME (node))
+        PKL_PASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (node));
+      PKL_PASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (node));
+      if (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (node))
+        PKL_PASS (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (node));
+      if (PKL_AST_STRUCT_FIELD_TYPE_LABEL (node))
+        PKL_PASS (PKL_AST_STRUCT_FIELD_TYPE_LABEL (node));
       break;
     case PKL_AST_DECL:
       PKL_PASS (PKL_AST_DECL_INITIAL (node));

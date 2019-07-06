@@ -128,7 +128,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_struct)
   pkl_ast_node t;
   size_t nelem = 0;
 
-  for (t = PKL_AST_STRUCT_ELEMS (astruct); t; t = PKL_AST_CHAIN (t))
+  for (t = PKL_AST_STRUCT_FIELDS (astruct); t; t = PKL_AST_CHAIN (t))
     nelem++;
 
   PKL_AST_STRUCT_NELEM (astruct) = nelem;
@@ -830,12 +830,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct)
   pkl_ast_node t;
   int literal_p = 1;
   
-  for (t = PKL_AST_STRUCT_ELEMS (PKL_PASS_NODE); t;
+  for (t = PKL_AST_STRUCT_FIELDS (PKL_PASS_NODE); t;
        t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node struct_elem_exp = PKL_AST_STRUCT_ELEM_EXP (t);
+      pkl_ast_node struct_field_exp = PKL_AST_STRUCT_FIELD_EXP (t);
 
-      literal_p &= PKL_AST_LITERAL_P (struct_elem_exp);
+      literal_p &= PKL_AST_LITERAL_P (struct_field_exp);
       if (!literal_p)
         break;
     }

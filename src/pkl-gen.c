@@ -128,8 +128,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pvm_val constructor_closure;
             
             pkl_ast_node type_struct = initial;
-            pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
-            pkl_ast_node elem;
+            pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+            pkl_ast_node field;
             
             /* Compile the struct closures and complete them using the
                current environment.  */
@@ -406,7 +406,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
         
         valmapper = PVM_NULL; /* XXX PKL_AST_TYPE_S_VALMAPPER (lvalue_type) */
 
-        /* We need to get the value (array element, or struct element)
+        /* We need to get the value (array element, or struct field)
            that will be replaced in the lvalue.  */
 
                                                       /* EXP LVALUE IDX */
@@ -1123,7 +1123,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
         {
         case PKL_AST_TYPE:
-        case PKL_AST_STRUCT_ELEM_TYPE:
+        case PKL_AST_STRUCT_FIELD_TYPE:
           /* Process these.  */
           break;
         default:
@@ -1501,7 +1501,7 @@ PKL_PHASE_END_HANDLER
 
 /*
  * STRUCT
- * | STRUCT_ELEM
+ * | STRUCT_FIELD
  * | ...
  */
 
@@ -1514,7 +1514,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- *  | STRUCT_ELEM
+ *  | STRUCT_FIELD
  *  | ...
  *  STRUCT
  */
@@ -1532,23 +1532,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- *  STRUCT_ELEM
- *  | [STRUCT_ELEM_NAME]
- *  | STRUCT_ELEM_EXP
+ *  STRUCT_FIELD
+ *  | [STRUCT_FIELD_NAME]
+ *  | STRUCT_FIELD_EXP
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_field)
 {
-  pkl_ast_node struct_elem = PKL_PASS_NODE;
-  pkl_ast_node struct_elem_name
-    = PKL_AST_STRUCT_ELEM_NAME (struct_elem);
+  pkl_ast_node struct_field = PKL_PASS_NODE;
+  pkl_ast_node struct_field_name
+    = PKL_AST_STRUCT_FIELD_NAME (struct_field);
 
   /* Element's offset.  PVM_NULL means use the "natural" offset.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 
   /* If the struct initializer doesn't include a name, generate a null
      value as expected by the mksct instruction.  */
-  if (!struct_elem_name)
+  if (!struct_field_name)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 }
 PKL_PHASE_END_HANDLER
@@ -1863,7 +1863,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           switch (PKL_AST_CODE (PKL_PASS_PARENT))
             {
             case PKL_AST_TYPE:
-            case PKL_AST_STRUCT_ELEM_TYPE:
+            case PKL_AST_STRUCT_FIELD_TYPE:
               /* Process these.  */
               break;
             default:
@@ -1916,7 +1916,7 @@ PKL_PHASE_END_HANDLER
 
 /*
  * TYPE_STRUCT
- * | STRUCT_ELEM_TYPE
+ * | STRUCT_FIELD_TYPE
  * | ...
  */
 
@@ -1941,8 +1941,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
     {
       /* Stack: OFF */
       pkl_ast_node type_struct = PKL_PASS_NODE;
-      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
-      pkl_ast_node elem;
+      pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node field;
 
       pvm_val type_struct_mapper = PKL_AST_TYPE_S_MAPPER (type_struct);
       pvm_val type_struct_writer = PKL_AST_TYPE_S_WRITER (type_struct);
@@ -2007,8 +2007,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
     {
       /* Stack: SCT */
       pkl_ast_node type_struct = PKL_PASS_NODE;
-      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
-      pkl_ast_node elem;
+      pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node field;
 
       pvm_val type_struct_constructor = PKL_AST_TYPE_S_CONSTRUCTOR (type_struct);
 
@@ -2038,7 +2038,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * | STRUCT_ELEM_TYPE
+ * | STRUCT_FIELD_TYPE
  * | ...
  * TYPE_STRUCT
  */
@@ -2063,12 +2063,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * STRUCT_ELEM_TYPE
- * | [STRUCT_ELEM_TYPE_NAME]
- * | STRUCT_ELEM_TYPE_TYPE
+ * STRUCT_FIELD_TYPE
+ * | [STRUCT_FIELD_TYPE_NAME]
+ * | STRUCT_FIELD_TYPE_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_field_type)
 {
   assert (!PKL_GEN_PAYLOAD->in_mapper);
 
@@ -2086,11 +2086,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_elem_type)
 
       /* If the struct type element doesn't include a name, generate a
          null value as expected by the mktysct instruction.  */
-      if (!PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE))
+      if (!PKL_AST_STRUCT_FIELD_TYPE_NAME (PKL_PASS_NODE))
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
       else
-        PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_NAME (PKL_PASS_NODE));
-      PKL_PASS_SUBPASS (PKL_AST_STRUCT_ELEM_TYPE_TYPE (PKL_PASS_NODE));
+        PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (PKL_PASS_NODE));
+      PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (PKL_PASS_NODE));
     }
   
   PKL_PASS_BREAK;
@@ -2596,9 +2596,9 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY_INITIALIZER, pkl_gen_ps_array_initializer),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT, pkl_gen_pr_struct),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
-   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM, pkl_gen_pr_struct_elem),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_FIELD, pkl_gen_pr_struct_field),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_ps_struct_ref),
-   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_ELEM_TYPE, pkl_gen_pr_struct_elem_type),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_FIELD_TYPE, pkl_gen_pr_struct_field_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_ps_op_add),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_ps_op_sub),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_ps_op_mul),

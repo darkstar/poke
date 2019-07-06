@@ -45,7 +45,7 @@ enum pkl_ast_code
   PKL_AST_INDEXER,
   PKL_AST_TRIMMER,
   PKL_AST_STRUCT,
-  PKL_AST_STRUCT_ELEM,
+  PKL_AST_STRUCT_FIELD,
   PKL_AST_STRUCT_REF,
   PKL_AST_OFFSET,
   PKL_AST_CAST,
@@ -57,7 +57,7 @@ enum pkl_ast_code
   PKL_AST_VAR,
   /* Types.  */
   PKL_AST_TYPE,
-  PKL_AST_STRUCT_ELEM_TYPE,
+  PKL_AST_STRUCT_FIELD_TYPE,
   PKL_AST_FUNC_TYPE_ARG,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
@@ -388,7 +388,7 @@ pkl_ast_node pkl_ast_make_array_initializer (pkl_ast ast,
 /* PKL_AST_STRUCT nodes represent struct literals.  */
 
 #define PKL_AST_STRUCT_NELEM(AST) ((AST)->sct.nelem)
-#define PKL_AST_STRUCT_ELEMS(AST) ((AST)->sct.elems)
+#define PKL_AST_STRUCT_FIELDS(AST) ((AST)->sct.elems)
 
 struct pkl_ast_struct
 {
@@ -402,18 +402,18 @@ pkl_ast_node pkl_ast_make_struct (pkl_ast ast,
                                   size_t nelem,
                                   pkl_ast_node elems);
 
-/* PKL_AST_STRUCT_ELEM nodes represent elements in struct
+/* PKL_AST_STRUCT_FIELD nodes represent elements in struct
    literals.
 
    NAME is a PKL_AST_IDENTIFIER node with the name of the struct
    element.  If no name is specified, this is NULL.
 
-   EXP is the value of the struct element.  */
+   EXP is the value of the struct field.  */
 
-#define PKL_AST_STRUCT_ELEM_NAME(AST) ((AST)->sct_elem.name)
-#define PKL_AST_STRUCT_ELEM_EXP(AST) ((AST)->sct_elem.exp)
+#define PKL_AST_STRUCT_FIELD_NAME(AST) ((AST)->sct_field.name)
+#define PKL_AST_STRUCT_FIELD_EXP(AST) ((AST)->sct_field.exp)
 
-struct pkl_ast_struct_elem
+struct pkl_ast_struct_field
 {
   struct pkl_ast_common common;
 
@@ -421,9 +421,9 @@ struct pkl_ast_struct_elem
   union pkl_ast_node *exp;
 };
 
-pkl_ast_node pkl_ast_make_struct_elem (pkl_ast ast,
-                                       pkl_ast_node name,
-                                       pkl_ast_node exp);
+pkl_ast_node pkl_ast_make_struct_field (pkl_ast ast,
+                                        pkl_ast_node name,
+                                        pkl_ast_node exp);
 
 /* PKL_AST_EXP nodes represent unary and binary expressions,
    consisting on an operator and one or two operators, respectively.
@@ -696,7 +696,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
                                       pkl_ast_node sct,
                                       pkl_ast_node identifier);
 
-/* PKL_AST_STRUCT_ELEM_TYPE nodes represent the element part of a
+/* PKL_AST_STRUCT_FIELD_TYPE nodes represent the field part of a
    struct type.
 
    NAME is a PKL_AST_IDENTIFIER node, or NULL if the struct type
@@ -704,19 +704,19 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
 
    TYPE is a PKL_AST_TYPE node.
  
-   CONSTRAINT is a constraint associated with the struct elem.  It is
+   CONSTRAINT is a constraint associated with the struct field.  It is
    an expression that should evaluate to a boolean.
 
    LABEL is an expression that, if present, should evaluate to an
    offset value.  If the struct type element doesn't have a label,
    this is NULL.  */
 
-#define PKL_AST_STRUCT_ELEM_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
-#define PKL_AST_STRUCT_ELEM_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
-#define PKL_AST_STRUCT_ELEM_TYPE_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
-#define PKL_AST_STRUCT_ELEM_TYPE_LABEL(AST) ((AST)->sct_type_elem.label)
+#define PKL_AST_STRUCT_FIELD_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
+#define PKL_AST_STRUCT_FIELD_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
+#define PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
+#define PKL_AST_STRUCT_FIELD_TYPE_LABEL(AST) ((AST)->sct_type_elem.label)
 
-struct pkl_ast_struct_elem_type
+struct pkl_ast_struct_field_type
 {
   struct pkl_ast_common common;
 
@@ -726,11 +726,11 @@ struct pkl_ast_struct_elem_type
   union pkl_ast_node *label;
 };
 
-pkl_ast_node pkl_ast_make_struct_elem_type (pkl_ast ast,
-                                            pkl_ast_node name,
-                                            pkl_ast_node type,
-                                            pkl_ast_node constraint,
-                                            pkl_ast_node label);
+pkl_ast_node pkl_ast_make_struct_field_type (pkl_ast ast,
+                                             pkl_ast_node name,
+                                             pkl_ast_node type,
+                                             pkl_ast_node constraint,
+                                             pkl_ast_node label);
 
 /* PKL_AST_FUNC_TYPE_ARG nodes represent the arguments part of a
    function type.
@@ -782,7 +782,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    used to hold closures, or PVM_NULL.
 
    In struct types, NELEM is the number of elements in the struct
-   type.  ELEMS is a chain of PKL_AST_STRUCT_ELEM_TYPE nodes.  PINNED
+   type.  ELEMS is a chain of PKL_AST_STRUCT_FIELD_TYPE nodes.  PINNED
    is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER and
    CONSTRUCTOR are used to hold closures, or PVM_NULL.
 
@@ -1498,7 +1498,7 @@ union pkl_ast_node
   struct pkl_ast_indexer indexer;
   struct pkl_ast_trimmer trimmer;
   struct pkl_ast_struct sct;
-  struct pkl_ast_struct_elem sct_elem;
+  struct pkl_ast_struct_field sct_field;
   struct pkl_ast_struct_ref sref;
   struct pkl_ast_offset offset;
   struct pkl_ast_cast cast;
@@ -1510,7 +1510,7 @@ union pkl_ast_node
   struct pkl_ast_var var;
   /* Types.  */
   struct pkl_ast_type type;
-  struct pkl_ast_struct_elem_type sct_type_elem;
+  struct pkl_ast_struct_field_type sct_type_elem;
   struct pkl_ast_func_type_arg fun_type_arg;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;
