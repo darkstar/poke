@@ -691,7 +691,7 @@
         ;; Iterate over the fields of the struct type.
  .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
  .c {
-        pushvar $off            ; ...[EOFF ENAME EVAL] NEOFF OFF
+        pushvar $off             ; ...[EOFF ENAME EVAL] NEOFF OFF
         .e struct_field_mapper   ; ...[EOFF ENAME EVAL] NEOFF
         ;; If the struct is pinned, replace NEOFF with OFF
    .c if (PKL_AST_TYPE_S_PINNED (type_struct))
