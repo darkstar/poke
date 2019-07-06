@@ -2,6 +2,9 @@
 GNU Poke - TODO lists
 =====================
 
+Copyright (C) 2019 Jose E. Marchesi
+See the end of the file for license conditions.
+
 NOTE: this file is not your typical abandoned TODO file that nobody
       reads and nobody updates.  We **do** use this file, and these
       are tasks that really need to get done.
@@ -47,7 +50,23 @@ ras
 - Make sure that macro arguments are defined when used.
 - Pretty print: indentation in .loop/.endloop etc.
 
+
+This file is part of GNU poke.
+
+GNU poke is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU poke is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 
 Local Variables:
 mode: rst
 End:
+
