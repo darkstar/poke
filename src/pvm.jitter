@@ -684,7 +684,11 @@ end
 
 instruction siz () # ( VAL -- VAL OFF )
   code
-    JITTER_PUSH_STACK (pvm_sizeof (JITTER_TOP_STACK ()));
+    uint64_t size = pvm_sizeof (JITTER_TOP_STACK ());
+    pvm_val unit = pvm_make_ulong (1, 64);
+    pvm_val offset = pvm_make_offset (pvm_make_ulong (size, 64), unit);
+    
+    JITTER_PUSH_STACK (offset);
   end
 end
 
@@ -1821,18 +1825,15 @@ instruction aset () # ( ARR ULONG VAL -- ARR )
 
     if (PVM_IS_OFF (bound))
       {
-        pvm_val new_size;
         pvm_val oval = PVM_VAL_ARR_ELEM_VALUE (arr, idx);
         uint64_t old_size_bits;
         uint64_t new_size_bits;
 
         PVM_VAL_ARR_ELEM_VALUE (arr, idx) = val;
-        new_size = pvm_sizeof (arr);
 
         old_size_bits = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (bound))
                          * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (bound)));
-        new_size_bits = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (new_size))
-                         * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (new_size)));
+        new_size_bits = pvm_sizeof (arr);
 
         if (new_size_bits != old_size_bits)
          {

@@ -576,8 +576,8 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
         PVM_VAL_ARR_SIZE_BOUND ((V)) = (O);     \
     } while (0)
 
-/* Return an offset with the size of VAL.  */
-pvm_val pvm_sizeof (pvm_val val);
+/* Return the size of VAL, in bits.  */
+uint64_t pvm_sizeof (pvm_val val);
 
 /* For strings, arrays and structs, return the number of
    elements/fields stored, as an unsigned 64-bits long.  Return 1
