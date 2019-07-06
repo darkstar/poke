@@ -266,7 +266,7 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
    mapped.  If the structure is not mapped then this is PVM_NULL.
 
    TYPE is the type of the struct.  This includes the types of the
-   struct elements.
+   struct fields.
 
    NELEM is the number of elements conforming the structure.
 
@@ -278,8 +278,8 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 #define PVM_VAL_SCT_MAPPER(V) (PVM_VAL_SCT((V))->mapper)
 #define PVM_VAL_SCT_WRITER(V) (PVM_VAL_SCT((V))->writer)
 #define PVM_VAL_SCT_TYPE(V) (PVM_VAL_SCT((V))->type)
-#define PVM_VAL_SCT_NELEM(V) (PVM_VAL_SCT((V))->nelem)
-#define PVM_VAL_SCT_ELEM(V,I) (PVM_VAL_SCT((V))->elems[(I)])
+#define PVM_VAL_SCT_NFIELDS(V) (PVM_VAL_SCT((V))->nfields)
+#define PVM_VAL_SCT_FIELD(V,I) (PVM_VAL_SCT((V))->fields[(I)])
 
 struct pvm_struct
 {
@@ -287,33 +287,33 @@ struct pvm_struct
   pvm_val mapper;
   pvm_val writer;
   pvm_val type;
-  pvm_val nelem;
-  struct pvm_struct_elem *elems;
+  pvm_val nfields;
+  struct pvm_struct_field *fields;
 };
 
-/* Struct elements hold the data of the elements, and/or information
-   on how to obtain these values.
+/* Struct fields hold the data of the fields, and/or information on
+   how to obtain these values.
 
    OFFSET is the offset, relative to the beginning of the struct,
-   where the struct element resides when stored.
+   where the struct field resides when stored.
 
-   NAME is a string containing the name of the struct element.  This
+   NAME is a string containing the name of the struct field.  This
    name should be unique in the struct.
 
-   VALUE is the value contained in the element.  If the struct is
+   VALUE is the value contained in the field.  If the struct is
    mapped then this is the cached value, which is returned by
    `sref'.
 
-   MODIFIED is a C boolean indicating whether the element value has
+   MODIFIED is a C boolean indicating whether the field value has
    been modified since struct creation, or since last mapping if the
    struct is mapped.  */
 
-#define PVM_VAL_SCT_ELEM_OFFSET(V,I) (PVM_VAL_SCT_ELEM((V),(I)).offset)
-#define PVM_VAL_SCT_ELEM_NAME(V,I) (PVM_VAL_SCT_ELEM((V),(I)).name)
-#define PVM_VAL_SCT_ELEM_VALUE(V,I) (PVM_VAL_SCT_ELEM((V),(I)).value)
-#define PVM_VAL_SCT_ELEM_MODIFIED(V,I) (PVM_VAL_SCT_ELEM((V),(I)).modified)
+#define PVM_VAL_SCT_FIELD_OFFSET(V,I) (PVM_VAL_SCT_FIELD((V),(I)).offset)
+#define PVM_VAL_SCT_FIELD_NAME(V,I) (PVM_VAL_SCT_FIELD((V),(I)).name)
+#define PVM_VAL_SCT_FIELD_VALUE(V,I) (PVM_VAL_SCT_FIELD((V),(I)).value)
+#define PVM_VAL_SCT_FIELD_MODIFIED(V,I) (PVM_VAL_SCT_FIELD((V),(I)).modified)
 
-struct pvm_struct_elem
+struct pvm_struct_field
 {
   pvm_val offset;
   pvm_val name;
@@ -323,7 +323,7 @@ struct pvm_struct_elem
 
 typedef struct pvm_struct *pvm_struct;
 
-pvm_val pvm_make_struct (pvm_val nelem, pvm_val type);
+pvm_val pvm_make_struct (pvm_val nfields, pvm_val type);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
 
@@ -337,11 +337,11 @@ int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
 #define PVM_VAL_TYP_A_BOUND(V) (PVM_VAL_TYP((V))->val.array.bound)
 #define PVM_VAL_TYP_A_ETYPE(V) (PVM_VAL_TYP((V))->val.array.etype)
 #define PVM_VAL_TYP_S_NAME(V) (PVM_VAL_TYP((V))->val.sct.name)
-#define PVM_VAL_TYP_S_NELEM(V) (PVM_VAL_TYP((V))->val.sct.nelem)
-#define PVM_VAL_TYP_S_ENAMES(V) (PVM_VAL_TYP((V))->val.sct.enames)
-#define PVM_VAL_TYP_S_ETYPES(V) (PVM_VAL_TYP((V))->val.sct.etypes)
-#define PVM_VAL_TYP_S_ENAME(V,I) (PVM_VAL_TYP_S_ENAMES((V))[(I)])
-#define PVM_VAL_TYP_S_ETYPE(V,I) (PVM_VAL_TYP_S_ETYPES((V))[(I)])
+#define PVM_VAL_TYP_S_NFIELDS(V) (PVM_VAL_TYP((V))->val.sct.nfields)
+#define PVM_VAL_TYP_S_FNAMES(V) (PVM_VAL_TYP((V))->val.sct.fnames)
+#define PVM_VAL_TYP_S_FTYPES(V) (PVM_VAL_TYP((V))->val.sct.ftypes)
+#define PVM_VAL_TYP_S_FNAME(V,I) (PVM_VAL_TYP_S_FNAMES((V))[(I)])
+#define PVM_VAL_TYP_S_FTYPE(V,I) (PVM_VAL_TYP_S_FTYPES((V))[(I)])
 #define PVM_VAL_TYP_O_UNIT(V) (PVM_VAL_TYP((V))->val.off.unit)
 #define PVM_VAL_TYP_O_BASE_TYPE(V) (PVM_VAL_TYP((V))->val.off.base_type)
 #define PVM_VAL_TYP_C_RETURN_TYPE(V) (PVM_VAL_TYP((V))->val.cls.return_type)
@@ -381,9 +381,9 @@ struct pvm_type
     struct
     {
       pvm_val name;
-      pvm_val nelem;
-      pvm_val *enames;
-      pvm_val *etypes;
+      pvm_val nfields;
+      pvm_val *fnames;
+      pvm_val *ftypes;
     } sct;
 
     struct
@@ -407,11 +407,12 @@ pvm_val pvm_make_integral_type (pvm_val size, pvm_val signed_p);
 pvm_val pvm_make_string_type (void);
 pvm_val pvm_make_any_type (void);
 pvm_val pvm_make_array_type (pvm_val type, pvm_val bound);
-pvm_val pvm_make_struct_type (pvm_val nelem, pvm_val name, pvm_val *enames, pvm_val *etypes);
+pvm_val pvm_make_struct_type (pvm_val nfields, pvm_val name,
+                              pvm_val *fnames, pvm_val *ftypes);
 pvm_val pvm_make_offset_type (pvm_val base_type, pvm_val unit);
 pvm_val pvm_make_closure_type (pvm_val rtype, pvm_val nargs, pvm_val *atypes);
 
-void pvm_allocate_struct_attrs (pvm_val nelem, pvm_val **enames, pvm_val **etypes);
+void pvm_allocate_struct_attrs (pvm_val nfields, pvm_val **fnames, pvm_val **ftypes);
 void pvm_allocate_closure_attrs (pvm_val nargs, pvm_val **atypes);
 
 pvm_val pvm_dup_type (pvm_val type);
@@ -578,8 +579,9 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 /* Return an offset with the size of VAL.  */
 pvm_val pvm_sizeof (pvm_val val);
 
-/* For strings, arrays and structs, return the number of elements
-   stored, as an unsigned 64-bits long.  Return 1 otherwise.  */
+/* For strings, arrays and structs, return the number of
+   elements/fields stored, as an unsigned 64-bits long.  Return 1
+   otherwise.  */
 pvm_val pvm_elemsof (pvm_val val);
 
 /* Return the mapper function for the given value, and the writer

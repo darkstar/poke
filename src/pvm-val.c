@@ -110,26 +110,26 @@ pvm_make_array (pvm_val nelem, pvm_val type)
 }
 
 pvm_val
-pvm_make_struct (pvm_val nelem, pvm_val type)
+pvm_make_struct (pvm_val nfields, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
   pvm_struct sct = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_struct));
-  size_t i, nbytes = sizeof (struct pvm_struct_elem) * PVM_VAL_ULONG (nelem);
+  size_t i, nbytes = sizeof (struct pvm_struct_field) * PVM_VAL_ULONG (nfields);
 
   sct->offset = PVM_NULL;
   sct->mapper = PVM_NULL;
   sct->writer = PVM_NULL;
   sct->type = type;
-  sct->nelem = nelem;
-  sct->elems = GC_MALLOC_UNCOLLECTABLE (nbytes);
-  memset (sct->elems, 0, nbytes);
+  sct->nfields = nfields;
+  sct->fields = GC_MALLOC_UNCOLLECTABLE (nbytes);
+  memset (sct->fields, 0, nbytes);
 
-  for (i = 0; i < PVM_VAL_ULONG (sct->nelem); ++i)
+  for (i = 0; i < PVM_VAL_ULONG (sct->nfields); ++i)
     {
-      sct->elems[i].offset = PVM_NULL;
-      sct->elems[i].name = PVM_NULL;
-      sct->elems[i].value = PVM_NULL;
-      sct->elems[i].modified = pvm_make_int (0, 32);
+      sct->fields[i].offset = PVM_NULL;
+      sct->fields[i].name = PVM_NULL;
+      sct->fields[i].value = PVM_NULL;
+      sct->fields[i].modified = pvm_make_int (0, 32);
     }
 
   PVM_VAL_BOX_SCT (box) = sct;
@@ -139,20 +139,20 @@ pvm_make_struct (pvm_val nelem, pvm_val type)
 pvm_val
 pvm_ref_struct (pvm_val sct, pvm_val name)
 {
-  size_t nelem, i;
-  struct pvm_struct_elem *elems;
+  size_t nfields, i;
+  struct pvm_struct_field *fields;
 
   assert (PVM_IS_SCT (sct) && PVM_IS_STR (name));
   
-  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
-  elems = PVM_VAL_SCT (sct)->elems;
+  nfields = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (sct));
+  fields = PVM_VAL_SCT (sct)->fields;
   
-  for (i = 0; i < nelem; ++i)
+  for (i = 0; i < nfields; ++i)
     {
-      if (elems[i].name != PVM_NULL
-          && strcmp (PVM_VAL_STR (elems[i].name),
+      if (fields[i].name != PVM_NULL
+          && strcmp (PVM_VAL_STR (fields[i].name),
                      PVM_VAL_STR (name)) == 0)
-        return elems[i].value;
+        return fields[i].value;
     }
           
   return PVM_NULL;
@@ -161,22 +161,22 @@ pvm_ref_struct (pvm_val sct, pvm_val name)
 int
 pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val)
 {
-  size_t nelem, i;
-  struct pvm_struct_elem *elems;
+  size_t nfields, i;
+  struct pvm_struct_field *fields;
 
   assert (PVM_IS_SCT (sct) && PVM_IS_STR (name));
   
-  nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (sct));
-  elems = PVM_VAL_SCT (sct)->elems;
+  nfields = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (sct));
+  fields = PVM_VAL_SCT (sct)->fields;
   
-  for (i = 0; i < nelem; ++i)
+  for (i = 0; i < nfields; ++i)
     {
-      if (elems[i].name != PVM_NULL
-          && strcmp (PVM_VAL_STR (elems[i].name),
+      if (fields[i].name != PVM_NULL
+          && strcmp (PVM_VAL_STR (fields[i].name),
                      PVM_VAL_STR (name)) == 0)
         {
-          PVM_VAL_SCT_ELEM_VALUE (sct,i) = val;
-          PVM_VAL_SCT_ELEM_MODIFIED (sct,i) =
+          PVM_VAL_SCT_FIELD_VALUE (sct,i) = val;
+          PVM_VAL_SCT_FIELD_MODIFIED (sct,i) =
             pvm_make_int (1, 32);
           return 1;
         }
@@ -241,15 +241,15 @@ pvm_make_array_type (pvm_val type, pvm_val bound)
 }
 
 pvm_val
-pvm_make_struct_type (pvm_val nelem, pvm_val name,
-                      pvm_val *enames, pvm_val *etypes)
+pvm_make_struct_type (pvm_val nfields, pvm_val name,
+                      pvm_val *fnames, pvm_val *ftypes)
 {
   pvm_val stype = pvm_make_type (PVM_TYPE_STRUCT);
 
   PVM_VAL_TYP_S_NAME (stype) = name;
-  PVM_VAL_TYP_S_NELEM (stype) = nelem;
-  PVM_VAL_TYP_S_ENAMES (stype) = enames;
-  PVM_VAL_TYP_S_ETYPES (stype) = etypes;
+  PVM_VAL_TYP_S_NFIELDS (stype) = nfields;
+  PVM_VAL_TYP_S_FNAMES (stype) = fnames;
+  PVM_VAL_TYP_S_FTYPES (stype) = ftypes;
 
   return stype;
 }
@@ -297,12 +297,12 @@ pvm_make_offset (pvm_val magnitude, pvm_val unit)
 }
 
 void
-pvm_allocate_struct_attrs (pvm_val nelem,
-                           pvm_val **enames, pvm_val **etypes)
+pvm_allocate_struct_attrs (pvm_val nfields,
+                           pvm_val **fnames, pvm_val **ftypes)
 {
-  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nelem) * 2;
-  *enames = GC_MALLOC_UNCOLLECTABLE (nbytes);
-  *etypes = GC_MALLOC_UNCOLLECTABLE (nbytes);
+  size_t nbytes = sizeof (pvm_val) * PVM_VAL_ULONG (nfields) * 2;
+  *fnames = GC_MALLOC_UNCOLLECTABLE (nbytes);
+  *ftypes = GC_MALLOC_UNCOLLECTABLE (nbytes);
 }
 
 void
@@ -318,7 +318,7 @@ pvm_elemsof (pvm_val val)
   if (PVM_IS_ARR (val))
     return PVM_VAL_ARR_NELEM (val);
   else if (PVM_IS_SCT (val))
-    return PVM_VAL_SCT_NELEM (val);
+    return PVM_VAL_SCT_NFIELDS (val);
   else if (PVM_IS_STR (val))
     return pvm_make_ulong (strlen (PVM_VAL_STR (val)), 64);
   else
@@ -390,7 +390,7 @@ pvm_sizeof (pvm_val val)
   else if (PVM_IS_SCT (val))
     {
       pvm_val sct_offset = PVM_VAL_SCT_OFFSET (val);
-      size_t nelem, i, size, sct_offset_bits;
+      size_t nfields, i, size, sct_offset_bits;
 
       if (sct_offset == PVM_NULL)
         sct_offset_bits = 0;
@@ -398,13 +398,13 @@ pvm_sizeof (pvm_val val)
         sct_offset_bits = (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (sct_offset))
                            * PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (sct_offset)));
 
-      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
+      nfields = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (val));
 
       size = 0;
-      for (i = 0; i < nelem; ++i)
+      for (i = 0; i < nfields; ++i)
         {
-          pvm_val elem_value = PVM_VAL_SCT_ELEM_VALUE (val, i);
-          pvm_val elem_offset = PVM_VAL_SCT_ELEM_OFFSET (val, i);
+          pvm_val elem_value = PVM_VAL_SCT_FIELD_VALUE (val, i);
+          pvm_val elem_offset = PVM_VAL_SCT_FIELD_OFFSET (val, i);
           pvm_val elem_size = pvm_sizeof (elem_value);
           uint64_t elem_size_bits
             = (PVM_VAL_ULONG (PVM_VAL_OFF_MAGNITUDE (elem_size))
@@ -760,7 +760,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       pvm_val struct_type = PVM_VAL_SCT_TYPE (val);
       pvm_val struct_type_name = PVM_VAL_TYP_S_NAME (struct_type);
 
-      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NELEM (val));
+      nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (val));
 
       if (struct_type_name != PVM_NULL)
         fputs (PVM_VAL_STR (struct_type_name), out);
@@ -771,9 +771,9 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       fprintf (out, "{");
       for (idx = 0; idx < nelem; ++idx)
         {
-          pvm_val name = PVM_VAL_SCT_ELEM_NAME(val, idx);
-          pvm_val value = PVM_VAL_SCT_ELEM_VALUE(val, idx);
-          pvm_val offset = PVM_VAL_SCT_ELEM_OFFSET(val, idx);
+          pvm_val name = PVM_VAL_SCT_FIELD_NAME(val, idx);
+          pvm_val value = PVM_VAL_SCT_FIELD_VALUE(val, idx);
+          pvm_val offset = PVM_VAL_SCT_FIELD_OFFSET(val, idx);
 
           if (idx != 0)
             fprintf (out, ",");
@@ -872,13 +872,13 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
           {
             size_t i, nelem;
 
-            nelem = PVM_VAL_ULONG (PVM_VAL_TYP_S_NELEM (val));
+            nelem = PVM_VAL_ULONG (PVM_VAL_TYP_S_NFIELDS (val));
 
             fprintf (out, "struct {");
             for (i = 0; i < nelem; ++i)
               {
-                pvm_val ename = PVM_VAL_TYP_S_ENAME(val, i);
-                pvm_val etype = PVM_VAL_TYP_S_ETYPE(val, i);
+                pvm_val ename = PVM_VAL_TYP_S_FNAME(val, i);
+                pvm_val etype = PVM_VAL_TYP_S_FTYPE(val, i);
 
                 if (i != 0)
                   fprintf (out, " ");

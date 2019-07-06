@@ -1904,15 +1904,15 @@ instruction mksct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
-      PVM_VAL_SCT_ELEM_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
+      PVM_VAL_SCT_FIELD_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
           = JITTER_TOP_STACK ();
-      PVM_VAL_SCT_ELEM_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
+      PVM_VAL_SCT_FIELD_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
           = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
 
-      PVM_VAL_SCT_ELEM_OFFSET (sct, PVM_VAL_ULONG (nelem) - e -1)
+      PVM_VAL_SCT_FIELD_OFFSET (sct, PVM_VAL_ULONG (nelem) - e -1)
           = JITTER_TOP_STACK ();
       JITTER_DROP_STACK ();
     }
@@ -1957,10 +1957,10 @@ instruction srefi () # ( SCT ULONG -- SCT ULONG VAL )
 
     if (PVM_VAL_ULONG (index) < 0
         || (PVM_VAL_ULONG (index) >=
-            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NELEM (sct))))
+            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NFIELDS (sct))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_VALUE (sct,
+    JITTER_PUSH_STACK (PVM_VAL_SCT_FIELD_VALUE (sct,
                                                PVM_VAL_ULONG (index)));
   end
 end
@@ -1972,11 +1972,11 @@ instruction srefio () # ( SCT ULONG -- SCT ULONG OFF )
 
     if (PVM_VAL_ULONG (index) < 0
         || (PVM_VAL_ULONG (index) >=
-            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NELEM (sct))))
+            PVM_VAL_INTEGRAL (PVM_VAL_SCT_NFIELDS (sct))))
       PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_OFFSET (sct,
-                                                PVM_VAL_ULONG (index)));
+    JITTER_PUSH_STACK (PVM_VAL_SCT_FIELD_OFFSET (sct,
+                                                 PVM_VAL_ULONG (index)));
   end
 end
 
@@ -1985,8 +1985,8 @@ instruction smodi () # ( SCT ULONG -- BOOL )
     pvm_val sct = JITTER_UNDER_TOP_STACK ();
     pvm_val index = JITTER_TOP_STACK ();
 
-    JITTER_PUSH_STACK (PVM_VAL_SCT_ELEM_MODIFIED (sct,
-                                                  PVM_VAL_ULONG (index)));
+    JITTER_PUSH_STACK (PVM_VAL_SCT_FIELD_MODIFIED (sct,
+                                                   PVM_VAL_ULONG (index)));
   end
 end
 
