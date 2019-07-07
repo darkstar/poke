@@ -5,51 +5,55 @@ GNU Poke - Hacking Notes
 Welcome, adventurous poker! This file contains useful information for
 you.
 
+Copyright (C) 2019 Jose E. Marchesi
+See the end of the file for license conditions.
+
 ..  Please be as good as to update the table of contents below if you
     modify the sectioning of the document.  If in Emacs,
     M-xrst-toc-update should take care of it automatically.
 
 .. contents:: 
 ..
-    1  Development Environment
-      1.1  Autotools
-      1.2  Flex
-      1.3  Building
-      1.4  Gettext
-    2  Coding Style and Conventions
-      2.1  When writing Poke
-    3  Poke Architecture
-    4  The Poke Compiler
-      4.1  Compiler Overview
-      4.2  The bison Parser in pkl-tab.y
-      4.3  The AST
-        4.3.1  Using ASTREF
-      4.4  Compiler Passes and Phases
-        4.4.1  Naming Conventions for Phases
-        4.4.2  Naming Conventions for Handlers
-        4.4.3  Transformation Phases
-        4.4.4  Analysis Phases
-        4.4.5  Type System Phases
-      4.5  The Type System
-        4.5.1  Type Expressions
-    5  The Poke Virtual Machine
-      5.1  Exception Handling
-    6  Debugging Poke
-      6.1  Building with Debugging support
-      6.2  Using GDB extensions
-      6.3  Valgrind and Poke
-      6.4  Debugging PVM Assembly Code
-    7  Future Developments
-    8  Appendix: The Source Tree
-      8.1  The Compiler
-      8.2  The Poke Virtual Machine
-      8.3  The IO Subsystem
-      8.4  Poke Program
-      8.5  Pickles and Libraries
-      8.6  Test Suite
-      8.7  Documentation
-      8.8  Other Stuff
-
+     1  Development Environment
+       1.1  Autotools
+       1.2  Flex
+       1.3  Building
+       1.4  Gettext
+     2  Coding Style and Conventions
+       2.1  When writing Poke
+     3  Poke Architecture
+     4  The Poke Compiler
+       4.1  Compiler Overview
+       4.2  The bison Parser in pkl-tab.y
+       4.3  The AST
+         4.3.1  Using ASTREF
+       4.4  Compiler Passes and Phases
+         4.4.1  Naming Conventions for Phases
+         4.4.2  Naming Conventions for Handlers
+         4.4.3  Transformation Phases
+         4.4.4  Analysis Phases
+         4.4.5  Type System Phases
+       4.5  The Type System
+         4.5.1  Type Expressions
+     5  The Poke Virtual Machine
+       5.1  Exception Handling
+       5.2  Offsets and bit-offsets in the PVM
+     6  Debugging Poke
+       6.1  Building with Debugging support
+       6.2  Using GDB extensions
+       6.3  Valgrind and Poke
+       6.4  Debugging PVM Assembly Code
+     7  Future Developments
+     8  Appendix: The Source Tree
+       8.1  The Compiler
+       8.2  The Poke Virtual Machine
+       8.3  The IO Subsystem
+       8.4  Poke Program
+       8.5  Pickles and Libraries
+       8.6  Test Suite
+       8.7  Documentation
+       8.8  Other Stuff
+     9  License Conditions of This Document
 
 
 Development Environment
@@ -772,6 +776,23 @@ Suppression list for memcheck
   ``etc/boehm-gc.suppressions``
 
 
+License Conditions of This Document
+-----------------------------------
+
+This file is part of GNU poke.
+
+GNU poke is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU poke is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 
 ..
   Local Variables:
