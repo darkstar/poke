@@ -231,8 +231,7 @@ late-header-c
      if ((io = ios_cur ()) == NULL)                                          \
         PVM_RAISE (PVM_E_NO_IOS);                                            \
                                                                              \
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))\
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ()))); \
+     offset = PVM_VAL_ULONG (JITTER_TOP_STACK ());                           \
                                                                              \
      if (ios_read_##IOTYPE (IOARGS) != IOS_OK)                               \
        {                                                                     \
@@ -262,8 +261,7 @@ late-header-c
      if ((io = ios_cur ()) == NULL)                                          \
         PVM_RAISE (PVM_E_NO_IOS);                                            \
                                                                              \
-     offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (offset_val))         \
-               * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (offset_val)));          \
+     offset = PVM_VAL_ULONG (offset_val);                                    \
                                                                              \
      if (ios_write_##IOTYPE (IOARGS) != IOS_OK)                              \
        {                                                                     \
@@ -2448,8 +2446,7 @@ instruction peeks ()
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (PVM_E_NO_IOS);
 
-    offset = (PVM_VAL_INTEGRAL (PVM_VAL_OFF_MAGNITUDE (JITTER_TOP_STACK ()))
-              * PVM_VAL_INTEGRAL (PVM_VAL_OFF_UNIT (JITTER_TOP_STACK ())));
+    offset = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
     if (ios_read_string (io, offset, 0 /* flags */, &ios_str) != IOS_OK)
       JITTER_TOP_STACK () = PVM_NULL;

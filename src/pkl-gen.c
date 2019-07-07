@@ -1165,8 +1165,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_offset)
   /* Note that in_writer is handled in the pre-order handler, and not
      here.  */
 
+  /* XXX handle mapper (peek the offset magnitude) and the writer
+     (poke the offset magnitude).  */
+
   if (PKL_GEN_PAYLOAD->in_mapper)
     /* Stack: OFF */
+    /* XXX wtf */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKO);
   else if (PKL_GEN_PAYLOAD->in_valmapper)
     {
@@ -1327,6 +1331,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
   pkl_ast_node map_offset = PKL_AST_MAP_OFFSET (map);
 
   /* Push the offset of the map.  */
+  /* XXX converted to a bit-offset in an ulong<64>.  */
+  /* XXX here we can assume the offset is offset<ulong<64>,b> as per
+     promo.  */
   PKL_PASS_SUBPASS (map_offset);
 
   PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -1615,11 +1622,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
   /* Note that the check for in_writer should appear first than the
      check for in_mapper.  */
   if (PKL_GEN_PAYLOAD->in_writer)
-    /* Stack: OFF VAL */
-    pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
+    {
+      /* Stack: OFF VAL */
+      /* XXX turn OFF to bit-offset  */
+      pkl_asm_insn (pasm, PKL_INSN_SWAP); /* VAL OFF */
+      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* VAL OFF OFFM */
+      pkl_asm_insn (pasm, PKL_INSN_NIP); /* VAL OFFM */
+      pkl_asm_insn (pasm, PKL_INSN_SWAP); /* OFFM VAL */
+      pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
+    }
   else if (PKL_GEN_PAYLOAD->in_mapper)
-    /* Stack: OFF */
-    pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+    {
+      /* Stack: OFF */
+      /* XXX turn OFF to bit-offset */
+      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF OFFM */
+      pkl_asm_insn (pasm, PKL_INSN_NIP); /* OFFM */
+      pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+    }
   else if (PKL_GEN_PAYLOAD->in_valmapper)
     {
       /* Stack: VAL NVAL OFF */
@@ -1898,11 +1917,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_string)
      check for in_mapper.  */
 
   if (PKL_GEN_PAYLOAD->in_writer)
-    /* Stack: OFF STR */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKES);
+    {
+      /* Stack: OFF STR */
+      /* XXX turn OFF to bit-offset  */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP); /* STR OFF */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM); /* STR OFF OFFM */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* STR OFFM */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP); /* OFFM STR */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POKES);
+    }
   else if (PKL_GEN_PAYLOAD->in_mapper)
-    /* Stack: OFF */
-    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
+    {
+      /* Stack: OFF */
+      /* XXX turn OFF to bit-offset */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OGETM); /* OFF OFFM */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP); /* OFFM */
+      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEEKS);
+    }
   else if (PKL_GEN_PAYLOAD->in_valmapper)
     {
       /* Stack: VAL NVAL OFF */
