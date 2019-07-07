@@ -182,8 +182,9 @@ void pvm_print_string (FILE *out, pvm_val string);
 /* Arrays values are boxed, and store sequences of homogeneous values
    called array "elements".  They can be mapped in IO, or unmapped.
 
-   OFFSET is the offset in the current IO space where the array is
-   mapped.  If the array is not mapped then this is PVM_NULL.
+   OFFSET is an ulong<64> value with the bit offset in the current IO
+   space where the array is mapped.  If the array is not mapped then
+   this is PVM_NULL.
 
    If the array is mapped, ELEMS_BOUND is an unsigned long containing
    the number of elements to which the map is bounded.  Similarly,
@@ -239,9 +240,9 @@ typedef struct pvm_array *pvm_array;
 /* Array elements hold the data of the arrays, and/or information on
    how to obtain these values.
 
-   OFFSET is the offset, relative to the array's offset, where the
-   array element is mapped.  If the array is not mapped then this is
-   PVM_NULL.
+   OFFSET is an ulong<64> value holding the bit offset of the element,
+   relative to the array's offset, if the array is mapped.  If the
+   array is not mapped then this is PVM_NULL.
 
    VALUE is the value contained in the element.  If the array is
    mapped this is the cached value, which is returned by `aref'.  */

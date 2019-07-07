@@ -208,7 +208,6 @@
         bnn .check_sbound
         drop
         ba .bounds_ok
-
 .check_ebound:
         swap                   ; EBOUND ARRAY
         sel                    ; EBOUND ARRAY NELEM
