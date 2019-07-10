@@ -2,4 +2,3 @@
 
 defun foo = void: { try 1; catch {}};
 foo ();
-

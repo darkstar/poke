@@ -10,4 +10,3 @@ defvar x = 0xffffffffU;
 /* For constant folding: */
 /* { dg-command { 0xffffffffU & 0xdeadbeefU } } */
 /* { dg-output "\n0xdeadbeefU" } */
-

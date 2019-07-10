@@ -19,4 +19,3 @@ defun indirect = (int n) int:
 /* { dg-command {  indirect (3) } } */
 /* { dg-command {  global } } */
 /* { dg-output "0\n0\n3\n0\n6" } */
-

@@ -2553,4 +2553,3 @@ rule drop3-drop-to-drop4 rewrite
 into
   drop4
 end
-

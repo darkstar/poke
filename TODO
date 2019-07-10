@@ -41,7 +41,7 @@ asm, gen
   assembler make an excessive use of `regvar'.  It would be more
   efficient to use the return stack to store temporaries (tor/fromr).
   Patches in this spirit are welcome.
-  
+
 ras
 ---
 
@@ -69,4 +69,3 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 Local Variables:
 mode: rst
 End:
-

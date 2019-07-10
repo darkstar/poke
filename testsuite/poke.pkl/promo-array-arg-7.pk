@@ -15,4 +15,3 @@ defun bar = (int[x][x] a = [[1,2],[3,4]]) int: { return a[1][1]; }
 
 /* { dg-command {bar([[10,20],[30,40]])} } */
 /* { dg-output "\n40" } */
-

@@ -44,4 +44,3 @@ defvar cc = ["foo","bar"];
 
 /* { dg-command { try fff (cc); catch if E_conv { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
-

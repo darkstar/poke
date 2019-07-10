@@ -12,4 +12,3 @@ defun foo = (int[] array) int:
 
 /* { dg-command {  foo ([1,2,3,4]) } } */
 /* { dg-output "6" } */
-

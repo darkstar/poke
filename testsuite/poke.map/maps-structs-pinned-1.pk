@@ -10,4 +10,3 @@ deftype Foo = pinned struct { int i; long j; };
 /* { dg-command { .set obase 16 } } */
 /* { dg-command { Foo @ 4#B } } */
 /* { dg-output "\nFoo \\{i=0x60507080,j=0x6050708090a0b0c0L\\}" } */
-

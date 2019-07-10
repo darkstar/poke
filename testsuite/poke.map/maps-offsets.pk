@@ -21,4 +21,3 @@
 /* { dg-command { defvar c = int[2*4#B] @ 0#B } } */
 /* { dg-command { c } } */
 /* { dg-output "\n\\\[0x10203040,0x50607080\\\]" } */
-

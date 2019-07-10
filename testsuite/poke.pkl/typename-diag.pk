@@ -10,4 +10,3 @@ defun foo = int:
   {
    return bar ("wrong"); /* { dg-error "\n.*MyType" } */
   }
-

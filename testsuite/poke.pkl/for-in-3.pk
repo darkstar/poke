@@ -8,4 +8,3 @@ defun foo = (string[] array) void:
 
 /* { dg-command {  foo (["a", "foo", "bar", "superduper"]) } } */
 /* { dg-output "foo\nbar\nsuperduper" } */
-

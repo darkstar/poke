@@ -23,6 +23,3 @@ deftype Packet = struct { int i; int j; int k;};
 
 /* { dg-command { dump :from p'offset :size p'size :group_by 2#B :ruler 0 } } */
 /* { dg-output "\n00000000: f000 f000 dead beef b000 b000" } */
-
-
-

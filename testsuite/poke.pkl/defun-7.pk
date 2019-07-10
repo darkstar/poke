@@ -12,4 +12,3 @@ defun foo = (int n) int:
 
 /* { dg-command {  foo (10) } } */
 /* { dg-output 10 } */
-

@@ -113,6 +113,16 @@ When writing Poke
     16 #B
 
 
+Before Committing your Patch
+----------------------------
+
+run the syntax checker
+  Please make sure to run::
+
+  $ make syntax-check
+
+  And fix any problem reported by the maintainer's makefile.  Thanks.
+
 Poke Architecture
 -----------------
 

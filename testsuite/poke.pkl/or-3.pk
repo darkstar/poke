@@ -8,4 +8,3 @@ defvar x = 666;
 /* For constant folding: */
 /* { dg-command { 666 || 0 } } */
 /* { dg-output "\n1" } */
-

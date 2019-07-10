@@ -7,4 +7,3 @@ defun foo = (string[] array) void:
   }
 
 foo (["foo", "bar"]); /* { dg-output "foo\nbar" } */
-

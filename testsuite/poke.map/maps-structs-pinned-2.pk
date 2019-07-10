@@ -6,4 +6,3 @@ deftype Foo = pinned struct { int i; long j; };
 /* { dg-command { defvar f = Foo @ 0#B } } */
 /* { dg-command { f'size } } */
 /* { dg-output "64UL#b" } */
-

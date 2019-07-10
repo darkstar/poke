@@ -7,4 +7,3 @@ deftype Packet = struct
   {
     fun()void foo; /* { dg-error "" } */
   };
-

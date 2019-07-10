@@ -16,4 +16,3 @@
 
 info_TEXINFOS = poke.texi
 poke_TEXINFOS = fdl.texi
-

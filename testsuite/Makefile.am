@@ -30,5 +30,3 @@ check-DEJAGNU: site.exp
 			$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
-
-

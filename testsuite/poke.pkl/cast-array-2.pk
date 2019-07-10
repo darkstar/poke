@@ -8,4 +8,3 @@ defvar b = [[1,2],[3,4]] as int[][];
 
 /* { dg-command {b[1][1]} } */
 /* { dg-output "\n4" } */
-

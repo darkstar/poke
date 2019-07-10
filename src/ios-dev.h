@@ -82,4 +82,3 @@ struct ios_dev_if
   
   int (*put_c) (void *dev, int c);
 };
-

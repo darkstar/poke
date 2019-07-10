@@ -34,5 +34,3 @@ deftype xushort = ushort;
 deftype xshort = short;
 deftype xulong = ulong;
 deftype xlong = long;
-
-

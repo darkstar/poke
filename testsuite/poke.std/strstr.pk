@@ -17,7 +17,3 @@
 
 /* { dg-command { strstr ("xxxxx", "") } } */
 /* { dg-output "\n-1L" } */
-
-
-
-

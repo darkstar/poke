@@ -19,7 +19,3 @@
 
 /* { dg-command { a'mapped + 1} } */
 /* { dg-output "\n2" } */
-
-
-
-

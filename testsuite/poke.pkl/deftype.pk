@@ -13,4 +13,3 @@ deftype uimm13 = uint<13>;
 
 /* { dg-command {  sizeof (uimm13) } } */
 /* { dg-output "\n13UL#b" } */
-

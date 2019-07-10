@@ -5,4 +5,3 @@
 
 /* { dg-command { try [[1,2,3] as int[],[3,4] as int[]] as int[3#int][5#int]; catch if E_conv { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
-
