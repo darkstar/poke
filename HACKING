@@ -113,20 +113,38 @@ When writing Poke
     16 #B
 
 
-Before Committing your Patch
-----------------------------
+Maintenance
+-----------
 
-run the syntax checker
-  We are using the syntax checker (and its rules) in maint.mk.  To run
-  it, execute::
+This section describes ``make'' targets that performs several
+maintenance tasks.
 
-    $ make syntax-check
+syntax-check
+  Run several syntax-related checks in the source files.  It is useful
+  to run this target before submitting code to be reviewed, and while
+  reviewing other people's code.
 
-  Then fix any problem reported by the maintainer's makefile.  Note,
-  however, that sometimes the diagnostics do not make much sense.
-  This happens, for example, when a rule oriented to C is applied to,
-  say, an AWK file.  In these cases, consider adding a ``.x-sc_*``
-  fine-tuning file.  But please ask in poke-devel first.
+  Note that sometimes the results have to be taken with a pinch of
+  salt.  This happens, for example, when a rule oriented to C is
+  applied to, say, an AWK file.  In these cases, consider adding a
+  ``.x-sc_*`` fine-tuning file.  But please ask in poke-devel first.
+
+coverage
+  This target builds *poke* with code coverage support, runs the
+  testsuite, and generates a nice html report under
+  ``$(top_builddir)/doc/coverage/``.  It is necessary to have the
+  ``lcov`` program for this to work.
+
+refresh-po
+  This target download the latest available translations from the
+  translationproject and installs them in the source tree.
+
+update-copyright
+  Run this rule once per year (usually early in January) to update all
+  the copyright years in the project.  By default this excludes all
+  variants of COPYING.  Exceptions to this procedure (such as
+  ``ChangeLog..*`` for rotated change logs) can be added in the file
+  ``.x-update-copyright``.
 
 Poke Architecture
 -----------------
