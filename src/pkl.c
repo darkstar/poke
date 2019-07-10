@@ -588,7 +588,7 @@ pkl_ice (pkl_ast ast,
          ...)
 {
   va_list valist;
-  char tmpfile[PATH_MAX];
+  char tmpfile[1024];
 
   /* XXX: dump the AST plus additional details on the current state to
      a temporary file.  */
