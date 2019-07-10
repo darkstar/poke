@@ -250,7 +250,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "invalid cast to string\n\
-expected uint<8>, got %s.",
+expected uint<8>, got %s",
                  found_type);
       free (found_type);
       PKL_TYPIFY_PAYLOAD->errors++;
@@ -267,7 +267,7 @@ expected uint<8>, got %s.",
 
       pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
                  "invalid cast to array\n\
-expected %s, got %s.",
+expected %s, got %s",
                  type_str, found_type_str);
       free (type_str);
       free (found_type_str);
@@ -1434,7 +1434,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
                   
                   pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_exp),
                              "invalid initializer for `%s' in constructor\n\
-expected %s, got %s.",
+expected %s, got %s",
                              PKL_AST_IDENTIFIER_POINTER (elem_name),
                              expected_type, found_type);
 
@@ -1652,7 +1652,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
           && PKL_AST_TYPE_CODE (raise_stmt_exp_type) != PKL_TYPE_INTEGRAL)
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (raise_stmt),
-                     "exception in `raise' statement should be an integral number.");
+                     "exception in `raise' statement should be an integral number");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
         }

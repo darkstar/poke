@@ -19,7 +19,7 @@
 /* An IO space operates on one or more "IO devices", which are
    abstractions providing byte-oriented operations, such as
    positioning, reading bytes, and writing bytes.  Typical abstracted
-   entities are files stored in some filesystem, the memory of a
+   entities are files stored in some file system, the memory of a
    process, etc.
 
    Since the IO devices are byte-oriented, aspects like endianness,

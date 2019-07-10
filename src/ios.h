@@ -30,7 +30,7 @@ void ios_shutdown (void);
 
 /* "IO spaces" are the entities used in poke in order to abstract the
    heterogeneous devices that are suitable to be edited, such as
-   files, filesystems, memory images of processes, etc.
+   files, file systems, memory images of processes, etc.
 
         "IO spaces"               "IO devices"
 
@@ -46,9 +46,9 @@ void ios_shutdown (void);
                    
                       :           :
                    
-                      |      +------------+
-                      +----->| Filesystem |
-                             +------------+
+                      |      +-------------+
+                      +----->| File system |
+                             +-------------+
 
    IO spaces are bit-addressable spaces of "IO objects", which can be
    generally read (peeked) and written (poked).  The kind of objects
