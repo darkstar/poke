@@ -33,7 +33,6 @@ config.h.in
 /doc/stamp-vti
 /doc/version.texi
 /doc/version-int.texi
-/gnulib
 /src/pcl-lex.h
 /GNUmakefile
 /maint.mk
