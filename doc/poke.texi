@@ -549,11 +549,11 @@ xref to the poke book.
 @node Source Files
 @section Source Files
 
-Poke source text shall be encoded in @acronym{ASCII} (ISO-646) and
-covers the @acronym{ASCII} character set.
+Poke source text shall be encoded in ASCII (ISO-646) and covers the
+ASCII character set.
 
 Source code lines are separated by the @dfn{newline character},
-@acronym{ASCII} code @code{012}.
+ASCII code @code{012}.
 
 @node Comments
 @section Comments
@@ -594,7 +594,7 @@ however.}.
 @c @section Identifiers
 
 @c @b{R-LEX-02}: A letter (uppercase or lowercase) or an underscore
-@c (@acronym{ASCII} code 137) followed by zero or more letters (uppercase
+@c (ASCII code 137) followed by zero or more letters (uppercase
 @c or lowercase), underscore characters, or digits conform an
 @c @dfn{identifier}.
 
@@ -618,7 +618,7 @@ however.}.
 @c like width and numeration base.
 
 @c @b{R-LEX-02}: @dfn{Decimal numeric literals} are denoted by a digit
-@c followed by zero or more digits or underscores (@acronym{ASCII} code
+@c followed by zero or more digits or underscores (ASCII code
 @c 137), followed by an optional suffix string.
 
 @c @b{R-LEX-03}: @dfn{Hexadecimal numeric literals} are denoted by the
@@ -671,12 +671,11 @@ however.}.
 
 @c @section Character Literals
 
-@c There is another way to express unsigned 8-bit integers, which is to
-@c use a @dfn{character literal}.  Character literals are delimited by
-@c @code{'} characters, and contain a representation of an
-@c @acronym{ASCII} character.  The value of the resulting integer is the
-@c code of the represented @acronym{ASCII} character in the
-@c @acronym{ASCII}s 7-bit encoding.
+@c There is another way to express unsigned 8-bit integers, which is
+@c to use a @dfn{character literal}.  Character literals are delimited
+@c by @code{'} characters, and contain a representation of an ASCII
+@c character.  The value of the resulting integer is the code of the
+@c represented ASCII character in the ASCIIs 7-bit encoding.
 
 @c The representation of a printable character is the printable
 @c representation of the character itself.  For example, @code{'a'}
@@ -691,9 +690,9 @@ however.}.
 @c or three digits, but no more.  Example: @code{\0} is the @code{NULL}
 @c character.
 @c @item '\t'
-@c Tab (@acronym{ASCII} @code{0x9}).
+@c Tab (ASCII @code{0x9}).
 @c @item '\n'
-@c Newline character (@acronym{ASCII} @code{0xa}).
+@c Newline character (ASCII @code{0xa}).
 @c @end table
 
 @c @section String Literals
@@ -717,9 +716,9 @@ however.}.
 @c @item \\
 @c Represents the @code{\} character.
 @c @item \n
-@c Newline character (@acronym{ASCII} @code{0xa}).
+@c Newline character (ASCII @code{0xa}).
 @c @item \t
-@c Tab (@acronym{ASCII} @code{0x9}).
+@c Tab (ASCII @code{0x9}).
 @c @end table
 
 @c XXX @section Formatted String Literals
