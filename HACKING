@@ -117,11 +117,16 @@ Before Committing your Patch
 ----------------------------
 
 run the syntax checker
-  Please make sure to run::
+  We are using the syntax checker (and its rules) in maint.mk.  To run
+  it, execute::
 
-  $ make syntax-check
+    $ make syntax-check
 
-  And fix any problem reported by the maintainer's makefile.  Thanks.
+  Then fix any problem reported by the maintainer's makefile.  Note,
+  however, that sometimes the diagnostics do not make much sense.
+  This happens, for example, when a rule oriented to C is applied to,
+  say, an AWK file.  In these cases, consider adding a ``.x-sc_*``
+  fine-tuning file.  But please ask in poke-devel first.
 
 Poke Architecture
 -----------------
