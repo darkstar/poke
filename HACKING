@@ -6,7 +6,22 @@ Welcome, adventurous poker! This file contains useful information for
 you.
 
 Copyright (C) 2019 Jose E. Marchesi
-See the end of the file for license conditions.
+
+This file is part of GNU poke.
+
+GNU poke is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+GNU poke is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
+
 
 ..  Please be as good as to update the table of contents below if you
     modify the sectioning of the document.  If in Emacs,
@@ -20,7 +35,7 @@ See the end of the file for license conditions.
        1.3  Building
        1.4  Gettext
      2  Coding Style and Conventions
-       2.1  When writing Poke
+       2.1  Writing Poke
      3  Maintenance
      4  Poke Architecture
      5  The Poke Compiler
@@ -54,7 +69,6 @@ See the end of the file for license conditions.
        9.6  Test Suite
        9.7  Documentation
        9.8  Other Stuff
-    10  License Conditions of This Document
 
 
 Development Environment
@@ -101,8 +115,8 @@ for more information.
 Coding Style and Conventions
 ----------------------------
 
-When writing Poke
-~~~~~~~~~~~~~~~~~
+Writing Poke
+~~~~~~~~~~~~
 
 - Do not separate magnitudes and units when writing offsets.  Do it
   like this::
@@ -808,25 +822,6 @@ GDB extensions to better debug poke
 
 Suppression list for memcheck
   ``etc/boehm-gc.suppressions``
-
-
-License Conditions of This Document
------------------------------------
-
-This file is part of GNU poke.
-
-GNU poke is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-GNU poke is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 
 ..
   Local Variables:
