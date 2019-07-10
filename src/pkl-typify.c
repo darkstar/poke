@@ -125,7 +125,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_rela)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of a binary operation EQ, NE, LT, GT, LE, GE, AND and OR
+/* The type of a binary operation EQ, NE, LT, GT, LE, GE, AND, and OR
    is a boolean encoded as a 32-bit signed integer type.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_boolean)

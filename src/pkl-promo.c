@@ -441,7 +441,7 @@ PKL_PHASE_END_HANDLER
    The same logic is applied to the magnitudes of the offset operands
    in the O x O -> O configuration.
 
-   No operand promotion is performed in the the S x S -> S
+   No operand promotion is performed in the S x S -> S
    configuration.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_rela)
