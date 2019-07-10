@@ -24,9 +24,12 @@
 #include <stdio.h>
 #include <assert.h>
 #define _(str) gettext (str)
+#include <streq.h>
 
 #include "ios.h"
 #include "ios-dev.h"
+
+#define STREQ(a, b) (strcmp (a, b) == 0)
 
 /* The following struct implements an instance of an IO space.
 
@@ -191,7 +194,7 @@ ios_search (const char *handler)
   ios io;
 
   for (io = io_list; io; io = io->next)
-    if (strcmp (io->handler, handler) == 0)
+    if (STREQ (io->handler, handler))
       break;
 
   return io;

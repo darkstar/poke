@@ -26,6 +26,8 @@
 #include "pkl-pass.h"
 #include "pkl-trans.h"
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 /* This file implements several transformation compiler phases which,
    generally speaking, are restartable.
 
@@ -434,7 +436,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 
   for (attr = 0; pkl_attr_name (attr); ++attr)
     {
-      if (strcmp (pkl_attr_name (attr), identifier_name) == 0)
+      if (STREQ (pkl_attr_name (attr), identifier_name))
         break;
     }
 

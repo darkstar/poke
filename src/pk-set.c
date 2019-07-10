@@ -28,6 +28,8 @@
 #include "ios.h"
 #include "pvm.h"
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 static int
 pk_cmd_set_obase (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
@@ -77,11 +79,11 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     {
       enum ios_endian endian;
       
-      if (strcmp (arg, "little") == 0)
+      if (STREQ (arg, "little"))
         endian = IOS_ENDIAN_LSB;
-      else if (strcmp (arg, "big") == 0)
+      else if (STREQ (arg, "big"))
         endian = IOS_ENDIAN_MSB;
-      else if (strcmp (arg, "host") == 0)
+      else if (STREQ (arg, "host"))
         {
 #ifdef WORDS_BIGENDIAN
           endian = IOS_ENDIAN_MSB;
@@ -89,7 +91,7 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
           endian = IOS_ENDIAN_LSB;
 #endif
         }
-      else if (strcmp (arg, "network") == 0)
+      else if (STREQ (arg, "network"))
         {
           uint32_t canary = 0x11223344;
 
@@ -156,9 +158,9 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     {
       enum ios_nenc nenc;
 
-      if (strcmp (arg, "1c") == 0)
+      if (STREQ (arg, "1c"))
         nenc = IOS_NENC_1;
-      else if (strcmp (arg, "2c") == 0)
+      else if (STREQ (arg, "2c"))
         nenc = IOS_NENC_2;
       else
         {

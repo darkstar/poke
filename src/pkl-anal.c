@@ -24,6 +24,8 @@
 #include "pkl-pass.h"
 #include "pkl-anal.h"
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 /* This file implements several analysis compiler phases, which can
    raise errors and/or warnings, and update annotations in nodes, but
    won't alter the structure of the AST.  These phases are
@@ -76,8 +78,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
           if (uname == NULL)
             continue;
 
-          if (strcmp (PKL_AST_IDENTIFIER_POINTER (ename),
-                      PKL_AST_IDENTIFIER_POINTER (uname)) == 0)
+          if (STREQ (PKL_AST_IDENTIFIER_POINTER (ename),
+                     PKL_AST_IDENTIFIER_POINTER (uname)))
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (uname),
                          "duplicated name element in struct");
@@ -111,8 +113,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
           
           if (uname
               && tname
-              && strcmp (PKL_AST_IDENTIFIER_POINTER (uname),
-                         PKL_AST_IDENTIFIER_POINTER (tname)) == 0)
+              && STREQ (PKL_AST_IDENTIFIER_POINTER (uname),
+                        PKL_AST_IDENTIFIER_POINTER (tname)))
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (u),
                          "duplicated element name in struct type spec");
@@ -201,8 +203,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
               pkl_ast_node identifier1 = PKL_AST_FUNCALL_ARG_NAME (funcall_arg);
               pkl_ast_node identifier2 = PKL_AST_FUNCALL_ARG_NAME (aa);
 
-              if (strcmp (PKL_AST_IDENTIFIER_POINTER (identifier1),
-                          PKL_AST_IDENTIFIER_POINTER (identifier2)) == 0)
+              if (STREQ (PKL_AST_IDENTIFIER_POINTER (identifier1),
+                         PKL_AST_IDENTIFIER_POINTER (identifier2)))
                 {
                   pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
                              "duplicated argument in funcall");

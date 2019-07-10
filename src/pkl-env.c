@@ -24,6 +24,8 @@
 
 #include "pkl-env.h"
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 /* The declarations are organized in a hash table, chained in their
    buckes through CHAIN2.  Note that in Pkl an unique namespace is
    shared by types, variables and functions, so only one table is
@@ -93,8 +95,8 @@ get_registered (pkl_hash hash_table, const char *name)
   for (t = hash_table[hash]; t != NULL; t = PKL_AST_CHAIN2 (t))
     {
       pkl_ast_node t_name = PKL_AST_DECL_NAME (t);
-      if (strcmp (PKL_AST_IDENTIFIER_POINTER (t_name),
-                  name) == 0)
+      if (STREQ (PKL_AST_IDENTIFIER_POINTER (t_name),
+                 name))
         return t;
     }
 

@@ -31,6 +31,9 @@
 
 #define PKL_FOLD_PAYLOAD ((pkl_fold_payload) PKL_PASS_PAYLOAD)
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+#define STRNEQ(a, b) (strcmp (a, b) != 0)
+
 /* Emulation routines.
 
    The letter-codes after EMUL_ specify the number and kind of
@@ -107,8 +110,8 @@ EMUL_III (sl) { return op1 << op2; } /* XXX support 1c */
 EMUL_UUU (sr) { return op1 >> op2; }
 EMUL_III (sr) { return op1 >> op2; } /* XXX support 2c */
 
-EMUL_SSI (eqs) { return (strcmp (op1, op2) == 0); }
-EMUL_SSI (nes) { return (strcmp (op1, op2) != 0); }
+EMUL_SSI (eqs) { return (STREQ (op1, op2)); }
+EMUL_SSI (nes) { return (STRNEQ (op1, op2)); }
 EMUL_SSI (gts) { return (strcmp (op1, op2) > 0); }
 EMUL_SSI (lts) { return (strcmp (op1, op2) < 0); }
 EMUL_SSI (les) { return (strcmp (op1, op2) <= 0); }

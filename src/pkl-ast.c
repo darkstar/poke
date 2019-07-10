@@ -28,6 +28,8 @@
 #include "pkl-ast.h"
 #include "pvm-val.h" /* For PVM_NULL */
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 /* Return the default endianness.  */
 
 enum pkl_ast_endian
@@ -646,8 +648,8 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
           return 0;
 
         /* Struct types are compared by name.  */
-        return (strcmp (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (a)),
-                        PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (b))) == 0);
+        return (STREQ (PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (a)),
+                       PKL_AST_IDENTIFIER_POINTER (PKL_AST_TYPE_NAME (b))));
         break;
       }
     case PKL_TYPE_FUNCTION:
@@ -1176,21 +1178,21 @@ pkl_ast_id_to_offset_unit (pkl_ast ast, pkl_ast_node id)
   const char *id_pointer = PKL_AST_IDENTIFIER_POINTER (id);
 
   /* XXX: replace this with a pkl-units.def file.  */
-  if (strcmp (id_pointer, "b") == 0)
+  if (STREQ (id_pointer, "b"))
     factor = PKL_AST_OFFSET_UNIT_BITS;
-  else if (strcmp (id_pointer, "N") == 0)
+  else if (STREQ (id_pointer, "N"))
     factor = PKL_AST_OFFSET_UNIT_NIBBLES;
-  else if (strcmp (id_pointer, "B") == 0)
+  else if (STREQ (id_pointer, "B"))
     factor = PKL_AST_OFFSET_UNIT_BYTES;
-  else if (strcmp (id_pointer, "Kb") == 0)
+  else if (STREQ (id_pointer, "Kb"))
     factor = PKL_AST_OFFSET_UNIT_KILOBITS;
-  else if (strcmp (id_pointer, "KB") == 0)
+  else if (STREQ (id_pointer, "KB"))
     factor =  PKL_AST_OFFSET_UNIT_KILOBYTES;
-  else if (strcmp (id_pointer, "Mb") == 0)
+  else if (STREQ (id_pointer, "Mb"))
     factor = PKL_AST_OFFSET_UNIT_MEGABITS;
-  else if (strcmp (id_pointer, "MB") == 0)
+  else if (STREQ (id_pointer, "MB"))
     factor = PKL_AST_OFFSET_UNIT_MEGABYTES;
-  else if (strcmp (id_pointer, "Gb") == 0)
+  else if (STREQ (id_pointer, "Gb"))
     factor = PKL_AST_OFFSET_UNIT_GIGABITS;
   else
     /* Invalid offset unit.  */

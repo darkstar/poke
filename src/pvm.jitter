@@ -80,6 +80,9 @@ early-header-c
 #   include "pvm.h"
 #   include "ios.h"
 
+#   define STREQ(a, b) (strcmp (a, b) == 0)
+#   define STRNEQ(a, b) (strcmp (a, b) != 0)
+
     /* Exception handlers, that are installed in the "exceptionstack".
 
        EXCEPTION is the exception type, either one of the E_* values defined
@@ -1119,8 +1122,8 @@ end
 
 instruction eqs () # ( STR STR -- STR STR INT )
   code
-    pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
-                                        PVM_VAL_STR (JITTER_TOP_STACK ())) == 0,
+    pvm_val res = pvm_make_int (STREQ (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
+                                       PVM_VAL_STR (JITTER_TOP_STACK ())),
                                 32);
     JITTER_PUSH_STACK (res);
   end
@@ -1128,8 +1131,8 @@ end
 
 instruction nes () # ( STR STR -- STR STR INT )
   code
-    pvm_val res = pvm_make_int (strcmp (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
-                                        PVM_VAL_STR (JITTER_TOP_STACK ())) != 0,
+    pvm_val res = pvm_make_int (STRNEQ (PVM_VAL_STR (JITTER_UNDER_TOP_STACK ()),
+                                        PVM_VAL_STR (JITTER_TOP_STACK ())),
                                 32);
     JITTER_PUSH_STACK (res);
   end

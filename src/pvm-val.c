@@ -25,6 +25,8 @@
 #include "pk-term.h"
 #include "pvm.h"
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 pvm_val
 pvm_make_int (int32_t value, int size)
 {
@@ -150,8 +152,8 @@ pvm_ref_struct (pvm_val sct, pvm_val name)
   for (i = 0; i < nfields; ++i)
     {
       if (fields[i].name != PVM_NULL
-          && strcmp (PVM_VAL_STR (fields[i].name),
-                     PVM_VAL_STR (name)) == 0)
+          && STREQ (PVM_VAL_STR (fields[i].name),
+                    PVM_VAL_STR (name)))
         return fields[i].value;
     }
           
@@ -172,8 +174,8 @@ pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val)
   for (i = 0; i < nfields; ++i)
     {
       if (fields[i].name != PVM_NULL
-          && strcmp (PVM_VAL_STR (fields[i].name),
-                     PVM_VAL_STR (name)) == 0)
+          && STREQ (PVM_VAL_STR (fields[i].name),
+                    PVM_VAL_STR (name)))
         {
           PVM_VAL_SCT_FIELD_VALUE (sct,i) = val;
           PVM_VAL_SCT_FIELD_MODIFIED (sct,i) =
@@ -983,8 +985,8 @@ pvm_type_equal (pvm_val type1, pvm_val type2)
                              PVM_VAL_TYP_A_ETYPE (type2));
       break;
     case PVM_TYPE_STRUCT:
-      return (strcmp (PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type1)),
-                      PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type2))) == 0);
+      return (STREQ (PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type1)),
+                     PVM_VAL_STR (PVM_VAL_TYP_S_NAME (type2))));
       break;
     case PVM_TYPE_OFFSET:
       return (pvm_type_equal (PVM_VAL_TYP_O_BASE_TYPE (type1),

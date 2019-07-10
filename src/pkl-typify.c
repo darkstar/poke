@@ -51,6 +51,8 @@
 
 #define PKL_TYPIFY_PAYLOAD ((pkl_typify_payload) PKL_PASS_PAYLOAD)
 
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 /* Note the following macro evaluates the arguments twice!  */
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
 
@@ -1018,8 +1020,8 @@ with prototype %s",
                 PKL_PASS_ERROR;
               }
 
-            if (strcmp (PKL_AST_IDENTIFIER_POINTER (aa_name),
-                        PKL_AST_IDENTIFIER_POINTER (fa_name)) == 0)
+            if (STREQ (PKL_AST_IDENTIFIER_POINTER (aa_name),
+                       PKL_AST_IDENTIFIER_POINTER (fa_name)))
               {
                 found_arg = 1;
                 break;
@@ -1061,8 +1063,8 @@ with prototype %s",
                 PKL_PASS_ERROR;
               }
 
-            if (strcmp (PKL_AST_IDENTIFIER_POINTER (aa_name),
-                        PKL_AST_IDENTIFIER_POINTER (fa_name)) == 0)
+            if (STREQ (PKL_AST_IDENTIFIER_POINTER (aa_name),
+                       PKL_AST_IDENTIFIER_POINTER (fa_name)))
               break;
           }
 
@@ -1281,8 +1283,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
         = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
       
       if (struct_field_type_name
-          && strcmp (PKL_AST_IDENTIFIER_POINTER (struct_field_type_name),
-                     PKL_AST_IDENTIFIER_POINTER (field_name)) == 0)
+          && STREQ (PKL_AST_IDENTIFIER_POINTER (struct_field_type_name),
+                    PKL_AST_IDENTIFIER_POINTER (field_name)))
         {
           type = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
           break;
@@ -1419,8 +1421,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
             = PKL_AST_STRUCT_FIELD_TYPE_NAME (type_elem);
           
           if (type_elem_name
-              && strcmp (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
-                         PKL_AST_IDENTIFIER_POINTER (elem_name)) == 0)
+              && STREQ (PKL_AST_IDENTIFIER_POINTER (type_elem_name),
+                        PKL_AST_IDENTIFIER_POINTER (elem_name)))
             {
               pkl_ast_node type_elem_type
                 = PKL_AST_STRUCT_FIELD_TYPE_TYPE (type_elem);
