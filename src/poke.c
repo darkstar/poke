@@ -301,6 +301,11 @@ initialize ()
   /* This is used by the `progname' gnulib module.  */
   set_program_name ("poke");
   
+  /* i18n */
+  setlocale (LC_ALL, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
+
   /* Determine whether the tool has been invoked interactively.  */
   poke_interactive_p = isatty (fileno (stdin));
   

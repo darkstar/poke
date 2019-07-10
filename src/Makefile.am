@@ -58,7 +58,8 @@ AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG \
                 -DPKGDATADIR=\"$(pkgdatadir)\" \
-                -DJITTER_VERSION=\"$(JITTER_VERSION)\"
+                -DJITTER_VERSION=\"$(JITTER_VERSION)\" \
+                -DLOCALEDIR=\"$(localedir)\"
 poke_CFLAGS = -Wall -Werror $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
              $(LTLIBREADLINE) $(BDW_GC_LIBS)
