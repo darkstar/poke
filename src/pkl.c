@@ -83,7 +83,7 @@ pkl_new ()
       {
         fprintf (stderr,
                  "Internal error: compiler failed to bootstrap itself\n");
-        exit (1);
+        exit (EXIT_FAILURE);
       }
     free (poke_rt_pk);
 

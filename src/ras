@@ -385,6 +385,9 @@ BEGIN {
     num_errors=0
     current_entity = ""
 
+    # This is to pacify make syntax-check.
+    EXIT_FAILURE = 1
+
     # Read the instructions from pkl-insn.def and build the
     # instructions hashes:
     #
@@ -591,7 +594,7 @@ BEGIN {
     {
         for (nerror = 1; nerror <= num_errors; nerror++)
             print errors[nerror] | "cat 1>&2"
-        exit (1);
+        exit (EXIT_FAILURE);
     }
 
     # Output the entity

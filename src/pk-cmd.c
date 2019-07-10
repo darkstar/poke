@@ -748,7 +748,7 @@ pk_cmd_init (void)
         strcpy (poke_cmdfile, poke_datadir);                            \
         strcat (poke_cmdfile, "/" filename);                            \
         if (!pkl_compile_file (poke_compiler, poke_cmdfile))            \
-          exit (1);                                                     \
+          exit (EXIT_FAILURE);                                          \
         free (poke_cmdfile);                                            \
       }                                                                 \
     while (0)

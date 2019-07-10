@@ -330,7 +330,7 @@ initialize ()
     strcpy (poke_std_pk, poke_datadir);
     strcat (poke_std_pk, "/std.pk");
     if (!pkl_compile_file (poke_compiler, poke_std_pk))
-      exit (1);
+      exit (EXIT_FAILURE);
     free (poke_std_pk);
   }
 

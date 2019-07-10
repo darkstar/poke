@@ -82,6 +82,6 @@ endif
 BUILT_SOURCES += pvm-vm.h pvm-vm1.c pvm-vm2.c
 
 pvm-vm.h pvm-vm1.c pvm-vm2.c: pvm.jitter
-	$(JITTER) $< --output $(builddir)
+	$(JITTER) $(srcdir)/pvm.jitter --output $(builddir)
 
 # End of Makefile.am
