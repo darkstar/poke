@@ -117,7 +117,7 @@ When writing Poke
 Maintenance
 -----------
 
-This section describes ``make'' targets that performs several
+This section describes ``make`` targets that performs several
 maintenance tasks.
 
 syntax-check
