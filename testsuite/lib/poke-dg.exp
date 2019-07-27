@@ -33,11 +33,12 @@ proc dg-command { args } {
         error "[linex $args 0]: too many arguments"
     }
 
-    # Note this makes use of the non-portable printf %q.  If this is a
-    # problem, we may need to write a little(?) tcl procedure to do
-    # shell unquoting.  I would rather not do that - jemarch.
-    set poke_commands \
-        "$poke_commands -c [exec printf %q [lindex $args 1]]"
+    # Prepare the command for shell unquoting.
+    set cmd \"[string map \
+               {$ \\$ \\ \\\\ \" \\" ` \\`} \
+               [lindex $args 1]]\"
+
+    set poke_commands "$poke_commands -c $cmd"
 }
 
 # Create a temporary data file containing the data specified as an
