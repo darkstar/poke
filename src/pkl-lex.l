@@ -170,6 +170,7 @@ D [0-9]
 "print"		{ return PRINT; }
 "printf"	{ return PRINTF; }
 "isa"		{ return ISA; }
+"unmap"		{ return UNMAP; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

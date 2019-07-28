@@ -511,7 +511,11 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
    : 0)
 
 /* The following macros allow to handle map-able PVM values (such as
-   arrays and structs) polymorphically.  */
+   arrays and structs) polymorphically.
+
+   It is important for the PVM_VAL_SET_{OFFSET,MAPPER,WRITER} to work
+   for non-mappeable values, as nops, as they are used in the
+   implementation of the `unmap' operator.  */
 
 #define PVM_VAL_OFFSET(V)                               \
   (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_OFFSET ((V))          \

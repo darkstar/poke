@@ -17,6 +17,21 @@
 ;;; You should have received a copy of the GNU General Public License
 ;;; along with this program.  If not, see <http: //www.gnu.org/licenses/>.
 
+;;; RAS_MACRO_OP_UNMAP
+;;; ( VAL -- VAL )
+;;;
+;;; Turn the value on the stack into a non-mapped value, if the value
+;;; is mapped.  If the value is not mapped, this is a NOP.
+
+        .macro op_unmap
+        push null
+        mseto
+        push null
+        msetm
+        push null
+        msetw
+        .end
+        
 ;;; RAS_FUNCTION_ARRAY_MAPPER
 ;;; ( OFF EBOUND SBOUND -- ARR )
 ;;; 

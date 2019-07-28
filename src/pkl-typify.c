@@ -140,8 +140,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_boolean)
 }
 PKL_PHASE_END_HANDLER
 
-/* The type of an unary operation NEG, POS, BNOT is the type of its
-   single operand.  */
+/* The type of an unary operation NEG, POS, BNOT, UNMAP is the type of
+   its single operand.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_first_operand)
 {
@@ -2043,6 +2043,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NEG, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_POS, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_UNMAP, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_typify1_ps_op_bconc),
 
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),

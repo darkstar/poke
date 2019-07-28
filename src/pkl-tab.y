@@ -237,6 +237,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %token ISA
 %token PRINT
 %token PRINTF
+%token UNMAP
 
 /* ATTRIBUTE operator.  */
 
@@ -630,6 +631,7 @@ unary_operator:
 	| '+'		{ $$ = PKL_AST_OP_POS; }
 	| '~'		{ $$ = PKL_AST_OP_BNOT; }
 	| '!'		{ $$ = PKL_AST_OP_NOT; }
+	| UNMAP		{ $$ = PKL_AST_OP_UNMAP; }
 	;
 
 primary:

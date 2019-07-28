@@ -2555,6 +2555,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_bconc)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * | OPERAND1
+ * EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_unmap)
+{
+  RAS_MACRO_OP_UNMAP;
+}
+PKL_PHASE_END_HANDLER
+
 /* The handler below generates and ICE if a given node isn't handled
    by the code generator.  */
 
@@ -2655,6 +2666,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_GE, pkl_gen_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_gen_ps_op_bconc),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_UNMAP, pkl_gen_ps_op_unmap),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ANY, pkl_gen_ps_type_any),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_gen_ps_type_function),
