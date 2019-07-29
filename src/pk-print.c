@@ -71,8 +71,6 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   pvm_ret = pvm_run (poke_vm, prog, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
-  // XXX jitter segfaults
-  //pvm_destroy_program (prog);
 
   pvm_print_val (stdout, val, base, pflags);
   printf ("\n");
