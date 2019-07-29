@@ -88,14 +88,14 @@ pvm_get_env (pvm apvm)
 void
 pvm_shutdown (pvm apvm)
 {
+  /* Finalize the memory allocator.  */
+  pvm_alloc_finalize ();
+
   /* Finalize the VM state.  */
   pvm_state_finalize (&apvm->pvm_state);
 
   /* Finalize the VM subsystem.  */
   pvm_finalize ();
-
-  /* Finalize the memory allocator.  */
-  pvm_alloc_finalize ();
 
   free (apvm);
 }
