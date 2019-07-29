@@ -4,7 +4,7 @@
 /* { dg-command { .set endian big } } */
 /* { dg-command { .set obase 16 } } */
 
-deftype Empty = struct {};
+deftype Packet3 = struct { byte uno; byte; byte tres; };
 
-/* { dg-command { Empty @ 0#B } } */
-/* { dg-output "Empty {}" } */
+/* { dg-command { Packet3 @ 0#B } } */
+/* { dg-output "Packet3 \\{uno=0x10UB,0x20UB,tres=0x30UB\\}" } */
