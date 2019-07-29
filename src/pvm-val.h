@@ -471,7 +471,7 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
 
 /* PVM_NULL is an invalid pvm_val.  */
 
-#define PVM_NULL (0x7ULL << 61)
+#define PVM_NULL 0x7ULL
 
 /* Public interface.  */
 

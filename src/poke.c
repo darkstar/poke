@@ -30,6 +30,7 @@
 #if defined HAVE_READLINE_HISTORY_H
 # include <readline/history.h>
 #endif
+#include <gc/gc.h>
 
 #include "ios.h"
 #include "pk-cmd.h"

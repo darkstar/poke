@@ -58,20 +58,23 @@ pvm_init (void)
   pvm_initialize ();
 
   /* Initialize the VM state.  */
-  PVM_STATE_ENV (apvm) = pvm_env_new ();
   pvm_state_initialize (&apvm->pvm_state);
 
   /* Register GC roots.  */
   pvm_alloc_add_gc_roots (&PVM_STATE_ENV (apvm), 1);
   pvm_alloc_add_gc_roots
-    (&apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.memory,
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.memory,
      apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
   pvm_alloc_add_gc_roots
-    (&apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.memory,
-     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.element_no);
   pvm_alloc_add_gc_roots
-    (&apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.memory,
-     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.element_no);
+
+  /* Initialize the global environment.  Note we do this after
+     registering GC roots, since we are allocating memory.  */
+  PVM_STATE_ENV (apvm) = pvm_env_new ();
 
   return apvm;
 }

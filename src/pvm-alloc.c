@@ -23,7 +23,7 @@
 void *
 pvm_alloc (size_t size)
 {
-  return GC_MALLOC (size);
+  return GC_MALLOC_UNCOLLECTABLE (size);
 }
 
 char *
