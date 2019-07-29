@@ -243,6 +243,11 @@ pkl_compile_buffer (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+
+  /* Note that the sole purpose of `pointers' is to serve as a root
+     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     to be collected.  Ugly as shit, but conservative garbage
+     collection doesn't really work.  */
   void *pointers;
 
   compiler->compiling = PKL_COMPILING_PROGRAM;
@@ -295,6 +300,11 @@ pkl_compile_statement (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+
+  /* Note that the sole purpose of `pointers' is to serve as a root
+     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     to be collected.  Ugly as shit, but conservative garbage
+     collection doesn't really work.  */
   void *pointers;
 
   compiler->compiling = PKL_COMPILING_STATEMENT;
@@ -341,6 +351,11 @@ pkl_compile_expression (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+
+  /* Note that the sole purpose of `pointers' is to serve as a root
+     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     to be collected.  Ugly as shit, but conservative garbage
+     collection doesn't really work.  */
   void *pointers;
 
   compiler->compiling = PKL_COMPILING_EXPRESSION;
@@ -381,6 +396,11 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   pvm_program program;
   FILE *fd;
   pkl_env env = NULL;
+
+  /* Note that the sole purpose of `pointers' is to serve as a root
+     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     to be collected.  Ugly as shit, but conservative garbage
+     collection doesn't really work.  */
   void *pointers;
 
   compiler->compiling = PKL_COMPILING_PROGRAM;
