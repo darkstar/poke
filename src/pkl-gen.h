@@ -55,6 +55,10 @@
    completed, the program is "finished" (in jitter parlance) and ready
    to be used.
 
+   POINTERS is an array of pointers to the boxed PVM values referenced
+   in PROGRAM.  It is necessary in order to provide the GC visibility
+   into the program.
+
    IN_STRUCT_DECL is 1 when a struct declaration is being generated.
    0 otherwise.
 
@@ -81,6 +85,7 @@ struct pkl_gen_payload
   int cur_pasm;
   int cur_pasm2;
   pvm_program program;
+  void *pointers;
   int in_struct_decl;
   int in_mapper;
   int in_constructor;

@@ -103,7 +103,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
   
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
                                              1 /* prologue */,
-                                             NULL /* pointers */);
+                                             &PKL_GEN_PAYLOAD->pointers);
 }
 PKL_PHASE_END_HANDLER
 

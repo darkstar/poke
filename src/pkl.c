@@ -103,7 +103,8 @@ pkl_free (pkl_compiler compiler)
 
 static pvm_program
 rest_of_compilation (pkl_compiler compiler,
-                     pkl_ast ast)
+                     pkl_ast ast,
+                     void **pointers)
 {
   struct pkl_gen_payload gen_payload;
   
@@ -226,6 +227,7 @@ rest_of_compilation (pkl_compiler compiler,
     goto error;
 
   pkl_ast_free (ast);
+  *pointers = gen_payload.pointers;
   return gen_payload.program;
 
  error:
@@ -241,6 +243,7 @@ pkl_compile_buffer (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+  void *pointers;
 
   compiler->compiling = PKL_COMPILING_PROGRAM;
   env = pkl_env_dup_toplevel (compiler->env);
@@ -256,7 +259,7 @@ pkl_compile_buffer (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
   
-  program = rest_of_compilation (compiler, ast);
+  program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
 
@@ -274,6 +277,7 @@ pkl_compile_buffer (pkl_compiler compiler,
     /* Discard the value.  */
   }
 
+  pvm_destroy_program (program);
   compiler->env = env;
   return 1;
 
@@ -291,6 +295,7 @@ pkl_compile_statement (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+  void *pointers;
 
   compiler->compiling = PKL_COMPILING_STATEMENT;
   env = pkl_env_dup_toplevel (compiler->env);
@@ -306,7 +311,7 @@ pkl_compile_statement (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
   
-  program = rest_of_compilation (compiler, ast);
+  program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
 
@@ -336,6 +341,7 @@ pkl_compile_expression (pkl_compiler compiler,
   pvm_program program;
   int ret;
   pkl_env env = NULL;
+  void *pointers;
 
   compiler->compiling = PKL_COMPILING_EXPRESSION;
   env = pkl_env_dup_toplevel (compiler->env);
@@ -351,7 +357,7 @@ pkl_compile_expression (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
   
-  program = rest_of_compilation (compiler, ast);
+  program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
 
@@ -375,6 +381,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   pvm_program program;
   FILE *fd;
   pkl_env env = NULL;
+  void *pointers;
 
   compiler->compiling = PKL_COMPILING_PROGRAM;
 
@@ -396,7 +403,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       printf (_("out of memory\n"));
     }
 
-  program = rest_of_compilation (compiler, ast);
+  program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
 
