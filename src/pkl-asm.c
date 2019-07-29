@@ -971,7 +971,7 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 
       /* Successful program finalization.  */
       pkl_asm_insn (pasm, PKL_INSN_POPE);
-      pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_OK, 32));
+      pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_EXIT_OK, 32));
       pkl_asm_insn (pasm, PKL_INSN_EXIT);      
 
       pvm_append_label (pasm->program, pasm->error_label);
@@ -992,7 +992,7 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
         }
 
       /* Set the exit status to ERROR and exit the PVM.  */
-      pkl_asm_push_val (program, pvm_make_int (PVM_EXIT_ERROR, 32));
+      pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_EXIT_ERROR, 32));
       pkl_asm_insn (pasm, PKL_INSN_EXIT);  
 
       pkl_asm_note (pasm, "#end epilogue");
