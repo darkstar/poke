@@ -318,6 +318,7 @@ pkl_compile_statement (pkl_compiler compiler,
   if (pvm_run (poke_vm, program, val) != PVM_EXIT_OK)
     goto error;
 
+  pvm_destroy_program (program);
   compiler->env = env;
   return 1;
 
@@ -414,6 +415,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
     /* Discard the value.  */
   }
 
+  pvm_destroy_program (program);
   compiler->env = env;
   return 1;
 

@@ -43,7 +43,8 @@ pk_cmd_vm_disas_exp (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
                              JITTER_OBJDUMP, NULL);
   else
     pvm_print_program (stdout, prog);
-  
+
+  pvm_destroy_program (prog);
   return 1;
 }
 
@@ -109,7 +110,8 @@ pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   program = PK_CMD_ARG_EXP (argv[0]);
   if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
     return 0;
-  
+  pvm_destroy_program (program);
+
   mapper = pvm_val_mapper (exp);
   if (mapper == PVM_NULL)
     {
@@ -143,6 +145,7 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   program = PK_CMD_ARG_EXP (argv[0]);
   if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
     return 0;
+  pvm_destroy_program (program);
 
   writer = pvm_val_writer (exp);
   if (writer == PVM_NULL)
