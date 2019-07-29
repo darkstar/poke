@@ -20,10 +20,10 @@
 
 #include <assert.h>
 #include <string.h>
-#include <gc.h>
 
 #include "pvm-val.h"
 #include "pvm-env.h"
+#include "pvm-alloc.h"
 
 /* The variables in each frame are organized in an array that can be
    efficiently accessed using OVER.
@@ -48,7 +48,7 @@ pvm_env
 pvm_env_new ()
 {
   int i;
-  pvm_env env = GC_MALLOC_UNCOLLECTABLE (sizeof (struct pvm_env));
+  pvm_env env = pvm_alloc (sizeof (struct pvm_env));
 
   memset (env, 0, sizeof (struct pvm_env));
 

@@ -25,6 +25,7 @@
 
 #include "pvm-val.h"
 #include "pvm-env.h"
+#include "pvm-alloc.h"
 
 /* The following enumeration contains every possible exit code
    resulting from the execution of a program in the PVM.

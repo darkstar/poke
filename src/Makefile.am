@@ -41,6 +41,7 @@ poke_SOURCES = poke.c poke.h \
                pkl-asm.h pkl-asm.c \
                pkl-parser.h pkl-parser.c \
                pvm.h pvm.c \
+               pvm-alloc.h pvm-alloc.c \
                pvm-val.h pvm-val.c \
                pvm-env.h pvm-env.c \
                pvm.jitter \

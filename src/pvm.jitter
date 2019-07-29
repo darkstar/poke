@@ -1282,7 +1282,7 @@ instruction sconc () # ( STR STR -- STR STR STR )
      pvm_val res;
      char *sa = PVM_VAL_STR (JITTER_UNDER_TOP_STACK ());
      char *sb = PVM_VAL_STR (JITTER_TOP_STACK ());
-     char *s = xmalloc (strlen (sa) + strlen (sb) + 1); /* XXX GC */
+     char *s = pvm_alloc (strlen (sa) + strlen (sb) + 1);
      strcpy (s, sa);
      strcat (s, sb);
      res = pvm_make_string (s);
@@ -1608,7 +1608,7 @@ end
 instruction ctos () # ( UINT8 - UINT8 STR )
   code
     uint8_t c = PVM_VAL_UINT (JITTER_TOP_STACK ());
-    char *str = xmalloc (2); /* XXX GC */
+    char *str = pvm_alloc (2);
     str[0] = c;
     str[1] = '\0';
 
@@ -1748,7 +1748,7 @@ instruction substr () # ( STR ULONG ULONG -- STR ULONG ULONG STR )
         || PVM_VAL_ULONG (from) > PVM_VAL_ULONG (to))
         PVM_RAISE (PVM_E_OUT_OF_BOUNDS);
 
-    s = xmalloc (slen + 1); /* XX XGC */
+    s = pvm_alloc (slen + 1); /* XX XGC */
     strncpy (s,
              PVM_VAL_STR (str) + PVM_VAL_ULONG (from),
              slen);
@@ -2476,7 +2476,7 @@ end
 instruction pushe (?l)
   code
    struct pvm_exception_handler *ehandler
-      = xmalloc (sizeof (struct pvm_exception_handler)); /* XXX GC */
+      = pvm_alloc (sizeof (struct pvm_exception_handler));
 
    ehandler->exception = PVM_VAL_INT (JITTER_TOP_STACK ());
    JITTER_DROP_STACK ();

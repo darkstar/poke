@@ -18,7 +18,6 @@
 
 #include <config.h>
 
-#include <gc.h>
 #include <xalloc.h>
 #include <string.h>
 #include <assert.h>
@@ -51,17 +50,28 @@ pvm_init (void)
 {
   pvm apvm = xmalloc (sizeof (struct pvm));
   memset (apvm, 0, sizeof (struct pvm));
-  
+
+  /* Initialize the memory allocation subsystem.  */
+  pvm_alloc_initialize ();
+
   /* Initialize the VM subsystem.  */
   pvm_initialize ();
-
-  /* Start the Boehm garbage collector, which is used to manage PVM
-     values and environments.  */
-  GC_INIT ();
 
   /* Initialize the VM state.  */
   PVM_STATE_ENV (apvm) = pvm_env_new ();
   pvm_state_initialize (&apvm->pvm_state);
+
+  /* Register GC roots.  */
+  pvm_alloc_add_gc_roots (&PVM_STATE_ENV (apvm), 1);
+  pvm_alloc_add_gc_roots
+    (&apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
+  pvm_alloc_add_gc_roots
+    (&apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
+  pvm_alloc_add_gc_roots
+    (&apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
 
   return apvm;
 }
@@ -78,12 +88,11 @@ pvm_shutdown (pvm apvm)
   /* Finalize the VM state.  */
   pvm_state_finalize (&apvm->pvm_state);
 
-  /* Make the garbage collector to collect the memory used by the
-     PVM.  */
-  GC_gcollect();
-
   /* Finalize the VM subsystem.  */
   pvm_finalize ();
+
+  /* Finalize the memory allocator.  */
+  pvm_alloc_finalize ();
 
   free (apvm);
 }

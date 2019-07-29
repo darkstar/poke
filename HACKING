@@ -745,6 +745,9 @@ Virtual machine driver
 Virtual machine values
   ``src/pvm-val.c``, ``src/pvm-val.h``
 
+Memory allocator with garbage collection
+  ``src/pvm-alloc.c``, ``src/pvm-alloc.h``
+
 Run-time environment
   ``src/pvm-env.c``, ``src/pvm-env.h``
 
