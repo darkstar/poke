@@ -92,6 +92,14 @@ struct pkl_asm_level
    COMPILER is the PKL compiler using the macro-assembler.
 
    PROGRAM is the PVM program being assembled.
+
+   POINTERS is an array of pointers.  Pointers to literal boxed
+   instruction arguments are collected and returned to the caller.
+   This is to make it possible for callers to garbage-collect these
+   values in the entities containing pvm_programs (such as closures.)
+
+   NEXT_POINTER is the next available slot in POINTERS.
+
    LEVEL is a pointer to the top of a stack of levels.
 
    AST is for creating ast nodes whenever needed.
@@ -100,12 +108,16 @@ struct pkl_asm_level
    prologue.  */
 
 #define PKL_ASM_LEVEL(PASM) ((PASM)->level)
+#define PKL_AST_MAX_POINTERS 128
 
 struct pkl_asm
 {
   pkl_compiler compiler;
 
   pvm_program program;
+  void **pointers;
+  int next_pointer;
+
   struct pkl_asm_level *level;
 
   pkl_ast ast;
@@ -915,6 +927,10 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
   program = pvm_make_program ();
   pasm->error_label = jitter_fresh_label (program);
   pasm->program = program;
+
+  pasm->pointers = pvm_alloc (sizeof (void*) * PKL_AST_MAX_POINTERS);
+  memset (pasm->pointers, 0, PKL_AST_MAX_POINTERS);
+  pasm->next_pointer = 0;
   
   if (prologue)
     {
@@ -945,7 +961,7 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
    program.  */
 
 pvm_program
-pkl_asm_finish (pkl_asm pasm, int epilogue)
+pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 {
   pvm_program program = pasm->program;
 
@@ -981,6 +997,9 @@ pkl_asm_finish (pkl_asm pasm, int epilogue)
 
       pkl_asm_note (pasm, "#end epilogue");
     }      
+
+  if (pointers != NULL)
+    *pointers = pasm->pointers;
   
   /* Free the assembler instance and return the assembled program to
      the user.  */
@@ -1013,16 +1032,21 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
   if (insn == PKL_INSN_PUSH)
     {
-      /* We handle PUSH as a special case, due to some jitter
-         limitations.  See the docstring for `pkl_asm_push_val'
-         above.  */
-
       pvm_val val;
 
       va_start (valist, insn);
       val = va_arg (valist, pvm_val);
       va_end (valist);
 
+      /* Collect VAL if it is a pointer, i.e. a boxed value.  */
+      if (PVM_VAL_BOXED_P (val))
+        {
+          assert (pasm->next_pointer < PKL_AST_MAX_POINTERS);
+          pasm->pointers[pasm->next_pointer++] = PVM_VAL_BOX (val);
+        }
+
+      /* Due to some jitter limitations, we have to do some additional
+         work.  See the docstring for `pkl_asm_push_val' - above.  */
       pkl_asm_push_val (pasm->program, val);
     }
   else if (insn < PKL_INSN_MACRO)

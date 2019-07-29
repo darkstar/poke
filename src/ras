@@ -580,11 +580,15 @@ BEGIN {
 
     if (current_entity == "function")
     {
-        out("\tprogram = pkl_asm_finish (RAS_ASM,                \\")
-        out("\t                           0 /* epilogue */);         \\")
-        out("\tPKL_GEN_POP_ASM;                                      \\")
-        out("\tpvm_specialize_program (program);                     \\")
-        out("\t(CLOSURE) = pvm_make_cls (program);                   \\")
+        out("\t{                                                       \\")
+        out("\t  void *pointers;                                       \\")
+        out("\t  program = pkl_asm_finish (RAS_ASM,                    \\")
+        out("\t                             0 /* epilogue */,          \\")
+        out("\t                             &pointers);                \\")
+        out("\t  PKL_GEN_POP_ASM;                                      \\")
+        out("\t  pvm_specialize_program (program);                     \\")
+        out("\t  (CLOSURE) = pvm_make_cls (program, pointers);         \\")
+        out("\t}                                                       \\")
     }
     out("\t} while (0)")
 

@@ -102,7 +102,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
-                                             1 /* prologue */);
+                                             1 /* prologue */,
+                                             NULL /* pointers */);
 }
 PKL_PHASE_END_HANDLER
 
@@ -250,13 +251,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
            Finalize the program and put it in a PVM closure, along
            with the current environment.  */
 
+        void *pointers;
         pvm_program program = pkl_asm_finish (PKL_GEN_ASM,
-                                              0 /* epilogue */);
+                                              0 /* epilogue */,
+                                              &pointers);
         pvm_val closure;
 
         PKL_GEN_POP_ASM;
         pvm_specialize_program (program);
-        closure = pvm_make_cls (program);
+        closure = pvm_make_cls (program, pointers);
 
         /*XXX*/
         /* pvm_print_program (stdout, program); */

@@ -268,12 +268,13 @@ pvm_make_closure_type (pvm_val rtype,
 }
 
 pvm_val
-pvm_make_cls (pvm_program program)
+pvm_make_cls (pvm_program program, void **pointers)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
   pvm_cls cls = pvm_alloc (sizeof (struct pvm_cls));
 
   cls->program = program;
+  cls->pointers = pointers;
   cls->entry_point = PVM_PROGRAM_BEGINNING (program);
   cls->env = NULL; /* This should be set by a PEC instruction before
                       using the closure.  */

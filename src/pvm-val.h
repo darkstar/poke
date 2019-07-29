@@ -66,6 +66,8 @@ typedef uint64_t pvm_val;
 #define PVM_VAL_TAG_TYP 0xc
 #define PVM_VAL_TAG_CLS 0xd
 
+#define PVM_VAL_BOXED_P(V) (PVM_VAL_TAG((V)) > 1)
+
 /* Integers up to 32-bit are unboxed and encoded the following way:
 
               val                   bits  tag
@@ -433,13 +435,15 @@ struct pvm_cls
   /* Note we have to use explicit pointers here due to the include
      mess induced by jitter's combined header files :/ */
   struct jitter_program *program;
+  void **pointers;
   const void *entry_point;
   struct pvm_env *env;
 };
 
 typedef struct pvm_cls *pvm_cls;
 
-pvm_val pvm_make_cls (struct jitter_program *program);
+pvm_val pvm_make_cls (struct jitter_program *program,
+                      void **pointers);
 
 /* Offsets are boxed values.  */
 
