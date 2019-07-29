@@ -51,3 +51,10 @@ pvm_alloc_add_gc_roots (void *pointer, size_t nelems)
   GC_add_roots (pointer,
                 ((char*) pointer) + sizeof (void*) * nelems);
 }
+
+void
+pvm_alloc_remove_gc_roots (void *pointer, size_t nelems)
+{
+  GC_remove_roots (pointer,
+                   ((char*) pointer) + sizeof (void*) * nelems);
+}
