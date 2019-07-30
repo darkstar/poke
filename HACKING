@@ -601,7 +601,7 @@ boxed value used in ``program``::
     struct pvm_env *env;
   };
 
-The subsystem responsible to collect the pointers is the
+The subsystem responsible for collecting the pointers is the
 macro-assembler in ``pkl-asm.c``.  ``pkl_asm_finish`` will return the
 array of pointers, and it is up to the caller (in the code generator)
 to install it the corresponding closure structure.
