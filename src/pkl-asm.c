@@ -1000,6 +1000,9 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 
   if (pointers != NULL)
     *pointers = pasm->pointers;
+
+  /* Free the first level.  */
+  pkl_asm_poplevel (pasm);
   
   /* Free the assembler instance and return the assembled program to
      the user.  */
