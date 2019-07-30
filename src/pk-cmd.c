@@ -555,6 +555,9 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   /* Free arguments occupying memory.  */
   for (i = 0; i < argc; ++i)
     {
+      /* XXX this causes problems but it's a leak */
+      /*    if (argv[i].type == PK_CMD_ARG_STR)
+      free (argv[i].val.str); */
       if (argv[i].type == PK_CMD_ARG_EXP
           || argv[i].type == PK_CMD_ARG_DEF
           || argv[i].type == PK_CMD_ARG_STMT)
