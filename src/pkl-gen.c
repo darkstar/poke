@@ -857,7 +857,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   if (vararg)
     {
       if (aindex == 0)
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+        {
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* Array offset. */
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
+        }
       
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
