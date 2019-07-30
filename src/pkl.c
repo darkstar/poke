@@ -283,6 +283,7 @@ pkl_compile_buffer (pkl_compiler compiler,
   }
 
   pvm_destroy_program (program);
+  pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;
 
@@ -334,6 +335,7 @@ pkl_compile_statement (pkl_compiler compiler,
     goto error;
 
   pvm_destroy_program (program);
+  pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;
 
@@ -376,6 +378,7 @@ pkl_compile_expression (pkl_compiler compiler,
   if (program == NULL)
     goto error;
 
+  pkl_env_free (compiler->env);
   compiler->env = env;
   pvm_specialize_program (program);
   /* XXX */
@@ -443,6 +446,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
   }
 
   pvm_destroy_program (program);
+  pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;
 
