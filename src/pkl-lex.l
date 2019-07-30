@@ -253,9 +253,9 @@ D [0-9]
        = pkl_env_lookup (yyextra->env, yytext + 1, NULL, NULL);
 
    if (decl && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE)
-      yylval->ast = ASTREF (PKL_AST_DECL_INITIAL (decl));
+     yylval->ast = PKL_AST_DECL_INITIAL (decl);
    else
-      yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
+     yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
 
    return UNIT;
 }

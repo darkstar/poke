@@ -839,7 +839,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
       PKL_AST_LOC (struct_field_type) = PKL_AST_LOC (t);
 
       struct_field_types = pkl_ast_chainon (struct_field_types,
-                                           ASTREF (struct_field_type));
+                                            struct_field_type);
     }
 
   /* Build the type of the struct.  */
@@ -875,7 +875,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_func)
       PKL_AST_LOC (func_type_arg) = PKL_AST_LOC (t);
 
       func_type_args = pkl_ast_chainon (func_type_args,
-                                        ASTREF (func_type_arg));
+                                        func_type_arg);
       PKL_AST_FUNC_TYPE_ARG_OPTIONAL (func_type_arg)
         = PKL_AST_FUNC_ARG_INITIAL (t) != NULL;
       PKL_AST_FUNC_TYPE_ARG_VARARG (func_type_arg)
@@ -1094,7 +1094,7 @@ with prototype %s",
           }
 
         ordered_arg_list
-          = pkl_ast_chainon (ordered_arg_list, ASTREF (new_aa));
+          = pkl_ast_chainon (ordered_arg_list, new_aa);
       }
 
     /* Dispose the old list of actual argument nodes.
@@ -1106,10 +1106,7 @@ with prototype %s",
            aa = ta)
         {
           ta = PKL_AST_CHAIN (aa);
-          if (PKL_AST_REFCOUNT (aa) > 1)
-            PKL_AST_REFCOUNT (aa) -= 1;
-          else
-            free (aa);
+          pkl_ast_node_free (aa);
         }
     }
 

@@ -1632,6 +1632,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_WRITER (ast), 1);
           pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_BOUNDER (ast), 1);
 
+          pkl_ast_node_free (PKL_AST_TYPE_A_BOUND (ast));
           pkl_ast_node_free (PKL_AST_TYPE_A_ETYPE (ast));
           break;
         case PKL_TYPE_STRUCT:
@@ -1647,15 +1648,20 @@ pkl_ast_node_free (pkl_ast_node ast)
             }
           break;
         case PKL_TYPE_FUNCTION:
+          pkl_ast_node_free (PKL_AST_TYPE_F_RTYPE (ast));
+          pkl_ast_node_free (PKL_AST_TYPE_F_FIRST_OPT_ARG (ast));
           for (t = PKL_AST_TYPE_F_ARGS (ast); t; t = n)
             {
               n = PKL_AST_CHAIN (t);
               pkl_ast_node_free (t);
             }
           break;
+        case PKL_TYPE_OFFSET:
+          pkl_ast_node_free (PKL_AST_TYPE_O_UNIT (ast));
+          pkl_ast_node_free (PKL_AST_TYPE_O_BASE_TYPE (ast));
+          break;
         case PKL_TYPE_INTEGRAL:
         case PKL_TYPE_STRING:
-        case PKL_TYPE_OFFSET:
         default:
           break;
         }
@@ -1694,18 +1700,19 @@ pkl_ast_node_free (pkl_ast_node ast)
       free (PKL_AST_FUNC_NAME (ast));
       pkl_ast_node_free (PKL_AST_FUNC_RET_TYPE (ast));
       pkl_ast_node_free (PKL_AST_FUNC_BODY (ast));
+      pkl_ast_node_free (PKL_AST_FUNC_FIRST_OPT_ARG (ast));
       for (t = PKL_AST_FUNC_ARGS (ast); t; t = n)
             {
               n = PKL_AST_CHAIN (t);
               pkl_ast_node_free (t);
             }
-      pkl_ast_node_free (PKL_AST_FUNC_FIRST_OPT_ARG (ast));
       break;
 
     case PKL_AST_FUNC_ARG:
 
       pkl_ast_node_free (PKL_AST_FUNC_ARG_TYPE (ast));
       pkl_ast_node_free (PKL_AST_FUNC_ARG_IDENTIFIER (ast));
+      pkl_ast_node_free (PKL_AST_FUNC_ARG_INITIAL (ast));
       break;
       
     case PKL_AST_STRING:

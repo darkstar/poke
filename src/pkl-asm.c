@@ -1483,6 +1483,7 @@ pkl_asm_endtry (pkl_asm pasm)
   pvm_append_label (pasm->program, pasm->level->label2);
 
   /* Cleanup and pop the current level.  */
+  pkl_ast_node_free (pasm->level->node1);
   pkl_asm_poplevel (pasm);
 }
 

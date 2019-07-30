@@ -576,7 +576,14 @@ expression:
                                  "expected struct type in constructor");
                       YYERROR;
                     }
-                  PKL_AST_TYPE_NAME (type) = ASTREF ($1);
+
+                  if (PKL_AST_TYPE_NAME (type) == NULL)
+                    PKL_AST_TYPE_NAME (type) = ASTREF ($1);
+                  else
+                    {
+                      $1 = ASTREF ($1);
+                      pkl_ast_node_free ($1);
+                    }
 
                   astruct = pkl_ast_make_struct (pkl_parser->ast,
                                                  0 /* nelem */, $3);
@@ -917,6 +924,7 @@ simple_type_specifier:
                           && PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_TYPE);
                   $$ = PKL_AST_DECL_INITIAL (decl);
                   PKL_AST_LOC ($$) = @$;
+                  $1 = ASTREF ($1); pkl_ast_node_free ($1);
                 }
         | ANY
         	{
@@ -945,7 +953,7 @@ integral_type_specifier:
                     $$ = pkl_ast_make_integral_type (pkl_parser->ast,
                                                      PKL_AST_INTEGER_VALUE ($2),
                                                      $1);
-                    ASTREF ($2); pkl_ast_node_free ($2);
+                    $2 = ASTREF ($2); pkl_ast_node_free ($2);
                     PKL_AST_LOC ($$) = @$;
                 }
 	;
