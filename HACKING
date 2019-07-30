@@ -54,21 +54,24 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      6  The Poke Virtual Machine
        6.1  Exception Handling
        6.2  Offsets and bit-offsets in the PVM
-     7  Debugging Poke
-       7.1  Building with Debugging support
-       7.2  Using GDB extensions
-       7.3  Valgrind and Poke
-       7.4  Debugging PVM Assembly Code
-     8  Future Developments
-     9  Appendix: The Source Tree
-       9.1  The Compiler
-       9.2  The Poke Virtual Machine
-       9.3  The IO Subsystem
-       9.4  Poke Program
-       9.5  Pickles and Libraries
-       9.6  Test Suite
-       9.7  Documentation
-       9.8  Other Stuff
+     7  Memory Management
+       7.1  PVM values in PVM programs
+       7.2  PVM values in AST nodes
+     8  Debugging Poke
+       8.1  Building with Debugging support
+       8.2  Using GDB extensions
+       8.3  Valgrind and Poke
+       8.4  Debugging PVM Assembly Code
+     9  Future Developments
+    10  Appendix: The Source Tree
+      10.1  The Compiler
+      10.2  The Poke Virtual Machine
+      10.3  The IO Subsystem
+      10.4  Poke Program
+      10.5  Pickles and Libraries
+      10.6  Test Suite
+      10.7  Documentation
+      10.8  Other Stuff
 
 
 Development Environment
