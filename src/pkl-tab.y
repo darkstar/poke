@@ -372,7 +372,7 @@ start:
                 {
                   /* This rule is to allow the presence of an extra
                      ';' after the sentence.  This to allow the poke
-                     command manager to ease the handlign of
+                     command manager to ease the handling of
                      semicolons in the command line.  */
                   $$ = pkl_ast_make_program (pkl_parser->ast, $2);
                   PKL_AST_LOC ($$) = @$;
