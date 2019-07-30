@@ -674,7 +674,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
       /* Now build the printable string.  */
       str_printable = xmalloc (printable_size + 1);
-      for (i = 0, j = 0; i < printable_size; i++)
+      for (i = 0, j = 0; i < str_size; i++)
         {
           switch (str[i])
             {
@@ -699,6 +699,7 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
               break;
             }
         }
+      assert (j == printable_size);
       str_printable[j] = '\0';
       
       fprintf (out, "\"%s\"", str_printable);
