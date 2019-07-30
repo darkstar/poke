@@ -1691,6 +1691,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_FUNC:
 
+      free (PKL_AST_FUNC_NAME (ast));
       pkl_ast_node_free (PKL_AST_FUNC_RET_TYPE (ast));
       pkl_ast_node_free (PKL_AST_FUNC_BODY (ast));
       for (t = PKL_AST_FUNC_ARGS (ast); t; t = n)
