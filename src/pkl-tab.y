@@ -1212,6 +1212,13 @@ declaration:
                     = ASTREF ($5);
                   $$ = $<ast>3;
                   
+                  /* If the reference counting of the declaration is
+                     bigger than 1, this means there are recursive
+                     calls in the function body.  Reset the refcount
+                     to 1, since these references are weak.  */
+                  if (PKL_AST_REFCOUNT ($<ast>3) > 1)
+                    PKL_AST_REFCOUNT ($<ast>3) = 1;
+
                   /* Annotate the contained RETURN statements with
                      their function and their lexical nest level
                      within the function.  */

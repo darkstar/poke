@@ -1819,7 +1819,8 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_VAR:
 
       pkl_ast_node_free (PKL_AST_VAR_NAME (ast));
-      pkl_ast_node_free (PKL_AST_VAR_DECL (ast));
+      if (!PKL_AST_VAR_IS_RECURSIVE (ast))
+        pkl_ast_node_free (PKL_AST_VAR_DECL (ast));
       break;
 
     case PKL_AST_COMP_STMT:

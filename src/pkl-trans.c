@@ -56,6 +56,42 @@
 
 #define PKL_TRANS_PAYLOAD ((pkl_trans_payload) PKL_PASS_PAYLOAD)
 
+static int pkl_trans_in_functions (pkl_ast_node functions[],
+                                   int next_function,
+                                   pkl_ast_node function)
+{
+  int i;
+  for (i = 0; i < next_function; i++)
+    {
+      if (functions[i] == function)
+        return 1;
+    }
+
+  return 0;
+}
+
+#define PKL_TRANS_FUNCTION_IS_RECURSIVE(function)                 \
+  pkl_trans_in_functions (PKL_TRANS_PAYLOAD->functions,           \
+                          PKL_TRANS_PAYLOAD->next_function,       \
+                          (function))
+  
+#define PKL_TRANS_PUSH_FUNCTION(function)                               \
+  do                                                                    \
+    {                                                                   \
+      assert (PKL_TRANS_PAYLOAD->next_function < PKL_TRANS_MAX_FUNCTION_NEST); \
+      PKL_TRANS_PAYLOAD->functions[PKL_TRANS_PAYLOAD->next_function++]  \
+        = (function);                                                   \
+    }                                                                   \
+  while (0)
+
+#define PKL_TRANS_POP_FUNCTION                                  \
+  do                                                            \
+    {                                                           \
+      assert (PKL_TRANS_PAYLOAD->next_function > 0);            \
+      PKL_TRANS_PAYLOAD->next_function -= 1;                    \
+    }                                                           \
+  while (0)
+
 /* The following handler is used in all trans phases and initializes
    the phase payload.  */
 
@@ -323,17 +359,45 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_funcall)
 }
 PKL_PHASE_END_HANDLER
 
-/* Variables that refer to parameterless functions are transformed
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_pr_decl)
+{
+  pkl_ast_node decl = PKL_PASS_NODE;
+
+  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC)
+    PKL_TRANS_PUSH_FUNCTION (PKL_AST_DECL_INITIAL (decl));
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_decl)
+{
+  pkl_ast_node decl = PKL_PASS_NODE;
+
+  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC)
+    PKL_TRANS_POP_FUNCTION;
+}
+PKL_PHASE_END_HANDLER
+
+/* Variables that refer to the current function (recursive calls)
+   should be marked as such, so `pkl_ast_node_free' knows to not free
+   the declaration.  This is to avoid loops in the AST reference
+   counting.
+
+   Variables that refer to parameterless functions are transformed
    into funcalls to these functions, but only if the variables are not
-   part of funcall themselves! :)  */
+   part of funcall themselves! :) */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
 {
+  pkl_ast_node var = PKL_PASS_NODE;
+  pkl_ast_node decl = PKL_AST_VAR_DECL (var);
+
+  if (PKL_AST_DECL_KIND (decl) == PKL_AST_DECL_KIND_FUNC)
+    PKL_AST_VAR_IS_RECURSIVE (var)
+      = PKL_TRANS_FUNCTION_IS_RECURSIVE (PKL_AST_DECL_INITIAL (decl));
+
   if (PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_FUNCALL)
     {
-      pkl_ast_node var = PKL_PASS_NODE;
-      pkl_ast_node decl = PKL_AST_VAR_DECL (var);
       pkl_ast_node initial = PKL_AST_DECL_INITIAL (decl);
       pkl_ast_node initial_type = PKL_AST_TYPE (initial);
 
@@ -741,6 +805,8 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_trans1_ps_func),
    PKL_PHASE_PS_HANDLER (PKL_AST_TRIMMER, pkl_trans1_ps_trimmer),
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_trans1_ps_print_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_DECL, pkl_trans1_pr_decl),
+   PKL_PHASE_PS_HANDLER (PKL_AST_DECL, pkl_trans1_ps_decl),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),

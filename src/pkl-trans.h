@@ -21,19 +21,29 @@
 
 #include <config.h>
 #include "pkl-pass.h"
+#include "pkl-ast.h"
 
 /* The following struct defines the payload of the trans phases.
 
    ERRORS is the number of errors detected while running the phase.
    
    ADD_FRAMES is the number of frames to add to lexical addresses.
-   This is used in transl.  */
+   This is used in transl.
+
+   FUNCTIONS is a stack of declaration nodes.
+
+   NEXT_FUNCTION - 1 is the index for the enclosing function in
+   FUNCTIONS, or 0 if not in a function.  */
+
+#define PKL_TRANS_MAX_FUNCTION_NEST 32
 
 struct pkl_trans_payload
 {
   int errors;
   int add_frames;
   int in_map;
+  pkl_ast_node functions[PKL_TRANS_MAX_FUNCTION_NEST];
+  int next_function;
 };
 
 typedef struct pkl_trans_payload *pkl_trans_payload;

@@ -1138,12 +1138,16 @@ pkl_ast_node pkl_ast_make_funcall_arg (pkl_ast ast, pkl_ast_node exp,
    in order to find the frame where the referred variable is declared.
 
    OVER is the position in the frame, i.e. the variable declaration is
-   the OVERth variable declaration in the frame.  */
+   the OVERth variable declaration in the frame.
+
+   IS_RECURSIVE is a boolean indicating whether the variable
+   references the declaration of the containing function.  */
 
 #define PKL_AST_VAR_NAME(AST) ((AST)->var.name)
 #define PKL_AST_VAR_DECL(AST) ((AST)->var.decl)
 #define PKL_AST_VAR_BACK(AST) ((AST)->var.back)
 #define PKL_AST_VAR_OVER(AST) ((AST)->var.over)
+#define PKL_AST_VAR_IS_RECURSIVE(AST) ((AST)->var.is_recursive)
 
 struct pkl_ast_var
 {
@@ -1153,6 +1157,7 @@ struct pkl_ast_var
   union pkl_ast_node *decl;
   int back;
   int over;
+  int is_recursive;
 };
 
 pkl_ast_node pkl_ast_make_var (pkl_ast ast,
