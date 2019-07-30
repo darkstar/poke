@@ -538,6 +538,164 @@ So, the take-home message is: in the PVM, restrict the presence of
 Whenever an offset is needed in some internal PVM structure, use
 bit-offsets instead encoded as ``ulong<64>`` values.
 
+Memory Management
+-----------------
+
+Different parts of poke use different strategies for memory
+management:
+
+- The compiler front-end uses reference counting to handle AST nodes.
+
+- The PVM uses the Boehm GC collector for values and the run-time
+  environment.
+
+- Everything else uses ``malloc``/``free``.
+
+This sometimes leads to tricky situations, which are documented in the
+subsections below.
+
+PVM values in PVM programs
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The PVM programs (data structures of type ``pvm_program``) are
+allocated by Jitter, using ``malloc``.  Therefore, they are not
+traversed by the GC.
+
+Now, the instructions in a program can contain literal PVM values, and
+some of these values will be boxed.  For example, the following
+program contains a pointer to a ``pvm_val_box``:
+
+  ;; Initialize the element index to 0UL, and put it
+  ;; in a local.
+  push ulong<64>0
+  regvar $eidx
+
+There are two places where PVM programs are stored in other data
+structures: in closures, and in the compiler.
+
+A closure is a kind of PVM value itself, and therefore allocated by
+the GC.  It is composed by a PVM program, a run-time environment and
+an entry point into the program::
+
+  struct pvm_cls
+  {
+    struct jitter_program *program;
+    const void *entry_point;
+    struct pvm_env *env;
+  };
+
+However, since ``program`` is malloc-allocated, the GC can't traverse
+it.  Consequently, the references to contained boxed values won't be
+accounted, and these values will be collected if there are no more
+refences to them!
+
+The solution, recommended by Luca Saiou, is to keep an array of
+pointers in the closure structure, containing the pointers to every
+boxed value used in ``program``::
+
+  struct pvm_cls
+  {
+    struct jitter_program *program;
+    void **pointers;
+    const void *entry_point;
+    struct pvm_env *env;
+  };
+
+The subsystem responsible to collect the pointers is the
+macro-assembler in ``pkl-asm.c``.  ``pkl_asm_finish`` will return the
+array of pointers, and it is up to the caller (in the code generator)
+to install it the corresponding closure structure.
+
+The second place where a PVM program is stored in other data
+structures is the compiler functions ``pkl_compile_file`` and
+``pkl_compile_buffer``.  In both functions, the compiled PVM program
+is executed and then discarded.  However, it is still required to have
+the ``pointers`` array linked from the C stack, to avoid the GC to
+collect the values from the program.  That's the purpose of the weird
+local variables, which are set but never used::
+
+  int
+  pkl_compile_buffer (pkl_compiler compiler,
+                      char *buffer, char **end)
+  {
+    ...
+    /* Note that the sole purpose of `pointers' is to serve as a root
+       (in the stack) for the GC, to prevent the boxed values in PROGRAM
+       to be collected.  Ugly as shit, but conservative garbage
+       collection doesn't really work.  */
+    void *pointers;
+    ...
+    program = rest_of_compilation (compiler, ast, &pointers);
+    ...
+  }
+
+PVM values in AST nodes
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Storing a PVM value (whose memory is handled by GC) in an AST node
+(reference-counted) lead to a problem: the GC is unable to see the
+reference to values, and will collect the memory if there are no other
+references.
+
+Let's see an example of this.  Both array and struct types contain
+closures for mappers, writers, bounders, and the like.  For example,
+let's take arrays::
+
+    struct pkl_ast_type
+    {
+        ...
+        struct
+        {
+          union pkl_ast_node *bound;
+          union pkl_ast_node *etype;
+          pvm_val mapper;
+          pvm_val writer;
+          pvm_val bounder;
+        } array;
+    }
+
+In this case, ``mapper``, ``writer`` and ``bounder`` are managed by
+GC.  However, the contained ``struct pkl_ast_type`` is not.  There is
+no way the GC can find these nodes thru the AST node.
+
+The solution is to declare the relevant pointers in the containing AST
+node as GC roots.  The right place to do that is in the corresponding
+constructor in ``pkl-ast.c``.  For example::
+
+  pkl_ast_node
+  pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound)
+  {
+    ...
+    /* The closure slots are GC roots.  */
+    pvm_alloc_add_gc_roots (&PKL_AST_TYPE_A_MAPPER (type), 1);
+    pvm_alloc_add_gc_roots (&PKL_AST_TYPE_A_WRITER (type), 1);
+    pvm_alloc_add_gc_roots (&PKL_AST_TYPE_A_BOUNDER (type), 1);
+    ...
+  }
+
+And of course, before the memory of the AST node is freed, these roots
+should be unregistered from the GC.  The right place to do this is in
+``pkl_ast_node_free``::
+
+  void
+  pkl_ast_node_free (pkl_ast_node ast)
+  {
+    ...
+    case PKL_AST_TYPE:
+      switch (PKL_AST_TYPE_CODE (ast))
+        {
+        ...
+        case PKL_TYPE_ARRAY:
+          /* Remove GC roots.  */
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_MAPPER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_WRITER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_BOUNDER (ast), 1);
+        }
+  }
+
+So if you add PVM values or PVM environments to an AST node, please
+follow the strategy above.
+
 Debugging Poke
 --------------
 
