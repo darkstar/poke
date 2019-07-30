@@ -19,4 +19,3 @@
 /* { dg-command {b[1] = 0x88} } */
 /* { dg-command {byte @ 1#B} } */
 /* { dg-output "\n0x66UB" } */
-
