@@ -1627,9 +1627,19 @@ pkl_ast_node_free (pkl_ast_node ast)
       switch (PKL_AST_TYPE_CODE (ast))
         {
         case PKL_TYPE_ARRAY:
+          /* Remove GC roots.  */
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_MAPPER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_WRITER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_A_BOUNDER (ast), 1);
+
           pkl_ast_node_free (PKL_AST_TYPE_A_ETYPE (ast));
           break;
         case PKL_TYPE_STRUCT:
+          /* Remove GC roots.  */
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_S_WRITER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_S_MAPPER (ast), 1);
+          pvm_alloc_remove_gc_roots (&PKL_AST_TYPE_S_CONSTRUCTOR (ast), 1);
+
           for (t = PKL_AST_TYPE_S_ELEMS (ast); t; t = n)
             {
               n = PKL_AST_CHAIN (t);
