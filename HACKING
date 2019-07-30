@@ -563,7 +563,7 @@ traversed by the GC.
 
 Now, the instructions in a program can contain literal PVM values, and
 some of these values will be boxed.  For example, the following
-program contains a pointer to a ``pvm_val_box``:
+program contains a pointer to a ``pvm_val_box``::
 
   ;; Initialize the element index to 0UL, and put it
   ;; in a local.
