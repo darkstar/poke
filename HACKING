@@ -589,7 +589,7 @@ it.  Consequently, the references to contained boxed values won't be
 accounted, and these values will be collected if there are no more
 refences to them!
 
-The solution, recommended by Luca Saiou, is to keep an array of
+The solution, recommended by Luca Saiu, is to keep an array of
 pointers in the closure structure, containing the pointers to every
 boxed value used in ``program``::
 
