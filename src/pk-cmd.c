@@ -254,7 +254,6 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   struct pk_cmd_arg argv[8];
   uint64_t uflags;
   const char *a;
-  char filename[NAME_MAX];
   int besilent = 0;
 
   /* Skip blanks, and return if the command is composed by only blank
@@ -449,6 +448,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                     size_t i;
                     wordexp_t exp_result;
                     char *end;
+                    char *filename = xmalloc (strlen (p) + 1);
 
                     p = skip_blanks (p);
                     i = 0;
@@ -555,9 +555,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   /* Free arguments occupying memory.  */
   for (i = 0; i < argc; ++i)
     {
-      /* XXX this causes problems but it's a leak */
-      /*    if (argv[i].type == PK_CMD_ARG_STR)
-      free (argv[i].val.str); */
+      if (argv[i].type == PK_CMD_ARG_STR)
+        free (argv[i].val.str);
       if (argv[i].type == PK_CMD_ARG_EXP
           || argv[i].type == PK_CMD_ARG_DEF
           || argv[i].type == PK_CMD_ARG_STMT)

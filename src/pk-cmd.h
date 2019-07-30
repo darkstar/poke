@@ -53,7 +53,7 @@ struct pk_cmd_arg
     pvm_program prog;
     int64_t integer;
     ios_off addr;
-    const char *str;
+    char *str;
     int64_t tag;
   } val;
 };
