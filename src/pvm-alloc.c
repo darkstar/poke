@@ -44,8 +44,8 @@ pvm_alloc_cls (void)
 {
   pvm_cls cls = pvm_alloc (sizeof (struct pvm_cls));
 
-  //  GC_register_finalizer (cls, pvm_alloc_finalize_closure, NULL,
-  //                         NULL, NULL);
+  GC_register_finalizer_no_order (cls, pvm_alloc_finalize_closure, NULL,
+                                  NULL, NULL);
   return cls;
 }
 
