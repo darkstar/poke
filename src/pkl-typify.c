@@ -1097,18 +1097,8 @@ with prototype %s",
           = pkl_ast_chainon (ordered_arg_list, new_aa);
       }
 
-    /* Dispose the old list of actual argument nodes.
-       XXX move this logic to a function in pkl-ast.c  */
-    {
-      pkl_ast_node ta;
-      for (aa = PKL_AST_FUNCALL_ARGS (funcall);
-           aa;
-           aa = ta)
-        {
-          ta = PKL_AST_CHAIN (aa);
-          pkl_ast_node_free (aa);
-        }
-    }
+    /* Dispose the old list of actual argument nodes.  */
+    pkl_ast_node_free_chain (PKL_AST_FUNCALL_ARGS (funcall));
 
     /* Install the new ordered list in the funcall.  */
     PKL_AST_FUNCALL_ARGS (funcall) = ASTREF (ordered_arg_list);
