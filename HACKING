@@ -561,16 +561,17 @@ instead, write::
 Using ASTDEREF
 ~~~~~~~~~~~~~~
 
-``ASTDEREF`` does the reverse of what ``ASTREF`` does: sit decreases
-the reference counter of the provided AST node, provided as a
-l-value.
+``ASTDEREF`` decreases the reference counter of the provided AST
+node.  The passed value should be a l-value.
 
-You will seldom need to use ``ASTDEREF``: just make sure that every
-``ASTREF`` is paired with a ``pkl_ast_node_free``.
+In practice you will seldom find yourself in the need to use
+``ASTDEREF``.  Just make sure that every ``ASTREF`` is paired with a
+``pkl_ast_node_free``.
 
-However, there is a situation where using ``ASTDEREF`` is fundamental
-to avoid a memory leak: when you do transformations like ``a -> b`` to
-``a -> x -> b``.  In that case, use something like::
+However, there are situations where ``ASTDEREF`` is necessary in order
+toavoid a memory leak.  For example, consider transformations like ``a
+-> b`` to ``a -> x -> b``.  In that case, you sould use something
+like::
 
   b = PKL_AST_KIND_WHAT (node);
   x = pkl_ast_make_xxx (ast, ASTDEREF (b));
@@ -579,9 +580,6 @@ to avoid a memory leak: when you do transformations like ``a -> b`` to
 This works because ``pkl_ast_make_xxx`` does an ``ASTREF`` to ``b``
 internally.  The final result is that the reference counter of ``b``
 doesn't change at all.
-
-In situations like the above, you will be leaking memory if you forget
-to ``ASTDEREF``.  So please be watchful.
   
 PVM values in PVM programs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
