@@ -42,7 +42,6 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
        5.1  Compiler Overview
        5.2  The bison Parser in pkl-tab.y
        5.3  The AST
-         5.3.1  Using ASTREF
        5.4  Compiler Passes and Phases
          5.4.1  Naming Conventions for Phases
          5.4.2  Naming Conventions for Handlers
@@ -55,8 +54,10 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
        6.1  Exception Handling
        6.2  Offsets and bit-offsets in the PVM
      7  Memory Management
-       7.1  PVM values in PVM programs
-       7.2  PVM values in AST nodes
+       7.1  Using ASTREF
+       7.2  Using ASTDEREF
+       7.3  PVM values in PVM programs
+       7.4  PVM values in AST nodes
      8  Debugging Poke
        8.1  Building with Debugging support
        8.2  Using GDB extensions
@@ -240,31 +241,6 @@ programs.
 
 The AST
 ~~~~~~~
-
-Using ASTREF
-............
-
-The AST uses reference counting in order to manage the memory used by
-the nodes.  Every time you store a pointer to an AST node, you should
-use the macro ``ASTREF`` in order to increase it's counter::
-
-  pkl_ast_node foo = ASTREF (node);
-
-Note that the ``pkl_ast_make_*`` constructors do ``ASTREF``
-internally, so you don't need to use it in calls like::
-
-  pkl_ast_node new = pkl_ast_make_struct (ast, 5, elems_node);
-
-There is a little caveat: the way ASTREF is defined, it requires a
-l-value to work properly.  Therefore, this doesn't work::
-
-  pkl_ast_node foo = ASTREF (PKL_AST_TYPE (node));
-
-instead, write::
-
-  pkl_ast_node type = PKL_AST_TYPE (node);
-  pkl_ast_node foo = ASTREF (type);
-
 
 Compiler Passes and Phases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -554,9 +530,59 @@ management:
 
 - Everything else uses ``malloc``/``free``.
 
-This sometimes leads to tricky situations, which are documented in the
-subsections below.
+This sometimes leads to tricky situations, some of which are
+documented in the subsections below.
 
+Using ASTREF
+~~~~~~~~~~~~
+
+The AST uses reference counting in order to manage the memory used by
+the nodes.  Every time you store a pointer to an AST node, you should
+use the macro ``ASTREF`` in order to increase it's counter::
+
+  pkl_ast_node foo = ASTREF (node);
+
+Note that the ``pkl_ast_make_*`` constructors do ``ASTREF``
+internally, so you don't need to use it in calls like::
+
+  pkl_ast_node new = pkl_ast_make_struct (ast, 5, elems_node);
+
+There is a little caveat: the way ASTREF is defined, it requires a
+l-value to work properly.  Therefore, this doesn't work::
+
+  pkl_ast_node foo = ASTREF (PKL_AST_TYPE (node));
+
+instead, write::
+
+  pkl_ast_node type = PKL_AST_TYPE (node);
+  pkl_ast_node foo = ASTREF (type);
+
+
+Using ASTDEREF
+~~~~~~~~~~~~~~
+
+``ASTDEREF`` does the reverse of what ``ASTREF`` does: sit decreases
+the reference counter of the provided AST node, provided as a
+l-value.
+
+You will seldom need to use ``ASTDEREF``: just make sure that every
+``ASTREF`` is paired with a ``pkl_ast_node_free``.
+
+However, there is a situation where using ``ASTDEREF`` is fundamental
+to avoid a memory leak: when you do transformations like ``a -> b`` to
+``a -> x -> b``.  In that case, use something like::
+
+  b = PKL_AST_KIND_WHAT (node);
+  x = pkl_ast_make_xxx (ast, ASTDEREF (b));
+  PKL_AST_KIND_WHAT (node) = ASTREF (x);
+
+This works because ``pkl_ast_make_xxx`` does an ``ASTREF`` to ``b``
+internally.  The final result is that the reference counter of ``b``
+doesn't change at all.
+
+In situations like the above, you will be leaking memory if you forget
+to ``ASTDEREF``.  So please be watchful.
+  
 PVM values in PVM programs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
