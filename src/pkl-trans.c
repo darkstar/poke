@@ -406,7 +406,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
               || pkl_ast_func_all_optargs (initial_type)))
         {
           pkl_ast_node funcall = pkl_ast_make_funcall (PKL_PASS_AST,
-                                                       var,
+                                                       ASTDEREF (var),
                                                        NULL /* args */);
           
           PKL_AST_LOC (funcall) = PKL_AST_LOC (var);
