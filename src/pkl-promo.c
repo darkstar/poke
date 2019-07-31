@@ -51,6 +51,7 @@ promote_integral (pkl_ast ast,
             = pkl_ast_make_integral_type (ast, size, sign);
           pkl_ast_loc loc = PKL_AST_LOC (*a);
           
+          ASTDEREF (*a);
           *a = pkl_ast_make_cast (ast, desired_type, *a);
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
           PKL_AST_LOC (*a) = loc;
@@ -107,6 +108,7 @@ promote_offset (pkl_ast ast,
           PKL_AST_LOC (unit) = loc;
           PKL_AST_LOC (type) = loc;
 
+          ASTDEREF (*a);
           *a = pkl_ast_make_cast (ast, type, *a);
           PKL_AST_TYPE (*a) = ASTREF (type);
           PKL_AST_LOC (*a) = loc;
@@ -165,6 +167,7 @@ promote_array (pkl_ast ast,
   {
     pkl_ast_loc loc = PKL_AST_LOC (*a);
               
+    ASTDEREF (*a);
     *a = pkl_ast_make_cast (ast, type, *a);
     PKL_AST_TYPE (*a) = ASTREF (type);
     PKL_AST_LOC (*a) = loc;
