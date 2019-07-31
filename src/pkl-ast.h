@@ -222,12 +222,8 @@ typedef union pkl_ast_node *pkl_ast_node;
 /* NOTE: both ASTREF and ASTDEREF need an l-value!  */
 #define ASTREF(AST) ((AST) ? (++((AST)->common.refcount), (AST)) \
                      : NULL)
-#define ASTDEREF(AST)                           \
-  do                                            \
-    {                                           \
-      --((AST)->common.refcount);               \
-    }                                           \
-  while (0)
+#define ASTDEREF(AST) ((AST) ? (--((AST)->common.refcount), (AST)) \
+                       : NULL)
 
 struct pkl_ast_loc
 {
