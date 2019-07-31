@@ -1937,10 +1937,6 @@ pkl_ast_init (void)
 void
 pkl_ast_free (pkl_ast ast)
 {
-#if 0
-  size_t i;
-#endif
-
   if (ast == NULL)
     return;
   
@@ -1958,8 +1954,7 @@ pkl_ast_reverse (pkl_ast_node ast)
   for (decl = ast; decl != NULL; decl = next)
     {
       next = PKL_AST_CHAIN (decl);
-      if (next)
-        PKL_AST_REFCOUNT (next) -= 1;
+      ASTDEREF (next);
       PKL_AST_CHAIN (decl) = ASTREF (prev);
       prev = decl;
     }
