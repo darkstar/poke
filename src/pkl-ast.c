@@ -1951,6 +1951,7 @@ pkl_ast_reverse (pkl_ast_node ast)
 {
   pkl_ast_node prev = NULL, decl, next;
 
+  ASTDEREF (ast);
   for (decl = ast; decl != NULL; decl = next)
     {
       next = PKL_AST_CHAIN (decl);
