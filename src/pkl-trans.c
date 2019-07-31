@@ -1047,7 +1047,10 @@ struct pkl_phase pkl_phase_trans3 =
    This is needed because at code generation time, the mka instruction
    processes initializers from top to bottom of the stack.  Since
    several initializers can refer to the same array element, they
-   should be processed in the right order.  */
+   should be processed in the right order.
+
+   XXX this won't be needed anymore when the mka instruction is
+   modified to not get the elements from the stack.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans4_ps_array)
 {
