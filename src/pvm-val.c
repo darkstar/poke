@@ -271,7 +271,7 @@ pvm_val
 pvm_make_cls (pvm_program program, void **pointers)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
-  pvm_cls cls = pvm_alloc (sizeof (struct pvm_cls));
+  pvm_cls cls = pvm_alloc_cls ();
 
   cls->program = program;
   cls->pointers = pointers;

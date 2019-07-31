@@ -88,8 +88,17 @@ pvm_get_env (pvm apvm)
 void
 pvm_shutdown (pvm apvm)
 {
-  /* Finalize the memory allocator.  */
-  pvm_alloc_finalize ();
+  /* Deregister GC roots.  */
+  pvm_alloc_remove_gc_roots (&PVM_STATE_ENV (apvm), 1);
+  pvm_alloc_remove_gc_roots
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_stack_backing.element_no);
+  pvm_alloc_remove_gc_roots
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_returnstack_backing.element_no);
+  pvm_alloc_remove_gc_roots
+    (apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.memory,
+     apvm->pvm_state.pvm_state_backing.jitter_stack_exceptionstack_backing.element_no);
 
   /* Finalize the VM state.  */
   pvm_state_finalize (&apvm->pvm_state);
@@ -98,6 +107,9 @@ pvm_shutdown (pvm apvm)
   pvm_finalize ();
 
   free (apvm);
+
+  /* Finalize the memory allocator.  */
+  pvm_alloc_finalize ();
 }
 
 enum pvm_exit_code

@@ -32,6 +32,23 @@ pvm_alloc_strdup (const char *string)
   return GC_strdup (string);
 }
 
+static void
+pvm_alloc_finalize_closure (void *object, void *client_data)
+{
+  pvm_cls cls = (pvm_cls) object;
+  pvm_destroy_program (cls->program);
+}
+
+void *
+pvm_alloc_cls (void)
+{
+  pvm_cls cls = pvm_alloc (sizeof (struct pvm_cls));
+
+  //  GC_register_finalizer (cls, pvm_alloc_finalize_closure, NULL,
+  //                         NULL, NULL);
+  return cls;
+}
+
 void
 pvm_alloc_initialize ()
 {
