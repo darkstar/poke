@@ -294,8 +294,6 @@ repl ()
         /* Avoid gcc warning here.  */ ;
       free (line);
     }
-
-  clear_history ();
 }
 
 static void
