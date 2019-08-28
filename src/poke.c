@@ -153,8 +153,7 @@ Report bugs to: %s\n"), PACKAGE_BUGREPORT);
   printf (_("Report %s bugs to: %s\n"), PACKAGE_PACKAGER,
           PACKAGE_PACKAGER_BUG_REPORTS);
 #endif
-  printf (_("%s home page: <http://www.gnu.org/s/poke/>\n"),
-          PACKAGE_NAME);
+  printf (_("%s home page: <%s>\n"), PACKAGE_NAME, PACKAGE_URL);
   fputs (_("General help using GNU software: <http://www.gnu.org/gethelp/>\n"),
          stdout);
 }
