@@ -102,7 +102,7 @@ ios_open (const char *handler)
         break;
     }
 
-  if (dev_if == NULL)
+  if (*dev_if == NULL)
     goto error;
 
   io->dev_if = *dev_if;

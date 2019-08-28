@@ -248,8 +248,15 @@ parse_args (int argc, char *argv[])
 
   if (optind < argc)
     {
-      if (!ios_open (argv[optind++]))
+      char *filename = xmalloc (strlen (argv[optind]) + 7 + 1);
+
+      strcpy (filename, "file://");
+      strcat (filename, argv[optind]);
+      if (!ios_open (filename))
         exit (EXIT_FAILURE);
+
+      free (filename);
+      optind++;
     }
 
   if (optind < argc)
