@@ -52,6 +52,14 @@ Invoking Poke
 Basic Editing
 @c* Commands::
 
+@c poke FILE
+@c
+@c Where FILE can be either the path of a file, or a poke URL like:
+@c
+@c   pid://1234
+@c
+@c Note these are no real URLs.  Hence, file:/host/ is not allowed.
+
 @c XXX IO cache:
 @c
 @c   (poke) ... poke something ...

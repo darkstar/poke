@@ -43,12 +43,8 @@ struct ios_dev_file
 static int
 ios_dev_file_handler_p (const char *handler)
 {
-  /* The compiler should be able to optimize the strlen of the
-     constant string...   GCC does on -O */
-#define FILEH "file://"
-  return (strlen (handler) > strlen (FILEH)
-          && strncmp (handler, FILEH, strlen (FILEH)) == 0);
-#undef FILEH
+  /* This backend is special, in the sense it accepts any handler.  */
+  return 1;
 }
 
 static void *
@@ -58,15 +54,17 @@ ios_dev_file_open (const char *handler)
   struct ios_dev_file *fio;
   FILE *f;
 
-  /* Skip the file:// part in the handler.  */
-  handler += strlen ("file://");
+  /* Skip the file:// part in the handler, if needed.  */
+  if (strlen (handler) >= 7
+      && strncmp (handler, "file://", 7) == 0)
+    handler += 7;
 
   /* Open the requested file.  The open mode is read-write if
      possible.  Otherwise read-only.  */
 
   mode =
     access (handler, R_OK | W_OK) != 0 ? "rb" : "r+b";
-  
+
   f = fopen (handler, mode);
   if (!f)
     {
