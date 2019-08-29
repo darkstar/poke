@@ -174,7 +174,7 @@ pk_print_version ()
      as done here, to avoid having to retranslate the message when a new
      year comes around.  */  
   printf (_("\
-Copyright (C) %s \033]8;;mailto:jemarch@gnu.org\033\\Jose E. Marchesi\033]8;;\033\\.\n\
+Copyright (C) %s Jose E. Marchesi.\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n"), "2019");
