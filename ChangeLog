@@ -1,0 +1,4 @@
+2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING (Jitter): Add information on the dependency on jitter.
+
