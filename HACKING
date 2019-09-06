@@ -32,8 +32,10 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      1  Development Environment
        1.1  Autotools
        1.2  Flex
-       1.3  Building
-       1.4  Gettext
+       1.3  Jitter
+       1.4  Building
+       1.5  Gettext
+       1.6  Running an Uninstalled Poke
      2  Coding Style and Conventions
        2.1  Writing Poke
      3  Maintenance
