@@ -65,6 +65,7 @@ wrapped-functions
   ios_read_int
   ios_read_uint
   ios_read_string
+  random
 end
 
 #wrapped-globals
@@ -713,6 +714,12 @@ instruction strace (?n) # ( -- )
      /* Restore the stack.  */
      for (j = (i - 1); j >= 0; j--)
         JITTER_PUSH_STACK (tmp[j]);
+  end
+end
+
+instruction rand () # ( -- INT )
+  code
+    JITTER_PUSH_STACK (pvm_make_int (random (), 32));
   end
 end
 

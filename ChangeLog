@@ -1,5 +1,19 @@
 2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-insn.def: New instruction RAND.
+	* src/pvm.jitter (rand): New instruction.
+	(wrapped-functions): Add wrapper for `random'.
+	* bootstrap.conf (gnulib_modules): Add `random' gnulib module.
+	* src/pkl-ast.h (PKL_AST_BUILTIN_RAND): Define.
+	* src/pkl-gen.c (pkl_gen_ps_comp_stmt): Emit code for the RAND
+	built-int.
+	* src/pkl-lex.l: Recognize BUILTIN_RAND token.
+	* src/pkl-tab.y: Define token BUILTIN_RANDR.
+	(comp_stmt): New rule for builtin randr.
+	* testsuite/poke.pkl/rand-1.pk: New file.
+
+2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Jitter): Replace git:// URL with an http://, for
 	jitter.
 	(Development Environment): Add a note about setting POKEDATADIR to

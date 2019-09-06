@@ -238,6 +238,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %token PRINT
 %token PRINTF
 %token UNMAP
+%token BUILTIN_RAND;
 
 /* ATTRIBUTE operator.  */
 
@@ -1293,6 +1294,15 @@ comp_stmt:
               /* Pop the frame pushed by the `pushlevel' above.  */
               pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
             }
+        | pushlevel BUILTIN_RAND
+        {
+          $$ = pkl_ast_make_builtin (pkl_parser->ast,
+                                     PKL_AST_BUILTIN_RAND);
+          PKL_AST_LOC ($$) = @$;
+          
+          /* Pop the frame pushed by the `pushlevel' above.  */
+          pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+        }
         ;
 
 stmt_decl_list:

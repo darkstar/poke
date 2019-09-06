@@ -1181,6 +1181,7 @@ pkl_ast_node pkl_ast_make_var (pkl_ast ast,
 
 #define PKL_AST_BUILTIN_NONE 0
 #define PKL_AST_BUILTIN_PRINT 1
+#define PKL_AST_BUILTIN_RAND 2
 
 struct pkl_ast_comp_stmt
 {

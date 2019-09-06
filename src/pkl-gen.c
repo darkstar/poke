@@ -332,10 +332,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_comp_stmt)
   pkl_ast_node comp_stmt = PKL_PASS_NODE;
 
   if (PKL_AST_COMP_STMT_BUILTIN (comp_stmt) == PKL_AST_BUILTIN_NONE)
-    {  
-      /* Push a frame into the environment.  */
-      pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-    }
+    /* Push a frame into the environment.  */
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
+    
 }
 PKL_PHASE_END_HANDLER
 
@@ -355,8 +354,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_comp_stmt)
     {
       switch (comp_stmt_builtin)
         {
+        case PKL_AST_BUILTIN_RAND:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAND);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+          break;
         default:
-            assert (0);
+          assert (0);
         }
     }
   else

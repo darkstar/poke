@@ -171,6 +171,7 @@ D [0-9]
 "printf"	{ return PRINTF; }
 "isa"		{ return ISA; }
 "unmap"		{ return UNMAP; }
+"__PKL_BUILTIN_RAND__" { return BUILTIN_RAND; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

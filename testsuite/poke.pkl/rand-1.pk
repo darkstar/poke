@@ -1,0 +1,4 @@
+/* { dg-do run } */
+
+defvar random_number = rand;
+

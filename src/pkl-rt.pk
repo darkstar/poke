@@ -31,6 +31,10 @@
 defvar true = 1;
 defvar false = 0;
 
+/* Compiler built-ins. */
+
+defun rand = int<32>: __PKL_BUILTIN_RAND__;
+
 /* Exceptions.
 
    XXX: use an enumeration?
