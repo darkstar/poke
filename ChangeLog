@@ -2,6 +2,8 @@
 
 	* HACKING (Jitter): Replace git:// URL with an http://, for
 	jitter.
+	(Development Environment): Add a note about setting POKEDATADIR to
+	run an uninstalled poke.
 
 2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
 

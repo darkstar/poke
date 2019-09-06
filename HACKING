@@ -126,6 +126,17 @@ po/ infrastructure.  After doing so, rerun gnulib-tool --import since
 otherwise older files will have been imported.  See the Gnulib manual
 for more information.
 
+Running an Uninstalled Poke
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once poke is compiled, you can run it before installing by defining
+the ``POKEDATADIR`` environment variable to point to the ``src/``
+directory in the sources tree.  For example::
+
+  $ pwd
+  /home/jemarch/gnu/hacks/poke/build/
+  $ export POKEDATADIR=../src
+  $ ./src/poke
 
 Coding Style and Conventions
 ----------------------------
