@@ -99,8 +99,9 @@ Jitter
 ~~~~~~
 
 In order to build and run poke, you need Luca Saiu's jitter.  Jitter
-is available in git@ageinghacker.net:jitter.git.  The specific
-revision you need is 745ba29c15dd56c60a7ab0320e09c1ca705018b7.
+is available in http://ageinghacker.net/git/cgit.cgi/jitter.  The
+specific revision you need is
+745ba29c15dd56c60a7ab0320e09c1ca705018b7.
 
 Configure and install jitter in some prefix.  When configuring poke,
 specify the location of the jitter installation with --with-jitter.
