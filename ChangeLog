@@ -1,3 +1,13 @@
+2019-09-07  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl-promo.c (pkl_promo_ps_op_unary): Initialize `restart'.
+	* src/pkl-lex.l: Avoid a dead initialization.
+	* src/pkl.c (pkl_error): Likewise.
+	* src/pkl-typify.c (pkl_typify1_ps_funcall): Likewise.
+	* src/pkl-gen.c (pkl_gen_pr_ass_stmt): Likewise.
+	* src/pkl-asm.c (pkl_asm_insn): Avoid the possibility of a NULL
+	deference.
+
 2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-insn.def: New instruction RAND.

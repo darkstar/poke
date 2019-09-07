@@ -403,8 +403,6 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
     case PKL_AST_INDEXER:
       /* Note that analf guarantees that the entity in this indexer is
          an array, not a string.  */
-
-      valmapper = PVM_NULL; /* XXX PKL_AST_TYPE_A_VALMAPPER (lvalue_type) */
       /* Fallthrough.  */
     case PKL_AST_STRUCT_REF:
       {

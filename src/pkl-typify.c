@@ -1041,7 +1041,7 @@ with prototype %s",
     /* Reorder the actual arguments to match the arguments specified
        in the function type.  For not mentioned optional formal
        arguments, add a NULL.  */
-    for (narg = 0, nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
+    for (nfa = 0, fa = PKL_AST_TYPE_F_ARGS (funcall_function_type);
          fa;
          nfa++, fa = PKL_AST_CHAIN (fa))
       {

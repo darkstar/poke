@@ -604,7 +604,7 @@ PKL_PHASE_END_HANDLER
 
 PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_unary)
 {
-  int restart;
+  int restart = 0;
 
   pkl_ast_node node = PKL_PASS_NODE;
   pkl_ast_node type = PKL_AST_TYPE (node);

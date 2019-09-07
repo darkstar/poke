@@ -523,7 +523,7 @@ pkl_error (pkl_ast ast,
 
     if (ast->buffer)
       {
-        char *p = ast->buffer;
+        char *p;
         for (p = ast->buffer; *p != '\0'; ++p)
           {
             if (*p == '\n')

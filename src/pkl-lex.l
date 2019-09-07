@@ -287,7 +287,7 @@ D [0-9]
   /* First of all, strip any '_' character from yytext.  */
   for (p = yytext; *p != '\0'; p++)
   {
-    char *tmp = p;
+    char *tmp;
 
     while (*p == '_')
      for (tmp = p; *tmp != '\0'; tmp++)
