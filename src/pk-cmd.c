@@ -483,6 +483,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                         goto usage;
                       }
 
+                    filename = xrealloc (filename,
+                                         strlen (exp_result.we_wordv[0]) + 1);
                     strcpy (filename, exp_result.we_wordv[0]);
                     wordfree (&exp_result);
 

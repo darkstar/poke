@@ -1,5 +1,10 @@
 2019-09-07  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pk-cmd.c (pk_cmd_exec_1): Avoid a buffer overrun when
+	doing tilde expansion in file names.
+
+2019-09-07  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Jitter): Documment a set of recommended switches to use
 	when configuring jitter.
 
