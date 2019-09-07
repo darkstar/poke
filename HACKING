@@ -476,6 +476,48 @@ A *function type*
   take any argument, T1 should be 'void'.  Likewise, if the function
   doesn't return a value, T2 should be 'void'.
 
+Adding Compiler Built-Ins
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compiler built-ins are predefined functions, provided by the compiler,
+that generate particular assembler instructions.
+
+The first step in defining a new built-in is to make the lexer to
+recognize tokens of the form ``__PKL_BUILTIN_NAME__`` where ``NAME``
+is some meaningful name, like for example ``RAND``::
+
+  "__PKL_BUILTIN_RAND__" { return BUILTIN_RAND; }
+
+Then, add a new rule to the rule ``comp_stmt`` in the bison parser.
+Built-ins are equivalent to compound statements.  For example, this is
+the rule for the rand built-in::
+
+          | pushlevel BUILTIN_RAND
+        {
+          $$ = pkl_ast_make_builtin (pkl_parser->ast,
+                                     PKL_AST_BUILTIN_RAND);
+          PKL_AST_LOC ($$) = @$;
+          
+          /* Pop the frame pushed by the `pushlevel' above.  */
+          pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
+        }
+
+Next step is to generate the code for the built-in.  This is done
+expanding the ``pkl_gen_ps_comp_stmt`` rule in the code generation.
+Keep in mind that the generated code should conform a valid function
+body.  For example, this is the code generation part for rand::
+
+          case PKL_AST_BUILTIN_RAND:
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAND);
+          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
+          break;
+
+The final step is to define the built-in function proper, in the
+compiler run-time, in ``pkl-rt.pk``::
+
+  defun rand = int<32>: __PKL_BUILTIN_RAND__;
+
+
 The Poke Virtual Machine
 ------------------------
 
