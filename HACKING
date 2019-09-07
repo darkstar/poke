@@ -108,6 +108,12 @@ specific revision you need is
 Configure and install jitter in some prefix.  When configuring poke,
 specify the location of the jitter installation with --with-jitter.
 
+For the time being, you should also use when configuring jitter::
+
+  --disable-dispatch-minimal-threading --disable-dispatch-no-threading
+
+or, alternatively, use ``--enable-debug`` when configuring poke.
+
 Building
 ~~~~~~~~
 
