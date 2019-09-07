@@ -1324,7 +1324,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
               pkl_asm_insn_mulo (pasm, base_type);
             else if (insn == PKL_INSN_DIVO)
               pkl_asm_insn_divo (pasm, base_type);
-            else if (insn = PKL_INSN_MODO)
+            else if (insn == PKL_INSN_MODO)
               pkl_asm_insn_modo (pasm, base_type, unit);
             else
               assert (0);
