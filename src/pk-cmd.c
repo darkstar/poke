@@ -74,8 +74,9 @@ static struct pk_cmd *cmds[] =
 static inline char *
 skip_blanks (char *p)
 {
-  while (isblank (*p))
-    p++;
+  if (p)
+    while (isblank (*p))
+      p++;
   return p;
 }
 
