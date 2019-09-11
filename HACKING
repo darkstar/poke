@@ -97,6 +97,16 @@ You will need a recent version of flex, since we are using some recent
 options like "reentrant" or "bison-bridge".  flex version 2.6.1 works
 fine.
 
+readline
+~~~~~~~~
+
+Poke uses libreadline in order to provide a nice line editor in the
+``(poke)`` prompt.  The ideal version of use is GNU readline.  Any
+recent version will suffice.
+
+However, in case you don't have libreadline installed, a minimum
+version from gnulib is used instead.
+
 Jitter
 ~~~~~~
 

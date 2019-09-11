@@ -1,3 +1,8 @@
+2019-09-11  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING (readline): New section in Development Environment,
+	about the dependency libreadline.
+
 2019-09-07  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pk-cmd.c (pk_cmd_exec_1): Avoid a buffer overrun when
