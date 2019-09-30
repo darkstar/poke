@@ -32,49 +32,53 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      1  Development Environment
        1.1  Autotools
        1.2  Flex
-       1.3  Jitter
-       1.4  Building
-       1.5  Gettext
-       1.6  Running an Uninstalled Poke
+       1.3  readline
+       1.4  Jitter
+       1.5  Building
+       1.6  Gettext
+       1.7  Running an Uninstalled Poke
      2  Coding Style and Conventions
-       2.1  Writing Poke
-     3  Maintenance
-     4  Poke Architecture
-     5  The Poke Compiler
-       5.1  Compiler Overview
-       5.2  The bison Parser in pkl-tab.y
-       5.3  The AST
-       5.4  Compiler Passes and Phases
-         5.4.1  Naming Conventions for Phases
-         5.4.2  Naming Conventions for Handlers
-         5.4.3  Transformation Phases
-         5.4.4  Analysis Phases
-         5.4.5  Type System Phases
-       5.5  The Type System
-         5.5.1  Type Expressions
-     6  The Poke Virtual Machine
-       6.1  Exception Handling
-       6.2  Offsets and bit-offsets in the PVM
-     7  Memory Management
-       7.1  Using ASTREF
-       7.2  Using ASTDEREF
-       7.3  PVM values in PVM programs
-       7.4  PVM values in AST nodes
-     8  Debugging Poke
-       8.1  Building with Debugging support
-       8.2  Using GDB extensions
-       8.3  Valgrind and Poke
-       8.4  Debugging PVM Assembly Code
-     9  Future Developments
-    10  Appendix: The Source Tree
-      10.1  The Compiler
-      10.2  The Poke Virtual Machine
-      10.3  The IO Subsystem
-      10.4  Poke Program
-      10.5  Pickles and Libraries
-      10.6  Test Suite
-      10.7  Documentation
-      10.8  Other Stuff
+       2.1  Writing C
+       2.2  Writing Poke
+     3  Submitting a Patch
+     4  Maintenance
+     5  Poke Architecture
+     6  The Poke Compiler
+       6.1  Compiler Overview
+       6.2  The bison Parser in pkl-tab.y
+       6.3  The AST
+       6.4  Compiler Passes and Phases
+         6.4.1  Naming Conventions for Phases
+         6.4.2  Naming Conventions for Handlers
+         6.4.3  Transformation Phases
+         6.4.4  Analysis Phases
+         6.4.5  Type System Phases
+       6.5  The Type System
+         6.5.1  Type Expressions
+       6.6  Adding Compiler Built-Ins
+     7  The Poke Virtual Machine
+       7.1  Exception Handling
+       7.2  Offsets and bit-offsets in the PVM
+     8  Memory Management
+       8.1  Using ASTREF
+       8.2  Using ASTDEREF
+       8.3  PVM values in PVM programs
+       8.4  PVM values in AST nodes
+     9  Debugging Poke
+       9.1  Building with Debugging support
+       9.2  Using GDB extensions
+       9.3  Valgrind and Poke
+       9.4  Debugging PVM Assembly Code
+    10  Future Developments
+    11  Appendix: The Source Tree
+      11.1  The Compiler
+      11.2  The Poke Virtual Machine
+      11.3  The IO Subsystem
+      11.4  Poke Program
+      11.5  Pickles and Libraries
+      11.6  Test Suite
+      11.7  Documentation
+      11.8  Other Stuff
 
 
 Development Environment
@@ -159,6 +163,12 @@ directory in the sources tree.  For example::
 Coding Style and Conventions
 ----------------------------
 
+Writing C
+~~~~~~~~~
+
+In Poke we follow the GNU Coding Standards.  Please see
+http://www.gnu.org/prep/standards/.
+
 Writing Poke
 ~~~~~~~~~~~~
 
@@ -171,7 +181,35 @@ Writing Poke
 
     16 #B
 
+Submitting a Patch
+------------------
 
+If you hack a feature/improvement/bugfix for poke and want to get it
+integrated upstream, please keep the following points in mind:
+
+- If your patch changes the user-visible characteristics of poke,
+  please include an update for the user manual.
+
+- If your patch adds or changes the way poke works internally, in a
+  significant way, please consider including an update for the
+  ``HACKING`` file.
+
+- Please include a GNU-style ChangeLog in the patch description, but
+  do not include it in the thunks.  This is to ease reviewers to apply
+  your patch for testing.  Of course, include the thunk in the final
+  push!  (We will get rid of manually ChangeLog entries soon.)
+
+- Let's keep poke.git master linear... no merges please.  Pull with
+  ``--ff-only``.
+
+- Send the patch to the ``poke-devel`` mailing list.
+
+- Use text email only.  No html please.
+
+- Inline the patch in the body of your email, or alternatively attach
+  it as ``text/x-diff`` or ``text/x-patch``.  This is to ease
+  reviewers to quote parts of the patch.
+    
 Maintenance
 -----------
 
