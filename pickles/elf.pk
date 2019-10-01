@@ -33,7 +33,7 @@ deftype Elf_Half = uint<16>;
 deftype Elf_Word = uint<32>;
 deftype Elf64_Xword = uint<64>;
 deftype Elf64_Sxword = int<64>;
-deftype Elf64_Addr = uint<64>;
+deftype Elf64_Addr = offset<uint<64>,B>;
 deftype Elf64_Off = offset<uint<64>,B>;
 
 defvar SHT_STRTAB = 3;
@@ -43,7 +43,7 @@ defvar SHT_DYNSYM = 11;
 deftype Elf64_Rela =
   struct
   {
-    offset<Elf64_Addr,B> r_offset;
+    Elf64_Addr r_offset;
     Elf64_Xword r_info;
     Elf64_Sxword r_addend;
   };
@@ -139,3 +139,4 @@ defun elf_section_by_type = (Elf64_Ehdr ehdr, Elf_Word type) Elf64_Shdr:
 
   raise E_generic;
 }
+ 

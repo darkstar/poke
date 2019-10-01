@@ -1,5 +1,10 @@
 2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/elf.pk (Elf64_Addr): turn type into an offset.
+	(Elf64_Rela): Adjust accordingly.
+
+2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/elf.pk (elf_section_by_name): New function.
 	(elf_section_by_type): Likewise.
 	(SHT_DYNSYM): Define.
