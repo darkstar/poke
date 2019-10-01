@@ -38,6 +38,7 @@ deftype Elf64_Off = offset<uint<64>,B>;
 
 defvar SHT_STRTAB = 3;
 defvar SHT_RELA = 4;
+defvar SHT_DYNSYM = 11;
 
 deftype Elf64_Rela =
   struct
@@ -97,9 +98,44 @@ deftype Elf64_Ehdr =
     Elf_Half e_shstrndx : e_shstrndx < e_shnum;
   };
 
+/* Given an ELF header and an offset in the file's string table,
+   return the string.  A different string table can be passed
+   optionally.  */
+
 defun elf_string = (Elf64_Ehdr ehdr, offset<Elf_Word,B> offset,
                     Elf_Half strtab = ehdr.e_shstrndx) string:
 {
  defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
  return string @ (shdr[strtab].sh_offset + offset);
+}
+
+/* Given a section name, return the section header corresponding to
+   the first section in the ELF file featuring that name.  In case no
+   such section exists, raise a generic error exception.  */
+
+defun elf_section_by_name = (Elf64_Ehdr ehdr,
+                             string name) Elf64_Shdr:
+{
+ defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
+
+ for (s in shdr)
+   if (elf_string (ehdr, s.sh_name) == name)
+     return s;
+
+ raise E_generic;
+}
+
+/* Given a section type (SHT_* value) return the section header
+   corresponding to the first section in the ELF file featuring that
+   name.  In case no such section exists, raise a generic error
+   exception.  */
+
+defun elf_section_by_type = (Elf64_Ehdr ehdr, Elf_Word type) Elf64_Shdr:
+{
+  defvar shdr = Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff;
+
+  for (s in shdr where s.sh_type == type)
+    return s;
+
+  raise E_generic;
 }
