@@ -1,3 +1,8 @@
+2019-10-01  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pk-file.c (pk_cmd_load_file): Try to load the specified file
+	relative to the current working directory, then look in datadir.
+
 2019-09-30  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* HACKING: (Nomenclature): New section.

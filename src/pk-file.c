@@ -155,22 +155,42 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* load FILENAME */
 
-  const char *filename;
+  const char *arg;
+  char *filename = NULL;
 
   assert (argc == 1);
-  filename = PK_CMD_ARG_STR (argv[0]);
+  arg = PK_CMD_ARG_STR (argv[0]);
 
-  if (access (filename, R_OK) != 0)
+  if (access (arg, R_OK) == 0)
+    filename = xstrdup (arg);
+  else if (arg[0] != '/')
     {
-      printf (_("%s: file cannot be read\n"), filename);
-      return 0;
+      /* Try to open the specified file relative to POKEDATADIR.  */
+      filename = xmalloc (strlen (poke_datadir)
+                          + 1 /* "/" */ + strlen (arg)
+                          + 1);
+      strcpy (filename, poke_datadir);
+      strcat (filename, "/");
+      strcat (filename, arg);
+
+      if (access (filename, R_OK) != 0)
+        goto no_file;
     }
+  else
+    goto no_file;
 
   if (!pkl_compile_file (poke_compiler, filename))
     /* Note that the compiler emits it's own error messages.  */
-    return 0;
+    goto error;
 
+  free (filename);
   return 1;
+
+ no_file:
+  printf (_("%s: file cannot be read\n"), arg);
+ error:
+  free (filename);
+  return 0;
 }
 
 struct pk_cmd file_cmd =
