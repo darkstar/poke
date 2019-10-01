@@ -1,5 +1,25 @@
 2019-10-01  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/Makefile.am (dist_pkgdata_DATA): Distribute elf.pk and
+	ctf.pk only.
+	* pickles/future/bmp.pk: Moved from pickles/
+	* pickles/future/tar.pk: Likewise.
+	* pickles/future/swf.pk: Likewise.
+	* pickles/future/pdp10.pk: Likewise.
+	* pickles/future/mp3.pk: Likewise.
+	* pickles/future/leb128.pk: Likewise.
+	* pickles/future/jpeg.pk: Likewise.
+	* pickles/future/id3v2.pk: Likewise.
+	* pickles/future/id3v1.pk: Likewise.
+	* pickles/future/gzip.pk: Likewise.
+	* pickles/future/flv.pk: Likewise.
+	* pickles/future/elf-future.pk: Likewise.
+	* pickles/future/dwarf.pk: Likewise.
+	* pickles/future/deflate.pk: Likewise.
+	* pickles/future/bson.pk: Likewise.
+
+2019-10-01  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pk-file.c (pk_cmd_load_file): Try to load the specified file
 	relative to the current working directory, then look in datadir.
 
