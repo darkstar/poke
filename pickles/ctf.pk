@@ -240,15 +240,6 @@ deftype Ctf_Enum =
     int<32> cte_value;
   };
 
-defun ctf_section = (Elf64_Ehdr ehdr) Elf64_Shdr:
-{
- for (s in Elf64_Shdr[ehdr.e_shnum] @ ehdr.e_shoff)
-   if (elf_string (ehdr, s.sh_name) == ".ctf")
-     return s;
-
- raise E_generic;
-}
-
 defun ctf_string = (Elf64_Ehdr ehdr,
                     Ctf_Header header,
                     Ctf_Name name) string:
