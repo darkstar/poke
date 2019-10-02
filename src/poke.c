@@ -104,18 +104,18 @@ static const struct option long_options[] =
 static void
 print_help ()
 {
-  /* TRANSLATORS: --help output, gnunity synopsis.
+  /* TRANSLATORS: --help output, GNU poke synopsis.
      no-wrap */
   printf (_("\
 Usage: poke [OPTION]... [FILE]\n"));
 
-  /* TRANSLATORS: --help output, gnunity summary.
+  /* TRANSLATORS: --help output, GNU poke summary.
      no-wrap */
   fputs(_("\
 Interactive editor for binary files.\n"), stdout);
 
   puts ("");
-  /* TRANSLATORS: --help output, poke arguments.
+  /* TRANSLATORS: --help output, GNU poke arguments.
      no-wrap */
   fputs (_("\
   -l, --load=FILE                     load the given pickle at startup.\n"),
@@ -123,7 +123,7 @@ Interactive editor for binary files.\n"), stdout);
 
   puts ("");
 
-  /* TRANSLATORS: --help output, poke arguments.
+  /* TRANSLATORS: --help output, GNU poke arguments.
      no-wrap */
   fputs(_("\
 Commanding poke from the command line:\n\
@@ -132,7 +132,7 @@ Commanding poke from the command line:\n\
          stdout);
 
   puts ("");
-  /* TRANSLATORS: --help output, less used poke arguments.
+  /* TRANSLATORS: --help output, less used GNU poke arguments.
      no-wrap */
   fputs (_("\
   -q, --no-init-file                  do not load an init file.\n\
