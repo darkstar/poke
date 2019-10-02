@@ -1,5 +1,9 @@
 2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/std.pk (NULL): New variable.
+
+2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/ctf.pk (ctf_section): Removed, as this replicates logic
 	in elf_section_by_name.
 

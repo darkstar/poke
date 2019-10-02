@@ -45,6 +45,9 @@ deftype long = int64;
 
 deftype off64 = offset<int64,b>;
 
+/* Having a NULL value which is compatible with C is useful.  */
+defvar NULL = 0#B;
+
 /* String related routines.  */
 
 defun substr = (string s, int f, int t = s'length - 1) string:
