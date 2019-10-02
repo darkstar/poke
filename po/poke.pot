@@ -1,0 +1,179 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the GNU poke package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: GNU poke 0.1-beta\n"
+"Report-Msgid-Bugs-To: bug-gnu-utils@gnu.org\n"
+"POT-Creation-Date: 2019-10-02 11:20+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/pk-cmd.c:278
+#, c-format
+msgid "%s: command not found.\n"
+msgstr ""
+
+#: src/pk-cmd.c:299
+#, c-format
+msgid "%s: invalid flag `%c'\n"
+msgstr ""
+
+#: src/pk-cmd.c:540
+msgid "This command requires an IO space.  Use the `file' command."
+msgstr ""
+
+#: src/pk-cmd.c:550
+msgid "This command requires a writable IO space."
+msgstr ""
+
+#: src/pk-cmd.c:573
+#, c-format
+msgid "Usage: %s\n"
+msgstr ""
+
+#: src/pk-def.c:107
+#, c-format
+msgid "Name\t\tValue\t\t\tDeclared at\n"
+msgstr ""
+
+#: src/pk-file.c:47 src/pk-file.c:105
+#, c-format
+msgid "No such file #%d\n"
+msgstr ""
+
+#: src/pk-file.c:62 src/pk-file.c:190
+#, c-format
+msgid "%s: file cannot be read\n"
+msgstr ""
+
+#: src/pk-file.c:71
+#, c-format
+msgid "File %s already opened.  Use `file #N' to switch.\n"
+msgstr ""
+
+#: src/pk-file.c:81 src/pk-file.c:120
+#, c-format
+msgid "The current file is now `%s'.\n"
+msgstr ""
+
+#: src/pk-file.c:116
+msgid "No more IO spaces."
+msgstr ""
+
+#: src/pk-file.c:147
+#, c-format
+msgid "  Id\tMode\tPosition\tFilename\n"
+msgstr ""
+
+#: src/pkl.c:265 src/pkl.c:323 src/pkl.c:375 src/pkl.c:426
+#, c-format
+msgid "out of memory\n"
+msgstr ""
+
+#: src/pk-print.c:57
+#, c-format
+msgid "print: only one of `x', `b' or `o' may be specified.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, gnunity synopsis.
+#. no-wrap
+#: src/poke.c:109
+#, c-format
+msgid "Usage: poke [OPTION]... [FILE]\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, gnunity summary.
+#. no-wrap
+#: src/poke.c:114
+msgid "Interactive editor for binary files.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, poke arguments.
+#. no-wrap
+#: src/poke.c:120
+msgid ""
+"  -l, --load=FILE                     load the given pickle at startup.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, poke arguments.
+#. no-wrap
+#: src/poke.c:128
+msgid ""
+"Commanding poke from the command line:\n"
+"  -c, --command=CMD                   execute the given command.\n"
+"  -s, --script=FILE                   execute commands from FILE.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output, less used poke arguments.
+#. no-wrap
+#: src/poke.c:137
+msgid ""
+"  -q, --no-init-file                  do not load an init file.\n"
+"      --quiet                         be as terse as possible.\n"
+"      --help                          print a help message and exit.\n"
+"      --version                       show version and exit.\n"
+msgstr ""
+
+#. TRANSLATORS: --help output 5+ (reports)
+#. TRANSLATORS: the placeholder indicates the bug-reporting address
+#. for this application.  Please add _another line_ with the
+#. address for translation bugs.
+#. no-wrap
+#: src/poke.c:150
+#, c-format
+msgid "Report bugs to: %s\n"
+msgstr ""
+
+#: src/poke.c:153
+#, c-format
+msgid "Report %s bugs to: %s\n"
+msgstr ""
+
+#: src/poke.c:156
+#, c-format
+msgid "%s home page: <%s>\n"
+msgstr ""
+
+#: src/poke.c:157
+msgid "General help using GNU software: <http://www.gnu.org/gethelp/>\n"
+msgstr ""
+
+#: src/poke.c:176
+#, c-format
+msgid ""
+"Copyright (C) %s Jose E. Marchesi.\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>.\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+msgstr ""
+
+#: src/poke.c:182
+#, c-format
+msgid ""
+"\n"
+"Powered by Jitter %s."
+msgstr ""
+
+#: src/poke.c:185
+msgid ""
+"\n"
+"Perpetrated by Jose E. Marchesi."
+msgstr ""
+
+#: src/poke.c:270
+msgid "For help, type \".help\"."
+msgstr ""
+
+#: src/poke.c:271
+msgid "Type \".exit\" to leave the program."
+msgstr ""

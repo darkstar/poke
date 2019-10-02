@@ -17,7 +17,15 @@ config.h.in
 /config.status
 /configure.lineno
 /lib
-/po
+/po/.gitignore
+/po/.reference
+/po/LINGUAS
+/po/stamp-po
+/po/POTFILES
+/po/remove-potcdate.sed
+/po/*.gmo
+/po/*.po
+/po/Makevars
 /build-aux/compile
 /build-aux/config.guess
 /build-aux/config.rpath

@@ -1,0 +1,15 @@
+2019-10-02  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.19.8.1.
+	* Rules-quot: Upgrade to gettext-0.19.8.1.
+
+2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* POTFILES.in: Updated.
+
+2019-10-02  gettextize  <bug-gnu-gettext@gnu.org>
+
+	* Makefile.in.in: Upgrade to gettext-0.19.8.1.
+	* Rules-quot: Upgrade to gettext-0.19.8.1.
+	* POTFILES.in: New file.
+
