@@ -1,5 +1,10 @@
 2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* HACKING (Building): Mention --skip-po to invoke bootstrap, and
+	other updates.
+
+2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Writing Poke): Add a note about using CamelCase for
 	type names.
 

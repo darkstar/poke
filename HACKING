@@ -150,10 +150,20 @@ Building
 After getting the git sources, and installing the tools above, you can
 run::
   
-  ./bootstrap
+  $ ./bootstrap --skip-po
 
-to do a fresh build.  After that first time, running make should
-suffice.
+Then, you can run ``configure``::
+
+  $ mkdir build/ && cd build
+  $ ../configure --with-jitter=PATH_TO_JITTER_INSTALL OTHER_OPTIONS...
+
+Note that, for now, it is necessary to specify ``--with-jitter`` even
+if Jitter is installed in a standard location.
+  
+Finally::
+
+  $ make
+  $ make check
 
 Gettext
 ~~~~~~~
