@@ -27,7 +27,7 @@ pk_help_str = pk_help_str
 defvar pk_dump_size = 128#B;
 defvar pk_dump_group_by = 2#B;
 defvar pk_dump_ruler = 1;
-defvar pk_dump_ascii = 0;
+defvar pk_dump_ascii = 1;
 
 /* `pk_dump_offset' keeps the last base offset used by `dump'.  It is
    the offset to be used in case the command is invoked with no :from
@@ -76,6 +76,20 @@ defun dump = (off64 from = pk_dump_offset,
              printf ("%u8x", int<8> @ (offset + o));
              o = o + 1#B;
            }
+         if (ascii)
+	   {
+	     print("  ");
+	     o = 0#B;
+	     while (o < step && offset + o < top)
+	       {
+	         defvar v = int<8> @ (offset + o);
+	         if (v < ' ' || v > '~')
+	           print(".");
+	         else
+	           printf ("%c", v);
+	         o = o + 1#B;
+	       }
+	   }
          print "\n";
          
          offset = offset + step;

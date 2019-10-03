@@ -1,5 +1,10 @@
 2019-10-03  Henner Zeller  <h.zeller@acm.org>
 
+	* src/pk-dump.pk (pk_dump_ascii): Default to 1.
+	(dump): Provide ASCII output.
+
+2019-10-03  Henner Zeller  <h.zeller@acm.org>
+
 	* src/pkl-trans.c: Include gettext.h and define _ for i18n.
 	(pkl_trans1_ps_print_stmt): Handle %c format tags.
 	Add more specific (i18n'd) error messages in format-string
