@@ -1,3 +1,8 @@
+2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING (Writing Poke): Add a note about using CamelCase for
+	type names.
+
 2019-10-02  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/std.pk (NULL): New variable.

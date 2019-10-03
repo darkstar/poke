@@ -197,6 +197,9 @@ Writing Poke
 
     16 #B
 
+- Use CamelCase for type names, but do not use CamelCase for
+  variable/function names!
+    
 Submitting a Patch
 ------------------
 
