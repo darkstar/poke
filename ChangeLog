@@ -1,5 +1,12 @@
 2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl.c (rest_of_compilation): Do not traverse node types in
+	the lex pass.
+	* src/pkl-trans.c (pkl_transl_pr_type_struct): New handler.
+	* testsuite/poke.map/maps-arrays-15.pk: New test.
+
+2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Building): Mention --skip-po to invoke bootstrap, and
 	other updates.
 

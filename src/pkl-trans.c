@@ -136,6 +136,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_type_array)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_transl_pr_type_struct)
+{
+  /* Do not modify the lexical environment of struct types, or they
+     will be incorrect if they happen to be contained in arrays in
+     maps.  This sucks, but will go away once we handle lexical
+     addresses properly later in the compilation process.  */
+  PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
 PKL_PHASE_BEGIN_HANDLER (pkl_transl_ps_var)
 {
   if (PKL_TRANS_PAYLOAD->add_frames != -1)
@@ -154,6 +164,7 @@ struct pkl_phase pkl_phase_transl =
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_transl_ps_var),
    PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_pr_type_array),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_transl_ps_type_array),
+   PKL_PHASE_PR_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_transl_pr_type_struct),
   };
 
 

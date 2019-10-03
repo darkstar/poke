@@ -186,7 +186,7 @@ rest_of_compilation (pkl_compiler compiler,
   pkl_trans_init_payload (&trans4_payload);
   pkl_gen_init_payload (&gen_payload, compiler);
 
-  if (!pkl_do_pass (ast, lex_phases, lex_payloads, PKL_PASS_F_TYPES))
+  if (!pkl_do_pass (ast, lex_phases, lex_payloads, 0))
     goto error;
 
   if (transl_payload.errors > 0)
