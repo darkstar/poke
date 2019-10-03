@@ -312,7 +312,12 @@ late-header-c
     {                                                                       \
       int prec = 0;                                                         \
                                                                             \
-      if (JITTER_ARGN1 == 16)                                               \
+      if (JITTER_ARGN1 == 256)                                              \
+      {                                                                     \
+        fmt[4] = 'c';                                                       \
+        prec = 1;                                                           \
+      }                                                                     \
+      else if (JITTER_ARGN1 == 16)                                          \
       {                                                                     \
         fmt[4] = 'x';                                                       \
         prec = (JITTER_ARGN0 / 4) + ((JITTER_ARGN0 % 4) != 0);              \

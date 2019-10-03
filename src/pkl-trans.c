@@ -18,6 +18,8 @@
 
 #include <config.h>
 
+#include <gettext.h>
+#define _(str) gettext (str)
 #include <stdio.h>
 #include <xalloc.h>
 
@@ -659,6 +661,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   pkl_ast_node t, arg;
   int ntag, nargs = 0;
   pkl_ast_node types = NULL;
+  const char *msg = NULL;
 
   /* Calculate the number of arguments.  */
   for (t = args; t; t = PKL_AST_CHAIN (t))
@@ -713,6 +716,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
           PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
           types = pkl_ast_chainon (types, atype);
           break;
+        case 'c':
+          p += 2;
+          PKL_AST_PRINT_STMT_ARG_BASE (arg) = 256;  /* Arbitrary */
+          atype = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
+          PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+          types = pkl_ast_chainon (types, atype);
+          break;
         case 'i':
         case 'u':
           {
@@ -734,7 +744,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                   }
                 
                 if (bits > 64)
-                  goto invalid_tag;
+                  {
+                    msg = _("Base with more than 64 bits");
+                    goto invalid_tag;
+                  }
                 
                 switch (p[base_idx])
                   {
@@ -742,7 +755,16 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                   case 'o': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 8; break;
                   case 'd': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 10; break;
                   case 'x': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 16; break;
+                  case 'c':
+                    PKL_AST_PRINT_STMT_ARG_BASE (arg) = 256;
+                    if (bits != 8)
+                      {
+                        msg = _("char format only makes sense with 8 bits");
+                        goto invalid_tag;
+                      }
+                    break;
                   default:
+                    msg = _("invalid base");
                     goto invalid_tag;
                   }
                 
@@ -757,10 +779,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                   p += 4;
               }
             else
-              goto invalid_tag;
+              {
+                msg = _("Expected decimal digit after %u");
+                goto invalid_tag;
+              }
             break;
           }
         default:
+          msg = _("invalid format specifier");
           goto invalid_tag;
         }        
 
@@ -798,7 +824,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 
  invalid_tag:
   pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_fmt),
-             "invalid %%- tag in format string");
+             "invalid %%- tag in format string: %s", msg);
   PKL_TRANS_PAYLOAD->errors++;
   PKL_PASS_ERROR;
 }

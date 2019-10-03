@@ -1,3 +1,11 @@
+2019-10-03  Henner Zeller  <h.zeller@acm.org>
+
+	* src/pkl-trans.c: Include gettext.h and define _ for i18n.
+	(pkl_trans1_ps_print_stmt): Handle %c format tags.
+	Add more specific (i18n'd) error messages in format-string
+	parsing.
+	* src/pvm.jitter (PVM_PRINTI): Handle %c.
+
 2019-10-03  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl.c (rest_of_compilation): Do not traverse node types in
