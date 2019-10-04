@@ -1,3 +1,14 @@
+2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* cfg.mk (local-checks-to-skip): Add sc_tight_scope.
+	* .x-sc_makefile_TAB_only_indentation: New file.
+	* .x-sc_prohibit_empty_lines_at_EOF: Likewise.
+	* .x-sc_makefile_path_separator_check: Likewise.
+	* .x-sc_prohibit_undesirable_word_seq: Likewise.
+	* .x-sc_tight_scope: Likewise.
+	* testsuite/poke.pkl/rand-1.pk: Remove empty lines at EOF.
+	* ChangeLog: Likewise.
+
 2019-10-03  Henner Zeller  <h.zeller@acm.org>
 
 	* .gitignore: ignore src/*.o files.
@@ -161,4 +172,3 @@
 2019-09-06  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* HACKING (Jitter): Add information on the dependency on jitter.
-
