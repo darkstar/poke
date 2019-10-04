@@ -1,5 +1,9 @@
 2019-10-03  Henner Zeller  <h.zeller@acm.org>
 
+	* .gitignore: ignore src/*.o files.
+
+2019-10-03  Henner Zeller  <h.zeller@acm.org>
+
 	* src/pk-dump.pk (pk_dump_ascii): Default to 1.
 	(dump): Provide ASCII output.
 
