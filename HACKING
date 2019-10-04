@@ -228,6 +228,11 @@ integrated upstream, please keep the following points in mind:
   your patch for testing.  Of course, include the thunk in the final
   push!  (We will get rid of manually ChangeLog entries soon.)
 
+- Make sure to run ``make syntax-check`` before submitting the patch,
+  and fix any reported problem.  Note that the maintainer reviewing
+  your patch will also do this, so this is a great time to save an
+  iteration ;)
+
 - Let's keep poke.git master linear... no merges please.  Pull with
   ``--ff-only``.
 

@@ -1,5 +1,10 @@
 2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* HACKING (Submitting a Patch): Add a note about running `make
+	syntax-check'.
+
+2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* cfg.mk (local-checks-to-skip): Remove sc_trailing_blank.
 	* .x-sc_trailing_blanks: New file.
 	* pickles/elf.pk: Remove trailing blanks.
