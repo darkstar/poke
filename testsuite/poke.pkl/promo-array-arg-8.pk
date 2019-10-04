@@ -9,4 +9,3 @@ defun foo = (List a = [1,2]) int: { return a[1]; }
 
 /* { dg-command {foo([3,4])} } */
 /* { dg-output "\n4" } */
-  

@@ -6,5 +6,3 @@ defvar a = ["foo", "bar", "baz"]
 /* { dg-command {a[1] = "xxx"} } */
 /* { dg-command {a[1]} } */
 /* { dg-output "xxx" } */
-
-  

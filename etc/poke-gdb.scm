@@ -46,7 +46,7 @@
                                           (value-lognot
                                            (value-cast (make-value 0)
                                                        (lookup-type "uint64_t")))
-                                          (value-sub uint-size 1))  
+                                          (value-sub uint-size 1))
                                          (make-value 1)))
                                        (lookup-type "uint32_t")))))
          (format #f "(pvm:uint<~a>) ~a" uint-size uint-val)))
@@ -93,7 +93,7 @@
                                          (value-lognot
                                           (value-cast (make-value 0)
                                                       (lookup-type "unsigned long long")))
-                                         (value-sub ulong-size 1))  
+                                         (value-sub ulong-size 1))
                                         (make-value 1)))
                                       (lookup-type "uint64_t")))))
          (format #f "(pvm:ulong<~a>) ~a" ulong-size ulong-val)))
@@ -133,7 +133,7 @@
       ((#x7) ;; PVM_NULL
        "PVM_NULL")
       (else
-       "Unknown PVM_VAL tag"))))  
+       "Unknown PVM_VAL tag"))))
 
 (define (make-poke-pvm-val-printer value)
   "Print a pvm_val object"

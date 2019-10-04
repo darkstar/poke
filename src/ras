@@ -117,7 +117,7 @@
 # .loop
 #  ... body ...
 # .endloop
-# 
+#
 # Instructions
 # ------------
 #
@@ -409,7 +409,7 @@ BEGIN {
     ideffile = srcdir "/pkl-insn.def"
     if (system ("test -r " ideffile) == 1)
         fatal("fatal: cannot read instruction definition file " ideffile)
-    
+
     cmd = "cpp -D'PKL_DEF_INSN(M,A,N)=M A N' -P " ideffile
     while ((cmd | getline line) > 0)
     {
@@ -420,7 +420,7 @@ BEGIN {
         # Remove leading and trailing double-quotes wherever
         # appropriate
         name = substr (name, 2, length (name) - 2)
-        args = substr (args, 2, length (args) - 2)     
+        args = substr (args, 2, length (args) - 2)
 
         # Build the instruction's regexp.
         iregexp = name
@@ -437,12 +437,12 @@ BEGIN {
             for (ia = 1; ia <= length (args); ia++)
             {
                 a = substr (args, ia, 1)
-                
+
                 if (ia == 1)
                     iregexp = iregexp "[ \t]+"
                 if (ia != 1)
                     iregexp = iregexp "[ \t]*,[ \t]*"
-                
+
                 switch (a)
                 {
                     case "n":
@@ -543,7 +543,7 @@ BEGIN {
     out("#define RAS_MACRO_" toupper($2) macro_args " \\")
     out("\tdo {                                                     \\")
     out("---LABELDECLS---")
-    
+
     current_entity = "macro"
     next
 }
@@ -752,10 +752,10 @@ BEGIN {
             lookup_var(vname)
             vback = lookup_var_found["back"]
             vover = lookup_var_found["over"]
-            
+
             if (vback == -1 || vover == -1)
                 error(FNR ": unknown variable $" vname)
-            
+
             $0 = gensub ("\\$" vname, vback "," vover, "g", $0);
         }
     }

@@ -1,3 +1,44 @@
+2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* cfg.mk (local-checks-to-skip): Remove sc_trailing_blank.
+	* .x-sc_trailing_blanks: New file.
+	* pickles/elf.pk: Remove trailing blanks.
+	* etc/poke-gdb.scm: Likewise.
+	* doc/poke.texi: Likewise.
+	* testsuite/poke.std/std.exp: Likewise.
+	* testsuite/poke.pkl/try-catch-2.pk: Likewise.
+	* testsuite/poke.pkl/structs.pk: Likewise.
+	* testsuite/poke.pkl/promo-array-arg-diag-7.pk: Likewise.
+	* testsuite/poke.pkl/promo-array-arg-8.pk: Likewise.
+	* testsuite/poke.pkl/pkl.exp: Likewise.
+	* testsuite/poke.pkl/loop-4.pk: Likewise.
+	* testsuite/poke.pkl/loop-3.pk: Likewise.
+	* testsuite/poke.pkl/funcall-def-diag-7.pk: Likewise.
+	* testsuite/poke.pkl/funcall-def-diag-5.pk: Likewise.
+	* testsuite/poke.pkl/funcall-def-2.pk: Likewise.
+	* testsuite/poke.pkl/fun-types-4.pk: Likewise.
+	* testsuite/poke.pkl/fun-types-3.pk: Likewise.
+	* testsuite/poke.pkl/for-in-2.pk: Likewise.
+	* testsuite/poke.pkl/defun-12.pk: Likewise.
+	* testsuite/poke.pkl/defun-10.pk: Likewise.
+	* testsuite/poke.pkl/break-while-2.pk: Likewise.
+	* testsuite/poke.pkl/break-while-1.pk: Likewise.
+	* testsuite/poke.pkl/break-for-1.pk: Likewise.
+	* testsuite/poke.pkl/array-siz-1.pk: Likewise.
+	* testsuite/poke.map/maps-structs-constraints-1.pk: Likewise.
+	* testsuite/poke.map/maps-arrays-4.pk: Likewise.
+	* testsuite/poke.map/map.exp: Likewise.
+	* testsuite/poke.cmd/cmd.exp: Likewise.
+	* testsuite/lib/poke.exp: Likewise.
+	* testsuite/lib/poke-dg.exp: Likewise.
+	* src/std.pk: Likewise.
+	* src/ras: Likewise.
+	* src/pvm.jitter: Likewise.
+	* src/pkl-insn.def: Likewise.
+	* src/pkl-gen.pks: Likewise.
+	* src/pkl-asm.pks: Likewise.
+	* src/pk-dump.pk: Likewise.
+
 2019-10-04  Henner Zeller  <h.zeller@acm.org>
 
 	* src/ios-dev.h: Remove trailing spaces.

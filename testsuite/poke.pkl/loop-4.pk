@@ -15,7 +15,7 @@ defun loop_4 = int:
          }
        i = i + 1;
      }
-   
+
    return res;
   }
 

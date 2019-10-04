@@ -4,5 +4,4 @@ po_file=does-not-exist
 export _gl_TS_headers = *.h
 
 local-checks-to-skip =                  \
-   sc_tight_scope                       \
-   sc_trailing_blank
+   sc_tight_scope

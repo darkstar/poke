@@ -52,7 +52,7 @@ PKL_DEF_INSN (PKL_INSN_SWAP, "", "swap")
 PKL_DEF_INSN (PKL_INSN_NIP, "", "nip")
 PKL_DEF_INSN (PKL_INSN_NIP2, "", "nip2")
 PKL_DEF_INSN (PKL_INSN_DUP, "", "dup")
-PKL_DEF_INSN (PKL_INSN_OVER, "", "over")  
+PKL_DEF_INSN (PKL_INSN_OVER, "", "over")
 PKL_DEF_INSN (PKL_INSN_ROT, "", "rot")
 PKL_DEF_INSN (PKL_INSN_NROT, "", "nrot")
 PKL_DEF_INSN (PKL_INSN_SAVER, "r", "saver")
@@ -62,7 +62,7 @@ PKL_DEF_INSN (PKL_INSN_FROMR, "", "fromr")
 PKL_DEF_INSN (PKL_INSN_ATR, "", "atr")
 
 PKL_DEF_INSN (PKL_INSN_REVN, "n", "revn")
-  
+
 /* Conversion instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_CTOS, "", "ctos")
@@ -93,7 +93,7 @@ PKL_DEF_INSN (PKL_INSN_NEGI, "", "negi")
 PKL_DEF_INSN (PKL_INSN_NEGIU, "", "negiu")
 PKL_DEF_INSN (PKL_INSN_NEGL, "", "negl")
 PKL_DEF_INSN (PKL_INSN_NEGLU, "", "neglu")
-  
+
 PKL_DEF_INSN (PKL_INSN_ADDI, "", "addi")
 PKL_DEF_INSN (PKL_INSN_ADDIU, "", "addiu")
 PKL_DEF_INSN (PKL_INSN_ADDL, "", "addl")
@@ -125,7 +125,7 @@ PKL_DEF_INSN (PKL_INSN_SWAPGTI, "", "swapgti")
 PKL_DEF_INSN (PKL_INSN_SWAPGTIU, "", "swapgtiu")
 PKL_DEF_INSN (PKL_INSN_SWAPGTL, "", "swapgtl")
 PKL_DEF_INSN (PKL_INSN_SWAPGTLU, "", "swapgtlu")
-  
+
 /* Shift instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_SLI, "", "bsli")
@@ -137,7 +137,7 @@ PKL_DEF_INSN (PKL_INSN_SRI, "", "bsri")
 PKL_DEF_INSN (PKL_INSN_SRIU, "", "bsriu")
 PKL_DEF_INSN (PKL_INSN_SRL, "", "bsrl")
 PKL_DEF_INSN (PKL_INSN_SRLU, "", "bsrlu")
-  
+
 /* Bitwise instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_BNOTI, "", "bnoti")
@@ -165,7 +165,7 @@ PKL_DEF_INSN (PKL_INSN_BXORLU, "", "bxorlu")
 PKL_DEF_INSN (PKL_INSN_AND, "", "and")
 PKL_DEF_INSN (PKL_INSN_OR, "", "or")
 PKL_DEF_INSN (PKL_INSN_NOT, "", "not")
-  
+
 /* Comparison instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_NN, "", "nn")
@@ -213,7 +213,7 @@ PKL_DEF_INSN (PKL_INSN_LES, "", "les")
 PKL_DEF_INSN (PKL_INSN_SCONC, "", "sconc")
 PKL_DEF_INSN (PKL_INSN_STRREF, "", "strref")
 PKL_DEF_INSN (PKL_INSN_SUBSTR, "", "substr")
-  
+
 /* Offset instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_MKO, "", "mko")
@@ -249,7 +249,7 @@ PKL_DEF_INSN (PKL_INSN_MSETO, "", "mseto")
 
 PKL_DEF_INSN (PKL_INSN_MGETM, "", "mgetm")
 PKL_DEF_INSN (PKL_INSN_MSETM, "", "msetm")
-  
+
 PKL_DEF_INSN (PKL_INSN_MGETW, "", "mgetw")
 PKL_DEF_INSN (PKL_INSN_MSETW, "", "msetw")
 

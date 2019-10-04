@@ -3,7 +3,7 @@
 defun foo = (int[] array) int:
   {
    defvar sum = 0;
-   
+
    for (a in array where a % 2 == 0)
      sum = sum + a;
 

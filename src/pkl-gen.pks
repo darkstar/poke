@@ -31,13 +31,13 @@
         push null
         msetw
         .end
-        
+
 ;;; RAS_FUNCTION_ARRAY_MAPPER
 ;;; ( OFF EBOUND SBOUND -- ARR )
-;;; 
+;;;
 ;;; Assemble a function that maps an array value at the given offset
 ;;; OFF, with mapping attributes EBOUND and SBOUND.
-;;; 
+;;;
 ;;; If both EBOUND and SBOUND are null, then perform an unbounded map,
 ;;; i.e. read array elements from IO until EOF.  XXX: what about empty
 ;;; arrays?
@@ -53,7 +53,7 @@
 ;;;
 ;;; Only one of EBOUND or SBOUND simultanously are supported.
 ;;; Note that OFF should be of type offset<uint<64>,*>.
-;;; 
+;;;
 ;;; The C environment required is:
 ;;;
 ;;; `array_type' is a pkl_ast_node with the array type being mapped.
@@ -132,7 +132,7 @@
         nip2                    ; OFF ATYPE (SBOUNDM+AOMAG)
         pushvar $eomag          ; OFF ATYPE (SBOUNDM+AOMAG) EOMAG
         gtlu                    ; OFF ATYPE (SBOUNDM+AOMAG) EOMAG ((SBOUNDM+AOMAG)>EOMAG)
-        nip2                    ; OFF ATYPE ((SBOUNDM+AOMAG)>EOMAG)  
+        nip2                    ; OFF ATYPE ((SBOUNDM+AOMAG)>EOMAG)
         ba .end_loop_on
 .loop_unbounded:
         drop                    ; OFF ATYPE
@@ -263,13 +263,13 @@
 
 ;;; RAS_FUNCTION_ARRAY_VALMAPPER
 ;;; ( VAL NVAL OFF -- ARR )
-;;; 
+;;;
 ;;; Assemble a function that "valmaps" a given NVAL at the given offset
 ;;; OFF, using the data of NVAL, and the mapping attributes of VAL.
-;;; 
+;;;
 ;;; This function can raise PVM_E_MAP_BOUNDS if the characteristics of
 ;;; NVAL violate the bounds of the map.
-;;; 
+;;;
 ;;; Note that OFF should be of type offset<uint<64>,*>.
 
         .function array_valmapper
@@ -333,7 +333,7 @@
         bnn .check_ebound
         drop                    ; OFF
         ba .ebound_ok
-   
+
 .check_ebound:
         pushvar $nelem          ; OFF EBOUND NELEM
         sublu                   ; OFF EBOUND NELEM (EBOUND-NELEM)
@@ -495,7 +495,7 @@
         addlu                   ; EDIX 1UL (EIDX+1UL)
         nip2                    ; (EIDX+1UL)
         popvar $idx             ; _
-     .endloop 
+     .endloop
         popf 1
         push null
         return
@@ -569,7 +569,7 @@
 ;;;
 ;;; `field' is a pkl_ast_node with the struct field being
 ;;; mapped.
-        
+
         .macro handle_struct_field_label
    .c if (PKL_AST_STRUCT_FIELD_TYPE_LABEL (field) == NULL)
         drop                    ; OFF
@@ -625,7 +625,7 @@
         drop
    .c }
         .end
-        
+
 ;;; RAS_MACRO_STRUCT_FIELD_MAPPER
 ;;; ( OFF SOFF -- OFF STR VAL NOFF )
 ;;;
@@ -663,7 +663,7 @@
         nrot                   ; OFF STR VAL
         fromr                  ; OFF STR VAL NOFF
         .end
-        
+
 ;;; RAS_FUNCTION_STRUCT_MAPPER
 ;;; ( OFF EBOUND SBOUND -- SCT )
 ;;;
@@ -679,10 +679,10 @@
 ;;;
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
-;;; 
+;;;
 ;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
-;;; 
+;;;
 ;;; `field' is a scratch pkl_ast_node.
 
         ;; NOTE: please be careful when altering the lexical structure of
@@ -744,10 +744,10 @@
 ;;;
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
-;;; 
+;;;
 ;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
-;;; 
+;;;
 ;;; `field' is a scratch pkl_ast_node.
 
         .function struct_constructor
@@ -794,7 +794,7 @@
         popf 1
         return
         .end
-        
+
 ;;; RAS_MACRO_STRUCT_FIELD_WRITER
 ;;; ( SCT I -- )
 ;;;
@@ -802,7 +802,7 @@
 ;;;
 ;;; C environment required:
 ;;; `field' is a pkl_ast_node with the type of the field to write.
-        
+
         .macro struct_field_writer
         ;; The field is written out only if it hasn't
         ;; been modified since the last mapping.
@@ -824,7 +824,7 @@
         drop                    ; _
 .next:
         .end
-        
+
 ;;; RAS_FUNCTION_STRUCT_WRITER
 ;;; ( OFF VAL -- )
 ;;;
@@ -834,10 +834,10 @@
 ;;;
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
-;;; 
+;;;
 ;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
 ;;; of the struct type being processed.
-;;; 
+;;;
 ;;; `field' is a scratch pkl_ast_node.
 
         .function struct_writer

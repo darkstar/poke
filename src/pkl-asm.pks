@@ -31,7 +31,7 @@
         mullu
         nip2                    ; OFF (OGETU*OGETM
         .end
-        
+
 ;;; RAS_MACRO_REMAP
 ;;; ( VAL -- VAL )
 ;;;
@@ -225,7 +225,7 @@
 ;;;
 ;;; Multiply an offset with a magnitude.  The result of the operation
 ;;; is an offset with base type BASE_TYPE.
-;;; 
+;;;
 ;;; Macro arguments:
 ;;; @base_type
 ;;;   a pkl_ast_node with the base type of the offset.

@@ -176,7 +176,7 @@ late-header-c
       pvm_val res = pvm_make_##TYPERLC (OP PVM_VAL_##TYPE (JITTER_TOP_STACK ()), size); \
       JITTER_PUSH_STACK (res);                                               \
     } while (0)
-   
+
 
 /* Binary numeric operations.
   ( TYPE TYPE -- TYPE TYPE TYPE ) */
@@ -694,7 +694,7 @@ instruction siz () # ( VAL -- VAL OFF )
     uint64_t size = pvm_sizeof (JITTER_TOP_STACK ());
     pvm_val unit = pvm_make_ulong (1, 64);
     pvm_val offset = pvm_make_offset (pvm_make_ulong (size, 64), unit);
-    
+
     JITTER_PUSH_STACK (offset);
   end
 end
@@ -2062,7 +2062,7 @@ end
 instruction msetm () #  ( VAL CLS -- VAL )
   code
     PVM_VAL_SET_MAPPER (JITTER_UNDER_TOP_STACK (), JITTER_TOP_STACK ());
-    JITTER_DROP_STACK ();           
+    JITTER_DROP_STACK ();
   end
 end
 
@@ -2075,7 +2075,7 @@ end
 instruction msetw () #  ( VAL CLS -- VAL )
   code
     PVM_VAL_SET_WRITER (JITTER_UNDER_TOP_STACK (), JITTER_TOP_STACK ());
-    JITTER_DROP_STACK ();           
+    JITTER_DROP_STACK ();
   end
 end
 

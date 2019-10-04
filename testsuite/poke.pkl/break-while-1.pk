@@ -11,4 +11,3 @@ while (i < 10)
   }
 
 /* { dg-output "foo\nfoo" } */
-  

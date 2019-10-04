@@ -4,4 +4,3 @@ defun def6 = (int[2] a = [1,2]) int: { return a[1]; }
 
 /* { dg-command { def6 } } */
 /* { dg-output "2" } */
-  

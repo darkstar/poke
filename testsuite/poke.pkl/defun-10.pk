@@ -4,6 +4,6 @@ deftype Callback = (int)int;
 
 defun foo = (Callback bar) int: { return bar (10); }
 defun double = (int a) int: { return a * 2; }
-  
+
 /* { dg-command {  foo (double) } } */
 /* { dg-output "20" } */

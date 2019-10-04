@@ -8,4 +8,3 @@ for (i in [1,2,3,4])
   }
 
 /* { dg-output "foo\nfoo" } */
-  

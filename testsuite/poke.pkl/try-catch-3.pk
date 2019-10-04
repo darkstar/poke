@@ -19,7 +19,7 @@ defun baz = (int n) int:
    }
 
    return ret;
-}  
+}
 
 /* { dg-command {  baz (2) } } */
 /* { dg-command {  baz (0) } } */

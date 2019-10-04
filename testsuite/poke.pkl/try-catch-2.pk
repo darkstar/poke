@@ -9,7 +9,7 @@ defun foo = (int n) int:
 defun baz = (int n) int:
 {
    defvar ret = 0;
-   
+
    try
      ret = foo (n);
    catch
@@ -19,7 +19,7 @@ defun baz = (int n) int:
    }
 
    return ret;
-}  
+}
 
 /* { dg-command {  baz (2) } } */
 /* { dg-command {  baz (0) } } */

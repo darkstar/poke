@@ -25,6 +25,6 @@ defun apply2 = (Callback[] callbacks, int a, int b) int:
      sum = sum + e (a, b);
    return sum;
   }
-  
+
 /* { dg-command {  apply2 ([add,sub], 10, 20) } } */
 /* { dg-output "\n20" } */

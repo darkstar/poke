@@ -139,4 +139,3 @@ defun elf_section_by_type = (Elf64_Ehdr ehdr, Elf_Word type) Elf64_Shdr:
 
   raise E_generic;
 }
- 

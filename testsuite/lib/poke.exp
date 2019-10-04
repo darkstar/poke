@@ -59,7 +59,7 @@ proc poke_start {} {
     global spawn_id
 
     #send_user "Executing $POKE --quiet\n"
-    
+
     spawn $POKE --quiet
     expect {
         -re "$poke_prompt $" { }
@@ -77,7 +77,7 @@ proc poke_test_cmd {cmd pattern} {
     } else {
         set expected_pattern "\r\n$pattern\r\n$poke_prompt $"
     }
-    
+
 
     send "$cmd\n"
     expect {
@@ -96,7 +96,7 @@ proc poke_test_cmd {cmd pattern} {
         -re "$poke_prompt $" {
             fail "$test (bad match)"
         }
-        
+
         timeout {
         fail "$test (timeout)"
         }

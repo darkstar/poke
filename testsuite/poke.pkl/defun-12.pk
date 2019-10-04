@@ -7,7 +7,7 @@ defun foo = (any a) int: { return a as int + 1; }
 
 /* { dg-command { try foo ("foo"); catch if E_conv { print "catched\n"; } } } */
 /* { dg-output "\ncatched" } */
-  
+
 defun bar = (any a) int: { return (a as int[])[1] + 1; }
 
 /* { dg-command {  bar ([2,4,6]) }  } */

@@ -63,7 +63,7 @@ defun strstr = (string s1, string s2) long:
      return 0;
    if (s1'length > s2'length)
      return -1;
-   
+
    while (i < s2'length - s1'length + 1)
      {
        if (s2[i..i + s1'length - 1] == s1)
@@ -80,7 +80,7 @@ defun format = (string fmt, args...) string:
    defvar fi = 0;
    defvar res = "";
    defvar narg = 0;
-   
+
    defun tohex = (uint<64> n) string:
    {
     defvar hex = "";
@@ -126,7 +126,7 @@ defun format = (string fmt, args...) string:
            && fi < fmt'length - 1)
          {
            /* Process %-sequence:
-              
+
               %{i,u}BITS{x,o,b,d,u}  */
 
            if (fmt[fi + 1] == 'x')
@@ -176,7 +176,7 @@ defun qsort = (any[] array, Comparator cmp_f,
 
      defvar pivot = array[right];
      defvar i = left - 1;
-    
+
      defvar j = left;
      while (j <= right - 1)
      {

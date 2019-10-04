@@ -8,13 +8,13 @@ defun loop_3 = (int i) int:
      {
        defvar n = 0;
        defvar res = 1;
-       
+
        while (n < i)
          {
            res = res * 2;
            n = n + 1;
          }
-       
+
        return res;
      }
   }

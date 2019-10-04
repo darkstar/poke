@@ -988,7 +988,7 @@ types.
 
 @c the type of @code{a} is @code{array (integer (32, 1))}, and it's size
 @c is @code{3}.
- 
+
 @c In function definitions, it is not allowed to specify a size for an
 @c array argument, thus, this is @emph{not} allowed:
 
@@ -1019,7 +1019,7 @@ types.
 
 @c is a type expression denoting a struct type having name @var{n} and @var{m}
 @c fields, each featuring a field name @var{li} and a type @var{ti}.
-  
+
 @c The strings @var{n} and @var{li} can be @code{NULL}, meaning the
 @c structure type is anonymous and that the corresponding struct fields
 @c are anonymous, respectively.
@@ -1617,7 +1617,7 @@ deftype Tag =
         int flags;
         int reserved;
       @};
-    
+
     struct
     @{
       int tag_type = TAG_VIDEO;
@@ -1640,7 +1640,7 @@ deftype Tag =
     @} null;
   @};
 @end example
-  
+
 Compare the above with the following version where flattening is not
 used at all.  The type `tag' is changed to a struct and an additional
 union is nested, very C-like.
@@ -1669,7 +1669,7 @@ deftype Tag =
       struct
       @{
       @} null : tag_type = TAG_NULL;
-      
+
     @} data;
   @};
 @end example
@@ -1791,7 +1791,7 @@ Allow constant expressions in integral type constructors, like
 @c                             of EXPR do not sum exactly LEN bytes.  */
 @c   @};
 @c @end example
-@c 
+@c
 @c     Note that if LEN is not achieved because of an union constraint
 @c     failure, this will catch the error (the union constraint failure
 @c     won't.)  Put an example.
@@ -2012,7 +2012,7 @@ pinned struct
   int f2;
 @};
 @end example
-  
+
    The location counter is not advanced when a pinned struct is
    processed.  Labels can be used with pinned fields with the usual
    semantics.
@@ -2066,7 +2066,7 @@ XXX: assignment to structs.
 
      for (elf_section section in elf.sections)
        switch (tagof (section))
-         @{ 
+         @{
           case progbits: bleh;
           case symtab: bleh;
          @}
@@ -2258,7 +2258,7 @@ XXX: optional fields.
        int f;
        struct @{@};
      @};
-@end example     
+@end example
 
      Note that if f does not have constraints associated with it, then
      it will be always present.
@@ -2429,7 +2429,7 @@ deftype astruct =
   struct
   @{
      int f1;
- 
+
      union
      @{
         int f2 : f1 == 0;
@@ -2453,7 +2453,7 @@ deftype astruct =
   struct
   @{
      int f1;
- 
+
      union
      @{
         int f2 : f1 == 0;
@@ -3380,7 +3380,7 @@ let packet = Packet @@ 0x00; /* This evals to a mapped Packet in an rhs.  */
 
       packet.field = 10;   /* This accesses IO.  */
       packet = @{0xa, 0xb@}; /* But this replaces the value of the variable.  */
-           
+
 let packets = Packet[] @@ 0x00; /* This evals to a mapped array value in an rhs.  */
 
       packets[0] = @{0xa, 0xb@};  /* This accesses IO.  */

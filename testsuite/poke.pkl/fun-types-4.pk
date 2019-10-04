@@ -20,4 +20,3 @@ defun apply = (Callback[] callbacks, int data) int:
 
 /* { dg-command { apply ([add], 1) } } */
 /* { dg-output "6" } */
-  

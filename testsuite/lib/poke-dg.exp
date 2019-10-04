@@ -112,7 +112,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
             if {$poke_commands eq {}} {
                 set poke_commands {-c ""}
             }
-            
+
             # Create a script in `output_file'.  DG will run it after
             # we return.
             set comp_output ""
