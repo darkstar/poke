@@ -52,9 +52,9 @@
 #endif
 
 #define scanner (pkl_parser->scanner)
-  
+
 /* YYLLOC_DEFAULT -> default code for computing locations.  */
-  
+
 #define PKL_AST_CHILDREN_STEP 12
 
 /* Convert a YYLTYPE value into an AST location and return it.  */
@@ -81,14 +81,14 @@ pkl_register_arg (struct pkl_parser *parser, pkl_ast_node arg)
   pkl_ast_node dummy
     = pkl_ast_make_integer (parser->ast, 0);
   PKL_AST_TYPE (dummy) = ASTREF (PKL_AST_FUNC_ARG_TYPE (arg));
-  
+
   arg_decl = pkl_ast_make_decl (parser->ast,
                                 PKL_AST_DECL_KIND_VAR,
                                 arg_identifier,
                                 dummy,
                                 NULL /* source */);
   PKL_AST_LOC (arg_decl) = PKL_AST_LOC (arg);
-  
+
   if (!pkl_env_register (parser->env,
                          PKL_AST_IDENTIFIER_POINTER (arg_identifier),
                          arg_decl))
@@ -157,7 +157,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
       char *name;
       pkl_ast_node id;
       pkl_ast_node decl;
-      
+
       asprintf (&name, "@*UNUSABLE_OFF_%d*@", i);
       id = pkl_ast_make_identifier (parser->ast, name);
       decl = pkl_ast_make_decl (parser->ast,
@@ -688,7 +688,7 @@ primary:
                   $$ = $1;
                   PKL_AST_LOC ($$) = @$;
                   PKL_AST_LOC (PKL_AST_TYPE ($$)) = @$;
-                } 
+                }
         | '(' expression ')'
         	{
                   $$ = $2;
@@ -886,7 +886,7 @@ function_arg:
 
                   PKL_AST_LOC (type) = @1;
                   PKL_AST_LOC (array_type) = @1;
-                  
+
                   $$ = pkl_ast_make_func_arg (pkl_parser->ast,
                                               array_type,
                                               $1,
@@ -981,7 +981,7 @@ offset_type_specifier:
 	;
 
 array_type_specifier:
-	  simple_type_specifier '[' ']' 
+	  simple_type_specifier '[' ']'
         	{
                   $$ = pkl_ast_make_array_type (pkl_parser->ast, $1,
                                                 NULL /* bound */);
@@ -1040,7 +1040,7 @@ function_type_arg:
 
                   PKL_AST_LOC (type) = @1;
                   PKL_AST_LOC (array_type) = @1;
-                  
+
                   $$ = pkl_ast_make_func_type_arg (pkl_parser->ast,
                                                    array_type, NULL /* name */);
                   PKL_AST_LOC ($$) = @$;
@@ -1112,7 +1112,7 @@ struct_field_type:
                                                 $2, dummy,
                                                 NULL /* source */);
                       PKL_AST_LOC (decl) = @$;
-                      
+
                       if (!pkl_env_register (pkl_parser->env,
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              decl))
@@ -1212,7 +1212,7 @@ declaration:
                   PKL_AST_DECL_INITIAL ($<ast>3)
                     = ASTREF ($5);
                   $$ = $<ast>3;
-                  
+
                   /* If the reference counting of the declaration is
                      bigger than 1, this means there are recursive
                      calls in the function body.  Reset the refcount
@@ -1290,7 +1290,7 @@ comp_stmt:
             {
               $$ = pkl_ast_make_comp_stmt (pkl_parser->ast, $3);
               PKL_AST_LOC ($$) = @$;
-              
+
               /* Pop the frame pushed by the `pushlevel' above.  */
               pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
             }
@@ -1299,7 +1299,7 @@ comp_stmt:
           $$ = pkl_ast_make_builtin (pkl_parser->ast,
                                      PKL_AST_BUILTIN_RAND);
           PKL_AST_LOC ($$) = @$;
-          
+
           /* Pop the frame pushed by the `pushlevel' above.  */
           pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
         }
@@ -1417,14 +1417,14 @@ stmt:
                   pkl_ast_node dummy = pkl_ast_make_integer (pkl_parser->ast,
                                                              0);
                   PKL_AST_LOC (dummy) = @3;
-                  
+
                   $<ast>$ = pkl_ast_make_decl (pkl_parser->ast,
                                                PKL_AST_DECL_KIND_VAR,
                                                $3,
                                                dummy,
                                                pkl_parser->filename);
                   PKL_AST_LOC ($<ast>$) = @3;
-                  
+
                   if (!pkl_env_register (pkl_parser->env,
                                          PKL_AST_IDENTIFIER_POINTER ($3),
                                          $<ast>$))
@@ -1548,7 +1548,7 @@ print_stmt_arg_list:
                   pkl_ast_node arg
                     = pkl_ast_make_print_stmt_arg (pkl_parser->ast, $3);
                   PKL_AST_LOC (arg) = @3;
-                  
+
                   $$ = pkl_ast_chainon ($1, arg);
                 }
 	;

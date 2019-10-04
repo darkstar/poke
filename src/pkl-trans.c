@@ -76,7 +76,7 @@ static int pkl_trans_in_functions (pkl_ast_node functions[],
   pkl_trans_in_functions (PKL_TRANS_PAYLOAD->functions,           \
                           PKL_TRANS_PAYLOAD->next_function,       \
                           (function))
-  
+
 #define PKL_TRANS_PUSH_FUNCTION(function)                               \
   do                                                                    \
     {                                                                   \
@@ -232,14 +232,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_array)
           PKL_AST_LOC (initializer_index_type)
             = PKL_AST_LOC (tmp);
 
-          
+
           initializer_index_node
             = pkl_ast_make_integer (PKL_PASS_AST, index);
           PKL_AST_TYPE (initializer_index_node)
             = ASTREF (initializer_index_type);
           PKL_AST_LOC (initializer_index_node)
             = PKL_AST_LOC (tmp);
-          
+
           PKL_AST_ARRAY_INITIALIZER_INDEX (tmp)
             = ASTREF (initializer_index_node);
 
@@ -268,7 +268,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_array)
           PKL_AST_INTEGER_VALUE (initializer_index_node)
             = effective_index;
         }
-          
+
       index += elems_appended;
       nelem += elems_appended;
     }
@@ -282,7 +282,7 @@ PKL_PHASE_END_HANDLER
    a type expressing its unit.  This handler takes care of the first
    case, replacing the identifier with a suitable unit factor.  If the
    identifier is invalid, then an error is raised.
-   
+
    Also, if the magnitude of the offset wasn't specified then it
    defaults to 1. */
 
@@ -421,7 +421,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_var)
           pkl_ast_node funcall = pkl_ast_make_funcall (PKL_PASS_AST,
                                                        ASTDEREF (var),
                                                        NULL /* args */);
-          
+
           PKL_AST_LOC (funcall) = PKL_AST_LOC (var);
           PKL_PASS_NODE = funcall;
           PKL_PASS_RESTART = 1;
@@ -490,7 +490,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
         new_string_pointer[i] = p[0];
     }
   new_string_pointer[i] = '\0';
-  
+
   free (string_pointer);
   PKL_AST_STRING_POINTER (string) = new_string_pointer;
 }
@@ -727,11 +727,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         case 'u':
           {
             unsigned int bits;
-            
+
             if (p[2] >= '0' && p[2] <= '9')
               {
                 int base_idx;
-                
+
                 if (p[3] >= '0' && p[3] <= '9')
                   {
                     bits = (p[2] - '0') * 10 + (p[3] - '0');
@@ -742,13 +742,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                     bits = p[2] - '0';
                     base_idx = 3;
                   }
-                
+
                 if (bits > 64)
                   {
                     msg = _("Base with more than 64 bits");
                     goto invalid_tag;
                   }
-                
+
                 switch (p[base_idx])
                   {
                   case 'b': PKL_AST_PRINT_STMT_ARG_BASE (arg) = 2; break;
@@ -767,12 +767,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                     msg = _("invalid base");
                     goto invalid_tag;
                   }
-                
+
                 atype = pkl_ast_make_integral_type (PKL_PASS_AST,
                                                     bits, p[1] == 'i');
                 PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
                 types = pkl_ast_chainon (types, atype);
-                
+
                 if (base_idx == 4)
                   p += 5;
                 else
@@ -788,7 +788,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         default:
           msg = _("invalid format specifier");
           goto invalid_tag;
-        }        
+        }
 
       /* Add the optional suffix to the argument.  */
       if (*p != '%')
@@ -862,7 +862,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_exp)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
   int o, literal_p = 1;
- 
+
   for (o = 0; o < PKL_AST_EXP_NUMOPS (exp); ++o)
     {
       pkl_ast_node op = PKL_AST_EXP_OPERAND (exp, o);
@@ -899,7 +899,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_array)
     {
       pkl_ast_node array_initializer_exp
         = PKL_AST_ARRAY_INITIALIZER_EXP (t);
-      
+
       literal_p &= PKL_AST_LITERAL_P (array_initializer_exp);
       if (!literal_p)
         break;
@@ -934,7 +934,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct)
 {
   pkl_ast_node t;
   int literal_p = 1;
-  
+
   for (t = PKL_AST_STRUCT_FIELDS (PKL_PASS_NODE); t;
        t = PKL_AST_CHAIN (t))
     {
@@ -1039,14 +1039,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
       PKL_PASS_ERROR;
     }
 
-  {    
+  {
     /* Calculate the size of the complete type in bytes and put it in
        an integer node.  */
     pkl_ast_node magnitude
       = pkl_ast_sizeof_type (PKL_PASS_AST, op);
     PKL_AST_LOC (magnitude) = PKL_AST_LOC (node);
     PKL_AST_LOC (PKL_AST_TYPE (magnitude)) = PKL_AST_LOC (node);
-  
+
     /* Build an offset with that magnitude, and unit bits.  */
     unit_type = pkl_ast_make_integral_type (PKL_PASS_AST, 64, 0);
     PKL_AST_LOC (unit_type) = PKL_AST_LOC (node);
@@ -1054,7 +1054,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
     unit = pkl_ast_make_integer (PKL_PASS_AST, PKL_AST_OFFSET_UNIT_BITS);
     PKL_AST_LOC (unit) = PKL_AST_LOC (node);
     PKL_AST_TYPE (unit) = ASTREF (unit_type);
-    
+
     offset = pkl_ast_make_offset (PKL_PASS_AST, magnitude, unit);
 
     PKL_AST_LOC (offset) = PKL_AST_LOC (node);

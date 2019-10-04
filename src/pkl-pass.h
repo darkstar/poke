@@ -178,7 +178,7 @@ typedef struct pkl_phase *pkl_phase;
    starting at NODE.  The subpass shares the same payloads than the
    current pass.  If the execution of the subpass returns an error
    then the expansion of this macro calls PKL_PASS_ERROR.
-   
+
    PKL_PASS_EXIT can be used in order to interrupt the execution of
    the compiler pass, making `pkl_do_pass' to return a non-error code.
 
@@ -284,7 +284,7 @@ pkl_phase_parent_in (pkl_ast_node parent,
 
 /* Traverse the given AST, applying the provided phases (or
    transformations) in sequence to each AST node.
-   
+
    PHASES is a NULL-terminated array of pointers to node handlers.
 
    PAYLOADS is an array of pointers to payloads, which will be passed

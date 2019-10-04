@@ -26,7 +26,7 @@
 /* The following struct defines the payload of the trans phases.
 
    ERRORS is the number of errors detected while running the phase.
-   
+
    ADD_FRAMES is the number of frames to add to lexical addresses.
    This is used in transl.
 

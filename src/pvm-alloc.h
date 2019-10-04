@@ -34,7 +34,7 @@ void pvm_alloc_finalize (void);
 
 /* Register/unregister NELEM pointers at POINTER as roots for the
    garbage-collector.  */
-    
+
 void pvm_alloc_add_gc_roots (void *pointer, size_t nelems);
 void pvm_alloc_remove_gc_roots (void *pointer, size_t nelems);
 

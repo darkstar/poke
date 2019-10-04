@@ -116,13 +116,13 @@ void pkl_asm_endif (pkl_asm pasm);
 /* While loops.
  *
  * pkl_asm_while (pasm);
- * 
+ *
  *   ... condition ...
  *
  * pkl_asm_loop (pasm);
  *
  *   ... loop body ...
- * 
+ *
  * pkl_asm_end_loop (pasm);
  */
 
@@ -157,7 +157,7 @@ void pkl_asm_for_endloop (pkl_asm pasm);
 /* Try-catch blocks.
  *
  * pkl_asm_try (pasm);
- * 
+ *
  * ... stmt ...
  *
  * pkl_asm_catch (pasm);

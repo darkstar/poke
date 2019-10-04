@@ -1,3 +1,39 @@
+2019-10-04  Henner Zeller  <h.zeller@acm.org>
+
+	* src/ios-dev.h: Remove trailing spaces.
+	* src/ios.c: Likewise.
+	* src/ios.h: Likewise.
+	* src/pk-cmd.c: Likewise.
+	* src/pk-def.c: Likewise.
+	* src/pk-file.c: Likewise.
+	* src/pk-misc.c: Likewise.
+	* src/pk-print.c: Likewise.
+	* src/pk-set.c: Likewise.
+	* src/pk-vm.c: Likewise.
+	* src/pkl-anal.c: Likewise.
+	* src/pkl-asm.c: Likewise.
+	* src/pkl-asm.h: Likewise.
+	* src/pkl-ast.c: Likewise.
+	* src/pkl-ast.h: Likewise.
+	* src/pkl-env.c: Likewise.
+	* src/pkl-fold.c: Likewise.
+	* src/pkl-gen.c: Likewise.
+	* src/pkl-lex.l: Likewise.
+	* src/pkl-parser.c: Likewise.
+	* src/pkl-pass.c: Likewise.
+	* src/pkl-pass.h: Likewise.
+	* src/pkl-promo.c: Likewise.
+	* src/pkl-tab.y: Likewise.
+	* src/pkl-trans.c: Likewise.
+	* src/pkl-trans.h: Likewise.
+	* src/pkl-typify.c: Likewise.
+	* src/pkl.c: Likewise.
+	* src/poke.c: Likewise.
+	* src/pvm-alloc.h: Likewise.
+	* src/pvm-env.c: Likewise.
+	* src/pvm-val.c: Likewise.
+	* src/pvm-val.h: Likewise.
+
 2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* cfg.mk (local-checks-to-skip): Add sc_tight_scope.

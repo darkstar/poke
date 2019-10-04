@@ -32,7 +32,7 @@ pk_cmd_vm_disas_exp (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   /* disassemble expression EXP.  */
 
   pvm_program prog;
-  
+
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
@@ -60,10 +60,10 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   pkl_env compiler_env = pkl_get_env (poke_compiler);
   pvm_env runtime_env = pvm_get_env (poke_vm);
-  
+
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_STR);
-  
+
   fname = PK_CMD_ARG_STR (argv[0]);
 
   decl = pkl_env_lookup (compiler_env, fname,
@@ -90,7 +90,7 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
                              JITTER_OBJDUMP, NULL);
   else
     pvm_print_program (stdout, prog);
-  
+
   return 1;
 }
 
@@ -152,7 +152,7 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     }
 
   program = PVM_VAL_CLS_PROGRAM (writer);
-  
+
   if (uflags & PK_VM_DIS_F_NAT)
     pvm_disassemble_program (program, true,
                              JITTER_OBJDUMP, NULL);

@@ -142,7 +142,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
   if (node_code == PKL_AST_EXP)
     {
       int opcode = PKL_AST_EXP_CODE (node);
-        
+
       switch (opcode)
         {
 #define PKL_DEF_OP(ocode, str)                                          \
@@ -183,7 +183,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
          Refresh the code.  */
       node_code = PKL_AST_CODE (node);
     }
-  
+
   /* Call the phase handlers defined for node codes, in the given
      order.  */
   if (order == PKL_PASS_PRE_ORDER)
@@ -319,7 +319,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
         PKL_PASS (PKL_AST_TRIMMER_FROM (node));
       if (PKL_AST_TRIMMER_TO (node))
         PKL_PASS (PKL_AST_TRIMMER_TO (node));
-      
+
       break;
     case PKL_AST_INDEXER:
       PKL_PASS (PKL_AST_INDEXER_ENTITY (node));
@@ -365,7 +365,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
     case PKL_AST_SCONS:
       PKL_PASS (PKL_AST_SCONS_TYPE (node));
       PKL_PASS (PKL_AST_SCONS_VALUE (node));
-      
+
       break;
     case PKL_AST_TYPE:
       {

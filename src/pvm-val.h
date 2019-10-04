@@ -105,8 +105,8 @@ pvm_val pvm_make_uint (uint32_t value, int size);
                            val
                            ---
    [0]   vvvv vvvv vvvv vvvv vvvv vvvv vvvv vvvv
-                                           bits         
-                                           ----         
+                                           bits
+                                           ----
    [1]   xxxx xxxx xxxx xxxx xxxx xxxx xxbb bbbb
 
    BITS+1 is the size of the integral value in bits, from 0 to 63.
@@ -534,7 +534,7 @@ pvm_val pvm_make_offset (pvm_val magnitude, pvm_val unit);
       else if (PVM_IS_SCT ((V)))                \
         PVM_VAL_SCT_OFFSET ((V)) = (O);         \
     } while (0)
-    
+
 #define PVM_VAL_MAPPER(V)                               \
   (PVM_IS_ARR ((V)) ? PVM_VAL_ARR_MAPPER ((V))          \
    : PVM_IS_SCT ((V)) ? PVM_VAL_SCT_MAPPER ((V))        \

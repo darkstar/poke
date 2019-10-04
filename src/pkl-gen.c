@@ -46,7 +46,7 @@
       PKL_GEN_PAYLOAD->ASM[++(PKL_GEN_PAYLOAD->cur_##ASM)] = (new_pasm); \
     }                                                                   \
   while (0)
-  
+
 #define PKL_GEN_PUSH_ASM(new_pasm)  PKL_GEN_PUSH_AN_ASM(pasm,new_pasm)
 #define PKL_GEN_PUSH_ASM2(new_pasm) PKL_GEN_PUSH_AN_ASM(pasm2,new_pasm)
 
@@ -100,7 +100,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
            && PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)
            && PKL_AST_CODE (PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)) == PKL_AST_EXP_STMT))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-  
+
   PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
                                              1 /* prologue */,
                                              &PKL_GEN_PAYLOAD->pointers);
@@ -127,21 +127,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pvm_val mapper_closure;
             pvm_val writer_closure;
             pvm_val constructor_closure;
-            
+
             pkl_ast_node type_struct = initial;
             pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
             pkl_ast_node field;
-            
+
             /* Compile the struct closures and complete them using the
                current environment.  */
-            
+
             PKL_GEN_PAYLOAD->in_writer = 1;
             RAS_FUNCTION_STRUCT_WRITER (writer_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_writer = 0;
-            
+
             PKL_GEN_PAYLOAD->in_mapper = 1;
             RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
@@ -169,9 +169,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
           {
             pvm_val mapper_closure;
             pvm_val writer_closure;
-            
+
             pkl_ast_node array_type = initial;
-            
+
             /* Compile the arrays closures and complete them using the
                current environment.  */
 
@@ -181,7 +181,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
             PKL_GEN_PAYLOAD->in_writer = 0;
-            
+
             PKL_GEN_PAYLOAD->in_mapper = 1;
             RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
@@ -334,7 +334,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_comp_stmt)
   if (PKL_AST_COMP_STMT_BUILTIN (comp_stmt) == PKL_AST_BUILTIN_NONE)
     /* Push a frame into the environment.  */
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHF);
-    
+
 }
 PKL_PHASE_END_HANDLER
 
@@ -407,7 +407,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
     case PKL_AST_STRUCT_REF:
       {
         jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
-        
+
         valmapper = PVM_NULL; /* XXX PKL_AST_TYPE_S_VALMAPPER (lvalue_type) */
 
         /* We need to get the value (array element, or struct field)
@@ -428,7 +428,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHR, 0);  /* LVALUE IDX VAL EXP */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_SWAP);      /* LVALUE IDX EXP VAL */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETM);     /* LVALUE IDX EXP VAL MCLS */
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, label); /* LVALUE IDX EXP VAL MCLS */    
+        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BN, label); /* LVALUE IDX EXP VAL MCLS */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);      /* LVALUE IDX EXP VAL */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);     /* LVALUE IDX EXP VAL OFFSET */
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NROT);      /* LVALUE IDX OFFSET EXP VAL */
@@ -460,7 +460,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_ass_stmt)
     default:
       break;
     }
-      
+
   /* All right, now assign the resulting rvalue to the lvalue.  */
   switch (PKL_AST_CODE (lvalue))
     {
@@ -604,7 +604,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_loop_stmt)
   else if (iterator && container)
     {
       pkl_ast_node container_type = PKL_AST_TYPE (container);
-      
+
       /* This is a FOR-IN[-WHERE] loop.  */
       pkl_asm_for (PKL_GEN_ASM,
                    PKL_AST_TYPE_CODE (container_type),
@@ -671,7 +671,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_return_stmt)
   if (PKL_AST_TYPE_CODE (PKL_AST_TYPE_F_RTYPE (function_type))
       == PKL_TYPE_VOID)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-  
+
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RETURN);
 }
 PKL_PHASE_END_HANDLER
@@ -715,7 +715,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (prefix));
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINTS);
         }
-      
+
       for (arg = print_stmt_args; arg; arg = PKL_AST_CHAIN (arg))
         {
           /* Print the argument, and the optional suffix.  */
@@ -785,7 +785,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_try_catch_stmt)
     PKL_PASS_SUBPASS (catch_exp);
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (0, 32));
-  
+
   pkl_asm_try (PKL_GEN_ASM, catch_arg);
   {
     PKL_PASS_SUBPASS (code);
@@ -826,7 +826,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
   int vararg = PKL_AST_TYPE_F_VARARG (function_type);
   int i, aindex = 0, vararg_actual = 0, optionals_specified = 0;
   pkl_ast_node aa;
- 
+
   /* Push the actuals to the stack. */
   for (aa = PKL_AST_FUNCALL_ARGS (funcall); aa; aa = PKL_AST_CHAIN (aa))
     {
@@ -854,7 +854,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
       else
         PKL_PASS_SUBPASS (aa);
     }
-  
+
   if (vararg)
     {
       if (aindex == 0)
@@ -862,12 +862,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_funcall)
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL); /* Array offset. */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_any_type ());
         }
-      
+
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (aindex, 64));
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DUP);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKA);
     }
-     
+
   /* Complete non-specified actuals for formals having default values.
      For these, we should push nulls.  But beware the vararg!  */
   {
@@ -942,7 +942,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func)
       {
         PKL_GEN_PAYLOAD->in_array_bounder = 1;
         PKL_PASS_SUBPASS (rtype);
-        PKL_GEN_PAYLOAD->in_array_bounder = 0;        
+        PKL_GEN_PAYLOAD->in_array_bounder = 0;
       }
   }
 }
@@ -998,7 +998,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_func_arg)
       pkl_asm_insn (pasm, PKL_INSN_ATOA,
                     NULL /* from_type */, func_arg_type);
     }
-  
+
   pkl_asm_label (PKL_GEN_ASM, after_conv_label);
 
   /* Pop the actual argument from the stack and put it in the current
@@ -1036,7 +1036,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_func)
                     pvm_make_int (PVM_E_NO_RETURN, 32));
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
     }
-     
+
   /* Pop the function's argument environment, if any, and return.  */
   if (PKL_AST_FUNC_ARGS (function))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_POPF, 1);
@@ -1077,7 +1077,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_integer)
       else
         val = pvm_make_uint (value, size);
     }
-  
+
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, val);
 }
 PKL_PHASE_END_HANDLER
@@ -1356,7 +1356,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_RAISE);
     pkl_asm_label (PKL_GEN_ASM, label);
   }
-        
+
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
@@ -1761,7 +1761,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
           PKL_GEN_PAYLOAD->in_mapper = 0;
           PKL_GEN_PAYLOAD->in_valmapper = 1;
-          
+
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* VAL OFF CLS */
           pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);                  /* VAL CLS */
@@ -1842,7 +1842,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       else
         {
           pvm_val writer_closure;
-          
+
           /* Compile a writer function to a closure.  */
           RAS_FUNCTION_ARRAY_WRITER (writer_closure);
 
@@ -1864,7 +1864,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
 
       if (PKL_AST_TYPE_CODE (etype) == PKL_TYPE_ARRAY)
         PKL_PASS_SUBPASS (etype);
-          
+
       RAS_FUNCTION_ARRAY_BOUNDER (bounder_closure);
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, bounder_closure); /* CLS */
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                   /* CLS */
@@ -2084,7 +2084,7 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 {
   /* We are generating a PVM struct type.  */
-  
+
   pkl_ast_node struct_type = PKL_PASS_NODE;
   pkl_ast_node type_name = PKL_AST_TYPE_NAME (struct_type);
 
@@ -2095,7 +2095,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
                   pvm_make_string (PKL_AST_IDENTIFIER_POINTER (type_name)));
   else
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-  
+
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MKTYSCT);
 }
 PKL_PHASE_END_HANDLER
@@ -2130,12 +2130,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_field_type)
         PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (PKL_PASS_NODE));
       PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (PKL_PASS_NODE));
     }
-  
+
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER
 
-/* 
+/*
  * Expression handlers.
  *
  * | OPERAND1
@@ -2216,7 +2216,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_mul)
       pkl_asm_insn (pasm, PKL_INSN_NIP2);
       break;
     case PKL_TYPE_OFFSET:
-      {       
+      {
         pkl_ast_node op1 = PKL_AST_EXP_OPERAND (node, 0);
         pkl_ast_node op2 = PKL_AST_EXP_OPERAND (node, 1);
         pkl_ast_node op1_type = PKL_AST_TYPE (op1);
@@ -2329,7 +2329,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_intexp)
       assert (0);
       break;
     }
-          
+
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -2496,7 +2496,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_attr)
         case PKL_TYPE_STRUCT:
           {
             jitter_label label = pkl_asm_fresh_label (PKL_GEN_ASM);
-            
+
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_MGETO);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP);
             pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BNN, label);

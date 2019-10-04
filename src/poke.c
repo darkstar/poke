@@ -172,7 +172,7 @@ pk_print_version ()
 
   /* It is important to separate the year from the rest of the message,
      as done here, to avoid having to retranslate the message when a new
-     year comes around.  */  
+     year comes around.  */
   printf (_("\
 Copyright (C) %s Jose E. Marchesi.\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
@@ -302,7 +302,7 @@ initialize ()
 {
   /* This is used by the `progname' gnulib module.  */
   set_program_name ("poke");
-  
+
   /* i18n */
   setlocale (LC_ALL, "");
   bindtextdomain (PACKAGE, LOCALEDIR);
@@ -310,7 +310,7 @@ initialize ()
 
   /* Determine whether the tool has been invoked interactively.  */
   poke_interactive_p = isatty (fileno (stdin));
-  
+
   /* Determine the directory containing poke's scripts and other
      architecture-independent data.  */
   poke_datadir = getenv ("POKEDATADIR");
@@ -366,7 +366,7 @@ initialize_user ()
           if (ret == 1)
             exit (EXIT_FAILURE);
         }
-      
+
       free (pokerc);
     }
 }
@@ -399,6 +399,6 @@ main (int argc, char *argv[])
 
   /* Cleanup.  */
   finalize ();
-  
+
   return poke_exit_code;
 }

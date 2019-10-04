@@ -41,7 +41,7 @@ pkl_ast_default_endian (void)
 
 /* Allocate and return a new AST node, with the given CODE.  The rest
    of the node is initialized to zero.  */
-  
+
 static pkl_ast_node
 pkl_ast_make_node (pkl_ast ast,
                    enum pkl_ast_code code)
@@ -80,7 +80,7 @@ pkl_ast_chainon (pkl_ast_node ast1, pkl_ast_node ast2)
 
 /* Build and return an AST node for an integer constant.  */
 
-pkl_ast_node 
+pkl_ast_node
 pkl_ast_make_integer (pkl_ast ast,
                       uint64_t value)
 {
@@ -88,13 +88,13 @@ pkl_ast_make_integer (pkl_ast ast,
 
   PKL_AST_INTEGER_VALUE (new) = value;
   PKL_AST_LITERAL_P (new) = 1;
-  
+
   return new;
 }
 
 /* Build and return an AST node for a string constant.  */
 
-pkl_ast_node 
+pkl_ast_node
 pkl_ast_make_string (pkl_ast ast,
                      const char *str)
 {
@@ -125,7 +125,7 @@ pkl_ast_make_identifier (pkl_ast ast,
 
 /* Build and return an AST node for an enumerator.  */
 
-pkl_ast_node 
+pkl_ast_node
 pkl_ast_make_enumerator (pkl_ast ast,
                          pkl_ast_node identifier,
                          pkl_ast_node value)
@@ -160,7 +160,7 @@ pkl_ast_make_cond_exp (pkl_ast ast,
 
   PKL_AST_LITERAL_P (cond_exp)
     = PKL_AST_LITERAL_P (thenexp) && PKL_AST_LITERAL_P (elseexp);
-  
+
   return cond_exp;
 }
 
@@ -219,7 +219,7 @@ pkl_ast_make_unary_exp (pkl_ast ast,
   PKL_AST_EXP_NUMOPS (exp) = 1;
   PKL_AST_EXP_OPERAND (exp, 0) = ASTREF (op);
   PKL_AST_LITERAL_P (exp) = PKL_AST_LITERAL_P (op);
-  
+
   return exp;
 }
 
@@ -311,7 +311,7 @@ pkl_ast_make_struct_ref (pkl_ast ast,
 
   PKL_AST_STRUCT_REF_STRUCT (sref) = ASTREF (sct);
   PKL_AST_STRUCT_REF_IDENTIFIER (sref) = ASTREF (identifier);
-  
+
   return sref;
 }
 
@@ -515,10 +515,10 @@ pkl_ast_node
 pkl_ast_dup_type (pkl_ast_node type)
 {
   pkl_ast_node t, new = pkl_ast_make_type (PKL_AST_AST (type));
-  
+
   PKL_AST_TYPE_CODE (new) = PKL_AST_TYPE_CODE (type);
   PKL_AST_TYPE_COMPLETE (new) = PKL_AST_TYPE_COMPLETE (type);
-  
+
   switch (PKL_AST_TYPE_CODE (type))
     {
     case PKL_TYPE_ANY:
@@ -647,7 +647,7 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
                   return 0;
               }
           }
-        
+
         return pkl_ast_type_equal (PKL_AST_TYPE_A_ETYPE (a),
                                    PKL_AST_TYPE_A_ETYPE (b));
         break;
@@ -680,7 +680,7 @@ pkl_ast_type_equal (pkl_ast_node a, pkl_ast_node b)
             if (PKL_AST_FUNC_TYPE_ARG_VARARG (fa)
                 != PKL_AST_FUNC_TYPE_ARG_VARARG (fb))
               return 0;
-            
+
             if (!pkl_ast_type_equal (PKL_AST_FUNC_TYPE_ARG_TYPE (fa),
                                      PKL_AST_FUNC_TYPE_ARG_TYPE (fb)))
               return 0;
@@ -834,7 +834,7 @@ int
 pkl_ast_type_is_complete (pkl_ast_node type)
 {
   int complete = PKL_AST_TYPE_COMPLETE_UNKNOWN;
-  
+
   switch (PKL_AST_TYPE_CODE (type))
     {
       /* Integral, offset and struct types are always complete.  */
@@ -920,7 +920,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
     case PKL_TYPE_ARRAY:
       {
         pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (type);
-        
+
         pkl_print_type (out, PKL_AST_TYPE_A_ETYPE (type),
                         use_given_name);
         fputc ('[', out);
@@ -968,7 +968,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         if (PKL_AST_TYPE_F_NARG (type) > 0)
           {
             fputc ('(', out);
-            
+
             for (t = PKL_AST_TYPE_F_ARGS (type); t;
                  t = PKL_AST_CHAIN (t))
               {
@@ -986,7 +986,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
                       fputc ('?', out);
                   }
               }
-            
+
             fputc (')', out);
           }
 
@@ -1013,7 +1013,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
           fprintf (out, "%" PRIu64, PKL_AST_INTEGER_VALUE (unit));
         else
           assert (0);
-        
+
         fputc ('>', out);
         break;
       }
@@ -1168,7 +1168,7 @@ pkl_ast_make_offset (pkl_ast ast,
   pkl_ast_node offset = pkl_ast_make_node (ast, PKL_AST_OFFSET);
 
   assert (unit);
-  
+
   if (magnitude != NULL)
     PKL_AST_OFFSET_MAGNITUDE (offset) = ASTREF (magnitude);
   PKL_AST_OFFSET_UNIT (offset) = ASTREF (unit);
@@ -1414,7 +1414,7 @@ pkl_ast_make_loop_stmt (pkl_ast ast, pkl_ast_node condition,
     PKL_AST_LOOP_STMT_ITERATOR (loop_stmt) = ASTREF (iterator);
   if (container)
     PKL_AST_LOOP_STMT_CONTAINER (loop_stmt) = ASTREF (container);
-  
+
   PKL_AST_LOOP_STMT_BODY (loop_stmt) = ASTREF (body);
 
   return loop_stmt;
@@ -1565,7 +1565,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 {
   pkl_ast_node t, n;
   size_t i;
-  
+
   if (ast == NULL)
     return;
 
@@ -1586,7 +1586,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
         }
-      
+
       break;
 
     case PKL_AST_EXP:
@@ -1595,18 +1595,18 @@ pkl_ast_node_free (pkl_ast_node ast)
         pkl_ast_node_free (PKL_AST_EXP_OPERAND (ast, i));
 
       break;
-      
+
     case PKL_AST_COND_EXP:
 
       pkl_ast_node_free (PKL_AST_COND_EXP_COND (ast));
       pkl_ast_node_free (PKL_AST_COND_EXP_THENEXP (ast));
       pkl_ast_node_free (PKL_AST_COND_EXP_ELSEEXP (ast));
       break;
-      
+
     case PKL_AST_ENUM:
 
       pkl_ast_node_free (PKL_AST_ENUM_TAG (ast));
-      
+
       for (t = PKL_AST_ENUM_VALUES (ast); t; t = n)
         {
           n = PKL_AST_CHAIN (t);
@@ -1614,13 +1614,13 @@ pkl_ast_node_free (pkl_ast_node ast)
         }
 
       break;
-      
+
     case PKL_AST_ENUMERATOR:
 
       pkl_ast_node_free (PKL_AST_ENUMERATOR_IDENTIFIER (ast));
       pkl_ast_node_free (PKL_AST_ENUMERATOR_VALUE (ast));
       break;
-      
+
     case PKL_AST_TYPE:
 
       free (PKL_AST_TYPE_NAME (ast));
@@ -1665,7 +1665,7 @@ pkl_ast_node_free (pkl_ast_node ast)
         default:
           break;
         }
-      
+
       break;
 
     case PKL_AST_STRUCT_FIELD_TYPE:
@@ -1681,7 +1681,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_FUNC_TYPE_ARG_TYPE (ast));
       pkl_ast_node_free (PKL_AST_FUNC_TYPE_ARG_NAME (ast));
       break;
-      
+
     case PKL_AST_INDEXER:
 
       pkl_ast_node_free (PKL_AST_INDEXER_ENTITY (ast));
@@ -1714,23 +1714,23 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_FUNC_ARG_IDENTIFIER (ast));
       pkl_ast_node_free (PKL_AST_FUNC_ARG_INITIAL (ast));
       break;
-      
+
     case PKL_AST_STRING:
 
       free (PKL_AST_STRING_POINTER (ast));
       break;
-      
+
     case PKL_AST_IDENTIFIER:
 
       free (PKL_AST_IDENTIFIER_POINTER (ast));
       break;
-      
+
     case PKL_AST_STRUCT_REF:
 
       pkl_ast_node_free (PKL_AST_STRUCT_REF_STRUCT (ast));
       pkl_ast_node_free (PKL_AST_STRUCT_REF_IDENTIFIER (ast));
       break;
-      
+
     case PKL_AST_STRUCT_FIELD:
 
       pkl_ast_node_free (PKL_AST_STRUCT_FIELD_NAME (ast));
@@ -1745,7 +1745,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           pkl_ast_node_free (t);
         }
       break;
-      
+
     case PKL_AST_ARRAY_INITIALIZER:
 
       pkl_ast_node_free (PKL_AST_ARRAY_INITIALIZER_INDEX (ast));
@@ -1759,7 +1759,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
         }
-      
+
       break;
 
     case PKL_AST_DECL:
@@ -1786,7 +1786,7 @@ pkl_ast_node_free (pkl_ast_node ast)
       pkl_ast_node_free (PKL_AST_ISA_TYPE (ast));
       pkl_ast_node_free (PKL_AST_ISA_EXP (ast));
       break;
-      
+
     case PKL_AST_MAP:
 
       pkl_ast_node_free (PKL_AST_MAP_TYPE (ast));
@@ -1807,7 +1807,7 @@ pkl_ast_node_free (pkl_ast_node ast)
           n = PKL_AST_CHAIN (t);
           pkl_ast_node_free (t);
         }
-      
+
       break;
 
     case PKL_AST_FUNCALL_ARG:
@@ -1897,7 +1897,7 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_BREAK_STMT:
       break;
-      
+
     case PKL_AST_RAISE_STMT:
 
       pkl_ast_node_free (PKL_AST_RAISE_STMT_EXP (ast));
@@ -1909,7 +1909,7 @@ pkl_ast_node_free (pkl_ast_node ast)
     case PKL_AST_INTEGER:
       /* Fallthrough.  */
       break;
-      
+
     default:
       assert (0);
     }
@@ -1939,7 +1939,7 @@ pkl_ast_free (pkl_ast ast)
 {
   if (ast == NULL)
     return;
-  
+
   pkl_ast_node_free (ast->ast);
   free (ast->buffer);
   free (ast->filename);
@@ -2204,7 +2204,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 {
   pkl_ast_node child;
   size_t i;
- 
+
   if (ast == NULL)
     {
       IPRINTF ("NULL::\n");
@@ -2223,7 +2223,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
                PKL_AST_LOC (ast).last_column);                  \
     }                                                           \
   while (0)
-  
+
   switch (PKL_AST_CODE (ast))
     {
     case PKL_AST_PROGRAM:
@@ -2314,7 +2314,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       IPRINTF ("elems:\n");
       PRINT_AST_SUBAST_CHAIN (STRUCT_FIELDS);
       break;
-      
+
     case PKL_AST_ARRAY_INITIALIZER:
       IPRINTF ("ARRAY_INITIALIZER::\n");
 
@@ -2410,7 +2410,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_STRUCT_FIELD_TYPE:
       IPRINTF ("STRUCT_FIELD_TYPE::\n");
 
-      PRINT_COMMON_FIELDS;      
+      PRINT_COMMON_FIELDS;
       PRINT_AST_SUBAST (name, STRUCT_FIELD_TYPE_NAME);
       PRINT_AST_SUBAST (type, STRUCT_FIELD_TYPE_TYPE);
       PRINT_AST_SUBAST (exp, STRUCT_FIELD_TYPE_CONSTRAINT);
@@ -2425,7 +2425,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, FUNC_TYPE_ARG_NAME);
       PRINT_AST_IMM (optional, FUNC_TYPE_ARG_OPTIONAL, "%d");
       break;
-      
+
     case PKL_AST_TRIMMER:
       IPRINTF ("TRIMMER::\n");
       PRINT_AST_SUBAST (from, TRIMMER_FROM);
@@ -2460,7 +2460,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (identifier, FUNC_ARG_IDENTIFIER);
       PRINT_AST_IMM (vararg, FUNC_ARG_VARARG, "%d");
       break;
-      
+
     case PKL_AST_STRUCT_REF:
       IPRINTF ("STRUCT_REF::\n");
 
@@ -2551,7 +2551,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_IMM (back, VAR_BACK, "%d");
       PRINT_AST_IMM (over, VAR_OVER, "%d");
       break;
-      
+
     case PKL_AST_COMP_STMT:
       IPRINTF ("COMP_STMT::\n");
 
@@ -2644,10 +2644,10 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
 
     case PKL_AST_NULL_STMT:
       IPRINTF ("NULL_STMT::\n");
-      
+
       PRINT_COMMON_FIELDS;
       break;
-      
+
     default:
       IPRINTF ("UNKNOWN:: code=%d\n", PKL_AST_CODE (ast));
       break;

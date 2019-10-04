@@ -39,7 +39,7 @@
    The letter-codes after EMUL_ specify the number and kind of
    arguments that the operations receive and return.  The type of the
    returned value comes last.
-   
+
    So, for example, EMUL_III declares an int64 OP int64 -> int64
    operation, whereas EMUL_SSI declares a string OP string -> int64
    operation.  */
@@ -553,7 +553,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_div)
           && PKL_AST_INTEGER_VALUE (magnitude) == 0)
         goto divbyzero;
     }
-  
+
   OP_BINARY_III (div);
   OP_BINARY_OOI (divo);
 
@@ -584,7 +584,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_mod)
           && PKL_AST_INTEGER_VALUE (magnitude) == 0)
         goto divbyzero;
     }
-  
+
   OP_BINARY_III (mod);
   OP_BINARY_OOO (modo);
 

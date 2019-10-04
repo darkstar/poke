@@ -34,7 +34,7 @@ pk_cmd_exit (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     code = 0;
   else
     code = (int) PK_CMD_ARG_INT (argv[0]);
-  
+
   if (poke_interactive_p)
     {
       /* XXX: if unsaved changes, ask and save.  */

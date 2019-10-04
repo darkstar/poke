@@ -62,17 +62,17 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
           printf (_("%s: file cannot be read\n"), arg_str);
           return 0;
         }
-      
+
       strcpy (filename, "file://");
       strcat (filename, arg_str);
-      
+
       if (ios_search (filename) != NULL)
         {
           printf (_("File %s already opened.  Use `file #N' to switch.\n"),
                   filename);
           return 0;
         }
-      
+
       ios_open (filename);
       free (filename);
     }
@@ -121,7 +121,7 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
                     ios_handler (ios_cur ()));
         }
     }
-  
+
   return 1;
 }
 

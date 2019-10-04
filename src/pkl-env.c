@@ -43,7 +43,7 @@ struct pkl_env
 
   int num_types;
   int num_vars;
-  
+
   struct pkl_env *up;
 };
 
@@ -109,7 +109,7 @@ register_decl (pkl_hash hash_table,
                pkl_ast_node decl)
 {
   int hash;
-  
+
   if (get_registered (hash_table, name) != NULL)
     /* Already registered.  */
     return 0;
@@ -239,7 +239,7 @@ pkl_env_map_decls (pkl_env env,
   for (i = 0; i < HASH_TABLE_SIZE; ++i)
     {
       pkl_ast_node t = env->hash_table[i];
-      
+
       for (; t; t = PKL_AST_CHAIN2 (t))
         {
           if ((what == PKL_AST_DECL_KIND_ANY
@@ -274,6 +274,6 @@ pkl_env_dup_toplevel (pkl_env env)
 
   new->num_types = env->num_types;
   new->num_vars = env->num_vars;
-  
+
   return new;
 }

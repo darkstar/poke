@@ -79,6 +79,6 @@ struct ios_dev_if
 
   /* Write a byte to the given device at the current position.  Return
      the character written as an int, or IOD_EOF on error.  */
-  
+
   int (*put_c) (void *dev, int c);
 };

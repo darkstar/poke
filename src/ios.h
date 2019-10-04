@@ -35,17 +35,17 @@ void ios_shutdown (void);
         "IO spaces"               "IO devices"
 
    Space of IO objects <=======> Space of bytes
-                             
-                             +------+  
+
+                             +------+
                       +----->| File |
        +-------+      |      +------+
-       |  IO   |      |       
+       |  IO   |      |
        | space |<-----+      +---------+
        |       |      +----->| Process |
        +-------+      |      +---------+
-                   
+
                       :           :
-                   
+
                       |      +-------------+
                       +----->| File system |
                              +-------------+
@@ -97,10 +97,10 @@ typedef int64_t ios_off;
    there are no spaces open:
 
           space1  ->  space2  ->  ...  ->  spaceN
- 
+
                         ^
                         |
-                 
+
                       current
 
    The functions declared below are used to manage this
@@ -183,7 +183,7 @@ void ios_map (ios_map_fn cb, void *data);
    that reflects the state of the requested operation.  The following
    values are supported, as well as the more generic IOS_OK and
    IOS_ERROR, */
-           
+
 #define IOS_EIOFF -2  /* The provided offset is invalid.  This happens
                          for example when the offset translates into a
                          byte offset that exceeds the capacity of the

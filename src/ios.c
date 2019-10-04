@@ -106,7 +106,7 @@ ios_open (const char *handler)
     goto error;
 
   io->dev_if = *dev_if;
-  
+
   /* Open the device using the interface found above.  */
   io->dev = io->dev_if->open (handler);
   if (io->dev == NULL)
@@ -133,7 +133,7 @@ void
 ios_close (ios io)
 {
   struct ios *tmp;
-  
+
   /* XXX: if not saved, ask before closing.  */
 
   /* Close the device operated by the IO space.
@@ -152,7 +152,7 @@ ios_close (ios io)
       tmp->next = io->next;
     }
   free (io);
-  
+
   /* Set the new current IO.  */
   cur_io = io_list;
 }
@@ -204,7 +204,7 @@ ios
 ios_get (int n)
 {
   ios io;
-  
+
   if (n < 0)
     return NULL;
 
@@ -246,18 +246,18 @@ ios_read_int (ios io, ios_off offset, int flags,
             c = io->dev_if->get_c (io->dev);
             if (c == IOD_EOF)
               return IOS_EIOFF;
-            
+
             *value = c;
             break;
           }
         case 16:
           {
             int16_t c1, c2;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
@@ -272,23 +272,23 @@ ios_read_int (ios io, ios_off offset, int flags,
         case 32:
           {
             int32_t c1, c2, c3, c4;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             if (endian == IOS_ENDIAN_LSB)
               *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
             else
@@ -299,19 +299,19 @@ ios_read_int (ios io, ios_off offset, int flags,
         case 64:
           {
             int64_t c1, c2, c3, c4, c5, c6, c7, c8;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
@@ -331,7 +331,7 @@ ios_read_int (ios io, ios_off offset, int flags,
             c8 = io->dev_if->get_c (io->dev);
             if (c8 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             if (endian == IOS_ENDIAN_LSB)
               *value = (c8 << 56) | (c7 << 48) | (c6 << 40) | (c5 << 32) | (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
             else
@@ -372,18 +372,18 @@ ios_read_uint (ios io, ios_off offset, int flags,
             c = io->dev_if->get_c (io->dev);
             if (c == IOD_EOF)
               return IOS_EIOFF;
-            
+
             *value = c;
             break;
           }
         case 16:
           {
             int16_t c1, c2;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
@@ -398,23 +398,23 @@ ios_read_uint (ios io, ios_off offset, int flags,
         case 32:
           {
             int32_t c1, c2, c3, c4;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             if (endian == IOS_ENDIAN_LSB)
               *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
             else
@@ -425,19 +425,19 @@ ios_read_uint (ios io, ios_off offset, int flags,
         case 64:
           {
             int64_t c1, c2, c3, c4, c5, c6, c7, c8;
-            
+
             c1 = io->dev_if->get_c (io->dev);
             if (c1 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c2 = io->dev_if->get_c (io->dev);
             if (c2 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c3 = io->dev_if->get_c (io->dev);
             if (c3 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             c4 = io->dev_if->get_c (io->dev);
             if (c4 == IOD_EOF)
               return IOS_EIOFF;
@@ -457,7 +457,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
             c8 = io->dev_if->get_c (io->dev);
             if (c8 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             if (endian == IOS_ENDIAN_LSB)
               *value = (c8 << 56) | (c7 << 48) | (c6 << 40) | (c5 << 32) | (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
             else
@@ -499,7 +499,7 @@ ios_read_string (ios io, ios_off offset, int flags, char **value)
         str[i] = (char) c;
     }
   while (str[i++] != '\0');
-  
+
   *value = str;
   return IOS_OK;
 }
@@ -522,7 +522,7 @@ ios_write_int (ios io, ios_off offset, int flags,
         case 32:
           {
             int32_t c1, c2, c3, c4;
-            
+
             c1 = (value >> 24) & 0xff;
             c2 = (value >> 16) & 0xff;
             c3 = (value >> 8) & 0xff;
@@ -543,7 +543,7 @@ ios_write_int (ios io, ios_off offset, int flags,
             if (io->dev_if->put_c (io->dev, c4)
                 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             break;
           }
         case 64:
@@ -628,7 +628,7 @@ ios_write_uint (ios io, ios_off offset, int flags,
         case 32:
           {
             int32_t c1, c2, c3, c4;
-            
+
             c1 = (value >> 24) & 0xff;
             c2 = (value >> 16) & 0xff;
             c3 = (value >> 8) & 0xff;
@@ -649,7 +649,7 @@ ios_write_uint (ios io, ios_off offset, int flags,
             if (io->dev_if->put_c (io->dev, c4)
                 == IOD_EOF)
               return IOS_EIOFF;
-            
+
             break;
           }
         case 64:

@@ -64,7 +64,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
   pkl_ast_node t;
 
   for (t = elems; t; t = PKL_AST_CHAIN (t))
-    {     
+    {
       pkl_ast_node ename = PKL_AST_STRUCT_FIELD_NAME (t);
       pkl_ast_node u;
 
@@ -110,7 +110,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
         {
           pkl_ast_node tname = PKL_AST_STRUCT_FIELD_TYPE_NAME (u);
           pkl_ast_node uname = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
-          
+
           if (uname
               && tname
               && STREQ (PKL_AST_IDENTIFIER_POINTER (uname),
@@ -192,7 +192,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
   /* If arguments are named, check that there are not arguments named
      twice.  */
   if (some_named)
-    { 
+    {
       for (funcall_arg = PKL_AST_FUNCALL_ARGS (funcall);
            funcall_arg;
            funcall_arg = PKL_AST_CHAIN (funcall_arg))

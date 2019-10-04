@@ -282,7 +282,7 @@ pkl_ast_node pkl_ast_make_program (pkl_ast ast,
                                    pkl_ast_node declarations);
 
 /* PKL_AST_IDENTIFIER nodes represent identifiers in PKL programs.
-   
+
    POINTER must point to a NULL-terminated string.
 
    LENGTH contains the size in bytes of the identifier
@@ -432,7 +432,7 @@ pkl_ast_node pkl_ast_make_struct_field (pkl_ast ast,
 
    The supported operators are specified in pkl-ops.def.
    The supported attributes are defined in pkl-attrs.def.
-   
+
    In PKL_AST_OP_ATTR exprssions, ATTR contains the code for the
    invoked attribute.
 
@@ -628,7 +628,7 @@ pkl_ast_node pkl_ast_make_func_arg (pkl_ast ast,
                                     pkl_ast_node init);
 
 /* PKL_AST_TRIMMER nodes represent a trim of an array, or a string.
-   
+
    ENTITY is either an array or a string, which is the subject of
    the trim.
 
@@ -705,7 +705,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
    element has no name.
 
    TYPE is a PKL_AST_TYPE node.
- 
+
    CONSTRAINT is a constraint associated with the struct field.  It is
    an expression that should evaluate to a boolean.
 
@@ -764,7 +764,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
                                          pkl_ast_node type, pkl_ast_node name);
 
 /* PKL_AST_TYPE nodes represent type expressions.
-   
+
    If NAME is not NULL, then this specific type instance has a given
    name, which is encoded in a PKL_AST_IDENTIFIER node.
 
@@ -841,7 +841,7 @@ struct pkl_ast_type
   union pkl_ast_node *name;
   enum pkl_ast_type_code code;
   int complete;
-  
+
   union
   {
     struct
@@ -883,7 +883,7 @@ struct pkl_ast_type
       union pkl_ast_node *args;
       union pkl_ast_node *first_opt_arg;
     } fun;
-    
+
   } val;
 };
 
@@ -993,7 +993,7 @@ pkl_ast_node pkl_ast_id_to_offset_unit (pkl_ast ast,
                                         pkl_ast_node id);
 
 /* PKL_AST_CAST nodes represent casts at the language level.
-   
+
    TYPE is the target type in the case.
    EXP is the expression whole value should be casted to the targe
    type.  */
@@ -1361,7 +1361,7 @@ pkl_ast_node pkl_ast_make_exp_stmt (pkl_ast ast, pkl_ast_node exp);
    TYPE, if specified, is the argument to the catch clause.  The type
    of the argument must be a signed 32-bit type, which is the type
    used to denote exception types.
-   
+
    EXP, if specified, is an expression evaluating to a 32-bit integer.
    Exceptions having any other type won't be catched by the `catch'
    clause of the statement.

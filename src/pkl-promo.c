@@ -40,7 +40,7 @@ promote_integral (pkl_ast ast,
                   int *restart)
 {
   pkl_ast_node type = PKL_AST_TYPE (*a);
-  
+
   *restart = 0;
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
     {
@@ -50,7 +50,7 @@ promote_integral (pkl_ast ast,
           pkl_ast_node desired_type
             = pkl_ast_make_integral_type (ast, size, sign);
           pkl_ast_loc loc = PKL_AST_LOC (*a);
-          
+
           *a = pkl_ast_make_cast (ast, desired_type, ASTDEREF (*a));
           PKL_AST_TYPE (*a) = ASTREF (desired_type);
           PKL_AST_LOC (*a) = loc;
@@ -61,7 +61,7 @@ promote_integral (pkl_ast ast,
 
       return 1;
     }
-  
+
   return 0;
 }
 
@@ -76,7 +76,7 @@ promote_offset (pkl_ast ast,
                 int *restart)
 {
   pkl_ast_node a_type = PKL_AST_TYPE (*a);
-  
+
   *restart = 0;
   if (PKL_AST_TYPE_CODE (a_type) == PKL_TYPE_OFFSET)
     {
@@ -116,7 +116,7 @@ promote_offset (pkl_ast ast,
 
       return 1;
     }
-  
+
   return 0;
 }
 
@@ -139,7 +139,7 @@ promote_array (pkl_ast ast,
   pkl_ast_node from_bound = PKL_AST_TYPE_A_BOUND (from_type);
 
   *restart = 0;
-  
+
   /* Note that at this point it is assured (by typify1) that the array
      element types of both arrays are equivalent.  XXX but not really,
      because the bounds in contained arrays may be different!!  We
@@ -164,7 +164,7 @@ promote_array (pkl_ast ast,
      performed even if there is not an actual check.  */
   {
     pkl_ast_loc loc = PKL_AST_LOC (*a);
-              
+
     *a = pkl_ast_make_cast (ast, type, ASTDEREF (*a));
     PKL_AST_TYPE (*a) = ASTREF (type);
     PKL_AST_LOC (*a) = loc;
@@ -172,7 +172,7 @@ promote_array (pkl_ast ast,
     *restart = 1;
     return 1;
   }
-  
+
   return 0;
 }
 
@@ -199,7 +199,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_div)
   pkl_ast_node op1_type = PKL_AST_TYPE (op1);
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
   pkl_ast_node op2_type = PKL_AST_TYPE (op2);
-        
+
   /* Note we discriminate on the first operand type in order to
      distinguish between configurations.  */
   switch (PKL_AST_TYPE_CODE (op1_type))
@@ -290,7 +290,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_add_sub_mod)
 
         size_t size = PKL_AST_TYPE_I_SIZE (type);
         int sign = PKL_AST_TYPE_I_SIGNED (type);
-        
+
         if (!promote_integral (PKL_PASS_AST, size, sign,
                                &PKL_AST_EXP_OPERAND (exp, 0), &restart1))
           goto error;
@@ -433,7 +433,7 @@ PKL_PHASE_END_HANDLER
            INTEGRAL x INTEGRAL -> BOOL
            STRING   x STRING   -> BOOL
            OFFSET   x OFFSET   -> BOOL
-          
+
    In the I x I -> I configuration, the types of the operands are
    promoted in a way both operands end having the same type, following
    the language's promotion rules.
@@ -454,7 +454,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_rela)
 
   if (PKL_AST_TYPE_CODE (op1_type) != PKL_AST_TYPE_CODE (op2_type))
     goto error;
-        
+
   switch (PKL_AST_TYPE_CODE (op1_type))
     {
     case PKL_TYPE_INTEGRAL:
@@ -540,7 +540,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_bshift)
     {
       size_t size = PKL_AST_TYPE_I_SIZE (type);
       int sign = PKL_AST_TYPE_I_SIGNED (type);
-      
+
       if (!promote_integral (PKL_PASS_AST, size, sign,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1)
           || !promote_integral (PKL_PASS_AST, 32, 0,
@@ -577,7 +577,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_binary)
     {
       size_t size = PKL_AST_TYPE_I_SIZE (type);
       int sign = PKL_AST_TYPE_I_SIGNED (type);
-      
+
       if (!promote_integral (PKL_PASS_AST, size, sign,
                              &PKL_AST_EXP_OPERAND (exp, 0), &restart1)
           || !promote_integral (PKL_PASS_AST, size, sign,
@@ -688,7 +688,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_type_array)
   pkl_ast_node array_type = PKL_PASS_NODE;
   pkl_ast_node bound = PKL_AST_TYPE_A_BOUND (array_type);
   pkl_ast_node bound_type;
-  
+
   if (bound == NULL)
     /* This array type hasn't a number of elements.  Be done.  */
     PKL_PASS_DONE;
@@ -831,7 +831,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
   if (PKL_AST_TYPE_CODE (lvalue_type) != PKL_TYPE_ARRAY
       && pkl_ast_type_equal (lvalue_type, exp_type))
     PKL_PASS_DONE;
-  
+
   /* A promotion is needed.  */
   switch (PKL_AST_TYPE_CODE (lvalue_type))
     {
@@ -874,7 +874,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_ass_stmt)
       PKL_PASS_ERROR;
       break;
     }
-  
+
   PKL_PASS_RESTART = restart;
   PKL_PASS_DONE;
 
@@ -1009,7 +1009,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_return_stmt)
   if (PKL_AST_TYPE_CODE (expected_type) != PKL_TYPE_VOID)
     {
       int restart = 0;
-      
+
       switch (PKL_AST_TYPE_CODE (expected_type))
         {
         case PKL_TYPE_ANY:
@@ -1172,7 +1172,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_func_arg)
 
   PKL_PASS_DONE;
 
- error:  
+ error:
   pkl_ice (PKL_PASS_AST, PKL_AST_LOC (initial),
            "couldn't promote argument initializer");
   PKL_PASS_ERROR;
@@ -1216,7 +1216,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_field_type)
     {
       pkl_ast_node constraint_type = PKL_AST_TYPE (elem_constraint);
       int restart = 0;
-        
+
       switch (PKL_AST_TYPE_CODE (constraint_type))
         {
         case PKL_TYPE_INTEGRAL:
@@ -1234,7 +1234,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_field_type)
                    "non-promoteable struct field constraint at promo time");
           PKL_PASS_ERROR;
           break;
-        }        
+        }
 
       PKL_PASS_RESTART = restart;
     }
@@ -1243,7 +1243,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_field_type)
     {
       pkl_ast_node label_type = PKL_AST_TYPE (elem_label);
       int restart = 0;
-        
+
       switch (PKL_AST_TYPE_CODE (label_type))
         {
         case PKL_TYPE_OFFSET:
@@ -1268,7 +1268,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_field_type)
                    "non-promoteable struct field label at promo time");
           PKL_PASS_ERROR;
           break;
-        }        
+        }
 
       PKL_PASS_RESTART = PKL_PASS_RESTART || restart;
     }

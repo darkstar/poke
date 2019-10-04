@@ -36,7 +36,7 @@ pkl_parser_init (void)
 
   parser = xmalloc (sizeof (struct pkl_parser));
   memset (parser, 0, sizeof (struct pkl_parser));
-  
+
   pkl_tab_lex_init (&(parser->scanner));
   pkl_tab_set_extra (parser, parser->scanner);
 

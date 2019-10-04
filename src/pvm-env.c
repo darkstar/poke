@@ -54,7 +54,7 @@ pvm_env_new ()
 
   for (i = 0; i < MAX_VARS; ++i)
     env->vars[i] = PVM_NULL;
-  
+
   return env;
 }
 

@@ -276,7 +276,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
       if (prefix != NULL)
         printf ("%s ", prefix);
       printf (_("%s: command not found.\n"), cmd_name);
-      return 0;      
+      return 0;
     }
 
   /* Process user flags.  */
@@ -312,7 +312,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
         goto usage;
       return pk_cmd_exec_1 (p, *cmd->subtrie, cmd_name);
     }
-  
+
   /* Parse arguments.  */
   argc = 0;
   a = cmd->arg_fmt;
@@ -333,13 +333,13 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
         {
           if (*a == '?')
             a++;
-          
+
           /* Try the different options, in order, until one succeeds or
              the next argument or the end of the input is found.  */
           while (*a != ',' && *a != '\0')
             {
               char *beg = p;
-              
+
               switch (*a)
                 {
                 case 'e':
@@ -365,7 +365,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                          messages, so don't bother the user with the
                          usage message.  */
                       besilent = 1;
-                       
+
                     break;
                   }
                 case 'i':
@@ -382,7 +382,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                           match = 1;
                         }
                     }
-                  
+
                   break;
                 case 'a':
                   /* Parse an address.  */
@@ -396,7 +396,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                           match = 1;
                         }
                     }
-                  
+
                   break;
                 case 't':
                   /* Parse a #N tag.  */
@@ -412,7 +412,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                           match = 1;
                         }
                     }
-                  
+
                   break;
                 case 's':
                   {
@@ -420,7 +420,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
                     char *end, *str;
                     size_t size;
-                    
+
                     end = skip_blanks (p);
                     while (*end != '\0' && *end != ',')
                       end++;
@@ -501,16 +501,16 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                   /* This should NOT happen.  */
                   assert (0);
                 }
-              
+
               if (match)
                 break;
-              
+
               /* Rewind input and try next option.  */
               p = beg;
               a++;
             }
         }
-      
+
       /* Boo, could not find valid input for this argument.  */
       if (!match)
         goto usage;
@@ -565,7 +565,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
           || argv[i].type == PK_CMD_ARG_STMT)
         pvm_destroy_program (argv[i].val.prog);
     }
-  
+
   return ret;
 
  usage:
@@ -597,7 +597,7 @@ pk_cmd_exec (char *str)
   /* If the first non-blank character in STR is a dot ('.'), then this
      is a poke command.  Dispatch it with pk_cmd_exec_1.  Otherwise,
      compile a Poke declaration or a statement and execute it.  */
-  
+
   char *cmd = skip_blanks (str);
 
   if (*cmd == '.')
@@ -647,7 +647,7 @@ pk_cmd_exec (char *str)
               fputc ('\n', stdout);
             }
         }
-      
+
       return 1;
 
     error:
@@ -689,7 +689,7 @@ pk_cmd_exec_script (const char *filename)
           int c = fgetc (fd);
 
           assert (i < MAX_LINE);
-          
+
           if (c == EOF)
             {
               line[i] = '\0';

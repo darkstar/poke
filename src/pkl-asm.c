@@ -43,7 +43,7 @@
       pkl_asm_dotimes (pasm, exp);
       {
          ... level-1 ...
-   
+
          pkl_asm_if (pasm, exp);
          {
             ... level-2 ...
@@ -62,7 +62,7 @@
 
    PARENT is the parent level, i.e. the level containing this one.
    This is NULL at the top-level.
-   
+
    The meaning of the LABEL* and NODE* fields depend on the particular
    kind of environment.  See the details in the implementation of the
    functions below.  */
@@ -254,7 +254,7 @@ pkl_asm_insn_atoa (pkl_asm pasm,
         /* Both array types are unbounded, hence they are identical =>
            no need to do anything.  */
         return;
-      
+
       /* No checks are due in this case, but the value itself
          should be typed as an unbound array.  */
       pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL); /* ARR NULL */
@@ -322,10 +322,10 @@ pkl_asm_insn_nton  (pkl_asm pasm,
 {
   size_t from_type_size = PKL_AST_TYPE_I_SIZE (from_type);
   int from_type_sign = PKL_AST_TYPE_I_SIGNED (from_type);
-      
+
   size_t to_type_size = PKL_AST_TYPE_I_SIZE (to_type);
   int to_type_sign = PKL_AST_TYPE_I_SIGNED (to_type);
-  
+
   if (from_type_size == to_type_size
       && from_type_sign == to_type_sign)
     {
@@ -396,7 +396,7 @@ static void
 pkl_asm_insn_write (pkl_asm pasm)
 {
   RAS_MACRO_WRITE;
-}  
+}
 
 /* Macro-instruction: PEEK type, endian, nenc
    ( -- VAL )
@@ -535,7 +535,7 @@ pkl_asm_insn_poked (pkl_asm pasm, pkl_ast_node type)
 
    Macro-instruction: ADD type
    ( VAL VAL -- VAL VAL VAL )
-   
+
    Macro-instruction: SUB type
    ( VAL VAL -- VAL VAL VAL )
 
@@ -547,7 +547,7 @@ pkl_asm_insn_poked (pkl_asm pasm, pkl_ast_node type)
 
    Macro-instruction: MOD type
    ( VAL VAL -- VAL VAL VAL )
-   
+
    Macro-instruction: BNOT type
    ( VAL -- VAL VAL VAL )
 
@@ -637,7 +637,7 @@ pkl_asm_insn_intop (pkl_asm pasm,
         pkl_asm_insn (pasm, div_table[tl][signed_p]);
       else
         pkl_asm_insn (pasm, mod_table[tl][signed_p]);
-      
+
       break;
     case PKL_INSN_BNOT:
       pkl_asm_insn (pasm, bnot_table[tl][signed_p]);
@@ -667,10 +667,10 @@ pkl_asm_insn_intop (pkl_asm pasm,
 
    Macro-instruction: NE type
    ( VAL VAL -- INT )
- 
+
    Macro-instruction: LT type
    ( VAL VAL -- INT )
- 
+
    Macro-instruction: GT type
    ( VAL VAL -- INT )
 
@@ -690,7 +690,7 @@ pkl_asm_insn_cmp (pkl_asm pasm,
                   pkl_ast_node type)
 {
   enum pkl_asm_insn oinsn;
-  
+
   /* Decide what instruction to assembly.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_STRING)
     {
@@ -710,18 +710,18 @@ pkl_asm_insn_cmp (pkl_asm pasm,
     {
       static int eq_table[2][2] = {{ PKL_INSN_EQIU, PKL_INSN_EQI },
                                    { PKL_INSN_EQLU, PKL_INSN_EQL }};
-      
+
       static int ne_table[2][2] = {{ PKL_INSN_NEIU, PKL_INSN_NEI },
                                    { PKL_INSN_NELU, PKL_INSN_NEL }};
       static int lt_table[2][2] = {{ PKL_INSN_LTIU, PKL_INSN_LTI },
                                    { PKL_INSN_LTLU, PKL_INSN_LTL }};
-      
+
       static int gt_table[2][2] = {{ PKL_INSN_GTIU, PKL_INSN_GTI },
                                    { PKL_INSN_GTLU, PKL_INSN_GTL }};
-      
+
       static int ge_table[2][2] = {{ PKL_INSN_GEIU, PKL_INSN_GEI },
                                    { PKL_INSN_GELU, PKL_INSN_GEL }};
-      
+
       static int le_table[2][2] = {{ PKL_INSN_LEIU, PKL_INSN_LEI },
                                    { PKL_INSN_LELU, PKL_INSN_LEL }};
 
@@ -772,7 +772,7 @@ pkl_asm_insn_gcd (pkl_asm pasm, pkl_ast_node type)
 {
   RAS_MACRO_GCD (type);
 }
-   
+
 /* Macro-instruction: ADDO base_type
    ( OFF OFF -- OFF OFF OFF )
 
@@ -931,7 +931,7 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
   pasm->pointers = pvm_alloc (sizeof (void*) * PKL_AST_MAX_POINTERS);
   memset (pasm->pointers, 0, PKL_AST_MAX_POINTERS);
   pasm->next_pointer = 0;
-  
+
   if (prologue)
     {
       /* Standard prologue.  */
@@ -972,7 +972,7 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
       /* Successful program finalization.  */
       pkl_asm_insn (pasm, PKL_INSN_POPE);
       pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_EXIT_OK, 32));
-      pkl_asm_insn (pasm, PKL_INSN_EXIT);      
+      pkl_asm_insn (pasm, PKL_INSN_EXIT);
 
       pvm_append_label (pasm->program, pasm->error_label);
 
@@ -993,17 +993,17 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 
       /* Set the exit status to ERROR and exit the PVM.  */
       pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_EXIT_ERROR, 32));
-      pkl_asm_insn (pasm, PKL_INSN_EXIT);  
+      pkl_asm_insn (pasm, PKL_INSN_EXIT);
 
       pkl_asm_note (pasm, "#end epilogue");
-    }      
+    }
 
   if (pointers != NULL)
     *pointers = pasm->pointers;
 
   /* Free the first level.  */
   pkl_asm_poplevel (pasm);
-  
+
   /* Free the assembler instance and return the assembled program to
      the user.  */
   free (pasm);
@@ -1029,7 +1029,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 #define PKL_DEF_INSN(SYM, ARGS, NAME) ARGS,
 #  include "pkl-insn.def"
 #undef PKL_DEF_INSN
-    };    
+    };
 
   va_list valist;
 
@@ -1066,7 +1066,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
       for (p = insn_args[insn]; *p != '\0'; ++p)
         {
           char arg_class = *p;
-          
+
           switch (arg_class)
             {
             case 'v':
@@ -1412,7 +1412,7 @@ pkl_asm_endif (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
   pvm_append_label (pasm->program, pasm->level->label2);
-  
+
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
   pkl_asm_poplevel (pasm);
@@ -1459,14 +1459,14 @@ pkl_asm_catch (pkl_asm pasm)
   /* XXX pkl_asm_note (pasm, "POP-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
   pvm_append_label (pasm->program, pasm->level->label1);
-  
+
   /* At this point the exception number is at the top of the stack.
      If the catch block received an argument, push a new environment
      and set it as a local.  Otherwise, just discard it.  */
-  
+
   if (pasm->level->node1)
     {
-      pkl_asm_insn (pasm, PKL_INSN_PUSHF);    
+      pkl_asm_insn (pasm, PKL_INSN_PUSHF);
       pkl_asm_insn (pasm, PKL_INSN_REGVAR);
     }
   else
@@ -1501,7 +1501,7 @@ pkl_asm_endtry (pkl_asm pasm)
    label2:
    POP the condition expression
    break_label:
-  
+
    Thus, loops use two labels.  */
 
 void
@@ -1533,7 +1533,7 @@ pkl_asm_endloop (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_DROP);
 
   pvm_append_label (pasm->program, pasm->level->break_label);
-  
+
   /* Cleanup and pop the current level.  */
   pkl_asm_poplevel (pasm);
 }
@@ -1552,7 +1552,7 @@ pkl_asm_endloop (pkl_asm pasm)
    REGVAR     ; CONTAINER
    SEL        ; CONTAINER NELEMS
    PUSH 0UL   ; CONTAINER NELEMS 0
-   SWAP       ; CONTAINER 0 NELEMS   
+   SWAP       ; CONTAINER 0 NELEMS
    PUSH NULL  ; CONTAINER 0 NELEMS NULL
  label2:
    DROP       ; CONTAINER I NELEMS
@@ -1690,7 +1690,7 @@ pkl_asm_call (pkl_asm pasm, const char *funcname)
 {
   pkl_env compiler_env = pkl_get_env (pasm->compiler);
   int back, over;
-  
+
   assert (pkl_env_lookup (compiler_env, funcname,
                           &back, &over) != NULL);
 

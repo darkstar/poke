@@ -90,7 +90,7 @@ pkl_new ()
     compiler->bootstrapped = 1;
     /* XXX: disable compiler built-ins from this point on.  */
   }
-  
+
   return compiler;
 }
 
@@ -107,7 +107,7 @@ rest_of_compilation (pkl_compiler compiler,
                      void **pointers)
 {
   struct pkl_gen_payload gen_payload;
-  
+
   struct pkl_anal_payload anal1_payload = { 0 };
   struct pkl_anal_payload anal2_payload = { 0 };
   struct pkl_anal_payload analf_payload = { 0 };
@@ -117,7 +117,7 @@ rest_of_compilation (pkl_compiler compiler,
   struct pkl_trans_payload trans2_payload;
   struct pkl_trans_payload trans3_payload;
   struct pkl_trans_payload trans4_payload;
-  
+
   struct pkl_typify_payload typify1_payload = { 0 };
   struct pkl_typify_payload typify2_payload = { 0 };
 
@@ -130,7 +130,7 @@ rest_of_compilation (pkl_compiler compiler,
 
   void *lex_payloads[]
     = { &transl_payload };
-  
+
   struct pkl_phase *frontend_phases[]
     = { &pkl_phase_trans1,
         &pkl_phase_anal1,
@@ -143,7 +143,7 @@ rest_of_compilation (pkl_compiler compiler,
         &pkl_phase_anal2,
         NULL,
   };
-  
+
   void *frontend_payloads[]
     = { &trans1_payload,
         &anal1_payload,
@@ -194,10 +194,10 @@ rest_of_compilation (pkl_compiler compiler,
 
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
-      
+
   if (!pkl_do_pass (ast, frontend_phases, frontend_payloads, PKL_PASS_F_TYPES))
     goto error;
-    
+
   if (trans1_payload.errors > 0
       || trans2_payload.errors > 0
       || trans3_payload.errors > 0
@@ -219,10 +219,10 @@ rest_of_compilation (pkl_compiler compiler,
 
   /* XXX */
   /* pkl_ast_print (stdout, ast->ast); */
-  
+
   if (!pkl_do_pass (ast, backend_phases, backend_payloads, 0))
     goto error;
-  
+
   if (analf_payload.errors > 0)
     goto error;
 
@@ -252,7 +252,7 @@ pkl_compile_buffer (pkl_compiler compiler,
 
   compiler->compiling = PKL_COMPILING_PROGRAM;
   env = pkl_env_dup_toplevel (compiler->env);
-  
+
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&env, &ast,
                           PKL_PARSE_PROGRAM,
@@ -263,7 +263,7 @@ pkl_compile_buffer (pkl_compiler compiler,
   else if (ret == 2)
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
-  
+
   program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
@@ -310,7 +310,7 @@ pkl_compile_statement (pkl_compiler compiler,
 
   compiler->compiling = PKL_COMPILING_STATEMENT;
   env = pkl_env_dup_toplevel (compiler->env);
-  
+
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&env, &ast,
                           PKL_PARSE_STATEMENT,
@@ -321,7 +321,7 @@ pkl_compile_statement (pkl_compiler compiler,
   else if (ret == 2)
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
-  
+
   program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
@@ -362,7 +362,7 @@ pkl_compile_expression (pkl_compiler compiler,
 
   compiler->compiling = PKL_COMPILING_EXPRESSION;
   env = pkl_env_dup_toplevel (compiler->env);
-  
+
   /* Parse the input program into an AST.  */
   ret = pkl_parse_buffer (&env, &ast,
                           PKL_PARSE_EXPRESSION,
@@ -373,7 +373,7 @@ pkl_compile_expression (pkl_compiler compiler,
   else if (ret == 2)
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
-  
+
   program = rest_of_compilation (compiler, ast, &pointers);
   if (program == NULL)
     goto error;
@@ -431,7 +431,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
     goto error;
 
   pvm_specialize_program (program);
-  /* XXX */  
+  /* XXX */
   /* pvm_print_program (stdout, program); */
   fclose (fd);
 
@@ -489,7 +489,7 @@ pkl_error (pkl_ast ast,
     {
       if (ast->filename)
         fprintf (stderr, "%s:", ast->filename);
-  
+
       if (PKL_AST_LOC_VALID (loc))
         {
           if (poke_quiet_p)
@@ -513,7 +513,7 @@ pkl_error (pkl_ast ast,
 
   if (poke_quiet_p)
     return;
-  
+
   /* XXX: cleanup this pile of shit, and make fancy output
      optional.  */
   if (PKL_AST_LOC_VALID (loc))
@@ -533,7 +533,7 @@ pkl_error (pkl_ast ast,
               }
             else
               cur_column++;
-            
+
             if (cur_line >= loc.first_line
                 && cur_line <= loc.last_line)
               {
@@ -563,7 +563,7 @@ pkl_error (pkl_ast ast,
               }
             else
               cur_column++;
-            
+
            if (cur_line >= loc.first_line
                 && cur_line <= loc.last_line)
               {
@@ -636,7 +636,7 @@ pkl_ice (pkl_ast ast,
                stderr);
         return;
       }
-    
+
     out = fdopen (des, "w");
     if (out == NULL)
       {

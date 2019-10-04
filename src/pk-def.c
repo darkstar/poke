@@ -50,7 +50,7 @@ print_var_decl (pkl_ast_node decl, void *data)
 
   val = pvm_env_lookup (runtime_env, back, over);
   assert (val != PVM_NULL);
-                              
+
   /* Print the name and the current value of the variable.  */
   fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
   fputs ("\t\t", stdout);
@@ -82,7 +82,7 @@ print_fun_decl (pkl_ast_node decl, void *data)
 
   if (PKL_AST_CODE (func) != PKL_AST_FUNC)
     return;
-    
+
   assert (pkl_env_lookup (compiler_env,
                           PKL_AST_IDENTIFIER_POINTER (decl_name),
                           &back, &over) != NULL);

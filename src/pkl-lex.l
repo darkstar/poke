@@ -139,7 +139,7 @@ D [0-9]
 {NEWLINE}	{ /* Ignore newlines.  */  }
 {BLANK}		{ /* Ignore whitespace.  */ }
 
-"/*" { BEGIN(C_COMMENT); }          
+"/*" { BEGIN(C_COMMENT); }
 <C_COMMENT>"*/" { BEGIN(INITIAL); }
 <C_COMMENT>.    {  }
 <C_COMMENT>\n   {  }
@@ -295,7 +295,7 @@ D [0-9]
   }
 
   base = pkl_lex_get_base (yytext, &offset);
-  
+
   /* Note that strtol can't fail in this context.  */
   value = strtoll (yytext + offset, &end, base);
 
@@ -337,7 +337,7 @@ D [0-9]
   yylval->ast = pkl_ast_make_integer (yyextra->ast, value);
   PKL_AST_TYPE (yylval->ast) = ASTREF (type);
 
-  return INTEGER;    
+  return INTEGER;
 }
 
 {CHAR} {
@@ -379,7 +379,7 @@ D [0-9]
    yylval->ast = pkl_ast_make_integer (yyextra->ast, value);
    PKL_AST_TYPE (yylval->ast) = ASTREF (type);
 
-   return CHAR;  
+   return CHAR;
 }
 
 {STRING} {

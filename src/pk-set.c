@@ -41,7 +41,7 @@ pk_cmd_set_obase (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       fputs ("error: obase should be one of 2, 8, 10 or 16.\n", stdout);
       return 0;
     }
-  
+
   poke_obase = base;
   return 1;
 }
@@ -78,7 +78,7 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   else
     {
       enum ios_endian endian;
-      
+
       if (STREQ (arg, "little"))
         endian = IOS_ENDIAN_LSB;
       else if (STREQ (arg, "big"))
