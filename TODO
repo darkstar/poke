@@ -16,39 +16,392 @@ probably help you.
 If you complete a task, please include a patch for this file in your
 patch submission, removing the corresponding entry.
 
-The tasks below are generally ordered in reverse order of importance
-within their categories, i.e. the most important tasks are listed
-first.
+Each TODO entry headline has a prefix that expresses certain
+characteristics of the task.  The prefix starts with a #
+character.
+
+After the #, a single character identifies the domain of the task.
+Valid value are:
+
+B
+  Build system.
+D
+  Documentation.
+C
+  Dot-commands, REPL and interface.
+L
+  The Poke language.
+P
+  The PKL compiler.
+A
+  The PKL compiler.  Frontend.
+B
+  The PKL compiler.  Backend.
+M
+  The Poke Virtual Machine.
+R
+  RAS, the retarded assembler.
+I
+  The IOS subsytem.
+
+
+Then follows a single-digit number, which identifies the expected
+difficulty of the task.  These are:
+
+0
+  Low Hanging Fruit.  Good for a bored rainy night while tired or a
+  hangoverish lazy Sunday.
+1
+  Easy and localized task.
+2
+  Moderately complex task.  May involve hacking several parts of
+  the program.
+3
+  Complex task.  Most probably planning is needed, splitting into
+  other tasks, etc.
+
+One of the following characters may follow the difficulty digit:
+
+!
+  Please ask in ``poke-devel`` before attacking this task.  It will
+  require discussion.
+
+All the headlines start exactly at the first column of a line.  This
+makes it easy to grep this file for particular TODO entries.
+
+Entries can contain a list of people working on that task.  If you
+intend to pick an item from the list, please let us know in
+``poke-devel`` so we can update the file.  Likewise, if you stop
+working on a given task, please let us know!
 
 For help on how to hack GNU poke, please see the file HACKING in this
-very directory.
+same directory.
 
 Happy poking!
 
-build
------
+#B0 Use jitter deopt options only where needed
+----------------------------------------------
 
-- Use jitter deopt options only where needed.  At the moment the
-  JITTER_CFLAGS and friends are applied to all the sources of the
-  `poke' program.  As jitter does some deoptimizations, it would be
-  more efficient to use these flags only in jitter-generated vm files.
-  This could be achieved using a libtool convenience library.
+At the moment the JITTER_CFLAGS and friends are applied to all the
+sources of the `poke' program.  As jitter does some deoptimizations,
+it would be more efficient to use these flags only in jitter-generated
+vm files.  This could be achieved using a libtool convenience library.
 
-asm, gen
---------
+#C1 Make poke_interactive_p available to Poke programs
+------------------------------------------------------
 
-- The assembly code snippets in both the code generator and the macro
-  assembler make an excessive use of `regvar'.  It would be more
-  efficient to use the return stack to store temporaries (tor/fromr).
-  Patches in this spirit are welcome.
+The global variable ``poke_interactive_p`` defined in ``src/poke.c``
+tells whether poke is running interactively, i.e. if the standard
+input and output are connected to a tty.
 
-ras
----
+It would be useful to have this information available in Poke
+programs, so they can alter their behavior accordingly.
 
-- Validate the number of bits in u?int and u?long arguments.
-- Make sure that label arguments are defined.
-- Make sure that macro arguments are defined when used.
-- Pretty print: indentation in .loop/.endloop etc.
+Probably a good way to implement this is via a built-in and a
+definition in ``pkl-rt.pk`` like::
+
+  defun poke_interactive_p = int<32>: __PKL_BUILTIN_INTERACTIVE_P__;
+
+#C3 Debugging mode in poke
+--------------------------
+
+Debug mode::
+
+  (poke) .set debug 1
+
+Also in the command line::
+  
+   $ poke --debug
+
+Makes the compiler to generate location instructions, and generally
+adapt to debug Poke programs.  This mode will probably be
+significantly slower... that's ok.
+
+#A1 Support for multiline strings with """
+------------------------------------------
+
+At some point we will support docstrings in Poke functions.  For that,
+it is useful to support multi-line strings in order to avoid having to
+terminate each line with ``\n\``.
+
+We can use the python syntax """ ... """.  Other ideas are welcome.
+
+This should be implemented in the lexer, ``src/pkl-lex.l``.
+
+#P2 Operator * for strings: "ab" * 3 -> "ababab"
+------------------------------------------------
+
+Introduce an operator ``*`` for strings implementing repetition.  This
+involves:
+
+- Adapting the ``pkl_typify1_ps_op_mul`` handler to accept a string
+  and an integer as operands for the MUL operator.
+
+- Adapting the ``pkl_gen_ps_op_mul`` handler to generate code
+  implementing the operation.
+
+It is probably best to implement this operation as a
+macro-instruction, and not as a real PVM instruction.  This involves
+adding stuff into ``src/pkl-insn.def``, ``src/pkl-asm.c`` and the
+instruction implementation in ``src/pkl-asm.pks``.
+
+#P3! Locations in exceptions
+----------------------------
+
+The exception objects then shall be augmented in order to carry the
+location information.  Something like::
+  
+  deftype Exception =
+    struct
+    {
+      int code;
+      string file;
+      int line;
+      int column;
+    }
+
+The ``raise`` instruction will install the current location in the
+exception.
+
+Then, the default exception handler ``_pkl_exception_handler`` in
+``src/pkl-rt.pk`` shall be expanded to print the file, line and the
+column, if present.
+
+#M1 Endianness and negative encoding PVM instructions
+-----------------------------------------------------
+
+At the moment the global endianness used by the ``peekd*`` and
+``poked*`` instructions is controlled by the user via the dot-command
+``.set``, for example::
+
+  (poke) .set endian little
+  (poke) .set endian big
+  (poke) .set endian host
+
+Ditto for the negative encoding.
+  
+We need to be able to set the endianness programmatically from Poke
+programs.  As a first step, it is necessary to add a few instructions
+to the PVM to update the global endianness state.  Suggested
+instructions::
+
+  popend             # ( ENDIANNESS  -- )
+  pushend ENDIANNESS # ( -- ENDIANNESS )
+  popenc             # ( NENCODING -- )
+  pushenc NENCODING  # ( -- NENCODING )
+
+Suitable encodings for ENDIANNESS and NENCODING in an int<32> are
+trivial::
+
+  0 - little endian
+  1 - big endian
+  2 - host endian
+
+  0 - 2's complement
+  1 - 1's complement
+
+#M2! Location tracking in PVM
+-----------------------------
+
+The PVM shall be expanded with new instructions for location
+tracking.  Something like::
+  
+  pushloc file,line,column
+  setloc line,column
+  poploc
+
+If you want to work in this, please start a discussion in
+``poke-devel`` so we can design a suitable set of instructions.
+
+
+#R1 Validate the number of bits in u?int and u?long arguments
+-------------------------------------------------------------
+
+Currently RAS doesn't validate the number of bits used in PVM values.
+For example, this is passed as valid::
+
+  push ulong<100>23
+
+RAS should emit an error in that case.
+
+#L3! Clarify and document shift operator semantics
+--------------------------------------------------
+
+In poke we support both 2c and 1c.  The semantics of the bit-shift
+instructions on signed types thus depend on the current negative
+encoding, but they _should_ be defined.
+   
+In C:
+
+Relevant quote from ISO C99 (6.5.7/4)::
+  
+  The result of E1 << E2 is E1 left-shifted E2 bit positions; vacated
+  bits are ﬁlled with zeros. If E1 has an unsigned type, the value of
+  the result is E1 × 2^E2, reduced modulo one more than the maximum
+  value representable in the result type. If E1 has a signed type and
+  nonnegative value, and E1 × 2^E2 is representable in the result
+  type, then that is the resulting value; otherwise, the behavior is
+  undeﬁned.
+
+ISO C++-03 (5.8/2)::
+  
+  The value of E1 << E2 is E1 (interpreted as a bit pattern)
+  left-shifted E2 bit positions; vacated bits are zero-filled. If E1
+  has an unsigned type, the value of the result is E1 multiplied by
+  the quantity 2 raised to the power E2, reduced modulo ULONG_MAX+1 if
+  E1 has type unsigned long, UINT_MAX+1 otherwise. [Note: the
+  constants ULONG_MAXand UINT_MAXare defined in the header ). ]
+   
+That means::
+  
+  int a = -1, b=2, c;
+  c= a << b ;
+
+The paragraph you copied is talking about unsigned types. The behavior
+is undefined in C++.  From the last C++0x draft::
+  
+  The value of E1 << E2 is E1 left-shifted E2 bit positions; vacated
+  bits are zero-filled.  If E1 has an unsigned type, the value of the
+  result is E1 × 2^E2, reduced modulo one more than the maximum value
+  representable in the result type. Otherwise, if E1 has a signed type
+  and non-negative value, and E1×2E^2 is representable in the result
+  type, then that is the resulting value; otherwise, the behavior is
+  undefined.
+   
+EDIT: got a look at C++98 paper. It just doesn't mention signed types
+at all. So it's still undefined behavior.
+
+We can emit an error if E1 is signed and left-shifted (?).
+
+#L2! Support for wide-strings and wide-chars
+--------------------------------------------
+
+Strings with UCS characters.  Similar than in C::
+
+  L"Hello there"
+  L'X'
+
+This requires changes in both compiler and PVM.
+
+#L2 Support bitwise operators for offsets
+-----------------------------------------
+
+Offset values should support bitwise operations, in exactly the same
+way than integer values::
+
+  OFF1 ^ OFF2
+  OFF1 & OFF2
+  OFF1 | OFF2
+  OFF1 <<. INT
+  OFF1 .>> INT
+
+This task involves modifying the relevant typify1 handlers to allow
+offsets in these operators, promotion rules in promo and updates to
+the code generator.  I suggest to implement the operations as
+macro-instructions in ``src/pkl-asm.c``.
+
+#L2 Support casts from/to integrals to strings
+----------------------------------------------
+
+This task is about supporting string-to-integer and integer-to-string
+conversions as casts::
+
+  10 as string -> "10"
+  "10" as uint<32> -> 10U
+
+Note that the string-to-integer cast can raise an E_conv exception if
+it is not possible to convert the string to an integer value.
+
+#L2 Support for defunit
+-----------------------
+
+Currently offsets can have named units from a fixed list of valid
+units: b, B, Kb, Mb, etc.
+
+This task is about introducing a new language construction to allow
+the user to define new units, i.e.::
+
+  defunit X = 1;
+  defunit Y = 3;
+
+where the number is the multiple of the basic unit, i.e. the bit.
+Thus::
+
+  3#X == 3#1
+  12#Y == 12#3
+
+Once this is in place, we can define the standard units in
+``src/std.pk`` instead of having them hardcoded in the compiler::
+
+  defunit b = 1;
+  defunit B = 2;
+  ...
+
+#L3! Support `big' integral values (>64 bit) with GMP
+-----------------------------------------------------
+
+Currently the PVM supports the following kind of integer values:
+
+Integers up to 32-bit, signed and unsigned
+  These values are unboxed.
+Long integers, up to 64-bit, signed and unsigned
+  These values are boxed.
+
+The task is to introduce an additional kind of integer:
+
+Big integers, up to infinite bits, signed and unsigned
+  These values are boxed.
+
+This new integer shall be implemented as a boxed value, using the GNU
+MultiPrecision library ``libgmp``.  This task involves:
+
+- Adding the support to ``src/pvm-val.[ch]``.
+- Add new instruction to ``src/pvm.jitter``, i.e. itob, btol, etc.
+- Adapt the compiler to support big integer literals.
+- Adapt the code generator to use the new instructions.
+
+#A1 fold bconc expressions
+--------------------------
+
+This task is about implementing constant folding for the
+bit-concatenation operation, ::.  For this purpose, a
+``pkl_fold_bconc`` handler should be defined in ``src/pkl-fold.c``.
+
+#A2 fold array trims
+--------------------
+
+This task is about implementing constant folding for array trims.
+This shall be implemented in a handler in ``src/pkl-fold.c``.
+
+#A2 fold array subscripts
+-------------------------
+
+This task is about implementing constant folding for subscripts of
+array literals.  This shall be implemented in a handler in
+``src/pkl-fold.c``.
+
+
+#A1 fold array casts
+--------------------
+
+This task is about implementing constant folding for casts of array
+literals, like in::
+
+  [1,2,3] as int[]
+
+Note that the construction above is relatively common in Poke, since
+that'st he only way to denote an array literal having an unbounded
+type.
+
+This should be implemented as a handler in ``src/pkl-fold.c``.
+
+
+#A1 fold .<< and .>> expressions
+--------------------------------
+
+This task is about implementing constant folding of bit-shift
+operations on integer literals.  This should be implemented as a
+handler in ``src/pkl-fold.c``.
 
 
 This file is part of GNU poke.
@@ -68,4 +421,5 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 
 Local Variables:
 mode: rst
+rst-toc-insert-style: listed
 End:

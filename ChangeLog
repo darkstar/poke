@@ -1,5 +1,11 @@
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* HACKING (Deciding on What to Work on): New section referring to
+	TODO.
+	* TODO: Reformat and complete.
+
+2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Flattening): Add a note about compile-time
 	flattening of pinned structs.
 

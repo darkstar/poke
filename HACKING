@@ -209,6 +209,12 @@ Writing Poke
 
 - Use CamelCase for type names, but do not use CamelCase for
   variable/function names!
+
+Deciding on What to Work on
+---------------------------
+
+We maintain a detailed task list in the ``TODO`` file at the root of
+the source tree.  Please take a look.
     
 Submitting a Patch
 ------------------
