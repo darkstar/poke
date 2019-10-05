@@ -2559,6 +2559,32 @@ struct
 @}
 @end example
 
+Ditto for pinned structs:
+
+@example
+struct
+@{
+   int f1;
+
+   pinned struct
+   @{
+     int f2;
+     long f3;
+   @};
+@}
+@end example
+
+is transformed at compile time to:
+
+@example
+struct
+@{
+   int f1;
+   int f2;
+   long f3 @ f2'offset;
+@}
+@end example
+
 @section Flattening Bitmaps
 
 Bit-fields defined in a bitmap can be flattened in exactly the same

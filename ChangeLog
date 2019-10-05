@@ -1,7 +1,12 @@
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Flattening): Add a note about compile-time
+	flattening of pinned structs.
+
+2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (String Indexing): New section.
-	(String Concatenation): Likewise.
+	(String Concatenation): Likewise
 
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
 
