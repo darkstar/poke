@@ -57,7 +57,8 @@ BUILT_SOURCES = pkl-tab.h pkl-lex.c \
 AM_YFLAGS = -y -d -t --report=state
 AM_LFLAGS = -d
 
-poke_CPPFLAGS = -I$(top_srcdir)/lib -DPKL_DEBUG \
+poke_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib \
+                -DPKL_DEBUG \
                 -DPKGDATADIR=\"$(pkgdatadir)\" \
                 -DJITTER_VERSION=\"$(JITTER_VERSION)\" \
                 -DLOCALEDIR=\"$(localedir)\"

@@ -1,3 +1,8 @@
+2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/Makefile.am (poke_CPPFLAGS): Add $(top_builddir)/lib to the
+	headers search path.
+
 2019-10-04  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* HACKING (Submitting a Patch): Add a note about running `make
