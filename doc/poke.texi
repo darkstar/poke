@@ -1416,6 +1416,8 @@ The type of a character literal is always @code{char}, aka
 
 @menu
 * String Literals::		Writing string values.
+* String Indexing::		Accessing the characters of a string.
+* String Concatenation::        Building new strings.
 @end menu
 
 @node String Literals
@@ -1428,16 +1430,16 @@ following syntax:
 "foo"
 @end example
 
-The above string is of type @code{string}.
+Poke string values are very similar to C strings.  They comprise a
+sequence of 8-bit character codes, terminated by the value
+@code{0UB}.
 
-Note that the empty string @code{""} corresponds to the array
-@code{[0x0]}, which is a valid array containing at least one
-element.
+Every string value in Poke is of type @code{string}.
 
 The following escape sequences are supported inside string literals:
 
 @table @code
-@item \DDD
+@item \0DDD
 Where @var{ddd} is a one to three digits octal number.  The escape
 sequence denotes the ASCII character having that code.  It must be in
 the range @code{0-127}.  For example @code{\000} denotes the ASCII
@@ -1453,6 +1455,58 @@ Denotes a new line character.
 @item \t
 Denotes an horizontal tab.
 @end table
+
+@node String Indexing
+@section String Indexing
+
+The character code in a string can be retrieved using the same syntax
+than for accessing array elements.  For example:
+
+@example
+(poke) "foo"[1]
+111UB
+@end example
+
+The index range is from @code{0} to the size of the string, not
+including the terminating null character.  Any attempt of indexing the
+string out of bounds will result in an exception:
+
+@example
+(poke) "foo"[3]
+unhandled out of bounds exception
+@end example
+
+@node String Concatenation
+@section String Concatenation
+
+Strings can be concatenated using the @code{+} operator.  This works
+like this:
+
+@example
+(poke) "foo" + "bar"
+"foobar"
+@end example
+
+Note how the null character terminating the first string is removed.
+Therefore, the length of the concatenation of two given strings
+of lengths @code{N} and @code{M} is always @code{N+M-1}.
+
+Concatenation and indexing are useful together for building strings.
+A string can be created empty, and additional characters added to it
+by means of concatenation:
+
+@example
+defvar bytes = "";
+bytes = bytes + 'x' as string;
+@end example
+
+Then, we can retrieve characters from the string we built using
+indexing:
+
+@example
+(poke) bytes[0]
+0x78UB
+@end example
 
 @node Arrays
 @chapter Arrays
@@ -1488,8 +1542,8 @@ a compilation-time error if evaluated, are:
 ['a',"b",'c']
 @end example
 
-Arrays must contain at least one element.  Accordingly, @code{[]} is
-not a valid array literal.
+Array literals must contain at least one element.  Accordingly,
+@code{[]} is not a valid array literal.
 
 This is how a @code{3x3} matrix could be constructed using an array of
 arrays:

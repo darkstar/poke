@@ -1,5 +1,10 @@
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (String Indexing): New section.
+	(String Concatenation): Likewise.
+
+2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/Makefile.am (poke_CPPFLAGS): Add $(top_builddir)/lib to the
 	headers search path.
 
