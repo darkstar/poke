@@ -41,45 +41,47 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      3  Coding Style and Conventions
        3.1  Writing C
        3.2  Writing Poke
-     4  Submitting a Patch
-     5  Maintenance
-     6  Poke Architecture
-     7  The Poke Compiler
-       7.1  Compiler Overview
-       7.2  The bison Parser in pkl-tab.y
-       7.3  The AST
-       7.4  Compiler Passes and Phases
-         7.4.1  Naming Conventions for Phases
-         7.4.2  Naming Conventions for Handlers
-         7.4.3  Transformation Phases
-         7.4.4  Analysis Phases
-         7.4.5  Type System Phases
-       7.5  The Type System
-         7.5.1  Type Expressions
-       7.6  Adding Compiler Built-Ins
-     8  The Poke Virtual Machine
-       8.1  Exception Handling
-       8.2  Offsets and bit-offsets in the PVM
-     9  Memory Management
-       9.1  Using ASTREF
-       9.2  Using ASTDEREF
-       9.3  PVM values in PVM programs
-       9.4  PVM values in AST nodes
-    10  Debugging Poke
-      10.1  Building with Debugging support
-      10.2  Using GDB extensions
-      10.3  Valgrind and Poke
-      10.4  Debugging PVM Assembly Code
-    11  Future Developments
-    12  Appendix: The Source Tree
-      12.1  The Compiler
-      12.2  The Poke Virtual Machine
-      12.3  The IO Subsystem
-      12.4  Poke Program
-      12.5  Pickles and Libraries
-      12.6  Test Suite
-      12.7  Documentation
-      12.8  Other Stuff
+     4  Deciding on What to Work on
+     5  Submitting a Patch
+     6  Maintenance
+     7  Poke Architecture
+     8  The Poke Compiler
+       8.1  Compiler Overview
+       8.2  The bison Parser in pkl-tab.y
+       8.3  The AST
+       8.4  Compiler Passes and Phases
+         8.4.1  Naming Conventions for Phases
+         8.4.2  Naming Conventions for Handlers
+         8.4.3  Transformation Phases
+         8.4.4  Analysis Phases
+         8.4.5  Type System Phases
+       8.5  The Type System
+         8.5.1  Type Expressions
+       8.6  Adding Compiler Built-Ins
+     9  The Poke Virtual Machine
+       9.1  Exception Handling
+       9.2  Offsets and bit-offsets in the PVM
+    10  Memory Management
+      10.1  Using ASTREF
+      10.2  Using ASTDEREF
+      10.3  PVM values in PVM programs
+      10.4  PVM values in AST nodes
+    11  Debugging Poke
+      11.1  Building with Debugging support
+      11.2  Using GDB extensions
+      11.3  Valgrind and Poke
+      11.4  Debugging PVM Assembly Code
+    12  Future Developments
+    13  Appendix: The Source Tree
+      13.1  The Compiler
+      13.2  The Poke Virtual Machine
+      13.3  The IO Subsystem
+      13.4  Poke Program
+      13.5  Pickles and Libraries
+      13.6  Test Suite
+      13.7  Documentation
+      13.8  Other Stuff
+
 
 Nomenclature
 ------------

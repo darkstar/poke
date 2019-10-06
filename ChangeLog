@@ -1,3 +1,7 @@
+2019-10-06  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING: Regenerate table of contents.
+
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* HACKING (Deciding on What to Work on): New section referring to
