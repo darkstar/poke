@@ -1,5 +1,6 @@
 2019-10-06  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* .x-sc_trailing_blank: Add TODO.
 	* HACKING: Regenerate table of contents.
 
 2019-10-05  Jose E. Marchesi  <jemarch@gnu.org>
