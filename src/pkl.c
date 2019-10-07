@@ -570,9 +570,9 @@ pkl_error (pkl_ast ast,
                 /* Print until newline or end of string.  */
                 do
                   {
-                    c = fgetc (fd);
                     if (c != '\n')
                       fputc (c, stderr);
+                    c = fgetc (fd);
                   }
                 while (c != EOF && c != '\0' && c != '\n');
                 break;

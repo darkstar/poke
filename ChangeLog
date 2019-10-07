@@ -1,3 +1,8 @@
+2019-10-07  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl.c (pkl_error): Fix truncation of source code sample in
+	detailed error output.
+
 2019-10-06  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* .x-sc_trailing_blank: Add TODO.
