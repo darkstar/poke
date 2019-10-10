@@ -104,7 +104,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
 
     switch $do_what {
         "compile" {
-            catch "exec $POKE --quiet -l $prog -c .exit $extra_tool_flags" comp_output
+            catch "exec $POKE --quiet --color=no -l $prog -c .exit $extra_tool_flags" comp_output
             set output_file ""
         }
         "run" {
@@ -119,7 +119,7 @@ proc poke-dg-test { prog do_what extra_tool_flags } {
             set output_file "${objdir}/[file rootname [file tail $prog]]"
             set fd [open $output_file w]
             puts $fd "#!/bin/bash"
-            puts $fd "$VALGRIND $POKE --quiet -q -l $prog $extra_tool_flags $poke_commands"
+            puts $fd "$VALGRIND $POKE --quiet --color=no -q -l $prog $extra_tool_flags $poke_commands"
             close $fd
             file attributes $output_file -permissions a+rx
         }

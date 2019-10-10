@@ -71,12 +71,18 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   if (decl == NULL)
     {
-      fprintf (stdout, "error: no such function `%s'\n", fname);
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
+      pk_printf ("no such function `%s'\n", fname);
       return 0;
     }
   else if (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC)
     {
-      fprintf (stdout, "error: `%s' is not a function\n", fname);
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
+      pk_printf ("`%s' is not a function\n", fname);
       return 0;
     }
 
@@ -113,7 +119,10 @@ pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   mapper = pvm_val_mapper (exp);
   if (mapper == PVM_NULL)
     {
-      fprintf (stdout, "error: the given value is not mapped\n");
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
+      pk_printf ("the given value is not mapped\n");
       return 0;
     }
 
@@ -147,7 +156,10 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   writer = pvm_val_writer (exp);
   if (writer == PVM_NULL)
     {
-      fprintf (stdout, "error: the given value is not mapped\n");
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
+      pk_printf ("the given value is not mapped\n");
       return 0;
     }
 

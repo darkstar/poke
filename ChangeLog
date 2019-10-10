@@ -1,3 +1,59 @@
+2019-10-10  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* etc/poke-default.css: New file.
+	* src/pk-term.c: Likewise.
+	* Makefile.am (SUBDIRS): Add etc/.
+	* src/pvm.jitter: pk_printf is a wrapped function.
+	Include pk-term.h in early-c.
+	Use pk-term printing services in pretty printers and instructions.
+	* src/pvm-val.h: pvm_print_string and pvm_print_val do not take a
+	FILE* argument any longer.
+	* src/pvm-val.c (pvm_print_binary): Likewise.
+	(pvm_print_val): Likewise.
+	(pvm_print_string): Likewise.
+	* src/poke.c: Include pk-term.h.
+	Support --color and --style long options.
+	(print_help): Use print services from pk-term.
+	(pk_print_version): Likewise.
+	(finalize): Shutdown the pk-term subsystem.
+	(repl): Likewise.
+	(parse_args): Handle --color and -style.
+	(initialize): Get argc and argv as arguments.
+	(initialize): Initialize the pk-term subsytem.
+	(main): Pass argc and argv to `initialize'.
+	* src/pkl.c (pkl_new): Likewise.
+	(pkl_error): Likewise.
+	(pkl_warning): Likewise.
+	(pkl_ice): Likewise.
+	* src/pk-vm.c (pk_cmd_vm_disas_fun): Use print services from
+	pk-term.
+	(pk_cmd_vm_disas_map): Likewise.
+	(pk_cmd_vm_disas_writ): Likewise.
+	* src/pk-term.h: Include textstyle.h.
+	Remove obsolete constants.
+	Add prototypes for pk-term services.
+	* src/pk-set.c: Include pk-term.h.
+	(pk_cmd_set_obase): Use print services form pk-term.
+	(pk_cmd_set_endian): Likewise.
+	(pk_cmd_set_nenc): Likewise.
+	* src/pk-print.c: Include pk-term.h.
+	(pk_cmd_print): Use print services from pk-term.
+	* src/pk-def.c: Include pk-term.h.
+	(print_var_decl): Use print services from pk-term.
+	(print_fun_decl): Likewise.
+	* src/pk-cmd.c: Include pk-term.h.
+	(pk_cmd_exec_1): Use print services from pk-term.
+	(pk_cmd_exec): Likewise.
+	* src/Makefile.am (poke_CPPFLAGS): Add $(top_builddir)/lib to the
+	include path.
+	* bootstrap.conf (gnulib_modules): Add textstyle-optional.
+	* configure.ac: Use gl_LIBTEXTSTYLE_OPTIONAL.
+	* src/Makefile.am (poke_LDADD): Link with libtextstyle.
+	* testsuite/lib/poke-dg.exp (poke-dg-test): Pass --color=no to
+	poke when running tests.
+	* testsuite/lib/poke.exp (poke_start): Likewise.
+	* HACKING (Appendix):List src/pk-term.c in sources.
+
 2019-10-07  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl.c (pkl_error): Fix truncation of source code sample in

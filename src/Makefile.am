@@ -23,6 +23,7 @@ bin_PROGRAMS = poke
 poke_SOURCES = poke.c poke.h \
                ios.c ios.h ios-dev.h \
                ios-dev-file.c \
+               pk-term.c pk-term.h \
                pk-cmd.c pk-cmd.h \
                pk-file.c \
                pk-info.c pk-misc.c pk-help.c pk-vm.c \
@@ -64,7 +65,7 @@ poke_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib \
                 -DLOCALEDIR=\"$(localedir)\"
 poke_CFLAGS = -Wall $(BDW_GC_CFLAGS)
 poke_LDADD = $(top_builddir)/lib/libpoke.la \
-             $(LTLIBREADLINE) $(BDW_GC_LIBS)
+             $(LTLIBREADLINE) $(BDW_GC_LIBS) $(LIBTEXTSTYLE)
 poke_LDFLAGS =
 
 # Integration with jitter.

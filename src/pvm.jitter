@@ -38,6 +38,7 @@ end
 ## Functions and globals to wrap.
 
 wrapped-functions
+  pk_printf
   printf
   pvm_assert
   pvm_env_lookup
@@ -80,6 +81,7 @@ early-header-c
   code
 #   include "pvm.h"
 #   include "ios.h"
+#   include "pk-term.h"
 
 #   define STREQ(a, b) (strcmp (a, b) == 0)
 #   define STRNEQ(a, b) (strcmp (a, b) != 0)
@@ -338,7 +340,7 @@ late-header-c
       fmt[5] = '\0';                                                        \
     }                                                                       \
                                                                             \
-    printf (fmt, val);                                                      \
+    pk_printf (fmt, val);                                                   \
     JITTER_DROP_STACK ();                                                   \
   } while (0)
 
@@ -380,7 +382,7 @@ late-header-c
       fmt[6] = '\0';                                                        \
     }                                                                       \
                                                                             \
-    printf (fmt, val);                                                      \
+    pk_printf (fmt, val);                                                   \
     JITTER_DROP_STACK ();                                                   \
   } while (0)
 
@@ -404,7 +406,8 @@ printer-c
     void
     pvm_literal_printer (FILE *out, jitter_uint val)
     {
-      pvm_print_val (out, (pvm_val) val, 10, 0);
+      /* XXX what about out.  */
+      pvm_print_val ((pvm_val) val, 10, 0);
     }
 
     void
@@ -418,9 +421,8 @@ printer-c
     pvm_literal_printer_lo (FILE *out, jitter_uint lo)
     {
       fprintf (out, "%%lo(0x%" JITTER_PRIx") (", lo);
-      pvm_print_val (out,
-                    ((pvm_val) printer_hi << 32) | lo,
-                    10, 0);
+      pvm_print_val (((pvm_val) printer_hi << 32) | lo,
+                      10, 0);
       fputc (')', out);
       printer_hi = 0;
     }
@@ -669,7 +671,7 @@ end
 
 instruction prints () # ( STR -- )
   code
-    pvm_print_string (stdout, JITTER_TOP_STACK ());
+    pvm_print_string (JITTER_TOP_STACK ());
     JITTER_DROP_STACK ();
   end
 end
@@ -710,8 +712,8 @@ instruction strace (?n) # ( -- )
                  jitter_original_state->pvm_state_backing.canary)))
         {
           assert (i < 1024);
-          pvm_print_val (stdout, JITTER_TOP_STACK (), 16, PVM_PRINT_F_MAPS);
-          fprintf (stdout, "\n");
+          pvm_print_val (JITTER_TOP_STACK (), 16, PVM_PRINT_F_MAPS);
+          pk_puts ("\n");
           tmp[i++] = JITTER_TOP_STACK ();
           JITTER_DROP_STACK ();
         }

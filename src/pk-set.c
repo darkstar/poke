@@ -25,6 +25,7 @@
 
 #include "poke.h"
 #include "pk-cmd.h"
+#include "pk-term.h"
 #include "ios.h"
 #include "pvm.h"
 
@@ -38,7 +39,10 @@ pk_cmd_set_obase (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   if (base != 10 && base != 16 && base != 2 && base != 8)
     {
-      fputs ("error: obase should be one of 2, 8, 10 or 16.\n", stdout);
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
+      pk_puts ("obase should be one of 2, 8, 10 or 16.\n");
       return 0;
     }
 
@@ -114,8 +118,10 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
         }
       else
         {
-          fputs ("error: endian should be one of `little', `big', `host' or `network'.\n",
-                 stdout);
+          pk_term_class ("error");
+          pk_puts ("error: ");
+          pk_term_end_class ("error");
+          pk_puts ("endian should be one of `little', `big', `host' or `network'.\n");
           return 0;
         }
 
@@ -164,8 +170,10 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
         nenc = IOS_NENC_2;
       else
         {
-          fputs ("error: nenc should be one of `1c' or `2c'.\n",
-                 stdout);
+          pk_term_class ("error");
+          pk_puts ("error: ");
+          pk_term_end_class ("error");
+          pk_puts (" nenc should be one of `1c' or `2c'.\n");
           return 0;
         }
 

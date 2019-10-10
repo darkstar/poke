@@ -81,8 +81,11 @@ pkl_new ()
 
     if (!pkl_compile_file (compiler, poke_rt_pk))
       {
-        fprintf (stderr,
-                 "Internal error: compiler failed to bootstrap itself\n");
+        pk_term_class ("error");
+        pk_puts ("internal error: ");
+        pk_term_end_class ("error");
+        pk_puts ("compiler failed to bootstrap itself\n");
+
         exit (EXIT_FAILURE);
       }
     free (poke_rt_pk);
@@ -488,26 +491,35 @@ pkl_error (pkl_ast ast,
   while (*p != '\0')
     {
       if (ast->filename)
-        fprintf (stderr, "%s:", ast->filename);
+        {
+          pk_term_class ("error-filename");
+          pk_printf ("%s:", ast->filename);
+          pk_term_end_class ("error-filename");
+        }
 
       if (PKL_AST_LOC_VALID (loc))
         {
+          pk_term_class ("error-location");
           if (poke_quiet_p)
-            fprintf (stderr, "%d: ", loc.first_line);
+            pk_printf ("%d: ", loc.first_line);
           else
-            fprintf (stderr, "%d:%d: ",
-                     loc.first_line, loc.first_column);
+            pk_printf ("%d:%d: ",
+                       loc.first_line, loc.first_column);
+          pk_term_end_class ("error-location");
         }
-      fputs (RED REVERSE "error: " NOATTR, stderr);
+
+      pk_term_class ("error");
+      pk_puts ("error: ");
+      pk_term_end_class ("error");
 
       while (*p != '\n' && *p != '\0')
         {
-          fputc (*p, stderr);
+          pk_printf ("%c", *p);
           p++;
         }
       if (*p == '\n')
         p++;
-      fputc ('\n', stderr);
+      pk_puts ("\n");
     }
   free (errmsg);
 
@@ -539,7 +551,7 @@ pkl_error (pkl_ast ast,
               {
                 /* Print until newline or end of string.  */
                 for (;*p != '\0' && *p != '\n'; ++p)
-                  fputc (*p, stderr);
+                  pk_printf ("%c", *p);
                 break;
               }
           }
@@ -571,7 +583,7 @@ pkl_error (pkl_ast ast,
                 do
                   {
                     if (c != '\n')
-                      fputc (c, stderr);
+                      pk_printf ("%c", c);
                     c = fgetc (fd);
                   }
                 while (c != EOF && c != '\0' && c != '\n');
@@ -583,16 +595,19 @@ pkl_error (pkl_ast ast,
         assert (fseeko (fd, cur_pos, SEEK_SET) == 0);
       }
 
-    fputc ('\n', stderr);
+    pk_puts ("\n");
 
     for (i = 1; i < loc.first_column; ++i)
-      fputc (' ', stderr);
+      pk_puts (" ");
+
+    pk_term_class ("error");
     for (; i < loc.last_column; ++i)
       if (i == loc.first_column)
-        fputc ('^', stderr);
+        pk_puts ("^");
       else
-        fputc ('~', stderr);
-    fputc ('\n', stderr);
+        pk_puts ("~");
+    pk_term_end_class ("error");
+    pk_puts ("\n");
   }
 }
 
@@ -603,15 +618,25 @@ pkl_warning (pkl_ast_loc loc,
              ...)
 {
   va_list valist;
+  char *msg;
 
-  va_start (valist, fmt);
-  if (PKL_AST_LOC_VALID (loc))
-    fprintf (stderr, "%d:%d: ",
-             loc.first_line, loc.first_column);
-  fputs ("warning: ", stderr);
-  vfprintf (stderr, fmt, valist);
-  fputc ('\n', stderr);
+  va_start(valist, fmt);
+  vasprintf (&msg, fmt, valist);
   va_end (valist);
+  
+  if (PKL_AST_LOC_VALID (loc))
+    {
+      pk_term_class ("error-location");
+      pk_printf ("%d:%d: ", loc.first_line, loc.first_column);
+      pk_term_end_class ("error-location");
+    }
+  pk_term_class ("warning");
+  pk_puts ("warning: ");
+  pk_term_end_class ("warning");
+  pk_puts (msg);
+  pk_puts ("\n");
+
+  free (msg);
 }
 
 void
@@ -632,17 +657,21 @@ pkl_ice (pkl_ast ast,
     if ((des = path_search (tmpfile, PATH_MAX, NULL, "poke", true) == -1)
         || ((des = mkstemp (tmpfile)) == -1))
       {
-        fputs ("internal error: determining a temporary file name\n",
-               stderr);
+        pk_term_class ("error");
+        pk_puts ("internal error: ");
+        pk_term_end_class ("error");
+        pk_puts ("determining a temporary file name\n");
+
         return;
       }
 
     out = fdopen (des, "w");
     if (out == NULL)
       {
-        fprintf (stderr,
-                 "internal error: opening temporary file `%s'\n",
-                 tmpfile);
+        pk_term_class ("error");
+        pk_puts ("internal error: ");
+        pk_term_end_class ("error");
+        pk_printf ("opening temporary file `%s'\n", tmpfile);
         return;
       }
 
@@ -656,16 +685,27 @@ pkl_ice (pkl_ast ast,
   }
 
   if (PKL_AST_LOC_VALID (loc))
-    fprintf (stderr, "%d:%d: ",
-             loc.first_line, loc.first_column);
-  fputs (RED REVERSE "internal compiler error: " NOATTR, stderr);
-  va_start (valist, fmt);
-  vfprintf (stderr, fmt, valist);
-  va_end (valist);
-  fputc ('\n', stderr);
-  fprintf (stderr, "Important information has been dumped in %s.\n",
-           tmpfile);
-  fputs ("Please attach it to a bug report and send it to bug-poke@gnu.org.\n", stderr);
+    {
+      pk_term_class ("error-location");
+      pk_printf ("%d:%d: ", loc.first_line, loc.first_column);
+      pk_term_end_class ("error-location");
+    }
+  pk_puts ("internal compiler error: ");
+  {
+    char *msg;
+
+    va_start (valist, fmt);
+    vasprintf (&msg, fmt, valist);
+    va_end (valist);
+
+    pk_puts (msg);
+    free (msg);
+  }
+  pk_puts ("\n");
+  pk_printf ("Important information has been dumped in %s.\n",
+             tmpfile);
+  /* XXX hyperlink */
+  pk_puts ("Please attach it to a bug report and send it to bug-poke@gnu.org.\n");
 }
 
 int

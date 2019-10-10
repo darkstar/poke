@@ -19,67 +19,26 @@
 #ifndef PK_TERM_H
 #define PK_TERM_H
 
-/* Define ANSI terminal escape sequences to print each object with
-   attributes depending on its tag. */
+#include <config.h>
 
-#if 0
+#include <textstyle.h>
 
-#define ESC        "\033"
-#define NOATTR     ESC"[0m"
-#define BOLD       ESC"[1m"
-#define FAINT      ESC"[2m"
-#define ITALIC     ESC"[3m"
-#define UNDERLINE  ESC"[4m"
-#define REVERSE    ESC"[7m"
-#define CROSSOUT   ESC"[9m"
+/* Initialize and finalize the terminal subsystem.  */
+void pk_term_init (int argc, char *argv[]);
+void pk_term_shutdown (void);
 
-#define BLACK        ESC"[0m"ESC"[30m"
-#define WHITE        ESC"[1m"ESC"[37m"
-#define BLUE         ESC"[0m"ESC"[34m"
-#define LIGHTBLUE    ESC"[1m"ESC"[34m"
-#define GREEN        ESC"[0m"ESC"[32m"
-#define LIGHTGREEN   ESC"[1m"ESC"[32m"
-#define CYAN         ESC"[0m"ESC"[36m"
-#define LIGHTCYAN    ESC"[1m"ESC"[36m"
-#define RED          ESC"[0m"ESC"[31m"
-#define LIGHTRED     ESC"[1m"ESC"[31m"
-#define MAGENTA      ESC"[0m"ESC"[35m"
-#define LIGHTMAGENTA ESC"[1m"ESC"[35m"
-#define BROWN        ESC"[0m"ESC"[33m"
-#define LIGHTGRAY    ESC"[0m"ESC"[37m"
-#define DARKGRAY     ESC"[1m"ESC"[30m"
-#define LIGHTBLUE    ESC"[1m"ESC"[34m"
-#define YELLOW       ESC"[1m"ESC"[33m"
+/* Flush the terminal output.  */
+extern void pk_term_flush (void);
 
-#else
+/* Print a string to the terminal.  */
+extern void pk_puts (const char *str);
 
-#define ESC
-#define NOATTR
-#define BOLD
-#define FAINT
-#define ITALIC
-#define UNDERLINE
-#define REVERSE
-#define CROSSOUT
+/* Print a formatted string to the terminal.  */
+extern void pk_printf (const char *format, ...);
 
-#define BLACK
-#define WHITE
-#define BLUE
-#define LIGHTBLUE
-#define GREEN
-#define LIGHTGREEN
-#define CYAN
-#define LIGHTCYAN
-#define RED
-#define LIGHTRED
-#define MAGENTA
-#define LIGHTMAGENTA
-#define BROWN
-#define LIGHTGRAY
-#define DARKGRAY
-#define LIGHTBLUE
-#define YELLOW
+/* Class handling.  */
 
-#endif
+extern void pk_term_class (const char *class);
+extern void pk_term_end_class (const char *class);
 
 #endif /* PK_TERM_H */

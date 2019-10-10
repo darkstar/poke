@@ -88,6 +88,11 @@ AC_ARG_ENABLE([debug],
 AM_CONDITIONAL([POKE_DEBUG],
                [test "x$poke_debug" = "xyes"])
 
+dnl Use libtextstyle if available.  Otherwise, use the dummy header
+dnl file provided by gnulib's libtextstyle-optional module.
+
+gl_LIBTEXTSTYLE_OPTIONAL
+
 dnl Generate output files
 AC_CONFIG_FILES(Makefile
                 lib/Makefile
@@ -95,7 +100,15 @@ AC_CONFIG_FILES(Makefile
                 pickles/Makefile
                 doc/Makefile
                 po/Makefile.in
+                etc/Makefile
                 testsuite/Makefile)
 AC_OUTPUT
+
+dnl Report warning
+
+if test "x$HAVE_LIBTEXTSTYLE" = "xno"; then
+   echo "warning: libtextstyle was not found in the system."
+   echo "warning: poke's output won't be styled."
+fi
 
 dnl End of configure.ac

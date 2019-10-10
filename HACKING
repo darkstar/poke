@@ -1123,7 +1123,7 @@ Infrastructure for writing poke commands
   ``src/pk-cmd.h``, ``src/pk-cmd.c``
 
 Terminal stuff
-  ``src/pk-term.h``
+  ``src/pk-term.h``, ``src/pk-term.c``
 
 Commands
   ``src/pk-def.c``, ``src/pk-dump.pk``, ``src/pk-file.c``,

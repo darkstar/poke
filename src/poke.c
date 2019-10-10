@@ -36,6 +36,7 @@
 #include "pk-cmd.h"
 #include "pkl.h"
 #include "pvm.h"
+#include "pk-term.h"
 #include "poke.h"
 
 /* poke can be run either interactively (from a tty) or in batch mode.
@@ -87,6 +88,8 @@ enum
   CMD_ARG,
   NO_INIT_FILE_ARG,
   SCRIPT_ARG,
+  COLOR_ARG,
+  STYLE_ARG
 };
 
 static const struct option long_options[] =
@@ -98,6 +101,8 @@ static const struct option long_options[] =
   {"command", required_argument, NULL, CMD_ARG},
   {"script", required_argument, NULL, SCRIPT_ARG},
   {"no-init-file", no_argument, NULL, NO_INIT_FILE_ARG},
+  {"color", required_argument, NULL, COLOR_ARG},
+  {"style", required_argument, NULL, STYLE_ARG},
   {NULL, 0, NULL, 0},
 };
 
@@ -106,85 +111,102 @@ print_help ()
 {
   /* TRANSLATORS: --help output, GNU poke synopsis.
      no-wrap */
-  printf (_("\
+  pk_puts (_("\
 Usage: poke [OPTION]... [FILE]\n"));
 
   /* TRANSLATORS: --help output, GNU poke summary.
      no-wrap */
-  fputs(_("\
-Interactive editor for binary files.\n"), stdout);
+  pk_puts (_("\
+Interactive editor for binary files.\n"));
 
-  puts ("");
+  pk_puts ("\n");
   /* TRANSLATORS: --help output, GNU poke arguments.
      no-wrap */
-  fputs (_("\
-  -l, --load=FILE                     load the given pickle at startup.\n"),
-         stdout);
+  pk_puts (_("\
+  -l, --load=FILE                     load the given pickle at startup.\n"));
 
-  puts ("");
+  pk_puts ("\n");
 
   /* TRANSLATORS: --help output, GNU poke arguments.
      no-wrap */
-  fputs(_("\
+  pk_puts (_("\
 Commanding poke from the command line:\n\
   -c, --command=CMD                   execute the given command.\n\
-  -s, --script=FILE                   execute commands from FILE.\n"),
-         stdout);
+  -s, --script=FILE                   execute commands from FILE.\n"));
 
-  puts ("");
+  pk_puts ("\n");
+  pk_puts (_("\
+Styling text output:\n\
+      --color=(yes|no|auto|html|test) emit styled output.\n\
+      --style=STYLE_FILE              style file to use when styling.\n"));
+
+  pk_puts ("\n");
   /* TRANSLATORS: --help output, less used GNU poke arguments.
      no-wrap */
-  fputs (_("\
+  pk_puts (_("\
   -q, --no-init-file                  do not load an init file.\n\
       --quiet                         be as terse as possible.\n\
       --help                          print a help message and exit.\n\
-      --version                       show version and exit.\n"),
-         stdout);
+      --version                       show version and exit.\n"));
 
-  puts ("");
+  pk_puts ("\n");
   /* TRANSLATORS: --help output 5+ (reports)
      TRANSLATORS: the placeholder indicates the bug-reporting address
      for this application.  Please add _another line_ with the
      address for translation bugs.
      no-wrap */
-  printf (_("\
+  pk_printf (_("\
 Report bugs to: %s\n"), PACKAGE_BUGREPORT);
 #ifdef PACKAGE_PACKAGER_BUG_REPORTS
   printf (_("Report %s bugs to: %s\n"), PACKAGE_PACKAGER,
           PACKAGE_PACKAGER_BUG_REPORTS);
 #endif
-  printf (_("%s home page: <%s>\n"), PACKAGE_NAME, PACKAGE_URL);
-  fputs (_("General help using GNU software: <http://www.gnu.org/gethelp/>\n"),
-         stdout);
+  pk_printf (_("%s home page: <%s>\n"), PACKAGE_NAME, PACKAGE_URL);
+  pk_puts (_("General help using GNU software: <http://www.gnu.org/gethelp/>\n"));
 }
 
 void
 pk_print_version ()
 {
-  puts ("     _____");
-  puts (" ---'   __\\_______");
-  printf ("            ______)  GNU poke %s\n", VERSION);
-  puts ("            __)");
-  puts ("           __)");
-  puts (" ---._______)");
+  pk_term_class ("logo");
+  pk_puts ("     _____\n");
+  pk_puts (" ---'   __\\_______\n");
+  pk_printf ("            ______)  GNU poke %s\n", VERSION);
+  pk_puts ("            __)\n");
+  pk_puts ("           __)\n");
+  pk_puts (" ---._______)\n");
+  pk_term_end_class ("logo");
   /* xgettesxt: no-wrap */
-  puts ("");
+  pk_puts ("\n");
 
   /* It is important to separate the year from the rest of the message,
      as done here, to avoid having to retranslate the message when a new
      year comes around.  */
-  printf (_("\
+  pk_term_class ("copyright");
+  pk_printf (_("\
 Copyright (C) %s Jose E. Marchesi.\n\
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n"), "2019");
+  pk_term_end_class ("copyright");
 
-  printf (_("\
+    pk_printf (_("\
 \nPowered by Jitter %s."), JITTER_VERSION);
 
-  puts (_("\
+    pk_puts (_("\
 \n\
-Perpetrated by Jose E. Marchesi."));
+Perpetrated by Jose E. Marchesi.\n"));
+
+}
+
+static void
+finalize ()
+{
+  ios_shutdown ();
+  pk_cmd_shutdown ();
+  pkl_free (poke_compiler);
+  pvm_shutdown (poke_vm);
+  pk_term_shutdown ();
 }
 
 static void
@@ -204,11 +226,11 @@ parse_args (int argc, char *argv[])
         {
         case HELP_ARG:
           print_help ();
-          exit (EXIT_SUCCESS);
+          goto exit_success;
           break;
         case VERSION_ARG:
           pk_print_version ();
-          exit (EXIT_SUCCESS);
+          goto exit_success;
           break;
         case QUIET_ARG:
           poke_quiet_p = 1;
@@ -220,14 +242,15 @@ parse_args (int argc, char *argv[])
         case 'l':
         case LOAD_ARG:
           if (!pkl_compile_file (poke_compiler, optarg))
-            exit (EXIT_FAILURE);
+            goto exit_success;
+
           break;
         case 'c':
         case CMD_ARG:
           {
             int ret = pk_cmd_exec (optarg);
             if (!ret)
-              exit (EXIT_FAILURE);
+              goto exit_failure;
             poke_interactive_p = 0;
             break;
           }
@@ -236,19 +259,24 @@ parse_args (int argc, char *argv[])
           {
             int ret = pk_cmd_exec_script (optarg);
             if (!ret)
-              exit (EXIT_FAILURE);
+              goto exit_failure;
             poke_interactive_p = 0;
             break;
           }
+          /* libtextstyle arguments are handled in pk-term.c, not
+             here.   */
+        case COLOR_ARG:
+        case STYLE_ARG:
+          break;
         default:
-          exit (EXIT_FAILURE);
+          goto exit_failure;
         }
     }
 
   if (optind < argc)
     {
       if (!ios_open (argv[optind++]))
-        exit (EXIT_FAILURE);
+        goto exit_failure;
 
       optind++;
     }
@@ -256,8 +284,18 @@ parse_args (int argc, char *argv[])
   if (optind < argc)
     {
       print_help();
-      exit (EXIT_FAILURE);
+      goto exit_failure;
     }
+
+  return;
+
+ exit_success:
+  finalize ();
+  exit (EXIT_SUCCESS);
+  
+ exit_failure:
+  finalize ();
+  exit (EXIT_FAILURE);
 }
 
 static void
@@ -266,9 +304,9 @@ repl ()
   if (!poke_quiet_p)
     {
       pk_print_version ();
-      puts ("");
-      puts (_("For help, type \".help\"."));
-      puts (_("Type \".exit\" to leave the program."));
+      pk_puts ("\n");
+      pk_puts (_("For help, type \".help\".\n"));
+      pk_puts (_("Type \".exit\" to leave the program.\n"));
     }
 
   while (!poke_exit_p)
@@ -276,6 +314,15 @@ repl ()
       int ret;
       char *line;
 
+#if 0
+      /* This doesn't work well because readline's edition commands
+         make use of the lenght of the prompt, i.e. the prompt string
+         is expected to be passed to readline().  */
+      pk_term_class ("prompt");
+      pk_puts ("(poke) ");
+      pk_term_end_class ("prompt");
+#endif
+      pk_term_flush ();
       line = readline ("(poke) ");
       if (line == NULL)
         /* EOF in stdin (probably Ctrl-D).  */
@@ -298,7 +345,7 @@ repl ()
 }
 
 static void
-initialize ()
+initialize (int argc, char *argv[])
 {
   /* This is used by the `progname' gnulib module.  */
   set_program_name ("poke");
@@ -316,6 +363,9 @@ initialize ()
   poke_datadir = getenv ("POKEDATADIR");
   if (poke_datadir == NULL)
     poke_datadir = PKGDATADIR;
+
+  /* Initialize the terminal output.  */
+  pk_term_init (argc, argv);
 
   /* Initialize the Poke Virtual Machine.  Note this should be done
      before initializing the compiler, since the later constructs and
@@ -371,20 +421,11 @@ initialize_user ()
     }
 }
 
-static void
-finalize ()
-{
-  ios_shutdown ();
-  pk_cmd_shutdown ();
-  pkl_free (poke_compiler);
-  pvm_shutdown (poke_vm);
-}
-
 int
 main (int argc, char *argv[])
 {
   /* Initialization.  */
-  initialize ();
+  initialize (argc, argv);
 
   /* Parse args, loading files, opening files for IO, etc etc */
   parse_args (argc, argv);

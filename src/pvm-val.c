@@ -435,51 +435,51 @@ pvm_sizeof (pvm_val val)
    _'s */
 
 static void
-pvm_print_binary (FILE *out, uint64_t val, int size, int sign)
+pvm_print_binary (uint64_t val, int size, int sign)
 {
   char b[65];
 
   if (size != 64 && size != 32 && size != 16 && size != 8
       && size != 4)
-    fprintf (out, "(%sint<%d>) ", sign ? "" : "u", size);
+    pk_printf ("(%sint<%d>) ", sign ? "" : "u", size);
 
   for (int z = 0; z < size; z++) {
     b[size-1-z] = ((val >> z) & 0x1) + '0';
   }
   b[size] = '\0';
 
-  fprintf (out, "0b%s", b);
+  pk_printf ("0b%s", b);
 
   if (size == 64)
     {
       if (!sign)
-        fputc ('U', out);
-      fputc ('L', out);
+        pk_puts ("U");
+      pk_puts ("L");
     }
   else if (size == 16)
     {
       if (!sign)
-        fputc ('U', out);
-      fputc ('H', out);
+        pk_puts ("U");
+      pk_puts ("H");
     }
   else if (size == 8)
     {
       if (!sign)
-        fputc ('U', out);
-      fputc ('B', out);
+        pk_puts ("U");
+      pk_puts ("B");
     }
   else if (size == 4)
     {
       {
         if (!sign)
-          fputc ('U', out);
+          pk_puts ("U");
       }
-      fputc ('N', out);
+      pk_puts ("N");
     }
 }
 
 void
-pvm_print_val (FILE *out, pvm_val val, int base, int flags)
+pvm_print_val (pvm_val val, int base, int flags)
 {
   const char *long64_fmt, *long_fmt;
   const char *ulong64_fmt, *ulong_fmt;
@@ -563,28 +563,32 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
   /* And print out the value in the given stream..  */
   if (val == PVM_NULL)
-    fprintf (out, "null");
+    pk_puts ("null");
   else if (PVM_IS_LONG (val))
     {
       int size = PVM_VAL_LONG_SIZE (val);
       int64_t longval = PVM_VAL_LONG (val);
       uint64_t ulongval;
 
+      pk_term_class ("integer");
+      
       if (size == 64)
         ulongval = (uint64_t) longval;
       else
         ulongval = (uint64_t) longval & ((((uint64_t) 1) << size) - 1);
 
       if (base == 2)
-        pvm_print_binary (out, ulongval, size, 1);
+        pvm_print_binary (ulongval, size, 1);
       else
         {
           if (size == 64)
-            fprintf (out, long64_fmt, base == 10 ? longval : ulongval);
+            pk_printf (long64_fmt, base == 10 ? longval : ulongval);
           else
-            fprintf (out, long_fmt,
-                     PVM_VAL_LONG_SIZE (val), base == 10 ? longval : ulongval);
+            pk_printf (long_fmt, PVM_VAL_LONG_SIZE (val),
+                       base == 10 ? longval : ulongval);
         }
+
+      pk_term_end_class ("integer");
     }
   else if (PVM_IS_INT (val))
     {
@@ -592,65 +596,76 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       int32_t intval = PVM_VAL_INT (val);
       uint32_t uintval;
 
+      pk_term_class ("integer");
+
       if (size == 32)
         uintval = (uint32_t) intval;
       else
         uintval = (uint32_t) intval & ((((uint32_t) 1) << size) - 1);
 
       if (base == 2)
-        pvm_print_binary (out, (uint64_t) uintval, size, 1);
+        pvm_print_binary ((uint64_t) uintval, size, 1);
       else
         {
           if (size == 32)
-            fprintf (out, int32_fmt, base == 10 ? intval : uintval);
+            pk_printf (int32_fmt, base == 10 ? intval : uintval);
           else if (size == 16)
-            fprintf (out, int16_fmt, base == 10 ? intval : uintval);
+            pk_printf (int16_fmt, base == 10 ? intval : uintval);
           else if (size == 8)
-            fprintf (out, int8_fmt, base == 10 ? intval : uintval);
+            pk_printf (int8_fmt, base == 10 ? intval : uintval);
           else if (size == 4)
-            fprintf (out, int4_fmt, base == 10 ? intval : uintval);
+            pk_printf (int4_fmt, base == 10 ? intval : uintval);
           else
-            fprintf (out, int_fmt,
-                     PVM_VAL_INT_SIZE (val), base == 10 ? intval : uintval);
+            pk_printf (int_fmt, PVM_VAL_INT_SIZE (val),
+                       base == 10 ? intval : uintval);
         }
+
+      pk_term_end_class ("integer");
     }
   else if (PVM_IS_ULONG (val))
     {
       int size = PVM_VAL_ULONG_SIZE (val);
       uint64_t ulongval = PVM_VAL_ULONG (val);
 
+      pk_term_class ("integer");
+
       if (base == 2)
-        pvm_print_binary (out, ulongval, size, 0);
+        pvm_print_binary (ulongval, size, 0);
       else
         {
           if (size == 64)
-            fprintf (out, ulong64_fmt, ulongval);
+            pk_printf (ulong64_fmt, ulongval);
           else
-            fprintf (out, ulong_fmt,
-                     PVM_VAL_LONG_SIZE (val), ulongval);
+            pk_printf (ulong_fmt, PVM_VAL_LONG_SIZE (val), ulongval);
         }
+
+      pk_term_end_class ("integer");
     }
   else if (PVM_IS_UINT (val))
     {
       int size = PVM_VAL_UINT_SIZE (val);
       uint32_t uintval = PVM_VAL_UINT (val);
 
+      pk_term_class ("integer");
+
       if (base == 2)
-        pvm_print_binary (out, uintval, size, 0);
+        pvm_print_binary (uintval, size, 0);
       else
         {
           if (size == 32)
-            fprintf (out, uint32_fmt, uintval);
+            pk_printf (uint32_fmt, uintval);
           else if (size == 16)
-            fprintf (out, uint16_fmt, uintval);
+            pk_printf (uint16_fmt, uintval);
           else if (size == 8)
-            fprintf (out, uint8_fmt, uintval);
+            pk_printf (uint8_fmt, uintval);
           else if (size == 4)
-            fprintf (out, uint4_fmt, uintval);
+            pk_printf (uint4_fmt, uintval);
           else
-            fprintf (out, uint_fmt,
-                     PVM_VAL_UINT_SIZE (val), uintval);
+            pk_printf (uint_fmt, PVM_VAL_UINT_SIZE (val),
+                       uintval);
         }
+
+      pk_term_end_class ("integer");
     }
   else if (PVM_IS_STR (val))
     {
@@ -659,6 +674,8 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       size_t str_size = strlen (PVM_VAL_STR (val));
       size_t printable_size, i, j;
 
+      pk_term_class ("string");
+      
       /* Calculate the length (in bytes) of the printable string
          corresponding to the string value.  */
       for (printable_size = 0, i = 0; i < str_size; i++)
@@ -702,8 +719,10 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
       assert (j == printable_size);
       str_printable[j] = '\0';
 
-      fprintf (out, "\"%s\"", str_printable);
+      pk_printf ("\"%s\"", str_printable);
       free (str_printable);
+
+      pk_term_end_class ("string");
     }
   else if (PVM_IS_ARR (val))
     {
@@ -712,29 +731,33 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
       nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
 
-      fprintf (out, "[");
+      pk_term_class ("array");
+      
+      pk_puts ("[");
       for (idx = 0; idx < nelem; idx++)
         {
           pvm_val elem_offset = PVM_VAL_ARR_ELEM_OFFSET (val, idx);
           pvm_val elem_value = PVM_VAL_ARR_ELEM_VALUE (val, idx);
 
           if (idx != 0)
-            fprintf (out, ",");
-          pvm_print_val (out, elem_value, base, flags);
+            pk_puts (",");
+          pvm_print_val (elem_value, base, flags);
 
           if (flags & PVM_PRINT_F_MAPS && elem_offset != PVM_NULL)
             {
-              fputc ('@', out);
-              pvm_print_val (out, elem_offset, base, flags);
+              pk_puts ("@");
+              pvm_print_val (elem_offset, base, flags);
             }
         }
-      fprintf (out, "]");
+      pk_puts ("]");
 
       if (flags & PVM_PRINT_F_MAPS && array_offset != PVM_NULL)
         {
-          fputc ('@', out);
-          pvm_print_val (out, array_offset, base, flags);
+          pk_puts ("@");
+          pvm_print_val (array_offset, base, flags);
         }
+
+      pk_term_end_class ("array");
     }
   else if (PVM_IS_SCT (val))
     {
@@ -744,13 +767,19 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (val));
 
+      pk_term_class ("struct");
+      
       if (struct_type_name != PVM_NULL)
-        fputs (PVM_VAL_STR (struct_type_name), out);
+        {
+          pk_term_class ("struct-type-name");
+          pk_puts ( PVM_VAL_STR (struct_type_name));
+          pk_term_end_class ("struct-type-name");
+        }
       else
-        fputs ("struct", out);
-      fputs (" ", out);
+        pk_puts ("struct");
+      pk_puts (" ");
 
-      fprintf (out, "{");
+      pk_printf ("{");
       for (idx = 0; idx < nelem; ++idx)
         {
           pvm_val name = PVM_VAL_SCT_FIELD_NAME(val, idx);
@@ -758,82 +787,93 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
           pvm_val offset = PVM_VAL_SCT_FIELD_OFFSET(val, idx);
 
           if (idx != 0)
-            fprintf (out, ",");
+            pk_puts (",");
           if (name != PVM_NULL)
-            fprintf (out, "%s=", PVM_VAL_STR (name));
-          pvm_print_val (out, value, base, flags);
+            {
+              pk_term_class ("struct-field-name");
+              pk_printf ("%s", PVM_VAL_STR (name));
+              pk_term_end_class ("struct-field-name");
+              pk_puts ("=");
+            }
+          pvm_print_val (value, base, flags);
 
           if (flags & PVM_PRINT_F_MAPS && offset != PVM_NULL)
             {
-              fputc ('@', out);
-              pvm_print_val (out, offset, base, flags);
+              pk_puts ("@");
+              pvm_print_val (offset, base, flags);
             }
         }
-      fprintf (out, "}");
+      pk_puts ("}");
+
+      pk_term_end_class ("struct");
     }
   else if (PVM_IS_TYP (val))
     {
+      pk_term_class ("type");
+
       switch (PVM_VAL_TYP_CODE (val))
         {
         case PVM_TYPE_INTEGRAL:
           {
             if (!(PVM_VAL_UINT (PVM_VAL_TYP_I_SIGNED (val))))
-              fprintf (out, "u");
+              pk_puts ("u");
 
             switch (PVM_VAL_ULONG (PVM_VAL_TYP_I_SIZE (val)))
               {
-              case 8: fprintf (out, "int8"); break;
-              case 16: fprintf (out, "int16"); break;
-              case 32: fprintf (out, "int32"); break;
-              case 64: fprintf (out, "int64"); break;
+              case 8: pk_puts ("int8"); break;
+              case 16: pk_puts ("int16"); break;
+              case 32: pk_puts ("int32"); break;
+              case 64: pk_puts ("int64"); break;
               default: assert (0); break;
               }
           }
           break;
         case PVM_TYPE_STRING:
-          fprintf (out, "string");
+          pk_puts ("string");
           break;
         case PVM_TYPE_ANY:
-          fprintf (out, "any");
+          pk_term_class ("any");
+          pk_puts ("any");
+          pk_term_end_class ("any");
           break;
         case PVM_TYPE_ARRAY:
-          pvm_print_val (out, PVM_VAL_TYP_A_ETYPE (val), base, flags);
-          fputc ('[', out);
+          pvm_print_val (PVM_VAL_TYP_A_ETYPE (val), base, flags);
+          pk_puts ("[");
           if (PVM_VAL_TYP_A_BOUND (val) != PVM_NULL)
-            pvm_print_val (out, PVM_VAL_TYP_A_BOUND (val), base, flags);
-          fputc (']', out);
+            pvm_print_val (PVM_VAL_TYP_A_BOUND (val), base, flags);
+          pk_puts ("]");
           break;
         case PVM_TYPE_OFFSET:
-          fprintf (out, "[");
-          pvm_print_val (out, PVM_VAL_TYP_O_BASE_TYPE (val), base, flags);
-          fputc (' ', out);
+          pk_puts ("[");
+          pvm_print_val (PVM_VAL_TYP_O_BASE_TYPE (val), base, flags);
+          pk_puts (" ");
           switch (PVM_VAL_ULONG (PVM_VAL_TYP_O_UNIT (val)))
             {
             case PVM_VAL_OFF_UNIT_BITS:
-              fputc ('b', out);
+              pk_puts ("b");
               break;
             case PVM_VAL_OFF_UNIT_BYTES:
-              fputc ('B', out);
+              pk_puts ("B");
               break;
             case PVM_VAL_OFF_UNIT_KILOBITS:
-              fputs ("Kb", out);
+              pk_puts ("Kb");
               break;
             case PVM_VAL_OFF_UNIT_KILOBYTES:
-              fputs ("KB", out);
+              pk_puts ("KB");
               break;
             case PVM_VAL_OFF_UNIT_MEGABITS:
-              fputs ("Mb", out);
+              pk_puts ("Mb");
               break;
             case PVM_VAL_OFF_UNIT_MEGABYTES:
-              fputs ("MB", out);
+              pk_puts ("MB");
               break;
             case PVM_VAL_OFF_UNIT_GIGABITS:
-              fputs ("Gb", out);
+              pk_puts ("Gb");
               break;
             default:
               assert (0);
             }
-          fprintf (out, "]");
+          pk_puts ("]");
           break;
         case PVM_TYPE_CLOSURE:
           {
@@ -841,13 +881,13 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
             nargs = PVM_VAL_ULONG (PVM_VAL_TYP_C_NARGS (val));
 
-            fprintf (out, "(");
+            pk_puts ("(");
             for (i = 0; i < nargs; ++i)
               {
                 pvm_val atype = PVM_VAL_TYP_C_ATYPE (val, i);
-                pvm_print_val (out, atype, base, flags);
+                pvm_print_val (atype, base, flags);
               }
-            pvm_print_val (out, PVM_VAL_TYP_C_RETURN_TYPE (val), 10, flags);
+            pvm_print_val (PVM_VAL_TYP_C_RETURN_TYPE (val), 10, flags);
             break;
           }
         case PVM_TYPE_STRUCT:
@@ -856,68 +896,74 @@ pvm_print_val (FILE *out, pvm_val val, int base, int flags)
 
             nelem = PVM_VAL_ULONG (PVM_VAL_TYP_S_NFIELDS (val));
 
-            fprintf (out, "struct {");
+            pk_puts ("struct {");
             for (i = 0; i < nelem; ++i)
               {
                 pvm_val ename = PVM_VAL_TYP_S_FNAME(val, i);
                 pvm_val etype = PVM_VAL_TYP_S_FTYPE(val, i);
 
                 if (i != 0)
-                  fprintf (out, " ");
+                  pk_puts (" ");
 
-                pvm_print_val (out, etype, base, flags);
+                pvm_print_val (etype, base, flags);
                 if (ename != PVM_NULL)
-                  fprintf (out, " %s", PVM_VAL_STR (ename));
-                fprintf (out, ";");
+                  pk_printf (" %s", PVM_VAL_STR (ename));
+                pk_puts (";");
               }
-            fprintf (out, "}");
+            pk_puts ("}");
           break;
           }
         default:
           assert (0);
         }
+
+      pk_term_end_class ("type");
     }
   else if (PVM_IS_OFF (val))
     {
-      pvm_print_val (out, PVM_VAL_OFF_MAGNITUDE (val), base, flags);
-      fprintf (out, CYAN "#" NOATTR);
+      pk_term_class ("offset");
+      pvm_print_val (PVM_VAL_OFF_MAGNITUDE (val), base, flags);
+      pk_puts ("#");
       switch (PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)))
         {
         case PVM_VAL_OFF_UNIT_BITS:
-          fprintf (out, CYAN "b" NOATTR);
+          pk_puts ("b");
           break;
         case PVM_VAL_OFF_UNIT_NIBBLES:
-          fprintf (out, CYAN "N" NOATTR);
+          pk_puts ("N");
           break;
         case PVM_VAL_OFF_UNIT_BYTES:
-          fprintf (out, CYAN "B" NOATTR);
+          pk_puts ("B");
           break;
         case PVM_VAL_OFF_UNIT_KILOBITS:
-          fprintf (out, CYAN "Kb" NOATTR);
+          pk_puts ("Kb");
           break;
         case PVM_VAL_OFF_UNIT_KILOBYTES:
-          fprintf (out, CYAN "KB" NOATTR);
+          pk_puts ("KB");
           break;
         case PVM_VAL_OFF_UNIT_MEGABITS:
-          fprintf (out, CYAN "Mb" NOATTR);
+          pk_puts ("Mb");
           break;
         case PVM_VAL_OFF_UNIT_MEGABYTES:
-          fprintf (out, CYAN "MB" NOATTR);
+          pk_puts ("MB");
           break;
         case PVM_VAL_OFF_UNIT_GIGABITS:
-          fprintf (out, CYAN "Gb" NOATTR);
+          pk_puts ("Gb");
           break;
         default:
           /* XXX: print here the name of the base type of the
              offset.  */
-          fprintf (out, CYAN "%" PRIu64 NOATTR,
-                   PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
+          pk_printf ("%" PRIu64, PVM_VAL_ULONG (PVM_VAL_OFF_UNIT (val)));
           break;
         }
+
+      pk_term_end_class ("offset");
     }
   else if (PVM_IS_CLS (val))
     {
-      fprintf (out, "#<closure>");
+      pk_term_class ("special");
+      pk_puts ("#<closure>");
+      pk_term_end_class ("special");
     }
   else
     assert (0);
@@ -1023,7 +1069,7 @@ pvm_type_equal (pvm_val type1, pvm_val type2)
 }
 
 void
-pvm_print_string (FILE *out, pvm_val string)
+pvm_print_string (pvm_val string)
 {
-  fputs (PVM_VAL_STR (string), out);
+  pk_puts (PVM_VAL_STR (string));
 }

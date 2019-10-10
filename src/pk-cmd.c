@@ -37,6 +37,7 @@
 #include "pkl-parser.h"
 #include "ios.h"
 #include "pk-cmd.h"
+#include "pk-term.h"
 
 /* Table of supported commands.  */
 
@@ -274,8 +275,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   if (cmd == NULL)
     {
       if (prefix != NULL)
-        printf ("%s ", prefix);
-      printf (_("%s: command not found.\n"), cmd_name);
+        pk_printf ("%s ", prefix);
+      pk_printf (_("%s: command not found.\n"), cmd_name);
       return 0;
     }
 
@@ -296,7 +297,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
           if (cmd->uflags[fi] == '\0')
             {
-              printf (_("%s: invalid flag `%c'\n"), cmd_name, *p);
+              pk_printf (_("%s: invalid flag `%c'\n"), cmd_name, *p);
               return 0;
             }
 
@@ -537,7 +538,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   if (cmd->flags & PK_CMD_F_REQ_IO
       && ios_cur () == NULL)
     {
-      puts (_("This command requires an IO space.  Use the `file' command."));
+      pk_puts (_("This command requires an IO space.  Use the `file' command."));
       return 0;
     }
 
@@ -547,7 +548,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
       if (cur_io == NULL
           || !(ios_mode (cur_io) & IOS_M_RDWR))
         {
-          puts (_("This command requires a writable IO space."));
+          pk_puts (_("This command requires a writable IO space."));
           return 0;
         }
     }
@@ -570,7 +571,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
  usage:
   if (!besilent)
-    printf (_("Usage: %s\n"), cmd->usage);
+    pk_printf (_("Usage: %s\n"), cmd->usage);
   return 0;
 }
 
@@ -643,8 +644,8 @@ pk_cmd_exec (char *str)
 
           if (val != PVM_NULL)
             {
-              pvm_print_val (stdout, val, poke_obase, 0);
-              fputc ('\n', stdout);
+              pvm_print_val (val, poke_obase, 0);
+              pk_puts ("\n");
             }
         }
 

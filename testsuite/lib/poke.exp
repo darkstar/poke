@@ -60,7 +60,7 @@ proc poke_start {} {
 
     #send_user "Executing $POKE --quiet\n"
 
-    spawn $POKE --quiet
+    spawn $POKE --quiet --color=no
     expect {
         -re "$poke_prompt $" { }
         timeout { perror "Failed to spawn $POKE (timeout)"; exit 1 }

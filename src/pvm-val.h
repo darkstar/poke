@@ -179,7 +179,7 @@ typedef struct pvm_val_box *pvm_val_box;
 #define PVM_VAL_STR(V) (PVM_VAL_BOX_STR (PVM_VAL_BOX ((V))))
 
 pvm_val pvm_make_string (const char *value);
-void pvm_print_string (FILE *out, pvm_val string);
+void pvm_print_string (pvm_val string);
 
 /* Arrays values are boxed, and store sequences of homogeneous values
    called array "elements".  They can be mapped in IO, or unmapped.
@@ -608,6 +608,6 @@ pvm_val pvm_val_writer (pvm_val val);
 
 #define PVM_PRINT_F_MAPS 1
 
-void pvm_print_val (FILE *out, pvm_val val, int base, int flags);
+void pvm_print_val (pvm_val val, int base, int flags);
 
 #endif /* !PVM_VAL_H */

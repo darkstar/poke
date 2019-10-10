@@ -1,0 +1,21 @@
+/* This file is in the public domain.
+   Default styling rules for GNU poke.  */
+
+/* .logo .copyright .type .struct-type-name .array */
+
+.logo { text-decoration: blink; }
+.error { color : red; }
+.error-filename { text-decoration: underline; }
+.error-location { text-decoration: underline; }
+.warning { color : yellow; }
+.prompt { font-weight : bold; }
+.offset { color : yellow; }
+.special { color : black; }
+.string { color : brown; }
+.any { color : yellow; }
+.struct-field-name { text-decoration : underline; }
+.integer { color : green; }
+
+html {
+    font-family: Menlo, Monaco, "Courier New", monospace;   
+}

@@ -18,12 +18,12 @@
 
 #include <config.h>
 #include <assert.h>
-#include <stdio.h> /* For stdout */
 #include <gettext.h>
 #define _(str) dgettext (PACKAGE, str)
 
 #include "poke.h"
 #include "pk-cmd.h"
+#include "pk-term.h"
 
 #define PK_PRINT_UFLAGS "xbom"
 #define PK_PRINT_F_HEX 0x1
@@ -54,7 +54,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       + !!(uflags & PK_PRINT_F_BIN)
       + !!(uflags & PK_PRINT_F_OCT) > 1)
     {
-      printf (_("print: only one of `x', `b' or `o' may be specified.\n"));
+      pk_printf (_("print: only one of `x', `b' or `o' may be specified.\n"));
       return 0;
     }
 
@@ -72,8 +72,8 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 
-  pvm_print_val (stdout, val, base, pflags);
-  printf ("\n");
+  pvm_print_val (val, base, pflags);
+  pk_puts ("\n");
   return 1;
 
  rterror:

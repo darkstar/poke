@@ -18,6 +18,7 @@
 
 #include <config.h>
 #include <assert.h>
+/* XXX to remove */
 #include <stdio.h>
 #include <string.h>
 #include <gettext.h>
@@ -27,6 +28,7 @@
 #include "pvm.h"
 #include "poke.h"
 #include "pk-cmd.h"
+#include "pk-term.h"
 
 static void
 print_var_decl (pkl_ast_node decl, void *data)
@@ -52,18 +54,18 @@ print_var_decl (pkl_ast_node decl, void *data)
   assert (val != PVM_NULL);
 
   /* Print the name and the current value of the variable.  */
-  fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
-  fputs ("\t\t", stdout);
+  pk_puts (PKL_AST_IDENTIFIER_POINTER (decl_name));
+  pk_puts ("\t\t");
   /* XXX: support different bases with a /[xbo] cmd flag.  */
-  pvm_print_val (stdout, val, 10, 0);
-  fputs ("\t\t", stdout);
+  pvm_print_val (val, 10, 0);
+  pk_puts ("\t\t");
 
   /* Print information about the site where the variable was
      declared.  */
   if (source)
-    printf ("%s:%d\n", basename (source), loc.first_line);
+    pk_printf ("%s:%d\n", basename (source), loc.first_line);
   else
-    fputs ("<stdin>\n", stdout);
+    pk_puts ("<stdin>\n");
 }
 
 static void
@@ -88,23 +90,23 @@ print_fun_decl (pkl_ast_node decl, void *data)
                           &back, &over) != NULL);
 
   /* Print the name and the type of the function.  */
-  fputs (PKL_AST_IDENTIFIER_POINTER (decl_name), stdout);
-  fputs ("  ", stdout);
+  pk_puts (PKL_AST_IDENTIFIER_POINTER (decl_name));
+  pk_puts ("  ");
   pkl_print_type (stdout, PKL_AST_TYPE (func), 1);
-  fputs ("  ", stdout);
+  pk_puts ("  ");
 
   /* Print information about the site where the function was
      declared.  */
   if (source)
-    printf ("%s:%d\n", basename (source), loc.first_line);
+    pk_printf ("%s:%d\n", basename (source), loc.first_line);
   else
-    fputs ("<stdin>\n", stdout);
+    pk_puts ("<stdin>\n");
 }
 
 static int
 pk_cmd_info_var (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
-  printf (_("Name\t\tValue\t\t\tDeclared at\n"));
+  pk_puts (_("Name\t\tValue\t\t\tDeclared at\n"));
   pkl_env_map_decls (pkl_get_env (poke_compiler), PKL_AST_DECL_KIND_VAR,
                      print_var_decl, NULL);
   return 1;
