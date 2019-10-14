@@ -70,6 +70,10 @@ if test "x$JITTER_CONFIG" = "x"; then
    AC_MSG_ERROR([you need jitter-config to compile])
 fi
 
+dnl Used in Makefile.am.  See the note there.
+WITH_JITTER=$with_jitter
+AC_SUBST([WITH_JITTER])
+
 dnl We need to determine the endianness of the host system.  The
 dnl following macro is also supposed to work when cross-compiling.
 
@@ -84,6 +88,9 @@ AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--enable-debug],
                              [Build poke in debug mode (default is NO)]),
                              [poke_debug=$enableval], [poke_debug=no])
+
+ENABLE_DEBUG=$enable_debug
+AC_SUBST([ENABLE_DEBUG])
 
 AM_CONDITIONAL([POKE_DEBUG],
                [test "x$poke_debug" = "xyes"])

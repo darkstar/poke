@@ -48,13 +48,19 @@ poke_SOURCES = poke.c poke.h \
                pvm.jitter \
                pvm-vm.h pvm-vm1.c pvm-vm2.c \
                pkl-gen.pks pkl-asm.pks \
-               pkl-gen.pkc pkl-asm.pkc
+               pkl-gen.pkc pkl-asm.pkc \
+               pkl-insn.def pkl-ops.def pkl-attrs.def
+
 
 %.pkc: %.pks
 	srcdir=$(srcdir) $(srcdir)/ras $< > $@
 
+# XXX this shouldn't be necessary?
+EXTRA_DIST = pkl-lex.h
+
 BUILT_SOURCES = pkl-tab.h pkl-lex.c \
-                pkl-gen.pkc pkl-asm.pkc
+                pkl-gen.pkc pkl-asm.pkc \
+                pvm-vm.h pvm-vm1.c pvm-vm2.c
 AM_YFLAGS = -y -d -t --report=state
 AM_LFLAGS = -d
 

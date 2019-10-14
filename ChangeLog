@@ -1,3 +1,13 @@
+2019-10-14  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* configure.ac (ENABLE_DEBUG): ac_subst.
+	(WITH_JITTER): Likewise.
+	* Makefile.am (AM_DISTCHECK_CONFIGURE_FLAGS): Specify
+	--with-jitter and --enable-debug options.
+	* src/Makefile.am (poke_SOURCES): Add pkl-insn.def, pkl-ops.def
+	and pkl-attrs.def.
+	(BUILT_SOURCES): Add pvm-vm.h, pvm-vm1.c and pvm-vm2.c.
+
 2019-10-10  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* etc/poke-default.css: New file.
