@@ -66,21 +66,25 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
       10.2  Using ASTDEREF
       10.3  PVM values in PVM programs
       10.4  PVM values in AST nodes
-    11  Debugging Poke
-      11.1  Building with Debugging support
-      11.2  Using GDB extensions
-      11.3  Valgrind and Poke
-      11.4  Debugging PVM Assembly Code
-    12  Future Developments
-    13  Appendix: The Source Tree
-      13.1  The Compiler
-      13.2  The Poke Virtual Machine
-      13.3  The IO Subsystem
-      13.4  Poke Program
-      13.5  Pickles and Libraries
-      13.6  Test Suite
-      13.7  Documentation
-      13.8  Other Stuff
+    11  Terminal Handling
+      11.1  pk-term
+      11.2  Styling Classes
+      11.3  Debugging Styling
+    12  Debugging Poke
+      12.1  Building with Debugging support
+      12.2  Using GDB extensions
+      12.3  Valgrind and Poke
+      12.4  Debugging PVM Assembly Code
+    13  Future Developments
+    14  Appendix: The Source Tree
+      14.1  The Compiler
+      14.2  The Poke Virtual Machine
+      14.3  The IO Subsystem
+      14.4  Poke Program
+      14.5  Pickles and Libraries
+      14.6  Test Suite
+      14.7  Documentation
+      14.8  Other Stuff
 
 
 Nomenclature
@@ -885,6 +889,59 @@ should be unregistered from the GC.  The right place to do this is in
 So if you add PVM values or PVM environments to an AST node, please
 follow the strategy above.
 
+Terminal Handling
+-----------------
+
+pk-term
+~~~~~~~
+
+Writing to the terminal, and getting information from the terminal, is
+handled by the ``pk-term`` module.  It provides functions to:
+
+- Write strings to the standard output.
+
+- Write formatted strings to the standard output, ala ``printf``.
+
+- Handle output "classes", which are the base of styling.
+
+Out terminal abstraction is implemented of top of GNU libtextstyle.
+In case it is not available when building poke, a dummy stub is
+provided by gnulib.  In that case output won't be styled, but poke
+will still compile and run properly.
+
+Styling Classes
+~~~~~~~~~~~~~~~
+
+Styling is handled using "classes", which are identified by some
+string.  Using ``pk_term`` calls, enclosed environments can be
+defined::
+
+  pk_term_class ("foo");
+  /* Text emitted here has class "foo"  */
+  pk_term_class ("bar");
+  /* Text emitted here has class "foo" and "bar" */
+  pk_term_end_class ("bar");
+  pk_term_end_class ("foo");
+
+The ``class`` and ``end_class`` calls should be properly paired.
+
+The styling classes used in poke should be documented in the user
+manual, so the user will know what is suitable to be configured.
+Also, whenever possible a reasonable default shall be provided in
+``poke-default.css``.
+
+Debugging Styling
+~~~~~~~~~~~~~~~~~
+
+As recommended in the libtextstyle manual, a good way to see the class
+hierarchy of some given output is to run poke passing the
+``--color=html`` option::
+
+  $ poke --color=html
+  [...]
+  (poke) [1#B,2#B]
+  <span class="array">[<span class="offset"><span class="integer">0x1</span>#B</span>,<span class="offset"><span class="integer">0x2</span>#B</span>]</span><br/>(poke) 
+
 Debugging Poke
 --------------
 
@@ -1166,6 +1223,9 @@ The Poke book
 
 Other Stuff
 ~~~~~~~~~~~
+
+Default styling file
+  ``etc/poke-default.css``
 
 GDB extensions to better debug poke
   ``etc/poke-gdb.scm``

@@ -1,5 +1,12 @@
 2019-10-14  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* HACKING (Terminal Handling): New chapter.
+	(pk-term): New section.
+	(Styling Classes): Likewise.
+	(Debugging Styling): Likewise.
+
+2019-10-14  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* configure.ac (ENABLE_DEBUG): ac_subst.
 	(WITH_JITTER): Likewise.
 	* Makefile.am (AM_DISTCHECK_CONFIGURE_FLAGS): Specify
