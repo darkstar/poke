@@ -185,9 +185,13 @@ pk_print_version ()
   pk_term_class ("copyright");
   pk_printf (_("\
 Copyright (C) %s Jose E. Marchesi.\n\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.\n\
+License GPLv3+: GNU GPL version 3 or later"), "2019");
+  pk_term_hyperlink ("http://gnu.org/licenses/gpl.html", NULL);
+  pk_puts (" <http://gnu.org/licenses/gpl.html>");
+  pk_term_end_hyperlink ();
+  pk_puts (".\n\
 This is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.\n"), "2019");
+There is NO WARRANTY, to the extent permitted by law.\n");
   pk_term_end_class ("copyright");
 
     pk_printf (_("\

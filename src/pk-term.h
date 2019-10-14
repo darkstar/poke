@@ -37,8 +37,11 @@ extern void pk_puts (const char *str);
 extern void pk_printf (const char *format, ...);
 
 /* Class handling.  */
-
 extern void pk_term_class (const char *class);
 extern void pk_term_end_class (const char *class);
+
+/* Hyperlinks.  */
+void pk_term_hyperlink (const char *url, const char *id);
+void pk_term_end_hyperlink (void);
 
 #endif /* PK_TERM_H */

@@ -129,3 +129,15 @@ pk_term_end_class (const char *class)
 {
   styled_ostream_end_use_class (poke_ostream, class);
 }
+
+void
+pk_term_hyperlink (const char *url, const char *id)
+{
+  styled_ostream_set_hyperlink (poke_ostream, url, id);
+}
+
+void
+pk_term_end_hyperlink (void)
+{
+  styled_ostream_set_hyperlink (poke_ostream, NULL, NULL);
+}
