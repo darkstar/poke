@@ -1,3 +1,7 @@
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING (libtextstyle): New section.
+
 2019-10-14  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pk-term.h: Prototypes for pk_term_hyperlink and

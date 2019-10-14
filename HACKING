@@ -35,9 +35,10 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
        2.2  Flex
        2.3  readline
        2.4  Jitter
-       2.5  Building
-       2.6  Gettext
-       2.7  Running an Uninstalled Poke
+       2.5  libtextstyle
+       2.6  Building
+       2.7  Gettext
+       2.8  Running an Uninstalled Poke
      3  Coding Style and Conventions
        3.1  Writing C
        3.2  Writing Poke
@@ -149,6 +150,16 @@ For the time being, you should also use when configuring jitter::
   --disable-dispatch-minimal-threading --disable-dispatch-no-threading
 
 or, alternatively, use ``--enable-debug`` when configuring poke.
+
+libtextstyle
+~~~~~~~~~~~~
+
+GNU poke uses libtextstyle in order to provide styled output.  If the
+library is not found, then a dummy version of it from gnulib is used
+instead... that does not any styling!
+
+At the moment libtextstyle lives in a subdirectory of GNU gettext.
+See http://www.gnu.org/s/gettext for more information.
 
 Building
 ~~~~~~~~
