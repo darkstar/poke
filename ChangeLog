@@ -5,6 +5,7 @@
 	* testsuite/poke.map/maps-unions-1.pk: New file.
 	* testsuite/poke.map/maps-unions-2.pk: Likewise.
 	* testsuite/poke.map/maps-unions-3.pk: Likewise.
+	* testsuite/poke.map/maps-unions-4.pk: Likewise.
 
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
