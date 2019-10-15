@@ -1,5 +1,13 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-anal.c (pkl_anal2_ps_type_struct): New handler.
+	(pkl_phase_anal2): Register pkl_anal2_ps_type_struct.
+	* testsuite/poke.pkl/union-diag-1.pk: New file.
+	* testsuite/poke.pkl/union-diag-2.pk: Likewise.
+	* testsuite/poke.pkl/union-diag-3.pk: Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h (struct pkl_ast_type): New field union_p for
 	struct types.
 	(PKL_AST_TYPE_S_UNION): Define.

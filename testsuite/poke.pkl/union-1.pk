@@ -1,0 +1,9 @@
+/* { dg-do compile } */
+
+/* The following code should not trigger any warning.  */
+
+deftype Foo = union
+ {
+   int foo : 2 - 2;
+   int bar;
+ };

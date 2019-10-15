@@ -427,6 +427,52 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+/* In unions, alternatives appearing after an alternative with no
+   constraint expression, or a constant expression known to be true,
+   are unreachable.  Also, if an union alternative has a constraint
+   known to be false, it is never taken.  Warning about these two
+   situations.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
+{
+  pkl_ast_node struct_type = PKL_PASS_NODE;
+  pkl_ast_node struct_type_elems
+    = PKL_AST_TYPE_S_ELEMS (struct_type);
+  pkl_ast_node t;
+  pkl_ast_node last_unconditional_alternative = NULL;
+
+  if (!PKL_AST_TYPE_S_UNION (struct_type))
+    PKL_PASS_DONE;
+
+  for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
+    {
+      pkl_ast_node constraint
+        = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (t);
+
+      if (last_unconditional_alternative)
+        {
+          pkl_warning (PKL_AST_LOC (t),
+                       "unreachable alternative in union");
+          break;
+        }
+
+      if (!constraint
+          || (PKL_AST_CODE (constraint) == PKL_AST_INTEGER
+              && PKL_AST_INTEGER_VALUE (constraint) != 0))
+        last_unconditional_alternative = t;
+
+      if (constraint
+          && PKL_AST_CODE (constraint) == PKL_AST_INTEGER
+          && PKL_AST_INTEGER_VALUE (constraint) == 0)
+        {
+          pkl_warning (PKL_AST_LOC (t),
+                       "unreachable alternative in union");
+          break;
+        }
+    }
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_anal2 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
@@ -436,6 +482,7 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_anal2_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal2_ps_funcall),
+   PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal2_ps_type_struct),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };
 
