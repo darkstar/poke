@@ -705,8 +705,25 @@
         ;; Iterate over the fields of the struct type.
  .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
  .c {
+   .c jitter_label alternative_failed = pkl_asm_fresh_label (RAS_ASM);
+        ;; If this is an union, install an exception handler for
+        ;; E_constraint.  If the exception is raised it means this union
+        ;; alternative didn't work, and another should be tried next.
+        ;;
+        ;; Note how we cannot use normal RAS labels here, since we
+        ;; are in a meta-loop.  XXX this should be improved by
+        ;; supporting auto-increased labels in RAS.
+   .c if (PKL_AST_TYPE_S_UNION (type_struct))
+   .c {
+        push PVM_E_CONSTRAINT
+   .c   pkl_asm_insn (RAS_ASM, PKL_INSN_PUSHE, alternative_failed);
+   .c }
         pushvar $off             ; ...[EOFF ENAME EVAL] NEOFF OFF
         .e struct_field_mapper   ; ...[EOFF ENAME EVAL] NEOFF
+   .c if (PKL_AST_TYPE_S_UNION (type_struct))
+   .c {
+        pope
+   .c }
         ;; If the struct is pinned, replace NEOFF with OFF
    .c if (PKL_AST_TYPE_S_PINNED (type_struct))
    .c {
@@ -719,7 +736,17 @@
         addl
         nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NFIELD+1UL)
         popvar $nfield          ; ...[EOFF ENAME EVAL] NEOFF
+   .c if (PKL_AST_TYPE_S_UNION (type_struct))
+   .c {
+        ;; An union field was decoded without raising any exception.
+        ;; We are done.
+        ba .fields_done
+   .c pkl_asm_label (RAS_ASM, alternative_failed);
+        ;; Drop the exception number.
+        drop
+   .c }
  .c }
+.fields_done:
         drop  			; ...[EOFF ENAME EVAL]
         ;; Ok, at this point all the struct field triplets are
         ;; in the stack.  Push the number of fields, create

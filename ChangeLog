@@ -1,5 +1,13 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.pks (struct_mapper): Support unions in the mapping
+	algorithm.
+	* testsuite/poke.map/maps-unions-1.pk: New file.
+	* testsuite/poke.map/maps-unions-2.pk: Likewise.
+	* testsuite/poke.map/maps-unions-3.pk: Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* testsuite/poke.pkl/union-1.pk: Test fixed.
 
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
