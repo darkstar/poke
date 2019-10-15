@@ -1,6 +1,9 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* TODO (#A0 fix multi-line warning messages): New todo entry.
+	* HACKING (Future Developments): add note about supporting
+	compile-time type checking for unions with alternatives with the
+	same name.
 
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 

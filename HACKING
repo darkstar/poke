@@ -1101,7 +1101,13 @@ Future Developments
 
     deftype Foo = struct { int i; }
     Foo { i = 10L }
-    
+
+- Doing compile-type static checking for union alternatives, if fields
+  with the same names are allowed, will require unification::
+
+    deftype Foo = union { int x : ...; string x; };
+    defvar f = Foo @ 0#B;
+    f.x = "foo";
 
 Appendix: The Source Tree
 -------------------------
