@@ -1,9 +1,9 @@
 /* { dg-do compile } */
 
-/* The following code should not trigger any warning.  */
+defvar jorl = 0;
 
 deftype Foo = union
  {
-   int foo : 2 - 2;
+   int foo : jorl != 0;
    int bar;
  };

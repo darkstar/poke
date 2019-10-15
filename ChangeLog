@@ -1,5 +1,9 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/poke.pkl/union-1.pk: Test fixed.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-anal.c (pkl_anal2_ps_type_struct): Pass an AST argument
 	to pkl_warning.
 
