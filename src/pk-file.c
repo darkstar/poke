@@ -44,7 +44,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       io = ios_get (io_id);
       if (io == NULL)
         {
-          printf (_("No such file #%d\n"), io_id);
+          pk_printf (_("No such file #%d\n"), io_id);
           return 0;
         }
 
@@ -59,7 +59,7 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
       if (access (arg_str, R_OK) != 0)
         {
-          printf (_("%s: file cannot be read\n"), arg_str);
+          pk_printf (_("%s: file cannot be read\n"), arg_str);
           return 0;
         }
 
@@ -78,8 +78,8 @@ pk_cmd_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
     }
 
   if (poke_interactive_p && !poke_quiet_p)
-    printf (_("The current file is now `%s'.\n"),
-            ios_handler (ios_cur ()) + strlen ("file://"));
+    pk_printf (_("The current file is now `%s'.\n"),
+               ios_handler (ios_cur ()) + strlen ("file://"));
 
   return 1;
 }
@@ -102,7 +102,7 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       io = ios_get (io_id);
       if (io == NULL)
         {
-          printf (_("No such file #%d\n"), io_id);
+          pk_printf (_("No such file #%d\n"), io_id);
           return 0;
         }
     }
@@ -117,8 +117,8 @@ pk_cmd_close (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       else
         {
           if (poke_interactive_p && !poke_quiet_p)
-            printf (_("The current file is now `%s'.\n"),
-                    ios_handler (ios_cur ()));
+            pk_printf (_("The current file is now `%s'.\n"),
+                       ios_handler (ios_cur ()));
         }
     }
 
@@ -129,11 +129,11 @@ static void
 print_info_file (ios io, void *data)
 {
   int *i = (int *) data;
-  printf ("%s#%d\t%s\t0x%08jx#b\t%s\n",
-          io == ios_cur () ? "* " : "  ",
-          (*i)++,
-          ios_mode (io) & IOS_M_RDWR ? "rw" : "r ",
-          ios_tell (io), ios_handler (io));
+  pk_printf ("%s#%d\t%s\t0x%08jx#b\t%s\n",
+             io == ios_cur () ? "* " : "  ",
+             (*i)++,
+             ios_mode (io) & IOS_M_RDWR ? "rw" : "r ",
+             ios_tell (io), ios_handler (io));
 }
 
 static int
@@ -144,7 +144,7 @@ pk_cmd_info_files (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   assert (argc == 0);
 
   id = 0;
-  printf (_("  Id\tMode\tPosition\tFilename\n"));
+  pk_printf (_("  Id\tMode\tPosition\tFilename\n"));
   ios_map (print_info_file, &id);
 
   return 1;
@@ -187,7 +187,7 @@ pk_cmd_load_file (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 
  no_file:
-  printf (_("%s: file cannot be read\n"), arg);
+  pk_printf (_("%s: file cannot be read\n"), arg);
  error:
   free (filename);
   return 0;

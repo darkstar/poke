@@ -1,5 +1,13 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pk-file.c (pk_cmd_file): Use pk_printf instead of printf.
+	(pk_cmd_close): Likewise.
+	(print_info_file): Likewise.
+	(pk_cmd_info_files): Likewise.
+	(pk_cmd_load_file): Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (libtextstyle): New section.
 
 2019-10-14  Jose E. Marchesi  <jemarch@gnu.org>
