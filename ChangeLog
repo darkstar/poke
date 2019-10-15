@@ -1,5 +1,12 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-lex.l: Support for token union.
+	* src/pkl-tab.y (UNION): New token.
+	(struct_or_union): New rule.
+	(struct_type_specifier): Use struct_or_union.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl.c (pkl_warning): Emit the filename containing the error.
 	(pkl_error): Use <stdin> as the filename whenever necessary.
 	(pkl_warning): Likewise.

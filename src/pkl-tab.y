@@ -216,6 +216,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %token ENUM
 %token <integer> PINNED
 %token STRUCT
+%token <integer> UNION
 %token CONST
 %token CONTINUE
 %token ELSE
@@ -302,7 +303,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> integral_type_specifier offset_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
-%type <integer> struct_type_pinned integral_type_sign
+%type <integer> struct_type_pinned integral_type_sign struct_or_union
 %type <ast> struct_field_type_list struct_field_type struct_field_type_identifier
 %type <ast> struct_field_type_constraint struct_field_type_label
 %type <ast> declaration
@@ -1049,7 +1050,7 @@ function_type_arg:
 	;
 
 struct_type_specifier:
-	  pushlevel struct_type_pinned STRUCT '{' '}'
+	  pushlevel struct_type_pinned struct_or_union '{' '}'
           	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
@@ -1063,7 +1064,7 @@ struct_type_specifier:
                        rule.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
-        | pushlevel struct_type_pinned STRUCT '{'
+        | pushlevel struct_type_pinned struct_or_union '{'
         	{
                   /* Register dummies for the locals used in
                      pkl-gen.pks:struct_mapper.  */
@@ -1080,6 +1081,11 @@ struct_type_specifier:
                     /* Pop the frame pushed in the `pushlevel' above.  */
                     pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
                 }
+        ;
+
+struct_or_union:
+	  STRUCT	{ $$ = 0; }
+	| UNION		{ $$ = 1; }
         ;
 
 struct_type_pinned:

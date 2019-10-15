@@ -148,6 +148,7 @@ D [0-9]
 
 "pinned"	{ return PINNED; }
 "struct"	{ return STRUCT; }
+"union"		{ return UNION; }
 "else"		{ return ELSE; }
 "while"		{ return WHILE; }
 "for"		{ return FOR; }
