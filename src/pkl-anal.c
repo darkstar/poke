@@ -451,7 +451,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
 
       if (last_unconditional_alternative)
         {
-          pkl_warning (PKL_AST_LOC (t),
+          pkl_warning (PKL_PASS_AST, PKL_AST_LOC (t),
                        "unreachable alternative in union");
           break;
         }
@@ -465,7 +465,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
           && PKL_AST_CODE (constraint) == PKL_AST_INTEGER
           && PKL_AST_INTEGER_VALUE (constraint) == 0)
         {
-          pkl_warning (PKL_AST_LOC (t),
+          pkl_warning (PKL_PASS_AST, PKL_AST_LOC (t),
                        "unreachable alternative in union");
           break;
         }

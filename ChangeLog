@@ -1,5 +1,10 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-anal.c (pkl_anal2_ps_type_struct): Pass an AST argument
+	to pkl_warning.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-anal.c (pkl_anal2_ps_type_struct): New handler.
 	(pkl_phase_anal2): Register pkl_anal2_ps_type_struct.
 	* testsuite/poke.pkl/union-diag-1.pk: New file.
