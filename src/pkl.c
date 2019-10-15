@@ -479,7 +479,7 @@ pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc,
   size_t cur_line = 1;
   size_t cur_column = 1;
   int i;
-  
+
   if (!PKL_AST_LOC_VALID (loc))
     return;
 
@@ -495,7 +495,7 @@ pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc,
             }
           else
             cur_column++;
-          
+
           if (cur_line >= loc.first_line
               && cur_line <= loc.last_line)
             {
@@ -634,7 +634,7 @@ pkl_warning (pkl_ast ast,
   else
     pk_puts ("<stdin>:");
   pk_term_end_class ("error-filename");
-  
+
   if (PKL_AST_LOC_VALID (loc))
     {
       pk_term_class ("error-location");

@@ -1,5 +1,12 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* etc/poke-default.css: Remove trailing whitespaces.
+	* src/pkl.c: Likewise.
+	* src/poke.c: Likewise.
+	* src/pvm-val.c: Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.pks (struct_mapper): Support unions in the mapping
 	algorithm.
 	* testsuite/poke.map/maps-unions-1.pk: New file.

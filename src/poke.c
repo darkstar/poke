@@ -296,7 +296,7 @@ parse_args (int argc, char *argv[])
  exit_success:
   finalize ();
   exit (EXIT_SUCCESS);
-  
+
  exit_failure:
   finalize ();
   exit (EXIT_FAILURE);

@@ -571,7 +571,7 @@ pvm_print_val (pvm_val val, int base, int flags)
       uint64_t ulongval;
 
       pk_term_class ("integer");
-      
+
       if (size == 64)
         ulongval = (uint64_t) longval;
       else
@@ -675,7 +675,7 @@ pvm_print_val (pvm_val val, int base, int flags)
       size_t printable_size, i, j;
 
       pk_term_class ("string");
-      
+
       /* Calculate the length (in bytes) of the printable string
          corresponding to the string value.  */
       for (printable_size = 0, i = 0; i < str_size; i++)
@@ -732,7 +732,7 @@ pvm_print_val (pvm_val val, int base, int flags)
       nelem = PVM_VAL_ULONG (PVM_VAL_ARR_NELEM (val));
 
       pk_term_class ("array");
-      
+
       pk_puts ("[");
       for (idx = 0; idx < nelem; idx++)
         {
@@ -768,7 +768,7 @@ pvm_print_val (pvm_val val, int base, int flags)
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (val));
 
       pk_term_class ("struct");
-      
+
       if (struct_type_name != PVM_NULL)
         {
           pk_term_class ("struct-type-name");
