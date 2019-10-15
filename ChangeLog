@@ -1,5 +1,9 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* TODO (#A0 fix multi-line warning messages): New todo entry.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* etc/poke-default.css: Remove trailing whitespaces.
 	* src/pkl.c: Likewise.
 	* src/poke.c: Likewise.

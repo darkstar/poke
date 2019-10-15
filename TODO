@@ -403,6 +403,18 @@ This task is about implementing constant folding of bit-shift
 operations on integer literals.  This should be implemented as a
 handler in ``src/pkl-fold.c``.
 
+#A0 fix multi-line warning messages
+-----------------------------------
+
+The ``pkl_warning`` function in ``src/pkl.c`` can't handle multi-line
+warning messages properly.  It also has some duplication with
+``pkl_error``.  This task is about factorizing the multi-line handling
+code from ``pkl_error`` and reuse it in ``pkl_warning`` without code
+duplication.
+
+It would be nice to have some tests too.
+
+
 
 This file is part of GNU poke.
 
