@@ -846,7 +846,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),
                                    struct_field_types,
-                                   0 /* pinned */);
+                                   0 /* pinned */,
+                                   0 /* union */);
   PKL_AST_LOC (type) = PKL_AST_LOC (node);
   PKL_AST_TYPE (node) = ASTREF (type);
   PKL_PASS_RESTART = 1;

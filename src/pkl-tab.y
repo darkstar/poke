@@ -1055,7 +1055,7 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
                                                    NULL /* elems */,
-                                                   $2);
+                                                   $2, $3);
                     PKL_AST_LOC ($$) = @$;
 
                     /* The pushlevel in this rule and the subsequent
@@ -1075,7 +1075,7 @@ struct_type_specifier:
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
                                                    $6,
-                                                   $2);
+                                                   $2, $3);
                     PKL_AST_LOC ($$) = @$;
 
                     /* Pop the frame pushed in the `pushlevel' above.  */

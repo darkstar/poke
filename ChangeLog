@@ -1,5 +1,18 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (struct pkl_ast_type): New field union_p for
+	struct types.
+	(PKL_AST_TYPE_S_UNION): Define.
+	(pkl_ast_make_struct_type): Get an union_p argument.
+	* src/pkl-ast.c (pkl_ast_make_struct_type): Initialize union_p.
+	(pkl_ast_dup_type): Handle union_p.
+	(pkl_ast_print_1): Likewise.
+	* src/pkl-tab.y (struct_type_specifier): Pass union_p to
+	pkl_ast_make_struct_type.
+	* src/pkl-typify.c (pkl_typify1_ps_struct): Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-lex.l: Support for token union.
 	* src/pkl-tab.y (UNION): New token.
 	(struct_or_union): New rule.

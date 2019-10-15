@@ -819,6 +819,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
 #define PKL_AST_TYPE_S_PINNED(AST) ((AST)->type.val.sct.pinned)
+#define PKL_AST_TYPE_S_UNION(AST) ((AST)->type.val.sct.union_p)
 #define PKL_AST_TYPE_S_MAPPER(AST) ((AST)->type.val.sct.mapper)
 #define PKL_AST_TYPE_S_WRITER(AST) ((AST)->type.val.sct.writer)
 #define PKL_AST_TYPE_S_CONSTRUCTOR(AST) ((AST)->type.val.sct.constructor)
@@ -864,6 +865,7 @@ struct pkl_ast_type
       size_t nelem;
       union pkl_ast_node *elems;
       int pinned;
+      int union_p;
       pvm_val mapper;
       pvm_val writer;
       pvm_val constructor;
@@ -893,7 +895,7 @@ pkl_ast_node pkl_ast_make_void_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound);
 pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems,
-                                       int pinned);
+                                       int pinned, int union_p);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
 pkl_ast_node pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
                                          size_t narg, pkl_ast_node args);
