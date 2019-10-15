@@ -577,12 +577,12 @@ pkl_error (pkl_ast ast,
   p = errmsg;
   while (*p != '\0')
     {
+      pk_term_class ("error-filename");
       if (ast->filename)
-        {
-          pk_term_class ("error-filename");
-          pk_printf ("%s:", ast->filename);
-          pk_term_end_class ("error-filename");
-        }
+        pk_printf ("%s:", ast->filename);
+      else
+        pk_puts ("<stdin>:");
+      pk_term_end_class ("error-filename");
 
       if (PKL_AST_LOC_VALID (loc))
         {
@@ -627,6 +627,13 @@ pkl_warning (pkl_ast ast,
   va_start(valist, fmt);
   vasprintf (&msg, fmt, valist);
   va_end (valist);
+
+  pk_term_class ("error-filename");
+  if (ast->filename)
+    pk_printf ("%s:", ast->filename);
+  else
+    pk_puts ("<stdin>:");
+  pk_term_end_class ("error-filename");
   
   if (PKL_AST_LOC_VALID (loc))
     {

@@ -1,5 +1,11 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl.c (pkl_warning): Emit the filename containing the error.
+	(pkl_error): Use <stdin> as the filename whenever necessary.
+	(pkl_warning): Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl.c (pkl_detailed_location): Get an additional argument
 	specifying the style class to use for terminal output.
 	(pkl_error): Pass the style class to pkl_detailed_location.
