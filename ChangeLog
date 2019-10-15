@@ -1,5 +1,12 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/lib/poke-dg.exp (dg-command): Add a comment block
+	explaining what the function does.
+	(dg-command): Avoid a font-lock problem in Emacs.
+	(dg-data): Fix indentation.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* TODO (#A0 fix multi-line warning messages): New todo entry.
 	* HACKING (Future Developments): add note about supporting
 	compile-time type checking for unions with alternatives with the

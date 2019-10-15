@@ -26,6 +26,9 @@ load_lib dg.exp
 set poke_commands {}
 set poke_data_file {}
 
+# Append the specified command to `poke_commands'.  The commands added
+# this way will be executed in order by the poke invocation.
+
 proc dg-command { args } {
     global poke_commands
 
@@ -37,6 +40,8 @@ proc dg-command { args } {
     set cmd \"[string map \
                {$ \\$ \\ \\\\ \" \\" ` \\`} \
                [lindex $args 1]]\"
+    # Do not remove this comment. It is to avoid Emacs to
+    # get confused while font-locking"
 
     set poke_commands "$poke_commands -c $cmd"
 }
@@ -66,7 +71,7 @@ proc dg-data { args } {
     set format [lindex $args 1]
     set bytes [lindex $args 2]
 
-     # Write the data to a temporary file.
+    # Write the data to a temporary file.
     set output_file ${objdir}/[pid].data
     set fd [open $output_file w]
     fconfigure $fd -translation binary
