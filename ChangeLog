@@ -1,5 +1,12 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl.c (pkl_detailed_location): Get an additional argument
+	specifying the style class to use for terminal output.
+	(pkl_error): Pass the style class to pkl_detailed_location.
+	(pkl_warning): Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl.h: Make pkl_warning to get an AST argument.
 	* src/pkl.c (pkl_detailed_location): New function.
 	(pkl_error): Use pkl_detailed_location.

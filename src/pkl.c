@@ -473,7 +473,8 @@ pkl_bootstrapped_p (pkl_compiler compiler)
 }
 
 static void
-pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc)
+pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc,
+                       const char *style_class)
 {
   size_t cur_line = 1;
   size_t cur_column = 1;
@@ -549,13 +550,13 @@ pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc)
   for (i = 1; i < loc.first_column; ++i)
     pk_puts (" ");
 
-  pk_term_class ("error");
+  pk_term_class (style_class);
   for (; i < loc.last_column; ++i)
     if (i == loc.first_column)
       pk_puts ("^");
     else
       pk_puts ("~");
-  pk_term_end_class ("error");
+  pk_term_end_class (style_class);
   pk_puts ("\n");
 }
 
@@ -610,7 +611,7 @@ pkl_error (pkl_ast ast,
   free (errmsg);
 
   if (!poke_quiet_p)
-    pkl_detailed_location (ast, loc);
+    pkl_detailed_location (ast, loc, "error");
 }
 
 
@@ -642,7 +643,7 @@ pkl_warning (pkl_ast ast,
   free (msg);
 
   if (!poke_quiet_p)
-    pkl_detailed_location (ast, loc);
+    pkl_detailed_location (ast, loc, "warning");
 }
 
 void
