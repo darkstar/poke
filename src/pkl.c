@@ -472,6 +472,93 @@ pkl_bootstrapped_p (pkl_compiler compiler)
   return compiler->bootstrapped;
 }
 
+static void
+pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc)
+{
+  size_t cur_line = 1;
+  size_t cur_column = 1;
+  int i;
+  
+  if (!PKL_AST_LOC_VALID (loc))
+    return;
+
+  if (ast->buffer)
+    {
+      char *p;
+      for (p = ast->buffer; *p != '\0'; ++p)
+        {
+          if (*p == '\n')
+            {
+              cur_line++;
+              cur_column = 1;
+            }
+          else
+            cur_column++;
+          
+          if (cur_line >= loc.first_line
+              && cur_line <= loc.last_line)
+            {
+              /* Print until newline or end of string.  */
+              for (;*p != '\0' && *p != '\n'; ++p)
+                pk_printf ("%c", *p);
+              break;
+            }
+        }
+    }
+  else
+    {
+      FILE *fd = ast->file;
+      int c;
+
+      off64_t cur_pos = ftello (fd);
+
+      /* Seek to the beginning of the file.  */
+      assert (fseeko (fd, 0, SEEK_SET) == 0);
+
+      while ((c = fgetc (fd)) != EOF)
+        {
+          if (c == '\n')
+            {
+              cur_line++;
+              cur_column = 1;
+            }
+          else
+            cur_column++;
+
+          if (cur_line >= loc.first_line
+              && cur_line <= loc.last_line)
+            {
+              /* Print until newline or end of string.  */
+              do
+                {
+                  if (c != '\n')
+                    pk_printf ("%c", c);
+                  c = fgetc (fd);
+                }
+              while (c != EOF && c != '\0' && c != '\n');
+              break;
+            }
+        }
+
+      /* Restore the file position so parsing can continue.  */
+      assert (fseeko (fd, cur_pos, SEEK_SET) == 0);
+    }
+
+  pk_puts ("\n");
+
+  for (i = 1; i < loc.first_column; ++i)
+    pk_puts (" ");
+
+  pk_term_class ("error");
+  for (; i < loc.last_column; ++i)
+    if (i == loc.first_column)
+      pk_puts ("^");
+    else
+      pk_puts ("~");
+  pk_term_end_class ("error");
+  pk_puts ("\n");
+}
+
 void
 pkl_error (pkl_ast ast,
            pkl_ast_loc loc,
@@ -479,7 +566,6 @@ pkl_error (pkl_ast ast,
            ...)
 {
   va_list valist;
-  size_t i;
   char *errmsg, *p;
 
   /* Write out the error message, line by line.  */
@@ -523,97 +609,14 @@ pkl_error (pkl_ast ast,
     }
   free (errmsg);
 
-  if (poke_quiet_p)
-    return;
-
-  /* XXX: cleanup this pile of shit, and make fancy output
-     optional.  */
-  if (PKL_AST_LOC_VALID (loc))
-  {
-    size_t cur_line = 1;
-    size_t cur_column = 1;
-
-    if (ast->buffer)
-      {
-        char *p;
-        for (p = ast->buffer; *p != '\0'; ++p)
-          {
-            if (*p == '\n')
-              {
-                cur_line++;
-                cur_column = 1;
-              }
-            else
-              cur_column++;
-
-            if (cur_line >= loc.first_line
-                && cur_line <= loc.last_line)
-              {
-                /* Print until newline or end of string.  */
-                for (;*p != '\0' && *p != '\n'; ++p)
-                  pk_printf ("%c", *p);
-                break;
-              }
-          }
-      }
-    else
-      {
-        FILE *fd = ast->file;
-        int c;
-
-        off64_t cur_pos = ftello (fd);
-
-        /* Seek to the beginning of the file.  */
-        assert (fseeko (fd, 0, SEEK_SET) == 0);
-
-        while ((c = fgetc (fd)) != EOF)
-          {
-            if (c == '\n')
-              {
-                cur_line++;
-                cur_column = 1;
-              }
-            else
-              cur_column++;
-
-           if (cur_line >= loc.first_line
-                && cur_line <= loc.last_line)
-              {
-                /* Print until newline or end of string.  */
-                do
-                  {
-                    if (c != '\n')
-                      pk_printf ("%c", c);
-                    c = fgetc (fd);
-                  }
-                while (c != EOF && c != '\0' && c != '\n');
-                break;
-              }
-          }
-
-        /* Restore the file position so parsing can continue.  */
-        assert (fseeko (fd, cur_pos, SEEK_SET) == 0);
-      }
-
-    pk_puts ("\n");
-
-    for (i = 1; i < loc.first_column; ++i)
-      pk_puts (" ");
-
-    pk_term_class ("error");
-    for (; i < loc.last_column; ++i)
-      if (i == loc.first_column)
-        pk_puts ("^");
-      else
-        pk_puts ("~");
-    pk_term_end_class ("error");
-    pk_puts ("\n");
-  }
+  if (!poke_quiet_p)
+    pkl_detailed_location (ast, loc);
 }
 
 
 void
-pkl_warning (pkl_ast_loc loc,
+pkl_warning (pkl_ast ast,
+             pkl_ast_loc loc,
              const char *fmt,
              ...)
 {
@@ -637,6 +640,9 @@ pkl_warning (pkl_ast_loc loc,
   pk_puts ("\n");
 
   free (msg);
+
+  if (!poke_quiet_p)
+    pkl_detailed_location (ast, loc);
 }
 
 void

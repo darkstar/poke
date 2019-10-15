@@ -1,5 +1,12 @@
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl.h: Make pkl_warning to get an AST argument.
+	* src/pkl.c (pkl_detailed_location): New function.
+	(pkl_error): Use pkl_detailed_location.
+	(pkl_warning): Likewise.
+
+2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pk-file.c (pk_cmd_file): Use pk_printf instead of printf.
 	(pk_cmd_close): Likewise.
 	(print_info_file): Likewise.

@@ -112,7 +112,7 @@ int pkl_compiling_statement_p (pkl_compiler compiler);
 /* Diagnostic routines.  */
 
 void pkl_error (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);
-void pkl_warning (pkl_ast_loc loc, const char *fmt, ...);
+void pkl_warning (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);
 void pkl_ice (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);
 
 #endif /* ! PKL_H */
