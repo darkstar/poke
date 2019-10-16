@@ -51,8 +51,10 @@ deftype BSON_String =
   struct
   {
     int32 size;
-    string value @ size#B;
-    char[size] chars : chars[size - 1] == '\0' @ 4#B;
+    /* XXX substitute the following with an anonymous pinned struct
+       when struct flattening is implemented.  */
+    string value;
+    char[size] chars : chars[size - 1] == '\0' @ size'size;
   };
 
 deftype BSON_Regexp =
@@ -62,14 +64,16 @@ deftype BSON_Regexp =
     string opts;
   };
 
+/* XXX uncomment when forward declarations are supported
 deftype BSON_Code_Scope =
   struct
   {
     int32 size;
     BSON_String code;
-    //    BSON_Doc doc;
+    BSON_Doc doc;
     int doc;
   };
+*/
 
 deftype BSON_Elem =
   union
@@ -81,11 +85,12 @@ deftype BSON_Elem =
       BSON_String value;
     } str;
 
+    /* XXX uncomment when forward declarations are supported
     struct
     {
       byte tag : tag == 0x03;
       string name;
-      //BSON_Doc value;
+      BSON_Doc value;
       int value;
     } doc;
 
@@ -93,9 +98,10 @@ deftype BSON_Elem =
     {
       byte tag : tag == 0x04;
       string name;
-      // BSON_Doc value;
+      BSON_Doc value;
       int value;
     } array;
+    */
     
     struct
     {
@@ -165,13 +171,15 @@ deftype BSON_Elem =
       string name;
       BSON_String value;
     } symbol;
-    
+
+    /* XXX uncomment when forward declarations are supported
     struct
     {
       byte tag : tag == 0x0f;
       string name;
       BSON_Code_Scope value;
     } js_scope;
+    */
     
     struct
     {
