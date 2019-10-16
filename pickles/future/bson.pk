@@ -19,227 +19,206 @@
 /* The specification implemented here is in
    http://bsonspec.org/spec.html  */
 
+// struct BSON_Doc; /* Forward declaration.  */
+
 /* Note that doubles are handled like 64-bit integers, since poke
    doesn't support FP types yet.  */
 
-struct bson_doc; /* Forward declaration.  */
+deftype BSON_Bool = byte;
 
-deftype bson_bool =
-  enum<byte>
-    {
-      BSON_FALSE = 0x00,
-      BSON_TRUE = 0x01
-    };
+defvar BSON_FALSE = 0;
+defvar BSON_TRUE = 1;
 
-deftype bson_subtype =
-  enum<byte>
-    {
-      BSON_SUBTYPE_GENERIC = 0x00,
-      BSON_SUBTYPE_FUNCTION = 0x01,
-      BSON_SUBTYPE_BINARY = 0x02,
-      BSON_SUBTYPE_UUID_OLD = 0x03,
-      BSON_SUBTYPE_UUID = 0x04,
-      BSON_SUBTYPE_MD5 = 0x05,
-      BSON_SUBTYPE_USER = 0x80
-    };
+deftype BSON_Subtype = byte;
 
-deftype bson_binary =
+defvar BSON_SUBTYPE_GENERIC = 0;
+defvar BSON_SUBTYPE_FUNCTION = 1;
+defvar BSON_SUBTYPE_BINARY = 2;
+defvar BSON_SUBTYPE_UUID_OLD = 3;
+defvar BSON_SUBTYPE_UUID = 4;
+defvar BSON_SUBTYPE_MD5 = 5;
+defvar BSON_SUBTYPE_USER = 8;
+
+deftype BSON_Binary =
   struct
   {
     int32 size;
-    bson_subtype subtype;
+    BSON_Subtype subtype;
     byte[size] data;
   };
 
-deftype bson_string =
+deftype BSON_String =
   struct
   {
     int32 size;
-    char[size + 1] chars : chars[size] == '\0';
+    string value @ size#B;
+    char[size] chars : chars[size - 1] == '\0' @ 4#B;
   };
 
-deftype bson_regexp =
+deftype BSON_Regexp =
   struct
   {
     string patterns;
     string opts;
   };
 
-deftype bson_code_scope =
+deftype BSON_Code_Scope =
   struct
   {
     int32 size;
-    bson_string code;
-    bson_doc doc;
+    BSON_String code;
+    //    BSON_Doc doc;
+    int doc;
   };
 
-deftype bson_elem =
+deftype BSON_Elem =
   union
   {
     struct
     {
-      byte tag = 0x02;
+      byte tag : tag == 0x02;
       string name;
-      bson_string value;
+      BSON_String value;
     } str;
 
     struct
     {
-      byte tag = 0x03;
+      byte tag : tag == 0x03;
       string name;
-      bson_doc value;
+      //BSON_Doc value;
+      int value;
     } doc;
 
     struct
     {
-      byte tag = 0x04;
+      byte tag : tag == 0x04;
       string name;
-      bson_doc value;
+      // BSON_Doc value;
+      int value;
     } array;
     
     struct
     {
-      byte tag = 0x05;
+      byte tag : tag == 0x05;
       string name;
-      bson_binary value;
+      BSON_Binary value;
     } binary;
     
     struct
     {
-      byte tag = 0x06;
+      byte tag : tag == 0x06;
       string name;
     } undefined;
     
     struct
     {
-      byte tag = 0x07;
+      byte tag : tag == 0x07;
       string name;
       byte[12] value;
     } obj_id;
     
     struct
     {
-      byte tag = 0x08;
+      byte tag : tag == 0x08;
       string name;
-      bson_bool value;
+      BSON_Bool value;
     } boolean;
     
     struct
     {
-      byte tag = 0x09;
+      byte tag : tag == 0x09;
       string name;
       int64 value;
     } datetime;
     
     struct
     {
-      byte tag = 0x0a;
+      byte tag : tag == 0x0a;
       string name;
     } null_elem;
     
     struct
     {
-      byte tag = 0x0b;
+      byte tag : tag == 0x0b;
       string name;
-      bson_regexp value;
+      BSON_Regexp value;
     } regexp;
     
-    deprecated struct
+    struct
     {
-      byte tag = 0x0c;
+      byte tag : tag == 0x0c;
       string name;
-      bson_string;
+      BSON_String;
       byte[12];
     } dbpointer;
     
     struct
     {
-      byte tag = 0x0d;
+      byte tag : tag == 0x0d;
       string name;
-      bson_string value;
+      BSON_String value;
     } js;
     
-    deprecated struct
+    struct
     {
-      byte tag = 0x0e;
+      byte tag : tag == 0x0e;
       string name;
-      bson_string value;
+      BSON_String value;
     } symbol;
     
     struct
     {
-      byte tag = 0x0f;
+      byte tag : tag == 0x0f;
       string name;
-      bson_code_scope value;
+      BSON_Code_Scope value;
     } js_scope;
     
     struct
     {
-      byte tag = 0x10;
+      byte tag : tag == 0x10;
       string name;
       int32 value;
     } integer32;
     
     struct
     {
-      byte tag = 0x11;
+      byte tag : tag == 0x11;
       string name;
       uint64 value;
     } timestamp;
     
     struct
     {
-      byte tag = 0x12;
+      byte tag : tag == 0x12;
       string name;
       int64 value;
     } integer64;
     
     struct
     {
-      byte tag = 0x13;
+      byte tag : tag == 0x13;
       string name;
       byte[16] value;
     } decimal128;
     
     struct
     {
-      byte tag = 0xff;
+      byte tag : tag == 0xff;
       string name;
     } min_key;
     
     struct
     {
-      byte tag = 0x7f;
+      byte tag : tag == 0x7f;
       string name;
     } max_key;
   };
 
-deftype bson_doc =
+deftype BSON_Doc =
   struct
   {
-    int32 size;
-    bson_elem[] elements : (sizeof (elements)
-                            + sizeof (byte) == size);
-    byte endmark = 0x0;
+    offset<int32,B> size;
+    BSON_Elem[size - size'size - 1#B] elements;
+    byte endmark : endmark == 0x0;
   };
 
-defun print_bson_elements (bson_doc doc) void:
-{
-  print ("size: " + doc.size);
-  
-  for (elem in doc.elements)
-    if (elem is str)
-      {
-        print (elem.value);
-      }
-    else if (elem is doc)
-      {
-        /* ... */
-      }
-};
-
-let bdoc_b = bson_doc {2, [{0xff,"foo"}, {0x7f, "bar"}],0x0UB};
-let bdoc_c = bson_doc @ 0x00;
-
-print_bson_elements (bdoc_b);
-print_bson_elements (bdoc_c);

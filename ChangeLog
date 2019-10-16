@@ -1,5 +1,9 @@
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/future/bson.pk: Rewrite in modern Poke.
+
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.pks (struct_mapper): Raise E_constraint if no valid
 	alternatives are found while mapping an union.
 	* testsuite/poke.map/maps-unions-3.pk: Fix the test to reflect the
