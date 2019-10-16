@@ -448,6 +448,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
     {
       pkl_ast_node constraint
         = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (t);
+      pkl_ast_node elem_type
+        = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
 
       if (last_unconditional_alternative)
         {
@@ -457,7 +459,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
         }
 
       if (!constraint
-          || (PKL_AST_CODE (constraint) == PKL_AST_INTEGER
+          && PKL_AST_TYPE_CODE (elem_type) != PKL_TYPE_STRUCT)
+        last_unconditional_alternative = t;
+
+      if (constraint
+          && (PKL_AST_CODE (constraint) == PKL_AST_INTEGER
               && PKL_AST_INTEGER_VALUE (constraint) != 0))
         last_unconditional_alternative = t;
 

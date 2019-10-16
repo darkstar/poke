@@ -1,5 +1,10 @@
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-anal.c (pkl_anal2_ps_type_struct): adjust conditions for
+	the "unreachable alternative in union" warning.
+
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/future/bson.pk: Rewrite in modern Poke.
 
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
