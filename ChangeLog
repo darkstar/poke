@@ -1,5 +1,12 @@
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.pks (struct_mapper): Raise E_constraint if no valid
+	alternatives are found while mapping an union.
+	* testsuite/poke.map/maps-unions-3.pk: Fix the test to reflect the
+	above change.
+
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pvm.jitter (pvm_literal_printer_cast): flush output buffers
 	to assure the right order in the output.
 	(pvm_literal_printer): Likewise.

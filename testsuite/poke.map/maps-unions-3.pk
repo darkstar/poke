@@ -7,5 +7,5 @@
 defvar n = 10;
 deftype Foo = union { byte b : n < 10; int c : n > 15; };
 
-/* { dg-command { Foo @ 0#B } } */
-/* { dg-output "Foo \\{\\}" } */
+/* { dg-command { try Foo @ 0#B; catch if E_constraint { print "catched\n"; } } } */
+/* { dg-output "catched" } */

@@ -732,13 +732,19 @@
    .c if (PKL_AST_TYPE_S_UNION (type_struct))
    .c {
         ;; Union field successfully mapped.  We are done.
-        ba .fields_done
-.alternative_failed:        
+        ba .union_fields_done
+.alternative_failed:
         ;; Drop the exception number and try next alternative.
         drop                    ; ...[EOFF ENAME EVAL] NEOFF
    .c }
  .c }
-.fields_done:
+ .c if (PKL_AST_TYPE_S_UNION (type_struct))
+  .c {
+        ;; No valid alternative found in union.
+        push PVM_E_CONSTRAINT
+        raise
+  .c }
+.union_fields_done:
         drop  			; ...[EOFF ENAME EVAL]
         ;; Ok, at this point all the struct field triplets are
         ;; in the stack.  Push the number of fields, create
