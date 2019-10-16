@@ -1,3 +1,11 @@
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+	    Bruno Haible <bruno@clisp.org>
+
+	* HACKING (Boehm GC): New section.
+	(Running an Uninstalled Poke): Mention POKESTYLESDIR.
+	(Continuous Integration): New section.
+	(Jitter): Clarify instructions on how to install jitter.
+
 2019-10-15  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* testsuite/lib/poke-dg.exp (dg-command): Add a comment block

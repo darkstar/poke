@@ -34,11 +34,13 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
        2.1  Autotools
        2.2  Flex
        2.3  readline
-       2.4  Jitter
-       2.5  libtextstyle
-       2.6  Building
-       2.7  Gettext
-       2.8  Running an Uninstalled Poke
+       2.4  Boehm GC
+       2.5  Jitter
+       2.6  libtextstyle
+       2.7  Building
+       2.8  Gettext
+       2.9  Running an Uninstalled Poke
+       2.10  Continuous Integration
      3  Coding Style and Conventions
        3.1  Writing C
        3.2  Writing Poke
@@ -134,22 +136,38 @@ recent version will suffice.
 However, in case you don't have libreadline installed, a minimum
 version from gnulib is used instead.
 
+Boehm GC
+~~~~~~~~
+
+poke uses the Boehm conservative garbage collector for managing the
+memory of some of its subsystems.  Therefore, you must have it
+installed.
+
+Note that if you have the Boehm GC installed in a prefix different
+from the one that contains pkg-config, you need to set PKL_CONFIG_PATH
+so that pkg-config finds it::
+
+  export PKG_CONFIG_PATH=${INSTALL_PREFIX_OF_LIBGC}/lib/pkgconfig
+
 Jitter
 ~~~~~~
 
 In order to build and run poke, you need Luca Saiu's jitter.  Jitter
-is available in http://ageinghacker.net/git/cgit.cgi/jitter.  The
-specific revision you need is
-745ba29c15dd56c60a7ab0320e09c1ca705018b7.
+is available in http://ageinghacker.net/git/cgit.cgi/jitter.  You need
+a specic revision. The command to download it is::
+  
+  wget http://ageinghacker.net/git/cgit.cgi/jitter/snapshot/jitter-745ba29c15dd56c60a7ab0320e09c1ca705018b7.tar.xz
 
-Configure and install jitter in some prefix.  When configuring poke,
-specify the location of the jitter installation with --with-jitter.
+Configure and install jitter in some prefix.  For the time being, you
+should use when configuring jitter::
 
-For the time being, you should also use when configuring jitter::
 
   --disable-dispatch-minimal-threading --disable-dispatch-no-threading
 
 or, alternatively, use ``--enable-debug`` when configuring poke.
+
+When configuring poke, specify the location of the jitter installation
+with --with-jitter.
 
 libtextstyle
 ~~~~~~~~~~~~
@@ -196,12 +214,24 @@ Running an Uninstalled Poke
 
 Once poke is compiled, you can run it before installing by defining
 the ``POKEDATADIR`` environment variable to point to the ``src/``
-directory in the sources tree.  For example::
+directory in the sources tree.  Another variable to set is
+``POKESTYLESDIR``.
+
+For example::
 
   $ pwd
   /home/jemarch/gnu/hacks/poke/build/
-  $ export POKEDATADIR=../src
+  $ export POKEDATADIR=../src POKESTYLESDIR=../etc
   $ ./src/poke
+
+Continuous Integration
+~~~~~~~~~~~~~~~~~~~~~~
+
+The package is built automatically, at regular intervals.  You find the
+latest build results here::
+  
+  https://gitlab.com/gnu-poke/ci-distcheck/pipelines
+  https://gitlab.com/gnu-poke/ci-distcheck/-/jobs?scope=finished
 
 Coding Style and Conventions
 ----------------------------
