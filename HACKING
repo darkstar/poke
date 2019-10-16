@@ -1280,6 +1280,9 @@ GDB extensions to better debug poke
 Suppression list for memcheck
   ``etc/boehm-gc.suppressions``
 
+Emacs mode for editing RAS files
+  ``etc/poke-ras-mode.el``
+
 ..
   Local Variables:
   mode: rst

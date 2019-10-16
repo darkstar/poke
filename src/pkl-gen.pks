@@ -1,4 +1,4 @@
-;;; -*- mode: asm -*-
+;;; -*- mode: poke-ras -*-
 ;;; pkl-gen.pks - Assembly routines for the codegen
 ;;;
 

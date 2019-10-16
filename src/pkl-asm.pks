@@ -1,4 +1,4 @@
-;;; -*- mode: asm -*-
+;;; -*- mode: poke-ras -*-
 ;;; pkl-asm.pks - Assembly routines for the Pkl macro-assembler
 ;;;
 
