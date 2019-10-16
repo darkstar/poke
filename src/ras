@@ -174,6 +174,34 @@
 # being assembled.  It is an error to define two labels having the
 # same name in the same entity.
 #
+# In most cases, you don't need to declare labels: just use them.
+# However, if you are including literal C code that can be executed
+# more than once, like for example a loop, you will get an error:
+#
+#  .function foo
+#  ...
+#  .c for (...)
+#  .c {
+#       ba .bar
+#       ...
+#  .bar:
+#       ...
+#  .c }
+#
+# The above will trigger run-time errors, because the bar_label jitter
+# label is used multiple times.  The solution is to declare the label
+# in the inner context using the .label directive, like this:
+#
+#  .function foo
+#  ...
+#  .c for (...)
+#  .c {
+#      .label .bar
+#      ...
+#  .bar:
+#      ...
+#  .c }
+#
 # Variables
 # ---------
 #
@@ -609,7 +637,7 @@ BEGIN {
         {
             # Emit label declarations
             for (label in labels)
-                print "\tjitter_label " label \
+                print "\t__attribute__((unused)) jitter_label " label \
                       "_label = pkl_asm_fresh_label (RAS_ASM); \\"
         }
         else
@@ -671,6 +699,14 @@ BEGIN {
 /^[ \t]*\.endloop[ \t]*(;.*)?$/ {
     out("\t}                                                         \\")
     out("\tpkl_asm_endloop (RAS_ASM);                            \\")
+    next
+}
+
+# .label
+/^[ \t]*\.label[ \t]+\.[a-zA-Z][0-9a-zA-Z_]*[ \t]*(;.*)?$/ {
+    labelname = gensub (/^[ \t]*\.label[ \t]+\.([a-zA-Z][0-9a-zA-Z_]*)[ \t]*(;.*)?$/, \
+                        "\\1", 1, $0) "_label"
+    out("\tjitter_label " labelname " = pkl_asm_fresh_label (RAS_ASM); \\")
     next
 }
 

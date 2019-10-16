@@ -1,4 +1,9 @@
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/ras: Support .label directives.
+	* src/pkl-gen.pks (struct_mapper): Use .label.
+
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
 	    Bruno Haible <bruno@clisp.org>
 
 	* HACKING (Boehm GC): New section.
