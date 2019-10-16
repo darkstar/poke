@@ -1,5 +1,17 @@
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pvm.jitter (pvm_literal_printer_cast): flush output buffers
+	to assure the right order in the output.
+	(pvm_literal_printer): Likewise.
+	(pvm_literal_printer_hi): Likewise.
+	(pvm_literal_printer_lo): Likewise.
+	(popf_printer): Likewise.
+	(bits_printer): Likewise.
+	(endian_printer): Likewise.
+	(nenc_printer): Likewise.
+
+2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* testsuite/poke.pkl/cast-array-diag-5.pk: Fix test.
 
 2019-10-16  Jose E. Marchesi  <jemarch@gnu.org>

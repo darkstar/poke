@@ -400,57 +400,71 @@ printer-c
     void
     pvm_literal_printer_cast (FILE *out, jitter_uint val)
     {
-      fprintf (out, "%" JITTER_PRIu, val);
+      fflush (out);
+      pk_printf ("%" JITTER_PRIu, val);
+      pk_term_flush ();
     }
 
     void
     pvm_literal_printer (FILE *out, jitter_uint val)
     {
       /* XXX what about out.  */
+      fflush (out);
       pvm_print_val ((pvm_val) val, 10, 0);
+      pk_term_flush ();
     }
 
     void
     pvm_literal_printer_hi (FILE *out, jitter_uint hi)
     {
-      fprintf (out, "%%hi(0x%" JITTER_PRIx ")", hi);
+      fflush (out);
+      pk_printf ("%%hi(0x%" JITTER_PRIx ")", hi);
+      pk_term_flush ();
       printer_hi = hi; /* This sucks */
     }
 
     void
     pvm_literal_printer_lo (FILE *out, jitter_uint lo)
     {
-      fprintf (out, "%%lo(0x%" JITTER_PRIx") (", lo);
+      fflush (out);
+      pk_printf ("%%lo(0x%" JITTER_PRIx") (", lo);
       pvm_print_val (((pvm_val) printer_hi << 32) | lo,
                       10, 0);
-      fputc (')', out);
+      pk_puts (")");
+      pk_term_flush ();
       printer_hi = 0;
     }
 
     void
     popf_printer (FILE *out, jitter_uint nframes)
     {
-      fprintf (out, "%" JITTER_PRIu, nframes);
+      fflush (out);
+      pk_printf ("%" JITTER_PRIu, nframes);
+      pk_term_flush ();
     }
 
     void
     bits_printer (FILE *out, jitter_uint val)
     {
-        fprintf (out, "%" JITTER_PRIu, val);
+      fflush (out);
+      pk_printf ("%" JITTER_PRIu, val);
+      pk_term_flush ();
     }
 
     void
     endian_printer (FILE *out, jitter_uint val)
     {
-       fprintf (out, "%s",
-               val == IOS_ENDIAN_MSB ? "big" : "little");
+      fflush (out);
+      pk_printf ("%s", val == IOS_ENDIAN_MSB ? "big" : "little");
+      pk_term_flush ();
     }
 
     void
     nenc_printer (FILE *out, jitter_uint val)
     {
-       fprintf (out, "%s",
-                val == IOS_NENC_1 ? "1c" : "2c");
+      fflush (out);
+      pk_printf ("%s", val == IOS_NENC_1 ? "1c" : "2c");
+      pk_term_flush ();
     }
   end
 end
