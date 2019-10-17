@@ -130,7 +130,7 @@ static void
 pkl_asm_pushlevel (pkl_asm pasm, int env)
 {
   struct pkl_asm_level *level
-    = xmalloc (sizeof (struct pkl_asm_level));
+    = pvm_alloc (sizeof (struct pkl_asm_level));
 
   memset (level, 0, sizeof (struct pkl_asm_level));
   level->parent = pasm->level;
@@ -146,7 +146,6 @@ pkl_asm_poplevel (pkl_asm pasm)
   struct pkl_asm_level *level = pasm->level;
 
   pasm->level = level->parent;
-  free (level);
 }
 
 /* Append instructions to PROGRAM to push VAL into the stack.  */
@@ -916,7 +915,7 @@ pkl_asm
 pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
              int prologue)
 {
-  pkl_asm pasm = xmalloc (sizeof (struct pkl_asm));
+  pkl_asm pasm = pvm_alloc (sizeof (struct pkl_asm));
   pvm_program program;
 
   memset (pasm, 0, sizeof (struct pkl_asm));
@@ -1006,7 +1005,6 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 
   /* Free the assembler instance and return the assembled program to
      the user.  */
-  free (pasm);
   return program;
 }
 

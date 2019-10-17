@@ -1,5 +1,15 @@
 2019-10-17  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-asm.c (pkl_asm_pushlevel): Use pvm_alloc instead of
+	malloc.
+	(pkl_asm_new): Likewise.
+	(pkl_asm_poplevel): Do not free memory.
+	(pkl_asm_finish): Likewise.
+	* src/pvm-alloc.c (pvm_alloc_initialize): Enable garbage
+	collection.
+
+2019-10-17  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl.h: Add an additional POINTERS to pkl_compile_expression.
 	* src/pkl.c (pkl_compile_expression): Likewise.
 	* src/pk-cmd.c (pk_cmd_exec_1): Keep a `pointers' variable in the

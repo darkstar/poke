@@ -54,8 +54,6 @@ pvm_alloc_initialize ()
 {
   /* Initialize the Boehm Garbage Collector.  */
   GC_INIT ();
-  /* XXX */
-  GC_disable ();
 }
 
 void
