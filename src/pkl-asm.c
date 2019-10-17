@@ -108,7 +108,7 @@ struct pkl_asm_level
    prologue.  */
 
 #define PKL_ASM_LEVEL(PASM) ((PASM)->level)
-#define PKL_AST_MAX_POINTERS 128
+#define PKL_AST_MAX_POINTERS 1024
 
 struct pkl_asm
 {
@@ -929,7 +929,7 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
   pasm->program = program;
 
   pasm->pointers = pvm_alloc (sizeof (void*) * PKL_AST_MAX_POINTERS);
-  memset (pasm->pointers, 0, PKL_AST_MAX_POINTERS);
+  memset (pasm->pointers, 0, sizeof (void*) * PKL_AST_MAX_POINTERS);
   pasm->next_pointer = 0;
 
   if (prologue)

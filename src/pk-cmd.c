@@ -258,6 +258,13 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
   const char *a;
   int besilent = 0;
 
+  /* Note that the sole purpose of `pointers' is to serve as a root
+     (in the stack) for the GC, to prevent the boxed values in the
+     program returned by pkl_compile_expression below to be collected.
+     XXX this should be hidden by a pkl_prog abstraction most
+     probably.  */
+  void *pointers;
+
   /* Skip blanks, and return if the command is composed by only blank
      characters.  */
   p = skip_blanks (str);
@@ -352,7 +359,8 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
                     program_string = p;
                     prog = pkl_compile_expression (poke_compiler,
-                                                   program_string, &end);
+                                                   program_string, &end,
+                                                   &pointers);
                     if (prog != NULL)
                       {
                         argv[argc].val.prog = prog;

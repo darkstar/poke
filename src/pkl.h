@@ -92,7 +92,8 @@ int pkl_compile_statement (pkl_compiler compiler, char *buffer, char **end,
    return NULL.  */
 
 pvm_program pkl_compile_expression (pkl_compiler compiler,
-                                    char *buffer, char **end);
+                                    char *buffer, char **end,
+                                    void **pointers);
 
 /* Return the current compile-time environment in COMPILER.  */
 
