@@ -371,7 +371,7 @@ pkl_compile_expression (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  program = rest_of_compilation (compiler, ast, &pointers);
+  program = rest_of_compilation (compiler, ast, pointers);
   if (program == NULL)
     goto error;
 
