@@ -1,5 +1,10 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-anal.c (pkl_nala1_ps_type_struct): Fix typo in variable
+	names.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.c (pkl_gen_pr_decl): Rename type_struct_fields to
 	type_struct_elems.
 	(pkl_gen_pr_type_struct): Likewise.

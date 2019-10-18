@@ -111,11 +111,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
         {
           pkl_ast_node tname
             = (PKL_AST_CODE (t) == PKL_AST_STRUCT_TYPE_FIELD
-               ? PKL_AST_STRUCT_TYPE_FIELD_NAME (u)
-               : PKL_AST_DECL_NAME (u));
-          pkl_ast_node uname
-            = (PKL_AST_CODE (t) == PKL_AST_STRUCT_TYPE_FIELD
                ? PKL_AST_STRUCT_TYPE_FIELD_NAME (t)
+               : PKL_AST_DECL_NAME (t));
+          pkl_ast_node uname
+            = (PKL_AST_CODE (u) == PKL_AST_STRUCT_TYPE_FIELD
+               ? PKL_AST_STRUCT_TYPE_FIELD_NAME (u)
                : PKL_AST_DECL_NAME (u));
 
           if (uname
