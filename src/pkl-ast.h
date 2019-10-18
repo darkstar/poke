@@ -784,9 +784,10 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    used to hold closures, or PVM_NULL.
 
    In struct types, NELEM is the number of elements in the struct
-   type.  ELEMS is a chain of PKL_AST_STRUCT_TYPE_FIELD nodes.  PINNED
-   is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER and
-   CONSTRUCTOR are used to hold closures, or PVM_NULL.
+   type.  ELEMS is a chain of elements, which can be
+   PKL_AST_STRUCT_TYPE_FIELD or PKL_AST_DECL nodes, potentially mixed.
+   PINNED is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER
+   and CONSTRUCTOR are used to hold closures, or PVM_NULL.
 
    In offset types, BASE_TYPE is a PKL_AST_TYPE with the base type for
    the offset's magnitude, and UNIT is either a PKL_AST_IDENTIFIER

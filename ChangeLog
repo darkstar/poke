@@ -1,5 +1,13 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h: Document that struct elements can be fields or
+	declarations.
+	* src/pkl-tab.y: Rename the struct_type_field_list rule to
+	struct_type_elem_list.
+	(struct_type_elem_list): Add declarations.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-anal.c (pkl_anal1_ps_type_struct): Rename
 	struct_field_type to struct_type_field.
 	(pkl_anal2_ps_type_struct): Likewise.

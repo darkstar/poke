@@ -304,7 +304,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned integral_type_sign struct_or_union
-%type <ast> struct_type_field_list struct_type_field struct_type_field_identifier
+%type <ast> struct_type_elem_list struct_type_field struct_type_field_identifier
 %type <ast> struct_type_field_constraint struct_type_field_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
@@ -1070,7 +1070,7 @@ struct_type_specifier:
                      pkl-gen.pks:struct_mapper.  */
                   pkl_register_dummies (pkl_parser, 2);
                 }
-          struct_type_field_list '}'
+          struct_type_elem_list '}'
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
@@ -1093,9 +1093,12 @@ struct_type_pinned:
 	| PINNED	{ $$ = 1; }
         ;
 
-struct_type_field_list:
+struct_type_elem_list:
 	  struct_type_field
-        | struct_type_field_list struct_type_field
+        | declaration
+        | struct_type_elem_list declaration
+          	{ $$ = pkl_ast_chainon ($1, $2); }
+        | struct_type_elem_list struct_type_field
         	{ $$ = pkl_ast_chainon ($1, $2); }
         ;
 
