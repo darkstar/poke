@@ -540,20 +540,29 @@ pkl_ast_dup_type (pkl_ast_node type)
       PKL_AST_TYPE_S_NELEM (new) = PKL_AST_TYPE_S_NELEM (type);
       for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
         {
-          pkl_ast_node struct_type_elem_name
-            = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
-          pkl_ast_node struct_type_elem_type
-            = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
-          pkl_ast_node struct_type_elem_constraint
-            = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
-          pkl_ast_node struct_type_elem_label
-            = PKL_AST_STRUCT_TYPE_FIELD_LABEL (t);
-          pkl_ast_node new_struct_type_elem_name
+          pkl_ast_node struct_type_elem_name;
+          pkl_ast_node struct_type_elem_type;
+          pkl_ast_node struct_type_elem_constraint;
+          pkl_ast_node struct_type_elem_label;
+          pkl_ast_node new_struct_type_elem_name;
+          pkl_ast_node struct_type_elem;
+            
+          /* Process only struct type fields.  XXX But what about
+             declarations?  These should also be duplicated.  */
+          if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
+            break;
+
+          struct_type_elem_name = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
+          struct_type_elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+          struct_type_elem_constraint = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
+          struct_type_elem_label = PKL_AST_STRUCT_TYPE_FIELD_LABEL (t);
+
+          new_struct_type_elem_name
             = (struct_type_elem_name
                ? pkl_ast_make_identifier (PKL_AST_AST (new),
                                           PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
                : NULL);
-          pkl_ast_node struct_type_elem
+          struct_type_elem
             = pkl_ast_make_struct_type_field (PKL_AST_AST (new),
                                              new_struct_type_elem_name,
                                              pkl_ast_dup_type (struct_type_elem_type),
@@ -796,8 +805,12 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
 
         for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
           {
-            pkl_ast_node elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+            pkl_ast_node elem_type;
 
+            if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
+              continue;
+
+            elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
             res = pkl_ast_make_binary_exp (ast, PKL_AST_OP_ADD,
                                            res,
                                            pkl_ast_sizeof_type (ast, elem_type));
@@ -949,11 +962,15 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
         for (t = PKL_AST_TYPE_S_ELEMS (type); t;
              t = PKL_AST_CHAIN (t))
           {
-            pkl_ast_node ename
-              = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
-            pkl_ast_node etype
-              = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+            pkl_ast_node ename;
+            pkl_ast_node etype;
 
+            if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
+              continue;
+
+            ename = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
+            etype = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+            
             pkl_print_type (out, etype, use_given_name);
             if (ename)
               fprintf (out, " %s",
