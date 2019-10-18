@@ -571,13 +571,13 @@
 ;;; mapped.
 
         .macro handle_struct_field_label
-   .c if (PKL_AST_STRUCT_FIELD_TYPE_LABEL (field) == NULL)
+   .c if (PKL_AST_STRUCT_TYPE_FIELD_LABEL (field) == NULL)
         drop                    ; OFF
    .c else
    .c {
         nip                     ; SOFF
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_LABEL (field));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_LABEL (field));
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
                                 ; SOFF LOFF
         ogetm                   ; SOFF LOFF LOFFM
@@ -612,10 +612,10 @@
 ;;; mapped.
 
         .macro check_struct_field_constraint
-   .c if (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (field) != NULL)
+   .c if (PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (field) != NULL)
    .c {
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (field));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (field));
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
         bnzi .constraint_ok
         drop
@@ -642,14 +642,14 @@
         ;; Increase OFF by the label, if the field has one.
         .e handle_struct_field_label     ; OFF
         dup                             ; OFF OFF
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (field));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (field));
                                 	; OFF VAL
         dup                             ; OFF VAL VAL
         regvar $val                     ; OFF VAL
-   .c if (PKL_AST_STRUCT_FIELD_TYPE_NAME (field) == NULL)
+   .c if (PKL_AST_STRUCT_TYPE_FIELD_NAME (field) == NULL)
         push null
    .c else
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (field));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_NAME (field));
                                 	; OFF VAL STR
         swap                            ; OFF STR VAL
         ;; Evaluate the field's constraint and raise
@@ -840,7 +840,7 @@
         nip2                    ; EVAL EOFF
         swap                    ; EOFF EVAL
         .c PKL_GEN_PAYLOAD->in_writer = 1;
-        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (field));
+        .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (field));
         .c PKL_GEN_PAYLOAD->in_writer = 0;
         ba .next
 .unmodified:

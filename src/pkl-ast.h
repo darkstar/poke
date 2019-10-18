@@ -57,7 +57,7 @@ enum pkl_ast_code
   PKL_AST_VAR,
   /* Types.  */
   PKL_AST_TYPE,
-  PKL_AST_STRUCT_FIELD_TYPE,
+  PKL_AST_STRUCT_TYPE_FIELD,
   PKL_AST_FUNC_TYPE_ARG,
   PKL_AST_ENUM,
   PKL_AST_ENUMERATOR,
@@ -698,7 +698,7 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
                                       pkl_ast_node sct,
                                       pkl_ast_node identifier);
 
-/* PKL_AST_STRUCT_FIELD_TYPE nodes represent the field part of a
+/* PKL_AST_STRUCT_TYPE_FIELD nodes represent the field part of a
    struct type.
 
    NAME is a PKL_AST_IDENTIFIER node, or NULL if the struct type
@@ -713,12 +713,12 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
    offset value.  If the struct type element doesn't have a label,
    this is NULL.  */
 
-#define PKL_AST_STRUCT_FIELD_TYPE_NAME(AST) ((AST)->sct_type_elem.name)
-#define PKL_AST_STRUCT_FIELD_TYPE_TYPE(AST) ((AST)->sct_type_elem.type)
-#define PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
-#define PKL_AST_STRUCT_FIELD_TYPE_LABEL(AST) ((AST)->sct_type_elem.label)
+#define PKL_AST_STRUCT_TYPE_FIELD_NAME(AST) ((AST)->sct_type_elem.name)
+#define PKL_AST_STRUCT_TYPE_FIELD_TYPE(AST) ((AST)->sct_type_elem.type)
+#define PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
+#define PKL_AST_STRUCT_TYPE_FIELD_LABEL(AST) ((AST)->sct_type_elem.label)
 
-struct pkl_ast_struct_field_type
+struct pkl_ast_struct_type_field
 {
   struct pkl_ast_common common;
 
@@ -728,7 +728,7 @@ struct pkl_ast_struct_field_type
   union pkl_ast_node *label;
 };
 
-pkl_ast_node pkl_ast_make_struct_field_type (pkl_ast ast,
+pkl_ast_node pkl_ast_make_struct_type_field (pkl_ast ast,
                                              pkl_ast_node name,
                                              pkl_ast_node type,
                                              pkl_ast_node constraint,
@@ -784,7 +784,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    used to hold closures, or PVM_NULL.
 
    In struct types, NELEM is the number of elements in the struct
-   type.  ELEMS is a chain of PKL_AST_STRUCT_FIELD_TYPE nodes.  PINNED
+   type.  ELEMS is a chain of PKL_AST_STRUCT_TYPE_FIELD nodes.  PINNED
    is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER and
    CONSTRUCTOR are used to hold closures, or PVM_NULL.
 
@@ -1520,7 +1520,7 @@ union pkl_ast_node
   struct pkl_ast_var var;
   /* Types.  */
   struct pkl_ast_type type;
-  struct pkl_ast_struct_field_type sct_type_elem;
+  struct pkl_ast_struct_type_field sct_type_elem;
   struct pkl_ast_func_type_arg fun_type_arg;
   struct pkl_ast_enum enumeration;
   struct pkl_ast_enumerator enumerator;

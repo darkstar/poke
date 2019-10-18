@@ -304,8 +304,8 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
 %type <integer> struct_type_pinned integral_type_sign struct_or_union
-%type <ast> struct_field_type_list struct_field_type struct_field_type_identifier
-%type <ast> struct_field_type_constraint struct_field_type_label
+%type <ast> struct_type_field_list struct_type_field struct_type_field_identifier
+%type <ast> struct_type_field_constraint struct_type_field_label
 %type <ast> declaration
 %type <ast> function_specifier function_arg_list function_arg function_arg_initial
 %type <ast> comp_stmt stmt_decl_list stmt print_stmt_arg_list
@@ -1070,7 +1070,7 @@ struct_type_specifier:
                      pkl-gen.pks:struct_mapper.  */
                   pkl_register_dummies (pkl_parser, 2);
                 }
-          struct_field_type_list '}'
+          struct_type_field_list '}'
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
@@ -1093,14 +1093,14 @@ struct_type_pinned:
 	| PINNED	{ $$ = 1; }
         ;
 
-struct_field_type_list:
-	  struct_field_type
-        | struct_field_type_list struct_field_type
+struct_type_field_list:
+	  struct_type_field
+        | struct_type_field_list struct_type_field
         	{ $$ = pkl_ast_chainon ($1, $2); }
         ;
 
-struct_field_type:
-	  type_specifier struct_field_type_identifier
+struct_type_field:
+	  type_specifier struct_type_field_identifier
           	{
                   if ($2 != NULL)
                     {
@@ -1130,9 +1130,9 @@ struct_field_type:
                         }
                     }
                 }
-          struct_field_type_constraint struct_field_type_label ';'
+          struct_type_field_constraint struct_type_field_label ';'
           	{
-                  $$ = pkl_ast_make_struct_field_type (pkl_parser->ast, $2, $1,
+                  $$ = pkl_ast_make_struct_type_field (pkl_parser->ast, $2, $1,
                                                        $4, $5);
                   PKL_AST_LOC ($$) = @$;
                   if ($2 != NULL)
@@ -1145,12 +1145,12 @@ struct_field_type:
                 }
         ;
 
-struct_field_type_identifier:
+struct_type_field_identifier:
 	  %empty	{ $$ = NULL; }
 	| identifier	{ $$ = $1; }
 	;
 
-struct_field_type_label:
+struct_type_field_label:
 	  %empty
 		{
                   $$ = NULL;
@@ -1162,7 +1162,7 @@ struct_field_type_label:
                 }
 	;
 
-struct_field_type_constraint:
+struct_type_field_constraint:
 	  %empty
 		{
                   $$ = NULL;

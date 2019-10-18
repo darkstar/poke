@@ -108,8 +108,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
       pkl_ast_node u;
       for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node tname = PKL_AST_STRUCT_FIELD_TYPE_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
+          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_FIELD_NAME (u);
+          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
 
           if (uname
               && tname
@@ -447,9 +447,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
   for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
     {
       pkl_ast_node constraint
-        = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (t);
+        = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
       pkl_ast_node elem_type
-        = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
+        = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
 
       if (last_unconditional_alternative)
         {

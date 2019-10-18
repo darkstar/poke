@@ -1130,7 +1130,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type)
       switch (PKL_AST_CODE (PKL_PASS_PARENT))
         {
         case PKL_AST_TYPE:
-        case PKL_AST_STRUCT_FIELD_TYPE:
+        case PKL_AST_STRUCT_TYPE_FIELD:
           /* Process these.  */
           break;
         default:
@@ -1889,7 +1889,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
           switch (PKL_AST_CODE (PKL_PASS_PARENT))
             {
             case PKL_AST_TYPE:
-            case PKL_AST_STRUCT_FIELD_TYPE:
+            case PKL_AST_STRUCT_TYPE_FIELD:
               /* Process these.  */
               break;
             default:
@@ -1954,7 +1954,7 @@ PKL_PHASE_END_HANDLER
 
 /*
  * TYPE_STRUCT
- * | STRUCT_FIELD_TYPE
+ * | STRUCT_TYPE_FIELD
  * | ...
  */
 
@@ -2076,7 +2076,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * | STRUCT_FIELD_TYPE
+ * | STRUCT_TYPE_FIELD
  * | ...
  * TYPE_STRUCT
  */
@@ -2101,12 +2101,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
 PKL_PHASE_END_HANDLER
 
 /*
- * STRUCT_FIELD_TYPE
- * | [STRUCT_FIELD_TYPE_NAME]
- * | STRUCT_FIELD_TYPE_TYPE
+ * STRUCT_TYPE_FIELD
+ * | [STRUCT_TYPE_FIELD_NAME]
+ * | STRUCT_TYPE_FIELD_TYPE
  */
 
-PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_field_type)
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_type_field)
 {
   assert (!PKL_GEN_PAYLOAD->in_mapper);
 
@@ -2124,11 +2124,11 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_field_type)
 
       /* If the struct type element doesn't include a name, generate a
          null value as expected by the mktysct instruction.  */
-      if (!PKL_AST_STRUCT_FIELD_TYPE_NAME (PKL_PASS_NODE))
+      if (!PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE))
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
       else
-        PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_NAME (PKL_PASS_NODE));
-      PKL_PASS_SUBPASS (PKL_AST_STRUCT_FIELD_TYPE_TYPE (PKL_PASS_NODE));
+        PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE));
+      PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (PKL_PASS_NODE));
     }
 
   PKL_PASS_BREAK;
@@ -2648,7 +2648,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT, pkl_gen_ps_struct),
    PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_FIELD, pkl_gen_pr_struct_field),
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_gen_ps_struct_ref),
-   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_FIELD_TYPE, pkl_gen_pr_struct_field_type),
+   PKL_PHASE_PR_HANDLER (PKL_AST_STRUCT_TYPE_FIELD, pkl_gen_pr_struct_type_field),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ADD, pkl_gen_ps_op_add),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_gen_ps_op_sub),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_gen_ps_op_mul),

@@ -445,24 +445,24 @@ pkl_ast_make_struct_type (pkl_ast ast,
 }
 
 pkl_ast_node
-pkl_ast_make_struct_field_type (pkl_ast ast,
+pkl_ast_make_struct_type_field (pkl_ast ast,
                                 pkl_ast_node name,
                                 pkl_ast_node type,
                                 pkl_ast_node constraint,
                                 pkl_ast_node label)
 {
   pkl_ast_node struct_type_elem
-    = pkl_ast_make_node (ast, PKL_AST_STRUCT_FIELD_TYPE);
+    = pkl_ast_make_node (ast, PKL_AST_STRUCT_TYPE_FIELD);
 
-  PKL_AST_STRUCT_FIELD_TYPE_NAME (struct_type_elem)
+  PKL_AST_STRUCT_TYPE_FIELD_NAME (struct_type_elem)
     = ASTREF (name);
-  PKL_AST_STRUCT_FIELD_TYPE_TYPE (struct_type_elem)
+  PKL_AST_STRUCT_TYPE_FIELD_TYPE (struct_type_elem)
     = ASTREF (type);
   if (constraint)
-    PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (struct_type_elem)
+    PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (struct_type_elem)
       = ASTREF (constraint);
   if (label)
-    PKL_AST_STRUCT_FIELD_TYPE_LABEL (struct_type_elem)
+    PKL_AST_STRUCT_TYPE_FIELD_LABEL (struct_type_elem)
       = ASTREF (label);
 
   return struct_type_elem;
@@ -541,20 +541,20 @@ pkl_ast_dup_type (pkl_ast_node type)
       for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
         {
           pkl_ast_node struct_type_elem_name
-            = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
+            = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
           pkl_ast_node struct_type_elem_type
-            = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
+            = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
           pkl_ast_node struct_type_elem_constraint
-            = PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (t);
+            = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
           pkl_ast_node struct_type_elem_label
-            = PKL_AST_STRUCT_FIELD_TYPE_LABEL (t);
+            = PKL_AST_STRUCT_TYPE_FIELD_LABEL (t);
           pkl_ast_node new_struct_type_elem_name
             = (struct_type_elem_name
                ? pkl_ast_make_identifier (PKL_AST_AST (new),
                                           PKL_AST_IDENTIFIER_POINTER (struct_type_elem_name))
                : NULL);
           pkl_ast_node struct_type_elem
-            = pkl_ast_make_struct_field_type (PKL_AST_AST (new),
+            = pkl_ast_make_struct_type_field (PKL_AST_AST (new),
                                              new_struct_type_elem_name,
                                              pkl_ast_dup_type (struct_type_elem_type),
                                              struct_type_elem_constraint,
@@ -796,7 +796,7 @@ pkl_ast_sizeof_type (pkl_ast ast, pkl_ast_node type)
 
         for (t = PKL_AST_TYPE_S_ELEMS (type); t; t = PKL_AST_CHAIN (t))
           {
-            pkl_ast_node elem_type = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
+            pkl_ast_node elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
 
             res = pkl_ast_make_binary_exp (ast, PKL_AST_OP_ADD,
                                            res,
@@ -950,9 +950,9 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
              t = PKL_AST_CHAIN (t))
           {
             pkl_ast_node ename
-              = PKL_AST_STRUCT_FIELD_TYPE_NAME (t);
+              = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
             pkl_ast_node etype
-              = PKL_AST_STRUCT_FIELD_TYPE_TYPE (t);
+              = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
 
             pkl_print_type (out, etype, use_given_name);
             if (ename)
@@ -1670,12 +1670,12 @@ pkl_ast_node_free (pkl_ast_node ast)
 
       break;
 
-    case PKL_AST_STRUCT_FIELD_TYPE:
+    case PKL_AST_STRUCT_TYPE_FIELD:
 
-      pkl_ast_node_free (PKL_AST_STRUCT_FIELD_TYPE_NAME (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_FIELD_TYPE_TYPE (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_FIELD_TYPE_CONSTRAINT (ast));
-      pkl_ast_node_free (PKL_AST_STRUCT_FIELD_TYPE_LABEL (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_FIELD_NAME (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_FIELD_TYPE (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (ast));
+      pkl_ast_node_free (PKL_AST_STRUCT_TYPE_FIELD_LABEL (ast));
       break;
 
     case PKL_AST_FUNC_TYPE_ARG:
@@ -2410,14 +2410,14 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
         }
       break;
 
-    case PKL_AST_STRUCT_FIELD_TYPE:
-      IPRINTF ("STRUCT_FIELD_TYPE::\n");
+    case PKL_AST_STRUCT_TYPE_FIELD:
+      IPRINTF ("STRUCT_TYPE_FIELD::\n");
 
       PRINT_COMMON_FIELDS;
-      PRINT_AST_SUBAST (name, STRUCT_FIELD_TYPE_NAME);
-      PRINT_AST_SUBAST (type, STRUCT_FIELD_TYPE_TYPE);
-      PRINT_AST_SUBAST (exp, STRUCT_FIELD_TYPE_CONSTRAINT);
-      PRINT_AST_SUBAST (exp, STRUCT_FIELD_TYPE_LABEL);
+      PRINT_AST_SUBAST (name, STRUCT_TYPE_FIELD_NAME);
+      PRINT_AST_SUBAST (type, STRUCT_TYPE_FIELD_TYPE);
+      PRINT_AST_SUBAST (exp, STRUCT_TYPE_FIELD_CONSTRAINT);
+      PRINT_AST_SUBAST (exp, STRUCT_TYPE_FIELD_LABEL);
       break;
 
     case PKL_AST_FUNC_TYPE_ARG:

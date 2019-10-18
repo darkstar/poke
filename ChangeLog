@@ -1,3 +1,35 @@
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl-anal.c (pkl_anal1_ps_type_struct): Rename
+	struct_field_type to struct_type_field.
+	(pkl_anal2_ps_type_struct): Likewise.
+	* src/pkl-typify.c (pkl_typify1_ps_struct): Likewise.
+	(pkl_typify1_ps_struct_ref): Likewise.
+	(pkl_typify1_ps_scons): Likewise.
+	(pkl_typify1_ps_attr): Likewise.
+	* src/pkl-tab.y: Likewise.
+	* src/pkl-promo.c (pkl_promo_ps_struct_type_field): Likewise.
+	* src/pkl-pass.c (pkl_do_pass_1): Likewise.
+	* src/pkl-gen.pks (handle_struct_field_name): Likewise.
+	(check_struct_field_constraint): Likewise.
+	(struct_mapper): Likewise.
+	(struct_field_mapper): Likewise.
+	* src/pkl-gen.c (pkl_gen_pr_type): Likewise.
+	(pkl_gen_pr_type_array): Likewise.
+	(pkl_gen_pr_struct_type_field): Likewise.
+	* src/pkl-ast.h (enum pkl_ast_code): Likewise.
+	(PKL_AST_STRUCT_TYPE_FIELD_NAME): Likewise.
+	(PKL_AST_STRUCT_TYPE_FIELD_TYPE): Likewise.
+	(PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT): Likewise.
+	(PKL_AST_STRUCT_TYPE_FIELD_LABEL): Likewise.
+	(struct pkl_ast_struct_type_field): Likewise.
+	* src/pkl-ast.c (pkl_ast_make_struct_field_type): Likewise.
+	(pkl_ast_dup_type): Likewise.
+	(pkl_ast_sizeof_type): Likewise.
+	(pkl_print_type): Likewise.
+	(pkl_ast_node_free): Likewise.
+	(pkl_ast_print_1): Likewise.
+
 2019-10-17  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-asm.c (pkl_asm_pushlevel): Use pvm_alloc instead of
