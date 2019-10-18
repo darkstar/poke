@@ -1,5 +1,9 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/poke.map/maps-unions-5.pk: New file.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.pks (struct_mapper): Generate code for declarations.
 	(struct_constructor): Likewise.
 	* testsuite/poke.pkl/struct-types-2.pk: New file.
