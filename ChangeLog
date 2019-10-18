@@ -1,5 +1,17 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.pks (struct_mapper): Generate code for declarations.
+	(struct_constructor): Likewise.
+	* testsuite/poke.pkl/struct-types-2.pk: New file.
+	* testsuite/poke.map/maps-structs-11.pk: Likewise.
+	* testsuite/poke.pkl/struct-types-3.pk: Likewise.
+	* testsuite/poke.pkl/struct-types-4.pk: Likewise.
+	* testsuite/poke.map/maps-structs-12.pk: Likewise.
+	* testsuite/poke.pkl/struct-types-5.pk: Likewise.
+	* testsuite/poke.map/maps-structs-13.pk: Likewise.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h (struct pkl_ast_type): Add nelem and ndecl fields
 	to struct types.
 	* src/pkl-trans.c (pkl_trans1_ps_type_struct): Count number of

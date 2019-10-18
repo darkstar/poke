@@ -1,0 +1,10 @@
+/* { dg-do compile } */
+
+deftype Packet =
+  struct
+  {
+    int b;
+    defvar a = 10;
+    defun f = (int i) int: { return i + 2; }
+    int c : c == f (a);
+  };

@@ -706,7 +706,14 @@
  .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
  .c   if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
+ .c   {
+ .c     /* This is a declaration.  Generate it.  */
+ .c     PKL_GEN_PAYLOAD->in_mapper = 0;
+ .c     PKL_PASS_SUBPASS (field);
+ .c     PKL_GEN_PAYLOAD->in_mapper = 1;
+ .c 
  .c     continue;
+ .c   }
         .label .alternative_failed
    .c if (PKL_AST_TYPE_S_UNION (type_struct))
    .c {
@@ -794,8 +801,14 @@
  .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
  .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
- .c       continue;
-
+ .c   {
+ .c     /* This is a declaration.  Generate it.  */
+ .c     PKL_GEN_PAYLOAD->in_mapper = 0;
+ .c     PKL_PASS_SUBPASS (field);
+ .c     PKL_GEN_PAYLOAD->in_mapper = 1;
+ .c 
+ .c     continue;
+ .c   }
         pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
 ;        .e struct_field_mapper      ; ...[EOFF ENAME EVAL] NEOFF
         ;; If the struct is pinned, replace NEOFF with OFF
