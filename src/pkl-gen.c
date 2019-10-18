@@ -2089,7 +2089,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_struct)
   pkl_ast_node type_name = PKL_AST_TYPE_NAME (struct_type);
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
-                pvm_make_ulong (PKL_AST_TYPE_S_NELEM (struct_type), 64));
+                pvm_make_ulong (PKL_AST_TYPE_S_NFIELD (struct_type), 64));
   if (type_name)
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                   pvm_make_string (PKL_AST_IDENTIFIER_POINTER (type_name)));

@@ -1054,6 +1054,8 @@ struct_type_specifier:
           	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
+                                                   0 /* nfield */,
+                                                   0 /* ndecl */,
                                                    NULL /* elems */,
                                                    $2, $3);
                     PKL_AST_LOC ($$) = @$;
@@ -1074,6 +1076,8 @@ struct_type_specifier:
         	{
                     $$ = pkl_ast_make_struct_type (pkl_parser->ast,
                                                    0 /* nelem */,
+                                                   0 /* nfield */,
+                                                   0 /* ndecl */,
                                                    $6,
                                                    $2, $3);
                     PKL_AST_LOC ($$) = @$;

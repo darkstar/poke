@@ -784,7 +784,8 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    used to hold closures, or PVM_NULL.
 
    In struct types, NELEM is the number of elements in the struct
-   type.  ELEMS is a chain of elements, which can be
+   type, NFIELD is the number of fields, and NDECL is the number of
+   declarations.  ELEMS is a chain of elements, which can be
    PKL_AST_STRUCT_TYPE_FIELD or PKL_AST_DECL nodes, potentially mixed.
    PINNED is 1 if the struct is pinned, 0 otherwise.  MAPPER, WRITER
    and CONSTRUCTOR are used to hold closures, or PVM_NULL.
@@ -817,6 +818,8 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_A_MAPPER(AST) ((AST)->type.val.array.mapper)
 #define PKL_AST_TYPE_A_WRITER(AST) ((AST)->type.val.array.writer)
 #define PKL_AST_TYPE_A_BOUNDER(AST) ((AST)->type.val.array.bounder)
+#define PKL_AST_TYPE_S_NFIELD(AST) ((AST)->type.val.sct.nfield)
+#define PKL_AST_TYPE_S_NDECL(AST) ((AST)->type.val.sct.ndecl)
 #define PKL_AST_TYPE_S_NELEM(AST) ((AST)->type.val.sct.nelem)
 #define PKL_AST_TYPE_S_ELEMS(AST) ((AST)->type.val.sct.elems)
 #define PKL_AST_TYPE_S_PINNED(AST) ((AST)->type.val.sct.pinned)
@@ -864,6 +867,8 @@ struct pkl_ast_type
     struct
     {
       size_t nelem;
+      size_t nfield;
+      size_t ndecl;
       union pkl_ast_node *elems;
       int pinned;
       int union_p;
@@ -895,8 +900,8 @@ pkl_ast_node pkl_ast_make_integral_type (pkl_ast ast, size_t size, int signed_p)
 pkl_ast_node pkl_ast_make_void_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_string_type (pkl_ast ast);
 pkl_ast_node pkl_ast_make_array_type (pkl_ast ast, pkl_ast_node etype, pkl_ast_node bound);
-pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, pkl_ast_node elems,
-                                       int pinned, int union_p);
+pkl_ast_node pkl_ast_make_struct_type (pkl_ast ast, size_t nelem, size_t nfield, size_t ndecl,
+                                       pkl_ast_node elems, int pinned, int union_p);
 pkl_ast_node pkl_ast_make_offset_type (pkl_ast ast, pkl_ast_node base_type, pkl_ast_node unit);
 pkl_ast_node pkl_ast_make_function_type (pkl_ast ast, pkl_ast_node rtype,
                                          size_t narg, pkl_ast_node args);

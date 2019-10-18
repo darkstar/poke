@@ -845,6 +845,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
   /* Build the type of the struct.  */
   type = pkl_ast_make_struct_type (PKL_PASS_AST,
                                    PKL_AST_STRUCT_NELEM (node),
+                                   PKL_AST_STRUCT_NELEM (node), /* nfield */
+                                   0, /* ndecl */
                                    struct_field_types,
                                    0 /* pinned */,
                                    0 /* union */);

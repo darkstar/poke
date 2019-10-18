@@ -1,5 +1,21 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (struct pkl_ast_type): Add nelem and ndecl fields
+	to struct types.
+	* src/pkl-trans.c (pkl_trans1_ps_type_struct): Count number of
+	fields and declarations.
+	* src/pkl-ast.c (pkl_ast_print_1): Print nfield and ndecl of
+	struct types.
+	(pkl_ast_dup_type): Copy ndecl and nfield when
+	duplicating struct types.
+	(pkl_ast_make_struct_type): Get nfield and ndecl arguments.
+	* src/pkl-typify.c (pkl_typify1_ps_struct): Pass extra arguments
+	to pkl_ast_make_struct_type.
+	* src/pkl-gen.c (pkl_gen_ps_type_struct): Use
+	PKL_AST_TYPE_S_NFIELD.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-tab.y (struct_field_type): Fix location of diagnostic
 	for duplicated struct elements.
 	* src/pkl-anal.c (pkl_anal1_ps_struct): Improve diagnostic.
