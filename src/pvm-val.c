@@ -110,19 +110,28 @@ pvm_make_array (pvm_val nelem, pvm_val type)
 }
 
 pvm_val
-pvm_make_struct (pvm_val nfields, pvm_val type)
+pvm_make_struct (pvm_val nfields, pvm_val nmethods, pvm_val type)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_SCT);
   pvm_struct sct = pvm_alloc (sizeof (struct pvm_struct));
-  size_t i, nbytes = sizeof (struct pvm_struct_field) * PVM_VAL_ULONG (nfields);
+  size_t i;
+  size_t nfieldbytes
+    = sizeof (struct pvm_struct_field) * PVM_VAL_ULONG (nfields);
+  size_t nmethodbytes
+    = sizeof (struct pvm_struct_method) * PVM_VAL_ULONG (nmethods);
 
   sct->offset = PVM_NULL;
   sct->mapper = PVM_NULL;
   sct->writer = PVM_NULL;
   sct->type = type;
+
   sct->nfields = nfields;
-  sct->fields = pvm_alloc (nbytes);
-  memset (sct->fields, 0, nbytes);
+  sct->fields = pvm_alloc (nfieldbytes);
+  memset (sct->fields, 0, nfieldbytes);
+
+  sct->nmethods = nmethods;
+  sct->methods = pvm_alloc (nmethodbytes);
+  memset (sct->methods, 0, nmethodbytes);
 
   for (i = 0; i < PVM_VAL_ULONG (sct->nfields); ++i)
     {
@@ -130,6 +139,12 @@ pvm_make_struct (pvm_val nfields, pvm_val type)
       sct->fields[i].name = PVM_NULL;
       sct->fields[i].value = PVM_NULL;
       sct->fields[i].modified = pvm_make_int (0, 32);
+    }
+
+  for (i = 0; i < PVM_VAL_ULONG (sct->nmethods); ++i)
+    {
+      sct->methods[i].name = PVM_NULL;
+      sct->methods[i].value = PVM_NULL;
     }
 
   PVM_VAL_BOX_SCT (box) = sct;

@@ -271,10 +271,15 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
    TYPE is the type of the struct.  This includes the types of the
    struct fields.
 
-   NELEM is the number of elements conforming the structure.
+   NFIELDS is the number of fields conforming the structure.
 
-   ELEMS is a list of elements.  The order of the elements is
-   relevant.  */
+   FIELDS is a list of fields.  The order of the fields is
+   relevant.
+
+   NMETHODS is the number of methods defined in the structure.
+
+   METHODS is a list of methods.  The order of the methods is
+   irrelevant.  */
 
 #define PVM_VAL_SCT(V) (PVM_VAL_BOX_SCT (PVM_VAL_BOX ((V))))
 #define PVM_VAL_SCT_OFFSET(V) (PVM_VAL_SCT((V))->offset)
@@ -283,6 +288,8 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 #define PVM_VAL_SCT_TYPE(V) (PVM_VAL_SCT((V))->type)
 #define PVM_VAL_SCT_NFIELDS(V) (PVM_VAL_SCT((V))->nfields)
 #define PVM_VAL_SCT_FIELD(V,I) (PVM_VAL_SCT((V))->fields[(I)])
+#define PVM_VAL_SCT_NMETHODS(V) (PVM_VAL_SCT((V))->nmethods)
+#define PVM_VAL_SCT_METHOD(V) (PVM_VAL_SCT((V))->methods[(I)])
 
 struct pvm_struct
 {
@@ -292,6 +299,8 @@ struct pvm_struct
   pvm_val type;
   pvm_val nfields;
   struct pvm_struct_field *fields;
+  pvm_val nmethods;
+  struct pvm_struct_method *methods;
 };
 
 /* Struct fields hold the data of the fields, and/or information on
@@ -324,9 +333,26 @@ struct pvm_struct_field
   pvm_val modified;
 };
 
+/* Struct methods are closures associated with the struct, which can
+   be invoked as functions.
+
+   NAME is a string containing the name of the method.  This name
+   should be unique in the struct.
+
+   VALUE is a PVM closure.  */
+
+#define PVM_VAL_SCT_METHOD_NAME(V,I) (PVM_VAL_SCT_METHOD((V),(I)).name)
+#define PVM_VAL_SCT_METHOD_VALUE(V,I) (PVM_VAL_SCT_METHOD((V),(I)).value)
+
+struct pvm_struct_method
+{
+  pvm_val name;
+  pvm_val value;
+};
+
 typedef struct pvm_struct *pvm_struct;
 
-pvm_val pvm_make_struct (pvm_val nfields, pvm_val type);
+pvm_val pvm_make_struct (pvm_val nfields, pvm_val nmethods, pvm_val type);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
 

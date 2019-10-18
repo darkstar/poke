@@ -1,3 +1,15 @@
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pvm-val.h (PVM_VAL_SCT_METHOD): Define.
+	(PVM_VAL_SCT_NMETHODS): Likewise.
+	(pvm_make_struct): Add argument nmethods.
+	(struct pvm_struct_method): New struct.
+	(PVM_VAL_SCT_METHOD_NAME): Define.
+	(PVM_VAL_SCT_METHOD_VALUE): Likewise.
+	* src/pvm-val.c (pvm_make_struct): Likewise.
+	* src/pvm.jitter (mksct): pass the number of methods to
+	pvm_make_struct.
+
 2019-10-22  Darkstar <michael@drueing.de>
 
 	* src/poke.c: Several typos in comments fixed.

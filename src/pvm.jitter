@@ -1938,6 +1938,7 @@ instruction mksct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
   code
     size_t e;
     pvm_val nelem, sct, type;
+    pvm_val nmethods = pvm_make_ulong (0, 64); /* XXX */
 
     type = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
@@ -1945,7 +1946,7 @@ instruction mksct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
     nelem = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem, type);
+    sct = pvm_make_struct (nelem, nmethods, type);
 
     for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
     {
