@@ -129,7 +129,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pvm_val constructor_closure;
 
             pkl_ast_node type_struct = initial;
-            pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+            pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
             pkl_ast_node field;
 
             /* Compile the struct closures and complete them using the
@@ -1979,7 +1979,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
     {
       /* Stack: OFF */
       pkl_ast_node type_struct = PKL_PASS_NODE;
-      pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
       pkl_ast_node field;
 
       pvm_val type_struct_mapper = PKL_AST_TYPE_S_MAPPER (type_struct);
@@ -2045,7 +2045,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_struct)
     {
       /* Stack: SCT */
       pkl_ast_node type_struct = PKL_PASS_NODE;
-      pkl_ast_node type_struct_fields = PKL_AST_TYPE_S_ELEMS (type_struct);
+      pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
       pkl_ast_node field;
 
       pvm_val type_struct_constructor = PKL_AST_TYPE_S_CONSTRUCTOR (type_struct);

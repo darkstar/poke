@@ -1,5 +1,13 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.c (pkl_gen_pr_decl): Rename type_struct_fields to
+	type_struct_elems.
+	(pkl_gen_pr_type_struct): Likewise.
+	* src/pkl-gen.pks: Adapt to the fact struct type elements can be
+	either struct type fields or declarations.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.c (pkl_ast_dup_type): Adapt to the fact struct type
 	elements can be either struct type fields or declarations.
 	(pkl_ast_sizeof_type): Likewise.

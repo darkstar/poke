@@ -680,8 +680,8 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;;
-;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
-;;; of the struct type being processed.
+;;; `type_struct_elems' is a pkl_ast_node with the chained list of
+;;; elements of the struct type being processed.
 ;;;
 ;;; `field' is a scratch pkl_ast_node.
 
@@ -703,8 +703,10 @@
         pushvar $off            ; OFF
         dup                     ; OFF OFF
         ;; Iterate over the fields of the struct type.
- .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
+ .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
+ .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
+ .c       continue;
         .label .alternative_failed
    .c if (PKL_AST_TYPE_S_UNION (type_struct))
    .c {
@@ -770,8 +772,8 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;;
-;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
-;;; of the struct type being processed.
+;;; `type_struct_elems' is a pkl_ast_node with the chained list of
+;;; elements of the struct type being processed.
 ;;;
 ;;; `field' is a scratch pkl_ast_node.
 
@@ -789,8 +791,11 @@
         dup                     ; OFF OFF
         regvar $off             ; OFF
         ;; Iterate over the fields of the struct type.
- .c for (field = type_struct_fields; field; field = PKL_AST_CHAIN (field))
+ .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
+ .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
+ .c       continue;
+
         pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF
 ;        .e struct_field_mapper      ; ...[EOFF ENAME EVAL] NEOFF
         ;; If the struct is pinned, replace NEOFF with OFF
@@ -860,8 +865,8 @@
 ;;; `type_struct' is a pkl_ast_node with the struct type being
 ;;;  processed.
 ;;;
-;;; `type_struct_fields' is a pkl_ast_node with the chained list fields
-;;; of the struct type being processed.
+;;; `type_struct_elems' is a pkl_ast_node with the chained list of
+;;; elements of the struct type being processed.
 ;;;
 ;;; `field' is a scratch pkl_ast_node.
 
@@ -871,14 +876,17 @@
         regvar $sct
         drop                    ; OFF is not used.
 .c { uint64_t i;
- .c for (i = 0, field = type_struct_fields; field; field = PKL_AST_CHAIN (field), ++i)
+ .c for (i = 0, field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
+ .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
+ .c       continue;
         ;; Poke this struct field, but only if it has been modified
         ;; since the last mapping.
         pushvar $sct            ; SCT
         .c pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (i, 64));
                                 ; SCT I
         .e struct_field_writer
+ .c   i = i + 1;
  .c }
 .c }
         popf 1
