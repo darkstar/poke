@@ -1,5 +1,14 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-tab.y (struct_field_type): Fix location of diagnostic
+	for duplicated struct elements.
+	* src/pkl-anal.c (pkl_anal1_ps_struct): Improve diagnostic.
+	* testsuite/poke.pkl/struct-types-diag-5.pk: New test.
+	* testsuite/poke.pkl/struct-types-diag-6.pk: Likewise.
+	* testsuite/poke.pkl/struct-types-diag-7.pk: Likewise.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-anal.c (pkl_nala1_ps_type_struct): Fix typo in variable
 	names.
 

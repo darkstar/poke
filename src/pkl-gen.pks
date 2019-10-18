@@ -705,8 +705,8 @@
         ;; Iterate over the fields of the struct type.
  .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
- .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
- .c       continue;
+ .c   if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
+ .c     continue;
         .label .alternative_failed
    .c if (PKL_AST_TYPE_S_UNION (type_struct))
    .c {

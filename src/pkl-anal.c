@@ -82,7 +82,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
                      PKL_AST_IDENTIFIER_POINTER (uname)))
             {
               pkl_error (PKL_PASS_AST, PKL_AST_LOC (uname),
-                         "duplicated name element in struct");
+                         "duplicated struct element '%s'",
+                         PKL_AST_IDENTIFIER_POINTER (uname));
               PKL_ANAL_PAYLOAD->errors++;
               PKL_PASS_ERROR;
               /* Do not report more duplicates in this struct.  */

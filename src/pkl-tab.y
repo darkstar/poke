@@ -1126,8 +1126,8 @@ struct_type_field:
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              decl))
                         {
-                          pkl_error (pkl_parser->ast, PKL_AST_LOC ($2),
-                                     "duplicated struct field '%s'",
+                          pkl_error (pkl_parser->ast, @2,
+                                     "duplicated struct element '%s'",
                                      PKL_AST_IDENTIFIER_POINTER ($2));
                           YYERROR;
                         }
