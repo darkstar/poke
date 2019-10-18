@@ -94,7 +94,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
 PKL_PHASE_END_HANDLER
 
 /* In struct TYPE nodes, check that no duplicated named element are
-   declared in the type.  */
+   declared in the type.  This covers both declared entities and
+   struct fields.  */
 
 PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
 {
@@ -108,8 +109,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
       pkl_ast_node u;
       for (u = struct_type_elems; u != t; u = PKL_AST_CHAIN (u))
         {
-          pkl_ast_node tname = PKL_AST_STRUCT_TYPE_FIELD_NAME (u);
-          pkl_ast_node uname = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
+          pkl_ast_node tname
+            = (PKL_AST_CODE (t) == PKL_AST_STRUCT_TYPE_FIELD
+               ? PKL_AST_STRUCT_TYPE_FIELD_NAME (u)
+               : PKL_AST_DECL_NAME (u));
+          pkl_ast_node uname
+            = (PKL_AST_CODE (t) == PKL_AST_STRUCT_TYPE_FIELD
+               ? PKL_AST_STRUCT_TYPE_FIELD_NAME (t)
+               : PKL_AST_DECL_NAME (u));
 
           if (uname
               && tname
@@ -446,10 +453,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
 
   for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node constraint
-        = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
-      pkl_ast_node elem_type
-        = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+      pkl_ast_node constraint;
+      pkl_ast_node elem_type;
+
+      /* Process only struct type fields.  */
+      if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
+        continue;
+
+      constraint = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
+      elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
 
       if (last_unconditional_alternative)
         {

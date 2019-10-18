@@ -1,5 +1,12 @@
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-anal.c (pkl_anal1_ps_type_struct): Adapt to the fact
+	struct type elements can be either struct type fields or
+	declarations.
+	(pkl_anal2_ps_type_struct): Likewise.
+
+2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h: Document that struct elements can be fields or
 	declarations.
 	* src/pkl-tab.y: Rename the struct_type_field_list rule to
