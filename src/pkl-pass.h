@@ -26,6 +26,7 @@
 #include <inttypes.h>
 #include <stdarg.h>
 #include "pkl-ast.h"
+#include "pkl.h"
 
 /* A `pass' is a complete run over a given AST.  A `phase' is an
    analysis or a transformation performed over a subset of the nodes
@@ -85,7 +86,8 @@
 
 struct pkl_phase; /* Forward declaration.  */
 
-typedef pkl_ast_node (*pkl_phase_handler_fn) (jmp_buf toplevel,
+typedef pkl_ast_node (*pkl_phase_handler_fn) (pkl_compiler compiler,
+                                              jmp_buf toplevel,
                                               pkl_ast ast,
                                               pkl_ast_node node,
                                               void *payload,
@@ -144,6 +146,9 @@ typedef struct pkl_phase *pkl_phase;
 /* The following macros are available to be used in the body of a node
    handler:
 
+   PKL_PASS_COMPILER expands to an l-value holding the compiler
+   executing the pass.
+
    PKL_PASS_PAYLOAD expands to an l-value holding the data pointer
    passed to `pkl_do_pass'.
 
@@ -189,6 +194,7 @@ typedef struct pkl_phase *pkl_phase;
    delete any node you create unless they are linked to the AST.
    Otherwise you will leak memory.  */
 
+#define PKL_PASS_COMPILER _compiler
 #define PKL_PASS_PAYLOAD _payload
 #define PKL_PASS_AST _ast
 #define PKL_PASS_NODE _node
@@ -199,7 +205,8 @@ typedef struct pkl_phase *pkl_phase;
 #define PKL_PASS_SUBPASS(NODE)                      \
   do                                                \
     {                                               \
-      if (pkl_do_subpass (PKL_PASS_AST,             \
+      if (pkl_do_subpass (PKL_PASS_COMPILER,        \
+                          PKL_PASS_AST,             \
                           (NODE),                   \
                           _phases,                  \
                           _payloads,                \
@@ -229,7 +236,8 @@ typedef struct pkl_phase *pkl_phase;
    the body finishes the execution of the handler.  */
 
 #define PKL_PHASE_BEGIN_HANDLER(name)                                   \
-  static pkl_ast_node name (jmp_buf _toplevel, pkl_ast _ast,            \
+  static pkl_ast_node name (pkl_compiler _compiler, jmp_buf _toplevel,  \
+                            pkl_ast _ast,                               \
                             pkl_ast_node _node, void *_payload,         \
                             int *_restart, size_t _child_pos,           \
                             pkl_ast_node _parent, int *_dobreak,        \
@@ -309,14 +317,14 @@ pkl_phase_parent_in (pkl_ast_node parent,
 
 #define PKL_PASS_F_TYPES 1
 
-int pkl_do_pass (pkl_ast ast,
+int pkl_do_pass (pkl_compiler compiler, pkl_ast ast,
                  struct pkl_phase *phases[], void *payloads[],
                  int flags);
 
 /* The following function is to be used by the PKL_PASS_SUBPASS macro
    defined above.  */
 
-int pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
+int pkl_do_subpass (pkl_compiler compiler, pkl_ast ast, pkl_ast_node node,
                     struct pkl_phase *phases[], void *payloads[],
                     int flags);
 

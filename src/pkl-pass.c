@@ -32,7 +32,8 @@
               int restart;                                              \
                                                                         \
               node                                                      \
-                = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (toplevel, \
+                = phases[i]->CLASS##_##ORDER##_handlers[(DISCR)] (compiler, \
+                                                                  toplevel, \
                                                                   ast,  \
                                                                   node, \
                                                                   payloads[i], \
@@ -50,7 +51,7 @@
               if (restart)                                              \
                 {                                                       \
                   /* Restart the subtree with the rest of the phases. */ \
-                  node = pkl_do_pass_1 (toplevel, ast, node,            \
+                  node = pkl_do_pass_1 (compiler, toplevel, ast, node,  \
                                         child_pos,                      \
                                         parent,                         \
                                         payloads + i + 1,               \
@@ -76,7 +77,8 @@
             {                                                           \
               int restart;                                              \
               node                                                      \
-                = phases[i]->what##_handler (toplevel,                  \
+                = phases[i]->what##_handler (compiler,                  \
+                                             toplevel,                  \
                                              ast,                       \
                                              node,                      \
                                              payloads[i],               \
@@ -93,7 +95,7 @@
               if (restart)                                              \
                 {                                                       \
                   /* Restart the subtree with the rest of the phases. */ \
-                  node = pkl_do_pass_1 (toplevel, ast, node,            \
+                  node = pkl_do_pass_1 (compiler, toplevel, ast, node,  \
                                         child_pos,                      \
                                         parent,                         \
                                         payloads + i + 1,               \
@@ -109,7 +111,8 @@
   while (0)
 
 /* Forward prototype.  */
-static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
+static pkl_ast_node pkl_do_pass_1 (pkl_compiler compiler,
+                                   jmp_buf toplevel,
                                    pkl_ast ast,
                                    pkl_ast_node node,
                                    size_t child_pos,
@@ -122,7 +125,8 @@ static pkl_ast_node pkl_do_pass_1 (jmp_buf toplevel,
 #define PKL_PASS_POST_ORDER 1
 
 static inline pkl_ast_node
-pkl_call_node_handlers (jmp_buf toplevel,
+pkl_call_node_handlers (pkl_compiler compiler,
+                        jmp_buf toplevel,
                         pkl_ast ast,
                         pkl_ast_node node,
                         void *payloads[],
@@ -208,7 +212,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
 #define PKL_PASS(CHILD)                                      \
   do                                                         \
     {                                                        \
-      (CHILD) = pkl_do_pass_1 (toplevel, ast,                \
+      (CHILD) = pkl_do_pass_1 (compiler, toplevel, ast,      \
                                (CHILD), 0, node,             \
                                payloads, phases,             \
                                flags);                       \
@@ -226,7 +230,7 @@ pkl_call_node_handlers (jmp_buf toplevel,
       /* Process first element in the chain.  */                \
       elem = (CHAIN);                                           \
       next = PKL_AST_CHAIN (elem);                              \
-      CHAIN = pkl_do_pass_1 (toplevel, ast, elem, cpos++, node,         \
+      CHAIN = pkl_do_pass_1 (compiler, toplevel, ast, elem, cpos++, node, \
                              payloads, phases, flags);                  \
       last = (CHAIN);                                           \
       elem = next;                                              \
@@ -235,7 +239,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
       while (elem)                                              \
         {                                                       \
           next = PKL_AST_CHAIN (elem);                          \
-          PKL_AST_CHAIN (last) = pkl_do_pass_1 (toplevel,       \
+          PKL_AST_CHAIN (last) = pkl_do_pass_1 (compiler,       \
+                                                toplevel,       \
                                                 ast,            \
                                                 elem,           \
                                                 cpos++,         \
@@ -249,7 +254,8 @@ pkl_call_node_handlers (jmp_buf toplevel,
     } while (0)
 
 static pkl_ast_node
-pkl_do_pass_1 (jmp_buf toplevel,
+pkl_do_pass_1 (pkl_compiler compiler,
+               jmp_buf toplevel,
                pkl_ast ast,
                pkl_ast_node node,
                size_t child_pos,
@@ -267,7 +273,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
     return node;
 
   /* Call the pre-order handlers from registered phases.  */
-  node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
+  node = pkl_call_node_handlers (compiler, toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_POST_ORDER, flags);
   if (dobreak)
@@ -279,7 +285,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
     {
       if (PKL_AST_TYPE (node))
         PKL_AST_TYPE (node)
-          = pkl_do_pass_1 (toplevel, ast,
+          = pkl_do_pass_1 (compiler, toplevel, ast,
                            PKL_AST_TYPE (node), 0, node,
                            payloads, phases, flags);
     }
@@ -515,7 +521,7 @@ pkl_do_pass_1 (jmp_buf toplevel,
     }
 
   /* Call the post-order handlers from registered phases.  */
-  node = pkl_call_node_handlers (toplevel, ast, node, payloads, phases,
+  node = pkl_call_node_handlers (compiler, toplevel, ast, node, payloads, phases,
                                  &handlers_used, child_pos, parent, &dobreak,
                                  PKL_PASS_PRE_ORDER, flags);
 
@@ -537,7 +543,8 @@ pkl_do_pass_1 (jmp_buf toplevel,
 }
 
 int
-pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
+pkl_do_subpass (pkl_compiler compiler,
+                pkl_ast ast, pkl_ast_node node,
                 struct pkl_phase *phases[], void *payloads[],
                 int flags)
 {
@@ -546,7 +553,8 @@ pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
   switch (setjmp (toplevel))
     {
     case 0:
-      ast->ast = pkl_do_pass_1 (toplevel, ast, node, 0, NULL /* parent */,
+      ast->ast = pkl_do_pass_1 (compiler, toplevel, ast, node, 0,
+                                NULL /* parent */,
                                 payloads, phases, flags);
       break;
     case 1:
@@ -562,9 +570,11 @@ pkl_do_subpass (pkl_ast ast, pkl_ast_node node,
 }
 
 int
-pkl_do_pass (pkl_ast ast,
+pkl_do_pass (pkl_compiler compiler,
+             pkl_ast ast,
              struct pkl_phase *phases[], void *payloads[],
              int flags)
 {
-  return pkl_do_subpass (ast, ast->ast, phases, payloads, flags);
+  return pkl_do_subpass (compiler, ast, ast->ast, phases,
+                         payloads, flags);
 }

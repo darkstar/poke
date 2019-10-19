@@ -1,5 +1,24 @@
 2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-pass.h (PKL_PASS_COMPILER): Define.
+	(PKL_PASS_SUBPASS): Pass compiler to pkl_do_subpass.
+	(PKL_PHASE_BEGIN_HANDLER): The node handler gets a compiler.
+	(pkl_do_pass): Get a compiler argument.
+	* src/pkl-pass.c (pkl_do_subpass): Handle new argument compiler.
+	(pkl_do_pass): Likewise.
+	(pkl_call_node_handlers): Likewise.
+	(pkl_do_pass_1):  Likewise.
+	(PKL_CALL_PHASES): Pass `compiler' to pkl_do_pass_1.
+	(PKL_CALL_PHASES_SINGLE): Likewise.
+	(PKL_PASS): Likewise.
+	(PKL_PASS_CHAIN): Likewise.
+	(pkl_do_pass_1): Likewise.
+	(pkl_do_subpass): Likewise.
+	* src/pkl.c (rest_of_compilation): Pass poke_compiler to
+	pkl_do_pass.
+
+2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl.c (struct pkl_compiler): New field error_on_warning.
 	(pkl_error_on_warning): New function.
 	(pkl_set_error_on_warning): Likewise.
