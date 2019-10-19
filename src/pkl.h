@@ -110,6 +110,14 @@ int pkl_bootstrapped_p (pkl_compiler compiler);
 int pkl_compiling_expression_p (pkl_compiler compiler);
 int pkl_compiling_statement_p (pkl_compiler compiler);
 
+/* Set/get the error-on-warning flag in/from the compiler.  If this
+   flag is set, then warnings are handled like errors.  By default,
+   the flag is not set.  */
+
+int pkl_error_on_warning (pkl_compiler compiler);
+void pkl_set_error_on_warning (pkl_compiler compiler,
+                               int error_on_warning);
+
 /* Diagnostic routines.  */
 
 void pkl_error (pkl_ast ast, pkl_ast_loc loc, const char *fmt, ...);

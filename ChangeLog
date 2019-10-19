@@ -1,5 +1,18 @@
 2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl.c (struct pkl_compiler): New field error_on_warning.
+	(pkl_error_on_warning): New function.
+	(pkl_set_error_on_warning): Likewise.
+	* src/pkl.h: Prototypes for pkl_error_on_warning and
+	pkl_set_error_on_warning.
+	* src/pk-cmd.c (pk_cmd_exec_1): Support `-' characters in command
+	names.
+	* src/pk-set.c (set_error_on_warning_cmd): New variable.
+	(pk_cmd_set_error_on_warning): New function.
+	(set_cmds): Add set_error_on_warning_cmd.
+
+2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* TODO (#B0 remove hard limit in PKL_AST_MAX_POINTERS): New todo
 	entry.
 	(#A1 fold "isa" expressions): Likewise.

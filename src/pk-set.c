@@ -183,6 +183,54 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   return 1;
 }
 
+static int
+pk_cmd_set_error_on_warning (int argc, struct pk_cmd_arg argv[],
+                             uint64_t uflags)
+{
+  /* set error-on-warning {yes,no} */
+
+  const char *arg;
+
+  /* Note that it is not possible to distinguish between no argument
+     and an empty unique string argument.  Therefore, argc should be
+     always 1 here, and we determine when no value was specified by
+     checking whether the passed string is empty or not.  */
+
+  if (argc != 1)
+    assert (0);
+
+  arg = PK_CMD_ARG_STR (argv[0]);
+
+  if (*arg == '\0')
+    {
+      if (pkl_error_on_warning (poke_compiler))
+        pk_puts ("yes\n");
+      else
+        pk_puts ("no\n");
+    }
+  else
+    {
+      int error_on_warning;
+
+      if (STREQ (arg, "yes"))
+        error_on_warning = 1;
+      else if (STREQ (arg, "no"))
+        error_on_warning = 0;
+      else
+        {
+          pk_term_class ("error");
+          pk_puts ("error: ");
+          pk_term_end_class ("error");
+          pk_puts ("error-on-warning should be one of `yes' or `no'.\n");
+          return 0;
+        }
+      
+      pkl_set_error_on_warning (poke_compiler, error_on_warning);
+    }
+
+  return 1;
+}
+
 extern struct pk_cmd null_cmd; /* pk-cmd.c  */
 
 struct pk_cmd set_obase_cmd =
@@ -194,11 +242,16 @@ struct pk_cmd set_endian_cmd =
 struct pk_cmd set_nenc_cmd =
   {"nenc", "s?", "", 0, NULL, pk_cmd_set_nenc, "set nenc (1c|2c)"};
 
+struct pk_cmd set_error_on_warning_cmd =
+  {"error-on-warning", "s?", "", 0, NULL, pk_cmd_set_error_on_warning,
+   "set error-on-warning (yes|no)"};
+
 struct pk_cmd *set_cmds[] =
   {
    &set_obase_cmd,
    &set_endian_cmd,
    &set_nenc_cmd,
+   &set_error_on_warning_cmd,
    &null_cmd
   };
 

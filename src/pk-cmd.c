@@ -273,7 +273,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
 
   /* Get the command name.  */
   i = 0;
-  while (isalnum (*p) || *p == '_' || *p == ':')
+  while (isalnum (*p) || *p == '_' || *p == '-' || *p == ':')
     cmd_name[i++] = *(p++);
   cmd_name[i] = '\0';
 

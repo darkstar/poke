@@ -55,6 +55,7 @@ struct pkl_compiler
   pkl_env env;  /* Compiler environment.  */
   int bootstrapped;
   int compiling;
+  int error_on_warning;
   /* XXX: put a link to the run-time top-level closure here.  */
 };
 
@@ -726,4 +727,17 @@ int
 pkl_compiling_statement_p (pkl_compiler compiler)
 {
   return compiler->compiling == PKL_COMPILING_STATEMENT;
+}
+
+int
+pkl_error_on_warning (pkl_compiler compiler)
+{
+  return compiler->error_on_warning;
+}
+
+void
+pkl_set_error_on_warning (pkl_compiler compiler,
+                          int error_on_warning)
+{
+  compiler->error_on_warning = error_on_warning;
 }
