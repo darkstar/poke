@@ -1,5 +1,15 @@
 2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (struct pkl_ast_print_stmt_arg): New fields
+	begin_sc and end_sc.
+	(PKL_AST_PRINT_STMT_ARG_BEGIN_SC): Define.
+	(PKL_AST_PRINT_STMT_ARG_END_SC): Likewise.
+	* src/pkl-ast.c (pkl_ast_node_free): Dispose the memory of
+	begin_sc and end_sc.
+	(pkl_ast_print_1): Print begin_sc and end_sc fields.
+
+2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pvm.jitter (wrapped-functions): Add pk_term_class and
 	pk_term_end_class.
 	(begsc): New instruction.

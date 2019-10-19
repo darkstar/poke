@@ -1900,6 +1900,8 @@ pkl_ast_node_free (pkl_ast_node ast)
 
     case PKL_AST_PRINT_STMT_ARG:
       free (PKL_AST_PRINT_STMT_ARG_SUFFIX (ast));
+      free (PKL_AST_PRINT_STMT_ARG_BEGIN_SC (ast));
+      free (PKL_AST_PRINT_STMT_ARG_END_SC (ast));
       pkl_ast_node_free (PKL_AST_PRINT_STMT_ARG_EXP (ast));
       break;
 
@@ -2643,6 +2645,10 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
     case PKL_AST_PRINT_STMT_ARG:
       IPRINTF ("PRINT_STMT_ARG::\n");
       PRINT_COMMON_FIELDS;
+      if (PKL_AST_PRINT_STMT_ARG_BEGIN_SC (ast))
+        PRINT_AST_IMM (begin_sc, PRINT_STMT_ARG_BEGIN_SC, "'%s'");
+      if (PKL_AST_PRINT_STMT_ARG_END_SC (ast))
+        PRINT_AST_IMM (end_sc, PRINT_STMT_ARG_END_SC, "'%s'");
       if (PKL_AST_PRINT_STMT_ARG_SUFFIX (ast))
         PRINT_AST_IMM (suffix, PRINT_STMT_ARG_SUFFIX, "'%s'");
       PRINT_AST_SUBAST (exp, PRINT_STMT_ARG_EXP);

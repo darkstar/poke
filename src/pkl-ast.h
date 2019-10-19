@@ -1406,7 +1406,8 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
    FMT, if not NULL, is a format string node.
 
    TYPES is a linked list of type nodes, corresponding to the %-
-   directives in FMT.
+   directives in FMT.  Note that %<class> and %</class> directives
+   have type PKL_TYPE_VOID.
 
    NARGS is the number of arguments in ARGS.
 
@@ -1440,17 +1441,29 @@ pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast,
 
    BASE is the numeration base to use when printing this argument.
 
+   BEGIN_SC, if not NULL, marks that this argument is a %<class>
+   directive, and is a NULL-terminated string with the name of the
+   styling class to begin.
+
+   END_SC, if not NULL, marks that this argument is a %</class>
+   directive, and is a NULL-terminated string with the name of the
+   styling class to end.
+
    SUFFIX, if not NULL, is a C string that should be printed after the
    value of EXP, respectively.  */
 
 #define PKL_AST_PRINT_STMT_ARG_EXP(AST) ((AST)->print_stmt_arg.exp)
 #define PKL_AST_PRINT_STMT_ARG_BASE(AST) ((AST)->print_stmt_arg.base)
 #define PKL_AST_PRINT_STMT_ARG_SUFFIX(AST) ((AST)->print_stmt_arg.suffix)
+#define PKL_AST_PRINT_STMT_ARG_BEGIN_SC(AST) ((AST)->print_stmt_arg.begin_sc)
+#define PKL_AST_PRINT_STMT_ARG_END_SC(AST) ((AST)->print_stmt_arg.end_sc)
 
 struct pkl_ast_print_stmt_arg
 {
   struct pkl_ast_common common;
 
+  char *begin_sc;
+  char *end_sc;
   int base;
   char *suffix;
   union pkl_ast_node *exp;
