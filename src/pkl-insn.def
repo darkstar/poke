@@ -346,6 +346,9 @@ PKL_DEF_INSN (PKL_INSN_PRINTLU, "nn", "printlu")
 
 PKL_DEF_INSN (PKL_INSN_PRINTS, "", "prints")
 
+PKL_DEF_INSN (PKL_INSN_PUSHSC, "", "pushsc")
+PKL_DEF_INSN (PKL_INSN_POPSC, "", "popsc")
+
 /* Miscellaneous instructions.  */
 
 PKL_DEF_INSN (PKL_INSN_NOP, "v", "nop")

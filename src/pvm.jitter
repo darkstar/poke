@@ -38,6 +38,8 @@ end
 ## Functions and globals to wrap.
 
 wrapped-functions
+  pk_term_class
+  pk_term_end_class
   pk_printf
   printf
   pvm_assert
@@ -690,6 +692,19 @@ instruction prints () # ( STR -- )
   end
 end
 
+instruction begsc () # ( STR -- )
+  code
+    pk_term_class (PVM_VAL_STR (JITTER_TOP_STACK ()));
+    JITTER_DROP_STACK ();
+  end
+end
+
+instruction endsc () # ( STR -- )
+  code
+    pk_term_end_class (PVM_VAL_STR (JITTER_TOP_STACK ()));
+    JITTER_DROP_STACK ();
+  end
+end
 
 
 

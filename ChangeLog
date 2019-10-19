@@ -1,5 +1,13 @@
 2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pvm.jitter (wrapped-functions): Add pk_term_class and
+	pk_term_end_class.
+	(begsc): New instruction.
+	(endsc): Likewise.
+	* src/pkl-insn.def: Define instructions begsc and endsc.
+
+2019-10-19  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-pass.h (PKL_PASS_COMPILER): Define.
 	(PKL_PASS_SUBPASS): Pass compiler to pkl_do_subpass.
 	(PKL_PHASE_BEGIN_HANDLER): The node handler gets a compiler.
