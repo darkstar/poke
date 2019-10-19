@@ -403,6 +403,13 @@ This task is about implementing constant folding of bit-shift
 operations on integer literals.  This should be implemented as a
 handler in ``src/pkl-fold.c``.
 
+#A1 fold "isa" expressions
+--------------------------
+
+This task is about implementing constant folding of ``isa``
+operations.  This should be implemented as a handler in
+``src/pkl-fold.c``.
+
 #A0 fix multi-line warning messages
 -----------------------------------
 
@@ -414,6 +421,21 @@ duplication.
 
 It would be nice to have some tests too.
 
+#B0 remove hard limit in PKL_AST_MAX_POINTERS
+---------------------------------------------
+
+The macro-assembler keeps an array of pointers to PVM values
+references in the program being assembled.  This is needed because the
+PVM programs (which are Jitter programs) are allocated using the
+system malloc, whereas the PVM values are allocated using the Boehm
+GC.  See HACKING for more information about this.
+
+The current implementation relies in a constant PKL_AST_MAX_POINTERS
+for the size of the array, which is therefore constant.  An assert in
+``pkl_asm_new`` makes sure the array is not overflown.
+
+The goal of this task is to remove the hard limit on the size of the
+array: it should be reallocated should more pointers be needed.
 
 
 This file is part of GNU poke.
