@@ -67,7 +67,7 @@ pkl_parser_free (struct pkl_parser *parser)
    syntax error and 2 if there was a memory exhaustion.  */
 
 int
-pkl_parse_file (pkl_env *env,
+pkl_parse_file (pkl_compiler compiler, pkl_env *env,
                 pkl_ast *ast, FILE *fd, const char *fname)
 {
   int ret;
@@ -76,6 +76,7 @@ pkl_parse_file (pkl_env *env,
   parser = pkl_parser_init ();
   parser->filename = xstrdup (fname);
   parser->start_token = START_PROGRAM;
+  parser->compiler = compiler;
 
   parser->env = *env;
   parser->ast->file = fd;
@@ -103,7 +104,7 @@ pkl_parse_file (pkl_env *env,
    memory exhaustion.  */
 
 int
-pkl_parse_buffer (pkl_env *env,
+pkl_parse_buffer (pkl_compiler compiler, pkl_env *env,
                   pkl_ast *ast, int what, char *buffer, char **end)
 {
   YY_BUFFER_STATE yybuffer;
@@ -112,6 +113,7 @@ pkl_parse_buffer (pkl_env *env,
 
   parser = pkl_parser_init ();
   parser->interactive = 1;
+  parser->compiler = compiler;
 
   if (what == PKL_PARSE_PROGRAM)
     parser->start_token = START_PROGRAM;

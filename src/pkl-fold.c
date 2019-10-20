@@ -560,7 +560,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_div)
   PKL_PASS_DONE;
 
  divbyzero:
-  pkl_error (PKL_PASS_AST, PKL_AST_LOC (op2), "division by zero");
+  PKL_ERROR (PKL_AST_LOC (op2), "division by zero");
   PKL_FOLD_PAYLOAD->errors++;
   PKL_PASS_ERROR;
 }
@@ -591,7 +591,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_mod)
   PKL_PASS_DONE;
 
  divbyzero:
-  pkl_error (PKL_PASS_AST, PKL_AST_LOC (op2), "division by zero");
+  PKL_ERROR (PKL_AST_LOC (op2), "division by zero");
   PKL_FOLD_PAYLOAD->errors++;
   PKL_PASS_ERROR;
 }

@@ -322,7 +322,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_offset)
 
       if (!new_unit)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+          PKL_ERROR (PKL_AST_LOC (unit),
                      "expected `b', `N', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
           PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -352,7 +352,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_type_offset)
 
       if (!new_unit)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+          PKL_ERROR (PKL_AST_LOC (unit),
                      "expected `b', `B', `Kb', `KB', `Mb', 'MB' or `Gb'");
           PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -467,7 +467,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_string)
               string_length++;
               break;
             default:
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (string),
+              PKL_ERROR (PKL_AST_LOC (string),
                          "invalid \\%c sequence in string", p[1]);
               PKL_TRANS_PAYLOAD->errors++;
               PKL_PASS_ERROR;
@@ -528,7 +528,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_op_attr)
 
   if (attr == PKL_AST_ATTR_NONE)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (identifier),
+      PKL_ERROR (PKL_AST_LOC (identifier),
                  "invalid attribute '%s", identifier_name);
       PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -715,7 +715,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
       assert (*p == '%');
       if (ntag >= nargs && p[1] != '>' && p[1] != '<')
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+          PKL_ERROR (PKL_AST_LOC (print_stmt),
                      "not enough arguments in printf");
           PKL_TRANS_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -936,7 +936,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 
   if (nargs > ntag)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
+      PKL_ERROR (PKL_AST_LOC (print_stmt),
                  "too many arguments in printf");
       PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -948,7 +948,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   PKL_PASS_DONE;
 
  invalid_tag:
-  pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_fmt),
+  PKL_ERROR (PKL_AST_LOC (print_fmt),
              "invalid %%- tag in format string: %s", msg);
   PKL_TRANS_PAYLOAD->errors++;
   PKL_PASS_ERROR;
@@ -1110,7 +1110,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_offset_type)
 
   if (PKL_AST_TYPE_COMPLETE (unit_type) != PKL_AST_TYPE_COMPLETE_YES)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit_type),
+      PKL_ERROR (PKL_AST_LOC (unit_type),
                  "offset types only work on complete types");
       PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1158,7 +1158,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans3_ps_op_sizeof)
   if (PKL_AST_TYPE_COMPLETE (op)
       != PKL_AST_TYPE_COMPLETE_YES)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
+      PKL_ERROR (PKL_AST_LOC (op),
                  "invalid operand to sizeof");
       PKL_TRANS_PAYLOAD->errors++;
       PKL_PASS_ERROR;

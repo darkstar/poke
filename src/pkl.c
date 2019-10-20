@@ -261,7 +261,7 @@ pkl_compile_buffer (pkl_compiler compiler,
   env = pkl_env_dup_toplevel (compiler->env);
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&env, &ast,
+  ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_PROGRAM,
                           buffer, end);
   if (ret == 1)
@@ -319,7 +319,7 @@ pkl_compile_statement (pkl_compiler compiler,
   env = pkl_env_dup_toplevel (compiler->env);
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&env, &ast,
+  ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_STATEMENT,
                           buffer, end);
   if (ret == 1)
@@ -365,7 +365,7 @@ pkl_compile_expression (pkl_compiler compiler,
   env = pkl_env_dup_toplevel (compiler->env);
 
   /* Parse the input program into an AST.  */
-  ret = pkl_parse_buffer (&env, &ast,
+  ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_EXPRESSION,
                           buffer, end);
   if (ret == 1)
@@ -417,7 +417,7 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
     }
 
   env = pkl_env_dup_toplevel (compiler->env);
-  ret = pkl_parse_file (&env,  &ast, fd, fname);
+  ret = pkl_parse_file (compiler, &env,  &ast, fd, fname);
   if (ret == 1)
     /* Parse error.  */
     goto error;
@@ -558,19 +558,17 @@ pkl_detailed_location (pkl_ast ast, pkl_ast_loc loc,
   pk_puts ("\n");
 }
 
-void
-pkl_error (pkl_ast ast,
-           pkl_ast_loc loc,
-           const char *fmt,
-           ...)
+static void
+pkl_error_internal (pkl_compiler compiler __attribute__((unused)),
+                    pkl_ast ast,
+                    pkl_ast_loc loc,
+                    const char *fmt,
+                    va_list valist)
 {
-  va_list valist;
   char *errmsg, *p;
 
   /* Write out the error message, line by line.  */
-  va_start (valist, fmt);
   vasprintf (&errmsg, fmt, valist);
-  va_end (valist);
 
   p = errmsg;
   while (*p != '\0')
@@ -612,15 +610,37 @@ pkl_error (pkl_ast ast,
     pkl_detailed_location (ast, loc, "error");
 }
 
+void
+pkl_error (pkl_compiler compiler,
+           pkl_ast ast,
+           pkl_ast_loc loc,
+           const char *fmt,
+           ...)
+{
+  va_list valist;
+  
+  va_start (valist, fmt);
+  pkl_error_internal (compiler, ast, loc, fmt, valist);
+  va_end (valist);
+}
 
 void
-pkl_warning (pkl_ast ast,
+pkl_warning (pkl_compiler compiler,
+             pkl_ast ast,
              pkl_ast_loc loc,
              const char *fmt,
              ...)
 {
   va_list valist;
   char *msg;
+
+  if (compiler->error_on_warning)
+    {
+      va_start (valist, fmt);
+      pkl_error_internal (compiler, ast, loc, fmt, valist);
+      va_end (valist);
+      return;
+    }
 
   va_start(valist, fmt);
   vasprintf (&msg, fmt, valist);

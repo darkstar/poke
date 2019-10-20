@@ -64,7 +64,7 @@ pkl_tab_error (YYLTYPE *llocp,
                struct pkl_parser *pkl_parser,
                char const *err)
 {
-    pkl_error (pkl_parser->ast, *llocp, "%s", err);
+    pkl_error (pkl_parser->compiler, pkl_parser->ast, *llocp, "%s", err);
 }
 
 /* Register an argument in the compile-time environment.  This is used
@@ -93,7 +93,7 @@ pkl_register_arg (struct pkl_parser *parser, pkl_ast_node arg)
                          PKL_AST_IDENTIFIER_POINTER (arg_identifier),
                          arg_decl))
     {
-      pkl_error (parser->ast, PKL_AST_LOC (arg_identifier),
+      pkl_error (parser->compiler, parser->ast,PKL_AST_LOC (arg_identifier),
                  "duplicated argument name `%s' in function declaration",
                  PKL_AST_IDENTIFIER_POINTER (arg_identifier));
       /* Make sure to pop the function frame.  */
@@ -134,7 +134,7 @@ pkl_register_args (struct pkl_parser *parser, pkl_ast_node arg_list)
                              PKL_AST_IDENTIFIER_POINTER (arg_identifier),
                              arg_decl))
         {
-          pkl_error (parser->ast, PKL_AST_LOC (arg_identifier),
+          pkl_error (parser->compiler, parser->ast, PKL_AST_LOC (arg_identifier),
                      "duplicated argument name `%s' in function declaration",
                      PKL_AST_IDENTIFIER_POINTER (arg_identifier));
           /* Make sure to pop the function frame.  */
@@ -574,7 +574,7 @@ expression:
                   type = PKL_AST_DECL_INITIAL (decl);
                   if (PKL_AST_TYPE_CODE (type) != PKL_TYPE_STRUCT)
                     {
-                      pkl_error (pkl_parser->ast, @1,
+                      pkl_error (pkl_parser->compiler, pkl_parser->ast, @1,
                                  "expected struct type in constructor");
                       YYERROR;
                     }
@@ -661,7 +661,7 @@ primary:
                       || (PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_VAR
                           && PKL_AST_DECL_KIND (decl) != PKL_AST_DECL_KIND_FUNC))
                     {
-                      pkl_error (pkl_parser->ast, @1,
+                      pkl_error (pkl_parser->compiler, pkl_parser->ast, @1,
                                  "undefined variable '%s'", name);
                       YYERROR;
                     }
@@ -1130,7 +1130,7 @@ struct_type_field:
                                              PKL_AST_IDENTIFIER_POINTER ($2),
                                              decl))
                         {
-                          pkl_error (pkl_parser->ast, @2,
+                          pkl_error (pkl_parser->compiler, pkl_parser->ast, @2,
                                      "duplicated struct element '%s'",
                                      PKL_AST_IDENTIFIER_POINTER ($2));
                           YYERROR;
@@ -1207,7 +1207,7 @@ declaration:
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
-                      pkl_error (pkl_parser->ast, @2,
+                      pkl_error (pkl_parser->compiler, pkl_parser->ast, @2,
                                  "function or variable `%s' already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       /* XXX: also, annotate the decl to be renaming a
@@ -1256,7 +1256,7 @@ declaration:
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
-                      pkl_error (pkl_parser->ast, @2,
+                      pkl_error (pkl_parser->compiler, pkl_parser->ast, @2,
                                  "the variable `%s' is already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       YYERROR;
@@ -1278,7 +1278,7 @@ declaration:
                     {
                       /* XXX: in the top-level, rename the old
                          declaration to "" and add the new one.  */
-                      pkl_error (pkl_parser->ast, @2,
+                      pkl_error (pkl_parser->compiler, pkl_parser->ast, @2,
                                  "the type `%s' is already defined",
                                  PKL_AST_IDENTIFIER_POINTER ($2));
                       YYERROR;

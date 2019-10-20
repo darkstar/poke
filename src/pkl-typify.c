@@ -76,7 +76,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_not)
 
   if (PKL_AST_TYPE_CODE (op_type) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (op),
+      PKL_ERROR (PKL_AST_LOC (op),
                  "invalid operand to NOT");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -119,7 +119,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_rela)
     }
   else
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (PKL_PASS_NODE),
+      PKL_ERROR (PKL_AST_LOC (PKL_PASS_NODE),
                  "invalid operands to relational operator");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -215,7 +215,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
   /* Casting from or to a function type is forbidden.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_FUNCTION)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+      PKL_ERROR (PKL_AST_LOC (cast),
                  "casting a value to a function type is not allowed");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -223,7 +223,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
 
   if (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_FUNCTION)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+      PKL_ERROR (PKL_AST_LOC (cast),
                  "casting a function to any other type is not allowed");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -233,7 +233,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
      always allowed.  */
   if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
+      PKL_ERROR (PKL_AST_LOC (cast),
                  "casting a value to `any' is not allowed");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -250,9 +250,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_cast)
     {
       char *found_type = pkl_type_str (exp_type, 1);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
-                 "invalid cast to string\n\
-expected uint<8>, got %s",
+      PKL_ERROR (PKL_AST_LOC (cast),
+                 "invalid cast to string\nexpected uint<8>, got %s",
                  found_type);
       free (found_type);
       PKL_TYPIFY_PAYLOAD->errors++;
@@ -267,9 +266,8 @@ expected uint<8>, got %s",
       char *type_str = pkl_type_str (type, 1);
       char *found_type_str = pkl_type_str (exp_type, 1);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (cast),
-                 "invalid cast to array\n\
-expected %s, got %s",
+      PKL_ERROR (PKL_AST_LOC (cast),
+                 "invalid cast to array\nexpected %s, got %s",
                  type_str, found_type_str);
       free (type_str);
       free (found_type_str);
@@ -337,9 +335,9 @@ PKL_PHASE_END_HANDLER
     PKL_PASS_DONE;                                                      \
                                                                         \
   error:                                                                \
-    pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),                         \
+    PKL_ERROR (PKL_AST_LOC (exp),                                       \
                "invalid operands in expression");                       \
-    PKL_TYPIFY_PAYLOAD->errors++;                                                  \
+    PKL_TYPIFY_PAYLOAD->errors++;                                       \
     PKL_PASS_ERROR;                                                     \
   }                                                                     \
   PKL_PHASE_END_HANDLER
@@ -559,7 +557,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_mul)
   PKL_PASS_DONE;
 
  error:
-  pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+  PKL_ERROR (PKL_AST_LOC (exp),
              "invalid operands in expression");
   PKL_TYPIFY_PAYLOAD->errors++;
   PKL_PASS_ERROR;
@@ -592,7 +590,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
   if (PKL_AST_TYPE_CODE (t1) != PKL_TYPE_INTEGRAL
       || PKL_AST_TYPE_CODE (t2) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+      PKL_ERROR (PKL_AST_LOC (exp),
                  "operator requires integral arguments");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -603,7 +601,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_bconc)
   if (PKL_AST_TYPE_I_SIZE (t1) + PKL_AST_TYPE_I_SIZE (t2)
       > 64)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+      PKL_ERROR (PKL_AST_LOC (exp),
                  "the sum of the width of the operators should not exceed 64-bit");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -661,7 +659,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_offset)
 
       if (PKL_AST_TYPE_COMPLETE (unit) != PKL_AST_TYPE_COMPLETE_YES)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (unit),
+          PKL_ERROR (PKL_AST_LOC (unit),
                      "offsets only work on complete types");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -705,7 +703,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_array)
         type = PKL_AST_TYPE (initializer);
       else if (!pkl_ast_type_equal (PKL_AST_TYPE (initializer), type))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (array),
+          PKL_ERROR (PKL_AST_LOC (array),
                      "array initializers should be of the same type");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -750,7 +748,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
 
   if (PKL_AST_TYPE_CODE (from_idx_type) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (from_idx),
+      PKL_ERROR (PKL_AST_LOC (from_idx),
                  "index in trimmer should be an integer");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -758,7 +756,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_trimmer)
 
   if (PKL_AST_TYPE_CODE (to_idx_type) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (to_idx),
+      PKL_ERROR (PKL_AST_LOC (to_idx),
                  "index in trimmer should be an integer");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -798,7 +796,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
         break;
       }
     default:
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
+      PKL_ERROR (PKL_AST_LOC (container),
                  "operator to [] must be an arry or a string");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -806,7 +804,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_indexer)
 
   if (PKL_AST_TYPE_CODE (index_type) != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (index),
+      PKL_ERROR (PKL_AST_LOC (index),
                  "index should be an integer");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -917,7 +915,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
   if (PKL_AST_TYPE_CODE (funcall_function_type)
       != PKL_TYPE_FUNCTION)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+      PKL_ERROR (PKL_AST_LOC (funcall_function),
                  "variable is not a function");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -938,7 +936,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
 
   if (PKL_AST_FUNCALL_NARG (funcall) < mandatory_args)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+      PKL_ERROR (PKL_AST_LOC (funcall_function),
                  "too few arguments passed to function");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -973,7 +971,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_funcall)
       char *function_type_str = pkl_type_str (funcall_function_type,
                                               0 /* use_given_name */);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+      PKL_ERROR (PKL_AST_LOC (funcall_function),
                  "too many arguments passed to function %s\n\
 with prototype %s",
                  function_name != NULL ? function_name : "",
@@ -1017,7 +1015,7 @@ with prototype %s",
 
             if (!fa_name)
               {
-                pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
+                PKL_ERROR (PKL_AST_LOC (aa_name),
                            "function doesn't take named arguments");
                 PKL_TYPIFY_PAYLOAD->errors++;
                 PKL_PASS_ERROR;
@@ -1033,7 +1031,7 @@ with prototype %s",
 
         if (!found_arg)
           {
-            pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+            PKL_ERROR (PKL_AST_LOC (aa),
                        "function doesn't take a `%s' argument",
                        PKL_AST_IDENTIFIER_POINTER (aa_name));
             PKL_TYPIFY_PAYLOAD->errors++;
@@ -1060,7 +1058,7 @@ with prototype %s",
             aa_name = PKL_AST_FUNCALL_ARG_NAME (aa);
             if (!fa_name)
               {
-                pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa_name),
+                PKL_ERROR (PKL_AST_LOC (aa_name),
                            "function doesn't take named arguments");
                 PKL_TYPIFY_PAYLOAD->errors++;
                 PKL_PASS_ERROR;
@@ -1089,7 +1087,7 @@ with prototype %s",
           continue;
         else
           {
-            pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
+            PKL_ERROR (PKL_AST_LOC (funcall),
                        "required argument `%s' not specified in funcall",
                        PKL_AST_IDENTIFIER_POINTER (fa_name));
             PKL_TYPIFY_PAYLOAD->errors++;
@@ -1136,7 +1134,7 @@ with prototype %s",
               char *passed_type = pkl_type_str (aa_type, 1);
               char *expected_type = pkl_type_str (fa_type, 1);
 
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+              PKL_ERROR (PKL_AST_LOC (aa),
                          "function argument %d has the wrong type\n\
 expected %s, got %s",
                          narg + 1, expected_type, passed_type);
@@ -1173,7 +1171,7 @@ expected %s, got %s",
             || parent_code == PKL_AST_FUNCALL_ARG
             || parent_code == PKL_AST_DECL))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+      PKL_ERROR (PKL_AST_LOC (funcall_function),
                  "function doesn't return a value");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1205,7 +1203,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_ass_stmt)
       char *expected_type = pkl_type_str (lvalue_type, 1);
       char *found_type = pkl_type_str (exp_type, 1);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+      PKL_ERROR (PKL_AST_LOC (ass_stmt),
                  "r-value in assignment has the wrong type\n\
 expected %s got %s",
                  expected_type, found_type);
@@ -1220,7 +1218,7 @@ expected %s got %s",
 #if 0
   if (PKL_AST_TYPE_CODE (lvalue_type) == PKL_TYPE_FUNCTION)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt),
+      PKL_ERROR (PKL_AST_LOC (ass_stmt),
                  "l-value in assignment cannot be a function");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1259,7 +1257,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
 
   if (PKL_AST_TYPE_CODE (struct_type) != PKL_TYPE_STRUCT)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (astruct),
+      PKL_ERROR (PKL_AST_LOC (astruct),
                  "expected struct");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1287,7 +1285,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
 
   if (type == NULL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (field_name),
+      PKL_ERROR (PKL_AST_LOC (field_name),
                  "referred field doesn't exist in struct");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1308,7 +1306,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_integral)
   if (PKL_AST_TYPE_I_SIZE (type) < 1
       || PKL_AST_TYPE_I_SIZE (type) > 64)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (type),
+      PKL_ERROR (PKL_AST_LOC (type),
                  "the width of an integral type should be in the [1,64] range");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1332,7 +1330,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_type_array)
   if (PKL_AST_TYPE_CODE (bound_type) != PKL_TYPE_INTEGRAL
       && PKL_AST_TYPE_CODE (bound_type) != PKL_TYPE_OFFSET)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (bound),
+      PKL_ERROR (PKL_AST_LOC (bound),
                  "expected integral or offset value");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1354,7 +1352,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_map)
 
   if (PKL_AST_TYPE_CODE (map_offset_type) != PKL_TYPE_OFFSET)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (map_offset),
+      PKL_ERROR (PKL_AST_LOC (map_offset),
                  "expected offset");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1380,7 +1378,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
      implicitly satisfied by the parser.  */
   if (PKL_AST_TYPE_CODE (scons_type) != PKL_TYPE_STRUCT)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (scons_type),
+      PKL_ERROR (PKL_AST_LOC (scons_type),
                  "expected struct type in constructor");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1401,7 +1399,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
 
       if (!elem_name)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem),
+          PKL_ERROR (PKL_AST_LOC (elem),
                      "anonymous initializer in struct constructor");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1432,7 +1430,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_scons)
                   char *expected_type = pkl_type_str (type_elem_type, 1);
                   char *found_type = pkl_type_str (elem_type, 1);
 
-                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_exp),
+                  PKL_ERROR (PKL_AST_LOC (elem_exp),
                              "invalid initializer for `%s' in constructor\n\
 expected %s, got %s",
                              PKL_AST_IDENTIFIER_POINTER (elem_name),
@@ -1450,7 +1448,7 @@ expected %s, got %s",
 
       if (!found)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_name),
+          PKL_ERROR (PKL_AST_LOC (elem_name),
                      "invalid struct field `%s' in constructor",
                      PKL_AST_IDENTIFIER_POINTER (elem_name));
           PKL_TYPIFY_PAYLOAD->errors++;
@@ -1517,7 +1515,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
     if (PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_ARRAY
         && PKL_AST_TYPE_CODE (container_type) != PKL_TYPE_STRING)
       {
-        pkl_error (PKL_PASS_AST, PKL_AST_LOC (container),
+        PKL_ERROR (PKL_AST_LOC (container),
                    "expected array or string");
         PKL_TYPIFY_PAYLOAD->errors++;
         PKL_PASS_ERROR;
@@ -1554,7 +1552,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_pr_loop_stmt)
           || PKL_AST_TYPE_I_SIZE (condition_type) != 32
           || PKL_AST_TYPE_I_SIGNED (condition_type) != 1)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (condition),
+          PKL_ERROR (PKL_AST_LOC (condition),
                      "expected boolean expression");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1609,7 +1607,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
                   char *found_type = pkl_type_str (arg_type, 1);
                   char *expected_type = pkl_type_str (type, 1);
 
-                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
+                  PKL_ERROR (PKL_AST_LOC (arg),
                              "printf argument is of an invalid type\n\
 expected %s, got %s",
                              expected_type, found_type);
@@ -1630,7 +1628,7 @@ expected %s, got %s",
 
       if (PKL_AST_TYPE_CODE (arg_type) != PKL_TYPE_STRING)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
+          PKL_ERROR (PKL_AST_LOC (arg_type),
                      "expected a string");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1656,7 +1654,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_raise_stmt)
       if (raise_stmt_exp_type
           && PKL_AST_TYPE_CODE (raise_stmt_exp_type) != PKL_TYPE_INTEGRAL)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (raise_stmt),
+          PKL_ERROR (PKL_AST_LOC (raise_stmt),
                      "exception in `raise' statement should be an integral number");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1686,7 +1684,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
           || PKL_AST_TYPE_I_SIZE (arg_type) != 32
           || PKL_AST_TYPE_I_SIGNED (arg_type) != 1)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg_type),
+          PKL_ERROR (PKL_AST_LOC (arg_type),
                      "expected int<32> for exception type");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1699,7 +1697,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_try_catch_stmt)
 
       if (PKL_AST_TYPE_CODE (exp_type) != PKL_TYPE_INTEGRAL)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp_type),
+          PKL_ERROR (PKL_AST_LOC (exp_type),
                      "invalid exception number");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1847,7 +1845,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_attr)
   {
     char *operand_type_str = pkl_type_str (operand_type, 1);
 
-    pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+    PKL_ERROR (PKL_AST_LOC (exp),
                "attribute '%s is not defined for values of type %s",
                pkl_attr_name (attr),
                operand_type_str);
@@ -1872,7 +1870,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_type_field)
      element.  */
   if (PKL_AST_TYPE_CODE (elem_type) == PKL_TYPE_FUNCTION)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_type),
+      PKL_ERROR (PKL_AST_LOC (elem_type),
                  "invalid type in struct field");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -1890,7 +1888,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_type_field)
       if (!pkl_ast_type_promoteable (constraint_type, bool_type,
                                      1 /* promote_array_of_any */))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_constraint),
+          PKL_ERROR (PKL_AST_LOC (elem_constraint),
                      "struct field constraint should evaluate to a boolean");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1913,7 +1911,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_type_field)
       if (!pkl_ast_type_promoteable (label_type, offset_type,
                                      1 /* promote_array_of_any */))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (elem_label),
+          PKL_ERROR (PKL_AST_LOC (elem_label),
                      "struct field label should evaluate to an offset");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -1949,7 +1947,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_return_stmt)
       char *returned_type_str = pkl_type_str (returned_type, 1);
       char *expected_type_str = pkl_type_str (expected_type, 1);
 
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+      PKL_ERROR (PKL_AST_LOC (exp),
                  "returning an expression of the wrong type\n\
 expected %s, got %s",
                  expected_type_str, returned_type_str);
@@ -1981,7 +1979,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_func_arg)
           char *arg_type_str = pkl_type_str (arg_type, 1);
           char *initial_type_str = pkl_type_str (initial_type, 1);
 
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (initial),
+          PKL_ERROR (PKL_AST_LOC (initial),
                      "argument initializer is of the wrong type\n\
 expected %s, got %s",
                      arg_type_str, initial_type_str);
@@ -2082,7 +2080,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify2_ps_type_array)
           && PKL_AST_CODE (bound) == PKL_AST_INTEGER
           && ((int64_t) PKL_AST_INTEGER_VALUE (bound)) <= 0)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (bound),
+          PKL_ERROR (PKL_AST_LOC (bound),
                      "array dimentions should be > 0");
           PKL_TYPIFY_PAYLOAD->errors++;
           PKL_PASS_ERROR;

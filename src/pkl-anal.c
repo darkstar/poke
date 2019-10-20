@@ -81,7 +81,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_struct)
           if (STREQ (PKL_AST_IDENTIFIER_POINTER (ename),
                      PKL_AST_IDENTIFIER_POINTER (uname)))
             {
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (uname),
+              PKL_ERROR (PKL_AST_LOC (uname),
                          "duplicated struct element '%s'",
                          PKL_AST_IDENTIFIER_POINTER (uname));
               PKL_ANAL_PAYLOAD->errors++;
@@ -124,7 +124,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
               && STREQ (PKL_AST_IDENTIFIER_POINTER (uname),
                         PKL_AST_IDENTIFIER_POINTER (tname)))
             {
-              pkl_error (PKL_PASS_AST, PKL_AST_LOC (u),
+              PKL_ERROR (PKL_AST_LOC (u),
                          "duplicated element name in struct type spec");
               PKL_ANAL_PAYLOAD->errors++;
               PKL_PASS_ERROR;
@@ -191,7 +191,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
 
   if (some_named && some_unnamed)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall),
+      PKL_ERROR (PKL_AST_LOC (funcall),
                  "mixed named and not-named arguments not allowed in funcall");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -214,7 +214,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_funcall)
               if (STREQ (PKL_AST_IDENTIFIER_POINTER (identifier1),
                          PKL_AST_IDENTIFIER_POINTER (identifier2)))
                 {
-                  pkl_error (PKL_PASS_AST, PKL_AST_LOC (aa),
+                  PKL_ERROR (PKL_AST_LOC (aa),
                              "duplicated argument in funcall");
                   PKL_ANAL_PAYLOAD->errors++;
                   PKL_PASS_ERROR;
@@ -241,7 +241,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
          be at the end of the arguments list.  */
       if (!PKL_AST_FUNC_ARG_INITIAL (fa))
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
+          PKL_ERROR (PKL_AST_LOC (fa),
                      "non-optional argument after optional arguments");
           PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -252,7 +252,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_func)
       if (PKL_AST_FUNC_ARG_VARARG (fa) == 1
           && PKL_AST_CHAIN (fa) != NULL)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (fa),
+          PKL_ERROR (PKL_AST_LOC (fa),
                      "vararg argument should be the last argument");
           PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -276,7 +276,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_function)
       if (PKL_AST_FUNC_TYPE_ARG_VARARG (arg)
           && PKL_AST_CHAIN (arg) != NULL)
         {
-          pkl_error (PKL_PASS_AST, PKL_AST_LOC (arg),
+          PKL_ERROR (PKL_AST_LOC (arg),
                      "vararg argument should be the last argument");
           PKL_ANAL_PAYLOAD->errors++;
           PKL_PASS_ERROR;
@@ -293,7 +293,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_break_stmt)
 
   if (!PKL_AST_BREAK_STMT_ENTITY (break_stmt))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (break_stmt),
+      PKL_ERROR (PKL_AST_LOC (break_stmt),
                  "`break' statement without containing statement");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -358,7 +358,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_offset)
   if (PKL_AST_TYPE_CODE (magnitude_type)
       != PKL_TYPE_INTEGRAL)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (magnitude_type),
+      PKL_ERROR (PKL_AST_LOC (magnitude_type),
                  "expected integer expression in offset");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -398,7 +398,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
   if (exp
       && PKL_AST_TYPE_CODE (PKL_AST_FUNC_RET_TYPE (function)) == PKL_TYPE_VOID)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (exp),
+      PKL_ERROR (PKL_AST_LOC (exp),
                  "returning a value in a void function");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -406,7 +406,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_return_stmt)
   else if (!exp
            && PKL_AST_TYPE_CODE (PKL_AST_FUNC_RET_TYPE (function)) != PKL_TYPE_VOID)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (return_stmt),
+      PKL_ERROR (PKL_AST_LOC (return_stmt),
                  "the function expects a return value");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -427,7 +427,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
       && PKL_PASS_PARENT
       && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_EXP_STMT)
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (funcall_function),
+      PKL_ERROR (PKL_AST_LOC (funcall_function),
                  "call to void function in expression");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;
@@ -466,7 +466,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
 
       if (last_unconditional_alternative)
         {
-          pkl_warning (PKL_PASS_AST, PKL_AST_LOC (t),
+          PKL_WARNING (PKL_AST_LOC (t),
                        "unreachable alternative in union");
           break;
         }
@@ -484,7 +484,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_type_struct)
           && PKL_AST_CODE (constraint) == PKL_AST_INTEGER
           && PKL_AST_INTEGER_VALUE (constraint) == 0)
         {
-          pkl_warning (PKL_PASS_AST, PKL_AST_LOC (t),
+          PKL_WARNING (PKL_AST_LOC (t),
                        "unreachable alternative in union");
           break;
         }
@@ -532,7 +532,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_analf_ps_ass_stmt)
 
   if (!pkl_ast_lvalue_p (ass_stmt_lvalue))
     {
-      pkl_error (PKL_PASS_AST, PKL_AST_LOC (ass_stmt_lvalue),
+      PKL_ERROR (PKL_AST_LOC (ass_stmt_lvalue),
                  "invalid l-value in assignment");
       PKL_ANAL_PAYLOAD->errors++;
       PKL_PASS_ERROR;

@@ -328,4 +328,14 @@ int pkl_do_subpass (pkl_compiler compiler, pkl_ast ast, pkl_ast_node node,
                     struct pkl_phase *phases[], void *payloads[],
                     int flags);
 
+/* Macros to emit a compilation error or a warning from a phase
+   handler.  Using them reduces verbosity by not passing the compiler
+   and the AST arguments explicitly.  */
+
+#define PKL_ERROR(...)                                                  \
+  pkl_error (PKL_PASS_COMPILER, PKL_PASS_AST, __VA_ARGS__)
+
+#define PKL_WARNING(...)                                                \
+  pkl_warning (PKL_PASS_COMPILER, PKL_PASS_AST, __VA_ARGS__)
+
 #endif /* PKL_PASS_H  */

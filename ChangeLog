@@ -1,3 +1,28 @@
+2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl.h: Make pkl_error and pkl_warning to get a `compiler'
+	option.
+	* src/pkl.c (pkl_error_internal): New function.
+	(pkl_error): Rewrite to be a wrapper for pkl_error_internal.
+	* src/pkl-pass.h (PKL_ERROR): Define.
+	(PKL_WARNING): Likewise.
+	* src/pkl-anal.c (pkl_anal2_ps_type_struct): Use PKL_WARNING.
+	* src/pkl-parser.h (struct pkl_parser): New field `compiler'.
+	Make pkl_parse_file and pkl_parse_buffer get a new argument
+	`compiler'.
+	* src/pkl-parser.c (pkl_parse_file): Get a `compiler' option.
+	(pkl_parse_buffer): Likewise.
+	* src/pkl.c (pkl_compile_file): Pass `compiler' to pkl_parse_file.
+	(pkl_compile_expression): Pass `compiler' to pkl_parse_buffer.
+	(pkl_compile_buffer): Likewise.
+	(pkl_compile_statement): Likewise.
+	* src/pkl-tab.y: Pass pkl_parser->compiler to pkl_error calls.
+	* src/pkl-anal.c: Use PKL_ERROR instead of pkl_error for
+	diagnostics.
+	* src/pkl-fold.c: Likewise.
+	* src/pkl-trans.c: Likewise.
+	* src/pkl-typify.c: Likewise.
+
 2019-10-20  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* etc/poke-default.css (.dump-ruler): New class.
