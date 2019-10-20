@@ -1,0 +1,5 @@
+/* { dg-do run } */
+/* { dg-options "--color=html" } */
+
+/* { dg-command {printf "xxx%<foo:%i32dyyy%<bar:%i32d%>%>zzz", 10, 20} } */
+/* { dg-output "xxx<span class=\"foo\">10yyy<span class=\"bar\">20</span></span>zzz" } */

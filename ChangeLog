@@ -1,5 +1,13 @@
 2019-10-20  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/Makefile.am (check-DEJAGNU): Set POKESTYLESDIR.
+	* testsuite/poke.pkl/printf-class-1.pk: New test.
+	* testsuite/poke.pkl/printf-class-4.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-3.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-2.pk: Likewise.
+
+2019-10-20  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-trans.c (pkl_trans1_ps_print_stmt): Fix diagnostic for
 	unclosed styling class tags.
 	* testsuite/poke.pkl/printf-diag-6.pk: New file.
