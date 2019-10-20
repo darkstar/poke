@@ -1591,8 +1591,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
            type = PKL_AST_CHAIN (type))
         {
           pkl_ast_node arg_exp = PKL_AST_PRINT_STMT_ARG_EXP (arg);
-          pkl_ast_node arg_type = PKL_AST_TYPE (arg_exp);
+          pkl_ast_node arg_type;
 
+          /* Skip arguments without associated values.  */
+          if (!arg_exp)
+            continue;
+
+          arg_type = PKL_AST_TYPE (arg_exp);
           if (!pkl_ast_type_equal (arg_type, type))
             {
               if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL

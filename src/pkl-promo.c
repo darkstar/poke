@@ -1079,8 +1079,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_print_stmt)
        arg = PKL_AST_CHAIN (arg), type = PKL_AST_CHAIN (type))
     {
       pkl_ast_node arg_exp = PKL_AST_PRINT_STMT_ARG_EXP (arg);
-      pkl_ast_node exp_type = PKL_AST_TYPE (arg_exp);
+      pkl_ast_node exp_type;
 
+      /* Skip arguments without associated values.  */
+      if (!arg_exp)
+        continue;
+
+      exp_type = PKL_AST_TYPE (arg_exp);
       if (PKL_AST_TYPE_CODE (exp_type) == PKL_TYPE_INTEGRAL)
         {
           int restart = 0;

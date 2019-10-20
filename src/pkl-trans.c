@@ -669,8 +669,12 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
   char *fmt, *p;
   pkl_ast_node t, arg;
   int ntag, nargs = 0;
-  pkl_ast_node types = NULL;
+  pkl_ast_node types = NULL, prev_arg = NULL;
   const char *msg = NULL;
+  /* XXX this hard limit should go away.  */
+#define MAX_CLASS_TAGS 32
+  int nclasses = 0;
+  char *classes[MAX_CLASS_TAGS];
 
   /* Calculate the number of arguments.  */
   for (t = args; t; t = PKL_AST_CHAIN (t))
@@ -701,14 +705,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
     }
 
   /* Process the format string.  */
-  for (types = NULL, ntag = 0, arg = args;
-       *p != '\0' && args;
-       ntag++, arg = PKL_AST_CHAIN (arg))
+  prev_arg = NULL;
+  for (types = NULL, ntag = 0, arg = args, nclasses = 0;
+       *p != '\0';
+       prev_arg = arg, arg = PKL_AST_CHAIN (arg))
     {
       pkl_ast_node atype;
 
       assert (*p == '%');
-      if (ntag >= nargs)
+      if (ntag >= nargs && p[1] != '>' && p[1] != '<')
         {
           pkl_error (PKL_PASS_AST, PKL_AST_LOC (print_stmt),
                      "not enough arguments in printf");
@@ -724,6 +729,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
           atype = pkl_ast_make_string_type (PKL_PASS_AST);
           PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
           types = pkl_ast_chainon (types, atype);
+          ntag++;
           break;
         case 'c':
           p += 2;
@@ -731,6 +737,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
           atype = pkl_ast_make_integral_type (PKL_PASS_AST, 8, 0);
           PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
           types = pkl_ast_chainon (types, atype);
+          ntag++;
           break;
         case 'i':
         case 'u':
@@ -792,6 +799,108 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                 msg = _("Expected decimal digit after %u");
                 goto invalid_tag;
               }
+            ntag++;
+            break;
+          }
+        case '<':
+          /* Fallthrough.  */
+        case '>':
+          {
+            int end_sc = 0;
+            char *class = xmalloc (strlen (fmt) + 1);
+            size_t j;
+            pkl_ast_node new_arg;
+
+            end_sc = (p[1] == '>');
+            p += 2;
+
+            if (!end_sc)
+              {
+                /* Empty classes are not allowed.  */
+                if (*p == ':')
+                  {
+                    msg = _("invalid format specifier");
+                    goto invalid_tag;
+                  }
+
+                /* Get the name of the styling class.  */
+                j = 0;
+                while (*p != ':' && *p != '\0')
+                  {
+                    class[j++] = *p;
+                    p++;
+                  }
+                class[j] = '\0';
+
+                if (*p != ':')
+                  {
+                    msg = _("invalid format specifier");
+                    goto invalid_tag;
+                  }
+                p++; /* Skip the : */
+
+                assert (nclasses < MAX_CLASS_TAGS);
+                classes[nclasses++] = class;
+              }
+            else
+              {
+                if (nclasses == 0)
+                  {
+                    msg = _("unpaired styling class");
+                    goto invalid_tag;
+                  }
+                assert (nclasses > 0);
+                class = classes[--nclasses];
+              }
+            
+            /* Create the new arg and add it to the list of
+               arguments.  */
+            new_arg = pkl_ast_make_print_stmt_arg (PKL_PASS_AST,
+                                                   NULL);
+            PKL_AST_LOC (new_arg) = PKL_AST_LOC (print_fmt);
+
+            if (end_sc)
+              PKL_AST_PRINT_STMT_ARG_END_SC (new_arg) = xstrdup (class);
+            else
+              PKL_AST_PRINT_STMT_ARG_BEGIN_SC (new_arg) = class;
+
+            if (arg)
+              {
+                if (arg == PKL_AST_PRINT_STMT_ARGS (print_stmt))
+                  {
+                    /* Prepend.  */
+                    PKL_AST_CHAIN (new_arg) = ASTREF (arg);
+                    PKL_AST_PRINT_STMT_ARGS (print_stmt)
+                      = ASTREF (new_arg);
+                  }
+                else
+                  {
+                    /* Add after.  */
+                    PKL_AST_CHAIN (new_arg) = PKL_AST_CHAIN (prev_arg);
+                    PKL_AST_CHAIN (prev_arg) = ASTREF (new_arg);
+                  }
+              }
+            else
+              {
+                /* Append.  */
+                if (!PKL_AST_PRINT_STMT_ARGS (print_stmt))
+                  PKL_AST_PRINT_STMT_ARGS (print_stmt)
+                    = ASTREF (new_arg);
+                else
+                  PKL_AST_PRINT_STMT_ARGS (print_stmt)
+                    = pkl_ast_chainon (PKL_AST_PRINT_STMT_ARGS (print_stmt),
+                                       new_arg);
+              }
+
+            arg = new_arg;
+
+
+            /* The type corresponding to a styling class format
+               directive is `void'.  */
+            atype = pkl_ast_make_void_type (PKL_PASS_AST);
+            PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+            types = pkl_ast_chainon (types, atype);
+
             break;
           }
         default:
@@ -816,6 +925,13 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
           suffix[j] = '\0';
           PKL_AST_PRINT_STMT_ARG_SUFFIX (arg) = suffix;
         }
+    }
+
+  /* Check that we are not leaving unclosed styling classes.  */
+  if (nclasses > 0)
+    {
+      msg = _("unclosed styling tag");
+      goto invalid_tag;
     }
 
   if (nargs > ntag)

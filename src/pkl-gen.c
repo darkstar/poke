@@ -718,16 +718,35 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
 
       for (arg = print_stmt_args; arg; arg = PKL_AST_CHAIN (arg))
         {
-          /* Print the argument, and the optional suffix.  */
+          /* Handle the argument.  */
 
           pkl_ast_node exp = PKL_AST_PRINT_STMT_ARG_EXP (arg);
+          char *begin_sc = PKL_AST_PRINT_STMT_ARG_BEGIN_SC (arg);
+          char *end_sc = PKL_AST_PRINT_STMT_ARG_END_SC (arg);
           char *suffix = PKL_AST_PRINT_STMT_ARG_SUFFIX (arg);
           int base = PKL_AST_PRINT_STMT_ARG_BASE (arg);
 
-          PKL_PASS_SUBPASS (exp);
-          pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
-                        base);
+          if (begin_sc)
+            {
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                            pvm_make_string (begin_sc));
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BEGINSC);
+            }
 
+          if (end_sc)
+            {
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
+                            pvm_make_string (end_sc));
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ENDSC);
+            }
+          
+          if (exp)
+            {
+              PKL_PASS_SUBPASS (exp);
+              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
+                            base);
+            }
+              
           if (suffix)
             {
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (suffix));
