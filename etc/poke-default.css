@@ -16,6 +16,10 @@
 .struct-field-name { text-decoration : underline; }
 .integer { color : green; }
 
+.dump-ruler { text-decoration: underline; }
+.dump-address { color : green; }
+.dump-ascii { color : brown; }
+
 html {
     font-family: Menlo, Monaco, "Courier New", monospace;
 }

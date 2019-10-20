@@ -47,18 +47,18 @@ defun dump = (off64 from = pk_dump_offset,
      {
       defvar o = 0#B;
 
-      print "76543210 ";
+      printf "%<dump-ruler:76543210 %>";
       for (s in ["00", "11", "22", "33", "44", "55", "66",
                  "77", "88", "99", "aa", "bb", "cc", "dd",
                  "ee", "ff"])
         {
           if (o % group_by == 0#B)
-            print " ";
-          print s;
+            printf "%<dump-ruler: %>";
+          printf "%<dump-ruler:%s%>", s;
           o = o + 1#B;
         }
        if (ascii)
-         print "  0123456789ABCDEF";
+         printf "%<dump-ruler:  0123456789ABCDEF%>";
        print "\n";
      }
 
@@ -66,7 +66,7 @@ defun dump = (off64 from = pk_dump_offset,
      {
       while (offset < top)
         {
-         printf ("%u32x:", offset / #B);
+         printf ("%<dump-address:%u32x:%>", offset / #B);
 
          defvar o = 0#B;
          while (o < step && offset + o < top)
@@ -84,9 +84,9 @@ defun dump = (off64 from = pk_dump_offset,
 	       {
 	         defvar v = int<8> @ (offset + o);
 	         if (v < ' ' || v > '~')
-	           print(".");
+	           printf "%<dump-ascii:%c%>", '.';
 	         else
-	           printf ("%c", v);
+	           printf "%<dump-ascii:%c%>", v;
 	         o = o + 1#B;
 	       }
 	   }
