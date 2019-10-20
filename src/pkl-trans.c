@@ -825,7 +825,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 
                 /* Get the name of the styling class.  */
                 j = 0;
-                while (*p != ':' && *p != '\0')
+                while (*p != ':' && *p != '%' && *p != '\0')
                   {
                     class[j++] = *p;
                     p++;
