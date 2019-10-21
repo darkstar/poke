@@ -254,7 +254,7 @@ Writing Poke
 
     16 #B
 
-- Use CamelCase for type names, but do not use CamelCase for
+- Use Camel_Case for type names, but do not use Camel_Case for
   variable/function names!
 
 Deciding on What to Work on
