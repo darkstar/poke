@@ -4,7 +4,7 @@
 /* .logo .copyright .type .struct-type-name .array */
 
 .logo { text-decoration: blink; }
-.error { color : red; }
+.error { font-weight: bold; color : red; }
 .error-filename { text-decoration: underline; }
 .error-location { text-decoration: underline; }
 .warning { color : yellow; }
