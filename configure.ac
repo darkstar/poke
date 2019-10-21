@@ -111,7 +111,13 @@ AC_CONFIG_FILES(Makefile
                 testsuite/Makefile)
 AC_OUTPUT
 
-dnl Report warning
+dnl Report warnings
+
+if test "x$gl_cv_lib_readline" = "xno"; then
+   echo "warning: an usable libreadline was not found in the system."
+   echo "warning: poke will use a dummy replacement with no edition "
+   echo "warning: capabilities."
+fi
 
 if test "x$HAVE_LIBTEXTSTYLE" = "xno"; then
    echo "warning: libtextstyle was not found in the system."

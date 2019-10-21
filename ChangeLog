@@ -1,3 +1,8 @@
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* configure.ac: Warn the user about not finding a full-fledged
+	readline.
+
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/poke.c (repl): print a newline when the user does Ctrl-D.
