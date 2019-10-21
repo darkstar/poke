@@ -909,7 +909,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
         }
 
       /* Add the optional suffix to the argument.  */
-      if (*p != '%')
+      if (*p != '\0' && *p != '%')
         {
           /* This argument has a prefix.  */
           size_t j;
