@@ -50,6 +50,15 @@ defvar NULL = 0#B;
 
 /* String related routines.  */
 
+defun catos = (char[] chars) string:
+  {
+   defvar s = "";
+
+   for (c in chars)
+     s = s + c as string;
+   return s;
+  }
+
 defun substr = (string s, int f, int t = s'length - 1) string:
   {
    return s[f..t];

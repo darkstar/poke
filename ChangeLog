@@ -1,5 +1,11 @@
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/std.pk (catos): New function.
+	* testsuite/poke.std/catos-1.pk: New file.
+	* testsuite/poke.pkl/catos-2.pk: Likewise.
+
+2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-lex.l (SHEBANG_COMMENT): New context.
 	Rules to support multi-line #! ... !# comments.
 	* src/poke.c (LOAD_AND_QUIT_ARG): Define.
