@@ -55,7 +55,7 @@ int poke_quiet_p;
 
 char *poke_datadir;
 
-/* This is used by commands to indicate the repl that it must
+/* This is used by commands to indicate to the REPL that it must
    exit.  */
 
 int poke_exit_p;
@@ -69,8 +69,8 @@ int poke_obase = 10;
 /* The following global is the poke compiler.  */
 pkl_compiler poke_compiler;
 
-/* The following global indicates whether to load an user
-   initialization file.  It default to 1.  */
+/* The following global indicates whether to load a user
+   initialization file.  It defaults to 1.  */
 
 int poke_load_init_file = 1;
 
@@ -178,7 +178,7 @@ pk_print_version ()
   pk_puts ("           __)\n");
   pk_puts (" ---._______)\n");
   pk_term_end_class ("logo");
-  /* xgettesxt: no-wrap */
+  /* xgettext: no-wrap */
   pk_puts ("\n");
 
   /* It is important to separate the year from the rest of the message,
@@ -411,7 +411,7 @@ initialize (int argc, char *argv[])
 static void
 initialize_user ()
 {
-  /* Load the user's initialization file ~/.pokerc, if it exist in the
+  /* Load the user's initialization file ~/.pokerc, if it exists in the
      HOME directory.  */
   char *homedir = getenv ("HOME");
 
