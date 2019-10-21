@@ -61,7 +61,7 @@ EXTRA_DIST = pkl-lex.h
 BUILT_SOURCES = pkl-tab.h pkl-lex.c \
                 pkl-gen.pkc pkl-asm.pkc \
                 pvm-vm.h pvm-vm1.c pvm-vm2.c
-AM_YFLAGS = -y -d -t --report=state
+AM_YFLAGS = -d -t --report=state
 AM_LFLAGS = -d
 
 poke_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib \

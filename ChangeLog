@@ -1,5 +1,10 @@
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/Makefile.am (AM_YFLAGS): Do not pass -y to bison, as we are
+	using non-POSIX capabilities.
+
+2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/std.pk (catos): New function.
 	* testsuite/poke.std/catos-1.pk: New file.
 	* testsuite/poke.pkl/catos-2.pk: Likewise.
