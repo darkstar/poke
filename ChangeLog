@@ -1,3 +1,9 @@
+2019-10-22  Darkstar <michael@drueing.de>
+
+	* src/poke.c: Several typos in comments fixed.
+	(pk_print_version): Likewise.
+	(initialize_user): Likewise.
+
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-trans.c (pkl_trans1_ps_print_stmt): Avoid adding an
