@@ -85,6 +85,7 @@ enum
   VERSION_ARG,
   QUIET_ARG,
   LOAD_ARG,
+  LOAD_AND_EXIT_ARG,
   CMD_ARG,
   NO_INIT_FILE_ARG,
   SCRIPT_ARG,
@@ -123,7 +124,8 @@ Interactive editor for binary files.\n"));
   /* TRANSLATORS: --help output, GNU poke arguments.
      no-wrap */
   pk_puts (_("\
-  -l, --load=FILE                     load the given pickle at startup.\n"));
+  -l, --load=FILE                     load the given pickle at startup.\n\
+  -L FILE                             load the given pickle and exit.\n"));
 
   pk_puts ("\n");
 
@@ -221,7 +223,7 @@ parse_args (int argc, char *argv[])
 
   while ((ret = getopt_long (argc,
                              argv,
-                             "ql:c:s:",
+                             "ql:c:s:L:",
                              long_options,
                              NULL)) != -1)
     {
@@ -248,6 +250,11 @@ parse_args (int argc, char *argv[])
           if (!pkl_compile_file (poke_compiler, optarg))
             goto exit_success;
 
+          break;
+        case 'L':
+          if (!pkl_compile_file (poke_compiler, optarg))
+            goto exit_success;
+          poke_interactive_p = 0;
           break;
         case 'c':
         case CMD_ARG:

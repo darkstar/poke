@@ -1,5 +1,13 @@
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-lex.l (SHEBANG_COMMENT): New context.
+	Rules to support multi-line #! ... !# comments.
+	* src/poke.c (LOAD_AND_QUIT_ARG): Define.
+	(print_help): Document -L.
+	(parse_args): Implement -L.
+
+2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* etc/poke-default.css (.error): Bold.
 
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>

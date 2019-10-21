@@ -122,6 +122,7 @@ L [a-zA-Z_]
 D [0-9]
 
 %x C_COMMENT
+%x SHEBANG_COMMENT
 
 %%
 
@@ -143,6 +144,11 @@ D [0-9]
 <C_COMMENT>"*/" { BEGIN(INITIAL); }
 <C_COMMENT>.    {  }
 <C_COMMENT>\n   {  }
+
+"#!" { BEGIN(SHEBANG_COMMENT); }
+<SHEBANG_COMMENT>"!#" { BEGIN(INITIAL); }
+<SHEBANG_COMMENT>.    {  }
+<SHEBANG_COMMENT>\n   {  }
 
 "//"[^\n]*	{ /* Partial-line comment.  */ }
 
