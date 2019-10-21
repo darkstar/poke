@@ -336,8 +336,11 @@ repl ()
       pk_term_flush ();
       line = readline ("(poke) ");
       if (line == NULL)
-        /* EOF in stdin (probably Ctrl-D).  */
-        break;
+        {
+          /* EOF in stdin (probably Ctrl-D).  */
+          pk_puts ("\n");
+          break;
+        }
 
       /* Ignore empty lines.  */
       if (*line == '\0')

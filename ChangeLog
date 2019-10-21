@@ -1,5 +1,9 @@
 2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/poke.c (repl): print a newline when the user does Ctrl-D.
+
+2019-10-21  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/Makefile.am (AM_YFLAGS): Do not pass -y to bison, as we are
 	using non-POSIX capabilities.
 
