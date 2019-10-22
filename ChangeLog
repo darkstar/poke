@@ -1,5 +1,15 @@
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-typify.c (pkl_typify1_ps_struct_ref): fix compile-time
+	detection of invalid fields in struct references.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* pickles/leb128.pk: Rewritten and moved from future/.
+	* etc/poke-default.css (.leb128): New class.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h (struct pkl_ast_print_stmt): New field
 	fmt_processed_p.
 	(PKL_AST_PRINT_STMT_FMT_PROCESSED_P): Define.

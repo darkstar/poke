@@ -20,6 +20,10 @@
 .dump-address { color : green; }
 .dump-ascii { color : brown; }
 
+/* Classes for pickles in pickles/  */
+
+.leb128 { color : grey; }
+
 html {
     font-family: Menlo, Monaco, "Courier New", monospace;
 }

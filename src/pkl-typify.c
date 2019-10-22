@@ -1281,7 +1281,9 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
             }
         }
       else if (PKL_AST_CODE (t) == PKL_AST_DECL
-               && PKL_AST_CODE (PKL_AST_DECL_INITIAL (t)) == PKL_AST_FUNC)
+               && PKL_AST_CODE (PKL_AST_DECL_INITIAL (t)) == PKL_AST_FUNC
+               && STREQ (PKL_AST_IDENTIFIER_POINTER (PKL_AST_DECL_NAME (t)),
+                         PKL_AST_IDENTIFIER_POINTER (field_name)))
         {
           pkl_ast_node func = PKL_AST_DECL_INITIAL (t);
           type = PKL_AST_TYPE (func);
