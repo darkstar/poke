@@ -1,5 +1,18 @@
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-typify.c (pkl_typify1_ps_struct_ref): Allow using dot
+	notation to refer to struct methods.
+	* src/pkl-trans.c (pkl_trans2_ps_struct_ref): Turn struct
+	references to parameterless methods into funcalls.
+	* src/pvm-val.c (pvm_ref_struct): Allow referencing to methods by
+	name.
+	* testsuite/poke.map/maps-structs-18.pk: New test.
+	* testsuite/poke.map/maps-structs-methods-1.pk: Likewise.
+	* testsuite/poke.map/maps-structs-methods-2.pk: Likewise.
+	* testsuite/poke.map/maps-structs-methods-3.pk: Likewise.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pvm.jitter (mksct): Change instruction to get a list of
 	methods.
 	* src/pkl-gen.pks (struct_mapper): Adapt to the new form of mksct.

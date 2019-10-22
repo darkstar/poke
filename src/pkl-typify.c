@@ -1267,20 +1267,27 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct_ref)
   for (t = PKL_AST_TYPE_S_ELEMS (struct_type); t;
        t = PKL_AST_CHAIN (t))
     {
-      pkl_ast_node struct_type_field_name;
-
-      /* Process only struct type fields.  */
-      if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
-        continue;
-      
-      struct_type_field_name = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
-      if (struct_type_field_name
-          && STREQ (PKL_AST_IDENTIFIER_POINTER (struct_type_field_name),
-                    PKL_AST_IDENTIFIER_POINTER (field_name)))
+      if (PKL_AST_CODE (t) == PKL_AST_STRUCT_TYPE_FIELD)
         {
-          type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
-          break;
+          pkl_ast_node struct_type_field_name
+            = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
+
+          if (struct_type_field_name
+              && STREQ (PKL_AST_IDENTIFIER_POINTER (struct_type_field_name),
+                        PKL_AST_IDENTIFIER_POINTER (field_name)))
+            {
+              type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
+              break;
+            }
         }
+      else if (PKL_AST_CODE (t) == PKL_AST_DECL
+               && PKL_AST_CODE (PKL_AST_DECL_INITIAL (t)) == PKL_AST_FUNC)
+        {
+          pkl_ast_node func = PKL_AST_DECL_INITIAL (t);
+          type = PKL_AST_TYPE (func);
+        }
+      else
+        continue;
     }
 
   if (type == NULL)

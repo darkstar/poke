@@ -154,11 +154,13 @@ pvm_make_struct (pvm_val nfields, pvm_val nmethods, pvm_val type)
 pvm_val
 pvm_ref_struct (pvm_val sct, pvm_val name)
 {
-  size_t nfields, i;
+  size_t nfields, nmethods, i;
   struct pvm_struct_field *fields;
+  struct pvm_struct_method *methods;
 
   assert (PVM_IS_SCT (sct) && PVM_IS_STR (name));
 
+  /* Lookup fields.  */
   nfields = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (sct));
   fields = PVM_VAL_SCT (sct)->fields;
 
@@ -168,6 +170,17 @@ pvm_ref_struct (pvm_val sct, pvm_val name)
           && STREQ (PVM_VAL_STR (fields[i].name),
                     PVM_VAL_STR (name)))
         return fields[i].value;
+    }
+
+  /* Lookup methods.  */
+  nmethods = PVM_VAL_ULONG (PVM_VAL_SCT_NMETHODS (sct));
+  methods = PVM_VAL_SCT (sct)->methods;
+
+  for (i = 0; i < nmethods; ++i)
+    {
+      if (STREQ (PVM_VAL_STR (methods[i].name),
+                 PVM_VAL_STR (name)))
+        return methods[i].value;
     }
 
   return PVM_NULL;

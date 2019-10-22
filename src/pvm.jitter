@@ -1957,7 +1957,7 @@ instruction mksct ()
       PVM_VAL_SCT_METHOD_VALUE (sct, PVM_VAL_ULONG (nmethods) - e - 1)
          = JITTER_TOP_STACK ();
       PVM_VAL_SCT_METHOD_NAME (sct, PVM_VAL_ULONG (nmethods) - e - 1)
-         = JITTER_TOP_STACK ();
+         = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();

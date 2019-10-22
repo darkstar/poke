@@ -1075,12 +1075,39 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct)
 PKL_PHASE_END_HANDLER
 
 /* A struct ref is a literal if the value of the referred element is
-   also a literal.  */
+   also a literal.
+
+   Also, struct references that refer to parameterless methods are
+   transformed into funcalls to these methods, but only if the struct
+   references are not part of funcall themselves.  This is similar to
+   what is done with variable nodes. */
+
 
 PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_struct_ref)
 {
-  pkl_ast_node stct = PKL_AST_STRUCT_REF_STRUCT (PKL_PASS_NODE);
+  pkl_ast_node struct_ref = PKL_PASS_NODE;
+  pkl_ast_node stct = PKL_AST_STRUCT_REF_STRUCT (struct_ref);
+
   PKL_AST_LITERAL_P (PKL_PASS_NODE) = PKL_AST_LITERAL_P (stct);
+
+  if (PKL_PASS_PARENT
+      && PKL_AST_CODE (PKL_PASS_PARENT) != PKL_AST_FUNCALL)
+    {
+      pkl_ast_node type = PKL_AST_TYPE (struct_ref);
+
+      if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_FUNCTION
+          && (PKL_AST_TYPE_F_NARG (type) == 0
+              || pkl_ast_func_all_optargs (type)))
+        {
+          pkl_ast_node funcall = pkl_ast_make_funcall (PKL_PASS_AST,
+                                                       ASTDEREF (struct_ref),
+                                                       NULL /* args */);
+
+          PKL_AST_LOC (funcall) = PKL_AST_LOC (struct_ref);
+          PKL_PASS_NODE = funcall;
+          PKL_PASS_RESTART = 1;
+        }
+    }
 }
 PKL_PHASE_END_HANDLER
 
@@ -1129,6 +1156,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans2_ps_offset_type)
   PKL_PASS_RESTART = 1;
 }
 PKL_PHASE_END_HANDLER
+
 
 struct pkl_phase pkl_phase_trans2 =
   {
