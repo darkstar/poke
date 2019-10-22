@@ -35,18 +35,14 @@ deftype ULEB128 =
       {
        defvar shift = 0;
        defvar result = 0UL;
-
-       defun extract = (byte b) byte:
-       {
-        return (b & 0x7f) <<. shift;
-       }
+       defun extract = (byte b) byte: { return (b & 0x7f) <<. shift; }
 
        /* poke supports up to 64-bit integers.  */
        if (variable'length > 8)
          raise E_generic;
 
        for (v in variable)
-         result = extract (v.b);
+         result = result | extract (v.b);
        result = extract (last);
        
        return result;
