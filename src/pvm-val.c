@@ -1142,7 +1142,9 @@ pvm_call_pretty_printer (pvm_val val, pvm_val cls)
   pkl_asm pasm = pkl_asm_new (NULL /* ast */,
                               poke_compiler, 1 /* prologue */);
 
-  /* Remap the struct.  */
+  /* Remap the struct.  XXX this shouldn't be needed, because it won't
+     have any effect in not-mapped structs.  What we need to do is to
+     install closures as methods with a duplicated environment.  */
   pkl_asm_insn (pasm, PKL_INSN_PUSH, val);
   pkl_asm_insn (pasm, PKL_INSN_REMAP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
