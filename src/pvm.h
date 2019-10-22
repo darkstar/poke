@@ -87,14 +87,17 @@ enum pvm_exit_code pvm_run (pvm pvm,
                             pvm_program prog,
                             pvm_val *res);
 
-/* Get and set the current endianness and negative encoding for the
-   given PVM.  */
+/* Get and set the current endianness, negative encoding and other
+   global flags for the given PVM.  */
 
 enum ios_endian pvm_endian (pvm pvm);
 void pvm_set_endian (pvm pvm, enum ios_endian endian);
 
 enum ios_nenc pvm_nenc (pvm pvm);
 void pvm_set_nenc (pvm pvm, enum ios_nenc nenc);
+
+int pvm_pretty_print (pvm pvm);
+void pvm_set_pretty_print (pvm pvm, int flag);
 
 /* Set the current negative encoding for PVM.  NENC should be one of
  * the IOS_NENC_* values defined in ios.h */

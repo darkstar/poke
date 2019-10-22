@@ -355,6 +355,7 @@ typedef struct pvm_struct *pvm_struct;
 pvm_val pvm_make_struct (pvm_val nfields, pvm_val nmethods, pvm_val type);
 pvm_val pvm_ref_struct (pvm_val sct, pvm_val name);
 int pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val);
+pvm_val pvm_get_struct_method (pvm_val sct, const char *name);
 
 /* Types are also boxed.  */
 
@@ -470,6 +471,7 @@ typedef struct pvm_cls *pvm_cls;
 
 pvm_val pvm_make_cls (struct jitter_program *program,
                       void **pointers);
+int pvm_call_pretty_printer (pvm_val val, pvm_val cls);
 
 /* Offsets are boxed values.  */
 

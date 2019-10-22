@@ -1,5 +1,26 @@
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pvm.h: Prototypes for pvm_pretty_print and
+	pvm_set_pretty_print.
+	* src/pvm.c (pvm_pretty_print): New function.
+	(pvm_set_pretty_print): Likewise.
+	(PVM_STATE_PRETTY_PRINT): Define.
+	* src/pvm.jitter (state-struct-runtime-c): Add pretty_print.
+	(state-initialization-c): Initialize pretty_print to 0.
+	* src/pk-set.c (pk_cmd_set_pretty_print): New function.
+	(set_pretty_print_cmd): New struct.
+	(set_cmds): Add set-pretty_print_cmd.
+	* src/pvm-val.h: Prototype for pvm_get_struct_method.
+	Prototype for pvm_call_cls.
+	* src/pvm-val.c (pvm_get_struct_method): New function.
+	(pvm_call_pretty_printer): Likewise.
+	* testsuite/poke.pkl/struct-pretty-print-1.pk: New file.
+	* testsuite/poke.pkl/struct-pretty-print-2.pk: New file.
+	* testsuite/poke.pkl/struct-pretty-print-3.pk: Likewise.
+	* testsuite/poke.pkl/struct-pretty-print-4.pk: Likewise.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-typify.c (pkl_typify1_ps_struct_ref): Allow using dot
 	notation to refer to struct methods.
 	* src/pkl-trans.c (pkl_trans2_ps_struct_ref): Turn struct

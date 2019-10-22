@@ -36,6 +36,8 @@
   ((PVM)->pvm_state.pvm_state_runtime.endian)
 #define PVM_STATE_NENC(PVM)                             \
   ((PVM)->pvm_state.pvm_state_runtime.nenc)
+#define PVM_STATE_PRETTY_PRINT(PVM)                     \
+  ((PVM)->pvm_state.pvm_state_runtime.pretty_print)
 
 struct pvm
 {
@@ -148,6 +150,18 @@ void
 pvm_set_nenc (pvm apvm, enum ios_nenc nenc)
 {
   PVM_STATE_NENC (apvm) = nenc;
+}
+
+int
+pvm_pretty_print (pvm apvm)
+{
+  return PVM_STATE_PRETTY_PRINT (apvm);
+}
+
+void
+pvm_set_pretty_print (pvm apvm, int flag)
+{
+  PVM_STATE_PRETTY_PRINT (apvm) = flag;
 }
 
 void

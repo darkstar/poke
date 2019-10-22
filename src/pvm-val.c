@@ -21,6 +21,10 @@
 #include <assert.h>
 #include <string.h>
 
+#include "poke.h" /* XXX for poke_vm and poke_compiler, this should go
+                     away.  */
+
+#include "pkl-asm.h"
 #include "pk-term.h"
 #include "pvm.h"
 
@@ -211,6 +215,21 @@ pvm_set_struct (pvm_val sct, pvm_val name, pvm_val val)
     }
 
   return 0;
+}
+
+pvm_val
+pvm_get_struct_method (pvm_val sct, const char *name)
+{
+  size_t i, nmethods = PVM_VAL_ULONG (PVM_VAL_SCT_NMETHODS (sct));
+  struct pvm_struct_method *methods = PVM_VAL_SCT (sct)->methods;
+
+  for (i = 0; i < nmethods; ++i)
+    {
+      if (STREQ (PVM_VAL_STR (methods[i].name), name))
+        return methods[i].value;
+    }
+
+  return PVM_NULL;
 }
 
 static pvm_val
@@ -792,6 +811,16 @@ pvm_print_val (pvm_val val, int base, int flags)
       size_t nelem, idx;
       pvm_val struct_type = PVM_VAL_SCT_TYPE (val);
       pvm_val struct_type_name = PVM_VAL_TYP_S_NAME (struct_type);
+      pvm_val pretty_printer = pvm_get_struct_method (val, "_print");
+
+      /* If the struct has a pretty printing method (called _print)
+         then use it, unless the PVM is configured to not do so.
+         XXX: avoid the global poke_vm here!  */
+      if (pvm_pretty_print (poke_vm) && pretty_printer != PVM_NULL)
+        {
+          pvm_call_pretty_printer (val, pretty_printer);
+          return;
+        }
 
       nelem = PVM_VAL_ULONG (PVM_VAL_SCT_NFIELDS (val));
 
@@ -1100,4 +1129,33 @@ void
 pvm_print_string (pvm_val string)
 {
   pk_puts (PVM_VAL_STR (string));
+}
+
+/* Call a struct pretty-print function in the closure CLS,
+   corresponding to the struct VAL.  */
+
+int
+pvm_call_pretty_printer (pvm_val val, pvm_val cls)
+{
+  pvm_program program;
+  int ret;
+  pkl_asm pasm = pkl_asm_new (NULL /* ast */,
+                              poke_compiler, 1 /* prologue */);
+
+  /* Remap the struct.  */
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, val);
+  pkl_asm_insn (pasm, PKL_INSN_REMAP);
+  pkl_asm_insn (pasm, PKL_INSN_DROP);
+
+  /* Call the closure.  */
+  pkl_asm_insn (pasm, PKL_INSN_PUSH, cls);
+  pkl_asm_insn (pasm, PKL_INSN_CALL);
+
+  /* Run the program in the poke VM.  */
+  program = pkl_asm_finish (pasm, 1 /* epilogue */, NULL /* pointers */);
+  pvm_specialize_program (program);
+  ret = pvm_run (poke_vm, program, NULL);
+  pvm_destroy_program (program);
+
+  return (ret == PVM_EXIT_OK);
 }

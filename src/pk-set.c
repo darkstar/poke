@@ -184,6 +184,53 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 }
 
 static int
+pk_cmd_set_pretty_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
+{
+  /* set pretty-print {yes,no}  */
+
+  const char *arg;
+
+  /* Note that it is not possible to distinguish between no argument
+     and an empty unique string argument.  Therefore, argc should be
+     always 1 here, and we determine when no value was specified by
+     checking whether the passed string is empty or not.  */
+
+  if (argc != 1)
+    assert (0);
+
+  arg = PK_CMD_ARG_STR (argv[0]);
+
+  if (*arg == '\0')
+    {
+      if (pvm_pretty_print (poke_vm))
+        pk_puts ("yes\n");
+      else
+        pk_puts ("no\n");
+    }
+  else
+    {
+      int do_pretty_print;
+
+      if (STREQ (arg, "yes"))
+        do_pretty_print = 1;
+      else if (STREQ (arg, "no"))
+        do_pretty_print = 0;
+      else
+        {
+          pk_term_class ("error");
+          pk_puts ("error: ");
+          pk_term_end_class ("error");
+          pk_puts (" pretty-print should be one of `yes' or `no'.\n");
+          return 0;
+        }
+
+      pvm_set_pretty_print (poke_vm, do_pretty_print);
+    }
+
+  return 1;
+}
+
+static int
 pk_cmd_set_error_on_warning (int argc, struct pk_cmd_arg argv[],
                              uint64_t uflags)
 {
@@ -224,7 +271,7 @@ pk_cmd_set_error_on_warning (int argc, struct pk_cmd_arg argv[],
           pk_puts ("error-on-warning should be one of `yes' or `no'.\n");
           return 0;
         }
-      
+
       pkl_set_error_on_warning (poke_compiler, error_on_warning);
     }
 
@@ -242,6 +289,10 @@ struct pk_cmd set_endian_cmd =
 struct pk_cmd set_nenc_cmd =
   {"nenc", "s?", "", 0, NULL, pk_cmd_set_nenc, "set nenc (1c|2c)"};
 
+struct pk_cmd set_pretty_print_cmd =
+  {"pretty-print", "s?", "", 0, NULL, pk_cmd_set_pretty_print,
+   "set pretty-print (yes|no)"};
+
 struct pk_cmd set_error_on_warning_cmd =
   {"error-on-warning", "s?", "", 0, NULL, pk_cmd_set_error_on_warning,
    "set error-on-warning (yes|no)"};
@@ -251,6 +302,7 @@ struct pk_cmd *set_cmds[] =
    &set_obase_cmd,
    &set_endian_cmd,
    &set_nenc_cmd,
+   &set_pretty_print_cmd,
    &set_error_on_warning_cmd,
    &null_cmd
   };

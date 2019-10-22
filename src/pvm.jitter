@@ -507,6 +507,7 @@ state-struct-runtime-c
       uint32_t push_hi;
       uint32_t endian;
       uint32_t nenc;
+      uint32_t pretty_print;
   end
 end
 
@@ -518,6 +519,7 @@ state-initialization-c
       /* XXX: are these reasonable defaults? */
       jitter_state_runtime->endian = IOS_ENDIAN_MSB;
       jitter_state_runtime->nenc = IOS_NENC_2;
+      jitter_state_runtime->pretty_print = 0;
   end
 end
 
