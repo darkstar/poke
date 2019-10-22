@@ -16,11 +16,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-deftype uleb128 =
-  union
+/* LEB128 or Little Endian Base 128 is a variable-length encoding for
+   arbitrarily large integers.  It is used in DWARF.  */
+
+deftype ULEB_128 =
+  struct
   {
-    byte[1] val : val[0] <= 0x7f;
-    byte[2] val : val[1] <= 0x7f;
-    byte[3] val : val[2] <= 0x7f;
-    byte[4] val;
+    deftype ULEB_128_Byte =
+      struct
+      {
+        byte b : b < 0x7f;
+      };
+
+    ULEB_128_Byte[] variable;
+    byte last;
+
+    defun value = uint<64>:
+      {
+       defvar result = 0UL;
+       defvar shift = 0;
+
+       if (variable'length > 8)
+         /* poke supports up to 64-bit integers.  */
+         raise E_generic;
+
+       for (v in variable)
+         result = result | ((v.b & 0x7f) <<. shift);
+       result = result | (last & 0x7f) <<. shift;
+       
+       return result;
+      }
+
+    defun _print = void:
+      {
+       defvar val = 0UL;
+       
+       try val = value;
+       catch { print "<inv>"; return; }
+       
+       printf ("%<leb128:<%u64d>%>", value);
+      }
   };

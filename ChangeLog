@@ -1,5 +1,15 @@
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (struct pkl_ast_print_stmt): New field
+	fmt_processed_p.
+	(PKL_AST_PRINT_STMT_FMT_PROCESSED_P): Define.
+	* src/pkl-trans.c (pkl_trans1_ps_print_stmt): Handle
+	fmt_processed_p.
+	* HACKING (Middle End Handlers should be Re-executable): New
+	section.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.pks (struct_mapper): Fix bug in method handling.
 	* testsuite/poke.map/maps-structs-methods-5.pk: New file.
 

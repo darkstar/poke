@@ -681,8 +681,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
     nargs++;
   PKL_AST_PRINT_STMT_NARGS (print_stmt) = nargs;
 
-  /* If this is a `print', then we are done.  */
-  if (!print_fmt)
+  /* If this is a `print', or if the format string has been already
+     processed, then we are done.  */
+  if (!print_fmt
+      || PKL_AST_PRINT_STMT_FMT_PROCESSED_P (print_stmt))
     PKL_PASS_DONE;
 
   fmt = PKL_AST_STRING_POINTER (print_fmt);
@@ -944,6 +946,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 
   PKL_AST_PRINT_STMT_TYPES (print_stmt) = ASTREF (types);
 
+  PKL_AST_PRINT_STMT_FMT_PROCESSED_P (print_stmt) = 1;
   PKL_PASS_RESTART=1;
   PKL_PASS_DONE;
 

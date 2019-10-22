@@ -1412,13 +1412,17 @@ pkl_ast_node pkl_ast_make_try_catch_stmt (pkl_ast ast,
    NARGS is the number of arguments in ARGS.
 
    PREFIX, if not NULL, is a C string that should be printed before
-   the arguments.  */
+   the arguments.
+
+   FMT_PROCESSED_P is a boolean indicating whether the format string
+   has been already processed in this node.  */
 
 #define PKL_AST_PRINT_STMT_FMT(AST) ((AST)->print_stmt.fmt)
 #define PKL_AST_PRINT_STMT_TYPES(AST) ((AST)->print_stmt.types)
 #define PKL_AST_PRINT_STMT_ARGS(AST) ((AST)->print_stmt.args)
 #define PKL_AST_PRINT_STMT_NARGS(AST) ((AST)->print_stmt.nargs)
 #define PKL_AST_PRINT_STMT_PREFIX(AST) ((AST)->print_stmt.prefix)
+#define PKL_AST_PRINT_STMT_FMT_PROCESSED_P(AST) ((AST)->print_stmt.fmt_processed_p)
 
 struct pkl_ast_print_stmt
 {
@@ -1426,6 +1430,7 @@ struct pkl_ast_print_stmt
 
   int nargs;
   char *prefix;
+  int fmt_processed_p;
   union pkl_ast_node *fmt;
   union pkl_ast_node *types;
   union pkl_ast_node *args;

@@ -31,15 +31,15 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 ..
      1  Nomenclature
      2  Development Environment
-       2.1  Autotools
-       2.2  Flex
-       2.3  readline
-       2.4  Boehm GC
-       2.5  Jitter
-       2.6  libtextstyle
-       2.7  Building
-       2.8  Gettext
-       2.9  Running an Uninstalled Poke
+       2. 1  Autotools
+       2. 2  Flex
+       2. 3  readline
+       2. 4  Boehm GC
+       2. 5  Jitter
+       2. 6  libtextstyle
+       2. 7  Building
+       2. 8  Gettext
+       2. 9  Running an Uninstalled Poke
        2.10  Continuous Integration
      3  Coding Style and Conventions
        3.1  Writing C
@@ -58,6 +58,7 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
          8.4.3  Transformation Phases
          8.4.4  Analysis Phases
          8.4.5  Type System Phases
+         8.4.6  Middle End Handlers should be Re-executable
        8.5  The Type System
          8.5.1  Type Expressions
        8.6  Adding Compiler Built-Ins
@@ -88,6 +89,7 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
       14.6  Test Suite
       14.7  Documentation
       14.8  Other Stuff
+
 
 
 Nomenclature
@@ -540,6 +542,19 @@ typify2
   - Checks that the type of the expression in a return statement
     matches the return type of its containing function.
 
+Middle End Handlers should be Re-executable
+...........................................
+
+When a type is referenced by name, for example in a map::
+
+  Foo @ 0#B
+
+The AST associated with the type is processed again thru the compiler
+middle-end phases.  This means that if a handler modifies an AST
+subtree, it should either do it in a way the new structure will be
+still valid if submitted to the same handler again.
+
+An example of this is the ``pkl_trans1_ps_print_stmt`` handler.
 
 The Type System
 ~~~~~~~~~~~~~~~
