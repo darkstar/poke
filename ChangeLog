@@ -1,5 +1,10 @@
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.pks (struct_mapper): Fix bug in method handling.
+	* testsuite/poke.map/maps-structs-methods-5.pk: New file.
+
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pvm.h: Prototypes for pvm_pretty_print and
 	pvm_set_pretty_print.
 	* src/pvm.c (pvm_pretty_print): New function.

@@ -762,7 +762,7 @@
  .c for (nmethod = 0, i = 0, field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
  .c   if (PKL_AST_CODE (field) != PKL_AST_DECL
- .c      && (PKL_AST_DECL_KIND (field) != PKL_AST_DECL_KIND_FUNC))
+ .c       || PKL_AST_DECL_KIND (field) != PKL_AST_DECL_KIND_FUNC)
  .c   {
  .c     if (PKL_AST_DECL_KIND (field) != PKL_AST_DECL_KIND_TYPE)
  .c       i++;
