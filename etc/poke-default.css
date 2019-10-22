@@ -10,7 +10,7 @@
 .warning { color : yellow; }
 .prompt { font-weight : bold; }
 .offset { color : yellow; }
-.special { color : black; }
+.special { color : white; }
 .string { color : brown; }
 .any { color : yellow; }
 .struct-field-name { text-decoration : underline; }

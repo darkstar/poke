@@ -1,3 +1,14 @@
+2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pvm.jitter (mksct): Change instruction to get a list of
+	methods.
+	* src/pkl-gen.pks (struct_mapper): Adapt to the new form of mksct.
+	(struct_constructor): Likewise.
+	* testsuite/poke.map/maps-structs-14.pk: New test.
+	* testsuite/poke.map/maps-structs-15.pk: Likewise.
+	* testsuite/poke.map/maps-structs-16.pk: Likewise.
+	* testsuite/poke.map/maps-structs-17.pk: Likewise.
+
 2019-10-18  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pvm-val.h (PVM_VAL_SCT_METHOD): Define.

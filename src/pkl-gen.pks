@@ -702,7 +702,7 @@
         regvar $nfield
         pushvar $off            ; OFF
         dup                     ; OFF OFF
-        ;; Iterate over the fields of the struct type.
+        ;; Iterate over the elements of the struct type.
  .c for (field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
  .c {
  .c   if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
@@ -756,9 +756,33 @@
 .union_fields_done:
         drop  			; ...[EOFF ENAME EVAL]
         ;; Ok, at this point all the struct field triplets are
-        ;; in the stack.  Push the number of fields, create
-        ;; the mapped struct and return it.
+        ;; in the stack.
+        ;; Iterate over the methods of the struct type.
+ .c { int i; int nmethod;
+ .c for (nmethod = 0, i = 0, field = type_struct_elems; field; field = PKL_AST_CHAIN (field))
+ .c {
+ .c   if (PKL_AST_CODE (field) != PKL_AST_DECL
+ .c      && (PKL_AST_DECL_KIND (field) != PKL_AST_DECL_KIND_FUNC))
+ .c   {
+ .c     if (PKL_AST_DECL_KIND (field) != PKL_AST_DECL_KIND_TYPE)
+ .c       i++;
+ .c     continue;
+ .c   }
+        ;; The lexical address of this method is 0,B where B is 2 +
+        ;; element order.  This 2 should be updated if the lexical
+        ;; structure of this function changes.
+ .c     pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH,
+ .c                   pvm_make_string (PKL_AST_IDENTIFIER_POINTER (PKL_AST_DECL_NAME (field))));
+ .c     pkl_asm_insn (RAS_ASM, PKL_INSN_PUSHVAR, 0, 2 + i);
+ .c     nmethod++;
+ .c     i++;
+ .c }
+        ;; Push the number of methods.
+ .c     pkl_asm_insn (RAS_ASM, PKL_INSN_PUSH, pvm_make_ulong (nmethod, 64));
+ .c }
+        ;;  Push the number of fields
         pushvar $nfield         ; OFF [OFF STR VAL]... NFIELD
+        ;; Finally, push the struct type and call mksct.
         .c PKL_GEN_PAYLOAD->in_mapper = 0;
         .c PKL_PASS_SUBPASS (type_struct);
         .c PKL_GEN_PAYLOAD->in_mapper = 1;
@@ -825,6 +849,8 @@
         popvar $nfield          ; ...[EOFF ENAME EVAL] NEOFF
  .c }
         drop  			; ...[EOFF ENAME EVAL]
+        ;; No methods in struct constructors.
+        push ulong<64>0
         ;; Ok, at this point all the struct field triplets are
         ;; in the stack.  Push the number of fields, create
         ;; the struct and return it.

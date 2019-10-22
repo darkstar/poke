@@ -1934,31 +1934,46 @@ end
 
 ## Struct instructions.
 
-instruction mksct () # ( OFF [OFF STR VAL]... ULONG TYP -- SCT )
+#          fields         methods  nmethods nfields
+# ( OFF [OFF STR VAL]... [STR VAL]... ULONG ULONG TYP -- SCT )
+instruction mksct ()
   code
     size_t e;
-    pvm_val nelem, sct, type;
-    pvm_val nmethods = pvm_make_ulong (0, 64); /* XXX */
+    pvm_val nfields, nmethods, sct, type;
 
     type = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    nelem = JITTER_TOP_STACK ();
+    nfields = JITTER_TOP_STACK ();
     JITTER_DROP_STACK ();
 
-    sct = pvm_make_struct (nelem, nmethods, type);
+    nmethods = JITTER_TOP_STACK ();
+    JITTER_DROP_STACK ();
 
-    for (e = 0; e < PVM_VAL_ULONG (nelem); ++e)
+    sct = pvm_make_struct (nfields, nmethods, type);
+
+    for (e = 0; e < PVM_VAL_ULONG (nmethods); ++e)
     {
-      PVM_VAL_SCT_FIELD_VALUE (sct, PVM_VAL_ULONG (nelem) - e - 1)
+      PVM_VAL_SCT_METHOD_VALUE (sct, PVM_VAL_ULONG (nmethods) - e - 1)
+         = JITTER_TOP_STACK ();
+      PVM_VAL_SCT_METHOD_NAME (sct, PVM_VAL_ULONG (nmethods) - e - 1)
+         = JITTER_TOP_STACK ();
+
+      JITTER_DROP_STACK ();
+      JITTER_DROP_STACK ();
+    }
+
+    for (e = 0; e < PVM_VAL_ULONG (nfields); ++e)
+    {
+      PVM_VAL_SCT_FIELD_VALUE (sct, PVM_VAL_ULONG (nfields) - e - 1)
           = JITTER_TOP_STACK ();
-      PVM_VAL_SCT_FIELD_NAME (sct, PVM_VAL_ULONG (nelem) - e - 1)
+      PVM_VAL_SCT_FIELD_NAME (sct, PVM_VAL_ULONG (nfields) - e - 1)
           = JITTER_UNDER_TOP_STACK ();
 
       JITTER_DROP_STACK ();
       JITTER_DROP_STACK ();
 
-      PVM_VAL_SCT_FIELD_OFFSET (sct, PVM_VAL_ULONG (nelem) - e -1)
+      PVM_VAL_SCT_FIELD_OFFSET (sct, PVM_VAL_ULONG (nfields) - e -1)
           = JITTER_TOP_STACK ();
       JITTER_DROP_STACK ();
     }

@@ -1557,6 +1557,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_struct)
   pkl_ast_node sct = PKL_PASS_NODE;
   pkl_ast_node sct_type = PKL_AST_TYPE (sct);
 
+  /* No methods in struct literals.  */
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_ulong (0, 64));
+  /* The number of elements in struct literals corresponds to the
+     number of fields, since there are no declarations in them.  */
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH,
                 pvm_make_ulong (PKL_AST_STRUCT_NELEM (sct), 64));
   PKL_PASS_SUBPASS (sct_type);

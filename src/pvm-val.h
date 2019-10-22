@@ -289,7 +289,7 @@ pvm_val pvm_make_array (pvm_val nelem, pvm_val type);
 #define PVM_VAL_SCT_NFIELDS(V) (PVM_VAL_SCT((V))->nfields)
 #define PVM_VAL_SCT_FIELD(V,I) (PVM_VAL_SCT((V))->fields[(I)])
 #define PVM_VAL_SCT_NMETHODS(V) (PVM_VAL_SCT((V))->nmethods)
-#define PVM_VAL_SCT_METHOD(V) (PVM_VAL_SCT((V))->methods[(I)])
+#define PVM_VAL_SCT_METHOD(V,I) (PVM_VAL_SCT((V))->methods[(I)])
 
 struct pvm_struct
 {
