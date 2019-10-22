@@ -12,4 +12,4 @@ deftype Foo =
 /* { dg-command {.set obase 10 } } */
 /* { dg-command {defvar f = Foo @ 0#B} } */
 /* { dg-command {Foo[3] @ 0#B} } */
-/* { dg-output "\\[<16>,<32>,<48>\\]" } */
+/* { dg-output "\\\[<16>,<32>,<48>\\\]" } */
