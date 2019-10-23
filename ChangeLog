@@ -1,3 +1,7 @@
+2019-10-23  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* pickles/Makefile.am (dist_pkgdata_DATA): Add leb128.pk
+
 2019-10-22  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* testsuite/poke.pkl/struct-types-diag-8.pk: New file.
