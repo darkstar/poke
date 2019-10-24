@@ -179,6 +179,8 @@ D [0-9]
 "isa"		{ return ISA; }
 "unmap"		{ return UNMAP; }
 "__PKL_BUILTIN_RAND__" { return BUILTIN_RAND; }
+"__PKL_BUILTIN_GET_ENDIAN__" { return BUILTIN_GET_ENDIAN; }
+"__PKL_BUILTIN_SET_ENDIAN__" { return BUILTIN_SET_ENDIAN; }
 
 "uint<"         { return UINTCONSTR; }
 "int<"          { return INTCONSTR; }

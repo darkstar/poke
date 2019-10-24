@@ -34,6 +34,11 @@ defvar false = 0;
 /* Compiler built-ins. */
 
 defun rand = int<32>: __PKL_BUILTIN_RAND__;
+defun get_endian = int<32>: __PKL_BUILTIN_GET_ENDIAN__;
+defun set_endian = (int<32> endian) int<32>: __PKL_BUILTIN_SET_ENDIAN__;
+
+defvar ENDIAN_LITTLE = 0;
+defvar ENDIAN_BIG = 1;
 
 /* Exceptions.
 

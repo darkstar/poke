@@ -73,8 +73,8 @@ pk_cmd_set_endian (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
       switch (endian)
         {
-        case IOS_ENDIAN_LSB: printf ("little\n"); break;
-        case IOS_ENDIAN_MSB: printf ("big\n"); break;
+        case IOS_ENDIAN_LSB: pk_puts ("little\n"); break;
+        case IOS_ENDIAN_MSB: pk_puts ("big\n"); break;
         default:
           assert (0);
         }
@@ -154,8 +154,8 @@ pk_cmd_set_nenc (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
       switch (nenc)
         {
-        case IOS_NENC_1: printf ("1c\n"); break;
-        case IOS_NENC_2: printf ("2c\n"); break;
+        case IOS_NENC_1: pk_puts ("1c\n"); break;
+        case IOS_NENC_2: pk_puts ("2c\n"); break;
         default:
           assert (0);
         }

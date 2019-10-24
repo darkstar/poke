@@ -564,6 +564,21 @@ instruction exit ()
   end
 end
 
+instruction pushend () # ( -- INT )
+  code
+    JITTER_PUSH_STACK (pvm_make_int (jitter_state_runtime.endian,
+                                     32));
+  end
+end
+
+instruction popend () # ( INT -- )
+  code
+    uint32_t endian = PVM_VAL_INT (JITTER_TOP_STACK ());
+    jitter_state_runtime.endian = endian;
+    JITTER_DROP_STACK ();
+  end
+end
+
 
 
 ## Function management instructions
@@ -581,7 +596,7 @@ instruction prolog ()
   callee
   code
     /* Fill the return stack slot with the return address.  The return
-       stack has already been pushed (with an unspecified value on the
+       stack has already been pushesd (with an unspecified value on the
        under top) by the caller. */
     JITTER_UNDER_TOP_RETURNSTACK() = (jitter_uint) JITTER_LINK;
   end

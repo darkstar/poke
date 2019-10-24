@@ -365,6 +365,14 @@ ios_read_uint (ios io, ios_off offset, int flags,
 
       switch (bits)
         {
+        case 4:
+          {
+            int8_t c;
+
+            c = io->dev_if->get_c (io->dev);
+            *value = (c >> 4) & 0xf;
+            break;
+          }
         case 8:
           {
             int8_t c;
@@ -464,6 +472,27 @@ ios_read_uint (ios io, ios_off offset, int flags,
               *value = (c1 << 56) | (c2 << 48) | (c3 << 40) | (c4 << 32) | (c5 << 24) | (c6 << 16) | (c7 << 8) | c8;
 
             break;
+          }
+        default:
+          assert (0);
+          break;
+        }
+    }
+  else if (offset % 4 == 0)
+    {
+      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
+          == -1)
+        return IOS_EIOFF;
+
+      switch (bits)
+        {
+        case 4:
+          {
+            int8_t c;
+
+            c = io->dev_if->get_c (io->dev);
+            *value = c & 0xf;
+            break;            
           }
         default:
           assert (0);

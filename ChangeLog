@@ -1,5 +1,28 @@
 2019-10-24  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (PKL_AST_BUILTIN_GET_ENDIAN): Define.
+	(PKL_AST_BUILTIN_SET_ENDIAN): Likewise.
+	* src/pkl-tab.y (BUILTIN_GET_ENDIAN): New token.
+	(BUILTIN_SET_ENDIAN): Likewise.
+	(builtins): New rule.
+	(comp_stmt): Use rule `builtins'.
+	* src/pkl-lex.l: Tokens for get_endian and set_endian built-ins.
+	* src/pvm.jitter (pushend): New instruction.
+	(popend): Likewise.
+	* src/pkl-insn.def (PKL_INSN_PUSHEND): Define.
+	(PKL_INSN_POPEND): Likewise.
+	* src/pkl-rt.pk (get_endian): Define.
+	(set_endian): Likewise.
+	(ENDIAN_LITTLE): New variable.
+	(ENDIAN_BIG): Likewise.
+	* src/pkl-gen.c (pkl_gen_ps_comp_stmt): Generate code for
+	PKL_AST_BUILTIN_GET_ENDIAN and PKL_AST_BUILTIN_SET_ENDIAN
+	builtins.
+	* testsuite/poke.pkl/get-endian-1.pk: New test.
+	* testsuite/poke.pkl/set-endian-1.pk: Likewise.
+
+2019-10-24  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/ios.c (ios_read_uint): Add support for reading 4-bit
 	unsigned integers from addresses aligned to 8 or 4 bytes.
 

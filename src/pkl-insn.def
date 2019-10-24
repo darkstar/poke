@@ -367,6 +367,8 @@ PKL_DEF_INSN (PKL_INSN_RAISE, "", "raise")
 
 PKL_DEF_INSN (PKL_INSN_CANARY, "", "canary")
 PKL_DEF_INSN (PKL_INSN_EXIT, "", "exit")
+PKL_DEF_INSN (PKL_INSN_PUSHEND, "", "pushend")
+PKL_DEF_INSN (PKL_INSN_POPEND, "",  "popend")
 
 /* The only purpose of PKL_INSN_MACRO is to mark the beginning of
    macro instructions.  It should _not_ be passed to
