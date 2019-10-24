@@ -32,15 +32,16 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      1  Nomenclature
      2  Development Environment
        2. 1  Autotools
-       2. 2  Flex
-       2. 3  readline
-       2. 4  Boehm GC
-       2. 5  Jitter
-       2. 6  libtextstyle
-       2. 7  Building
-       2. 8  Gettext
-       2. 9  Running an Uninstalled Poke
-       2.10  Continuous Integration
+       2. 2  Dejagnu
+       2. 3  Flex
+       2. 4  readline
+       2. 5  Boehm GC
+       2. 6  Jitter
+       2. 7  libtextstyle
+       2. 8  Building
+       2. 9  Gettext
+       2.10  Running an Uninstalled Poke
+       2.11  Continuous Integration
      3  Coding Style and Conventions
        3.1  Writing C
        3.2  Writing Poke
@@ -120,6 +121,13 @@ are getting the sources from git (or change configure.ac), you'll need
 to have these tools installed to (re)build.  You'll also need
 help2man.  All of these programs are available from
 ftp://ftp.gnu.org/gnu.
+
+Dejagnu
+~~~~~~~
+
+The poke testsuite uses DejaGNU.  Please install it if you indent to
+run the tests.  If you want to hack poke, you definitely want to run
+the tests :)
 
 Flex
 ~~~~

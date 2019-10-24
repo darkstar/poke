@@ -1,3 +1,7 @@
+2019-10-24  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* HACKING (Dejagnu): Mention as a dependency.
+
 2019-10-24  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-ast.h (PKL_AST_BUILTIN_GET_ENDIAN): Define.
