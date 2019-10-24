@@ -1,3 +1,8 @@
+2019-10-24  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/ios.c (ios_read_uint): Add support for reading 4-bit
+	unsigned integers from addresses aligned to 8 or 4 bytes.
+
 2019-10-23  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* pickles/Makefile.am (dist_pkgdata_DATA): Add leb128.pk
