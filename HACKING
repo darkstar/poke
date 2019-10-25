@@ -45,6 +45,7 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
      3  Coding Style and Conventions
        3.1  Writing C
        3.2  Writing Poke
+       3.3  Writing RAS
      4  Deciding on What to Work on
      5  Submitting a Patch
      6  Maintenance
@@ -90,7 +91,6 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
       14.6  Test Suite
       14.7  Documentation
       14.8  Other Stuff
-
 
 
 Nomenclature
@@ -266,6 +266,12 @@ Writing Poke
 
 - Use Camel_Case for type names, but do not use Camel_Case for
   variable/function names!
+
+Writing RAS
+~~~~~~~~~~~
+
+We recommend to use the Emacs mode in ``etc/poke-ras-mode.el`` to
+write ``.pks`` files.
 
 Deciding on What to Work on
 ---------------------------
