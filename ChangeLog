@@ -1,5 +1,9 @@
 2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/ras: Recognize empty .c lines without a trailing whitespace.
+
+2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/future/bson.pk: Syntax-check fixes.
 	* src/pkl.c: Likewise.
 	* testsuite/poke.map/maps-structs-methods-5.pk: Likewise.
