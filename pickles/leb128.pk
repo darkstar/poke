@@ -44,21 +44,21 @@ deftype ULEB128 =
        for (v in variable)
          result = result | extract (v.b);
        result = extract (last);
-       
+
        return result;
       }
 
     defun _print = void:
       {
        defvar val = 0UL;
-       
+
        try val = value;
        catch
        {
          printf "#<leb128:%<warning:inv%>>";
          return;
        }
-       
+
        printf ("%<leb128:#<leb128:%<integer:%u64d%>>%>",
                value);
       }

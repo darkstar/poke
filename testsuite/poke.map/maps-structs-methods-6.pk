@@ -21,4 +21,3 @@ deftype Foo =
 /* { dg-output "2" } */
 /* { dg-command { f.prefix.geta } } */
 /* { dg-output "\n2" } */
-

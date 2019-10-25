@@ -13,4 +13,3 @@ deftype Foo =
 
 /* { dg-command { Foo @ 0#B } } */
 /* { dg-output "Foo \\{single=0x10UB\\}" } */
-

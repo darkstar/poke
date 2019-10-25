@@ -25,17 +25,17 @@ deftype ULEB_128 =
        for (v in variable)
          result = result | ((v.b & 0x7f) <<. shift);
        result = result | (last & 0x7f) <<. shift;
-       
+
        return result;
       }
 
     defun _print = void:
       {
        defvar val = 0UL;
-       
+
        try val = value;
        catch { print "<inv>"; return; }
-       
+
        printf ("<%u64d>", value);
       }
   };

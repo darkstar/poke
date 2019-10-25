@@ -3,4 +3,3 @@
 
 /* { dg-command {printf "xxx%<foo:%i32d%>yyy", 10} } */
 /* { dg-output "xxx<span class=\"foo\">10</span>yyy" } */
-

@@ -552,7 +552,7 @@ pkl_ast_dup_type (pkl_ast_node type)
           pkl_ast_node struct_type_elem_label;
           pkl_ast_node new_struct_type_elem_name;
           pkl_ast_node struct_type_elem;
-            
+
           /* Process only struct type fields.  XXX But what about
              declarations?  These should also be duplicated.  */
           if (PKL_AST_CODE (t) != PKL_AST_STRUCT_TYPE_FIELD)
@@ -976,7 +976,7 @@ pkl_print_type (FILE *out, pkl_ast_node type, int use_given_name)
 
             ename = PKL_AST_STRUCT_TYPE_FIELD_NAME (t);
             etype = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
-            
+
             pkl_print_type (out, etype, use_given_name);
             if (ename)
               fprintf (out, " %s",

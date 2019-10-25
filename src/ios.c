@@ -492,7 +492,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
 
             c = io->dev_if->get_c (io->dev);
             *value = c & 0xf;
-            break;            
+            break;
           }
         default:
           assert (0);

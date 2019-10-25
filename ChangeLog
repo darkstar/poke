@@ -1,6 +1,27 @@
 2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
 
-	* src/pvm.jitter (PVM_PEEK): Raise exceptions in case of IO
+	* pickles/future/bson.pk: Syntax-check fixes.
+	* src/pkl.c: Likewise.
+	* testsuite/poke.map/maps-structs-methods-5.pk: Likewise.
+	* src/pkl-trans.c: Likewise.
+	* src/pkl-gen.pks: Likewise.
+	* src/pkl-gen.c: Likewise.
+	* src/pkl-ast.c: Likewise.
+	* src/pkl-anal.c: Likewise.
+	* src/ios.c: Likewise.
+	* pickles/leb128.pk: Likewise.
+	* etc/poke-ras-mode.el: Likewise.
+	* testsuite/poke.map/maps-unions-8.pk: Likewise.
+	* testsuite/poke.pkl/struct-pretty-print-3.pk: Likewise.
+	* testsuite/poke.pkl/struct-pretty-print-1.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-2.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-1.pk: Likewise.
+	* testsuite/poke.map/maps-structs-methods-7.pk: Likewise.
+	* testsuite/poke.map/maps-structs-methods-6.pk: Likewise.
+
+2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pvm.jitter (PVM_PEEK): Raise exceptionspa in case of IO
 	end-of-file and generic IO error.
 	(PVM_POKE): Likewise.
 	(peeks): Likewise.

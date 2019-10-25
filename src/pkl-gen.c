@@ -751,14 +751,14 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
                             pvm_make_string (end_sc));
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_ENDSC);
             }
-          
+
           if (exp)
             {
               PKL_PASS_SUBPASS (exp);
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
                             base);
             }
-              
+
           if (suffix)
             {
               pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_string (suffix));
@@ -1377,7 +1377,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_map)
   PKL_GEN_PAYLOAD->in_mapper = 1;
   PKL_PASS_SUBPASS (map_type);
   PKL_GEN_PAYLOAD->in_mapper = 0;
-  
+
   PKL_PASS_BREAK;
 }
 PKL_PHASE_END_HANDLER

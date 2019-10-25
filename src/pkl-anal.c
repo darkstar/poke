@@ -111,7 +111,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal1_ps_type_struct)
   if (PKL_AST_TYPE_S_UNION (struct_type))
     {
       int found_field = 0;
-      
+
       for (t = struct_type_elems; t; t = PKL_AST_CHAIN (t))
         {
           if (found_field

@@ -714,7 +714,7 @@
  .c     PKL_GEN_PAYLOAD->in_mapper = 0;
  .c     PKL_PASS_SUBPASS (field);
  .c     PKL_GEN_PAYLOAD->in_mapper = 1;
- .c 
+ .c
  .c     continue;
  .c   }
         .label .alternative_failed
@@ -838,7 +838,7 @@
  .c     PKL_GEN_PAYLOAD->in_mapper = 0;
  .c     PKL_PASS_SUBPASS (field);
  .c     PKL_GEN_PAYLOAD->in_mapper = 1;
- .c 
+ .c
  .c     continue;
  .c   }
         pushvar $off               ; ...[EOFF ENAME EVAL] NEOFF OFF

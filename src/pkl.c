@@ -618,7 +618,7 @@ pkl_error (pkl_compiler compiler,
            ...)
 {
   va_list valist;
-  
+
   va_start (valist, fmt);
   pkl_error_internal (compiler, ast, loc, fmt, valist);
   va_end (valist);

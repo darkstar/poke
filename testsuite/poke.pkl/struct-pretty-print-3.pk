@@ -18,4 +18,3 @@ deftype Foo =
 /* { dg-output "\n<32>" } */
 /* { dg-command {a[2]} } */
 /* { dg-output "\n<48>" } */
-

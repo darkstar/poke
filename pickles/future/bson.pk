@@ -229,4 +229,3 @@ deftype BSON_Doc =
     BSON_Elem[size - size'size - 1#B] elements;
     byte endmark : endmark == 0x0;
   };
-

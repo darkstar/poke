@@ -35,6 +35,6 @@
   (font-lock-add-keywords nil
                           '(("^[ \t]*\\.c .*" . 'poke-ras-c-literal-face)
                             ("\\$[a-zA-Z][0-9a-zA-Z_]*" . 'poke-ras-variable-face))))
-                          
+
 
 ;;; ras-mode.el ends here

@@ -854,7 +854,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
                 assert (nclasses > 0);
                 class = classes[--nclasses];
               }
-            
+
             /* Create the new arg and add it to the list of
                arguments.  */
             new_arg = pkl_ast_make_print_stmt_arg (PKL_PASS_AST,
