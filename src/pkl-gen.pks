@@ -715,44 +715,44 @@
  .c     continue;
  .c   }
         .label .alternative_failed
-   .c if (PKL_AST_TYPE_S_UNION (type_struct))
-   .c {
+ .c   if (PKL_AST_TYPE_S_UNION (type_struct))
+ .c   {
         push PVM_E_CONSTRAINT
         pushe .alternative_failed
-   .c }
+ .c   }
         pushvar $off             ; ...[EOFF ENAME EVAL] NEOFF OFF
         .e struct_field_mapper   ; ...[EOFF ENAME EVAL] NEOFF
-   .c if (PKL_AST_TYPE_S_UNION (type_struct))
-   .c {
+ .c   if (PKL_AST_TYPE_S_UNION (type_struct))
+ .c   {
         pope
-   .c }
+ .c   }
         ;; If the struct is pinned, replace NEOFF with OFF
-   .c if (PKL_AST_TYPE_S_PINNED (type_struct))
-   .c {
+ .c   if (PKL_AST_TYPE_S_PINNED (type_struct))
+ .c   {
         drop
         pushvar $off            ; ...[EOFF ENAME EVAL] OFF
-   .c }
+ .c   }
         ;; Increase the number of fields.
         pushvar $nfield         ; ...[EOFF ENAME EVAL] NEOFF NFIELD
         push ulong<64>1         ; ...[EOFF ENAME EVAL] NEOFF NFIELD 1UL
         addl
         nip2                    ; ...[EOFF ENAME EVAL] NEOFF (NFIELD+1UL)
         popvar $nfield          ; ...[EOFF ENAME EVAL] NEOFF
-   .c if (PKL_AST_TYPE_S_UNION (type_struct))
-   .c {
+ .c   if (PKL_AST_TYPE_S_UNION (type_struct))
+ .c   {
         ;; Union field successfully mapped.  We are done.
         ba .union_fields_done
 .alternative_failed:
         ;; Drop the exception number and try next alternative.
         drop                    ; ...[EOFF ENAME EVAL] NEOFF
-   .c }
+ .c   }
  .c }
  .c if (PKL_AST_TYPE_S_UNION (type_struct))
-  .c {
+ .c {
         ;; No valid alternative found in union.
         push PVM_E_CONSTRAINT
         raise
-  .c }
+ .c }
 .union_fields_done:
         drop  			; ...[EOFF ENAME EVAL]
         ;; Ok, at this point all the struct field triplets are
