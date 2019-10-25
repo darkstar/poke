@@ -474,7 +474,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
             break;
           }
         default:
-          *value = 6;
+          assert (0);
           break;
         }
     }
@@ -495,16 +495,12 @@ ios_read_uint (ios io, ios_off offset, int flags,
             break;            
           }
         default:
-          {
-            *value = 6;
-            break;
-          }
+          assert (0);
+          break;
         }
     }
   else
-    {
-      *value = 6;
-    }
+    assert (0);
 
   return IOS_OK;
 }
