@@ -1,5 +1,18 @@
 2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pvm.jitter (PVM_PEEK): Raise exceptions in case of IO
+	end-of-file and generic IO error.
+	(PVM_POKE): Likewise.
+	(peeks): Likewise.
+	* src/pkl-gen.c (pkl_gen_pr_map): Do not handle EOF.
+	* src/pkl-rt.pk (_pkl_exception_handler): Handle E_io.
+	* src/pkl-gen.pks (array_mapper): Adjust to the new handling of
+	EOF.
+	* testsuite/poke.map/maps-unions-7.pk: New test.
+	* testsuite/poke.map/maps-unions-8.pk: Likewise.
+
+2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-anal.c (pkl_anal1_ps_type_struct): Do not allow
 	declarations after union fields.
 	* testsuite/poke.map/maps-unions-6.pk: Likewise.

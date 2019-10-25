@@ -229,6 +229,7 @@ late-header-c
 #define PVM_PEEK(TYPE,IOTYPE,NENC,ENDIAN,BITS,IOARGS)                        \
   do                                                                         \
    {                                                                         \
+     int ret;                                                                \
      __attribute__((unused)) enum ios_nenc nenc = (NENC);                    \
      enum ios_endian endian = (ENDIAN);                                      \
      int bits = (BITS);                                                      \
@@ -241,9 +242,12 @@ late-header-c
                                                                              \
      offset = PVM_VAL_ULONG (JITTER_TOP_STACK ());                           \
                                                                              \
-     if (ios_read_##IOTYPE (IOARGS) != IOS_OK)                               \
+     if ((ret = ios_read_##IOTYPE (IOARGS)) != IOS_OK)                       \
        {                                                                     \
-         /* XXX: raise an IO exception for a != EOF error.  */               \
+         if (ret == IOS_EIOFF)                                               \
+            PVM_RAISE (PVM_E_EOF);                                           \
+         else                                                                \
+            PVM_RAISE (PVM_E_IO);                                            \
          JITTER_TOP_STACK () = PVM_NULL;                                     \
        }                                                                     \
      else                                                                    \
@@ -255,6 +259,7 @@ late-header-c
 #define PVM_POKE(TYPE,IOTYPE,NENC,ENDIAN,BITS,IOARGS)                        \
   do                                                                         \
    {                                                                         \
+     int ret;                                                                \
      __attribute__((unused)) enum ios_nenc nenc = (NENC);                    \
      enum ios_endian endian = (ENDIAN);                                      \
      int bits = (BITS);                                                      \
@@ -271,9 +276,12 @@ late-header-c
                                                                              \
      offset = PVM_VAL_ULONG (offset_val);                                    \
                                                                              \
-     if (ios_write_##IOTYPE (IOARGS) != IOS_OK)                              \
+     if ((ret = ios_write_##IOTYPE (IOARGS)) != IOS_OK)                      \
        {                                                                     \
-         /* XXX: raise an IO exception.  */                                  \
+         if (ret == IOS_EIOFF)                                               \
+            PVM_RAISE (PVM_E_EOF);                                           \
+         else                                                                \
+            PVM_RAISE (PVM_E_IO);                                            \
        }                                                                     \
    } while (0)
 
@@ -2521,14 +2529,21 @@ instruction peeks ()
     ios io;
     ios_off offset;
     char *ios_str;
+    int ret;
 
     if ((io = ios_cur ()) == NULL)
         PVM_RAISE (PVM_E_NO_IOS);
 
     offset = PVM_VAL_ULONG (JITTER_TOP_STACK ());
 
-    if (ios_read_string (io, offset, 0 /* flags */, &ios_str) != IOS_OK)
+    if ((ret = ios_read_string (io, offset, 0 /* flags */, &ios_str)) != IOS_OK)
+    {
+      if (ret == IOS_EIOFF)
+         PVM_RAISE (PVM_E_EOF);
+      else
+         PVM_RAISE (PVM_E_IO);
       JITTER_TOP_STACK () = PVM_NULL;
+    }
     else
       JITTER_TOP_STACK () = pvm_make_string (ios_str);
   end

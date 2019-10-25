@@ -59,6 +59,7 @@ defvar E_map           = 7;
 defvar E_conv          = 8;
 defvar E_elem          = 9;
 defvar E_constraint    = 10;
+defvar E_io            = 11;
 
 /* Default exception handler.
 
@@ -91,6 +92,8 @@ defun _pkl_exception_handler = (Exception exception) void:
      print "no IOS";
    else if (exception == E_no_return)
      print "no return";
+   else if (exception == E_io)
+     print "generic IO exception";
    else
      print "generic";
 

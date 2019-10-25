@@ -145,11 +145,13 @@
         push ulong<64>1         ; ... EOMAG EOUNIT
         mko                     ; ... EOFF
         dup                     ; ... EOFF EOFF
+        push PVM_E_EOF
+        pushe .eof
         push PVM_E_CONSTRAINT
         pushe .constraint_error
         .c PKL_PASS_SUBPASS (PKL_AST_TYPE_A_ETYPE (array_type));
         pope
-        bn .eof
+        pope
         ;; Update the current offset with the size of the value just
         ;; peeked.
         siz                     ; ... EOFF EVAL ESIZ
@@ -194,6 +196,7 @@
         raise
 .eof:
         ;; Remove the partial EOFF null element from the stack.
+        drop
                                 ; ... EOFF null
         drop                    ; ... EOFF
         drop                    ; ...
