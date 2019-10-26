@@ -131,11 +131,11 @@ deftype BPF_Reg =
 
    defun _print = void:
    {
-    print "#<%";
+    print "#<";
     if (code < BPF_R9)
-      printf "r%i32d", code;
+      printf "%<insn-register:%sr%i32d%>", "%", code;
     else
-      print "fp";
+      printf "%<insn-register:fp%>";
     print ">";
    }
   };
@@ -156,9 +156,9 @@ deftype BPF_Insn_Opcode =
            print "#<";
            if (class == BPF_INSN_CLASS_ALU
                || class == BPF_INSN_CLASS_ALU64)
-             print bpf_alu_opcodes[code];
+             printf "%<insn-mnemonic:%s%>", bpf_alu_opcodes[code];
            else
-             print bpf_jmp_opcodes[code];
+             printf "%<insn-mnemonic:%s%>", bpf_jmp_opcodes[code];
            print ">";
           }
       } alujmp;
@@ -173,14 +173,14 @@ deftype BPF_Insn_Opcode =
           {
            print "#<";
            if (class == BPF_INSN_CLASS_LDX)
-             print "ldx";
+             printf "%<insn-mnemonic:ldx%>";
            else if (class == BPF_INSN_CLASS_LD)
-             print "ld";
+             printf "%<insn-mnemonic:ld%>";
            else if (class == BPF_INSN_CLASS_STX)
-             print "stx";
+             print "%<insn-mnemonic:stx%>";
            else if (class == BPF_INSN_CLASS_ST)
-             print "st";
-           print bpf_ldst_sizes[size];
+             print "%<insn-mnemonic:st%>";
+           printf "%<insn-mnemonic:%s%>",  bpf_ldst_sizes[size];
            print ">";
           }
       } ldst;

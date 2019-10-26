@@ -1,5 +1,13 @@
 2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/bpf.pk (BPF_Reg): Use styling when printing register
+	names.
+	(BPF_Insn_Opcode): Likewise for instruction mnemonics.
+	* etc/poke-default.css (.insn-register): New class.
+	(.insn-mnemonic): Likewise.
+
+2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/bpf.pk (bpf_alu_opcodes): New variable.
 	(bpf_jmp_opcodes): Likewise.
 	(bpf_ldst_sizes): Likewise.

@@ -24,6 +24,10 @@
 
 .leb128 { color : grey; }
 
+/* Classes for ISA-related stuff.  */
+.insn-mnemonic { color : yellow; }
+.insn-register { color : yellow; }
+
 html {
     font-family: Menlo, Monaco, "Courier New", monospace;
 }
