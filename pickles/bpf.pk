@@ -57,6 +57,10 @@ defvar BPF_ALU_INSN_MOV = 0xb;
 defvar BPF_ALU_INSN_ARSH = 0xc;
 defvar BPF_ALU_INSN_END = 0xd;
 
+defvar bpf_alu_opcodes =
+  ["add", "sub", "mul", "div", "or", "and", "lsh",
+   "rsh", "neg", "mod", "xor", "mov", "arsh", "end"];
+
 /* JMP instructions operation codes.  */
 
 defvar BPF_JMP_INSN_JA  = 0x0;
@@ -74,6 +78,10 @@ defvar BPF_JMP_INSN_JLE = 0xb;
 defvar BPF_JMP_INSN_JSLT = 0xc;
 defvar BPF_JMP_INSN_JSLE = 0xd;
 
+defvar bpf_jmp_opcodes =
+  ["ja", "jeq", "jgt", "jge", "jset", "jne", "jsgt",
+   "jsge", "call", "exit", "jlt", "jle", "jslt", "jsle"];
+
 /* Instruction source for ALU and JMP instructions.  */
 
 deftype BPF_Insn_Source = uint<1>;
@@ -89,6 +97,8 @@ defvar BPF_LDST_INSN_SIZE_W = 0b00;
 defvar BPF_LDST_INSN_SIZE_H = 0b01;
 defvar BPF_LDST_INSN_SIZE_B = 0b10;
 defvar BPF_LDST_INSN_SIZE_DW = 0b11;
+
+defvar bpf_ldst_sizes = ["w", "h", "b", "dw"];
 
 /* LD and ST instruction modes.  */
 
@@ -121,11 +131,12 @@ deftype BPF_Reg =
 
    defun _print = void:
    {
-    print "%";
+    print "#<%";
     if (code < BPF_R9)
       printf "r%i32d", code;
     else
       print "fp";
+    print ">";
    }
   };
 
@@ -139,6 +150,17 @@ deftype BPF_Insn_Opcode =
         BPF_Insn_Op_Code code;
         BPF_Insn_Source src;
         BPF_Insn_Class class : bpf_class_is_alujmp (class);
+
+        defun _print = void:
+          {
+           print "#<";
+           if (class == BPF_INSN_CLASS_ALU
+               || class == BPF_INSN_CLASS_ALU64)
+             print bpf_alu_opcodes[code];
+           else
+             print bpf_jmp_opcodes[code];
+           print ">";
+          }
       } alujmp;
 
       struct
@@ -146,6 +168,21 @@ deftype BPF_Insn_Opcode =
         BPF_Insn_LDST_Mode mode;
         BPF_Insn_Data_Size size;
         BPF_Insn_Class class;
+
+        defun _print = void:
+          {
+           print "#<";
+           if (class == BPF_INSN_CLASS_LDX)
+             print "ldx";
+           else if (class == BPF_INSN_CLASS_LD)
+             print "ld";
+           else if (class == BPF_INSN_CLASS_STX)
+             print "stx";
+           else if (class == BPF_INSN_CLASS_ST)
+             print "st";
+           print bpf_ldst_sizes[size];
+           print ">";
+          }
       } ldst;
   };
 
@@ -188,6 +225,13 @@ deftype BPF_Insn =
         uint<32> lo;
         uint<32>;
         uint<32> hi;
+
+        defun _print = void:
+          {
+           print "#<";
+           printf "%<integer:%i64x%>", hi::lo;
+           print ">";
+          }
       } imm64 : imm64_p;
 
       int<32> imm32;

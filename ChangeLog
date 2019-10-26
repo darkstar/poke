@@ -1,5 +1,13 @@
 2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/bpf.pk (bpf_alu_opcodes): New variable.
+	(bpf_jmp_opcodes): Likewise.
+	(bpf_ldst_sizes): Likewise.
+	(BPF_Insn_Opcode): Pretty printers.
+	(BPF_Insn): Pretty printer for imm64.
+
+2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.c (pkl_gen_pr_op_and): New handler.
 	(pkl_gen_pr_op_or): Likewise.
 	(pkl_gen_ps_op_and): Remove.
