@@ -1,3 +1,21 @@
+2019-10-26  Egeyar Bagcioglu  <egeyar@gmail.com>
+
+	* bootstrap.conf (gnulib_modules): Import the module byteswap from
+	gnulib.
+	* src/ios.c (IOS_GET_C_ERR_CHCK): Define.
+	(IOS_READ_INTO_CHARRAY_1BYTE): Likewise.
+	(IOS_READ_INTO_CHARRAY_2BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_3BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_4BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_5BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_6BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_7BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_8BYTES): Likewise.
+	(IOS_READ_INTO_CHARRAY_9BYTES): Likewise.
+	(ios_mask_first_byte): New function.
+	(ios_mask_last_byte): Likewise.
+	(ios_read_uint): Rewrite.
+
 2019-10-25  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* HACKING (Writing RAS): New section.

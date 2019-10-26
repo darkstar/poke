@@ -31,6 +31,66 @@
 
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
+#define IOS_GET_C_ERR_CHCK(c, io)	\
+{					\
+  (c) = io->dev_if->get_c ((io)->dev); 	\
+  if ((c) == IOD_EOF)			\
+    return IOS_EIOFF;			\
+}
+
+#define IOS_READ_INTO_CHARRAY_1BYTE(charray)		\
+{							\
+  IOS_GET_C_ERR_CHCK((charray)[0], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_2BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_1BYTE(charray);			\
+  IOS_GET_C_ERR_CHCK((charray)[1], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_3BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_2BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[2], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_4BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_3BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[3], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_5BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_4BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[4], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_6BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_5BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[5], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_7BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_6BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[6], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_8BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_7BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[7], io);			\
+}
+
+#define IOS_READ_INTO_CHARRAY_9BYTES(charray)		\
+{							\
+  IOS_READ_INTO_CHARRAY_8BYTES(charray);		\
+  IOS_GET_C_ERR_CHCK((charray)[8], io);			\
+}
+
 /* The following struct implements an instance of an IO space.
 
    HANDLER is a copy of the handler string used to open the space.
@@ -223,6 +283,74 @@ ios_map (ios_map_fn cb, void *data)
     (*cb) (io, data);
 }
 
+inline static void
+ios_mask_first_byte(uint64_t *byte, int significant_bits)
+{
+  switch (significant_bits)
+    {
+    case 1:
+      *byte &= (char) 0x01;
+      return;
+    case 2:
+      *byte &= (char) 0x03;
+      return;
+    case 3:
+      *byte &= (char) 0x07;
+      return;
+    case 4:
+      *byte &= (char) 0x0f;
+      return;
+    case 5:
+      *byte &= (char) 0x1f;
+      return;
+    case 6:
+      *byte &= (char) 0x3f;
+      return;
+    case 7:
+      *byte &= (char) 0x7f;
+      return;
+    case 8:
+      return;
+    default:
+      assert (0);
+      return;
+    }
+}
+
+inline static void
+ios_mask_last_byte(uint64_t *byte, int significant_bits)
+{
+  switch (significant_bits)
+    {
+    case 1:
+      *byte &= (char) 0x80;
+      return;
+    case 2:
+      *byte &= (char) 0xc0;
+      return;
+    case 3:
+      *byte &= (char) 0xe0;
+      return;
+    case 4:
+      *byte &= (char) 0xf0;
+      return;
+    case 5:
+      *byte &= (char) 0xf8;
+      return;
+    case 6:
+      *byte &= (char) 0xfc;
+      return;
+    case 7:
+      *byte &= (char) 0xfe;
+      return;
+    case 8:
+      return;
+    default:
+      assert (0);
+      return;
+    }
+}
+
 int
 ios_read_int (ios io, ios_off offset, int flags,
               int bits,
@@ -356,153 +484,414 @@ ios_read_uint (ios io, ios_off offset, int flags,
                enum ios_endian endian,
                uint64_t *value)
 {
-  /* XXX: writeme  */
-  if (offset % 8 == 0)
+  /* 64 bits might span at most 9 bytes.  */
+  uint64_t c[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+  /* We always need to start reading from offset / 8  */
+  if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET) == -1)
+    return IOS_EIOFF;
+
+  /* Fast track for byte-aligned 8x bits  */
+  if (offset % 8 == 0 && bits % 8 == 0)
     {
-      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
-          == -1)
-        return IOS_EIOFF;
+      switch (bits) {
+      case 8:
+	IOS_READ_INTO_CHARRAY_1BYTE(c);
+	*value = c[0];
+	return IOS_OK;
 
-      switch (bits)
-        {
-        case 4:
-          {
-            int8_t c;
+      case 16:
+	IOS_READ_INTO_CHARRAY_2BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 8) | c[1];
+	return IOS_OK;
 
-            c = io->dev_if->get_c (io->dev);
-            *value = (c >> 4) & 0xf;
-            break;
-          }
-        case 8:
-          {
-            int8_t c;
+      case 24:
+	IOS_READ_INTO_CHARRAY_3BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 16) | (c[1] << 8) | c[2];
+	return IOS_OK;
 
-            c = io->dev_if->get_c (io->dev);
-            if (c == IOD_EOF)
-              return IOS_EIOFF;
+      case 32:
+	IOS_READ_INTO_CHARRAY_4BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | c[3];
+	return IOS_OK;
 
-            *value = c;
-            break;
-          }
-        case 16:
-          {
-            int16_t c1, c2;
+      case 40:
+	IOS_READ_INTO_CHARRAY_5BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[4] << 32) | (c[3] << 24) | (c[2] << 16) | (c[1] << 8)
+		   | c[0];
+	else
+	  *value = (c[0] << 32) | (c[1] << 24) | (c[2] << 16) | (c[2] << 8)
+		   | c[4];
+	return IOS_OK;
 
-            c1 = io->dev_if->get_c (io->dev);
-            if (c1 == IOD_EOF)
-              return IOS_EIOFF;
+      case 48:
+	IOS_READ_INTO_CHARRAY_6BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[5] << 40) | (c[4] << 32) | (c[3] << 24) | (c[2] << 16)
+		   | (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 40) | (c[1] << 32) | (c[2] << 24) | (c[3] << 16)
+		   | (c[4] << 8) | c[5];
+	return IOS_OK;
 
-            c2 = io->dev_if->get_c (io->dev);
-            if (c2 == IOD_EOF)
-              return IOS_EIOFF;
+      case 56:
+	IOS_READ_INTO_CHARRAY_7BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[6] << 48) | (c[5] << 40) | (c[4] << 32) | (c[3] << 24)
+		   | (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 48) | (c[1] << 40) | (c[2] << 32) | (c[3] << 24)
+		   | (c[4] << 16) | (c[5] << 8) | c[6];
+	return IOS_OK;
 
-            if (endian == IOS_ENDIAN_LSB)
-              *value = (c2 << 8) | c1;
-            else
-              *value = (c1 << 8) | c2;
-
-            break;
-          }
-        case 32:
-          {
-            int32_t c1, c2, c3, c4;
-
-            c1 = io->dev_if->get_c (io->dev);
-            if (c1 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c2 = io->dev_if->get_c (io->dev);
-            if (c2 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c3 = io->dev_if->get_c (io->dev);
-            if (c3 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c4 = io->dev_if->get_c (io->dev);
-            if (c4 == IOD_EOF)
-              return IOS_EIOFF;
-
-            if (endian == IOS_ENDIAN_LSB)
-              *value = (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
-            else
-              *value = (c1 << 24) | (c2 << 16) | (c3 << 8) | c4;
-
-            break;
-          }
-        case 64:
-          {
-            int64_t c1, c2, c3, c4, c5, c6, c7, c8;
-
-            c1 = io->dev_if->get_c (io->dev);
-            if (c1 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c2 = io->dev_if->get_c (io->dev);
-            if (c2 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c3 = io->dev_if->get_c (io->dev);
-            if (c3 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c4 = io->dev_if->get_c (io->dev);
-            if (c4 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c5 = io->dev_if->get_c (io->dev);
-            if (c5 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c6 = io->dev_if->get_c (io->dev);
-            if (c6 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c7 = io->dev_if->get_c (io->dev);
-            if (c7 == IOD_EOF)
-              return IOS_EIOFF;
-
-            c8 = io->dev_if->get_c (io->dev);
-            if (c8 == IOD_EOF)
-              return IOS_EIOFF;
-
-            if (endian == IOS_ENDIAN_LSB)
-              *value = (c8 << 56) | (c7 << 48) | (c6 << 40) | (c5 << 32) | (c4 << 24) | (c3 << 16) | (c2 << 8) | c1;
-            else
-              *value = (c1 << 56) | (c2 << 48) | (c3 << 40) | (c4 << 32) | (c5 << 24) | (c6 << 16) | (c7 << 8) | c8;
-
-            break;
-          }
-        default:
-          assert (0);
-          break;
-        }
+      case 64:
+	IOS_READ_INTO_CHARRAY_8BYTES(c);
+	if (endian == IOS_ENDIAN_LSB)
+	  *value = (c[7] << 56) | (c[6] << 48) | (c[5] << 40) | (c[4] << 32)
+		   | (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  *value = (c[0] << 56) | (c[1] << 48) | (c[2] << 40) | (c[3] << 32)
+		   | (c[4] << 24) | (c[5] << 16) | (c[6] << 8) | c[7];
+	return IOS_OK;
+      }
     }
-  else if (offset % 4 == 0)
-    {
-      if (io->dev_if->seek (io->dev, offset / 8, IOD_SEEK_SET)
-          == -1)
-        return IOS_EIOFF;
 
-      switch (bits)
-        {
-        case 4:
-          {
-            int8_t c;
+  /* Number of signifcant bits in the first byte.  */
+  int firstbyte_bits = 8 - (offset % 8);
 
-            c = io->dev_if->get_c (io->dev);
-            *value = c & 0xf;
-            break;
-          }
-        default:
-          assert (0);
-          break;
-        }
-    }
-  else
-    assert (0);
+  /* (Total number of bytes that need to be read) - 1.  */
+  int bytes_minus1 = (bits - firstbyte_bits + 7) / 8;
 
-  return IOS_OK;
+  /* Number of significant bits in the last byte.  */
+  int lastbyte_bits = (bits + (offset % 8)) % 8;
+  lastbyte_bits = lastbyte_bits == 0 ? 8 : lastbyte_bits;
+
+  /* Read the first byte and mask the unused bits.  */
+  IOS_GET_C_ERR_CHCK(c[0], io);
+  ios_mask_first_byte(&c[0], firstbyte_bits);
+
+  switch (bytes_minus1)
+  {
+  case 0:
+    *value = c[0] >> (8 - lastbyte_bits);
+    return IOS_OK;
+
+  case 1:
+    IOS_READ_INTO_CHARRAY_1BYTE(c+1);
+    ios_mask_last_byte(&c[1], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if (bits <= 8)
+	  /* We need to shift to align the least significant bit.  */
+	  *value = (c[0] << lastbyte_bits) | (c[1] >> (8 - lastbyte_bits));
+	else if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[1] << lastbyte_bits) | c[0];
+	else
+	  {
+	    /* Consider the order of bits in a little endian number:
+	    7-6-5-4-3-2-1-0-15-14-13-12-11-10-9-8- ... If such an
+	    encoding is not byte-aligned, we have to first shift to fill the
+	    least significant byte to get the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (8 + offset % 8)) | (c[1] << offset % 8);
+	    *value = ((reg & 0xff) << (bits % 8)) | (reg >> 8);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << lastbyte_bits) | (c[1] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 2:
+    IOS_READ_INTO_CHARRAY_2BYTES(c+1);
+    ios_mask_last_byte(&c[2], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[2] << (8 + lastbyte_bits)) | (c[1] << 8) | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8));
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 16)
+	      reg = ((reg & 0x00ff000000000000LL) >> (16 - bits))
+		    | (reg & 0xff00ffffffffffffLL);
+	    else
+	      reg = ((reg & 0x0000ff0000000000LL) >> (24 - bits))
+		    | (reg & 0xffff00ffffffffffLL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (8 + lastbyte_bits)) | (c[1] << lastbyte_bits)
+		 | (c[2] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 3:
+    IOS_READ_INTO_CHARRAY_3BYTES(c+1);
+    ios_mask_last_byte(&c[3], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[3] << (16 + lastbyte_bits)) | (c[2] << 16) | (c[1] << 8)
+		   | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8));
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 24)
+	      reg = ((reg & 0x0000ff0000000000LL) >> (24 - bits))
+		    | (reg & 0xffff00ffffffffffLL);
+	    else
+	      reg = ((reg & 0x000000ff00000000LL) >> (32 - bits))
+		    | (reg & 0xffffff00ffffffffLL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (16 + lastbyte_bits)) | (c[1] << (8 + lastbyte_bits))
+		 | (c[2] << lastbyte_bits) | (c[3] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 4:
+    IOS_READ_INTO_CHARRAY_4BYTES(c+1);
+    ios_mask_last_byte(&c[4], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[4] << (24 + lastbyte_bits)) | (c[3] << 24) | (c[2] << 16)
+		   | (c[1] << 8) | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8))
+		  | (c[4] << (24 + offset % 8));
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 32)
+	      reg = ((reg & 0x000000ff00000000LL) >> (32 - bits))
+		    | (reg & 0xffffff00ffffffffLL);
+	    else
+	      reg = ((reg & 0x00000000ff000000LL) >> (40 - bits))
+		    | (reg & 0xffffffff00ffffffLL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (24 + lastbyte_bits)) | (c[1] << (16 + lastbyte_bits))
+		 | (c[2] << (8 + lastbyte_bits)) | (c[3] << lastbyte_bits)
+		 | (c[4] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 5:
+    IOS_READ_INTO_CHARRAY_5BYTES(c+1);
+    ios_mask_last_byte(&c[5], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[5] << (32 + lastbyte_bits)) | (c[4] << 32) | (c[3] << 24)
+		   | (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8))
+		  | (c[4] << (24 + offset % 8)) | (c[5] << (16 + offset % 8));
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 40)
+	      reg = ((reg & 0x00000000ff000000LL) >> (40 - bits))
+		    | (reg & 0xffffffff00ffffffLL);
+	    else
+	      reg = ((reg & 0x0000000000ff0000LL) >> (48 - bits))
+		    | (reg & 0xffffffffff00ffffLL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (32 + lastbyte_bits)) | (c[1] << (24 + lastbyte_bits))
+		 | (c[2] << (16 + lastbyte_bits)) | (c[3] << (8 + lastbyte_bits))
+		 | (c[4] << lastbyte_bits) | (c[5] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 6:
+    IOS_READ_INTO_CHARRAY_6BYTES(c+1);
+    ios_mask_last_byte(&c[6], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[6] << (40 + lastbyte_bits)) | (c[5] << 40) | (c[4] << 32)
+		   | (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8))
+		  | (c[4] << (24 + offset % 8)) | (c[5] << (16 + offset % 8))
+		  | (c[6] << (8 + offset % 8));
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 48)
+	      reg = ((reg & 0x0000000000ff0000LL) >> (48 - bits))
+		    | (reg & 0xffffffffff00ffffLL);
+	    else
+	      reg = ((reg & 0x000000000000ff00LL) >> (56 - bits))
+		    | (reg & 0xffffffffffff00ffLL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (40 + lastbyte_bits)) | (c[1] << (32 + lastbyte_bits))
+		 | (c[2] << (24 + lastbyte_bits)) | (c[3] << (16 + lastbyte_bits))
+		 | (c[4] << (8 + lastbyte_bits)) | (c[5] << lastbyte_bits)
+		 | (c[6] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 7:
+    IOS_READ_INTO_CHARRAY_7BYTES(c+1);
+    ios_mask_last_byte(&c[7], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	if ((offset % 8) == 0)
+	  /* If little endian and the least significant byte is 8 bits aligned,
+	  then we can handle the information byte by byte as we read.  */
+	  *value = (c[7] << (48 + lastbyte_bits)) | (c[6] << 48) | (c[5] << 40)
+		   | (c[4] << 32) | (c[3] << 24) | (c[2] << 16) | (c[1] << 8)
+		   | c[0];
+	else
+	  {
+	    /* We have to shift to fill the least significant byte to get
+	       the right bits in the same bytes.  */
+	    uint64_t reg;
+	    reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+		  | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8))
+		  | (c[4] << (24 + offset % 8)) | (c[5] << (16 + offset % 8))
+		  | (c[6] << (8 + offset % 8)) | (c[7] << offset % 8);
+	    /* The bits in the most-significant-byte-to-be is alligned to left,
+	       shift it towards right! */
+	    if (bits <= 56)
+	      reg = ((reg & 0x000000000000ff00LL) >> (56 - bits))
+		    | (reg & 0xffffffffffff00ffLL);
+	    else
+	      reg = ((reg & 0x00000000000000ffLL) >> (64 - bits))
+		    | (reg & 0xffffffffffffff00LL);
+	    /* Now we can place the bytes correctly.  */
+	    *value = __bswap_64(reg);
+	  }
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (48 + lastbyte_bits)) | (c[1] << (40 + lastbyte_bits))
+		 | (c[2] << (32 + lastbyte_bits)) | (c[3] << (24 + lastbyte_bits))
+		 | (c[4] << (16 + lastbyte_bits)) | (c[5] << (8 + lastbyte_bits))
+		 | (c[6] << lastbyte_bits) | (c[7] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  case 8:
+    IOS_READ_INTO_CHARRAY_8BYTES(c+1);
+    ios_mask_last_byte(&c[8], lastbyte_bits);
+    if (endian == IOS_ENDIAN_LSB)
+      {
+	/* We have to shift to fill the least significant byte to get
+	   the right bits in the same bytes.  */
+	uint64_t reg;
+	reg = (c[0] << (56 + offset % 8)) | (c[1] << (48 + offset % 8))
+	      | (c[2] << (40 + offset % 8)) | (c[3] << (32 + offset % 8))
+	      | (c[4] << (24 + offset % 8)) | (c[5] << (16 + offset % 8))
+	      | (c[6] << (8 + offset % 8)) | (c[7] << offset % 8)
+	      | (c[8] >> firstbyte_bits);
+	/* The bits in the most-significant-byte-to-be is alligned to left,
+	   shift it towards right! */
+	reg = ((reg & 0x00000000000000ffLL) >> (64 - bits))
+	      | (reg & 0xffffffffffffff00LL);
+	/* Now we can place the bytes correctly.  */
+	*value = __bswap_64(reg);
+      }
+    else
+      {
+	/* We should shift to fill the least significant byte
+	which is the last 8 bits.  */
+	*value = (c[0] << (56 + lastbyte_bits)) | (c[1] << (48 + lastbyte_bits))
+		 | (c[2] << (40 + lastbyte_bits)) | (c[3] << (32 + lastbyte_bits))
+		 | (c[4] << (24 + lastbyte_bits)) | (c[5] << (16 + lastbyte_bits))
+		 | (c[6] << (8 + lastbyte_bits)) | (c[7] << lastbyte_bits)
+		 | (c[8] >> (8 - lastbyte_bits));
+      }
+    return IOS_OK;
+
+  default:
+    assert(0);
+  }
 }
 
 int
