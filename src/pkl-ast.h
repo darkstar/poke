@@ -1457,13 +1457,17 @@ pkl_ast_node pkl_ast_make_print_stmt (pkl_ast ast,
    styling class to end.
 
    SUFFIX, if not NULL, is a C string that should be printed after the
-   value of EXP, respectively.  */
+   value of EXP, respectively.
+
+   VALUE_P indicates whether the argument shall be printed as a PVM
+   value or not.  */
 
 #define PKL_AST_PRINT_STMT_ARG_EXP(AST) ((AST)->print_stmt_arg.exp)
 #define PKL_AST_PRINT_STMT_ARG_BASE(AST) ((AST)->print_stmt_arg.base)
 #define PKL_AST_PRINT_STMT_ARG_SUFFIX(AST) ((AST)->print_stmt_arg.suffix)
 #define PKL_AST_PRINT_STMT_ARG_BEGIN_SC(AST) ((AST)->print_stmt_arg.begin_sc)
 #define PKL_AST_PRINT_STMT_ARG_END_SC(AST) ((AST)->print_stmt_arg.end_sc)
+#define PKL_AST_PRINT_STMT_ARG_VALUE_P(AST) ((AST)->print_stmt_arg.value_p)
 
 struct pkl_ast_print_stmt_arg
 {
@@ -1472,6 +1476,7 @@ struct pkl_ast_print_stmt_arg
   char *begin_sc;
   char *end_sc;
   int base;
+  int value_p;
   char *suffix;
   union pkl_ast_node *exp;
 };

@@ -1607,9 +1607,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_print_stmt)
           arg_type = PKL_AST_TYPE (arg_exp);
           if (!pkl_ast_type_equal (arg_type, type))
             {
-              if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL
-                  && PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL)
-                /* Integers can be promoted.  */
+              if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY
+                  || (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL
+                      && PKL_AST_TYPE_CODE (arg_type) == PKL_TYPE_INTEGRAL))
+                /* Integers can be promoted.  Ditto for any.  */
                 ;
               else
                 {

@@ -755,8 +755,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_print_stmt)
           if (exp)
             {
               PKL_PASS_SUBPASS (exp);
-              pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
-                            base);
+              if (PKL_AST_PRINT_STMT_ARG_VALUE_P (arg))
+                {
+                  pkl_ast_node any_type
+                    = pkl_ast_make_any_type (PKL_PASS_AST);
+
+                  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, any_type, base);
+                  ASTREF (any_type); pkl_ast_node_free (any_type);
+                }
+              else
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PRINT, PKL_AST_TYPE (exp),
+                              base);
             }
 
           if (suffix)

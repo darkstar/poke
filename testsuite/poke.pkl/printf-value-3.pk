@@ -1,0 +1,4 @@
+/* { dg-do run } */
+
+/* { dg-command { printf "%v\n", struct { i = 10, j = 20 } } } */
+/* { dg-output "struct {i=0xa,j=0x14}" } */

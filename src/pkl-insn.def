@@ -345,6 +345,7 @@ PKL_DEF_INSN (PKL_INSN_PRINTL, "nn", "printl")
 PKL_DEF_INSN (PKL_INSN_PRINTLU, "nn", "printlu")
 
 PKL_DEF_INSN (PKL_INSN_PRINTS, "", "prints")
+PKL_DEF_INSN (PKL_INSN_PRINTV, "", "printv")
 
 PKL_DEF_INSN (PKL_INSN_BEGINSC, "", "begsc")
 PKL_DEF_INSN (PKL_INSN_ENDSC, "", "endsc")

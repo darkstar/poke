@@ -725,6 +725,15 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans1_ps_print_stmt)
 
       switch (p[1])
         {
+        case 'v':
+          p += 2;
+          PKL_AST_PRINT_STMT_ARG_BASE (arg) = 0; /* Arbitrary.  */
+          atype = pkl_ast_make_any_type (PKL_PASS_AST);
+          PKL_AST_PRINT_STMT_ARG_VALUE_P (arg) = 1;
+          PKL_AST_LOC (atype) = PKL_AST_LOC (print_fmt);
+          types = pkl_ast_chainon (types, atype);
+          ntag++;
+          break;
         case 's':
           p += 2;
           PKL_AST_PRINT_STMT_ARG_BASE (arg) = 10; /* Arbitrary.  */

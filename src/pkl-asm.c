@@ -477,6 +477,8 @@ pkl_asm_insn_print (pkl_asm pasm, pkl_ast_node type, int base)
 
   if (type_code == PKL_TYPE_STRING)
     pkl_asm_insn (pasm, PKL_INSN_PRINTS);
+  else if (type_code == PKL_TYPE_ANY)
+    pkl_asm_insn (pasm, PKL_INSN_PRINTV);
   else if (type_code == PKL_TYPE_INTEGRAL)
     {
       size_t size = PKL_AST_TYPE_I_SIZE (type);

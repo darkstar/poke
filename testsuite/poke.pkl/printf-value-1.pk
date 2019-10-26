@@ -1,0 +1,4 @@
+/* { dg-do run } */
+
+/* { dg-command { printf "%v\n", 10 } } */
+/* { dg-output "0xaUL" } */

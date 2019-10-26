@@ -717,6 +717,13 @@ instruction prints () # ( STR -- )
   end
 end
 
+instruction printv () # ( VAL -- )
+  code
+    pvm_print_val (JITTER_TOP_STACK (), 16 /*XXX*/, 0);
+    JITTER_DROP_STACK ();
+  end
+end
+
 instruction begsc () # ( STR -- )
   code
     pk_term_class (PVM_VAL_STR (JITTER_TOP_STACK ()));
