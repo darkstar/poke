@@ -177,9 +177,9 @@ deftype BPF_Insn_Opcode =
            else if (class == BPF_INSN_CLASS_LD)
              printf "%<insn-mnemonic:ld%>";
            else if (class == BPF_INSN_CLASS_STX)
-             print "%<insn-mnemonic:stx%>";
+             printf "%<insn-mnemonic:stx%>";
            else if (class == BPF_INSN_CLASS_ST)
-             print "%<insn-mnemonic:st%>";
+             printf "%<insn-mnemonic:st%>";
            printf "%<insn-mnemonic:%s%>",  bpf_ldst_sizes[size];
            print ">";
           }
