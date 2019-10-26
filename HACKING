@@ -267,6 +267,9 @@ Writing Poke
 - Use Camel_Case for type names, but do not use Camel_Case for
   variable/function names!
 
+- Surround pretty-printed values with #< and >.   This is to notify
+  the reader that the value has been pretty-printed.
+
 Writing RAS
 ~~~~~~~~~~~
 

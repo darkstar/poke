@@ -1,5 +1,10 @@
 2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* HACKING (Writing Poke): Recommend using the #<...> convention
+	for pretty-printed values.
+
+2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/bpf.pk (BPF_Reg): Use styling when printing register
 	names.
 	(BPF_Insn_Opcode): Likewise for instruction mnemonics.
