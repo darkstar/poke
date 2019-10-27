@@ -1,5 +1,5 @@
 /* { dg-do run } */
 
-/* { dg-command { .set obase 16 } } */
+/* { dg-command { .set obase 10 } } */
 /* { dg-command { printf "%v\n", struct { i = 10, j = 20 } } } */
-/* { dg-output "struct {i=0xa,j=0x14}" } */
+/* { dg-output "struct {i=10,j=20}" } */

@@ -88,6 +88,9 @@ early-header-c
 #   define STREQ(a, b) (strcmp (a, b) == 0)
 #   define STRNEQ(a, b) (strcmp (a, b) != 0)
 
+    /* Globals.  */
+    extern int poke_obase;
+
     /* Exception handlers, that are installed in the "exceptionstack".
 
        EXCEPTION is the exception type, either one of the E_* values defined
@@ -719,7 +722,7 @@ end
 
 instruction printv () # ( VAL -- )
   code
-    pvm_print_val (JITTER_TOP_STACK (), 16 /*XXX*/, 0);
+    pvm_print_val (JITTER_TOP_STACK (), poke_obase, 0);
     JITTER_DROP_STACK ();
   end
 end

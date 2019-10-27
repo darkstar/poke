@@ -1,3 +1,11 @@
+2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pvm.jitter (printv): Use the global poke_obase.
+	* testsuite/poke.pkl/printf-value-1.pk: .set obase.
+	* testsuite/poke.pkl/printf-value-2.pk: Likewise.
+	* testsuite/poke.pkl/printf-value-3.pk: Likewise.
+	* testsuite/poke.pkl/printf-value-4.pk: New file.
+
 2019-10-26  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-ast.h (PKL_AST_PRINT_STMT_ARG_PRINT_VALUE_P): Define.
