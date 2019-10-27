@@ -72,10 +72,10 @@ Documentation License''.
 @c Writing poke commands.
 
 @menu
-Introduction
 @c * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
 @c * Demo
+* Output::			printing in Poke programs.
 
 Appendices
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -116,6 +116,121 @@ for example, could be implemented in a pickle named
 @file{bitpatterns.pk}.
 
 We hope this helps to clarify things.
+
+@node Output
+@chapter Output
+
+Poke programs can print text to the standard output in two ways:
+simple unformatted output, and formatted output.
+
+@menu
+* print::		simple output.
+* printf::		formatted output.
+@end menu
+
+@node print
+@section print
+@cindex print, output
+
+The @code{print} sentence prints the given string to the standard output.
+@code{print} outputs text strings verbatim.  It can be invoked using
+two alternative syntaxes, which are equivalent:
+
+@example
+print (@var{str});
+print @var{str};
+@end example
+
+@code{print} is simple, but fast.  It is good to use it in simple
+cases where the information to print out doesn't require any kind of
+formatting and styling.
+
+@node printf
+@section printf
+@cindex printf, formatted output, stylized output
+
+The @code{printf} sentence gets a format string and, optionally, a
+list of values to print.  It can be invoked using two alternative
+syntaxes, which are equivalent:
+
+@example
+printf (@var{fmt}[, @var{value}...])
+printf @var{fmt}[, @var{value}...]
+@end example
+
+The format string @var{fmt} is printed verbatim to the standard
+output, but for @dfn{format tags} which start with @code{%}.  These
+format tags are interpreted especially.
+
+Most of the format tags ``consume'' one of the specified values.
+Every value in the list shall be described by a tag, or the compiler
+will signal an error.  Likewise, values without a corresponding
+describing tag is an error.  These tags are:
+
+@table @code
+@item %s
+Print the argument as a string.
+@item %i@var{bits}(d|x|o|b|c)
+Print the argument as a signed integer of size @var{bits}.  The last
+letter determines how the argument is printed.
+@table @code
+@item d
+Print the integer in decimal.
+@item x
+Print the integer in hexadecimal.
+@item o
+Print the integer in octal.
+@item b
+Print the integer in binary.
+@item c
+Print the integer as an ASCII character.  This only works with 8 bit
+integers.
+@end table
+@item %u
+Same than @code{%s}, but for unsigned integers.
+@item %c
+A shorter way to write @code{%u8c}.
+@item %v
+Print the value printed representation of the argument, which can be
+of any type including complex types like arrays and structs.  This is
+similar to the @code{write} operation available in many Lisp systems.
+
+This tag is mainly intended to be used in pretty-printers.
+@end table
+
+The following format tags do not consume arguments.  They support
+emitting styled text using the libtextstyle approach of having styling
+classes that user can customize in a @file{.css} file.
+
+@table @code
+@item %<@var{classname}:
+Start the styling class with name @var{classname}.  The class name
+cannot be empty.
+@item %>
+End the last opened styling class.  All styling classes should be
+ended before finishing the format string.
+@end table
+
+Note that styling classes can be nested, but all classes should be
+ended before finishing the format string.
+
+If you use a @var{name} class, you can define how to style it in the
+@file{.css} file (poke installs and uses poke-default.css but you can
+set the @code{POKE_STYLE} environment variable to point to another
+css) like this:
+
+@example
+.NAME @{ text-decoration: blink; color : pink; @}
+@end example
+
+Examples:
+
+@example
+(poke) printf "This is a NAME: %<NAME:xxx%>"
+This is a NAME: xxx
+(poke) printf "Name: %<string:%s%> Age: %<integer:%i32d%>, "Jose", 39
+Name: Jose Age: 39
+@end example
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License

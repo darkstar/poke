@@ -1,5 +1,12 @@
 2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Output): New chapter.
+	(print): New section.
+	(printf): Likewise.
+	(Styling): Likewise.
+
+2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-promo.c (pkl_promo_ps_print_stmt): Fix bug handling %v
 	printf arguments.
 	* pickles/bpf.pk: Use %v in imm64 pretty-printer.
