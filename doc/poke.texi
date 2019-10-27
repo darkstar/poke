@@ -75,6 +75,7 @@ Documentation License''.
 @c * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
 @c * Demo
+* Offsets::			working with memory sizes.
 * Endianness::			byte ordering.
 * Output::			printing in Poke programs.
 
@@ -117,6 +118,323 @@ for example, could be implemented in a pickle named
 @file{bitpatterns.pk}.
 
 We hope this helps to clarify things.
+
+@node Offsets
+@chapter Offsets
+@cindex offset, united values
+
+Poke uses united values to handle offsets and data sizes.  This is a
+very central concept in poke.
+
+@menu
+* Why offsets::			byte-oriented or bit-oriented?
+* Offset values::		denoting offsets in Poke.
+* Offset operations::		operating with offsets.
+@end menu
+
+@node Why offsets
+@section Why offsets
+
+Early in the design of what is becoming GNU poke I was struck by a
+problem that, to my surprise, would prove not easy to fix in a
+satisfactory way: would I make a byte-oriented program, or a
+bit-oriented program?  Considering that the program in question was
+nothing less than an editor for binary data, this was no petty
+dilemma.
+
+Since the very beginning I had a pretty clear idea of what I wanted to
+achieve: a binary editor that would be capable of editing user defined
+data structures, besides bytes and bits.  I also knew I needed some
+sort of domain specific language to describe these structures and
+operate on them.  How that language would look like, and what kind of
+abstractions it would provide, however, was not clear to me.  Not at
+all.
+
+So once I sketched an initial language design, barely something very
+similar to C structs, I was determined to not continue with the poke
+implementation until I had described as many as binary formats in my
+language as possible.  That, I reckoned, was the only way to make sure
+the implemented language would be expressive, complete and useful
+enough to fulfill my requirements.
+
+The first formats I implemented using my immature little language
+included ELF, FLV, MP3, BSON... all of them describing structures
+based on whole bytes.  Even when they try to be compact, it is always
+by packing bit-fields in elements that are, invariably, sized as a
+multiple of bytes.  Consequently, the language I was evolving became
+byte oriented as well.  No doubt also influenced by my C inheritance,
+I would think of bitfields either as a sort of second class citizen,
+or as mere results of shifting and masking.
+
+This worked well.  The language evolved to be able to express many
+different aspects of these formats in a very nice way, like
+variable-length data and holes in structures.  Consider the following
+definition in what actually is @strong{not} valid today's Poke:
+
+@example
+deftype Data =
+  struct
+  @{
+    byte magic;
+    byte count;
+    byte dstart;
+
+    byte[count] data @ dstart;
+  @};
+@end example
+
+The data starts with a byte that is a magic number.  Then the size of
+the data stored, in bytes, and then the data itself.  This data,
+however, doesn't start right after @code{dstart}: it starts at
+@code{dstart}, which is expressed as an offset, in bytes, since the
+beginning of the Data.  I conceived struct field labels to be any
+expression evaluating to an integer, which would be... bytes,
+obviously.
+
+@noindent
+Very nice but...
+
+Then, one day, it was the turn for IETF RFC1951, which is the
+specification of the DEFLATE algorithm and associated file format.  Oh
+dear.  Near the beginning of the spec document it can be read:
+
+@quotation
+This document does not address the issue of the order in which bits of
+a byte are transmitted on a bit-sequential medium, since the final
+data format described here is byte- rather than bit-oriented.
+However, we describe the compressed block format in below, as a
+sequence of data elements of various bit lengths, not a sequence of
+bytes.
+@end quotation
+
+Then it goes on describing rules to pack the DEFLATE elements into
+bytes.  I was appalled, and certainly sort of deflated as well.  The
+purpose of my program was precisely to edit binary in terms of the
+data elements described by a format.  And in this case, these data
+elements came in all sort of bit lengths and alignments.  This can be
+seen in the following RFC1951 excerpt, that describes the header of a
+compressed block:
+
+@quotation
+Each block of compressed data begins with 3 header bits
+containing the following data:
+@example
+first bit       BFINAL
+next 2 bits     BTYPE
+@end example      
+
+Note that the header bits do not necessarily begin on a byte boundary,
+since a block does not necessarily occupy an integral number of bytes.
+@end quotation
+
+At this point I understood that my little language on the works would
+be never capable to describe the DEFLATE structures naturally: C-like
+bit-fields, masking and shifting, all based on byte-oriented
+containers and boundaries, would never provide the slickness I wanted
+for my editor.  I mean, just use C and get done with it.
+
+This pissed me off.  Undoubtely other formats and protocols would be
+impacted in a similar way.  Even when most formats are byte oriented,
+what am I supposed to tell to the people hacking bit-oriented stuff?
+``Sorry pal, this is not supported, this program is not for you''?  No
+way, I thought, not on my watch.
+
+The obvious solution for the problem, is to be general.  In this case,
+to express every offset and every memory size in bits instead of
+bytes.  While this obviously gives the language maximum expressiveness
+power, and is ideal for expressing the few bit-oriented formats, it
+has the disadvantage of being very inconvenient for most situations.
+
+To see how annoying this is, let's revisit the little Data element we
+saw above.  In a bit-oriented description language, we would need to
+write something like:
+
+@example
+deftype BitData =
+  struct
+  @{
+    byte magic;
+    byte count;
+    byte dstart;
+
+    byte[count] data @ dstart * 8;
+  @};
+@end example
+
+Yeah... exactly.  The @key{*} and @key{8}> keys in the keyboards of
+the poke users would wear out very fast, not to mention their patience
+as well.  Also, should I provide both @code{sizeof} and
+@code{bitsizeof} operators?  Nasty.
+
+I am very fond of the maxim ``Never write a program you would never
+use yourself''@footnote{Actually it is Lord Vetinari's ``Never build a
+dungeon you can't get out of.'' but the point is the same.}, so I
+resigned myself to make GNU poke byte oriented, and to provide as many
+facilities for operating on bit-fields as possible.
+
+@noindent
+Fortunately, I have smart friends...
+
+During one of the Rabbit Herd's Hacking
+Weekends@footnote{@url{http://www.jemarch.net/rhhw}} I shared my
+frustration and struggle with the other rabbits, and we came to
+realize that offsets and data sizes in Poke should not be pure
+magnitudes or mere integer values: they should be united.  They should
+have units.
+
+It makes full sense when you come to think about it.  For a program
+like poke, it is only natural to talk about different memory units,
+like bits, bytes, kilobytes, megabits, and so on.  Bits and bytes are
+just too common units.  Apart from allowing me to express values in
+different units, this approach also has other benefits as we will see
+shortly.
+
+I'm really grateful to Bruno Haible, Luca Saiu and Nacho Gonzalez for
+putting me on the right track.
+
+@node Offset values
+@section Offset values
+
+Poke provides a convenient syntax to provide united values, which are
+called @dfn{offsets} (because in a binary editor you mostly use them
+to denote offsets in the file you are editing):
+
+@example
+12#B
+7#b
+1024#Kb
+@end example
+
+The offsets above denote twelve bytes, seven bits and one thousand
+twenty four kilobytes, respectively.  The unit can be separated from
+the magnitude by blank characters, so you can write the following
+instead if you are so inclined:
+
+@example
+12 #B
+7 #b
+(1024 * 1024) #Kb
+@end example
+
+Note how the magnitude part of an offset doesn't need to be constant.
+If the variable @code{a} contains an integer, this is how you would
+denote ``a bytes'':
+
+@example
+a#B
+@end example
+
+In the offset syntax units are specified as @code{#@var{foo}}, where
+@var{FOO} is the name of the unit.  Poke provides the following list
+of hardcoded unit names:
+
+@table @code
+@item b
+bits.
+@item B
+bytes.
+@item Kb
+kilo bits (1024 bits.)
+@item KB
+Kilo bytes (1024 bytes.)
+@item Mb
+Mega bits.
+@item MB
+Mega bytes.
+@item Gb
+Mega bits.
+@end table
+
+However, it is also possible to express units in multiples of the base
+unit, which is the bit.  Using this syntax, it becomes possible to
+express offsets in any arbitrary unit, as disparate as it may seem:
+
+@example
+17#3
+0#12
+8#1
+@end example
+
+Thats it, 17 units of 3 bits each, zero units of 12 bits each,
+and eight units of 1 bit each.
+
+But then, why stopping there?  Poking is all about defining data
+structures and operating on them... so why not using these structures
+as units as well?  Consider the following struct:
+
+@example
+deftype Packet = struct @{ int i; long j; @};
+@end example
+
+The size of a @code{Packet} is known at compile time (which is not
+generally true for Poke structs).  Wouldn't it be nice to use it as a
+unit in offsets?  Sure it is:
+
+@example
+23#Packet
+@end example
+
+The above is the size occupied by 23 packets.  Any type whose size is
+known at compile time can be specified as an offset unit.
+
+Expressing offsets as united values also relieves the programmer from
+doing many explicit unit conversions: poke can do them for you.
+Consider for example an ELF section header.  One of its fields is the
+size of the described section, in bytes:
+
+@example
+deftype Elf64_Shdr =
+  struct
+  @{
+   ...
+   offset<Elf64_Xword,B> sh_size;
+   ...
+  @};
+@end example
+
+If a given section is to contain, say, relocations with addends,
+we can set its size doing something like this:
+
+@example
+shdr.sh_size = 10#Elf64_Rela;
+@end example
+
+@noindent
+Instead of doing the conversion to bytes explicitly.
+
+If the magnitude of an offset is 1 then it is allowed to omit it
+entirely.  To denote one kilobyte, for example, we can write
+@code{#KB}.
+
+@node Offset operations
+@section Offset operations
+
+Poke supports a little algebra for offsets:
+
+@example
+OFFSET + OFFSET -> OFFSET
+OFFSET - OFFSET -> OFFSET
+OFFSET * MAGNITUDE -> OFFSET
+OFFSET / OFFSET -> MAGNITUDE
+OFFSET % OFFSET -> OFFSET
+@end example
+
+The addition or subtraction of two offsets results in another offset:
+@code{1#B + 1#b -> 7#b}.  Multiplying an offset by a magnitude gives
+you another offset: @code{8#b * 2 -> 2#B}.  Dividing two offsets gives
+you a magnitude: @code{16#b / 1#B -> 2}.  Finally, the modulus of two
+offsets is another offset: @code{17#b / 1#B -> 1#b}.
+
+These operators provide a comfortable and smooth way to convert memory
+magnitudes between different units: just use units like you do when
+doing physics or working with units in other contexts.  Example:
+
+@example
+24 #Kb/#B
+@end example
+
+@noindent
+Which gives you the number of bytes in 24 kilobytes.
 
 @node Endianness
 @chapter Endianness
