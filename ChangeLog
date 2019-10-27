@@ -1,5 +1,11 @@
 2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Endianness): New chapter.
+	(.set endian): New section.
+	(Endian built-ins): Likewise.
+
+2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* bootstrap.conf (gnulib_modules): Import the gendocs-template
 	gnulib module.
 

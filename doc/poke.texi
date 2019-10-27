@@ -75,6 +75,7 @@ Documentation License''.
 @c * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
 @c * Demo
+* Endianness::			byte ordering.
 * Output::			printing in Poke programs.
 
 Appendices
@@ -117,6 +118,217 @@ for example, could be implemented in a pickle named
 
 We hope this helps to clarify things.
 
+@node Endianness
+@chapter Endianness
+@cindex endian, endianness
+
+Byte endianness is an important aspect of encoding data.  As a good
+binary editor poke provides support for both little and big endian,
+and will soon acquire the ability to encode exotic endianness like PDP
+endian.  Endianness control is integrated in the Poke language, and is
+designed to be easily used in type descriptions.
+
+@menu
+* .set endian::			dot-command to get and set the endianness.
+* Endian built-ins::		changing endianness programmatically.
+@end menu
+
+@node .set endian
+@section .set endian
+@cindex commands
+
+GNU poke maintains a global variable that holds the current
+endianness.  This is the endianness that will be used when mapping
+integers whose types do not specify an explicit endianness.
+
+Like other poke global state, this global variable can be
+modified using the @command{.set} dot-command:
+
+@example
+.set endian little
+.set endian big
+.set endian host
+@end example
+
+@noindent
+The current endianness can be obtained like this:
+
+@example
+(poke) .set endian
+little
+@end example
+      
+We can easily see how changing The current endianness indeed impacts
+the way integers are mapped:
+
+@example
+(poke) dump :from 0#B :size 4#B :ruler 0 :ascii 0
+00000000: 8845 4c46
+(poke) .set endian little
+(poke) int @ 0#B
+0x464c4588
+(poke) .set endian big
+(poke) int @ 0#B
+0x88454c46
+@end example
+
+@node Endian built-ins
+@section Endian built-ins
+
+As handy as the @command {.set endian} dot-command may be, it is also
+important to be able to change the current endianness programmatically
+from a Poke program.  For that purpose, the PKL compiler provides a
+couple of built-in functions: @code{get_endian} and @code{set_endian}.
+
+Their definitions, along with the specific supported values, look
+like:
+
+@example
+defvar ENDIAN_LITTLE = 0;
+defvar ENDIAN_BIG = 1;
+      
+defun get_endian = int: @{ ... @}
+defun set_endian = (int endian) int: @{ ... @}
+@end example
+
+Accessing the current endianness programmatically is especially useful
+in situations where the data being poked features a different
+structure, depending on the endianness.
+
+A good (or bad) example of this is the way registers are encoded in
+eBPF instructions.  eBPF is the in-kernel virtual machine of Linux,
+and features an ISA with ten general-purpose registers.  eBPF
+instructions generally use two registers, namely the source register
+and the destination register.  Each register is encoded using 4 bits,
+and the fields encoding registers are consecutive in the instructions.
+
+Typical.  However, for reasons we won't be discussing here the order
+of the source and destination register fields is switched depending on
+the endianness.
+
+@noindent
+In big-endian systems the order is:
+
+@example
+dst:4 src:4
+@end example
+
+@noindent
+Whereas in little-endian systems the order is:
+
+@example
+src:4 dst:4
+@end example
+
+In Poke, the obvious way of representing data whose structure depends
+on some condition is using an union.  In this case, it could read like
+this:
+
+@example
+deftype BPF_Insn_Regs =
+  union
+  @{
+    struct
+    @{
+      BPF_Reg src;
+      BPF_Reg dst;
+    @} le : get_endian == ENDIAN_LITTLE;
+
+    struct
+    @{
+      BPF_Reg dst;
+      BPF_Reg src;
+    @} be;
+  @};
+@end example
+
+Note the call to the @code{get_endian} function (which takes no
+arguments and thus can be called Algol68-style, without specifying an
+empty argument list) in the constraint of the union alternative.  This
+way, the register fields will have the right order corresponding to
+the current endianness.
+
+Nifty.  However, there is an ever better way to denote the
+structure of these fields.  This is it:
+
+@example
+deftype BPF_Insn_Regs =
+  struct
+  @{
+    defvar little_p = (get_endian == ENDIAN_LITTLE);
+    
+    BPF_Reg src @ !little_p * 4#b;
+    BPF_Reg dst @ little_p * 4#b;
+  @};
+@end example
+
+This version, where the ordering of the fields is implemented using
+field labels, is not only more compact, but also has the virtue of not
+requiring additional "intermediate" fields like @code{le} and
+@code{be} above.  It also shows how convenient can be to declare
+variables inside structs.
+
+@noindent
+Let's see it in action:
+
+@example
+(poke) BPF_Insn_Regs @ 1#B
+BPF_Insn_Regs @{src=#<%r4>,dst=#<%r5>@}
+(poke) .set endian big
+(poke) BPF_Insn_Regs @ 1#B
+BPF_Insn_Regs @{src=#<%r5>,dst=#<%r4>@}
+@end example
+
+Changing the current endianness in constraint expressions is useful
+when dealing with binary formats that specify the endianness of the
+data that follows using some sort of tag.  This is the case of ELF,
+for example.
+
+The first few bytes in an ELF header conform what is known as the
+@code{e_ident}.  One of these bytes is called @code{ei_data} and its
+value specifies the endianness of the data stored in the ELF file.
+
+@noindent
+This is how we handle this in Poke:
+
+@example
+defun elf_endian = (int endian) byte:
+ @{
+   if (endian == ENDIAN_LITTLE)
+     return ELFDATA2LSB;
+   else
+     return ELFDAT2MSB;
+ @}
+
+[...]
+
+deftype Elf64_Ehdr =
+  struct
+  @{
+    struct
+    @{
+      byte[4] ei_mag : ei_mag[0] == 0x7fUB
+                       && ei_mag[1] == 'E'
+                       && ei_mag[2] == 'L'
+                       && ei_mag[3] == 'F';
+      byte ei_class;
+      byte ei_data : (ei_data != ELFDATANONE
+                      && set_endian (elf_endian (ei_data)));
+      byte ei_version;
+      byte ei_osabi;
+      byte ei_abiversion;
+      byte[6] ei_pad;
+      offset<byte,B> ei_nident;
+    @} e_ident;
+
+    [...]
+  @};
+@end example
+
+Note how @code{set_endian} returns an integer value...  it is always
+@code{1}. This is to facilitate its usage in fields constraint
+expressions.
+
 @node Output
 @chapter Output
 
@@ -124,8 +336,8 @@ Poke programs can print text to the standard output in two ways:
 simple unformatted output, and formatted output.
 
 @menu
-* print::		simple output.
-* printf::		formatted output.
+* print::			simple output.
+* printf::			formatted output.
 @end menu
 
 @node print
