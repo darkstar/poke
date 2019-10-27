@@ -1,5 +1,10 @@
 2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* bootstrap.conf (gnulib_modules): Import the gendocs-template
+	gnulib module.
+
+2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Output): New chapter.
 	(print): New section.
 	(printf): Likewise.
