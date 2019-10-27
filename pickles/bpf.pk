@@ -229,7 +229,7 @@ deftype BPF_Insn =
         defun _print = void:
           {
            print "#<";
-           printf "%<integer:%i64x%>", hi::lo;
+           printf "%<integer:%v%>", hi::lo;
            print ">";
           }
       } imm64 : imm64_p;

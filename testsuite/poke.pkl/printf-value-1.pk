@@ -2,4 +2,4 @@
 
 /* { dg-command { .set obase 16 } } */
 /* { dg-command { printf "%v\n", 10 } } */
-/* { dg-output "0xaUL" } */
+/* { dg-output "0xa" } */

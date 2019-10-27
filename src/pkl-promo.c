@@ -1081,8 +1081,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_print_stmt)
       pkl_ast_node arg_exp = PKL_AST_PRINT_STMT_ARG_EXP (arg);
       pkl_ast_node exp_type;
 
-      /* Skip arguments without associated values.  */
-      if (!arg_exp)
+      /* Skip arguments without associated values.  Also skip
+         arguments with declared type ANY (%v) */
+      if (!arg_exp
+          || PKL_AST_TYPE_CODE (type) == PKL_TYPE_ANY)
         continue;
 
       exp_type = PKL_AST_TYPE (arg_exp);
