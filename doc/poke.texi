@@ -77,6 +77,7 @@ Documentation License''.
 @c * Demo
 * Integers::			working with whole numbers.
 * Offsets::			working with memory sizes.
+* Strings::			working with null-terminated strings.
 * Endianness::			byte ordering.
 * Output::			printing from Poke programs.
 
@@ -443,7 +444,35 @@ The following right-associative unary logical operators are supported:
 @node Integer Attributes
 @section Integer Attributes
 
-XXX
+The following attributes are defined for integer values.
+
+@table @code
+@item size
+Gives an offset with the storage occupied by the string.  This
+includes the terminating null.  Examples:
+
+@example
+(poke) 10'size
+0x20UL#b
+(poke) 10N'size
+0x4UL#b
+(poke) (10 as int<1>)'size
+0x1UL#b
+@end example
+
+@item signed
+Gives 1 if the value is a signed integer, 0 otherwise.  Examples:
+
+@example
+(poke) 10'signed
+1
+(poke) 10UL'signed
+0
+@end example
+@item mapped
+Always 0 for integers.  See mapping.
+@end table
+
 
 @node Offsets
 @chapter Offsets
@@ -458,6 +487,7 @@ very central concept in poke.
 * Offset Types::		offset<...>.
 * Casting Offsets::		Converting offsets.
 * Offset Operations::		Operating with offsets.
+* Offset Attributes::           Accessing properties of offset values.
 @end menu
 
 @node Why Offsets
@@ -853,6 +883,163 @@ semantics.  Examples:
 
 The unit of the result is the greatest common divisor of the units of
 the operands.
+
+@node Offset Attributes
+@section Offset Attributes
+
+The following attributes are defined for offset values.
+
+@table @code
+@item size
+Gives an offset with the storage occupied by the offset.  Examples:
+
+@example
+(poke) 10#B'size
+0x20UL#b
+(poke) 10N#B'size
+0x4UL#b
+@end example
+@item magnitude
+Gives the magnitude part of the offset.  Examples:
+
+@example
+(poke) 10#B'magnitude
+10
+(poke) 2H#b'magnitude
+2H
+@end example
+@item unit
+Gives a number with the unit of the offset, expressed in bits.
+Examples:
+
+@example
+(poke) 10#B'unit
+8UL
+(poke) 2H#b'unit
+1UL
+@end example
+@item mapped
+Always 0 for offsets.  See mapping.
+@end table
+
+
+@node Strings
+@chapter Strings
+@cindex strings
+
+Poke supports a notion of @dfn{strings} which is very similar to the C
+programming language: a string value is a sequence of characters that
+is terminated by the so-called @dfn{null character}.
+
+@menu
+* String Literals::		Writing string values.
+* String Types::		string.
+* String Indexing::		Accessing the characters of a string.
+* String Concatenation::        Building new strings.
+* String Attributes::           Accessing properties of string values.
+@end menu
+
+@node String Literals
+@section String Literals
+
+NULL-terminated sequences of ASCII codes can be denoted using the
+following syntax:
+
+@example
+"foo"
+@end example
+
+Poke string values are very similar to C strings.  They comprise a
+sequence of 8-bit character codes, terminated by the value @code{0UB}.
+
+The following escape sequences are supported inside string literals:
+
+@table @code
+@item \n
+Denotes a new line character.
+@item \t
+Denotes an horizontal tab.
+@item \\
+Denotes a backlash @code{\} character.
+@end table
+
+@node String Types
+@section String Types
+
+Every string value in Poke is of type @code{string}.
+
+@node String Indexing
+@section String Indexing
+
+Poke supports accessing the characters in a string using the array
+indexing notation.  The indexes are in the @code{[0,@var{n}]} range,
+where @var{n} is the length of the string minus one.  Note the length
+doesn't include the null character, i.e. it is not possible to access
+the terminating null.  Examples:
+
+@example
+(poke) "foo"[0]
+0x66UB
+(poke) "foo"[1]
+0x6fUB
+@end example
+
+If the passed index is less than zero or it is too big, an
+@code{E_out_of_bounds} exception is raised:
+
+@example
+(poke) "foo"[-1]
+unhandled out of bounds exception
+(poke) "foo"[3]
+unhandled out of bounds exception
+@end example
+
+@node String Concatenation
+@section String Concatenation
+
+The left-associative binary operator @code{+} concatenates strings.
+The second argument is concatenated at the end of the first argument,
+whose null terminating character is discarded.  Examples:
+
+@example
+(poke) "foo" + "bar"
+"foobar"
+(poke) "" + "x"
+"x"
+(poke) "" + ""
+""
+@end example
+
+@node String Attributes
+@section String Attributes
+
+The following attributes are defined for string values.
+
+@table @code
+@item length
+Gives the number of characters composing the string, not counting the
+terminating null.  Examples:
+
+@example
+(poke) "foo"length
+3UL
+(poke) ""'length
+0UL
+@end example
+
+@item size
+Gives an offset with the storage occupied by the string.  This
+includes the terminating null.  Examples:
+
+@example
+(poke) "foo"'size
+32UL#b
+(poke) ""'size
+8UL#b
+@end example
+@item mapped
+Always 0 for strings.  See mapping.
+@end table
 
 @node Endianness
 @chapter Endianness
