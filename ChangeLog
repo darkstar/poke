@@ -1,3 +1,11 @@
+2019-10-28  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* doc/poke.texi (Integers): New chapter.
+	(Integer Literals): New section.
+	(Characters): Likewise.
+	* testsuite/poke.pkl/printf-value-2.pk: Remove empty line at EOF.
+	* testsuite/poke.pkl/printf-value-5.pk: Likewise.
+
 2019-10-27  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* doc/poke.texi (Offsets): New chapter.

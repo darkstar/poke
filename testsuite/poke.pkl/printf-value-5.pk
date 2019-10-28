@@ -5,5 +5,3 @@ deftype Foo2 = struct { defun foo = void: { printf "%v", 20; }};
 
 /* { dg-command { Foo2 @ 0#B } } */
 /* { dg-output "Foo2 {}" } */
-
-

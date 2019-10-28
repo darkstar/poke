@@ -75,9 +75,10 @@ Documentation License''.
 @c * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
 @c * Demo
+* Integers::			working with whole numbers.
 * Offsets::			working with memory sizes.
 * Endianness::			byte ordering.
-* Output::			printing in Poke programs.
+* Output::			printing from Poke programs.
 
 Appendices
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -118,6 +119,121 @@ for example, could be implemented in a pickle named
 @file{bitpatterns.pk}.
 
 We hope this helps to clarify things.
+
+@node Integers
+@chapter Integers
+@cindex integers
+
+@menu
+* Integer Literals::		Writing integers in different bases.
+* Characters::		        Another way to write small integers.
+@end menu
+
+@node Integer Literals
+@section Integer Literals
+
+Integers literals can be expressed in several numeration bases.
+
+@emph{Decimal numbers} use the usual syntax @code{[1-9][0-9]*}.  For
+example, @code{2345}.
+
+@emph{Octal numbers} are expressed using a prefix @code{0o} (or
+@code{0O}) followed by one or more digits in the range @code{[0-7]}.
+Examples are @code{0o0}, @code{0o100} and @code{0o777}.
+
+@emph{Hexadecimal numbers} are expressed using a prefix @code{0x} (or
+@code{0X}) followed by one or more hexadecimal digits in the range
+@code{[0-f]}.  Examples are @code{0x0} and @code{0xfe00ffff}.  Note
+that both the @code{x} in the prefix and the letters in the
+hexadecimal number are case insensitive.  Thus, @code{0XdeadBEEF} is a
+valid (but ugly as hell) literal.
+
+@emph{Binary numbers} are expressed using a prefix @code{0b} (or
+@code{0B}) followed by one or more binary digits in the range
+@code{[0-1]}.  Examples of binary literals are @code{0b0} and
+@code{0B010}.
+
+Negative numbers, of any numeration base, are constructed using the
+minus operator as explained below.  Therefore the minus symbol
+@code{-} in negative numbers is no part of the literal themselves.
+
+@subsection The digits separator @code{_}
+
+The character @code{_} can appear anywhere in a numeric literal other
+than leading them.  It is ignored, and its purpose is to make it
+easier for programmers to read them:
+
+@example
+0xf000_0000_0000_0000
+0b0000_0001_0000_0001
+@end example
+
+@subsection Types of integer literals
+
+The type of a numeric literal is the smallest signed integer capable
+of holding it, starting with 32 bits, in steps of powers of two and up
+to 64 bits.@footnote{Rationale: the width of a C ``int'' is 32 bits in
+most currently used architectures, and binary data formats are usually
+modeled after C.}
+
+So, for example, the value @code{2} has type @code{int<32>}, but the
+value @code{0xffff_ffff} has type @code{int<64>}, because it is out of
+the range of signed 32-bit numbers.
+
+A set of suffixes can be used to construct integer literals of certain
+types explicitly.  @code{L} or @code{l} is for 64-bit integers.
+@code{H} or @code{h} is for 16-bit integers (also known as
+@dfn{halves}), @code{B} or @code{b} is for 8-bit integers (also known
+as @dfn{bytes}) and @code{n} or @code{N} is for 4-bit integers (algo
+known as @dfn{nibbles}).
+
+Thus, @code{10L} is a 64-bit integer with value
+@code{0x0000_0000_0000_000A}, @code{10H} is a 16-bit integer with
+value @code{0x000A} and @code{10b} is a 8-bit integer with value
+@code{0x0A}.
+
+Similarly, the signed or unsigned attribute of an integer can be
+explicitly specified using the suffix @code{u} or @code{U} (the
+default are signed types).  For example @code{0xffff_ffffU} has type
+@code{uint<32>} and @code{0ub} has type @code{uint<8>}.  It is possible
+to combine width-indicating suffixes with signedness suffixes:
+@code{10UL} denotes the same literal than @code{10LU}.
+
+The above rules guarantee that it is always possible to determine the
+width and signedness of an integer constant just by looking at it,
+with no ambiguity.
+
+@node Characters
+@section Characters
+
+8-bit unsigned integers can use an alternative literal notation that
+is useful when working with @emph{ASCII character codes}.  Printable
+character codes can be denoted with @code{'c'}.
+
+Non-printable characters can be expressed using escape-sequences.  The
+allowed sequences are:
+
+@table @code
+@item \n
+New-line character (ASCII 012).
+@item \t
+Tab character (ASCII 011).
+@item \[0-9][0-9]?[0-9]?
+Character whose ASCII code is the specified number, in octal.
+@end table
+
+Examples:
+
+@example
+'o'
+'\n'
+'\t'
+'\0'
+@end example
+
+The type of a character literal is always @code{char}, aka
+@code{uint<8>}.
+
 
 @node Offsets
 @chapter Offsets
@@ -218,7 +334,7 @@ containing the following data:
 @example
 first bit       BFINAL
 next 2 bits     BTYPE
-@end example      
+@end example
 
 Note that the header bits do not necessarily begin on a byte boundary,
 since a block does not necessarily occupy an integral number of bytes.
@@ -520,7 +636,7 @@ The current endianness can be obtained like this:
 (poke) .set endian
 little
 @end example
-      
+
 We can easily see how changing The current endianness indeed impacts
 the way integers are mapped:
 
@@ -549,7 +665,7 @@ like:
 @example
 defvar ENDIAN_LITTLE = 0;
 defvar ENDIAN_BIG = 1;
-      
+
 defun get_endian = int: @{ ... @}
 defun set_endian = (int endian) int: @{ ... @}
 @end example
@@ -619,7 +735,7 @@ deftype BPF_Insn_Regs =
   struct
   @{
     defvar little_p = (get_endian == ENDIAN_LITTLE);
-    
+
     BPF_Reg src @ !little_p * 4#b;
     BPF_Reg dst @ little_p * 4#b;
   @};
