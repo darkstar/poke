@@ -2,12 +2,12 @@
 @comment %**start of header
 @setfilename poke.info
 @include version.texi
-@settitle The Poke Book
+@settitle The Pokist Guide
 @afourpaper
 @comment %**end of header
 
 @copying
-This book describes GNU poke (version @value{VERSION},
+This manual describes GNU poke (version @value{VERSION},
 @value{UPDATED}).
 
 Copyright @copyright{} 2019 Jose E. Marchesi
@@ -48,28 +48,31 @@ Documentation License''.
 @c Introduction
 @c
 @c - Motivation, and history (first part of talk)
-@c - Nomenclature
 @c - The program
 @c - Demo: poking a relocation
-@c
-@c The Program
-@c
-@c Dump
-@c Files
-@c Settings
-@c pokerc
-@c Styling poke's output
 @c
 @c Hacking poke
 @c
 @c Writing poke commands.
 
 @menu
-@c * Motivation::			Why a binary editor?
+Introduction
+* Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
-@c * Demo
+* Invoking poke::		command line options.
 
-The Program
+Dot-Commands
+* .file::			Opening and closing IO spaces.
+* .set::			Querying and setting global options.
+* .vm::				Poke Virtual Machine related commands.
+* .exit::			Exiting poke :(
+
+Commands
+* dump::			Inspecting crude binary.
+
+Configuration
+* pokerc::			User's initialization file.
+* Styling::			Changing the appearance of poke's output.
 
 The Language
 * Integers::			Working with whole numbers.
@@ -80,12 +83,20 @@ The Language
 * Mapping::			Accessing the IO space.
 * Output::			Printing from Poke programs.
 
+Hacking poke
+* Writing Commands::		Extending poke with new commands.
+
 Appendices
 * GNU Free Documentation License:: Distribution terms for this document.
 
 Indexes
 * Concept Index::
 @end menu
+
+@node Motivation
+@chapter Motivation
+
+XXX
 
 @node Nomenclature
 @chapter Nomenclature
@@ -119,6 +130,45 @@ for example, could be implemented in a pickle named
 @file{bitpatterns.pk}.
 
 We hope this helps to clarify things.
+
+@node Invoking poke
+@chapter Invoking poke
+
+XXX
+
+@node .file
+@chapter .file
+
+XXX
+
+@node .set
+@chapter .set
+
+XXX
+
+@node .vm
+@chapter .vm
+
+@node .exit
+@chapter .exit
+
+XXX
+
+@node dump
+@chapter dump
+@cindex dump
+
+XXX
+
+@node pokerc
+@chapter pokerc
+
+XXX
+
+@node Styling
+@chapter Styling
+
+XXX
 
 @node Integers
 @chapter Integers
@@ -1749,6 +1799,7 @@ simple unformatted output, and formatted output.
 @menu
 * print::			simple output.
 * printf::			formatted output.
+* Pretty Printers::		improve the legibility of your data structures.
 @end menu
 
 @node print
@@ -1854,6 +1905,16 @@ This is a NAME: xxx
 (poke) printf "Name: %<string:%s%> Age: %<integer:%i32d%>, "Jose", 39
 Name: Jose Age: 39
 @end example
+
+@node Pretty Printers
+@section Pretty Printers
+
+XXX
+
+@node Writing Commands
+@chapter Writing Commands
+
+XXX
 
 @node GNU Free Documentation License
 @appendix GNU Free Documentation License
