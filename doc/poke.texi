@@ -191,9 +191,6 @@ beginning of the Data.  I conceived struct field labels to be any
 expression evaluating to an integer, which would be... bytes,
 obviously.
 
-@noindent
-Very nice but...
-
 Then, one day, it was the turn for IETF RFC1951, which is the
 specification of the DEFLATE algorithm and associated file format.  Oh
 dear.  Near the beginning of the spec document it can be read:
@@ -409,32 +406,80 @@ entirely.  To denote one kilobyte, for example, we can write
 @node Offset operations
 @section Offset operations
 
-Poke supports a little algebra for offsets:
+Poke supports a little algebra for offsets.
+
+@subsection Addition and subtraction
+
+The addition or subtraction of two offsets results in another offset.
+Examples:
 
 @example
-OFFSET + OFFSET -> OFFSET
-OFFSET - OFFSET -> OFFSET
-OFFSET * MAGNITUDE -> OFFSET
-OFFSET / OFFSET -> MAGNITUDE
-OFFSET % OFFSET -> OFFSET
+(poke) 1#B + 1#b
+9#b
+(poke) 2#KB - 1024#B
+1024#B
 @end example
 
-The addition or subtraction of two offsets results in another offset:
-@code{1#B + 1#b -> 7#b}.  Multiplying an offset by a magnitude gives
-you another offset: @code{8#b * 2 -> 2#B}.  Dividing two offsets gives
-you a magnitude: @code{16#b / 1#B -> 2}.  Finally, the modulus of two
-offsets is another offset: @code{17#b / 1#B -> 1#b}.
+The unit of the result is the greatest common divisor of the units of
+the operands.
 
-These operators provide a comfortable and smooth way to convert memory
-magnitudes between different units: just use units like you do when
-doing physics or working with units in other contexts.  Example:
+@subsection Multiplication by a scalar
+
+Multiplying an offset by a magnitude gives you another offset.
+Examples:
 
 @example
-24 #Kb/#B
+(poke) 8#b * 2
+16#b
+(poke) 16#MB * 0
+0#MB
 @end example
 
-@noindent
-Which gives you the number of bytes in 24 kilobytes.
+The unit of the result is the same than the unit of the offset
+operand.
+
+Note that multiplying two offsets is not supported.  This makes sense,
+since computer memory is linear, and therefore it wouldn't make any
+sense to have units like @code{#B@sup{2}}.
+
+@subsection Division
+
+Dividing two offsets gives you a magnitude.  Examples:
+
+@example
+(poke) 16#b / 1#B
+2
+(poke) 1024#MB / 512#Mb
+16
+@end example
+
+Dividing offsets is the Pokish way of converting memory magnitudes
+between different units: just use units like you do when doing physics
+or working with units in other contexts.
+
+For example, using the syntactic trick of omitting the magnitude (in
+which case it is assumed to be 1) it is very natural to write
+something like the following to convert from kilobits to bytes:
+
+@example
+(poke) 24 #Kb/#B
+3072
+@end example
+
+@subsection Modulus
+
+The modulus of two offsets gives you another offset with the expected
+semantics.  Examples:
+
+@example
+(poke) 9#b % 1#B
+1#b
+(poke) 1#B % 9#b
+8#b
+@end example
+
+The unit of the result is the greatest common divisor of the units of
+the operands.
 
 @node Endianness
 @chapter Endianness
