@@ -997,17 +997,33 @@ unhandled out of bounds exception
 @node String Concatenation
 @section String Concatenation
 
-The left-associative binary operator @code{+} concatenates strings.
-The second argument is concatenated at the end of the first argument,
-whose null terminating character is discarded.  Examples:
+Strings can be concatenated using the @code{+} operator.  This works
+like this:
 
 @example
 (poke) "foo" + "bar"
 "foobar"
-(poke) "" + "x"
-"x"
-(poke) "" + ""
-""
+@end example
+
+Note how the null character terminating the first string is removed.
+Therefore, the length of the concatenation of two given strings
+of lengths @code{N} and @code{M} is always @code{N+M-1}.
+
+Concatenation and indexing are useful together for building strings.
+A string can be created empty, and additional characters added to it
+by means of concatenation:
+
+@example
+(poke) defvar bytes = "";
+(poke) bytes = bytes + 'x' as string;
+@end example
+
+Then, we can retrieve characters from the string we built using
+indexing:
+
+@example
+(poke) bytes[0]
+0x78UB
 @end example
 
 @node String Attributes
