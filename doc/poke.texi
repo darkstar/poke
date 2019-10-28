@@ -52,13 +52,6 @@ Documentation License''.
 @c - The program
 @c - Demo: poking a relocation
 @c
-@c The Language
-@c
-@c Values
-@c Types
-@c Structs
-@c Arrays
-@c
 @c The Program
 @c
 @c Dump
@@ -75,11 +68,17 @@ Documentation License''.
 @c * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
 @c * Demo
-* Integers::			working with whole numbers.
-* Offsets::			working with memory sizes.
-* Strings::			working with null-terminated strings.
-* Endianness::			byte ordering.
-* Output::			printing from Poke programs.
+
+The Program
+
+The Language
+* Integers::			Working with whole numbers.
+* Offsets::			Working with memory sizes.
+* Strings::			Working with null-terminated strings.
+* Arrays::			Working with homogeneous collections of values.
+* Endianness::			Byte ordering.
+* Mapping::			Accessing the IO space.
+* Output::			Printing from Poke programs.
 
 Appendices
 * GNU Free Documentation License:: Distribution terms for this document.
@@ -537,7 +536,7 @@ deftype Data =
     byte count;
     byte dstart;
 
-    byte[count] data @ dstart;
+    byte[count] data @@ dstart;
   @};
 @end example
 
@@ -612,7 +611,7 @@ deftype BitData =
     byte count;
     byte dstart;
 
-    byte[count] data @ dstart * 8;
+    byte[count] data @@ dstart * 8;
   @};
 @end example
 
@@ -1057,6 +1056,223 @@ includes the terminating null.  Examples:
 Always 0 for strings.  See mapping.
 @end table
 
+@node Arrays
+@chapter Arrays
+@cindex arrays
+
+Arrays are homogeneous collections of values.
+
+@menu
+* Array Literals::		Writing array values.
+* Array Types::			Bounded and unbounded arrays.
+* Array Indexing::		Accessing values stored in arrays.
+* Array Trimming::		Working with array pieces.
+* Array Attributes::		Accessing properties of array values.
+@end menu
+
+@node Array Literals
+@section Array Literals
+
+Array literals are constructed using the following syntax:
+
+@example
+[@var{exp},@var{exp}...]
+@end example
+
+Where @var{exp} is an arbitrary expression.
+
+For example, @code{[1,2,3]} constructs an array of three signed 32-bit
+integers.  Likewise, @code{['a','b','c']} constructs an array of three
+unsigned 8-bit integers (characters).
+
+The type of the array literal is inferred from the type of its
+elements.  Accordingly, all the elements in an array literal must be
+of the same type.  Examples of invalid array literals, that will raise
+a compilation-time error if evaluated, are:
+
+@example
+[1,2u,3]
+[1,0xffff_ffff,3]
+['a',"b",'c']
+@end example
+
+Array literals must contain at least one element.  Accordingly,
+@code{[]} is not a valid array literal.
+
+This is how a @code{3x3} matrix could be constructed using an array of
+arrays:
+
+@example
+[[1,2,3],[4,5,6],[7,8,9]]
+@end example
+
+It is possible to refer to specific elements when constructing array
+literals.  For example, @code{[1,2,3,.[3] = 4]} denotes the same
+array than @code{[1,2,3,4]}.
+
+This allows creating arrays without having to specify all its
+elements.  Unspecified elements have the next specified value.  For
+example, @code{[.[2] = 2]} denotes the same array than
+@code{[2,2,2]}.
+
+Note that an array element can be referenced more than once.  When
+that happens, the final value of the element is the last specified.
+For example, @code{[1,2,3,.[1]=10]} denotes the array @code{[1,10,3]}.
+
+@node Array Types
+@section Array Types
+
+There are three different kind of array types in Poke.
+
+@dfn{Unbounded} arrays have no explicit boundaries.  Examples are
+@code{int[]} or @code{Elf64_Shdr[]}.  Arrays can be @dfn{bounded by
+number of elements} specifying a Poke expression that evaluates to an
+integer value.  For example, @code{int[2]}.  Finally, arrays can be
+@dfn{bounded by size} specifying a Poke expression that evaluates to
+an offset value.  For example, @code{int[8#B]}.
+
+@subsection Writing unbounded array literals
+
+The type of an array literal is always bounded by number of elements.
+For example, the type of @code{[1,2,3]} is @code{int[3]}.  If what we
+want is an unbounded array literal we can obtain it with a case like
+@code{[1,2,3] as int[]}.
+
+@subsection Array boundaries and closures
+
+Poke arrays are rather peculiar.  One of their seemingly bizarre
+characteristics is the fact that the expressions calculating their
+boundaries (when they are bounded) evaluate in their own lexical
+environment, which is captured.  In other words: the expressions
+denoting the boundaries of Poke arrays conform closures.  Also, the
+way they evaluate may be surprising.  This is no capricious.
+
+When an array type is bounded, be it by number of elements or by size,
+the expression indicating the boundary doesn't need to be constant and
+it can involve variables.  For example, consider the following type
+definition:
+
+@example
+defvar N = 2;
+deftype List = int[N*2];
+@end example
+
+@noindent
+Let's map a @code{List} at some offset:
+
+@example
+(poke) List @@ 0#B
+[0x746f6f72,0x303a783a,0x723a303a,0x3a746f6f]
+@end example
+
+As expected, we get an array of four integers.  Very good,
+obviously the boundary expression @code{N*2} got evaluated
+when defining the type @code{List}, and the result of the
+evaluation was @code{4}, right?.  Typical semantics like in my
+garden variety programming language... right?  Right?!?
+
+Well, not really.  Let's modify the value of @code{N} and map
+a @code{List} again...
+
+@example
+(poke) N = 1
+(poke) List @@ 0#B
+[0x746f6f72,0x303a783a]
+@end example
+
+
+Yes, The boundary of the array type changed... come on, this is Poke,
+was you @strong{really} expecting something typical? ;)
+
+What happens is that at type definition time the lexical environment
+is captured and a closure is created.  The body of the closure is the
+expression.  Every time the type is referred, the closure is
+re-evaluated and a new value is computed.
+
+Consequently, if the value of a variable referred in the expression
+changes, like in our example, the type itself gets updated
+automagically.  Very nice but, why is Poke designed like this?  Just
+to impress the cat?  Nope.
+
+In binary formats, and also in protocols, the size of some given data
+is often defined in terms of some other data that should be decoded
+first.  Consider for example the following definition of a
+@code{Packet}:
+
+@example
+deftype Packet =
+  struct
+  @{
+    byte size;
+    byte[size] payload;
+  @};
+@end example
+
+Each packet contains a 8-bit integer specifying the size of the
+payload transported in the packet.  The payload, a sequence of
+@code{size} bytes, follows.
+
+In struct types like the above, the boundaries of arrays depend on
+fields that have been decoded before and that exist, like variables,
+in the lexical scope captured by the struct type definition (yes,
+these are also closures, but that's for another article.)  This
+absolutely depends on having the array types evaluate their bounding
+expressions when the type is used, and not at type definition time.
+
+
+@noindent
+To show this property in action, let's play a bit:
+
+@example
+(poke) defvar data = byte[4] @@ 0#B
+(poke) data[0] = 2
+(poke) data[1] = 3
+(poke) data[2] = 4
+(poke) data[3] = 5
+(poke) dump
+76543210  0011 2233 4455 6677 8899 aabb ccdd eeff
+00000000: 0203 0405 0000 0000 0000 0000 0000 0000
+00000010: 0000 0000 0000 0000 0000 0000 0000 0000
+(poke) defvar p1 = Packet @@ 0#B
+(poke) defvar p2 = Packet @@ 1#B
+(poke) p1
+Packet @{size=0x2UB,payload=[0x3UB,0x4UB]@}
+(poke) p2
+Packet @{size=0x3UB,payload=[0x4UB,0x5UB,0x0UB]@}
+@end example
+
+Now, let's change the data and see how the sizes of the payloads
+are adjusted accordingly:
+
+@example
+(poke) data[0] = 1
+(poke) data[1] = 0
+(poke) p1
+Packet @{size=0x1UB,payload=[0x0UB]@}
+(poke) p2
+Packet @{size=0x0UB,payload=[]@}
+@end example
+
+So, as we have seen, Poke's way of handling boundaries in array types
+allows data structures to adjust to the particular data they contain,
+so usual in binary formats.  This is an important feature, that gives
+Poke part of it's feel and magic.
+
+@node Array Indexing
+@section Array Indexing
+
+XXX
+
+@node Array Trimming
+@section Array Trimming
+
+XXX
+
+@node Array Attributes
+@section Array Attributes
+
+XXX
+
 @node Endianness
 @chapter Endianness
 @cindex endian, endianness
@@ -1104,10 +1320,10 @@ the way integers are mapped:
 (poke) dump :from 0#B :size 4#B :ruler 0 :ascii 0
 00000000: 8845 4c46
 (poke) .set endian little
-(poke) int @ 0#B
+(poke) int @@ 0#B
 0x464c4588
 (poke) .set endian big
-(poke) int @ 0#B
+(poke) int @@ 0#B
 0x88454c46
 @end example
 
@@ -1196,8 +1412,8 @@ deftype BPF_Insn_Regs =
   @{
     defvar little_p = (get_endian == ENDIAN_LITTLE);
 
-    BPF_Reg src @ !little_p * 4#b;
-    BPF_Reg dst @ little_p * 4#b;
+    BPF_Reg src @@ !little_p * 4#b;
+    BPF_Reg dst @@ little_p * 4#b;
   @};
 @end example
 
@@ -1211,10 +1427,10 @@ variables inside structs.
 Let's see it in action:
 
 @example
-(poke) BPF_Insn_Regs @ 1#B
+(poke) BPF_Insn_Regs @@ 1#B
 BPF_Insn_Regs @{src=#<%r4>,dst=#<%r5>@}
 (poke) .set endian big
-(poke) BPF_Insn_Regs @ 1#B
+(poke) BPF_Insn_Regs @@ 1#B
 BPF_Insn_Regs @{src=#<%r5>,dst=#<%r4>@}
 @end example
 
@@ -1267,6 +1483,262 @@ deftype Elf64_Ehdr =
 Note how @code{set_endian} returns an integer value...  it is always
 @code{1}. This is to facilitate its usage in fields constraint
 expressions.
+
+@node Mapping
+@chapter Mapping
+
+The purpose of poke is to edit an ``IO space'', which is the file or
+device being edited.  This is achieved by mapping values, which is
+perhaps the most important concept in Poke.
+
+@menu
+* The Map Operator::		The @@ operator.
+* Mapping Simple Types::	Mapping integers, offsets and strings.
+* Mapping Structs::		Mapping collections of fields.
+* Mapping Arrays::		Mapping sequences of things.
+@end menu
+
+@node The Map Operator
+@section The Map Operator
+
+XXX
+
+@node Mapping Simple Types
+@section Mapping Simple Types
+
+XXX
+
+@node Mapping Structs
+@section Mapping Structs
+
+XXX
+
+@node Mapping Arrays
+@section Mapping Arrays
+
+Arrays can be mapped in IO space in three different ways, depending on
+the characteristics of the type provided to the mapping operator.
+
+@subsection Array maps bounded by number of elements
+
+When an array type bounded by number of elements is used in a mapping
+operation, the resulting mapped array is also bounded by number of
+elements.
+
+For example, this is how we would map an array of four 32-bit signed
+integers in the current IO space:
+
+@example
+(poke) int[4] @@ 0#B
+[10,20,30,40]
+@end example
+
+Since you can also provide a dynamic array type to the map operator,
+the number of elements doesn't need to be constant.  For example,
+given the variable @code{nelems} has a value of @code{2}:
+
+@example
+(poke) defvar nelems = 2
+(poke) int[nelems + 1] @@ 0#B
+[100,222,333]
+@end example
+
+If an end-of-file condition happens while mapping the array, because
+the number of elements specified in the array type, at the given
+offset, exceeds the capacity of the underlying IO device, an exception
+is raised and the mapping is not completed:
+
+@example
+(poke) int[99999999999] @@ 0#B
+unhandled EOF exception
+@end example
+
+Likewise, if a constraint fails while performing the mapping (while
+mapping an array of structs, for example) an exception is raised and
+the map is aborted.
+
+@subsection Array maps bounded by size
+
+While dealing with binary formats, it often happens that the number of
+entities in a collection is given by the space they occupy, rather
+than the count itself.
+
+For example, consider ELF sections holding relocations.  These
+sections contain a collection of zero or more relocations. The layout
+of each relocation is specified by the following type:
+
+@example
+deftype Elf64_Rela =
+  struct
+  @{
+    offset<Elf64_Addr,B> r_offset;
+    Elf64_Xword r_info;
+    Elf64_Sxword r_addend;
+  @};
+@end example
+
+The section is described by an entry in the ELF sections header table:
+
+@example
+deftype Elf64_Shdr =
+  struct
+  @{
+    Elf_Word sh_name;
+    Elf_Word sh_type;
+    Elf64_Xword sh_flags;
+    Elf64_Addr sh_addr;
+    Elf64_Off sh_offset;
+    offset<Elf64_Xword,B> sh_size;
+    Elf_Word sh_link;
+    Elf_Word sh_info;
+    Elf64_Xword sh_addralign;
+    offset<Elf64_Xword,b> sh_entsize;
+  @};
+@end example
+
+The relevant elements of @code{Elf64_Shdr} are @code{sh_offset} and
+@code{sh_size}, which indicate the offset of the beginning of the
+section's contents, and its size, respectively.  At this point, if we
+wanted to get an array with all the relocations in the section, we
+could map an array bounded by number of elements like we saw in the
+previous section, like this:
+
+@example
+(poke) Elf64_Rela[sh_size / 1#Elf64_Rela]
+[... relocs ...]
+@end example
+
+However, this approach adoleces from two problems.  First, it doesn't
+work with any entity type.  For an offset like @code{1#Elf64_Rela} to
+work, it is required to know the size of the type specified as the
+unit at compile time.  In the particular case of @code{Elf64_Rela},
+that condition is satisfied, but too often that's not the case.  For
+example, think about a section containing @code{NULL} terminated
+strings: you can't know the number of strings contained in the section
+until you actually read it.
+
+Another problem is when the data in the header is corrupted.  Using
+the mapping bounded by number of elements, we wouldn't realize it.  It
+would be good if the tool would tell us whether the specified size
+actually holds an exact number of the requested elements.
+
+A mapping bound by size is what we need.  Fortunately, as we saw when
+discussing array types, Poke allows to specify an offset instead of an
+integral value, in the array type specification.  The right amount of
+entities (in this case relocations) to strictly satisfy the provided
+size will be mapped in the IO space.  So, in order to obtain an array
+containing all the relocations in the section, we simply write:
+
+@example
+(poke) Elf64_Rela[ehdr.sh_size] @@ ehdr.sh_offset
+[... relocs ...]
+@end example
+
+The strictness mentioned above is important.  GNU poke will complain
+(and abort the mapping) if it is not possible to map an exact number
+of elements.  Thus the following mapping would not be successful:
+
+@example
+(poke) int[33#b] @@ 0#B
+unhandled out of map bounds exception
+@end example
+
+Like in mappings bounded by number of elements, if a constraint fails
+while performing the mapping, an exception is raised and the map is
+aborted.
+
+@subsection Unbounded array maps
+
+We mentioned above that if an end-of-file condition happens while
+performing a mapping (be it bounded by number of elements or bounded
+by size) an EOF exception is raised, and the mapping operation is
+aborted.
+
+Unbounded array mappings are performed by using an unbounded array
+type in the mapping operation, like in:
+
+@example
+@var{type}[] @@ 0#B
+@end example
+
+The above construction will map values of type @var{type} in the IO
+space until there is an end-of-file condition, or a constraint fails,
+whatever happens first.  When it is a constraint expression that
+fails, that last element is not included in the mapped array.
+
+Let's assume a binary file contains a series of blocks, located one
+after the other, of a kind described by the following struct type:
+
+@example
+deftype Block =
+  struct
+  @{
+     byte magic[2] : magic[0] == 'B' && magic[1] == 'K';
+     ... other data ...
+  @};
+@end example
+
+we can map the blocks using an unbounded array map:
+
+@example
+(poke) Block[] @@ 0#B
+[ ... blocks ... ]
+@end example
+
+If the blocks extend up to the end of the IO space, that many blocks
+will be mapped.  If there is some other content in the file following
+the blocks, the constraint in the @code{magic} field will fail and
+will delimit the map that way (provided the binary format is well
+designed.)
+
+@subsection Mapped bounds in bounded arrays
+
+When an array map is bounded, be it by number of elements or by size,
+the bounding value can be mapped itself.  To illustrate how this
+works, let's go back to our ELF file and the section containing
+relocations.  First, we map an @code{Elf64_Shdr} to get the section
+header:
+
+@example
+(poke) defvar shdr = Elf64_Shdr @@ @var{offset}
+(poke) shdr.sh_offset
+120#B
+(poke) shdr.sh_size
+24#B
+@end example
+
+Now we map an array with the relocations themselves, using a map
+bounded by size, as we learned in the last section:
+
+@example
+(poke) defvar relocs = ELF64_Rela[shdr.sh_size] @@ shdr.sh_offset
+(poke) relocs'length
+3
+@end example
+
+Now, observe that @code{shdr.sh_size} is mapped itself!  This means
+that, should the section size be modified (to accommodate an extra
+relocation, for example) the mapping of @code{relocs} will reflect
+that automatically:
+
+@example
+(poke) shdr.sh_size = shdr.sh_size + 1#Elf64_Rela
+(poke) relocs'length
+4
+@end example
+
+This is certainly an useful idiom, that is often used while poking
+around.  However, sometimes this is @emph{not} what we want.  If we
+don't want the mapping bounds of @code{relocs} to be tied to
+@code{shdr}, we can just use a temporary for the size:
+
+@example
+(poke) defvar s = shdr.sh_size
+(poke) defvar relocs = Elf64_Rela[s] @@ shdr.sh_offset
+@end example
+
+Since simple values (such as the size above) are not mapped, this
+trick works as intended.
 
 @node Output
 @chapter Output
