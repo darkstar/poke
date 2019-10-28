@@ -1,5 +1,9 @@
 2019-10-28  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi: New chapters and sections.
+
+2019-10-28  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Integers): New chapter.
 	(Integer Literals): New section.
 	(Characters): Likewise.

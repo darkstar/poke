@@ -124,9 +124,26 @@ We hope this helps to clarify things.
 @chapter Integers
 @cindex integers
 
+Most of the values manipulated in Poke programs are whole numbers,
+also typically known as @dfn{integers} in computing parlance.  This is
+because integers are pervasive in binary formats, often featuring
+unusual characteristics in terms of size and/or alignment.  Single
+bits denoting flags or packed small integers are good examples of
+this.  In order to ease the manipulation of such entities, and unlike
+most programming languages, Poke provides integer types of any number
+of bits and a rich set of accompanying operators.
+
 @menu
 * Integer Literals::		Writing integers in different bases.
-* Characters::		        Another way to write small integers.
+* Characters::			Another way to write small integers.
+* Booleans::			Integers denoting truth values.
+* Integer Types::		int<N> and uint<N>.
+* Casting Integers::		Converting integers.
+* Relational Operators::	Comparing integers.
+* Arithmetic Operators::	Operating with integers.
+* Bitwise Operators::		Getting and setting integer bits.
+* Boolean Operators::		Equality and inequality.
+* Integer Attributes::		Accessing properties of integer values.
 @end menu
 
 @node Integer Literals
@@ -234,6 +251,199 @@ Examples:
 The type of a character literal is always @code{char}, aka
 @code{uint<8>}.
 
+@node Booleans
+@section Booleans
+
+Like in C, truth values in Poke are encoded using integers.  Zero
+(@code{0}) denotes the logical value ``false'', and any integer other
+than zero denotes the logical value ``true''.
+
+@node Integer Types
+@section Integer Types
+
+Most general-purpose programming languages provide a small set of
+integer types, each featuring a range corresponding to strategic
+storage sizes: basically, signed and unsigned variants of 8, 16, 32,
+64 bits.  As we have seen in the previous sections, suffixes like
+@code{H} or @code{L} are used in Poke for that purpose.
+
+However, in conventional programming languages when integers having an
+``odd'' width (like 13 bits, for example) get into play for whatever
+reason, the programmer is required to use the integer arithmetic
+operators (and sometimes bit-wise operators) herself, in a clever way,
+in order to achieve the desired results.
+
+Poke, on the contrary, provides a rich set of integer types featuring
+different widths, in both signed and unsigned variants.  The language
+operators are aware of these types, and will do the right thing when
+operating on integer values having different widths.
+
+Unsigned integer types are specified using the type constructor
+@code{uint<@var{n}>}, where @var{n} is the number of bits.  @var{n}
+should be an integer literal in the range @code{[1,64]}.  Examples:
+
+@example
+uint<1>
+uint<7>
+uint<64>
+@end example
+
+Similarly, signed integer types are created using the type constructor
+@var{int<@var{n}>}, where @var{n} is the number of bits.  @var{n}
+should be an integer literal in the range @code{[1,64]}.  Examples:
+
+@example
+int<1>
+int<8>
+int<64>
+@end example
+
+Note that expressions are not allowed in the type integral constructor
+parameters.  Not even constant expressions.  Thus, things like
+@code{int<foo>} and @code{uint<2+3>} are not allowed.
+
+@node Casting Integers
+@section Casting Integers
+
+The right-associative unary operator cast @code{as} can be used to
+derive a new integer value having a different type from an existing
+value.
+
+For example, this is how we would create a signed 12-bit integer value
+holding the value 666:
+
+@example
+(poke) 666 as int<12>
+(int<12>) 666
+@end example
+
+Note that the @code{666} literal is originally a 32-bit signed
+integer.  The cast performs the conversion.
+
+Casts between integer types are always allowed, and never fail.  If
+the new type is narrower than the existing type, truncation may be
+performed to accommodate the value in its new type.  For example, the
+expression @code{0x8765_4321 as uint<16>} evaluates to @code{0x4321}.
+If the new type is wider than the existing type, either zero-extension
+or sign-extension is performed depending on the signedness of the
+operand.
+
+The semantics of the sign-extension operation depends on the
+signedness of the value being connverted, and on the currently
+selected encoding for negative numbers.
+
+When using two's complement encoding, converting a signed value will
+always sign-extend regardless of the signedness of the target type.
+Thus:
+
+@example
+(poke) -2H as uint<32>
+0xfffffffeU
+(poke) -2H as int<32>
+0xfffffffe
+@end example
+
+Likewise, converting an unsigned value will always zero-extend
+regardless of the signedness of the target type. Thus:
+
+@example
+(poke) 0xffffUH as uint<32>
+0xffffU
+(poke) 0xffffUH as int<32>
+0xffff
+@end example
+
+@node Relational Operators
+@section Relational Operators
+
+The following binary relational operators are supported on integer
+values, in descending precedence order:
+
+@itemize
+@item Equality @code{==} and inequality @code{!=}.
+@item Less than @code{<} and less or equal than @code{<=}.
+@item Greater than @code{>} and greater or equal than @code{>=}.
+@end itemize
+
+When applied to integer and character values, these operators
+implement an arithmetic ordering.
+
+These operators resolve in boolean values encoded as 32-bit integers:
+@code{0} meaning false and @code{1} meaning true.
+
+@node Arithmetic Operators
+@section Arithmetic Operators
+
+The following left-associative binary arithmetic operators are
+supported, in descending precedence order:
+
+@itemize
+@item Multiplication @code{*}, integer division @code{/} and modulus
+      @code{%}.
+@item Addition @code{+} and subtraction @code{-}.
+@end itemize
+
+In all the binary arithmetic operations automatic promotions
+(coercions) are performed in the operands as needed.  The rules are:
+
+@itemize @bullet
+@item If one of the operands is unsigned and the other operand is
+signed, the second is converted to an unsigned value.
+@item If the size in bits of one of the operands is bigger than the
+size of the other operand, the second is converted to the same number
+of bits.
+@end itemize
+
+The following right-associative unary arithmetic operators are
+supported:
+
+@itemize
+@item Unary minus @code{-} and unary plus @code{+}.
+@end itemize
+
+@node Bitwise Operators
+@section Bitwise Operators
+
+The following left-associative bitwise binary operators are supported,
+in descending precedence order:
+
+@itemize
+@item Bitwise shift left @code{<<.} and bitwise shift right @code{.>>}.
+@item Bitwise AND @code{&}.
+@item Bitwise exclusive OR @code{^}.
+@item Bitwise inclusive OR @code{|}.
+@item Bitwise concatenation @code{::}.
+@end itemize
+
+Bitwise concatenation works with any integral type, of any bit length.
+
+The following right-associative unary bitwise operators are supported:
+
+@itemize
+@item Bitwise complement @code{~}.
+@end itemize
+
+@node Boolean Operators
+@section Boolean Operators
+
+The following left-associative, short-circuited binary logical
+operators are supported, in descending precedence order:
+
+@itemize
+@item Logical AND: @code{&&}.
+@item Inclusive OR: @code{||}.
+@end itemize
+
+The following right-associative unary logical operators are supported:
+
+@itemize
+@item Logical negation @code{!}.
+@end itemize
+
+@node Integer Attributes
+@section Integer Attributes
+
+XXX
 
 @node Offsets
 @chapter Offsets
@@ -243,13 +453,15 @@ Poke uses united values to handle offsets and data sizes.  This is a
 very central concept in poke.
 
 @menu
-* Why offsets::			byte-oriented or bit-oriented?
-* Offset values::		denoting offsets in Poke.
-* Offset operations::		operating with offsets.
+* Why Offsets::			Byte-oriented or bit-oriented?
+* Offset Literals::		Denoting offsets in Poke.
+* Offset Types::		offset<...>.
+* Casting Offsets::		Converting offsets.
+* Offset Operations::		Operating with offsets.
 @end menu
 
-@node Why offsets
-@section Why offsets
+@node Why Offsets
+@section Why Offsets
 
 Early in the design of what is becoming GNU poke I was struck by a
 problem that, to my surprise, would prove not easy to fix in a
@@ -405,8 +617,8 @@ shortly.
 I'm really grateful to Bruno Haible, Luca Saiu and Nacho Gonzalez for
 putting me on the right track.
 
-@node Offset values
-@section Offset values
+@node Offset Literals
+@section Offset Literals
 
 Poke provides a convenient syntax to provide united values, which are
 called @dfn{offsets} (because in a binary editor you mostly use them
@@ -519,8 +731,53 @@ If the magnitude of an offset is 1 then it is allowed to omit it
 entirely.  To denote one kilobyte, for example, we can write
 @code{#KB}.
 
-@node Offset operations
-@section Offset operations
+@node Offset Types
+@section Offset Types
+
+Offset types are denoted as @code{offset<@var{base_type},@var{unit}>},
+where @var{base_type} is an integer type and @var{unit} the
+specification of an unit.
+
+The offset base type is the type of the magnitude part of the united
+value.  It can be any integer type, signed or unsigned, of any size.
+
+The unit specification should be one of the unit identifiers that are
+allowed in offset literals (see above) or the name of a Poke type
+whose size is known as compile time.
+
+Let's see some examples.  A signed 32-bit offset expressed in bytes
+has type @code{offset<int<32>,B>}.  An unsigned 12-bit offset
+expressed in kilobits has type @code{offset<uint<12>,Kb>}.  Finally, a
+signed 64-bit offset in units of ``packets'', where a packet is
+denoted with a Poke type @code{Packet} has type
+@code{offset<uint<64>,Packet>}.
+
+@node Casting Offsets
+@section Casting Offsets
+
+The right-associative unary operator cast @code{as} can be used to
+derive a new offset value having a different type from an existing
+value.
+
+For example, this is how we would create a signed 12-bit offset in
+units bytes:
+
+@example
+(poke) 1024#b as offset<int<12>,B>
+(int<12>) 128#B
+@end example
+
+The same rules governing conversion of integers apply for the
+magnitude part.  Depending on the unit, there can be truncation, like
+in:
+
+@example
+(poke) 9#b as offset<int,B>
+1#B
+@end example
+
+@node Offset Operations
+@section Offset Operations
 
 Poke supports a little algebra for offsets.
 
