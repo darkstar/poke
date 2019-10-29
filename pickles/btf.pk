@@ -112,8 +112,9 @@ deftype BTF_Type =
       BTF_Type_Id type;
     } attrs;
 
-    /* XXX move this type to the top-level once we get support to pass
-       arguments to struct types.  */
+    /* XXX move these types to the top-level once we get support to
+       pass arguments to struct types.  */
+    
     deftype BTF_Member =
       struct
       {
@@ -130,29 +131,31 @@ deftype BTF_Type =
         } offset;
       };
 
+    deftype BTF_Func_Proto =
+      struct
+      {
+        BTF_Param[info.vlen] params;
+
+        defun vararg_p = int:
+          {
+           defvar last_param = params[info.vlen - 1];
+           return (last_param.name == 0#B && last_param.type == 0);
+           }
+      };
+
     union
     {
-      BTF_Int int_data : info.kind == BTF_KIND_INT;
-      BTF_Array array_data : info.kind == BTF_KIND_ARRAY;
-      BTF_Enum[info.vlen] enum_data : info.kind == BTF_KIND_ENUM;
-      BTF_Param[info.vlen] func_proto_data : info.kind == BTF_KIND_FUNC_PROTO;
-      BTF_Variable var_data : info.kind == BTF_KIND_VAR;
-      BTF_Member[info.vlen] union_data : info.kind == BTF_KIND_UNION;
-      BTF_Var_SecInfo[info.vlen] datasec_data : info.kind == BTF_KIND_DATASEC;
+      BTF_Int integer                    : info.kind == BTF_KIND_INT;
+      BTF_Array array                    : info.kind == BTF_KIND_ARRAY;
+      BTF_Enum[info.vlen] enum           : info.kind == BTF_KIND_ENUM;
+      BTF_Func_Proto func_proto          : info.kind == BTF_KIND_FUNC_PROTO;
+      BTF_Variable variable              : info.kind == BTF_KIND_VAR;
+      BTF_Member[info.vlen] members      : info.kind == BTF_KIND_UNION;
+      BTF_Var_SecInfo[info.vlen] datasec : info.kind == BTF_KIND_DATASEC;
 
       struct {};
     } data;
 
-    defun fun_proto_vararg_p = int:
-      {
-         if (info.kind_flag == BTF_KIND_FUNC_PROTO)
-           {
-            defvar last_param = data.func_proto_data [info.vlen - 1];
-            return (last_param.name == 0#B && last_param.type == 0);
-           }
-
-         return 0;
-      }
   };
 
 deftype BTF_Header =
