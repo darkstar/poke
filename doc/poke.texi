@@ -140,12 +140,74 @@ XXX
 @node .file
 @chapter .file
 
-XXX
+The @command{.file} command opens a new IO space backed by a file, or
+switches to a previously opened file.  The syntax is:
+
+@example
+.file @var{path}|@var{#tag}
+@end example
+
+Where @var{path} is a path to a file to open (which can be relative to
+poke's current working directory or absolute) and @var{tag} is a tag
+of the form @code{#NUMBER} that identifies a previously open file.
+
+When a new file is opened, it becomes the current IO space.  On that
+point on, every map executed in the REPL or while loading a Poke
+program will operate on that IO space:
+
+@example
+(poke) .file foo.o
+The current file is now `foo.o'.
+@end example
+
+A list of open files, and their corresponding tags, can be obtained
+using the @command{.info files} command.  Once a tag is known, you can
+use it to switch back to that file:
+
+@example
+(poke) .file #1
+The current file is now `foo.o'.
+@end example
 
 @node .info
 @chapter .info
 
-XXX
+The @command{.info} command provides information about several kinds
+of entities.  The recognized sub commands are:
+
+@table @command
+@item .info files
+Display a list of open files.
+
+@example
+(poke) .info files
+  Id	Mode	Position	Filename
+* #0	rw	0x00000000#b	foo.bson
+  #1	r 	0x00000000#b	foo.o
+@end example
+
+The file acting as the current IO space is marked with an asterisk
+character @code{*} at the beginning of the file.  The mode in which
+the file is open is also specified.  The @code{Id} field is the tag of
+the file that can be passed to the @command{.file} command in order to
+switch to it as the new current IO space:
+
+@example
+(poke) .file #1
+The current file is now `foo.o'.
+(poke) .info files
+  Id	Mode	Position	Filename
+  #0	rw	0x00000000#b	file://foo.bson
+* #1	r 	0x00000000#b	foo.o
+@end example
+
+@item .info variable
+Shows a list of defined variables along with their current values and
+the location where the variables were defined.
+@item .info function
+Shows a list of defined functions along with their prototypes and the
+location where the functions were defined.
+@end table
 
 @node .set
 @chapter .set

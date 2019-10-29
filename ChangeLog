@@ -2,6 +2,8 @@
 
 	* doc/poke.texi (.set): New section.
 	(.exit): Likewise.
+	(.file): Likewise.
+	(.info): Likewise.
 
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
