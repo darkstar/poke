@@ -3,8 +3,8 @@
 
 /* { dg-command {.set endian big} } */
 /* { dg-command { defvar a = int[] @ 0#B } } */
-/* { dg-command { defvar b = a[1..2] } } */
-/* { dg-command { defvar c = a[0..1] } } */
+/* { dg-command { defvar b = a[1:2] } } */
+/* { dg-command { defvar c = a[0:1] } } */
 /* { dg-command { a[1] = 0xeadbeef } } */
 /* { dg-command { .print/x a } } */
 /* { dg-output "\\\[0x10203040,0xeadbeef,0x90a0b0c0\\\]" } */

@@ -1,5 +1,41 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-lex.l: Remove token TRIMOP.
+	* src/pkl-tab.y: Use ':' instead of TRIMOP in trimmers rules.
+	* src/std.pk (substr): Adapt to the new syntax.
+	* trim.pk: Remove.
+	* testsuite/poke.pkl/trim-1.pk: From trim.pk and adapted to new
+	syntax.
+	* testsuite/poke.pkl/trim-24.pk: Likewise.
+	* testsuite/poke.pkl/trim-23.pk: Likewise.
+	* testsuite/poke.pkl/trim-22.pk: Likewise.
+	* testsuite/poke.pkl/trim-21.pk: Likewise.
+	* testsuite/poke.pkl/trim-20.pk: Likewise.
+	* testsuite/poke.pkl/trim-19.pk: Likewise.
+	* testsuite/poke.pkl/trim-18.pk: Likewise.
+	* testsuite/poke.pkl/trim-17.pk: Likewise.
+	* testsuite/poke.pkl/trim-16.pk: Likewise.
+	* testsuite/poke.pkl/trim-15.pk: Likewise.
+	* testsuite/poke.pkl/trim-14.pk: Likewise.
+	* testsuite/poke.pkl/trim-13.pk: Likewise.
+	* testsuite/poke.pkl/trim-12.pk: Likewise.
+	* testsuite/poke.pkl/trim-11.pk: Likewise.
+	* testsuite/poke.pkl/trim-10.pk: Likewise.
+	* testsuite/poke.pkl/trim-9.pk: Likewise.
+	* testsuite/poke.pkl/trim-8.pk: Likewise.
+	* testsuite/poke.pkl/trim-7.pk: Likewise.
+	* testsuite/poke.pkl/trim-6.pk: Likewise.
+	* testsuite/poke.pkl/trim-5.pk: Likewise.
+	* testsuite/poke.pkl/trim-4.pk: Likewise.
+	* testsuite/poke.pkl/trim-3.pk: Likewise.
+	* testsuite/poke.pkl/trim-2.pk: Likewise.
+	* testsuite/poke.map/trimmed-map.pk: Adapt to new syntax.
+	* testsuite/poke.map/trimmed-map-4.pk: Likewise.
+	* testsuite/poke.map/trimmed-map-3.pk: Likewise.
+	* testsuite/poke.map/trimmed-map-2.pk: Likewise.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Array Indexing): New section.
 	(Array Trimming): Likewise.
 	(Array Attributes): Likewise.

@@ -263,7 +263,6 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %token MSB LSB
 %token SIGNED UNSIGNED
 %token THREEDOTS
-%token TRIMOP
 
 /* This is for the dangling ELSE.  */
 
@@ -272,7 +271,6 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 
 /* Operator tokens and their precedences, in ascending order.  */
 
-%right <ast> NARG
 %right '?' ':'
 %left OR
 %left AND
@@ -706,25 +704,25 @@ primary:
                   $$ = pkl_ast_make_indexer (pkl_parser->ast, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' expression TRIMOP expression ']' %prec '.'
+        | primary '[' expression ':' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, $3, $5);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' TRIMOP ']' %prec '.'
+        | primary '[' ':' ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, NULL, NULL);
                   PKL_AST_LOC ($$) = @$;
                 }
-        | primary '[' TRIMOP expression ']' %prec '.'
+        | primary '[' ':' expression ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, NULL, $4);
                   PKL_AST_LOC ($$) = @$;
                 }
-	| primary '[' expression TRIMOP ']' %prec '.'
+	| primary '[' expression ':' ']' %prec '.'
         	{
                   $$ = pkl_ast_make_trimmer (pkl_parser->ast,
                                              $1, $3, NULL);
@@ -1589,11 +1587,11 @@ funcall_stmt_arg_list:
         ;
 
 funcall_stmt_arg:
-	  NARG expression
+	  ':' IDENTIFIER expression
           	{
                   $$ = pkl_ast_make_funcall_arg (pkl_parser->ast,
-                                                 $2, $1);
-                  PKL_AST_LOC ($1) = @1;
+                                                 $3, $2);
+                  PKL_AST_LOC ($2) = @2;
                   PKL_AST_LOC ($$) = @$;
                 }
 	;

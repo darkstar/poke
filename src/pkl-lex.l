@@ -187,7 +187,6 @@ D [0-9]
 "offset<"       { return OFFSETCONSTR; }
 
 "..."		{ return THREEDOTS; }
-".."		{ return TRIMOP; }
 
 "*="		{ return MULA; }
 "/="		{ return DIVA; }
@@ -221,8 +220,8 @@ D [0-9]
 ","		{ return ','; }
 "="		{ return '='; }
 "?"		{ return '?'; }
-":"		{ return ':'; }
 ";"		{ return ';'; }
+":"		{ return ':'; }
 "|"		{ return '|'; }
 "^"		{ return '^'; }
 "&"		{ return '&'; }
@@ -268,11 +267,6 @@ D [0-9]
      yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
 
    return UNIT;
-}
-
-:{L}({L}|{D})* {
-  yylval->ast = pkl_ast_make_identifier (yyextra->ast, yytext + 1);
-  return NARG;
 }
 
 {L}({L}|{D})* {

@@ -61,7 +61,7 @@ defun catos = (char[] chars) string:
 
 defun substr = (string s, int f, int t = s'length - 1) string:
   {
-   return s[f..t];
+   return s[f:t];
   }
 
 defun strstr = (string s1, string s2) long:
@@ -75,7 +75,7 @@ defun strstr = (string s1, string s2) long:
 
    while (i < s2'length - s1'length + 1)
      {
-       if (s2[i..i + s1'length - 1] == s1)
+       if (s2[i:i + s1'length - 1] == s1)
          return i;
 
        i = i + 1;
