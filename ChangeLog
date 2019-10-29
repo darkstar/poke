@@ -1,5 +1,10 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-gen.c (pkl_gen_pr_decl): Avoid recompiling type closures
+	(mapper, writer, constructor, etc) again and again.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.pks (struct_constructor): Set/clear
 	payload->in_constructor and not payload->in_mapper.
 	* testsuite/poke.pkl/struct-types-6.pk: New test.

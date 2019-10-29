@@ -132,35 +132,45 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             pkl_ast_node type_struct_elems = PKL_AST_TYPE_S_ELEMS (type_struct);
             pkl_ast_node field;
 
-            /* Compile the struct closures and complete them using the
-               current environment.  */
+            /* Compile the struct closures, complete them using the
+               current environment and install them in the AST node.
+               But only if they haven't been compiled already.  */
 
-            PKL_GEN_PAYLOAD->in_writer = 1;
-            RAS_FUNCTION_STRUCT_WRITER (writer_closure);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
-            PKL_GEN_PAYLOAD->in_writer = 0;
+            if (PKL_AST_TYPE_S_WRITER (type_struct) == PVM_NULL)
+              {
+                PKL_GEN_PAYLOAD->in_writer = 1;
+                RAS_FUNCTION_STRUCT_WRITER (writer_closure);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
+                PKL_GEN_PAYLOAD->in_writer = 0;
 
-            PKL_GEN_PAYLOAD->in_mapper = 1;
-            RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
-            PKL_GEN_PAYLOAD->in_mapper = 0;
+                PKL_AST_TYPE_S_WRITER (type_struct) = writer_closure;
+              }
 
-            PKL_GEN_PAYLOAD->in_constructor = 1;
-            RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      /* _ */
-            PKL_GEN_PAYLOAD->in_constructor = 0;
+            if (PKL_AST_TYPE_S_MAPPER (type_struct) == PVM_NULL)
+              {
+                PKL_GEN_PAYLOAD->in_mapper = 1;
+                RAS_FUNCTION_STRUCT_MAPPER (mapper_closure);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
+                PKL_GEN_PAYLOAD->in_mapper = 0;
 
-            /* Install the closures in the type AST node.  */
+                PKL_AST_TYPE_S_MAPPER (type_struct) = mapper_closure;
+              }
 
-            PKL_AST_TYPE_S_WRITER (type_struct) = writer_closure;
-            PKL_AST_TYPE_S_MAPPER (type_struct) = mapper_closure;
-            PKL_AST_TYPE_S_CONSTRUCTOR (type_struct) = constructor_closure;
+            if (PKL_AST_TYPE_S_CONSTRUCTOR (type_struct) == PVM_NULL)
+              {
+                PKL_GEN_PAYLOAD->in_constructor = 1;
+                RAS_FUNCTION_STRUCT_CONSTRUCTOR (constructor_closure);          /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, constructor_closure); /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                       /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                      /* _ */
+                PKL_GEN_PAYLOAD->in_constructor = 0;
+
+                PKL_AST_TYPE_S_CONSTRUCTOR (type_struct) = constructor_closure;
+              }
 
             PKL_PASS_BREAK;
             break;
@@ -175,31 +185,39 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_decl)
             /* Compile the arrays closures and complete them using the
                current environment.  */
 
-            PKL_GEN_PAYLOAD->in_writer = 1;
-            RAS_FUNCTION_ARRAY_WRITER (writer_closure);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
-            PKL_GEN_PAYLOAD->in_writer = 0;
+            if (PKL_AST_TYPE_A_WRITER (array_type) != PVM_NULL)
+              {
+                PKL_GEN_PAYLOAD->in_writer = 1;
+                RAS_FUNCTION_ARRAY_WRITER (writer_closure);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, writer_closure); /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
+                PKL_GEN_PAYLOAD->in_writer = 0;
 
-            PKL_GEN_PAYLOAD->in_mapper = 1;
-            RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
-            pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
-            PKL_GEN_PAYLOAD->in_mapper = 0;
+                PKL_AST_TYPE_A_WRITER (array_type) = writer_closure;
+              }
 
-            /* The bounder closures for this array and possibly
-               contained sub-arrays are installed in the
-               pkl_gen_pr_type_array handler.  */
-            PKL_GEN_PAYLOAD->in_array_bounder = 1;
-            PKL_PASS_SUBPASS (array_type);
-            PKL_GEN_PAYLOAD->in_array_bounder = 0;
+            if (PKL_AST_TYPE_A_MAPPER (array_type) == PVM_NULL)
+              {
+                PKL_GEN_PAYLOAD->in_mapper = 1;
+                RAS_FUNCTION_ARRAY_MAPPER (mapper_closure);
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, mapper_closure); /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);                  /* CLS */
+                pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                 /* _ */
+                PKL_GEN_PAYLOAD->in_mapper = 0;
 
-            /* Install the closures in the type AST node.  */
+                PKL_AST_TYPE_A_MAPPER (array_type) = mapper_closure;
+              }
 
-            PKL_AST_TYPE_A_WRITER (array_type) = writer_closure;
-            PKL_AST_TYPE_A_MAPPER (array_type) = mapper_closure;
+            if (PKL_AST_TYPE_A_BOUNDER (array_type) == PVM_NULL)
+              {
+                /* The bounder closures for this array and possibly
+                   contained sub-arrays are installed in the
+                   pkl_gen_pr_type_array handler.  */
+                PKL_GEN_PAYLOAD->in_array_bounder = 1;
+                PKL_PASS_SUBPASS (array_type);
+                PKL_GEN_PAYLOAD->in_array_bounder = 0;
+              }
 
             PKL_PASS_BREAK;
             break;
