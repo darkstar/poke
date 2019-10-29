@@ -110,6 +110,10 @@ defvar BPF_LDST_INSN_MODE_IND = 0b010;
 defvar BPF_LDST_INSN_MODE_MEM = 0b011;
 defvar BPF_LDST_INSN_MODE_XADD = 0b110;
 
+/* Offsets in instructions are measured in 64-bit words.  */
+
+deftype BPF_Insn_Offset = offset<int<16>,uint<64>>;
+
 /* Registers.  */
 
 defvar BPF_R0 = 0x0;
@@ -209,7 +213,7 @@ deftype BPF_Insn =
   {
     BPF_Insn_Opcode opcode;
     BPF_Insn_Regs regs;
-    int<16> offset;
+    BPF_Insn_Offset offset;
 
     defun imm64_p = int:
       {

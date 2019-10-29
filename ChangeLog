@@ -1,5 +1,10 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/bpf.pk (BPF_Insn_Offset): New type.
+	(BPF_Insn): Use BPF_Insn_Offset.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* pickles/btf.pk (btf_types): New function.
 	(btf_strings): Likewise.
 
