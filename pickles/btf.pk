@@ -173,3 +173,14 @@ deftype BTF_Header =
     offset<uint<32>,B> str_off;
     offset<uint<32>,B> str_len;
   };
+
+defun btf_types = (BTF_Header hdr) BTF_Type[]:
+  {
+   return BTF_Type[hdr.type_len] @ (hdr'size + hdr.type_off);
+  }
+
+defun btf_strings = (BTF_Header hdr) string[]:
+  {
+   return string[hdr.str_len] @ (hdr'size + hdr.str_off);
+  }
+     

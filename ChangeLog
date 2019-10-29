@@ -1,5 +1,10 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* pickles/btf.pk (btf_types): New function.
+	(btf_strings): Likewise.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Commanding poke): New chapter.
 	(The REPL): New section.
 	(Evaluation): New section.
