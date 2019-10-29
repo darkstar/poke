@@ -65,7 +65,7 @@ Dot-Commands
 * .file::			Opening and closing IO spaces.
 * .info::			Getting information about open files, etc.
 * .set::			Querying and setting global options.
-* .vm::				Poke Virtual Machine related commands.
+* .vm::				Poke Virtual Machine services.
 * .exit::			Exiting poke :(
 
 Commands
@@ -248,6 +248,39 @@ Default value is @code{no}.
 
 @node .vm
 @chapter .vm
+
+The Poke Virtual Machine (PVM) executes the programs that are the
+result of the compilation of what you write in the REPL or the pickles
+you load.  The @command{.vm} command provides sub-commands to interact
+with the PVM.
+
+@menu
+* .vm disassemble::		PVM and native disassembler.
+@end menu
+
+@node .vm disassemble
+@section .vm disassemble
+
+The @command{.vm disassemble} command provides access to the PVM
+disassembler.  It supports the following subcommands:
+
+@table @command
+@item .vm disassemble expression @var{expr}
+Dumps the assembler corresponding to the Poke expression @var{expr}.
+@item .vm disassemble function @var{function}
+Dumps the assembler corresponding to the Poke function called
+@var{function}.  The function shall be reachable from the top-level.
+@item .vm disassemble mapper @var{expr}
+If @var{expr} is a mapped value, dumps the assembler corresponding to
+its mapper function.
+@item .vm disassemble writer @var{expr}
+If @var{expr} is a mapped value, dumps the assembler corresponding to
+its writer function.
+@end table
+
+The disassembler will provide a PVM disassembly by default, but it can
+be passed the flag @command{/n} to do a native disassembly instead in
+whatever architecture running poke.
 
 @node .exit
 @chapter .exit

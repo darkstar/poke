@@ -1,5 +1,10 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (.vm): New chapter.
+	(.vm disassemble): New section.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-fold.c (pkl_fold_pr_type): New handler.
 	(pkl_phase_fold): Register handler.
 	* src/pkl-promo.c (pkl_promo_pr_type): New handler.
