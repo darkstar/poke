@@ -835,9 +835,9 @@
  .c     if (PKL_AST_CODE (field) != PKL_AST_STRUCT_TYPE_FIELD)
  .c   {
  .c     /* This is a declaration.  Generate it.  */
- .c     PKL_GEN_PAYLOAD->in_mapper = 0;
+ .c     PKL_GEN_PAYLOAD->in_constructor = 0;
  .c     PKL_PASS_SUBPASS (field);
- .c     PKL_GEN_PAYLOAD->in_mapper = 1;
+ .c     PKL_GEN_PAYLOAD->in_constructor = 1;
  .c
  .c     continue;
  .c   }
