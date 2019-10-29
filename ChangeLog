@@ -1,5 +1,21 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (struct pkl_ast_type): New field `compiled'.
+	(PKL_AST_TYPE_COMPILED): Define.
+	* src/pkl-anal.c (pkl_anal_pr_type): Define.
+	(pkl_anal_ps_type): Define.
+	(pkl_phase_anal1): Registers the handlers.
+	(pkl_phase_anal2): Likewise.
+	(pkl_phase_analf): Likewise.
+	* src/pkl-trans.c (pkl_trans_pr_type): Define.
+	(pkl_trans_ps_type): Define.
+	(pkl_phase_trans1): Registers the handlers.
+	(pkl_phase_trans2): Likewise.
+	(pkl_phase_trans3): Likewise.
+	(pkl_phase_trans4): Likewise.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-gen.c (pkl_gen_pr_decl): Avoid recompiling type closures
 	(mapper, writer, constructor, etc) again and again.
 

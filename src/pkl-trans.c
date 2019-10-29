@@ -104,6 +104,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_trans_pr_program)
 }
 PKL_PHASE_END_HANDLER
 
+/* The following handlers are used to set the compiled flag in type
+   AST nodes.  This is to avoid re-processing them.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans_pr_type)
+{
+  if (PKL_AST_TYPE_COMPILED (PKL_PASS_NODE))
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_trans_ps_type)
+{
+  PKL_AST_TYPE_COMPILED (PKL_PASS_NODE) = 1;
+}
+PKL_PHASE_END_HANDLER
+
+
 /* The array mappers introduce a lexical frame.  Unfortunately, it is
    not possible to add this frame in the bison parser due to syntactic
    ambiguities.  So, we need to reflect the extra lexical frame
@@ -981,6 +998,8 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_PRINT_STMT, pkl_trans1_ps_print_stmt),
    PKL_PHASE_PR_HANDLER (PKL_AST_DECL, pkl_trans1_pr_decl),
    PKL_PHASE_PS_HANDLER (PKL_AST_DECL, pkl_trans1_ps_decl),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
@@ -1182,6 +1201,8 @@ struct pkl_phase pkl_phase_trans2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_REF, pkl_trans2_ps_struct_ref),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_trans2_ps_cast),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans2_ps_offset_type),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
   };
 
 
@@ -1239,6 +1260,8 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_ps_op_sizeof),
   };
 
@@ -1268,4 +1291,6 @@ struct pkl_phase pkl_phase_trans4 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_ARRAY, pkl_trans4_ps_array),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
   };

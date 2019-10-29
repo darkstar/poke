@@ -54,6 +54,23 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal_pr_program)
 }
 PKL_PHASE_END_HANDLER
 
+
+/* The following handlers are used to set the compiled flag in type
+   AST nodes.  This is to avoid re-processing them.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal_pr_type)
+{
+  if (PKL_AST_TYPE_COMPILED (PKL_PASS_NODE))
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal_ps_type)
+{
+  PKL_AST_TYPE_COMPILED (PKL_PASS_NODE) = 1;
+}
+PKL_PHASE_END_HANDLER
+
 /* In struct literals, make sure that the names of its elements are
    unique in the structure.  */
 
@@ -331,6 +348,8 @@ struct pkl_phase pkl_phase_anal1 =
    PKL_PHASE_PS_HANDLER (PKL_AST_BREAK_STMT, pkl_anal1_ps_break_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal1_ps_funcall),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC, pkl_anal1_ps_func),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_anal_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_anal_ps_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_anal1_ps_type_function),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
@@ -523,6 +542,8 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_anal2_ps_offset),
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal2_ps_funcall),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_anal_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_anal_ps_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal2_ps_type_struct),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };
@@ -567,4 +588,6 @@ struct pkl_phase pkl_phase_analf =
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_anal_pr_program),
    PKL_PHASE_PS_HANDLER (PKL_AST_OFFSET, pkl_analf_ps_array_initializer),
    PKL_PHASE_PS_HANDLER (PKL_AST_ASS_STMT, pkl_analf_ps_ass_stmt),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_anal_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_anal_ps_type),
   };

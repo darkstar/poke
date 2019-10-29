@@ -771,6 +771,9 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
    CODE contains the kind of type, as defined in the pkl_ast_type_code
    enumeration above.
 
+   COMPILED is 0 if the type has not been compiled yet.  1 otherwise.
+   This is used to avoid unneccessary work in the compiler.
+
    In integral types, SIGNED is 1 if the type denotes a signed numeric
    type.  In non-integral types SIGNED is 0.  SIZE is the size in bits
    of type.
@@ -811,6 +814,7 @@ pkl_ast_node pkl_ast_make_func_type_arg (pkl_ast ast,
 #define PKL_AST_TYPE_CODE(AST) ((AST)->type.code)
 #define PKL_AST_TYPE_NAME(AST) ((AST)->type.name)
 #define PKL_AST_TYPE_COMPLETE(AST) ((AST)->type.complete)
+#define PKL_AST_TYPE_COMPILED(AST) ((AST)->type.compiled)
 #define PKL_AST_TYPE_I_SIZE(AST) ((AST)->type.val.integral.size)
 #define PKL_AST_TYPE_I_SIGNED(AST) ((AST)->type.val.integral.signed_p)
 #define PKL_AST_TYPE_A_BOUND(AST) ((AST)->type.val.array.bound)
@@ -846,6 +850,7 @@ struct pkl_ast_type
   union pkl_ast_node *name;
   enum pkl_ast_type_code code;
   int complete;
+  int compiled;
 
   union
   {
