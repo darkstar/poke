@@ -1311,17 +1311,120 @@ Poke part of it's feel and magic.
 @node Array Indexing
 @section Array Indexing
 
-XXX
+Arrays are indexed using the usual notation, providing an index
+enclosed between square brackets with @code{[} and @code{]}:
+
+@example
+(poke) [1,2,3][0]
+1
+(poke) [1,2,3][1]
+2
+@end example
+
+The index should be an expression that evaluates to an integer value,
+and it is promoted to an unsigned 64-bit integer when needed.
+
+The valid range for the index is @code{[0,@var{n}]} where @var{n} is
+the number of elements stored in the array minus one.  If the passed
+integer is out of that range, an @code{E_out_of_bounds} exception is
+raised:
+
+@example
+(poke) [1,2,3][-1]
+unhandled out of bounds exception
+(poke) [1,2,3][3]
+unhandled out of bounds exception
+@end example
 
 @node Array Trimming
 @section Array Trimming
 
-XXX
+Indexing is used to fetch elements from arrays.  Another operation,
+called @dfn{trimming}, allows to extract a subset of the array, as
+another array.
+
+Trims use the following notation, where a range is specified between
+square brackets.  Both sides of the range are included:
+
+@example
+(poke) [1,2,3][0:1]
+[1,2]
+(poke) [1,2,3][1:1]
+[2]
+(poke) [1,2,3][0:2]
+[1,2,3]
+@end example
+
+If the minimum side of the range is omitted, it is assumed to be zero.
+If the maximum side of the range is omitted, it is assumed to be the
+length of the trimmed array minus one:
+
+@example
+(poke) [1,2,3][:1]
+[1,2]
+(poke) [1,2,3][1:]
+[2,3]
+(poke) [1,2,3][:]
+[1,2,3]
+@end example
+
+The elements of the base array and the trimmed sub-array are copied by
+shared value, exactly like when passing arguments to functions.  This
+means that for simple types, copies of the elements are done:
+
+@example
+(poke) defvar a = [1,2,3]
+(poke) defvar s = a[1:1]
+(poke) s[0] = 66
+(poke) a
+[1,2,3]
+@end example
+
+However, for comples types like arrays and structs, the values are
+shared:
+
+@example
+(poke) defvar a = Packet[] @@ 0#B
+(poke) defvar s = a[1:1]
+(poke) s[0].field = 66
+(poke) a[1].field
+66
+@end example
 
 @node Array Attributes
 @section Array Attributes
 
-XXX
+The following attributes are defined for array values.
+
+@table @code
+@item size
+Gives an offset with the storage occupied by the complete array.
+Example:
+
+@example
+(poke) [1,2,3]'size
+96UL#b
+@end example
+@item length
+Gives the number of elements stored in the array.  Example:
+
+@example
+(poke) [1,2,3]'length
+3
+@end example
+@item mapped
+Gives 1 if the array is mapped, 0 otherwise.  Examples:
+
+@example
+(poke) defvar a = [1,2,3]
+(poke) defvar b = int[3] @ 0#B
+(poke) a'mapped
+0
+(poke) b'mapped
+1
+@end example
+@end table
+
 
 @node Endianness
 @chapter Endianness
