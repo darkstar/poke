@@ -176,6 +176,16 @@ promote_array (pkl_ast ast,
   return 0;
 }
 
+/* The following handler is used in the promo phase to avoid
+   re-promoting already processed AST type nodes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_pr_type)
+{
+  if (PKL_AST_TYPE_COMPILED (PKL_PASS_NODE))
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
 /* Division is defined on the following configurations of operands and
    result types:
 
@@ -1284,6 +1294,8 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_promo =
   {
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_promo_pr_type),
+
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_EQ, pkl_promo_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_NE, pkl_promo_ps_op_rela),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_LT, pkl_promo_ps_op_rela),

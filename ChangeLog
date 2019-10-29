@@ -1,5 +1,19 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-fold.c (pkl_fold_pr_type): New handler.
+	(pkl_phase_fold): Register handler.
+	* src/pkl-promo.c (pkl_promo_pr_type): New handler.
+	(pkl_phase_promo): Register handler.
+	* src/pkl-typify.c (pkl_typify_pr_type): New handler.
+	(pkl_phase_typify1): Register handler.
+	Likewise.
+	* src/pkl-anal.c: Do not define nor use a pkl_anal_ps_type
+	handler.  It is unneccessary.
+	* src/pkl-trans.c: Set the `compiled' flag of types AST nodes only
+	in trans4.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h (struct pkl_ast_type): New field `compiled'.
 	(PKL_AST_TYPE_COMPILED): Define.
 	* src/pkl-anal.c (pkl_anal_pr_type): Define.

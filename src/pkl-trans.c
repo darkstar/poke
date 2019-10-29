@@ -999,7 +999,6 @@ struct pkl_phase pkl_phase_trans1 =
    PKL_PHASE_PR_HANDLER (PKL_AST_DECL, pkl_trans1_pr_decl),
    PKL_PHASE_PS_HANDLER (PKL_AST_DECL, pkl_trans1_ps_decl),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
-   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_trans1_ps_op_attr),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_trans1_ps_type_struct),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans1_ps_type_offset),
@@ -1202,7 +1201,6 @@ struct pkl_phase pkl_phase_trans2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_trans2_ps_cast),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_OFFSET, pkl_trans2_ps_offset_type),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
-   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
   };
 
 
@@ -1261,7 +1259,6 @@ struct pkl_phase pkl_phase_trans3 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_trans_pr_program),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_trans_pr_type),
-   PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_trans_ps_type),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_trans3_ps_op_sizeof),
   };
 

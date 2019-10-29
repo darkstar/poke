@@ -65,6 +65,17 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify_pr_program)
 }
 PKL_PHASE_END_HANDLER
 
+/* The following handler is used in all the typify phases to avoid
+   re-typifying already processed AST type nodes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify_pr_type)
+{
+  if (PKL_AST_TYPE_COMPILED (PKL_PASS_NODE))
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
+
 /* The type of a NOT is a boolean encoded as a 32-bit signed integer,
    and the type of its sole operand sould be suitable to be promoted
    to a boolean, i.e. it is an integral value.  */
@@ -2006,6 +2017,7 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify1 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_typify_pr_type),
 
    PKL_PHASE_PS_HANDLER (PKL_AST_VAR, pkl_typify1_ps_var),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_typify1_ps_cast),
@@ -2114,6 +2126,8 @@ PKL_PHASE_END_HANDLER
 struct pkl_phase pkl_phase_typify2 =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_PROGRAM, pkl_typify_pr_program),
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_typify_pr_type),
+
    PKL_PHASE_PS_HANDLER (PKL_AST_TYPE, pkl_typify2_ps_type),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify2_ps_type_array),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SIZEOF, pkl_typify2_ps_op_sizeof),

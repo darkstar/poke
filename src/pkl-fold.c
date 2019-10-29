@@ -34,6 +34,16 @@
 #define STREQ(a, b) (strcmp (a, b) == 0)
 #define STRNEQ(a, b) (strcmp (a, b) != 0)
 
+/* The following handler is used in the folding phase to avoid
+   re-folding already processed AST type nodes.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_pr_type)
+{
+  if (PKL_AST_TYPE_COMPILED (PKL_PASS_NODE))
+    PKL_PASS_BREAK;
+}
+PKL_PHASE_END_HANDLER
+
 /* Emulation routines.
 
    The letter-codes after EMUL_ specify the number and kind of
@@ -682,6 +692,7 @@ PKL_PHASE_END_HANDLER
 
 struct pkl_phase pkl_phase_fold =
   {
+   PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_fold_pr_type),
    PKL_PHASE_PS_HANDLER (PKL_AST_CAST, pkl_fold_ps_cast),
 #define ENTRY(ops, fs)\
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_##ops, pkl_fold_##fs)
