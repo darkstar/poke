@@ -2143,27 +2143,18 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_struct_type_field)
 {
   assert (!PKL_GEN_PAYLOAD->in_mapper);
+  assert (!PKL_GEN_PAYLOAD->in_writer);
+  assert (!PKL_GEN_PAYLOAD->in_constructor);
 
-  if (PKL_GEN_PAYLOAD->in_writer)
-    {
-      assert (0);
-    }
-  else if (PKL_GEN_PAYLOAD->in_constructor)
-    {
-      assert (0);
-    }
+  /* We are generating a PVM struct type.  */
+
+  /* If the struct type element doesn't include a name, generate a
+     null value as expected by the mktysct instruction.  */
+  if (!PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE))
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
   else
-    {
-      /* We are generating a PVM struct type.  */
-
-      /* If the struct type element doesn't include a name, generate a
-         null value as expected by the mktysct instruction.  */
-      if (!PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE))
-        pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
-      else
-        PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE));
-      PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (PKL_PASS_NODE));
-    }
+    PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_NAME (PKL_PASS_NODE));
+  PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (PKL_PASS_NODE));
 
   PKL_PASS_BREAK;
 }
