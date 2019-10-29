@@ -59,9 +59,13 @@ Documentation License''.
 Introduction
 * Motivation::			Why a binary editor?
 * Nomenclature::		poke, Poke and pickles.
+
+Using poke
 * Invoking poke::		command line options.
+* Commanding poke::		Interactive and non-interactive usage.
 
 Dot-Commands
+* .load::                       Loading pickles.
 * .file::			Opening and closing IO spaces.
 * .info::			Getting information about open files, etc.
 * .set::			Querying and setting global options.
@@ -136,6 +140,208 @@ We hope this helps to clarify things.
 @chapter Invoking poke
 
 XXX
+
+@node Commanding poke
+@chapter Commanding poke
+
+GNU poke is primarily an interactive editor that works in the command
+line.  However, it is also possible to use it in a non-interactive
+way.  This chapter documents both possibilities.
+
+@menu
+* The REPL::		Using poke interactively.
+* Evaluation::		Evaluating Poke.
+* Commands::		Commands and dot-commands.
+* Scripts::		Loading commands from files.
+* Shebang::		Executing Poke programs in the command line.
+@end menu
+
+@node The REPL
+@section The REPL
+
+If poke is invoked with an interactive TTY connected in the standard
+input, it greets the user with a welcome message, licensing
+information and such, and finally a prompt that looks like:
+
+@example
+(poke) 
+@end example
+
+At this point, the program is ready to be commanded.  The user is
+expected to introduce a line and press @key{enter}.  At that point
+poke will examine the command, notify the user if there is some error
+condition, process the line and maybe displaying something in the
+terminal.
+
+There are several kinds of lines that can be provided in the REPL:
+
+@itemize @bullet
+@item A @dfn{dot-command} invocation, that starts with a dot character
+(@command{.}).
+@item A command invocation.
+@item A Poke statement.
+@item A Poke expression.
+@end itemize
+
+These are explained in the following sections.
+
+@node Evaluation
+@section Evaluation
+
+Both Poke expressions and statements can be introduced at the REPL.
+When a trailing semicolon is required, it can be omitted.
+
+When an expression is evaluated, the result of the expression is
+printed back to the user.  For example:
+
+@example
+(poke) 23
+23
+(poke) [1,2,3]
+[1,2,3]
+(poke) Packet @@ 0#B
+Packet @{i=1179403647,j=65794L@}
+@end example
+
+When a statement is executed in the REPL no result is printed, but of
+course the statement can print on it's own:
+
+@example
+(poke) defun do_foo = void: @{@}
+(poke) do_foo
+(poke) for (i in [1,2,3]) printf "elem %i32d\n", i;
+elem 1
+elem 2
+elem 3
+@end example
+
+If there is an error compiling the line, the user is notified with a
+nice error message, showing the location of the error.  For example:
+
+@example
+(poke) [1,2,3 + "foo"]
+<stdin>:1:6: error: invalid operands in expression
+[1,2,3 + "foo"];
+     ^~~~~~~~~
+@end example
+
+@node Commands
+@section Commands
+
+There are two kinds of commands in poke: the @dfn{dot-commands}, which
+are written in C and have their own conventions for handling
+sub-commands and passing arguments and flags, and normal commands,
+which are written in Poke.
+
+@subsection Dot-Commands
+
+Dot-commands are so called because their name start with the dot
+character (@code{.}).  They can feature subcommands.  Example:
+
+@example
+(poke) .vm disassemble mapper int[] @@ 0#B
+(poke) .vm disassemble writer int[] @@ 0#B
+@end example
+
+When there is no ambiguity, the command name and the subcommands can
+be shortened to prefixes.  The commands above can also be written as:
+
+@example
+(poke) .vm dis m int[] @@ 0#B
+(poke) .vm dis w int[] @@ 0#B
+@end example
+
+Some commands also get flags, which are one-letter indicators that can
+be appended to the command name (including subcommands) after a slash
+character (@code{/}).  For example, the @command{.vm} disassembler
+commands accept a @code{n} flag to indicate we want a native
+disassemble.  We can pass it as follows:
+
+@example
+(poke) .vm disassemble mapper/n int[] @@ 0#B
+(poke) .vm disassemble writer/n int[] @@ 0#B
+@end example
+
+If a dot-command accepts more than one argument, they are separated
+using comma characters (@code{,}).  Spaces are generally ignored.
+
+@subsection Commands
+
+Regular poke commands are written in Poke and use different
+conventions.  The name of commands follow the same rules than normal
+Poke identifiers, and do not start with a dot character.
+
+An example is the @command{dump} command:
+
+@example
+(poke) dump
+76543210  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF
+00000000: 7f45 4c46 0201 0100 0000 0000 0000 0000  .ELF............
+00000010: 0100 f700 0100 0000 0000 0000 0000 0000  ................
+00000020: 0000 0000 0000 0000 8001 0000 0000 0000  ................
+00000030: 0000 0000 4000 0000 0000 4000 0800 0700  ....@.....@.....
+00000040: 1800 0000 0000 0000 0000 0000 0000 0000  ................
+00000050: 7900 0000 0000 0000 b701 0000 9a02 0000  y...............
+00000060: 7b10 0000 0000 0000 1800 0000 0000 0000  @{...............
+00000070: 0000 0000 0000 0000 7900 0000 0000 0000  ........y.......
+@end example
+
+After the name of the command, arguments can be specified by name,
+like this:
+
+@example
+(poke) dump :from 0#B :size 8#B
+(poke) dump :from 0#B :size 8#B
+76543210  0011 2233 4455 6677 8899 aabb ccdd eeff  0123456789ABCDEF
+00000000: 7f45 4c46 0201 0100                      .ELF....
+@end example
+
+The order of arguments is irrelevant in principle:
+
+@example
+(poke) dump :from 0#B :size 8#B :ascii 0 :ruler 0
+00000000: 7f45 4c46 0201 0100
+(poke) dump :ruler 0 :from 0#B :size 8#B :ascii 0
+00000000: 7f45 4c46 0201 0100
+@end example
+
+However, beware side effects while computing the values you pass as
+the arguments!  The expressions themselves are evaluated from left to
+right.
+
+Which arguments are accepted, and their kind, depend on the specific
+command.
+
+Note that the idea is to restrict the number of dot-commands to the
+absolutely minimum.  Most of the command-like functionality provided
+in poke shall be implemented as regular commands.
+
+@node Scripts
+@section Scripts
+
+XXX
+
+@node Shebang
+@section Shebang
+
+XXX
+
+@node .load
+@chapter .load
+
+The @command{.load} command loads a file containing Poke code and
+compiles and executes it.  These files usually have the extension
+@file{.pk}.
+
+If a relative path is provided, then @file{@var{prefix}/share/poke}
+is tried first as a base directory to find the specified file.  If it
+is not found, then the current directory is tried next.
+
+If the environment variable @code{POKEDATADIR} is defined, it replaces
+@file{@var{prefix}/share/poke}.  This is mainly intended to test a
+poke program before it gets installed in its final location.
+
+If an absolute path is provided, it is used as-is.
 
 @node .file
 @chapter .file
@@ -1550,7 +1756,7 @@ Gives 1 if the array is mapped, 0 otherwise.  Examples:
 
 @example
 (poke) defvar a = [1,2,3]
-(poke) defvar b = int[3] @ 0#B
+(poke) defvar b = int[3] @@ 0#B
 (poke) a'mapped
 0
 (poke) b'mapped
@@ -2042,9 +2248,9 @@ simple unformatted output, and formatted output.
 @section print
 @cindex print, output
 
-The @code{print} sentence prints the given string to the standard output.
-@code{print} outputs text strings verbatim.  It can be invoked using
-two alternative syntaxes, which are equivalent:
+The @code{print} statement prints the given string to the standard
+output.  @code{print} outputs text strings verbatim.  It can be
+invoked using two alternative syntaxes, which are equivalent:
 
 @example
 print (@var{str});
@@ -2059,7 +2265,7 @@ formatting and styling.
 @section printf
 @cindex printf, formatted output, stylized output
 
-The @code{printf} sentence gets a format string and, optionally, a
+The @code{printf} statement gets a format string and, optionally, a
 list of values to print.  It can be invoked using two alternative
 syntaxes, which are equivalent:
 

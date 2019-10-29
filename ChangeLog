@@ -1,5 +1,15 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Commanding poke): New chapter.
+	(The REPL): New section.
+	(Evaluation): New section.
+	(Commands): Likewise.
+	(Scripts): Likewise.
+	(Shebang): Likewise.
+	(.load): New chapter.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (.vm): New chapter.
 	(.vm disassemble): New section.
 
