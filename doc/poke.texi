@@ -63,6 +63,7 @@ Introduction
 
 Dot-Commands
 * .file::			Opening and closing IO spaces.
+* .info::			Getting information about open files, etc.
 * .set::			Querying and setting global options.
 * .vm::				Poke Virtual Machine related commands.
 * .exit::			Exiting poke :(
@@ -141,10 +142,47 @@ XXX
 
 XXX
 
+@node .info
+@chapter .info
+
+XXX
+
 @node .set
 @chapter .set
 
-XXX
+The @command{.set} command allows to inspect and set the value of
+global settings.  The syntax is:
+
+@example
+.set @var{setting} [@var{value}]
+@end example
+
+Where @var{setting} is an identifier identifying the setting to
+inspect or modify.  If @var{value} is specified, then it is the new
+value for the setting.  If @var{value} is not specified the current
+value of the setting is displayed.
+
+The following settings can be handled with @command{.set}:
+
+@table @code
+@item endian
+Byte endianness that will be used when mapping the IO space.  Valid
+values are @code{big}, @code{little} and @code{host}.  The default
+endianness is the host endianness.
+@item obase
+Numeric base to be used when displaying values in the REPL and in
+@code{printf} statements using the @code{%v} format tag.  Valid values
+are @code{2}, @code{8}, @code{10} and @code{16}.  Default value is
+@code{10}.
+@item pretty-print
+Flag indicating whether pretty-printers shall be used when printing
+values in the REPL and in @code{printf} statements using the @code{%v}
+format tag.  Valid values are @code{yes} and @code{no}.  Default value
+is @code{no}.
+@item error-on-warning
+Flag indicating whether handling compilation warnings as errors.
+Default value is @code{no}.
+@end table
 
 @node .vm
 @chapter .vm
@@ -152,7 +190,7 @@ XXX
 @node .exit
 @chapter .exit
 
-XXX
+The @code{.exit} command exits poke.
 
 @node dump
 @chapter dump

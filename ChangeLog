@@ -1,5 +1,10 @@
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (.set): New section.
+	(.exit): Likewise.
+
+2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-lex.l: Remove token TRIMOP.
 	* src/pkl-tab.y: Use ':' instead of TRIMOP in trimmers rules.
 	* src/std.pk (substr): Adapt to the new syntax.
