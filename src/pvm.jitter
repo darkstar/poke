@@ -423,7 +423,7 @@ printer-c
     {
       /* XXX what about out.  */
       fflush (out);
-      pvm_print_val ((pvm_val) val, 10, 0);
+      pvm_print_val ((pvm_val) val, poke_obase, 0);
       pk_term_flush ();
     }
 
@@ -442,7 +442,7 @@ printer-c
       fflush (out);
       pk_printf ("%%lo(0x%" JITTER_PRIx") (", lo);
       pvm_print_val (((pvm_val) printer_hi << 32) | lo,
-                      10, 0);
+                      poke_obase, 0);
       pk_puts (")");
       pk_term_flush ();
       printer_hi = 0;
@@ -776,7 +776,7 @@ instruction strace (?n) # ( -- )
                  jitter_original_state->pvm_state_backing.canary)))
         {
           assert (i < 1024);
-          pvm_print_val (JITTER_TOP_STACK (), 16, PVM_PRINT_F_MAPS);
+          pvm_print_val (JITTER_TOP_STACK (), poke_obase, PVM_PRINT_F_MAPS);
           pk_puts ("\n");
           tmp[i++] = JITTER_TOP_STACK ();
           JITTER_DROP_STACK ();

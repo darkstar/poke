@@ -1,3 +1,9 @@
+2019-10-30  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pvm.jitter (pvm_literal_printer): Use poke_obase.
+	(pvm_literal_printer_lo): Likewise.
+	(strace): Likewise.
+
 2019-10-29  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* pickles/bpf.pk (BPF_Insn_Offset): New type.
