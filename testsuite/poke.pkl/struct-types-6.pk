@@ -11,6 +11,6 @@ deftype Foo =
       {
         defvar jo = 10;
       };
-       
+
     int data;
   };

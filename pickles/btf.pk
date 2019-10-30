@@ -114,7 +114,7 @@ deftype BTF_Type =
 
     /* XXX move these types to the top-level once we get support to
        pass arguments to struct types.  */
-    
+
     deftype BTF_Member =
       struct
       {
@@ -183,4 +183,3 @@ defun btf_strings = (BTF_Header hdr) string[]:
   {
    return string[hdr.str_len] @ (hdr'size + hdr.str_off);
   }
-     

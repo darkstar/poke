@@ -139,7 +139,47 @@ We hope this helps to clarify things.
 @node Invoking poke
 @chapter Invoking poke
 
-XXX
+Synopsis:
+
+@example
+poke [@var{option}@dots{}] [@var{file}]
+@end example
+
+@noindent
+The following options are available.
+
+@table @samp
+@item -l
+@itemx --load=@var{file}
+Load the given file as a Poke program.  Any number of @samp{-l}
+options can be specified, and they are loaded in the given order.
+@item -L
+Load the given file as a Poke program and exit.  This is commonly used
+along with a shebang to implement Poke scripts.
+@item -c
+@itemx --command=@var{cmd}
+Execute the given command.  Any number of @samp{-c} options can be
+specified, and they are executed in the given order.
+@item -s
+@itemx --script=@var{file}
+Load @var{file} as a poke script.  Any number of @samp{-s} options may
+be specified, and they are loaded in the given order.
+@item --color=@var{how}
+Whether to use styled output, and how.  Valid options for @var{how}
+are @samp{yes}, @samp{no}, @samp{auto}, @samp{html} and @samp{test}.
+@item --style=@var{file}
+Use @var{file} as the CSS to use for styling poke, instead of the
+default style.
+@item -q
+@itemx --no-init-file
+Do not load the @file{~/.pokerc} init file.
+@item --quiet
+Be as terse as possible.
+@item --help
+Print a help message and exit.
+@item --version
+Show version and exit.
+@end table
 
 @node Commanding poke
 @chapter Commanding poke
@@ -164,7 +204,7 @@ input, it greets the user with a welcome message, licensing
 information and such, and finally a prompt that looks like:
 
 @example
-(poke) 
+(poke)
 @end example
 
 At this point, the program is ready to be commanded.  The user is
@@ -319,12 +359,27 @@ in poke shall be implemented as regular commands.
 @node Scripts
 @section Scripts
 
-XXX
+Files containing one poke command per line (which, as we saw above can
+include Poke statements and expressions) can be loaded at startup
+using the @code{-s} command line option.
+
+The @file{~/.pokerc} startup file is also a poke script.
 
 @node Shebang
 @section Shebang
 
-XXX
+Following the example of Guile Scheme, the Poke syntax includes
+support for multi-line comments using the @code{#!} and @code{!#}
+delimiters.  This, along with the @code{-L} command line option,
+allows to write Poke scripts and execute them in the command line like
+if they were normal programs.  Example of a script:
+
+@example
+#!/usr/bin/poke -L
+!#
+
+print "Hello world!\n";
+@end example
 
 @node .load
 @chapter .load
@@ -388,8 +443,8 @@ Display a list of open files.
 @example
 (poke) .info files
   Id	Mode	Position	Filename
-* #0	rw	0x00000000#b	foo.bson
-  #1	r 	0x00000000#b	foo.o
+* #0	rw      0x00000000#b	foo.bson
+  #1	r       0x00000000#b	foo.o
 @end example
 
 The file acting as the current IO space is marked with an asterisk
@@ -403,8 +458,8 @@ switch to it as the new current IO space:
 The current file is now `foo.o'.
 (poke) .info files
   Id	Mode	Position	Filename
-  #0	rw	0x00000000#b	file://foo.bson
-* #1	r 	0x00000000#b	foo.o
+  #0	rw      0x00000000#b	file://foo.bson
+* #1	r       0x00000000#b	foo.o
 @end example
 
 @item .info variable

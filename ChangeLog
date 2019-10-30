@@ -1,5 +1,11 @@
 2019-10-30  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Shebang): New section.
+	(Scripts): Likewise.
+	(Invoking poke): Likewise.
+
+2019-10-30  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pvm.jitter (pvm_literal_printer): Use poke_obase.
 	(pvm_literal_printer_lo): Likewise.
 	(strace): Likewise.
