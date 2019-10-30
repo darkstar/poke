@@ -2035,7 +2035,7 @@ expressions.
 @chapter Mapping
 
 The purpose of poke is to edit an ``IO space'', which is the file or
-device being edited.  This is achieved by mapping values, which is
+device being edited.  This is achieved by mapping values.  Mapping is
 perhaps the most important concept in Poke.
 
 @menu
@@ -2048,12 +2048,116 @@ perhaps the most important concept in Poke.
 @node The Map Operator
 @section The Map Operator
 
-XXX
+Poke values reside in memory, and their in-memory representation is
+not visible from Poke programs.  For example, @code{32} is a 32-bit
+signed integer value, and it happens to not be boxed in the Poke
+Virtual Machine.  Therefore, it occupies exactly 32-bit in the memory
+of the machine running poke.  Other values, like arrays for example,
+are boxed, and they need to store various meta-data.
+
+Regardless of the internal representation, we say these values live
+``in memory''.  Now, it is also possible to ``map'' a value to some
+area in the underlying IO space.  This is done with the map operator
+@code{@@}, that has the following syntax:
+
+@example
+@var{type} @@ @var{offset}
+@end example
+
+The map operator creates a new value using the data located at the
+offset @var{offset} in the IO space.  If there is no IO space, an
+@code{E_no_ios} exception is raised:
+
+@example
+(poke) int @@ 0#B
+unhandled no IOS exception
+@end example
+
+The value created in a map can be either mapped or not mapped.
+Mapping simple types produces not mapped values, whereas mapping
+non-simple types create mapped values.
+
+The value attributes @code{mapped} and @code{offset} can be used to
+check whether a value is mapped or not, and in that case the offset
+where it is mapped:
+
+@example
+(poke) defvar p = Packet @@ 0#B
+(poke) p'mapped
+0x1
+(poke) p'offset
+0x0UL#b
+@end example
+
+Using the @code{offset} attribute in a not mapped value results in the
+@code{E_no_map} exception being raised:
+
+@example
+(poke) [1,2,3]'mapped
+0x0
+(poke) [1,2,3]'offset
+unhandled no map exception
+@end example
+
+If the type specified in the map is not a simple type, like an array
+or a struct, the resulting value is said to be mapped in the IO
+space:
+
+@example
+(poke) deftype Packet = struct @{ int i; long l; @}
+(poke) Packet @@ 0#B
+Packet @{i=0x464c457f,l=0x10102L@}
+(poke) uint<8>[2] @@ 0#B
+[0x7fUB,0x45UB]
+@end example
+
+A very important idea on Poke mapping is that it should be possible to
+manipulate mapped and non-mapped values in a transparent way.  For
+example, consider the quicksort implementation in poke's standard
+library.  The prototype is:
+
+@example
+defun qsort = (any[] array, Comparator cmp_f,
+               long left = 0, long right = array'length - 1) void:
+@end example
+
+@noindent
+@code{qsort} works with both mapped and not-mapped arrays:
+
+@example
+(poke) defvar a = [2,3,1]
+(poke) defvar b = int[3] @@ 0#B
+(poke) b
+[1179403647,65794,0]
+(poke) qsort (a, IntComparator)
+(poke) a
+[1,2,3]
+(poke) qsort (b, IntComparator)
+(poke) b
+[0,33620224,1179403647]
+(poke) dump :from b'offset :size b'size :ascii 0
+76543210  0011 2233 4455 6677 8899 aabb ccdd eeff
+00000000: 0000 0000 0001 0102 7f45 4c46
+@end example
+
+Similarly, the user can write functions that operate on abstract
+entities and data structures such as ELF relocations and sections,
+DWARF DIEs, etc, and the same code will work with non mapped and
+mapped values.
 
 @node Mapping Simple Types
 @section Mapping Simple Types
 
-XXX
+Simple values (i.e. integers, offsets, strings) cannot be mapped.
+Therefore, if the type specified in the map is a simple type, the
+resulting value will be a regular non-mapped value.  Examples:
+
+@example
+(poke) uint<8> @@ 0#B
+0x7fUB
+(poke) string @@ 0#B
+"ELF"
+@end example
 
 @node Mapping Structs
 @section Mapping Structs
