@@ -104,6 +104,8 @@ EMUL_UUU (mul) { return op1 * op2; }
 EMUL_III (mul) { return op1 * op2; }
 EMUL_UUU (div) { return op1 / op2; }
 EMUL_III (div) { return op1 / op2; }
+EMUL_UUU (cdiv) { return (op1 - 1 + op2) / op2; }
+EMUL_III (cdiv) { return (op1 - 1 + op2) / op2; } 
 EMUL_UUU (mod) { return op1 % op2; }
 EMUL_III (mod) { return op1 % op2; }
 EMUL_UUU (lt) { return op1 < op2; }
@@ -576,6 +578,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_div)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_cdiv)
+{
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_INTEGRAL
+      && PKL_AST_CODE (op2) == PKL_AST_INTEGER
+      && PKL_AST_INTEGER_VALUE (op2) == 0)
+    goto divbyzero;
+
+  if (PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node magnitude = PKL_AST_OFFSET_MAGNITUDE (op2);
+
+      if (PKL_AST_CODE (magnitude) == PKL_AST_INTEGER
+          && PKL_AST_INTEGER_VALUE (magnitude) == 0)
+        goto divbyzero;
+    }
+
+  OP_BINARY_III (cdiv);
+  //XXX  OP_BINARY_OOI (divo);
+
+  PKL_PASS_DONE;
+
+ divbyzero:
+  PKL_ERROR (PKL_AST_LOC (op2), "division by zero");
+  PKL_FOLD_PAYLOAD->errors++;
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
+
 PKL_PHASE_BEGIN_HANDLER (pkl_fold_mod)
 {
   pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
@@ -701,7 +735,8 @@ struct pkl_phase pkl_phase_fold =
    ENTRY (XOR, xor), ENTRY (AND, and), ENTRY (BAND, band),
    ENTRY (EQ, eq), ENTRY (NE, ne), ENTRY (SL, sl),
    ENTRY (SR, sr), ENTRY (ADD, add), ENTRY (SUB, sub),
-   ENTRY (MUL, mul), ENTRY (DIV, div), ENTRY (MOD, mod),
+   ENTRY (MUL, mul), ENTRY (DIV, div), ENTRY (CEILDIV, cdiv),
+   ENTRY (MOD, mod),
    ENTRY (LT, lt), ENTRY (GT, gt), ENTRY (LE, le),
    ENTRY (GE, ge),
    ENTRY (BCONC, bconc),

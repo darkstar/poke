@@ -1,5 +1,36 @@
 2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-fold.c (EMUL_UUU): For cdiv.
+	(EMUL_III): Likewise.
+	(pkl_fold_cdiv): New handler.
+	* src/pkl-asm.pks (cdiv): New macro.
+	(cdivo): New macro.
+	* src/pkl-asm.c (pkl_asm_insn_cdivo, pvm_make_integral): New
+	function.
+	(pkl_asm_insn_cdiv): Likewise.
+	(pkl_asm_insn_cdivo): Likewise.
+	(pkl_asm_insn): Call pkl_asm_insn_cdiv and pkl_asm_insn_cdivo.
+	* src/pkl-insn.def (PKL_INSN_CDIV): New instruction.
+	(PKL_INSN_CDIVO): Likewise.
+	* src/pkl-gen.c (pkl_gen_ps_op_ceildiv): New handler.
+	(pkl_phase_gen): Register the handler.
+	* src/pkl-promo.c (pkl_phase_promo): Register pkl_promo_ps_op_div
+	to promote ceildiv nodes.
+	* src/pkl-typify.c (pkl_typify1_ps_op_ceildiv): New handler.
+	(pkl_phase_typify1): Register handler.
+	(CASE_OFFSET): Handle ceildiv.
+	* src/pkl-ops.def (PKL_AST_OP_CEILDIV): Define.
+	* src/pkl-tab.y: New token CEILDIV.
+	* src/pkl-lex.l: Rule for CEILDIV.
+	* testsuite/poke.pkl/cdiv-offsets-2.pk: Likewise.
+	* testsuite/poke.pkl/cdiv-offsets-1.pk: Likewise.
+	* testsuite/poke.pkl/cdiv-integers-2.pk: Likewise.
+	* testsuite/poke.pkl/cdiv-integers-1.pk: New test.
+	* doc/poke.texi (Offset Operations): Document /^ for offsets.
+	(Arithmetic Operators): Likewise for integers.
+
+2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (.set): The default endianness is big endian, not
 	host endian.
 

@@ -281,7 +281,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %left LE GE '<' '>'
 %left SL SR
 %left '+' '-'
-%left '*' '/' '%'
+%left '*' '/' CEILDIV '%'
 %left BCONC
 %right '@'
 %nonassoc UNIT
@@ -462,6 +462,11 @@ expression:
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_DIV,
                                                 $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| expression CEILDIV expression
+        	{
+                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_CEILDIV, $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }
         | expression '%' expression

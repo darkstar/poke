@@ -500,3 +500,48 @@
         drop                    ; ARR BOUND
         asettb                  ; ARR
         .end
+
+;;; RAS_MACRO_CDIV
+;;; ( VAL VAL -- VAL VAL VAL )
+;;;
+;;; This macro generates code that performs ceil-division on integral
+;;; values.
+;;;
+;;; Macro arguments:
+;;; #one
+;;; @type
+;;;    pkl_ast_node reflecting the type of the operands.
+        
+        .macro cdiv #one @type
+        dup
+        nrot
+        push #one
+        sub @type
+        nip2
+        add @type
+        nip2
+        swap
+        div @type
+        .end
+
+;;; RAS_MACRO_CDIVO one base_type
+;;; ( OFF OFF -- OFF OFF OFF )
+;;;
+;;; This macro generates code that performs ceil-division on integral
+;;; values.
+;;;
+;;; Macro arguments:
+;;; #one
+;;; @type
+;;;    pkl_ast_node reflecting the type of the operands.
+        
+        .macro cdivo @type
+        swap                    ; OFF2 OFF1
+        ogetm                   ; OFF2 OFF1 OFF1M
+        rot                     ; OFF1 OFF1M OFF2
+        ogetm                   ; OFF1 OFF1M OFF2 OFF2M
+        rot                     ; OFF1 OFF2 OFF2M OFF1M
+        swap                    ; OFF1 OFF2 OFF1M OFF2M
+        cdiv @type
+        nip2                    ; OFF1 OFF2 (OFF1M/^OFF2M)
+        .end

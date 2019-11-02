@@ -397,7 +397,8 @@ TYPIFY_BIN (band);
     pkl_ast_node base_type_1 = PKL_AST_TYPE_O_BASE_TYPE (t1);           \
     pkl_ast_node base_type_2 = PKL_AST_TYPE_O_BASE_TYPE (t2);           \
                                                                         \
-    if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_DIV)                       \
+    if (PKL_AST_EXP_CODE (exp) == PKL_AST_OP_DIV                        \
+        || PKL_AST_EXP_CODE (exp) == PKL_AST_OP_CEILDIV)                \
       {                                                                 \
         size_t base_type_1_size = PKL_AST_TYPE_I_SIZE (base_type_1);    \
         size_t base_type_2_size = PKL_AST_TYPE_I_SIZE (base_type_2);    \
@@ -434,6 +435,7 @@ TYPIFY_BIN (band);
   }
 
 TYPIFY_BIN (div);
+TYPIFY_BIN (ceildiv);
 TYPIFY_BIN (mod);
 
 /* SUB accepts integrals and offsets.  */
@@ -2056,6 +2058,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SUB, pkl_typify1_ps_sub),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_typify1_ps_mul),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_typify1_ps_div),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_CEILDIV, pkl_typify1_ps_ceildiv),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MOD, pkl_typify1_ps_mod),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SL, pkl_typify1_ps_sl),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_SR, pkl_typify1_ps_sr),

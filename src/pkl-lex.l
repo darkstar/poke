@@ -230,6 +230,7 @@ D [0-9]
 "+"		{ return '+'; }
 "-"		{ return '-'; }
 "*"		{ return '*'; }
+"/^"		{ return CEILDIV; }
 "/"		{ return '/'; }
 "%"		{ return '%'; }
 "!"		{ return '!'; }

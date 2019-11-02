@@ -124,6 +124,32 @@ struct pkl_asm
   jitter_label error_label;
 };
 
+/* Return a PVM value to hold an integral value VALUE of size SIZE and
+   sign SIGNED.  */
+
+pvm_val
+pvm_make_integral (uint64_t value, int size, int signed_p)
+{
+  pvm_val res;
+  
+  if (size < 33)
+    {
+      if (signed_p)
+        res = pvm_make_int (value, size);
+      else
+        res = pvm_make_uint (value, size);
+    }
+  else
+    {
+      if (signed_p)
+        res = pvm_make_long (value, size);
+      else
+        res = pvm_make_ulong (value, size);
+    }
+
+  return res;
+}
+
 /* Push a new level to PASM's level stack with ENV.  */
 
 static void
@@ -661,6 +687,36 @@ pkl_asm_insn_intop (pkl_asm pasm,
     default:
       assert (0);
     }
+}
+
+/*
+  Macro-instruction: CDIV type
+  ( VAL VAL -- VAL VAL VAL )
+*/
+
+static void
+pkl_asm_insn_cdiv (pkl_asm pasm,
+                   enum pkl_asm_insn insn,
+                   pkl_ast_node type)
+{
+  pvm_val one = pvm_make_integral (1,
+                                   PKL_AST_TYPE_I_SIZE (type),
+                                   PKL_AST_TYPE_I_SIGNED (type));
+  
+  RAS_MACRO_CDIV (one, type);
+}
+
+/*
+  Macro-instruction: CDIVO type
+  ( VAL VAL -- VAL VAL VAL )
+*/
+
+static void
+pkl_asm_insn_cdivo (pkl_asm pasm,
+                    enum pkl_asm_insn insn,
+                    pkl_ast_node base_type)
+{
+  RAS_MACRO_CDIVO (base_type);
 }
 
 /* Macro-instruction: EQ type
@@ -1260,6 +1316,21 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_intop (pasm, insn, type);
+            break;
+          }
+        case PKL_INSN_CDIV:
+        case PKL_INSN_CDIVO:
+          {
+            pkl_ast_node type;
+
+            va_start (valist, insn);
+            type = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            if (insn == PKL_INSN_CDIV)
+              pkl_asm_insn_cdiv (pasm, insn, type);
+            else
+              pkl_asm_insn_cdivo (pasm, insn, type);
             break;
           }
         case PKL_INSN_EQ:

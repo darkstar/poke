@@ -822,8 +822,8 @@ The following left-associative binary arithmetic operators are
 supported, in descending precedence order:
 
 @itemize
-@item Multiplication @code{*}, integer division @code{/} and modulus
-      @code{%}.
+@item Multiplication @code{*}, integer division @code{/}, integer
+ceil-division @code{/^} and modulus @code{%}.
 @item Addition @code{+} and subtraction @code{-}.
 @end itemize
 
@@ -1310,6 +1310,14 @@ something like the following to convert from kilobits to bytes:
 @example
 (poke) 24 #Kb/#B
 3072
+@end example
+
+There is also a ceil-division operator for offsets, with the same
+semantics than the ceil-division for integers:
+
+@example
+(poke) 10#B /^ 3#B
+4
 @end example
 
 @subsection Modulus
