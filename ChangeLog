@@ -1,3 +1,23 @@
+2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl-ops.def: Define IN operator.
+	* src/pkl-tab.y: Rule for the IN binary operator.
+	* src/pkl-typify.c (pkl_typify1_ps_op_in): New handler.
+	(pkl_phase_typify1): Register handler.
+	* src/pkl-promo.c (pkl_promo_ps_op_in): New handler.
+	(pkl_phase_promo): Register handler.
+	* src/pkl-asm.c (pkl_asm_insn_cmp): Add support for offsets.
+	* src/pkl-gen.c (pkl_gen_ps_op_rela): Adjust accordingly.
+	* src/pkl-gen.c (pkl_gen_ps_op_in): New handler.
+	(pkl_phase_gen): Register handler.
+	* testsuite/poke.pkl/in-diag-1.pk: New test.
+	* testsuite/poke.pkl/in-diag-2.pk: Likewise.
+	* testsuite/poke.pkl/in-diag-3.pk: Likewise.
+	* testsuite/poke.pkl/in-diag-4.pk: Likewise.
+	* testsuite/poke.pkl/in-3.pk: Likewise.
+	* testsuite/poke.pkl/in-2.pk: Likewise.
+	* testsuite/poke.pkl/in-1.pk: Likewise.
+
 2019-11-02  Egeyar Bagcioglu  <egeyar@gmail.com>
 
         * src/ios.c (ios_read_uint): Fix the fast track for 40 bit integers.

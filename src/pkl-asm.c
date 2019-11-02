@@ -762,6 +762,9 @@ pkl_asm_insn_cmp (pkl_asm pasm,
         default:
           assert (0);
         }
+
+      /* Assembly the instruction.  */
+      pkl_asm_insn (pasm, oinsn);
     }
   else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL)
     {
@@ -798,12 +801,29 @@ pkl_asm_insn_cmp (pkl_asm pasm,
           assert (0);
           break;
         }
+
+      /* Assembly the instruction.  */
+      pkl_asm_insn (pasm, oinsn);
+    }
+  else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_OFFSET)
+    {
+      pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
+      
+      /* Equality and inequality are commutative, so we can save an
+         instruction here.  */
+      if (insn != PKL_INSN_EQ && insn != PKL_INSN_NE)
+        pkl_asm_insn (pasm, PKL_INSN_SWAP);
+
+      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF2 OFF1 OFF1M */
+      pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF1M OFF2 */
+      pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF1 OFF1M OFF2 OFF2M */
+      pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF2 OFF2M OFF1M */
+      pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF1 OFF2 OFF1M OFF2M */
+      pkl_asm_insn (pasm, insn, base_type);
+      pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* OFF1 OFF2 (OFF1M?OFF2M) */
     }
   else
     assert (0);
-
-  /* Assembly the instruction.  */
-  pkl_asm_insn (pasm, oinsn);
 }
 
 /* Macro-instruction: ATRIM array_type

@@ -1292,6 +1292,68 @@ PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_struct_type_field)
 }
 PKL_PHASE_END_HANDLER
 
+/* The left operand of an `in' operator shall be promoted to the type
+ * of the elements stored in the array at the right operand.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_promo_ps_op_in)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);
+  pkl_ast_node t2 = PKL_AST_TYPE_A_ETYPE (PKL_AST_TYPE (op2));
+
+  int restart = 0;
+
+  if (pkl_ast_type_equal (t1, t2))
+    PKL_PASS_DONE;
+
+  switch (PKL_AST_TYPE_CODE (t2))
+    {
+    case PKL_TYPE_INTEGRAL:
+      if (!promote_integral (PKL_PASS_AST,
+                             PKL_AST_TYPE_I_SIZE (t2),
+                             PKL_AST_TYPE_I_SIGNED (t2),
+                             &PKL_AST_EXP_OPERAND (exp, 0),
+                             &restart))
+        goto error;
+
+      PKL_PASS_RESTART = 1;
+      break;
+    case PKL_TYPE_OFFSET:
+      {
+        pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (t2);
+        pkl_ast_node unit = PKL_AST_TYPE_O_UNIT (t2);
+
+        size_t size = PKL_AST_TYPE_I_SIZE (base_type);
+        int sign = PKL_AST_TYPE_I_SIGNED (base_type);
+        uint64_t unit_bits = PKL_AST_INTEGER_VALUE (unit);
+
+        if (!promote_offset (PKL_PASS_AST,
+                             size, sign, unit_bits,
+                             &PKL_AST_EXP_OPERAND (exp, 0),
+                             &restart))
+          goto error;
+
+        PKL_PASS_RESTART = 1;
+      }
+      break;
+    case PKL_TYPE_STRING:
+      break;
+    default:
+      assert (0);
+      break;
+    }
+
+  PKL_PASS_DONE;
+
+ error:
+  pkl_ice (PKL_PASS_AST, PKL_AST_LOC (op1),
+           "couldn't promote operand argument");
+  PKL_PASS_ERROR;
+}
+PKL_PHASE_END_HANDLER
+
 struct pkl_phase pkl_phase_promo =
   {
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_promo_pr_type),
@@ -1316,6 +1378,7 @@ struct pkl_phase pkl_phase_promo =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_MUL, pkl_promo_ps_op_mul),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_DIV, pkl_promo_ps_op_div),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_CEILDIV, pkl_promo_ps_op_div),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IN, pkl_promo_ps_op_in),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNC_ARG, pkl_promo_ps_func_arg),
    PKL_PHASE_PS_HANDLER (PKL_AST_MAP, pkl_promo_ps_map),
    PKL_PHASE_PS_HANDLER (PKL_AST_INDEXER, pkl_promo_ps_indexer),

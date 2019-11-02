@@ -2495,28 +2495,10 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_rela)
   switch (PKL_AST_TYPE_CODE (op1_type))
     {
     case PKL_TYPE_INTEGRAL:
+    case PKL_TYPE_OFFSET:
     case PKL_TYPE_STRING:
       pkl_asm_insn (pasm, rela_insn, op1_type);
       pkl_asm_insn (pasm, PKL_INSN_NIP2);
-      break;
-    case PKL_TYPE_OFFSET:
-      {
-        pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (op1_type);
-
-        /* Equality and inequality are commutative, so we can save an
-           instruction here.  */
-        if (exp_code != PKL_AST_OP_EQ && exp_code != PKL_AST_OP_NE)
-          pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
-        pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF2 OFF1 OFF1M */
-        pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF1M OFF2 */
-        pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF1 OFF1M OFF2 OFF2M */
-        pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF2 OFF2M OFF1M */
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF1 OFF2 OFF1M OFF2M */
-        pkl_asm_insn (pasm, rela_insn, base_type);
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* OFF1 OFF2 (OFF1M?OFF2M) */
-        pkl_asm_insn (pasm, PKL_INSN_NIP2);  /* (OFF1M?OFF2M) */
-      }
       break;
     default:
       assert (0);
@@ -2675,6 +2657,64 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_unmap)
 }
 PKL_PHASE_END_HANDLER
 
+/*
+ * | OPERAND1
+ * | OPERAND2
+ * EXP
+ */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_in)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node elem = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node container = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node container_type = PKL_AST_TYPE (container);
+  pkl_ast_node elem_type = PKL_AST_TYPE (elem);
+
+  /* XXX optimize for arrays having a known, small number of
+     elements.  */
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, pvm_make_int (0, 32));
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TOR);
+
+  pkl_asm_for (PKL_GEN_ASM,
+               PKL_AST_TYPE_CODE (container_type),
+               NULL /* condition */);
+  {
+    PKL_PASS_SUBPASS (container);
+  }
+  pkl_asm_for_where (PKL_GEN_ASM);
+  {
+    /* No condition.  */
+  }
+  pkl_asm_for_loop (PKL_GEN_ASM);
+  {
+    jitter_label label_continue = pkl_asm_fresh_label (PKL_GEN_ASM);
+
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSHVAR, 0, 0);
+    PKL_PASS_SUBPASS (elem);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_EQ, elem_type);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_FROMR);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_OR);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BZI, label_continue);
+
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TOR);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_BA, pkl_asm_break_label (PKL_GEN_ASM));
+
+    pkl_asm_label (PKL_GEN_ASM, label_continue);
+    pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_TOR);
+  }
+  pkl_asm_for_endloop (PKL_GEN_ASM);
+
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_FROMR);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+}
+PKL_PHASE_END_HANDLER
+
 /* The handler below generates and ICE if a given node isn't handled
    by the code generator.  */
 
@@ -2777,6 +2817,7 @@ struct pkl_phase pkl_phase_gen =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_ATTR, pkl_gen_ps_op_attr),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_gen_ps_op_bconc),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_UNMAP, pkl_gen_ps_op_unmap),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IN, pkl_gen_ps_op_in),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ANY, pkl_gen_ps_type_any),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_gen_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_FUNCTION, pkl_gen_ps_type_function),

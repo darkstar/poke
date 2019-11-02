@@ -272,6 +272,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 /* Operator tokens and their precedences, in ascending order.  */
 
 %right '?' ':'
+%left IN
 %left OR
 %left AND
 %left '|'
@@ -550,6 +551,12 @@ expression:
 	| expression OR expression
         	{
                   $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_OR,
+                                                $1, $3);
+                  PKL_AST_LOC ($$) = @$;
+                }
+	| expression IN expression
+        	{
+                  $$ = pkl_ast_make_binary_exp (pkl_parser->ast, PKL_AST_OP_IN,
                                                 $1, $3);
                   PKL_AST_LOC ($$) = @$;
                 }

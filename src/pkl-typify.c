@@ -582,6 +582,66 @@ PKL_PHASE_END_HANDLER
 #undef CAST_OFFSET
 #undef TYPIFY_BIN
 
+/* The type of an included operation IN is a boolean.  The right
+   operator shall be an array, and the type of the left operator shall
+   be promoteable to the type of the elements in the array.  Also the
+   left type should allow testing for equality.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_op_in)
+{
+  pkl_ast_node exp = PKL_PASS_NODE;
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (exp, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (exp, 1);
+  pkl_ast_node t1 = PKL_AST_TYPE (op1);
+  pkl_ast_node t2 = PKL_AST_TYPE (op2);
+
+  pkl_ast_node exp_type;
+
+  if (PKL_AST_TYPE_CODE (t2) != PKL_TYPE_ARRAY)
+    {
+      PKL_ERROR (PKL_AST_LOC (op2),
+                 "operator has the wrong type\n\
+expected array");
+      PKL_TYPIFY_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+
+  /* XXX remove this check when all types support testing for
+     equality.  */
+  if (PKL_AST_TYPE_CODE (t1) != PKL_TYPE_INTEGRAL
+      && PKL_AST_TYPE_CODE (t1) != PKL_TYPE_STRING
+      && PKL_AST_TYPE_CODE (t1) != PKL_TYPE_OFFSET)
+    {
+      PKL_ERROR (PKL_AST_LOC (op2),
+                 "operator has the wrong type\n\
+it should support testing for equality");
+      PKL_TYPIFY_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+  
+  if (!pkl_ast_type_promoteable (t1,
+                                 PKL_AST_TYPE_A_ETYPE (t2),
+                                 0 /* promote_array_of_any */))
+    {
+      char *t1_str = pkl_type_str (t1, 1);
+      char *t2_str = pkl_type_str (t2, 1);
+
+      PKL_ERROR (PKL_AST_LOC (op1), "operator has the wrong type\n\
+expected %s, got %s",
+                 t2_str, t1_str);
+      free (t1_str);
+      free (t2_str);
+
+      PKL_TYPIFY_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+  
+  exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
+  PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
+  PKL_AST_TYPE (exp) = ASTREF (exp_type);
+}
+PKL_PHASE_END_HANDLER
+
 /* When applied to integral arguments, the type of a bit-concatenation
    :: is an integral type with the following characteristics: the
    width of the operation is the sum of the widths of the operands,
@@ -2071,6 +2131,7 @@ struct pkl_phase pkl_phase_typify1 =
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BNOT, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_UNMAP, pkl_typify1_ps_first_operand),
    PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_BCONC, pkl_typify1_ps_op_bconc),
+   PKL_PHASE_PS_OP_HANDLER (PKL_AST_OP_IN, pkl_typify1_ps_op_in),
 
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_INTEGRAL, pkl_typify1_ps_type_integral),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_ARRAY, pkl_typify1_ps_type_array),
