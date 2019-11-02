@@ -1,5 +1,23 @@
 2019-11-02  Egeyar Bagcioglu  <egeyar@gmail.com>
 
+        * src/ios.c (ios_read_uint): Fix the fast track for 40 bit integers.
+        * testsuite/poke.map/maps-uint-41.pk: New test.
+        * testsuite/poke.map/maps-uint-42.pk: Likewise.
+        * testsuite/poke.map/maps-uint-43.pk: Likewise.
+        * testsuite/poke.map/maps-uint-44.pk: Likewise.
+        * testsuite/poke.map/maps-uint-45.pk: Likewise.
+        * testsuite/poke.map/maps-uint-46.pk: Likewise.
+        * testsuite/poke.map/maps-uint-47.pk: Likewise.
+        * testsuite/poke.map/maps-uint-48.pk: Likewise.
+        * testsuite/poke.map/maps-uint-49.pk: Likewise.
+        * testsuite/poke.map/maps-uint-50.pk: Likewise.
+        * testsuite/poke.map/maps-uint-51.pk: Likewise.
+        * testsuite/poke.map/maps-uint-52.pk: Likewise.
+        * testsuite/poke.map/maps-uint-53.pk: Likewise.
+        * testsuite/poke.map/maps-uint-54.pk: Likewise.
+
+2019-11-02  Egeyar Bagcioglu  <egeyar@gmail.com>
+
         * testsuite/poke.map/maps-uint-1.pk: New test.
         * testsuite/poke.map/maps-uint-2.pk: Likewise.
         * testsuite/poke.map/maps-uint-3.pk: Likewise.

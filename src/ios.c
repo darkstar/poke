@@ -530,7 +530,7 @@ ios_read_uint (ios io, ios_off offset, int flags,
 	  *value = (c[4] << 32) | (c[3] << 24) | (c[2] << 16) | (c[1] << 8)
 		   | c[0];
 	else
-	  *value = (c[0] << 32) | (c[1] << 24) | (c[2] << 16) | (c[2] << 8)
+	  *value = (c[0] << 32) | (c[1] << 24) | (c[2] << 16) | (c[3] << 8)
 		   | c[4];
 	return IOS_OK;
 
