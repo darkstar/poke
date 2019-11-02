@@ -1,3 +1,8 @@
+2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* doc/poke.texi (.set): The default endianness is big endian, not
+	host endian.
+
 2019-10-30  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* doc/poke.texi (Shebang): New section.

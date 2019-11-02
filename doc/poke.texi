@@ -491,7 +491,7 @@ The following settings can be handled with @command{.set}:
 @item endian
 Byte endianness that will be used when mapping the IO space.  Valid
 values are @code{big}, @code{little} and @code{host}.  The default
-endianness is the host endianness.
+endianness is big endian.
 @item obase
 Numeric base to be used when displaying values in the REPL and in
 @code{printf} statements using the @code{%v} format tag.  Valid values
