@@ -1,3 +1,47 @@
+2019-11-02  Egeyar Bagcioglu  <egeyar@gmail.com>
+
+        * testsuite/poke.map/maps-uint-1.pk: New test.
+        * testsuite/poke.map/maps-uint-2.pk: Likewise.
+        * testsuite/poke.map/maps-uint-3.pk: Likewise.
+        * testsuite/poke.map/maps-uint-4.pk: Likewise.
+        * testsuite/poke.map/maps-uint-5.pk: Likewise.
+        * testsuite/poke.map/maps-uint-6.pk: Likewise.
+        * testsuite/poke.map/maps-uint-7.pk: Likewise.
+        * testsuite/poke.map/maps-uint-8.pk: Likewise.
+        * testsuite/poke.map/maps-uint-9.pk: Likewise.
+        * testsuite/poke.map/maps-uint-10.pk: Likewise.
+        * testsuite/poke.map/maps-uint-11.pk: Likewise.
+        * testsuite/poke.map/maps-uint-12.pk: Likewise.
+        * testsuite/poke.map/maps-uint-13.pk: Likewise.
+        * testsuite/poke.map/maps-uint-14.pk: Likewise.
+        * testsuite/poke.map/maps-uint-15.pk: Likewise.
+        * testsuite/poke.map/maps-uint-16.pk: Likewise.
+        * testsuite/poke.map/maps-uint-17.pk: Likewise.
+        * testsuite/poke.map/maps-uint-18.pk: Likewise.
+        * testsuite/poke.map/maps-uint-19.pk: Likewise.
+        * testsuite/poke.map/maps-uint-20.pk: Likewise.
+        * testsuite/poke.map/maps-uint-21.pk: Likewise.
+        * testsuite/poke.map/maps-uint-22.pk: Likewise.
+        * testsuite/poke.map/maps-uint-23.pk: Likewise.
+        * testsuite/poke.map/maps-uint-24.pk: Likewise.
+        * testsuite/poke.map/maps-uint-25.pk: Likewise.
+        * testsuite/poke.map/maps-uint-26.pk: Likewise.
+        * testsuite/poke.map/maps-uint-27.pk: Likewise.
+        * testsuite/poke.map/maps-uint-28.pk: Likewise.
+        * testsuite/poke.map/maps-uint-29.pk: Likewise.
+        * testsuite/poke.map/maps-uint-30.pk: Likewise.
+        * testsuite/poke.map/maps-uint-31.pk: Likewise.
+        * testsuite/poke.map/maps-uint-32.pk: Likewise.
+        * testsuite/poke.map/maps-uint-33.pk: Likewise.
+        * testsuite/poke.map/maps-uint-34.pk: Likewise.
+        * testsuite/poke.map/maps-uint-35.pk: Likewise.
+        * testsuite/poke.map/maps-uint-36.pk: Likewise.
+        * testsuite/poke.map/maps-uint-37.pk: Likewise.
+        * testsuite/poke.map/maps-uint-38.pk: Likewise.
+        * testsuite/poke.map/maps-uint-39.pk: Likewise.
+        * testsuite/poke.map/maps-uint-40.pk: Likewise.
+        * testsuite/poke.map/maps-uint-diag-1.pk: Likewise.
+
 2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-fold.c (EMUL_UUU): For cdiv.
