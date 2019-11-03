@@ -52,7 +52,7 @@ poke_SOURCES = poke.c poke.h \
                pkl-insn.def pkl-ops.def pkl-attrs.def
 
 
-%.pkc: %.pks
+.pks.pkc:
 	srcdir=$(srcdir) $(srcdir)/ras $< > $@
 
 # XXX this shouldn't be necessary?
