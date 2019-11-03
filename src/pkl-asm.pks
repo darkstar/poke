@@ -547,7 +547,7 @@
         .end
 
 ;;; RAS_MACRO_AIS atype
-;;; ( VAL ARR -- ARR VAL BOOL )
+;;; ( VAL ARR -- VAL ARR BOOL )
 ;;;
 ;;; This macro generates code that, given an array ARR and a value VAL,
 ;;; determines whether VAL exists in ARR.  If it does, it pushes int<32>1
