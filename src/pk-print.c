@@ -36,7 +36,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* print EXP */
 
-  pvm_program prog;
+  pvm_routine routine;
   pvm_val val;
   int pvm_ret;
   int base;
@@ -45,7 +45,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
-  prog = PK_CMD_ARG_EXP (argv[0]);
+  routine = PK_CMD_ARG_EXP (argv[0]);
 
   /* Numeration base to use while printing values.  Default is
      decimal.  Command flags can be used to change this.  */
@@ -68,7 +68,7 @@ pk_cmd_print (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   if (uflags & PK_PRINT_F_MAP)
     pflags |= PVM_PRINT_F_MAPS;
 
-  pvm_ret = pvm_run (poke_vm, prog, &val);
+  pvm_ret = pvm_run (poke_vm, routine, &val);
   if (pvm_ret != PVM_EXIT_OK)
     goto rterror;
 

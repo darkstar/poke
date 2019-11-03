@@ -1,3 +1,46 @@
+2019-11-05  Luca Saiu  <positron@gnu.org>
+
+	* HACKING: Replace "program" to "routine".  Update data
+	structure description.  Update debugging and configuration
+	information as related to Jitter.  Minor rewording and grammar
+	fixes.
+	* TODO: Change "program" to "routine".
+	* Makefile.am (SUBDIRS): Add jitter.
+	* acinclude.m4: Remove file.
+	* bootstrap.conf (bootstrap_post_import_hook): New function.
+	* configure.ac: Include m4/jitter.m4, now copied from jitter by
+	bootstrap.
+	(AC_JITTER): Remove along with checks.  Replace with
+	AC_JITTER_SUBPACKAGE, which includes tests.
+	(--enable-debug, --disable-debug): Remove options.
+	(ENABLE_DEBUG): Remove variable.  Remove substitution.
+	(POKE_DEBUG): Remove Automake conditional.
+	* src/Makefile.am (poke_CPPFLAGS, poke_CFLAGS, poke_LDADD)
+	(poke_LDFLAGS): Unconditionalize.
+	* src/pvm-val.h: Change to Jitter unified routine API.
+	Include jitter/jitter-routine.h to break dependency cycle.
+	Add comments.
+	(struct pvm_cls): Rename field program to routine, type
+	from struct jitter_program * to jitter_routine.
+	Change type for field entry_point from void * to
+	jitter_program_point.
+	(pvm_program): Remove typedef.  Now the include cycle breaking works
+	differently.
+	* src/pvm-val.c: Change to Jitter unified routine API.
+	* src/pk-cmd.c: Change to Jitter unified routine API.
+	* src/pk-cmd.h: Change to Jitter unified routine API.
+	* src/pk-print.c: Change to Jitter unified routine API.
+	* src/pkl-asm.c: Change to Jitter unified routine API.
+	* src/pkl-gen.c: Change to Jitter unified routine API.
+	* src/pkl-gen.h: Change to Jitter unified routine API.
+	* src/pkl.c: Change to Jitter unified routine API.
+	* src/pkl.h: Change to Jitter unified routine API.
+	* src/pvm-alloc.c: Change to Jitter unified routine API.
+	* src/pvm-env.h: Change to Jitter unified routine API.
+	* src/pvm.c: Change to Jitter unified routine API.
+	* src/pvm.h: Change to Jitter unified routine API.
+	* src/ras: Change to Jitter unified routine API.
+
 2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* doc/poke.texi (Structs): New chapter.

@@ -48,9 +48,9 @@
    types, function etc from the user.
 
    At any point, the user can request to compile a poke expression
-   with `pkl_compile_expression'.  This returns a PVM program that,
+   with `pkl_compile_expression'.  This returns a PVM routine that,
    can be executed in a virtual machine.  It is up to the user to free
-   the returned PVM program when it is not useful anymore.
+   the returned PVM routine when it is not useful anymore.
 
    `pkl_compile_buffer', `pkl_compile_file' and
    `pkl_compile_expression' can be called any number of times, in any
@@ -88,10 +88,10 @@ int pkl_compile_statement (pkl_compiler compiler, char *buffer, char **end,
 
 
 /* Like pkl_compile_buffer, but compile a Poke expression and return a
-   PVM program that evaluates to the expression.  In case of error
+   PVM routine that evaluates to the expression.  In case of error
    return NULL.  */
 
-pvm_program pkl_compile_expression (pkl_compiler compiler,
+pvm_routine pkl_compile_expression (pkl_compiler compiler,
                                     char *buffer, char **end,
                                     void **pointers);
 

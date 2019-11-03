@@ -425,8 +425,8 @@ It would be nice to have some tests too.
 ---------------------------------------------
 
 The macro-assembler keeps an array of pointers to PVM values
-references in the program being assembled.  This is needed because the
-PVM programs (which are Jitter programs) are allocated using the
+references in the routine being assembled.  This is needed because the
+PVM routines (which are Jitter routines) are allocated using the
 system malloc, whereas the PVM values are allocated using the Boehm
 GC.  See HACKING for more information about this.
 

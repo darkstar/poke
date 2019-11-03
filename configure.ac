@@ -26,6 +26,10 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
+# Include the Autoconf macros from Jitter.
+m4_include([m4/jitter.m4])
+
+
 dnl Autobuild
 dnl AB_INIT
 
@@ -62,13 +66,7 @@ PKG_CHECK_MODULES(BDW_GC,[bdw-gc])
 
 dnl Jitter
 
-AC_JITTER
-if test "x$JITTER" = "x"; then
-   AC_MSG_WARN([you need Jitter to regenerate C files])
-fi
-if test "x$JITTER_CONFIG" = "x"; then
-   AC_MSG_ERROR([you need jitter-config to compile])
-fi
+AC_JITTER_SUBPACKAGE([jitter])
 
 dnl Used in Makefile.am.  See the note there.
 WITH_JITTER=$with_jitter
@@ -78,22 +76,6 @@ dnl We need to determine the endianness of the host system.  The
 dnl following macro is also supposed to work when cross-compiling.
 
 AC_C_BIGENDIAN
-
-dnl --{enable,disable}-debug controls whether building poke in
-dnl debug mode.  In particular, this causes using a more inefficient
-dnl jitter model that keeps the dwarf info of the instruction
-dnl bodies.
-
-AC_ARG_ENABLE([debug],
-              AS_HELP_STRING([--enable-debug],
-                             [Build poke in debug mode (default is NO)]),
-                             [poke_debug=$enableval], [poke_debug=no])
-
-ENABLE_DEBUG=$enable_debug
-AC_SUBST([ENABLE_DEBUG])
-
-AM_CONDITIONAL([POKE_DEBUG],
-               [test "x$poke_debug" = "xyes"])
 
 dnl Use libtextstyle if available.  Otherwise, use the dummy header
 dnl file provided by gnulib's libtextstyle-optional module.

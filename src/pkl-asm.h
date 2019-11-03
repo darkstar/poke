@@ -29,7 +29,7 @@
 #include "pvm.h"
 
 /* The macro-assembler provides constants, enumerations, C macros and
-   functions to make it easier to program the Poke Virtual Machine.  */
+   functions to make it easier to routine the Poke Virtual Machine.  */
 
 /* The user of the assembler refers to specific instructions using the
    PKL_INSN_* symbols defined below.  See the file pkl-insn.def for
@@ -64,23 +64,23 @@ enum pkl_asm_reg
 typedef struct pkl_asm *pkl_asm;
 
 /* Create a new instance of an assembler.  This initializes a new
-   program.  */
+   routine.  */
 
 pkl_asm pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
                      int prologue);
 
-/* Finish the assembly of the current program and return it.  This
+/* Finish the assembly of the current routine and return it.  This
    function frees all resources used by the assembler instance, and
    `pkl_asm_new' should be called again in order to assemble another
-   program.
+   routine.
 
    If POINTERS is not NULL, then it is an array of pointers to boxed
-   values stored in the returned program.  */
+   values stored in the returned routine.  */
 
-pvm_program pkl_asm_finish (pkl_asm pasm, int epilogue,
+pvm_routine pkl_asm_finish (pkl_asm pasm, int epilogue,
                             void **pointers);
 
-/* Assemble an instruction INSN and append it to the program being
+/* Assemble an instruction INSN and append it to the routine being
    assembled in PASM.  If the instruction takes any argument, they
    follow after INSN.  */
 

@@ -115,12 +115,12 @@ pvm_shutdown (pvm apvm)
 }
 
 enum pvm_exit_code
-pvm_run (pvm apvm, pvm_program prog, pvm_val *res)
+pvm_run (pvm apvm, pvm_routine routine, pvm_val *res)
 {
   PVM_STATE_RESULT_VALUE (apvm) = PVM_NULL;
   PVM_STATE_EXIT_CODE (apvm) = PVM_EXIT_OK;
 
-  pvm_interpret (prog, &apvm->pvm_state);
+  pvm_execute_routine (routine, &apvm->pvm_state);
 
   if (res != NULL)
     *res = PVM_STATE_RESULT_VALUE (apvm);

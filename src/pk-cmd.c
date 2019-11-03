@@ -353,17 +353,17 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
                 case 'e':
                   {
                     /* Compile a poke program.  */
-                    pvm_program prog;
+                    pvm_routine routine;
                     char *end;
                     char *program_string;
 
                     program_string = p;
-                    prog = pkl_compile_expression (poke_compiler,
-                                                   program_string, &end,
-                                                   &pointers);
-                    if (prog != NULL)
+                    routine = pkl_compile_expression (poke_compiler,
+                                                      program_string, &end,
+                                                      &pointers);
+                    if (routine != NULL)
                       {
-                        argv[argc].val.prog = prog;
+                        argv[argc].val.routine = routine;
                         match = 1;
 
                         argv[argc].type = PK_CMD_ARG_EXP;
@@ -572,7 +572,7 @@ pk_cmd_exec_1 (char *str, struct pk_trie *cmds_trie, char *prefix)
       if (argv[i].type == PK_CMD_ARG_EXP
           || argv[i].type == PK_CMD_ARG_DEF
           || argv[i].type == PK_CMD_ARG_STMT)
-        pvm_destroy_program (argv[i].val.prog);
+        pvm_destroy_routine (argv[i].val.routine);
     }
 
   return ret;

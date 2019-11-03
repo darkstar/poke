@@ -28,9 +28,9 @@
 #include "pvm-alloc.h"
 
 /* The following enumeration contains every possible exit code
-   resulting from the execution of a program in the PVM.
+   resulting from the execution of a routine in the PVM.
 
-   PVM_EXIT_OK is returned if the program was executed successfully,
+   PVM_EXIT_OK is returned if the routine was executed successfully,
    and every raised exception was properly handled.
 
    PVM_EXIT_ERROR is returned in case of an unhandled exception.  */
@@ -63,12 +63,6 @@ enum pvm_exit_code
 
 typedef struct pvm *pvm;
 
-/* A PVM program can be executed in the virtual machine at any time.
-   The struct pvm_program is provided by Jitter, but we provide here
-   an opaque type to be used by the PVM users.  */
-
-typedef struct pvm_program *pvm_program;
-
 /* Initialize a new Poke Virtual Machine and return it.  */
 
 pvm pvm_init (void);
@@ -81,11 +75,11 @@ void pvm_shutdown (pvm pvm);
 
 pvm_env pvm_get_env (pvm pvm);
 
-/* Run a PVM program in a given Poke Virtual Machine.  Put the
+/* Run a PVM routine in a given Poke Virtual Machine.  Put the
    resulting value in RES, if any, and return an exit code.  */
 
 enum pvm_exit_code pvm_run (pvm pvm,
-                            pvm_program prog,
+                            pvm_routine routine,
                             pvm_val *res);
 
 /* Get and set the current endianness, negative encoding and other

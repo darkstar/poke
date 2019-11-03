@@ -26,7 +26,7 @@
 
 /* The poke virtual machine (PVM) maintains a data structure called
    the run-time environment.  This structure contains run-time frames,
-   which in turn store the variables of PVM programs.
+   which in turn store the variables of PVM routines.
 
    A set of PVM instructions are provided to allow programs to
    manipulate the run-time environment.  These are implemented in

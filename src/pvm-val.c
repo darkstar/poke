@@ -315,14 +315,14 @@ pvm_make_closure_type (pvm_val rtype,
 }
 
 pvm_val
-pvm_make_cls (pvm_program program, void **pointers)
+pvm_make_cls (pvm_routine routine, void **pointers)
 {
   pvm_val_box box = pvm_make_box (PVM_VAL_TAG_CLS);
   pvm_cls cls = pvm_alloc_cls ();
 
-  cls->program = program;
+  cls->routine = routine;
   cls->pointers = pointers;
-  cls->entry_point = PVM_PROGRAM_BEGINNING (program);
+  cls->entry_point = PVM_ROUTINE_BEGINNING (routine);
   cls->env = NULL; /* This should be set by a PEC instruction before
                       using the closure.  */
 
@@ -1137,7 +1137,7 @@ pvm_print_string (pvm_val string)
 int
 pvm_call_pretty_printer (pvm_val val, pvm_val cls)
 {
-  pvm_program program;
+  pvm_routine routine;
   int ret;
   pkl_asm pasm = pkl_asm_new (NULL /* ast */,
                               poke_compiler, 1 /* prologue */);
@@ -1153,11 +1153,11 @@ pvm_call_pretty_printer (pvm_val val, pvm_val cls)
   pkl_asm_insn (pasm, PKL_INSN_PUSH, cls);
   pkl_asm_insn (pasm, PKL_INSN_CALL);
 
-  /* Run the program in the poke VM.  */
-  program = pkl_asm_finish (pasm, 1 /* epilogue */, NULL /* pointers */);
-  pvm_specialize_program (program);
-  ret = pvm_run (poke_vm, program, NULL);
-  pvm_destroy_program (program);
+  /* Run the routine in the poke VM.  */
+  routine = pkl_asm_finish (pasm, 1 /* epilogue */, NULL /* pointers */);
+  jitter_routine_make_executable_if_needed (routine);
+  ret = pvm_run (poke_vm, routine, NULL);
+  pvm_destroy_routine (routine);
 
   return (ret == PVM_EXIT_OK);
 }

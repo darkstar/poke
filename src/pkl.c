@@ -105,7 +105,7 @@ pkl_free (pkl_compiler compiler)
   free (compiler);
 }
 
-static pvm_program
+static pvm_routine
 rest_of_compilation (pkl_compiler compiler,
                      pkl_ast ast,
                      void **pointers)
@@ -235,7 +235,7 @@ rest_of_compilation (pkl_compiler compiler,
 
   pkl_ast_free (ast);
   *pointers = gen_payload.pointers;
-  return gen_payload.program;
+  return gen_payload.routine;
 
  error:
   pkl_ast_free (ast);
@@ -247,12 +247,12 @@ pkl_compile_buffer (pkl_compiler compiler,
                     char *buffer, char **end)
 {
   pkl_ast ast = NULL;
-  pvm_program program;
+  pvm_routine routine;
   int ret;
   pkl_env env = NULL;
 
   /* Note that the sole purpose of `pointers' is to serve as a root
-     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     (in the stack) for the GC, to prevent the boxed values in ROUTINE
      to be collected.  Ugly as shit, but conservative garbage
      collection doesn't really work.  */
   void *pointers;
@@ -260,7 +260,7 @@ pkl_compile_buffer (pkl_compiler compiler,
   compiler->compiling = PKL_COMPILING_PROGRAM;
   env = pkl_env_dup_toplevel (compiler->env);
 
-  /* Parse the input program into an AST.  */
+  /* Parse the input routine into an AST.  */
   ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_PROGRAM,
                           buffer, end);
@@ -271,25 +271,25 @@ pkl_compile_buffer (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  program = rest_of_compilation (compiler, ast, &pointers);
-  if (program == NULL)
+  routine = rest_of_compilation (compiler, ast, &pointers);
+  if (routine == NULL)
     goto error;
 
-  pvm_specialize_program (program);
+  jitter_routine_make_executable_if_needed (routine);
   /* XXX */
-  /* pvm_print_program (stdout, program); */
+  /* pvm_routine_print (stdout, routine); */
 
-  /* Execute the program in the poke vm.  */
+  /* Execute the routine in the poke vm.  */
   {
     pvm_val val;
 
-    if (pvm_run (poke_vm, program, &val) != PVM_EXIT_OK)
+    if (pvm_run (poke_vm, routine, &val) != PVM_EXIT_OK)
       goto error;
 
     /* Discard the value.  */
   }
 
-  pvm_destroy_program (program);
+  pvm_destroy_routine (routine);
   pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;
@@ -305,12 +305,12 @@ pkl_compile_statement (pkl_compiler compiler,
                        pvm_val *val)
 {
   pkl_ast ast = NULL;
-  pvm_program program;
+  pvm_routine routine;
   int ret;
   pkl_env env = NULL;
 
   /* Note that the sole purpose of `pointers' is to serve as a root
-     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     (in the stack) for the GC, to prevent the boxed values in ROUTINE
      to be collected.  Ugly as shit, but conservative garbage
      collection doesn't really work.  */
   void *pointers;
@@ -318,7 +318,7 @@ pkl_compile_statement (pkl_compiler compiler,
   compiler->compiling = PKL_COMPILING_STATEMENT;
   env = pkl_env_dup_toplevel (compiler->env);
 
-  /* Parse the input program into an AST.  */
+  /* Parse the input routine into an AST.  */
   ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_STATEMENT,
                           buffer, end);
@@ -329,19 +329,19 @@ pkl_compile_statement (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  program = rest_of_compilation (compiler, ast, &pointers);
-  if (program == NULL)
+  routine = rest_of_compilation (compiler, ast, &pointers);
+  if (routine == NULL)
     goto error;
 
-  pvm_specialize_program (program);
+  jitter_routine_make_executable_if_needed (routine);
   /* XXX */
-  /* pvm_print_program (stdout, program); */
+  /* pvm_routine_print (stdout, routine); */
 
-  /* Execute the program in the poke vm.  */
-  if (pvm_run (poke_vm, program, val) != PVM_EXIT_OK)
+  /* Execute the routine in the poke vm.  */
+  if (pvm_run (poke_vm, routine, val) != PVM_EXIT_OK)
     goto error;
 
-  pvm_destroy_program (program);
+  pvm_destroy_routine (routine);
   pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;
@@ -352,19 +352,19 @@ pkl_compile_statement (pkl_compiler compiler,
 }
 
 
-pvm_program
+pvm_routine
 pkl_compile_expression (pkl_compiler compiler,
                         char *buffer, char **end, void **pointers)
 {
   pkl_ast ast = NULL;
-  pvm_program program;
+  pvm_routine routine;
   int ret;
   pkl_env env = NULL;
 
   compiler->compiling = PKL_COMPILING_EXPRESSION;
   env = pkl_env_dup_toplevel (compiler->env);
 
-  /* Parse the input program into an AST.  */
+  /* Parse the input routine into an AST.  */
   ret = pkl_parse_buffer (compiler, &env, &ast,
                           PKL_PARSE_EXPRESSION,
                           buffer, end);
@@ -375,16 +375,16 @@ pkl_compile_expression (pkl_compiler compiler,
     /* Memory exhaustion.  */
     printf (_("out of memory\n"));
 
-  program = rest_of_compilation (compiler, ast, pointers);
-  if (program == NULL)
+  routine = rest_of_compilation (compiler, ast, pointers);
+  if (routine == NULL)
     goto error;
 
   pkl_env_free (compiler->env);
   compiler->env = env;
-  pvm_specialize_program (program);
+  jitter_routine_make_executable_if_needed (routine);
   /* XXX */
-  /* pvm_print_program (stdout, program); */
-  return program;
+  /* pvm_routine_print (stdout, routine); */
+  return routine;
 
  error:
   pkl_env_free (env);
@@ -397,12 +397,12 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
 {
   int ret;
   pkl_ast ast = NULL;
-  pvm_program program;
+  pvm_routine routine;
   FILE *fd;
   pkl_env env = NULL;
 
   /* Note that the sole purpose of `pointers' is to serve as a root
-     (in the stack) for the GC, to prevent the boxed values in PROGRAM
+     (in the stack) for the GC, to prevent the boxed values in ROUTINE
      to be collected.  Ugly as shit, but conservative garbage
      collection doesn't really work.  */
   void *pointers;
@@ -427,26 +427,26 @@ pkl_compile_file (pkl_compiler compiler, const char *fname)
       printf (_("out of memory\n"));
     }
 
-  program = rest_of_compilation (compiler, ast, &pointers);
-  if (program == NULL)
+  routine = rest_of_compilation (compiler, ast, &pointers);
+  if (routine == NULL)
     goto error;
 
-  pvm_specialize_program (program);
+  jitter_routine_make_executable_if_needed (routine);
   /* XXX */
-  /* pvm_print_program (stdout, program); */
+  /* pvm_routine_print (stdout, routine); */
   fclose (fd);
 
-  /* Execute the program in the poke vm.  */
+  /* Execute the routine in the poke vm.  */
   {
     pvm_val val;
 
-    if (pvm_run (poke_vm, program, &val) != PVM_EXIT_OK)
+    if (pvm_run (poke_vm, routine, &val) != PVM_EXIT_OK)
       goto error_no_close;
 
     /* Discard the value.  */
   }
 
-  pvm_destroy_program (program);
+  pvm_destroy_routine (routine);
   pkl_env_free (compiler->env);
   compiler->env = env;
   return 1;

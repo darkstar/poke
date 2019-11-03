@@ -31,18 +31,18 @@ pk_cmd_vm_disas_exp (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 {
   /* disassemble expression EXP.  */
 
-  pvm_program prog;
+  pvm_routine routine;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
-  prog = PK_CMD_ARG_EXP (argv[0]);
+  routine = PK_CMD_ARG_EXP (argv[0]);
 
   if (uflags & PK_VM_DIS_F_NAT)
-    pvm_disassemble_program (prog, true,
+    pvm_disassemble_routine (routine, true,
                              JITTER_OBJDUMP, NULL);
   else
-    pvm_print_program (stdout, prog);
+    pvm_routine_print (stdout, routine);
 
   return 1;
 }
@@ -54,7 +54,7 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   const char *fname;
   pkl_ast_node decl;
-  pvm_program prog;
+  pvm_routine routine;
   int back, over;
   pvm_val val;
 
@@ -89,13 +89,13 @@ pk_cmd_vm_disas_fun (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
   val = pvm_env_lookup (runtime_env, back, over);
   assert (val != PVM_NULL);
 
-  prog = PVM_VAL_CLS_PROGRAM (val);
+  routine = PVM_VAL_CLS_ROUTINE (val);
 
   if (uflags & PK_VM_DIS_F_NAT)
-    pvm_disassemble_program (prog, true,
+    pvm_disassemble_routine (routine, true,
                              JITTER_OBJDUMP, NULL);
   else
-    pvm_print_program (stdout, prog);
+    pvm_routine_print (stdout, routine);
 
   return 1;
 }
@@ -107,13 +107,13 @@ pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   pvm_val exp;
   pvm_val mapper;
-  pvm_program program;
+  pvm_routine routine;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
-  program = PK_CMD_ARG_EXP (argv[0]);
-  if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
+  routine = PK_CMD_ARG_EXP (argv[0]);
+  if (pvm_run (poke_vm, routine, &exp) != PVM_EXIT_OK)
     return 0;
 
   mapper = pvm_val_mapper (exp);
@@ -126,13 +126,13 @@ pk_cmd_vm_disas_map (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       return 0;
     }
 
-  program = PVM_VAL_CLS_PROGRAM (mapper);
+  routine = PVM_VAL_CLS_ROUTINE (mapper);
 
   if (uflags & PK_VM_DIS_F_NAT)
-    pvm_disassemble_program (program, true,
+    pvm_disassemble_routine (routine, true,
                              JITTER_OBJDUMP, NULL);
   else
-    pvm_print_program (stdout, program);
+    pvm_routine_print (stdout, routine);
 
   return 1;
 }
@@ -144,13 +144,13 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
 
   pvm_val exp;
   pvm_val writer;
-  pvm_program program;
+  pvm_routine routine;
 
   assert (argc == 1);
   assert (PK_CMD_ARG_TYPE (argv[0]) == PK_CMD_ARG_EXP);
 
-  program = PK_CMD_ARG_EXP (argv[0]);
-  if (pvm_run (poke_vm, program, &exp) != PVM_EXIT_OK)
+  routine = PK_CMD_ARG_EXP (argv[0]);
+  if (pvm_run (poke_vm, routine, &exp) != PVM_EXIT_OK)
     return 0;
 
   writer = pvm_val_writer (exp);
@@ -163,13 +163,13 @@ pk_cmd_vm_disas_writ (int argc, struct pk_cmd_arg argv[], uint64_t uflags)
       return 0;
     }
 
-  program = PVM_VAL_CLS_PROGRAM (writer);
+  routine = PVM_VAL_CLS_ROUTINE (writer);
 
   if (uflags & PK_VM_DIS_F_NAT)
-    pvm_disassemble_program (program, true,
+    pvm_disassemble_routine (routine, true,
                              JITTER_OBJDUMP, NULL);
   else
-    pvm_print_program (stdout, program);
+    pvm_routine_print (stdout, routine);
 
   return 1;
 }

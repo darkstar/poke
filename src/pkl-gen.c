@@ -101,7 +101,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_program)
            && PKL_AST_CODE (PKL_AST_PROGRAM_ELEMS (PKL_PASS_NODE)) == PKL_AST_EXP_STMT))
     pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, PVM_NULL);
 
-  PKL_GEN_PAYLOAD->program = pkl_asm_finish (PKL_GEN_ASM,
+  PKL_GEN_PAYLOAD->routine = pkl_asm_finish (PKL_GEN_ASM,
                                              1 /* prologue */,
                                              &PKL_GEN_PAYLOAD->pointers);
 }
@@ -266,21 +266,21 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_decl)
       {
         /* At this point the code for the function specification
            INITIAL has been assembled in the current macroassembler.
-           Finalize the program and put it in a PVM closure, along
+           Finalize the routine and put it in a PVM closure, along
            with the current environment.  */
 
         void *pointers;
-        pvm_program program = pkl_asm_finish (PKL_GEN_ASM,
+        pvm_routine routine = pkl_asm_finish (PKL_GEN_ASM,
                                               0 /* epilogue */,
                                               &pointers);
         pvm_val closure;
 
         PKL_GEN_POP_ASM;
-        pvm_specialize_program (program);
-        closure = pvm_make_cls (program, pointers);
+        jitter_routine_make_executable_if_needed (routine);
+        closure = pvm_make_cls (routine, pointers);
 
         /*XXX*/
-        /* pvm_print_program (stdout, program); */
+        /* pvm_routine_print (stdout, routine); */
 
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PUSH, closure);
         pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_PEC);
@@ -1923,7 +1923,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_pr_type_array)
       pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_DROP);                  /* _ */
 
       /* XXX */
-      /* pvm_print_program (stdout, PVM_VAL_CLS_PROGRAM (bounder_closure)); */
+      /* pvm_routine_print (stdout, PVM_VAL_CLS_ROUTINE (bounder_closure)); */
 
       PKL_AST_TYPE_A_BOUNDER (array_type) = bounder_closure;
       PKL_PASS_BREAK;

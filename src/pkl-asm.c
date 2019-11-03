@@ -91,12 +91,12 @@ struct pkl_asm_level
 
    COMPILER is the PKL compiler using the macro-assembler.
 
-   PROGRAM is the PVM program being assembled.
+   ROUTINE is the PVM routine being assembled.
 
    POINTERS is an array of pointers.  Pointers to literal boxed
    instruction arguments are collected and returned to the caller.
    This is to make it possible for callers to garbage-collect these
-   values in the entities containing pvm_programs (such as closures.)
+   values in the entities containing pvm_routines (such as closures.)
 
    NEXT_POINTER is the next available slot in POINTERS.
 
@@ -114,7 +114,7 @@ struct pkl_asm
 {
   pkl_compiler compiler;
 
-  pvm_program program;
+  pvm_routine routine;
   void **pointers;
   int next_pointer;
 
@@ -174,15 +174,15 @@ pkl_asm_poplevel (pkl_asm pasm)
   pasm->level = level->parent;
 }
 
-/* Append instructions to PROGRAM to push VAL into the stack.  */
+/* Append instructions to ROUTINE to push VAL into the stack.  */
 
 static inline void
-pkl_asm_push_val (pvm_program program, pvm_val val)
+pkl_asm_push_val (pvm_routine routine, pvm_val val)
 {
 #if __WORDSIZE == 64
-  PVM_APPEND_INSTRUCTION (program, push);
-  pvm_append_unsigned_literal_parameter (program,
-                                         (jitter_uint) val);
+  PVM_ROUTINE_APPEND_INSTRUCTION (routine, push);
+  pvm_routine_append_unsigned_literal_parameter (routine,
+                                                 (jitter_uint) val);
 #else
   /* Use the push-hi and push-lo instructions, to overcome jitter's
      limitation of only accepting a jitter_uint value as a literal
@@ -190,19 +190,22 @@ pkl_asm_push_val (pvm_program program, pvm_val val)
 
   if (val & ~0xffffffffLL)
     {
-      PVM_APPEND_INSTRUCTION (program, pushhi);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val >> 32)));
+      PVM_ROUTINE_APPEND_INSTRUCTION (routine, pushhi);
+      pvm_routine_append_unsigned_literal_parameter (routine,
+                                                     ((jitter_uint)
+                                                      (val >> 32)));
 
-      PVM_APPEND_INSTRUCTION (program, pushlo);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val & 0xffffffff)));
+      PVM_ROUTINE_APPEND_INSTRUCTION (routine, pushlo);
+      pvm_routine_append_unsigned_literal_parameter (routine,
+                                                     ((jitter_uint)
+                                                      (val & 0xffffffff)));
     }
   else
     {
-      PVM_APPEND_INSTRUCTION (program, push32);
-      pvm_append_unsigned_literal_parameter (program,
-                                             ((jitter_uint) (val & 0xffffffff)));
+      PVM_ROUTINE_APPEND_INSTRUCTION (routine, push32);
+      pvm_routine_append_unsigned_literal_parameter (routine,
+                                                     ((jitter_uint)
+                                                      (val & 0xffffffff)));
     }
 #endif
 }
@@ -980,23 +983,23 @@ pkl_asm_insn_ais (pkl_asm pasm, pkl_ast_node atype)
 }
 
 /* Create a new instance of an assembler.  This initializes a new
-   program.  */
+   routine.  */
 
 pkl_asm
 pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
              int prologue)
 {
   pkl_asm pasm = pvm_alloc (sizeof (struct pkl_asm));
-  pvm_program program;
+  pvm_routine routine;
 
   memset (pasm, 0, sizeof (struct pkl_asm));
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_NULL);
 
   pasm->compiler = compiler;
   pasm->ast = ast;
-  program = pvm_make_program ();
-  pasm->error_label = jitter_fresh_label (program);
-  pasm->program = program;
+  routine = pvm_make_routine ();
+  pasm->error_label = jitter_fresh_label (routine);
+  pasm->routine = routine;
 
   pasm->pointers = pvm_alloc (sizeof (void*) * PKL_AST_MAX_POINTERS);
   memset (pasm->pointers, 0, sizeof (void*) * PKL_AST_MAX_POINTERS);
@@ -1025,26 +1028,26 @@ pkl_asm_new (pkl_ast ast, pkl_compiler compiler,
   return pasm;
 }
 
-/* Finish the assembly of the current program and return it.  This
+/* Finish the assembly of the current routine and return it.  This
    function frees all resources used by the assembler instance, and
    `pkl_asm_new' should be called again in order to assemble another
-   program.  */
+   routine.  */
 
-pvm_program
+pvm_routine
 pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
 {
-  pvm_program program = pasm->program;
+  pvm_routine routine = pasm->routine;
 
   if (epilogue)
     {
       pkl_asm_note (pasm, "#begin epilogue");
 
-      /* Successful program finalization.  */
+      /* Successful routine finalization.  */
       pkl_asm_insn (pasm, PKL_INSN_POPE);
       pkl_asm_insn (pasm, PKL_INSN_PUSH, pvm_make_int (PVM_EXIT_OK, 32));
       pkl_asm_insn (pasm, PKL_INSN_EXIT);
 
-      pvm_append_label (pasm->program, pasm->error_label);
+      pvm_routine_append_label (pasm->routine, pasm->error_label);
 
       /* Default exception handler.  If we are bootstrapping the
          compiler, then use a very simple one inlined here in
@@ -1074,12 +1077,12 @@ pkl_asm_finish (pkl_asm pasm, int epilogue, void **pointers)
   /* Free the first level.  */
   pkl_asm_poplevel (pasm);
 
-  /* Free the assembler instance and return the assembled program to
+  /* Free the assembler instance and return the assembled routine to
      the user.  */
-  return program;
+  return routine;
 }
 
-/* Assemble an instruction INSN and append it to the program being
+/* Assemble an instruction INSN and append it to the routine being
    assembled in PASM.  If the instruction takes any argument, they
    follow after INSN.  */
 
@@ -1119,17 +1122,17 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
 
       /* Due to some jitter limitations, we have to do some additional
          work.  See the docstring for `pkl_asm_push_val' - above.  */
-      pkl_asm_push_val (pasm->program, val);
+      pkl_asm_push_val (pasm->routine, val);
     }
   else if (insn < PKL_INSN_MACRO)
     {
       /* This is a PVM instruction.  Process its arguments and append
-         it to the jitter program.  */
+         it to the jitter routine.  */
 
       const char *insn_name = insn_names[insn];
       const char *p;
 
-      pvm_append_instruction_name (pasm->program, insn_name);
+      pvm_routine_append_instruction_name (pasm->routine, insn_name);
 
       va_start (valist, insn);
       for (p = insn_args[insn]; *p != '\0'; ++p)
@@ -1142,14 +1145,15 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
               {
                 pvm_val val = va_arg (valist, pvm_val);
                 /* XXX: this doesn't work in 32-bit  */
-                pvm_append_unsigned_literal_parameter (pasm->program,
-                                                       (jitter_uint) val);
+                pvm_routine_append_unsigned_literal_parameter (pasm->routine,
+                                                               (jitter_uint)
+                                                               val);
                 break;
               }
             case 'n':
               {
                 jitter_uint n = va_arg (valist, jitter_uint);
-                pvm_append_unsigned_literal_parameter (pasm->program, n);
+                pvm_routine_append_unsigned_literal_parameter (pasm->routine, n);
                 break;
               }
             case 'a':
@@ -1158,7 +1162,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             case 'l':
               {
                 jitter_label label = va_arg (valist, jitter_label);
-                pvm_append_label_parameter (pasm->program, label);
+                pvm_routine_append_label_parameter (pasm->routine, label);
                 break;
               }
             case 'i':
@@ -1167,7 +1171,7 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             case 'r':
               {
                 jitter_uint reg = va_arg (valist, jitter_uint);
-                PVM_APPEND_REGISTER_PARAMETER (pasm->program, r, reg);
+                PVM_ROUTINE_APPEND_REGISTER_PARAMETER (pasm->routine, r, reg);
                 break;
               }
             }
@@ -1474,8 +1478,8 @@ pkl_asm_if (pkl_asm pasm, pkl_ast_node exp)
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_CONDITIONAL);
 
-  pasm->level->label1 = jitter_fresh_label (pasm->program);
-  pasm->level->label2 = jitter_fresh_label (pasm->program);
+  pasm->level->label1 = jitter_fresh_label (pasm->routine);
+  pasm->level->label2 = jitter_fresh_label (pasm->routine);
   pasm->level->node1 = ASTREF (exp);
 }
 
@@ -1497,7 +1501,7 @@ pkl_asm_else (pkl_asm pasm)
   assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
 
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
-  pvm_append_label (pasm->program, pasm->level->label1);
+  pvm_routine_append_label (pasm->routine, pasm->level->label1);
   /* Pop the expression condition from the stack.  */
   pkl_asm_insn (pasm, PKL_INSN_DROP);
 }
@@ -1506,7 +1510,7 @@ void
 pkl_asm_endif (pkl_asm pasm)
 {
   assert (pasm->level->current_env == PKL_ASM_ENV_CONDITIONAL);
-  pvm_append_label (pasm->program, pasm->level->label2);
+  pvm_routine_append_label (pasm->routine, pasm->level->label2);
 
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
@@ -1538,8 +1542,8 @@ pkl_asm_try (pkl_asm pasm, pkl_ast_node arg)
 
   if (arg)
     pasm->level->node1 = ASTREF (arg);
-  pasm->level->label1 = jitter_fresh_label (pasm->program);
-  pasm->level->label2 = jitter_fresh_label (pasm->program);
+  pasm->level->label1 = jitter_fresh_label (pasm->routine);
+  pasm->level->label2 = jitter_fresh_label (pasm->routine);
 
   /* pkl_asm_note (pasm, "PUSH-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_PUSHE, pasm->level->label1);
@@ -1553,7 +1557,7 @@ pkl_asm_catch (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_POPE);
   /* XXX pkl_asm_note (pasm, "POP-REGISTERS"); */
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
-  pvm_append_label (pasm->program, pasm->level->label1);
+  pvm_routine_append_label (pasm->routine, pasm->level->label1);
 
   /* At this point the exception number is at the top of the stack.
      If the catch block received an argument, push a new environment
@@ -1577,7 +1581,7 @@ pkl_asm_endtry (pkl_asm pasm)
   if (pasm->level->node1)
     pkl_asm_insn (pasm, PKL_INSN_POPF, 1);
 
-  pvm_append_label (pasm->program, pasm->level->label2);
+  pvm_routine_append_label (pasm->routine, pasm->level->label2);
 
   /* Cleanup and pop the current level.  */
   pkl_ast_node_free (pasm->level->node1);
@@ -1604,11 +1608,11 @@ pkl_asm_while (pkl_asm pasm)
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_LOOP);
 
-  pasm->level->label1 = jitter_fresh_label (pasm->program);
-  pasm->level->label2 = jitter_fresh_label (pasm->program);
-  pasm->level->break_label = jitter_fresh_label (pasm->program);
+  pasm->level->label1 = jitter_fresh_label (pasm->routine);
+  pasm->level->label2 = jitter_fresh_label (pasm->routine);
+  pasm->level->break_label = jitter_fresh_label (pasm->routine);
 
-  pvm_append_label (pasm->program, pasm->level->label1);
+  pvm_routine_append_label (pasm->routine, pasm->level->label1);
 }
 
 void
@@ -1623,11 +1627,11 @@ void
 pkl_asm_endloop (pkl_asm pasm)
 {
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label1);
-  pvm_append_label (pasm->program, pasm->level->label2);
+  pvm_routine_append_label (pasm->routine, pasm->level->label2);
   /* Pop the loop condition from the stack.  */
   pkl_asm_insn (pasm, PKL_INSN_DROP);
 
-  pvm_append_label (pasm->program, pasm->level->break_label);
+  pvm_routine_append_label (pasm->routine, pasm->level->break_label);
 
   /* Cleanup and pop the current level.  */
   pkl_asm_poplevel (pasm);
@@ -1694,10 +1698,10 @@ pkl_asm_for (pkl_asm pasm, int container_type,
 {
   pkl_asm_pushlevel (pasm, PKL_ASM_ENV_FOR_LOOP);
 
-  pasm->level->label1 = jitter_fresh_label (pasm->program);
-  pasm->level->label2 = jitter_fresh_label (pasm->program);
-  pasm->level->label3 = jitter_fresh_label (pasm->program);
-  pasm->level->break_label = jitter_fresh_label (pasm->program);
+  pasm->level->label1 = jitter_fresh_label (pasm->routine);
+  pasm->level->label2 = jitter_fresh_label (pasm->routine);
+  pasm->level->label3 = jitter_fresh_label (pasm->routine);
+  pasm->level->break_label = jitter_fresh_label (pasm->routine);
 
   if (selector)
     pasm->level->node1 = ASTREF (selector);
@@ -1709,7 +1713,7 @@ pkl_asm_for (pkl_asm pasm, int container_type,
 void
 pkl_asm_for_where (pkl_asm pasm)
 {
-  pvm_append_label (pasm->program, pasm->level->label1);
+  pvm_routine_append_label (pasm->routine, pasm->level->label1);
 
   pkl_asm_insn (pasm, PKL_INSN_PUSHF);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
@@ -1719,7 +1723,7 @@ pkl_asm_for_where (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_SWAP);
   pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
 
-  pvm_append_label (pasm->program, pasm->level->label2);
+  pvm_routine_append_label (pasm->routine, pasm->level->label2);
 
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_EQLU);
@@ -1764,12 +1768,12 @@ pkl_asm_for_endloop (pkl_asm pasm)
   pkl_asm_insn (pasm, PKL_INSN_PUSH, PVM_NULL);
   pkl_asm_insn (pasm, PKL_INSN_BA, pasm->level->label2);
 
-  pvm_append_label (pasm->program, pasm->level->label3);
+  pvm_routine_append_label (pasm->routine, pasm->level->label3);
 
   /* Cleanup the stack, and pop the current frame from the
      environment.  */
   pkl_asm_insn (pasm, PKL_INSN_DROP);
-  pvm_append_label (pasm->program, pasm->level->break_label);
+  pvm_routine_append_label (pasm->routine, pasm->level->break_label);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
   pkl_asm_insn (pasm, PKL_INSN_DROP);
@@ -1820,11 +1824,11 @@ pkl_asm_break_label (pkl_asm pasm)
 jitter_label
 pkl_asm_fresh_label (pkl_asm pasm)
 {
-  return jitter_fresh_label (pasm->program);
+  return jitter_fresh_label (pasm->routine);
 }
 
 void
 pkl_asm_label (pkl_asm pasm, jitter_label label)
 {
-  pvm_append_label (pasm->program, label);
+  pvm_routine_append_label (pasm->routine, label);
 }

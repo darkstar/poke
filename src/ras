@@ -80,7 +80,7 @@
 #
 # This translates into a C macro RAS_FUNCTION_NAME(CLOSURE), with a
 # single argument which should be an l-value.  The macro will compile
-# the function into a pvm_program, and install it into a PVM closure
+# the function into a pvm_routine, and install it into a PVM closure
 # value that is assigned to CLOSURE.
 #
 # Expanding Macros
@@ -286,7 +286,7 @@
 # Another difficulty when dealing with lexical addresses is that
 # different addresses are required to refer to the same variable,
 # depending on the context.  For example, consider the following PVM
-# program:
+# routine:
 #
 # pushf
 # regvar        ; A
@@ -590,7 +590,7 @@ BEGIN {
 
     out("#define RAS_FUNCTION_" toupper($2) "(CLOSURE)  \\")
     out("\tdo {                                         \\")
-    out("\tpvm_program program;                         \\")
+    out("\tpvm_routine routine;                         \\")
     out("\t                                             \\")
     out("\tPKL_GEN_PUSH_ASM (pkl_asm_new (PKL_PASS_AST, \\")
     out("\t                               PKL_GEN_PAYLOAD->compiler, \\")
@@ -613,12 +613,12 @@ BEGIN {
     {
         out("\t{                                                       \\")
         out("\t  void *pointers;                                       \\")
-        out("\t  program = pkl_asm_finish (RAS_ASM,                    \\")
+        out("\t  routine = pkl_asm_finish (RAS_ASM,                    \\")
         out("\t                            0 /* epilogue */,           \\")
         out("\t                            &pointers);                 \\")
         out("\t  PKL_GEN_POP_ASM;                                      \\")
-        out("\t  pvm_specialize_program (program);                     \\")
-        out("\t  (CLOSURE) = pvm_make_cls (program, pointers);         \\")
+        out("\t  jitter_routine_make_executable_if_needed (routine);   \\")
+        out("\t  (CLOSURE) = pvm_make_cls (routine, pointers);         \\")
         out("\t}                                                       \\")
     }
     out("\t} while (0)")

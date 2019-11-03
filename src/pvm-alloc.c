@@ -36,7 +36,7 @@ static void
 pvm_alloc_finalize_closure (void *object, void *client_data)
 {
   pvm_cls cls = (pvm_cls) object;
-  pvm_destroy_program (cls->program);
+  pvm_destroy_routine (cls->routine);
 }
 
 void *
