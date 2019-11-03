@@ -1,3 +1,10 @@
+2019-11-03  Egeyar Bagcioglu  <egeyar@gmail.com>
+
+	* src/ios.c (ios_read_int): Rewrite.
+	(ios_read_uint): Move the common functionality between read_ios_int
+	and read_ios_uint from here ...
+	(ios_read_int_common): ... to here.
+
 2019-11-03  Darshit Shah  <darnir@gnu.org>
 
 	* bootstrap.conf (MSGID_BUGS_ADDRESS): Fix bug reporting address
