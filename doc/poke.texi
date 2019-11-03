@@ -1519,6 +1519,7 @@ Arrays are homogeneous collections of values.
 * Array Types::			Bounded and unbounded arrays.
 * Array Indexing::		Accessing values stored in arrays.
 * Array Trimming::		Working with array pieces.
+* Array Elements::		Checking for array elements.
 * Array Attributes::		Accessing properties of array values.
 @end menu
 
@@ -1792,6 +1793,22 @@ shared:
 (poke) a[1].field
 66
 @end example
+
+@node Array Elements
+@section Array Elements
+
+The @code{in} operator can be used to determine whether a given
+element is stored in an array.  Examples:
+
+@example
+(poke) 2 in [1,2,3]
+1
+(poke) 10#B in [2#b,10*8#b,3#b]
+1
+(poke) 30#B in [2#b,10*8#b,3#b]
+0
+@end example
+
 
 @node Array Attributes
 @section Array Attributes

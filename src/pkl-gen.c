@@ -2666,11 +2666,15 @@ PKL_PHASE_END_HANDLER
 PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_in)
 {
   pkl_ast_node exp = PKL_PASS_NODE;
-  pkl_ast_node elem = PKL_AST_EXP_OPERAND (exp, 0);
+  //  pkl_ast_node elem = PKL_AST_EXP_OPERAND (exp, 0);
   pkl_ast_node container = PKL_AST_EXP_OPERAND (exp, 1);
   pkl_ast_node container_type = PKL_AST_TYPE (container);
-  pkl_ast_node elem_type = PKL_AST_TYPE (elem);
+  //  pkl_ast_node elem_type = PKL_AST_TYPE (elem);
 
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_AIS, container_type);
+  pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+
+#if 0
   /* XXX optimize for arrays having a known, small number of
      elements.  */
 
@@ -2712,6 +2716,7 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_op_in)
 
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_FROMR);
   pkl_asm_insn (PKL_GEN_ASM, PKL_INSN_NIP2);
+#endif
 }
 PKL_PHASE_END_HANDLER
 

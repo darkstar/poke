@@ -809,11 +809,7 @@ pkl_asm_insn_cmp (pkl_asm pasm,
     {
       pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
       
-      /* Equality and inequality are commutative, so we can save an
-         instruction here.  */
-      if (insn != PKL_INSN_EQ && insn != PKL_INSN_NE)
-        pkl_asm_insn (pasm, PKL_INSN_SWAP);
-
+      pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF2 OFF1 */
       pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF2 OFF1 OFF1M */
       pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF1M OFF2 */
       pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF1 OFF1M OFF2 OFF2M */
@@ -984,6 +980,20 @@ pkl_asm_insn_bnz (pkl_asm pasm,
   int tl = !!((size - 1) & ~0x1f);
 
   pkl_asm_insn (pasm, bnz_table[tl][sign], label);
+}
+
+/* Macro-instruction: AIS type
+   ( VAL ARR -- VAL ARR BOOL )
+
+   Push 0 (false) if the given VAL is not found in the container ARR.
+   Push 1 (true) otherwise.  */
+
+static void
+pkl_asm_insn_ais (pkl_asm pasm, pkl_ast_node atype)
+{
+  pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (atype);
+  
+  RAS_MACRO_AIS (atype, etype);
 }
 
 /* Create a new instance of an assembler.  This initializes a new
@@ -1314,6 +1324,17 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             va_end (valist);
 
             pkl_asm_insn_swapgt (pasm, type);
+            break;
+          }
+        case PKL_INSN_AIS:
+          {
+            pkl_ast_node atype;
+
+            va_start (valist, insn);
+            atype = va_arg (valist, pkl_ast_node);
+            va_end (valist);
+
+            pkl_asm_insn_ais (pasm, atype);
             break;
           }
         case PKL_INSN_NEG:

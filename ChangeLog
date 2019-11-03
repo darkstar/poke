@@ -1,3 +1,12 @@
+2019-11-03  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl-insn.def: New instruction ais.
+	* src/pkl-asm.c (pkl_asm_insn): Handle AIS.
+	(pkl_asm_insn_ais): New function.
+	* src/pkl-asm.pks (ais): New macro.
+	* src/pkl-gen.c (pkl_gen_ps_op_in): Use PKL_INSN_AIS.
+	* doc/poke.texi (Array Elements): New section.
+
 2019-11-02  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pkl-ops.def: Define IN operator.
