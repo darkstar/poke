@@ -99,6 +99,7 @@ dnl Use libtextstyle if available.  Otherwise, use the dummy header
 dnl file provided by gnulib's libtextstyle-optional module.
 
 gl_LIBTEXTSTYLE_OPTIONAL
+AX_LIBTEXTSTYLE_HYPERLINK
 
 dnl Generate output files
 AC_CONFIG_FILES(Makefile

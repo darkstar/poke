@@ -1,3 +1,13 @@
+2019-11-03  Darshit Shah  <darnir@gnu.org>
+
+	* m4/libtextstyle-hyperlink.m4: New file with autoconf macro to
+	test for hyperlink support in libtextstyle
+	* configure.ac: Invoke new macro AX_LIBTEXTSTYLE_HYPERLINK
+	* src/pk-term.c (pk_term_hyperlink): Conditionally invoke the
+	function styled_ostream_set_hyperlink based on whether
+	libtextstyle supports it
+	(pk_term_end_hyperlink): Same
+
 2019-11-03  Luca Saiu  <positron@gnu.org>
 
 	* src/Makefile.am (.pks.pkc): Do not rely on GNU Make extension.
