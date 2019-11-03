@@ -1,3 +1,6 @@
 [submodule "gnulib"]
 	path = gnulib
 	url = git://git.sv.gnu.org/gnulib
+[submodule "jitter"]
+	path = jitter
+	url = http://ageinghacker.net/git/cgit.cgi/jitter
