@@ -83,7 +83,8 @@ The Language
 * Integers::			Working with whole numbers.
 * Offsets::			Working with memory sizes.
 * Strings::			Working with null-terminated strings.
-* Arrays::			Working with homogeneous collections of values.
+* Arrays::			Working with homogeneous collections.
+* Structs::			Working with heterogeneous collections.
 * Endianness::			Byte ordering.
 * Mapping::			Accessing the IO space.
 * Output::			Printing from Poke programs.
@@ -1844,6 +1845,213 @@ Gives 1 if the array is mapped, 0 otherwise.  Examples:
 @end example
 @end table
 
+@node Structs
+@chapter Structs
+@cindex structs
+
+Structs are the main abstraction that Poke provides to structure data.
+They contain heterogeneous collections of values.
+
+@menu
+* Struct Literals::		Writing struct values.
+* Struct Types::		Simple structs.
+* Accessing Fields::            Getting and fetching the values of fields.
+* Field Constraints::		Specifying data integrity.
+* Field Labels::		Explicit offsets for fields.
+* Pinned Structs::		Fix the offset of fields.
+* Unions::			Dealing with conditional data.
+* Declarations in Structs::	Declaring stuff within a struct.
+* Methods::			Declaring functions within a struct.	
+* Struct Attributes::		Accessing properties of struct values.
+@end menu
+
+@node Struct Literals
+@section Struct Literals
+
+A struct literal is written like:
+
+@example
+struct @{ [[@var{field_name}=]@var{exp},]... @}
+@end example
+
+The contents of the struct literal is a possibly empty set of fields.
+Each field has an optional name @var{field_name} and a value
+@var{exp}.  The expression for the value can be of any type.
+
+@c XXX document struct constructors once they are supported.
+
+@node Struct Types
+@section Struct Types
+
+A simple struct type definition in Poke looks like:
+
+@example
+deftype Packet =
+  struct
+  @{
+    byte magic;
+    uint<16> length;
+    byte[length] data;
+  @}
+@end example
+
+The above defines a ``Packet'', which consists on a magic number
+encoded in a byte, a length encoded in an unsigned 16-bit integer, and
+an array of @code{length} bytes, which is the payload of the packet.
+
+Each entry in the struct type above defines a @dfn{struct field}.
+
+Each field has a type, which is mandatory, and a name, which is
+optional.  Fields without names are not accessible (not even within
+the struct itself) but they are handy for expressing padding.
+Example:
+
+@example
+deftype Imm64 =
+  struct
+  @{
+    uint<32> lo;
+    uint<32>;
+    uint<32> hi;
+  @}
+@end example
+
+It is not allowed to have several fields with the same name in the
+same struct.  The compiler will complain if it finds such an
+occurrence.
+
+@node Accessing Fields
+@section Accessing Fields
+
+Poke uses the usual dot-notation to provide access to struct fields.
+Examples:
+
+@example
+(poke) defvar s = struct @{ i = 10, l = 20L @}
+(poke) s.i
+10
+(poke) s.l
+20L
+@end example
+
+Writing to fields is achieved by having the field reference in the
+left side of an assignment statement:
+
+@example
+(poke) s.i = 100
+(poke) s.l = 200
+(poke) s
+struct @{i=100,l=200L@}
+@end example
+
+@node Field Constraints
+@section Field Constraints
+
+XXX
+
+@node Field Labels
+@section Field Labels
+
+In structs, each field is associated with an offset, which is relative
+to the beginning of the struct.  This is the offset used when reading
+and writing the field from/to the IO space when mapping.
+
+The offset is reset to zero bits at the beginning of the struct type,
+and it is increased by the size of the fields:
+
+@example
+struct
+@{
+                /* Offset: 0#b */
+    uint<1> f1; /* Offset: 1#b */
+    sint<7> f2; /* Offset: 1#B */
+    int     f3; /* Offset: 5#B */
+    Bar     f4; /* Offset: 23#B */
+@}
+@end example
+
+It is possible to specify an alternative offset for a field using a
+@dfn{field label}.
+
+Consider for example an entry in an ELF symbol table.  Each entry has
+a @code{st_info} field which is 64-bits long, that in turn can be
+interpreted as two fields @code{st_bind} and @code{st_type}.
+
+The obvious solution is to encode @code{st_info} as a sub-struct, like
+this:
+
+@example
+struct
+@{
+  elf32_word st_name;
+  struct
+  @{
+    uint<60> st_bind;
+    uint<4> st_type;
+  @} st_info;
+@}
+@end example
+
+However, that makes it inconvenient to access the value of
+@code{st_info} as an integral value, using the bit-concatenation
+operator @code{symbol.st_info.st_bind::symbol.st_info.st_type}.  We
+can use labels instead:
+
+@example
+struct
+@{
+  elf32_word st_name;
+  elf64_word st_info;
+  uint<60> st_bind @ 4#B;
+  uint<4> st_type @ 4#B + 60#b;
+@}
+@end example
+
+The resulting struct has fields @code{st_info}, @code{st_bind} and
+@code{st_type}, with the last two overlapping the first.
+
+@node Pinned Structs
+@section Pinned Structs
+
+Pinned structs is a convenient way to write struct types where the
+offset of all its fields is zero.  They are equivalent to C unions.
+
+For example, consider the @code{_u} field below in a CTF type
+description:
+
+@example
+deftype Ctf_Stype_V1 =
+  struct
+  @{
+    Ctf_Name ctt_name;
+    Ctf_Info_V1 ctt_info;
+    pinned struct
+    @{
+      uint32 _size;		/* Size of entire type in bytes.  */
+      uint32 _type;		/* Reference to another type.  */
+    @} _u;
+  @};
+@end example
+
+@node Unions
+@section Unions
+
+XXX
+
+@node Declarations in Structs
+@section Declarations in Structs
+
+XXX
+
+@node Methods
+@section Methods
+
+XXX
+
+@node Struct Attributes
+@section Struct Attributes
+
+XXX
 
 @node Endianness
 @chapter Endianness

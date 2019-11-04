@@ -1,5 +1,16 @@
 2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Structs): New chapter.
+	(Struct Literals): New section.
+	(Struct Types): Likewise.
+	(Unions): Likewise.
+	(Pinned Structs): Likewise.
+	(Struct Attributes): Likewise.
+	(Methods): Likewise.
+	(Declarations in Structs): Likewise.
+
+2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-asm.pks (remap): Do not check for a null value.
 
 2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
