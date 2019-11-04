@@ -45,7 +45,6 @@
         drop                    ; VAL
         ;; XXX do not re-map if the object is up to date (cached
         ;; value.)
-        ;; XXX rewrite using variables to avoid extra instructions.
         mgetw                   ; VAL WCLS
         swap                    ; WCLS VAL
         mgetm                   ; WCLS VAL MCLS
@@ -64,12 +63,6 @@
         msetm                   ; WCLS NVAL
         swap                    ; NVAL WCLS
         msetw                   ; NVAL
-        ;; If the mapped value is null then raise an EOF
-        ;; exception.
-        dup                     ; NVAL NVAL
-        bnn .label
-        push PVM_E_EOF
-        raise
         push null               ; NVAL null
 .label:
         drop                    ; NVAL
