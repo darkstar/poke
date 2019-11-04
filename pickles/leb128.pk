@@ -26,6 +26,7 @@ deftype ULEB128 =
       struct
       {
         byte b : b < 0x7f;
+        defun _print = void: { printf "%v", b; }
       };
 
     ULEB_128_Byte[] variable;
@@ -42,7 +43,10 @@ deftype ULEB128 =
          raise E_generic;
 
        for (v in variable)
-         result = result | extract (v.b);
+         {
+           result = result | extract (v.b);
+           shift = shift + 7;
+         }
        result = extract (last);
 
        return result;
@@ -55,10 +59,14 @@ deftype ULEB128 =
        try val = value;
        catch
        {
-         printf "#<leb128:%<warning:inv%>>";
+         print "#<leb128:";
+         for (b in variable)
+           printf "%v,", b;
+         printf "%v", last;
+         print ">";
          return;
        }
-
+       
        printf ("%<leb128:#<leb128:%<integer:%u64d%>>%>",
                value);
       }
