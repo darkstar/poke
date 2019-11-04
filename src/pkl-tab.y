@@ -260,7 +260,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %token <opcode> XORA
 %token <opcode> IORA
 
-%token MSB LSB
+%token BIG LITTLE
 %token SIGNED UNSIGNED
 %token THREEDOTS
 
@@ -302,7 +302,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
 %type <ast> integral_type_specifier offset_type_specifier array_type_specifier
 %type <ast> function_type_specifier function_type_arg_list function_type_arg
 %type <ast> struct_type_specifier
-%type <integer> struct_type_pinned integral_type_sign struct_or_union builtin
+%type <integer> struct_type_pinned integral_type_sign struct_or_union builtin endianness
 %type <ast> struct_type_elem_list struct_type_field struct_type_field_identifier
 %type <ast> struct_type_field_constraint struct_type_field_label
 %type <ast> declaration
@@ -1116,10 +1116,16 @@ struct_type_elem_list:
         	{ $$ = pkl_ast_chainon ($1, $2); }
         ;
 
+endianness:
+	  %empty	{ $$ = PKL_AST_ENDIAN_DFL; }
+	| LITTLE	{ $$ = PKL_AST_ENDIAN_LSB; }
+	| BIG		{ $$ = PKL_AST_ENDIAN_MSB; }
+        ;
+
 struct_type_field:
-	  type_specifier struct_type_field_identifier
+	  endianness type_specifier struct_type_field_identifier
           	{
-                  if ($2 != NULL)
+                  if ($3 != NULL)
                     {
                       /* Register a variable IDENTIFIER in the current
                          environment.  We do it in this mid-rule so
@@ -1129,35 +1135,35 @@ struct_type_field:
                       pkl_ast_node dummy, decl;
 
                       dummy = pkl_ast_make_integer (pkl_parser->ast, 0);
-                      PKL_AST_TYPE (dummy) = ASTREF ($1);
+                      PKL_AST_TYPE (dummy) = ASTREF ($2);
                       decl = pkl_ast_make_decl (pkl_parser->ast,
                                                 PKL_AST_DECL_KIND_VAR,
-                                                $2, dummy,
+                                                $3, dummy,
                                                 NULL /* source */);
                       PKL_AST_LOC (decl) = @$;
 
                       if (!pkl_env_register (pkl_parser->env,
-                                             PKL_AST_IDENTIFIER_POINTER ($2),
+                                             PKL_AST_IDENTIFIER_POINTER ($3),
                                              decl))
                         {
-                          pkl_error (pkl_parser->compiler, pkl_parser->ast, @2,
+                          pkl_error (pkl_parser->compiler, pkl_parser->ast, @3,
                                      "duplicated struct element '%s'",
-                                     PKL_AST_IDENTIFIER_POINTER ($2));
+                                     PKL_AST_IDENTIFIER_POINTER ($3));
                           YYERROR;
                         }
                     }
                 }
           struct_type_field_constraint struct_type_field_label ';'
           	{
-                  $$ = pkl_ast_make_struct_type_field (pkl_parser->ast, $2, $1,
-                                                       $4, $5);
+                  $$ = pkl_ast_make_struct_type_field (pkl_parser->ast, $3, $2,
+                                                       $5, $6, $1);
                   PKL_AST_LOC ($$) = @$;
-                  if ($2 != NULL)
+                  if ($3 != NULL)
                     {
-                      PKL_AST_LOC ($2) = @2;
-                      PKL_AST_TYPE ($2) = pkl_ast_make_string_type (pkl_parser->ast);
-                      ASTREF (PKL_AST_TYPE ($2));
-                      PKL_AST_LOC (PKL_AST_TYPE ($2)) = @2;
+                      PKL_AST_LOC ($3) = @3;
+                      PKL_AST_TYPE ($3) = pkl_ast_make_string_type (pkl_parser->ast);
+                      ASTREF (PKL_AST_TYPE ($3));
+                      PKL_AST_LOC (PKL_AST_TYPE ($3)) = @3;
                     }
                 }
         ;

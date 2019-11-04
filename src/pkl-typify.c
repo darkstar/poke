@@ -906,7 +906,8 @@ PKL_PHASE_BEGIN_HANDLER (pkl_typify1_ps_struct)
                                           PKL_AST_STRUCT_FIELD_NAME (t),
                                           PKL_AST_TYPE (t),
                                           NULL /* constraint */,
-                                          NULL /* label */);
+                                          NULL /* label */,
+                                          PKL_AST_ENDIAN_DFL /* endian */);
       PKL_AST_LOC (struct_type_field) = PKL_AST_LOC (t);
 
       struct_field_types = pkl_ast_chainon (struct_field_types,

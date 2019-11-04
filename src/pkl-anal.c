@@ -469,6 +469,25 @@ PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_funcall)
 }
 PKL_PHASE_END_HANDLER
 
+/* Endianness specifiers in struct fields are only valid when applied
+   to integral types.  */
+
+PKL_PHASE_BEGIN_HANDLER (pkl_anal2_ps_struct_type_field)
+{
+  pkl_ast_node field = PKL_PASS_NODE;
+  pkl_ast_node type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (field);
+
+  if (PKL_AST_STRUCT_TYPE_FIELD_ENDIAN (field) != PKL_AST_ENDIAN_DFL
+      && PKL_AST_TYPE_CODE (type) != PKL_TYPE_INTEGRAL)
+    {
+      PKL_ERROR (PKL_AST_LOC (field),
+                 "endianness can only be specified in integral fields");
+      PKL_ANAL_PAYLOAD->errors++;
+      PKL_PASS_ERROR;
+    }
+}
+PKL_PHASE_END_HANDLER
+
 /* In unions, alternatives appearing after an alternative with no
    constraint expression, or a constant expression known to be true,
    are unreachable.  Also, if an union alternative has a constraint
@@ -536,6 +555,7 @@ struct pkl_phase pkl_phase_anal2 =
    PKL_PHASE_PS_HANDLER (PKL_AST_RETURN_STMT, pkl_anal2_ps_return_stmt),
    PKL_PHASE_PS_HANDLER (PKL_AST_FUNCALL, pkl_anal2_ps_funcall),
    PKL_PHASE_PR_HANDLER (PKL_AST_TYPE, pkl_anal_pr_type),
+   PKL_PHASE_PS_HANDLER (PKL_AST_STRUCT_TYPE_FIELD, pkl_anal2_ps_struct_type_field),
    PKL_PHASE_PS_TYPE_HANDLER (PKL_TYPE_STRUCT, pkl_anal2_ps_type_struct),
    PKL_PHASE_PS_DEFAULT_HANDLER (pkl_anal_ps_default),
   };

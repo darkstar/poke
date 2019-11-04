@@ -1,5 +1,23 @@
 2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pkl-ast.h (PKL_AST_STRUCT_TYPE_FIELD_ENDIAN): Define.
+	(enum pkl_ast_endian): New entry PKL_AST_DFL.
+	(struct pkl_ast_struct_type_field): New field endian.
+	* src/pkl-ast.c (pkl_ast_make_struct_type_field): Handle the
+	`endian' attribute.
+	(pkl_ast_dup_type): Likewise.
+	(pkl_ast_print_1): Likewise.
+	* src/pkl-typify.c (pkl_typify1_ps_struct): Likewise.
+	* src/pkl-lex.l: Tokens BIG and LITTLE.
+	* src/pkl-tab.y (struct_type_field): handle endianness in fields.
+	(endianness): New rule.
+	* src/pkl-anal.c (pkl_anal2_ps_struct_type_field): New handler.
+	(pkl_phase_anal2): Register handler.
+	* testsuite/poke.pkl/struct-endian-diag-1.pk: New test.
+	* testsuite/poke.pkl/struct-types-endian-diag-2.pk: Likewise.
+
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* testsuite/Makefile.am (POKESTYLESDIR): Define when invoking
 	dejagnu.
 	* testsuite/lib/poke-dg.exp (dg-require): Mark the test as

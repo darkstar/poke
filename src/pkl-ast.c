@@ -31,14 +31,6 @@
 
 #define STREQ(a, b) (strcmp (a, b) == 0)
 
-/* Return the default endianness.  */
-
-enum pkl_ast_endian
-pkl_ast_default_endian (void)
-{
-  return PKL_AST_MSB;
-}
-
 /* Allocate and return a new AST node, with the given CODE.  The rest
    of the node is initialized to zero.  */
 
@@ -453,7 +445,8 @@ pkl_ast_make_struct_type_field (pkl_ast ast,
                                 pkl_ast_node name,
                                 pkl_ast_node type,
                                 pkl_ast_node constraint,
-                                pkl_ast_node label)
+                                pkl_ast_node label,
+                                int endian)
 {
   pkl_ast_node struct_type_elem
     = pkl_ast_make_node (ast, PKL_AST_STRUCT_TYPE_FIELD);
@@ -468,6 +461,9 @@ pkl_ast_make_struct_type_field (pkl_ast ast,
   if (label)
     PKL_AST_STRUCT_TYPE_FIELD_LABEL (struct_type_elem)
       = ASTREF (label);
+
+  PKL_AST_STRUCT_TYPE_FIELD_ENDIAN (struct_type_elem)
+    = endian;
 
   return struct_type_elem;
 }
@@ -552,6 +548,7 @@ pkl_ast_dup_type (pkl_ast_node type)
           pkl_ast_node struct_type_elem_label;
           pkl_ast_node new_struct_type_elem_name;
           pkl_ast_node struct_type_elem;
+          int struct_type_elem_endian;
 
           /* Process only struct type fields.  XXX But what about
              declarations?  These should also be duplicated.  */
@@ -562,6 +559,7 @@ pkl_ast_dup_type (pkl_ast_node type)
           struct_type_elem_type = PKL_AST_STRUCT_TYPE_FIELD_TYPE (t);
           struct_type_elem_constraint = PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT (t);
           struct_type_elem_label = PKL_AST_STRUCT_TYPE_FIELD_LABEL (t);
+          struct_type_elem_endian = PKL_AST_STRUCT_TYPE_FIELD_ENDIAN (t);
 
           new_struct_type_elem_name
             = (struct_type_elem_name
@@ -570,10 +568,11 @@ pkl_ast_dup_type (pkl_ast_node type)
                : NULL);
           struct_type_elem
             = pkl_ast_make_struct_type_field (PKL_AST_AST (new),
-                                             new_struct_type_elem_name,
-                                             pkl_ast_dup_type (struct_type_elem_type),
-                                             struct_type_elem_constraint,
-                                             struct_type_elem_label);
+                                              new_struct_type_elem_name,
+                                              pkl_ast_dup_type (struct_type_elem_type),
+                                              struct_type_elem_constraint,
+                                              struct_type_elem_label,
+                                              struct_type_elem_endian);
 
           PKL_AST_TYPE_S_ELEMS (new)
             = pkl_ast_chainon (PKL_AST_TYPE_S_ELEMS (new),
@@ -2445,6 +2444,7 @@ pkl_ast_print_1 (FILE *fd, pkl_ast_node ast, int indent)
       PRINT_AST_SUBAST (type, STRUCT_TYPE_FIELD_TYPE);
       PRINT_AST_SUBAST (exp, STRUCT_TYPE_FIELD_CONSTRAINT);
       PRINT_AST_SUBAST (exp, STRUCT_TYPE_FIELD_LABEL);
+      PRINT_AST_IMM (endian, STRUCT_TYPE_FIELD_ENDIAN, "%d");
       break;
 
     case PKL_AST_FUNC_TYPE_ARG:

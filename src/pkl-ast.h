@@ -124,6 +124,9 @@ enum pkl_ast_attr
 /* Certain AST nodes can be characterized of featuring a byte
    endianness.  The following values are supported:
 
+   DFL means the default endianness, which is the endianness used by
+   the system running poke.
+
    MSB means that the most significative bytes come first.  This is
    what is popularly known as big-endian.
 
@@ -131,18 +134,14 @@ enum pkl_ast_attr
    what is known as little-endian.
 
    In both endiannesses the bits inside the bytes are ordered from
-   most significative to least significative.
-
-   The function `pkl_ast_default_endian' returns the endianness used
-   in the system running poke.  */
+   most significative to least significative.  */
 
 enum pkl_ast_endian
 {
-  PKL_AST_MSB, /* Big-endian.  */
-  PKL_AST_LSB  /* Little-endian.  */
+  PKL_AST_ENDIAN_DFL, /* Default endian.  */
+  PKL_AST_ENDIAN_MSB, /* Big-endian.  */
+  PKL_AST_ENDIAN_LSB  /* Little-endian.  */
 };
-
-enum pkl_ast_endian pkl_ast_default_endian (void);
 
 enum pkl_ast_type_code
 {
@@ -711,12 +710,16 @@ pkl_ast_node pkl_ast_make_struct_ref (pkl_ast ast,
 
    LABEL is an expression that, if present, should evaluate to an
    offset value.  If the struct type element doesn't have a label,
-   this is NULL.  */
+   this is NULL.
+
+   ENDIAN is the endianness to use when reading and writing data
+   to/from the field.  */
 
 #define PKL_AST_STRUCT_TYPE_FIELD_NAME(AST) ((AST)->sct_type_elem.name)
 #define PKL_AST_STRUCT_TYPE_FIELD_TYPE(AST) ((AST)->sct_type_elem.type)
 #define PKL_AST_STRUCT_TYPE_FIELD_CONSTRAINT(AST) ((AST)->sct_type_elem.constraint)
 #define PKL_AST_STRUCT_TYPE_FIELD_LABEL(AST) ((AST)->sct_type_elem.label)
+#define PKL_AST_STRUCT_TYPE_FIELD_ENDIAN(AST) ((AST)->sct_type_elem.endian)
 
 struct pkl_ast_struct_type_field
 {
@@ -726,13 +729,15 @@ struct pkl_ast_struct_type_field
   union pkl_ast_node *type;
   union pkl_ast_node *constraint;
   union pkl_ast_node *label;
+  int endian;
 };
 
 pkl_ast_node pkl_ast_make_struct_type_field (pkl_ast ast,
                                              pkl_ast_node name,
                                              pkl_ast_node type,
                                              pkl_ast_node constraint,
-                                             pkl_ast_node label);
+                                             pkl_ast_node label,
+                                             int endian);
 
 /* PKL_AST_FUNC_TYPE_ARG nodes represent the arguments part of a
    function type.
