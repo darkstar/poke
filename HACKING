@@ -30,67 +30,73 @@ along with GNU poke.  If not, see <https://www.gnu.org/licenses/>.
 .. contents:: 
 ..
      1  Nomenclature
-     2  Development Environment
-       2. 1  Autotools
-       2. 2  Dejagnu
-       2. 3  Flex
-       2. 4  readline
-       2. 5  Boehm GC
-       2. 6  Jitter
-       2. 7  libtextstyle
-       2. 8  Building
-       2. 9  Gettext
-       2.10  Running an Uninstalled Poke
-       2.11  Continuous Integration
-     3  Coding Style and Conventions
-       3.1  Writing C
-       3.2  Writing Poke
-       3.3  Writing RAS
-     4  Deciding on What to Work on
-     5  Submitting a Patch
-     6  Maintenance
-     7  Poke Architecture
-     8  The Poke Compiler
-       8.1  Compiler Overview
-       8.2  The bison Parser in pkl-tab.y
-       8.3  The AST
-       8.4  Compiler Passes and Phases
-         8.4.1  Naming Conventions for Phases
-         8.4.2  Naming Conventions for Handlers
-         8.4.3  Transformation Phases
-         8.4.4  Analysis Phases
-         8.4.5  Type System Phases
-         8.4.6  Middle End Handlers should be Re-executable
-       8.5  The Type System
-         8.5.1  Type Expressions
-       8.6  Adding Compiler Built-Ins
-     9  The Poke Virtual Machine
-       9.1  Exception Handling
-       9.2  Offsets and bit-offsets in the PVM
-    10  Memory Management
-      10.1  Using ASTREF
-      10.2  Using ASTDEREF
-      10.3  PVM values in PVM programs
-      10.4  PVM values in AST nodes
-    11  Terminal Handling
-      11.1  pk-term
-      11.2  Styling Classes
-      11.3  Debugging Styling
-    12  Debugging Poke
-      12.1  Building with Debugging support
-      12.2  Using GDB extensions
-      12.3  Valgrind and Poke
-      12.4  Debugging PVM Assembly Code
-    13  Future Developments
-    14  Appendix: The Source Tree
-      14.1  The Compiler
-      14.2  The Poke Virtual Machine
-      14.3  The IO Subsystem
-      14.4  Poke Program
-      14.5  Pickles and Libraries
-      14.6  Test Suite
-      14.7  Documentation
-      14.8  Other Stuff
+     2  Maintainers
+       2.1  GNU Maintainer
+       2.2  Global Reviewers
+       2.3  Write After Approval
+       2.4  Personal Branches
+       2.5  Installing Obvious Changes
+     3  Development Environment
+       3. 1  Autotools
+       3. 2  Dejagnu
+       3. 3  Flex
+       3. 4  readline
+       3. 5  Boehm GC
+       3. 6  Jitter
+       3. 7  libtextstyle
+       3. 8  Building
+       3. 9  Gettext
+       3.10  Running an Uninstalled Poke
+       3.11  Continuous Integration
+     4  Coding Style and Conventions
+       4.1  Writing C
+       4.2  Writing Poke
+       4.3  Writing RAS
+     5  Deciding on What to Work on
+     6  Submitting a Patch
+     7  Maintenance
+     8  Poke Architecture
+     9  The Poke Compiler
+       9.1  Compiler Overview
+       9.2  The bison Parser in pkl-tab.y
+       9.3  The AST
+       9.4  Compiler Passes and Phases
+         9.4.1  Naming Conventions for Phases
+         9.4.2  Naming Conventions for Handlers
+         9.4.3  Transformation Phases
+         9.4.4  Analysis Phases
+         9.4.5  Type System Phases
+         9.4.6  Middle End Handlers should be Re-executable
+       9.5  The Type System
+         9.5.1  Type Expressions
+       9.6  Adding Compiler Built-Ins
+    10  The Poke Virtual Machine
+      10.1  Exception Handling
+      10.2  Offsets and bit-offsets in the PVM
+    11  Memory Management
+      11.1  Using ASTREF
+      11.2  Using ASTDEREF
+      11.3  PVM values in PVM programs
+      11.4  PVM values in AST nodes
+    12  Terminal Handling
+      12.1  pk-term
+      12.2  Styling Classes
+      12.3  Debugging Styling
+    13  Debugging Poke
+      13.1  Building with Debugging support
+      13.2  Using GDB extensions
+      13.3  Valgrind and Poke
+      13.4  Debugging PVM Assembly Code
+    14  Future Developments
+    15  Appendix: The Source Tree
+      15.1  The Compiler
+      15.2  The Poke Virtual Machine
+      15.3  The IO Subsystem
+      15.4  Poke Program
+      15.5  Pickles and Libraries
+      15.6  Test Suite
+      15.7  Documentation
+      15.8  Other Stuff
 
 
 Nomenclature
@@ -108,6 +114,61 @@ domain.  For example, ``elf.pk`` is a pickle that provides facilities
 to poke ELF object files.  Pickles are not necessarily related to file
 formats: a set of functions to work with bit patterns, for example,
 could be implemented in a pickle ``bitpatterns.pk``.
+
+Maintainers
+-----------
+
+GNU Maintainer
+~~~~~~~~~~~~~~
+
+Jose E. Marchesi	<jemarch@gnu.org>
+
+Global Reviewers
+~~~~~~~~~~~~~~~~
+
+Jose E. Marchesi	<jemarch@gnu.org>
+
+Write After Approval
+~~~~~~~~~~~~~~~~~~~~
+
+The people below have write access to the git repository, and can
+install their changes after getting explicit approval from a global
+reviewer.
+
+Egeyar Bagcioglu	<egeyar@gmail.com>
+Luca Saiu		<positron@gnu.org>
+
+Personal Branches
+~~~~~~~~~~~~~~~~~
+
+Anyone having write access to the git repository is allowed to push
+and maintain personal branches.  These branches should be called
+``WHO/WHAT``, where ``WHO`` is the nick identifying the owner of the
+branch and ``WHAT`` a description of what it contains.
+
+Example::
+
+  jemarch/hyperlinks-server
+
+Personal branches are intended to ease the interaction between
+developers, and to provide a convenient basis for testing large
+changes.
+
+Personal branches can be rebased, and deleted.  Please do not write
+into a personal branch unless you have the explicit approval of the
+branch owner.
+
+Installing Obvious Changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Anyone having write access to the git repository is allowed to push
+obvious changes to non-personal branches.  The "obvious" category
+includes typos in comments, renaming of variables, etc.
+
+If you commit and push a non-obvious change, you are still required to
+send an email to the mailing list stating you installed the change.
+Please include a suggestive tag in your email's subject, something
+like ``[COMMITTED]``.  Also, make sure to include the patch itself.
 
 Development Environment
 -----------------------
