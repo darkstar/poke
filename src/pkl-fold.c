@@ -105,7 +105,7 @@ EMUL_III (mul) { return op1 * op2; }
 EMUL_UUU (div) { return op1 / op2; }
 EMUL_III (div) { return op1 / op2; }
 EMUL_UUU (cdiv) { return (op1 - 1 + op2) / op2; }
-EMUL_III (cdiv) { return (op1 - 1 + op2) / op2; } 
+EMUL_III (cdiv) { return (op1 - 1 + op2) / op2; }
 EMUL_UUU (mod) { return op1 % op2; }
 EMUL_III (mod) { return op1 % op2; }
 EMUL_UUU (lt) { return op1 < op2; }

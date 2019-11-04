@@ -618,7 +618,7 @@ it should support testing for equality");
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
-  
+
   if (!pkl_ast_type_promoteable (t1,
                                  PKL_AST_TYPE_A_ETYPE (t2),
                                  0 /* promote_array_of_any */))
@@ -635,7 +635,7 @@ expected %s, got %s",
       PKL_TYPIFY_PAYLOAD->errors++;
       PKL_PASS_ERROR;
     }
-  
+
   exp_type = pkl_ast_make_integral_type (PKL_PASS_AST, 32, 1);
   PKL_AST_LOC (exp_type) = PKL_AST_LOC (exp);
   PKL_AST_TYPE (exp) = ASTREF (exp_type);

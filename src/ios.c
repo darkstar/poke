@@ -713,7 +713,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 16:
 	{
-	  int16_t c[2] = {0, 0};  
+	  int16_t c[2] = {0, 0};
 	  IOS_READ_INTO_CHARRAY_2BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[1] << 8) | c[0];
@@ -723,8 +723,8 @@ ios_read_int (ios io, ios_off offset, int flags,
 	}
 
       case 24:
-	{ 
-	  int64_t c[3] = {0, 0, 0};  
+	{
+	  int64_t c[3] = {0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_3BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[2] << 16) | (c[1] << 8) | c[0];
@@ -737,7 +737,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 32:
         {
-	  int32_t c[4] = {0, 0, 0, 0};  
+	  int32_t c[4] = {0, 0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_4BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[3] << 24) | (c[2] << 16) | (c[1] << 8) | c[0];
@@ -748,7 +748,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 40:
         {
-	  int64_t c[5] = {0, 0, 0, 0, 0};  
+	  int64_t c[5] = {0, 0, 0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_5BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[4] << 32) | (c[3] << 24) | (c[2] << 16) | (c[1] << 8)
@@ -763,7 +763,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 48:
 	{
-	  int64_t c[6] = {0, 0, 0, 0, 0, 0};  
+	  int64_t c[6] = {0, 0, 0, 0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_6BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[5] << 40) | (c[4] << 32) | (c[3] << 24) | (c[2] << 16)
@@ -778,7 +778,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 56:
 	{
-	  int64_t c[7] = {0, 0, 0, 0, 0, 0, 0};  
+	  int64_t c[7] = {0, 0, 0, 0, 0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_7BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[6] << 48) | (c[5] << 40) | (c[4] << 32) | (c[3] << 24)
@@ -793,7 +793,7 @@ ios_read_int (ios io, ios_off offset, int flags,
 
       case 64:
 	{
-	  int64_t c[8] = {0, 0, 0, 0, 0, 0, 0, 0};  
+	  int64_t c[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 	  IOS_READ_INTO_CHARRAY_8BYTES(c);
 	  if (endian == IOS_ENDIAN_LSB)
 	    *value = (c[7] << 56) | (c[6] << 48) | (c[5] << 40) | (c[4] << 32)

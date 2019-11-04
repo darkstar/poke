@@ -131,7 +131,7 @@ pvm_val
 pvm_make_integral (uint64_t value, int size, int signed_p)
 {
   pvm_val res;
-  
+
   if (size < 33)
     {
       if (signed_p)
@@ -702,7 +702,7 @@ pkl_asm_insn_cdiv (pkl_asm pasm,
   pvm_val one = pvm_make_integral (1,
                                    PKL_AST_TYPE_I_SIZE (type),
                                    PKL_AST_TYPE_I_SIGNED (type));
-  
+
   RAS_MACRO_CDIV (one, type);
 }
 
@@ -808,7 +808,7 @@ pkl_asm_insn_cmp (pkl_asm pasm,
   else if (PKL_AST_TYPE_CODE (type) == PKL_TYPE_OFFSET)
     {
       pkl_ast_node base_type = PKL_AST_TYPE_O_BASE_TYPE (type);
-      
+
       pkl_asm_insn (pasm, PKL_INSN_SWAP);  /* OFF2 OFF1 */
       pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF2 OFF1 OFF1M */
       pkl_asm_insn (pasm, PKL_INSN_ROT);   /* OFF1 OFF1M OFF2 */

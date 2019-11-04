@@ -511,7 +511,7 @@
 ;;; #one
 ;;; @type
 ;;;    pkl_ast_node reflecting the type of the operands.
-        
+
         .macro cdiv #one @type
         dup
         nrot
@@ -534,7 +534,7 @@
 ;;; #one
 ;;; @type
 ;;;    pkl_ast_node reflecting the type of the operands.
-        
+
         .macro cdivo @type
         swap                    ; OFF2 OFF1
         ogetm                   ; OFF2 OFF1 OFF1M
