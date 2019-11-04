@@ -201,7 +201,6 @@
 ;;; same base type and same units.
 ;;;
 ;;; Macro arguments:
-;;;
 ;;; #unit
 ;;;   an ulong<64> with the unit of the result.
 ;;; @base_type
@@ -277,7 +276,6 @@
 ;;; offsets type and the magnitude type is BASE_TYPE.
 ;;;
 ;;; Macro arguments:
-;;;
 ;;; #unit
 ;;;   an ulong<64> with the unit of the result.
 ;;; @base_type
@@ -509,6 +507,7 @@
 ;;;
 ;;; Macro arguments:
 ;;; #one
+;;;    the integer value one (1) in the same type than the operands.
 ;;; @type
 ;;;    pkl_ast_node reflecting the type of the operands.
 
@@ -531,7 +530,6 @@
 ;;; values.
 ;;;
 ;;; Macro arguments:
-;;; #one
 ;;; @type
 ;;;    pkl_ast_node reflecting the type of the operands.
 
@@ -546,12 +544,16 @@
         nip2                    ; OFF1 OFF2 (OFF1M/^OFF2M)
         .end
 
-;;; RAS_MACRO_AIS etype
+;;; RAS_MACRO_AIS
 ;;; ( VAL ARR -- VAL ARR BOOL )
 ;;;
 ;;; This macro generates code that, given an array ARR and a value VAL,
 ;;; determines whether VAL exists in ARR.  If it does, it pushes int<32>1
 ;;; to the stack.  Otherwise it pushes int<32>0.
+;;;
+;;; Macro arguments:
+;;; @etype
+;;;   AST node containing the type of the elements of ARR.
 
         .macro ais @etype
         sel                     ; VAL ARR SEL
@@ -609,7 +611,7 @@
         swap                    ; VAL ARR RES
         .end
 
-;;; RAS_MACRO_BCONC #op2_type_size @op1_type @op2_type @res_type
+;;; RAS_MACRO_BCONC
 ;;; ( VAL VAL -- VAL VAL VAL )
 ;;;
 ;;; This macro generates code that bit-concatenates the two values in
