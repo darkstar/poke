@@ -29,11 +29,13 @@
 
 (defface poke-ras-c-literal-face '((t :foreground "brown")) "" :group 'poke-ras-mode)
 (defface poke-ras-variable-face '((t :foreground "green")) "" :group 'poke-ras-mode)
+(defface poke-ras-argument-face '((t :foreground "magenta")) "" :group 'poke-ras-mode)
 
 (define-derived-mode poke-ras-mode asm-mode "Poke RAS"
   "Major mode for editing RAS code."
   (font-lock-add-keywords nil
                           '(("^[ \t]*\\.c .*" . 'poke-ras-c-literal-face)
+                            ("[#@][a-zA-Z][0-9a-zA-Z_]+" . 'poke-ras-argument-face)
                             ("\\$[a-zA-Z][0-9a-zA-Z_]*" . 'poke-ras-variable-face)))
   (modify-syntax-entry ?. "w"))
 
