@@ -1,5 +1,9 @@
 2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* etc/poke-ras-mode.el (poke-ras-mode): Indent labels properly.
+
+2019-11-04  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-asm.pks (ais): Remove unused argument atype.
 	* src/pkl-asm.c (pkl_asm_insn_ais): Adjust accordintly.
 

@@ -34,7 +34,7 @@
   "Major mode for editing RAS code."
   (font-lock-add-keywords nil
                           '(("^[ \t]*\\.c .*" . 'poke-ras-c-literal-face)
-                            ("\\$[a-zA-Z][0-9a-zA-Z_]*" . 'poke-ras-variable-face))))
-
+                            ("\\$[a-zA-Z][0-9a-zA-Z_]*" . 'poke-ras-variable-face)))
+  (modify-syntax-entry ?. "w"))
 
 ;;; ras-mode.el ends here
