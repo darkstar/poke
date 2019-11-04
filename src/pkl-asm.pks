@@ -608,3 +608,38 @@
         fromr                   ; VAL RES ARR
         swap                    ; VAL ARR RES
         .end
+
+;;; RAS_MACRO_BCONC #op2_type_size @op1_type @op2_type @res_type
+;;; ( VAL VAL -- VAL VAL VAL )
+;;;
+;;; This macro generates code that bit-concatenates the two values in
+;;; the stack and pushes the result.
+;;;
+;;; Macro arguments:
+;;; #op2_type_size
+;;;   uint<32> with the size of op2_type in bits.
+;;; @op1_type
+;;;   AST node with the type of the first argument.
+;;; @op2_type
+;;;   AST node with the type of the second argument.
+;;; @res_type
+;;;   AST node with the type of the result.
+
+        .macro bconc #op2_type_size @op1_type @op2_type @res_type
+        dup                       ; OP1 OP2 OP2
+        rot                       ; OP2 OP2 OP1
+        dup                       ; OP2 OP2 OP1 OP1
+        rot                       ; OP2 OP1 OP1 OP2
+        ;; Convert the second operand to the result type.
+        nton @op2_type, @res_type ; ... OP1 OP2 OP2C
+        nip                       ; ... OP1 OP2C
+        ;; Convert the first operand to the result type.
+        swap                      ; ... OP2C OP1
+        nton @op1_type, @res_type ; ... OP2C OP1 OP1C
+        nip                       ; ... OP2C OP1C
+        push #op2_type_size       ; ... OP2C OP1C OP2_SIZE
+        sl @res_type              ; ... OP2C OP1C OP2_SIZE (OP1C<<.OP2_SIZE)
+        nip2                      ; ... OP2C (OP1C<<.OP2_SIZE)
+        bor @res_type             ; ... OP2C (OP1C<<.OP2_SIZE) ((OP1C<<.OP2_SIZE)|OP2C)
+        nip2                      ; OP2 OP1 ((OP1C<<.OP2_SIZE)|OP2C)
+        .end

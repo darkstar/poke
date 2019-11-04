@@ -641,6 +641,38 @@ PKL_PHASE_BEGIN_HANDLER (pkl_fold_mod)
 }
 PKL_PHASE_END_HANDLER
 
+PKL_PHASE_BEGIN_HANDLER (pkl_fold_bconc)
+{
+  pkl_ast_node op1 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 0);
+  pkl_ast_node op2 = PKL_AST_EXP_OPERAND (PKL_PASS_NODE, 1);
+  pkl_ast_node op1_type = PKL_AST_TYPE (op1);
+  pkl_ast_node op2_type = PKL_AST_TYPE (op2);
+  pkl_ast_node type = PKL_AST_TYPE (PKL_PASS_NODE);
+  pkl_ast_node new;
+
+  uint64_t result;
+
+  assert (PKL_AST_TYPE_CODE (type) == PKL_TYPE_INTEGRAL
+          && PKL_AST_TYPE_CODE (op1_type) == PKL_TYPE_INTEGRAL
+          && PKL_AST_TYPE_CODE (op2_type) == PKL_TYPE_INTEGRAL);
+
+  if (PKL_AST_CODE (op1) != PKL_AST_INTEGER
+      || PKL_AST_CODE (op2) != PKL_AST_INTEGER)
+    /* We cannot fold this expression.  */
+    PKL_PASS_DONE;
+
+  result = ((PKL_AST_INTEGER_VALUE (op1) << PKL_AST_TYPE_I_SIZE (op2_type))
+            | PKL_AST_INTEGER_VALUE (op2));
+
+  new = pkl_ast_make_integer (PKL_PASS_AST, result);
+  PKL_AST_TYPE (new) = ASTREF (type);
+  PKL_AST_LOC (new) = PKL_AST_LOC (PKL_PASS_NODE);
+
+  pkl_ast_node_free (PKL_PASS_NODE);
+  PKL_PASS_NODE = new;
+}
+PKL_PHASE_END_HANDLER
+
 #define PKL_PHASE_HANDLER_UNIMPL(op)            \
   PKL_PHASE_BEGIN_HANDLER (pkl_fold_##op)       \
   {                                             \
@@ -648,7 +680,6 @@ PKL_PHASE_END_HANDLER
   }                                             \
   PKL_PHASE_END_HANDLER
 
-PKL_PHASE_HANDLER_UNIMPL (bconc);
 PKL_PHASE_HANDLER_UNIMPL (sl);
 PKL_PHASE_HANDLER_UNIMPL (sr);
 

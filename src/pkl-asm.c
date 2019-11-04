@@ -305,7 +305,7 @@ pkl_asm_insn_atoa (pkl_asm pasm,
 }
 
 /* Macro-instruction: BCONC op1_type, op2_type, res_type
-   ( VAL(op1_type) VAL(op2_type) -- VAL(op1_type) VAL(op2_type) VAL(res_type) )
+   ( VAL VAL -- VAL VAL VAL )
 
    Generate code to bit-concatenate the arguments.  */
 
@@ -315,23 +315,8 @@ pkl_asm_insn_bconc (pkl_asm pasm,
                     pkl_ast_node op2_type,
                     pkl_ast_node res_type)
 {
-  /* Convert the second operand to the result type.  */
-  pkl_asm_insn (pasm, PKL_INSN_NTON, op2_type, res_type);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-
-  /* Convert the first operand to the result type and shift left.  */
-  pkl_asm_insn (pasm, PKL_INSN_SWAP);
-  pkl_asm_insn (pasm, PKL_INSN_NTON, op1_type, res_type);
-  pkl_asm_insn (pasm, PKL_INSN_NIP);
-  pkl_asm_insn (pasm, PKL_INSN_PUSH,
-                pvm_make_uint (PKL_AST_TYPE_I_SIZE (op2_type), 32));
-  pkl_asm_insn (pasm, PKL_INSN_SL, res_type);
-  pkl_asm_insn (pasm, PKL_INSN_NIP2);
-
-  /* Stack: op2c op1c  */
-
-  /* Ok, or the magnitudes to get the result.  */
-  pkl_asm_insn (pasm, PKL_INSN_BOR, res_type);
+  RAS_MACRO_BCONC (pvm_make_uint (PKL_AST_TYPE_I_SIZE (op2_type), 32),
+                   op1_type, op2_type, res_type);
 }
 
 /* Macro-instruction: NTON from_type, to_type
