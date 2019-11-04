@@ -67,7 +67,9 @@
 #  ...
 #  .end
 #
-# This translates into a C macro RAS_MACRO_NAME, with no arguments.
+# This translates into a C macro RAS_MACRO_NAME, with the given
+# arguments.  The arguments use the prefix @ when they are AST nodes
+# (pkl_ast_node) and # when they are PVM values.
 #
 # Likewise, functions can be defined using .function/.end pairs of
 # assembler directives:
