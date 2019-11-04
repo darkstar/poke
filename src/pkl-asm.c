@@ -991,9 +991,7 @@ pkl_asm_insn_bnz (pkl_asm pasm,
 static void
 pkl_asm_insn_ais (pkl_asm pasm, pkl_ast_node atype)
 {
-  pkl_ast_node etype = PKL_AST_TYPE_A_ETYPE (atype);
-  
-  RAS_MACRO_AIS (atype, etype);
+  RAS_MACRO_AIS (PKL_AST_TYPE_A_ETYPE (atype));
 }
 
 /* Create a new instance of an assembler.  This initializes a new

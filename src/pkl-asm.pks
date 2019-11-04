@@ -546,14 +546,14 @@
         nip2                    ; OFF1 OFF2 (OFF1M/^OFF2M)
         .end
 
-;;; RAS_MACRO_AIS atype
+;;; RAS_MACRO_AIS etype
 ;;; ( VAL ARR -- VAL ARR BOOL )
 ;;;
 ;;; This macro generates code that, given an array ARR and a value VAL,
 ;;; determines whether VAL exists in ARR.  If it does, it pushes int<32>1
 ;;; to the stack.  Otherwise it pushes int<32>0.
 
-        .macro ais @atype @etype
+        .macro ais @etype
         sel                     ; VAL ARR SEL
         swap                    ; VAL SEL ARR
         tor                     ; VAL SEL [ARR]
