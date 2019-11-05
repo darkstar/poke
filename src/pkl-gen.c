@@ -1688,7 +1688,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
       pkl_asm_insn (pasm, PKL_INSN_OGETM); /* VAL OFF OFFM */
       pkl_asm_insn (pasm, PKL_INSN_NIP); /* VAL OFFM */
       pkl_asm_insn (pasm, PKL_INSN_SWAP); /* OFFM VAL */
-      pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
+      switch (PKL_GEN_PAYLOAD->endian)
+        {
+        case PKL_AST_ENDIAN_DFL:
+          pkl_asm_insn (pasm, PKL_INSN_POKED, integral_type);
+          break;
+        case PKL_AST_ENDIAN_LSB:
+          pkl_asm_insn (pasm, PKL_INSN_POKE, integral_type,
+                        IOS_NENC_2, IOS_ENDIAN_LSB);
+          break;
+        case PKL_AST_ENDIAN_MSB:
+          pkl_asm_insn (pasm, PKL_INSN_POKE, integral_type,
+                        IOS_NENC_2, IOS_ENDIAN_MSB);
+          break;
+        default:
+          assert (0);
+        }
     }
   else if (PKL_GEN_PAYLOAD->in_mapper)
     {
@@ -1696,7 +1711,22 @@ PKL_PHASE_BEGIN_HANDLER (pkl_gen_ps_type_integral)
       /* XXX turn OFF to bit-offset */
       pkl_asm_insn (pasm, PKL_INSN_OGETM); /* OFF OFFM */
       pkl_asm_insn (pasm, PKL_INSN_NIP); /* OFFM */
-      pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+      switch (PKL_GEN_PAYLOAD->endian)
+        {
+        case PKL_AST_ENDIAN_DFL:
+          pkl_asm_insn (pasm, PKL_INSN_PEEKD, integral_type);
+          break;
+        case PKL_AST_ENDIAN_LSB:
+          pkl_asm_insn (pasm, PKL_INSN_PEEK, integral_type,
+                        IOS_NENC_2, IOS_ENDIAN_LSB);
+          break;
+        case PKL_AST_ENDIAN_MSB:
+          pkl_asm_insn (pasm, PKL_INSN_PEEK, integral_type,
+                        IOS_NENC_2, IOS_ENDIAN_MSB);
+          break;
+        default:
+          assert (0);
+        }
     }
   else if (PKL_GEN_PAYLOAD->in_valmapper)
     {

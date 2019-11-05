@@ -1855,6 +1855,7 @@ They contain heterogeneous collections of values.
 @menu
 * Struct Literals::		Writing struct values.
 * Struct Types::		Simple structs.
+* Field Endianness::            Specifying the endianness of integral fields.
 * Accessing Fields::            Getting and fetching the values of fields.
 * Field Constraints::		Specifying data integrity.
 * Field Labels::		Explicit offsets for fields.
@@ -1919,6 +1920,27 @@ deftype Imm64 =
 It is not allowed to have several fields with the same name in the
 same struct.  The compiler will complain if it finds such an
 occurrence.
+
+@node Field Endianness
+@section Field Endianness
+
+By default fields are accessed in IO space using the current default
+endianness.  However, it is possible to annotate integral fields with
+an explicit endianness, like in:
+
+@example
+deftype Foo =
+  struct
+  @{
+    little int a;
+    big int b;
+    int c;
+  @};
+@end example
+
+In the example above, the field @code{a} will be stored using
+little-endian, the field @code{b} will be stored using big-endian, and
+the field @code{c} will be stored using whatever current endianness.
 
 @node Accessing Fields
 @section Accessing Fields

@@ -1,5 +1,19 @@
 2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* doc/poke.texi (Field Endianness): New section.
+
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pkl-gen.h (struct pkl_gen_payload): New field endian.
+	* src/pkl-gen.pks (struct_field_mapper): Handle field endianness.
+	* src/pkl-gen.c (pkl_gen_ps_type_integral): Likewise.
+	* src/pkl-asm.c (pkl_asm_insn): Handle PKL_INSN_POKE.
+	(pkl_asm_insn_poke): New function.
+	* src/pkl-insn.def: Define PKL_INSN_POKE.
+	* testsuite/poke.map/maps-structs-endian-1.pk: New test.
+
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* src/pkl-ast.h (PKL_AST_STRUCT_TYPE_FIELD_ENDIAN): Define.
 	(enum pkl_ast_endian): New entry PKL_AST_DFL.
 	(struct pkl_ast_struct_type_field): New field endian.

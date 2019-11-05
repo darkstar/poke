@@ -514,6 +514,45 @@ pkl_asm_insn_print (pkl_asm pasm, pkl_ast_node type, int base)
     assert (0);
 }
 
+/* Macro-instruction: POKE type, endian, nenc
+   ( -- VAL )
+
+   Generate code for a poke operation to TYPE, which should be an
+   integral type.  */
+
+static void
+pkl_asm_insn_poke (pkl_asm pasm, pkl_ast_node type,
+                   jitter_uint nenc, jitter_uint endian)
+{
+  int type_code = PKL_AST_TYPE_CODE (type);
+
+  if (type_code == PKL_TYPE_INTEGRAL)
+    {
+      size_t size = PKL_AST_TYPE_I_SIZE (type);
+      int sign = PKL_AST_TYPE_I_SIGNED (type);
+
+      static int poke_table[2][2] =
+        {
+         {PKL_INSN_POKEIU, PKL_INSN_POKEI},
+         {PKL_INSN_POKELU, PKL_INSN_POKEL}
+        };
+
+      int tl = !!((size - 1) & ~0x1f);
+
+      if (sign)
+        pkl_asm_insn (pasm, poke_table[tl][sign],
+                      nenc, endian,
+                      (jitter_uint) size);
+      else
+        pkl_asm_insn (pasm, poke_table[tl][sign],
+                      endian,
+                      (jitter_uint) size);
+    }
+  else
+    assert (0);
+}
+
+
 /* Macro-instruction: POKED type
    ( OFF VAL -- )
 
@@ -1235,17 +1274,21 @@ pkl_asm_insn (pkl_asm pasm, enum pkl_asm_insn insn, ...)
             break;
           }
         case PKL_INSN_PEEK:
+        case PKL_INSN_POKE:
           {
-            pkl_ast_node peek_type;
+            pkl_ast_node type;
             jitter_uint endian, nenc;
 
             va_start (valist, insn);
-            peek_type = va_arg (valist, pkl_ast_node);
+            type = va_arg (valist, pkl_ast_node);
             nenc = va_arg (valist, jitter_uint);
             endian = va_arg (valist, jitter_uint);
             va_end (valist);
 
-            pkl_asm_insn_peek (pasm, peek_type, nenc, endian);
+            if (insn == PKL_INSN_PEEK)
+              pkl_asm_insn_peek (pasm, type, nenc, endian);
+            else
+              pkl_asm_insn_poke (pasm, type, nenc, endian);
             break;
           }
         case PKL_INSN_PRINT:

@@ -5,11 +5,15 @@ deftype Foo =
   struct {
     little int a;
     big int b;
+    int c;
   };
 
 /* { dg-command {.set obase 16 } } */
+/* { dg-command {.set endian little} } */
 /* { dg-command {defvar f = Foo @ 0#B} } */
-/* { dg-comamnd { f.a } } */
+/* { dg-command { f.a } } */
 /* { dg-output "0x40302010" } */
 /* { dg-command { f.b } } */
 /* { dg-output "\n0x50607080" } */
+/* { dg-command { f.c } } */
+/* { dg-output "\n0xc0b0a090" } */

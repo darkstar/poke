@@ -645,7 +645,10 @@
         ;; Increase OFF by the label, if the field has one.
         .e handle_struct_field_label     ; OFF
         dup                             ; OFF OFF
+        .c { int endian = PKL_AST_STRUCT_TYPE_FIELD_ENDIAN (field);
+        .c PKL_GEN_PAYLOAD->endian = PKL_AST_STRUCT_TYPE_FIELD_ENDIAN (field);
         .c PKL_PASS_SUBPASS (PKL_AST_STRUCT_TYPE_FIELD_TYPE (field));
+        .c PKL_GEN_PAYLOAD->endian = endian; }
                                 	; OFF VAL
         dup                             ; OFF VAL VAL
         regvar $val                     ; OFF VAL

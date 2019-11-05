@@ -75,7 +75,10 @@
    assignment statement.  0 otherwise.
 
    IN_ARRAY_BOUNDER is 1 when an array bounder function is being
-   generated.  0 otherwise.  */
+   generated.  0 otherwise.
+
+   ENDIAN is the endianness to be used when mapping and writing
+   integral types.  */
 
 struct pkl_gen_payload
 {
@@ -93,6 +96,7 @@ struct pkl_gen_payload
   int in_valmapper;
   int in_lvalue;
   int in_array_bounder;
+  int endian;
 };
 
 typedef struct pkl_gen_payload *pkl_gen_payload;
