@@ -1,5 +1,16 @@
 2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/Makefile.am (POKESTYLESDIR): Define when invoking
+	dejagnu.
+	* testsuite/lib/poke-dg.exp (dg-require): Mark the test as
+	unsupported if appropriate.
+	* testsuite/poke.pkl/printf-class-1.pk: Require libtextstyle.
+	* testsuite/poke.pkl/printf-class-4.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-3.pk: Likewise.
+	* testsuite/poke.pkl/printf-class-2.pk: Likewise.
+
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Building): it is no longer necessary to pass
 	--with-jitter to configure.
 

@@ -33,7 +33,7 @@ proc dg-command { args } {
     global poke_commands
 
     if { [llength $args] > 2 } {
-        error "[linex $args 0]: too many arguments"
+        error "[lindex $args 0]: too many arguments"
     }
 
     # Prepare the command for shell unquoting.
@@ -46,6 +46,21 @@ proc dg-command { args } {
     set poke_commands "$poke_commands -c $cmd"
 }
 
+# Require a certain capability.
+
+set skip_test 0;
+               
+proc dg-require { args } {
+
+    upvar dg-do-what do-what
+
+    if {[lindex $args 1] == "libtextstyle" \
+            && $::env(HAVE_LIBTEXTSTYLE) != "yes"} {
+        # Mark the test as unsupported
+        set do-what [list [lindex do-what 0] N P]
+    }
+}
+               
 # Create a temporary data file containing the data specified as an
 # argument, with a random name.  The incoming data is encoded in
 # a Tcl list, like in:
@@ -90,9 +105,6 @@ proc dg-data { args } {
 # as expected.
 setenv LC_ALL C
 setenv LANG C
-
-# The default do-what keyword
-set dg-do-what-default compile
 
 proc poke-dg-test { prog do_what extra_tool_flags } {
 
