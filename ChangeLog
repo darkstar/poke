@@ -1,5 +1,11 @@
 2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* testsuite/poke.pkl/union-diag-7.pk: New test.
+	* src/pkl-tab.y (struct_type_field): Adjust location for $$ when
+	the first token in the rule is empty.
+
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* doc/poke.texi (Field Endianness): New section.
 
 2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>

@@ -1158,6 +1158,17 @@ struct_type_field:
                   $$ = pkl_ast_make_struct_type_field (pkl_parser->ast, $3, $2,
                                                        $5, $6, $1);
                   PKL_AST_LOC ($$) = @$;
+
+                  /* If endianness is empty, bison includes the blank
+                     characters before the type field as if they were
+                     part of this rule.  Therefore the location should
+                     be adjusted here.  */
+                  if ($1 == PKL_AST_ENDIAN_DFL)
+                    {
+                      PKL_AST_LOC ($$).first_line = @2.first_line;
+                      PKL_AST_LOC ($$).first_column = @2.first_column;
+                    }
+
                   if ($3 != NULL)
                     {
                       PKL_AST_LOC ($3) = @3;
