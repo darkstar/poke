@@ -257,10 +257,7 @@ run::
 Then, you can run ``configure``::
 
   $ mkdir build/ && cd build
-  $ ../configure --with-jitter=PATH_TO_JITTER_INSTALL OTHER_OPTIONS...
-
-Note that, for now, it is necessary to specify ``--with-jitter`` even
-if Jitter is installed in a standard location.
+  $ ../configure
   
 Finally::
 

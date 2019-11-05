@@ -1,3 +1,8 @@
+2019-11-05  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* HACKING (Building): it is no longer necessary to pass
+	--with-jitter to configure.
+
 2019-11-05  Luca Saiu  <positron@gnu.org>
 
 	* HACKING: Replace "program" to "routine".  Update data
