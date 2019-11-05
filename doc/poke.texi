@@ -2087,6 +2087,7 @@ designed to be easily used in type descriptions.
 
 @menu
 * .set endian::			dot-command to get and set the endianness.
+* Endian in Fields::		setting the endianness of struct fields.
 * Endian built-ins::		changing endianness programmatically.
 @end menu
 
@@ -2128,6 +2129,12 @@ the way integers are mapped:
 (poke) int @@ 0#B
 0x88454c46
 @end example
+
+@node Endian in Fields
+@section Endian in Fields
+
+It is possible to set the endianness of integral fields in struct type
+descriptors.  @xref{Field Endianness}.
 
 @node Endian built-ins
 @section Endian built-ins
