@@ -133,7 +133,7 @@ pk_term_end_class (const char *class)
 void
 pk_term_hyperlink (const char *url, const char *id)
 {
-#ifdef HAVE_LIBTEXT_HYPERLINK_SUPPORT
+#ifdef HAVE_TEXTSTYLE_HYPERLINK_SUPPORT
   styled_ostream_set_hyperlink (poke_ostream, url, id);
 #endif
 }
@@ -141,7 +141,7 @@ pk_term_hyperlink (const char *url, const char *id)
 void
 pk_term_end_hyperlink (void)
 {
-#ifdef HAVE_LIBTEXT_HYPERLINK_SUPPORT
+#ifdef HAVE_TEXTSTYLE_HYPERLINK_SUPPORT
   styled_ostream_set_hyperlink (poke_ostream, NULL, NULL);
 #endif
 }

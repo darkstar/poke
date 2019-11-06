@@ -1,5 +1,10 @@
 2019-11-06  Jose E. Marchesi  <jemarch@gnu.org>
 
+	* src/pk-term.c (pk_term_hyperlink): Fix guard.
+	(pk_term_end_hyperlink): Likewise.
+
+2019-11-06  Jose E. Marchesi  <jemarch@gnu.org>
+
 	* HACKING (Write After Approval): Add Darshit Shah to the list of
 	commiters.
 
