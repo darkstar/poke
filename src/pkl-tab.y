@@ -183,8 +183,7 @@ pkl_register_dummies (struct pkl_parser *parser, int n)
       switch (PKL_AST_CODE ($$))
         {
         case PKL_AST_COMP_STMT:
-          /* XXX: for comp_stmt, we should pop N-levels.  */
-          assert (0);
+          pkl_parser->env = pkl_env_pop_frame (pkl_parser->env);
           break;
         case PKL_AST_TYPE:
           /*          if (PKL_AST_TYPE_CODE ($$) == PKL_TYPE_STRUCT)
