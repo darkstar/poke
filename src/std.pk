@@ -210,3 +210,38 @@ defun qsort = (any[] array, Comparator cmp_f,
      qsort (array, cmp_f, pi + 1, right);
    }
 }
+
+/* Convert string to number */
+
+defun atoi = (string s, int b = 10) long:
+  {
+    defvar result = 0;
+
+    defun htoi = (char c) int:
+      {
+        if (c >= '0' && c <= '9') return c - '0';
+        if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+        if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+      }
+
+    defun valid = (char c, int b) int:
+      {
+        if (b <= 10) return (c >= '0') && (c <= '0' + b - 1);
+        if (b == 16) return ((c >= '0') && (c <= '9')) ||
+         ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'));
+      }
+
+    if (!(b in [2, 8, 10, 16]))
+      raise E_generic;
+
+    for (c in s)
+    {
+      if (!valid(c, b))
+        return result;
+
+      result = result * b + htoi(c);
+    }
+
+    return result;
+  }
+
