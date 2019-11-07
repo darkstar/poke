@@ -24,6 +24,7 @@ poke_SOURCES = poke.c poke.h \
                ios.c ios.h ios-dev.h \
                ios-dev-file.c \
                pk-term.c pk-term.h \
+               pk-repl.c pk-repl.h \
                pk-cmd.c pk-cmd.h \
                pk-file.c \
                pk-info.c pk-misc.c pk-help.c pk-vm.c \

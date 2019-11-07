@@ -1350,6 +1350,9 @@ Infrastructure for writing poke commands
 Terminal stuff
   ``src/pk-term.h``, ``src/pk-term.c``
 
+REPL
+  ``src/pk-repl.h, ``src/pk-repl.c``
+  
 Commands
   ``src/pk-def.c``, ``src/pk-dump.pk``, ``src/pk-file.c``,
   ``src/pk-help.c``, ``src/pk-info.c``, ``src/pk-misc.h``,

@@ -36,6 +36,7 @@
 #include "pk-cmd.h"
 #include "pkl.h"
 #include "pvm.h"
+#include "pk-repl.h"
 #include "pk-term.h"
 #include "poke.h"
 
@@ -310,55 +311,6 @@ parse_args (int argc, char *argv[])
 }
 
 static void
-repl ()
-{
-  if (!poke_quiet_p)
-    {
-      pk_print_version ();
-      pk_puts ("\n");
-      pk_puts (_("For help, type \".help\".\n"));
-      pk_puts (_("Type \".exit\" to leave the program.\n"));
-    }
-
-  while (!poke_exit_p)
-    {
-      int ret;
-      char *line;
-
-#if 0
-      /* This doesn't work well because readline's edition commands
-         make use of the lenght of the prompt, i.e. the prompt string
-         is expected to be passed to readline().  */
-      pk_term_class ("prompt");
-      pk_puts ("(poke) ");
-      pk_term_end_class ("prompt");
-#endif
-      pk_term_flush ();
-      line = readline ("(poke) ");
-      if (line == NULL)
-        {
-          /* EOF in stdin (probably Ctrl-D).  */
-          pk_puts ("\n");
-          break;
-        }
-
-      /* Ignore empty lines.  */
-      if (*line == '\0')
-        continue;
-
-#if defined HAVE_READLINE_HISTORY_H
-      if (line && *line)
-        add_history (line);
-#endif
-
-      ret = pk_cmd_exec (line);
-      if (!ret)
-        /* Avoid gcc warning here.  */ ;
-      free (line);
-    }
-}
-
-static void
 initialize (int argc, char *argv[])
 {
   /* This is used by the `progname' gnulib module.  */
@@ -450,7 +402,7 @@ main (int argc, char *argv[])
 
   /* Enter the REPL.  */
   if (poke_interactive_p)
-    repl ();
+    pk_repl ();
 
   /* Cleanup.  */
   finalize ();

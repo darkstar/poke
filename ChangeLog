@@ -1,3 +1,14 @@
+2019-11-07  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* src/pk-repl.h: New file.
+	* src/pk-repl.c: Likewise.
+	* src/Makefile.am (poke_SOURCES): Add pk-repl.c and pk-repl.h
+	* HACKING (Appendix): Add src/pk-repl.h and src/pk-repl.c to the
+	list of sources.
+	* src/poke.c: Include pk-repl.h
+	(repl): Remove function.
+	(main): Use pk_repl.
+
 2019-11-06  Darshit Shah  <darnir@gnu.org>
 
     * bootstrap.conf: Exit out if jitter's bootstrap fails
