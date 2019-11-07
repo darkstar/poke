@@ -331,6 +331,69 @@ Writing RAS
 We recommend to use the Emacs mode in ``etc/poke-ras-mode.el`` to
 write ``.pks`` files.
 
+Writing poke Tests
+------------------
+
+The poke testsuites live in the ``testsuite/`` subdirectory.  This
+section contains useful hints for adding tests there.
+
+Naming Tests
+~~~~~~~~~~~~
+
+For testing a functionality ``foo``, name your test ``foo.pk`` or
+``foo-N.pk`` where ``N`` is a number.
+
+If the test is a ``do-compile`` whose compilation is expected to fail,
+name the test ``func-diag.pk`` or ``func-diag-N.pk``.  Here "diag"
+means diagnostic.
+
+Always set obase
+~~~~~~~~~~~~~~~~
+
+If your test relies on printing integer values in the REPL (or using
+the ``%v`` formatting tag in a ``printf``) please make sure to set an
+explicit output numerical base, like in::
+
+  /* { dg-command {.set obase 10} }  */
+
+This way, we won't have to change the tests if at some point we change
+the default obase.
+
+Put each test in its own file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are writing tests for a specific functionality, like for
+example a standard function ``foo``, it may seem logical to put all
+the tests in a single file ``foo.pk`` like::
+
+  /* { dg-do run } */
+
+  /* { dg-command {foo (1)} } */
+  /* { dg-output "expected result" } */
+  
+  /* { dg-command {foo (1)} } */
+  /* { dg-output "\nexpected result" } */
+
+  [... and so on ...]
+
+However, this is not a good idea.  If some of the "subtests" fail, it
+becomes difficult to determine which one is the culprit looking at the
+test log file.
+
+It is better to put each test in it's own file: ``foo-1.pk``,
+``foo-2.pk`` and so on.
+
+dg-output may require a newline
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If despite the advise above you really need to put more than dg-output
+in a dg-run test file, please be aware you need to prefix all of them
+(but the first one) with a newline, like in::
+
+  /* { dg-output "foo" } */
+  /* { dg-output "\nbar" } */
+  /* { dg-output "\n baz" } */
+
 Deciding on What to Work on
 ---------------------------
 
