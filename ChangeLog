@@ -1,3 +1,7 @@
+2019-11-06  Darshit Shah  <darnir@gnu.org>
+
+    * bootstrap.conf: Exit out if jitter's bootstrap fails
+
 2019-11-06  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* src/pk-term.c (pk_term_hyperlink): Fix guard.
